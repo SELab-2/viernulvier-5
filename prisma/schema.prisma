@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client"
   output   = "../app/generated/prisma"
@@ -11,4 +5,472 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+model crop {
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @default(now()) @db.Timestamp(6)
+  id         String   @id @db.Uuid
+  name       String?  @db.VarChar
+  url        String?  @db.VarChar
+  item       item[]
+}
+
+model crosssells {
+  created_at                       DateTime @default(now()) @db.Timestamp(6)
+  updated_at                       DateTime @default(now()) @db.Timestamp(6)
+  id                               String   @id @db.Uuid
+  ticket                           String?  @db.Uuid
+  ticket_type                      String?  @db.VarChar
+  booking_id                       String?  @db.VarChar
+  price                            String?  @db.VarChar
+  hall_section_code                String?  @db.VarChar
+  order                            String?  @db.Uuid
+  order_crosssells_orderToorder    order?   @relation("crosssells_orderToorder", fields: [order], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ticket_crosssells_ticketToticket ticket?  @relation("crosssells_ticketToticket", fields: [ticket], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model event {
+  created_at                              DateTime      @default(now()) @db.Timestamp(6)
+  updated_at                              DateTime      @default(now()) @db.Timestamp(6)
+  id                                      String        @id @db.Uuid
+  starts_at                               DateTime?     @db.Timestamp(6)
+  ends_at                                 DateTime?     @db.Timestamp(6)
+  intermission_at                         DateTime?     @db.Timestamp(6)
+  doors_at                                DateTime?     @db.Timestamp(6)
+  box_office_id                           String?       @db.VarChar
+  vendor_id                               String?       @db.VarChar
+  max_tickets_per_order                   Int?
+  uitdatabank_id                          String?       @db.VarChar
+  secure                                  Boolean?
+  sms_verification                        Boolean?
+  info                                    String?
+  eticket_info                            String?
+  external_order_url                      String?       @db.VarChar
+  order_url                               String?       @db.VarChar
+  production                              String?       @db.Uuid
+  status                                  String?       @db.Uuid
+  hall                                    String?       @db.Uuid
+  hall_event_hallTohall                   hall?         @relation("event_hallTohall", fields: [hall], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  production_event_productionToproduction production?   @relation("event_productionToproduction", fields: [production], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  status_event_statusTostatus             status?       @relation("event_statusTostatus", fields: [status], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  event_price                             event_price[]
+  ticket_ticket_eventToevent              ticket[]      @relation("ticket_eventToevent")
+}
+
+model event_price {
+  created_at                     DateTime  @default(now()) @db.Timestamp(6)
+  updated_at                     DateTime  @default(now()) @db.Timestamp(6)
+  id                             String    @id @db.Uuid
+  event_id                       String?   @db.Uuid
+  available                      Int?
+  amount                         String?   @db.VarChar
+  box_office_id                  String?   @db.VarChar
+  contigent_id                   Int?
+  expires_at                     DateTime? @db.Timestamp(6)
+  price                          String?   @db.Uuid
+  rank                           String?   @db.Uuid
+  event                          event?    @relation(fields: [event_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  price_event_price_priceToprice price?    @relation("event_price_priceToprice", fields: [price], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  rank_event_price_rankTorank    rank?     @relation("event_price_rankTorank", fields: [rank], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model gallery {
+  created_at                                    DateTime       @default(now()) @db.Timestamp(6)
+  updated_at                                    DateTime       @default(now()) @db.Timestamp(6)
+  id                                            String         @id @db.Uuid
+  name                                          String?        @db.VarChar
+  gallery_item                                  gallery_item[]
+  item_item_galleryTogallery                    item[]         @relation("item_galleryTogallery")
+  production_production_media_galleryTogallery  production[]   @relation("production_media_galleryTogallery")
+  production_production_poster_galleryTogallery production[]   @relation("production_poster_galleryTogallery")
+  production_production_review_galleryTogallery production[]   @relation("production_review_galleryTogallery")
+  tag_tag_galleryTogallery                      tag[]          @relation("tag_galleryTogallery")
+}
+
+model gallery_item {
+  gallery_id String  @db.Uuid
+  item_id    String  @db.Uuid
+  gallery    gallery @relation(fields: [gallery_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  item       item    @relation(fields: [item_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([gallery_id, item_id])
+}
+
+model genre {
+  created_at       DateTime           @default(now()) @db.Timestamp(6)
+  updated_at       DateTime           @default(now()) @db.Timestamp(6)
+  id               String             @id @db.Uuid
+  type             String?            @db.VarChar
+  use_as           String?            @db.VarChar
+  vendor_id        String?            @db.VarChar
+  name             Json?
+  slug             Json?
+  description      Json?
+  genre_production genre_production[]
+}
+
+model genre_production {
+  genre_id      String     @db.Uuid
+  production_id String     @db.Uuid
+  genre         genre      @relation(fields: [genre_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  production    production @relation(fields: [production_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([genre_id, production_id])
+}
+
+model hall {
+  created_at              DateTime @default(now()) @db.Timestamp(6)
+  updated_at              DateTime @default(now()) @db.Timestamp(6)
+  id                      String   @id @db.Uuid
+  vendor_id               String?  @db.VarChar
+  box_office_id           String?  @db.VarChar
+  seat_selection          String?  @db.VarChar
+  open_seating            String?  @db.VarChar
+  name                    Json?
+  remark                  Json?
+  space                   String?  @db.Uuid
+  event_event_hallTohall  event[]  @relation("event_hallTohall")
+  space_hall_spaceTospace space?   @relation("hall_spaceTospace", fields: [space], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model item {
+  created_at                    DateTime       @default(now()) @db.Timestamp(6)
+  updated_at                    DateTime       @default(now()) @db.Timestamp(6)
+  id                            String         @id @db.Uuid
+  type                          String?        @db.VarChar
+  original_filename             String?        @db.VarChar
+  position                      Int?
+  width                         Int?
+  height                        Int?
+  format                        String?        @db.VarChar
+  gallery                       String?        @db.Uuid
+  title                         Json?
+  description                   Json?
+  credits                       Json?
+  link                          Json?
+  crops                         String?        @db.Uuid
+  gallery_item                  gallery_item[]
+  crop                          crop?          @relation(fields: [crops], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  gallery_item_galleryTogallery gallery?       @relation("item_galleryTogallery", fields: [gallery], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model location {
+  created_at                     DateTime @default(now()) @db.Timestamp(6)
+  updated_at                     DateTime @default(now()) @db.Timestamp(6)
+  id                             String   @id @db.Uuid
+  name                           Json?
+  code                           String?  @db.VarChar
+  street                         String?  @db.VarChar
+  number                         String?  @db.VarChar
+  postal_code                    String?  @db.VarChar
+  city                           String?  @db.VarChar
+  phone_1                        String?  @db.VarChar
+  phone_2                        String?  @db.VarChar
+  own_location                   String?  @db.VarChar
+  country                        String?  @db.VarChar
+  uitdatabank_id                 String?  @db.VarChar
+  space_space_locationTolocation space[]  @relation("space_locationTolocation")
+}
+
+model mailinglist {
+  created_at             DateTime                 @default(now()) @db.Timestamp(6)
+  updated_at             DateTime                 @default(now()) @db.Timestamp(6)
+  id                     String                   @id @db.Uuid
+  name                   String?                  @db.VarChar
+  type                   String?                  @db.VarChar
+  public                 String?                  @db.VarChar
+  one_time               String?                  @db.VarChar
+  subscriber_mailinglist subscriber_mailinglist[]
+}
+
+model optins {
+  created_at        DateTime            @default(now()) @db.Timestamp(6)
+  updated_at        DateTime            @default(now()) @db.Timestamp(6)
+  id                String              @id @db.Uuid
+  key_name          String?             @db.VarChar
+  name              Json?
+  title             Json?
+  description       Json?
+  provider          String?             @db.VarChar
+  code              String?             @db.VarChar
+  type              String?             @db.VarChar
+  subscriber_optins subscriber_optins[]
+}
+
+model order {
+  created_at                           DateTime      @default(now()) @db.Timestamp(6)
+  updated_at                           DateTime      @default(now()) @db.Timestamp(6)
+  id                                   String        @id @db.Uuid
+  ordered_at                           DateTime?     @db.Timestamp(6)
+  total_amount                         String?       @db.VarChar
+  box_office_id                        String?       @db.VarChar
+  visitor                              String?       @db.Uuid
+  crosssells_crosssells_orderToorder   crosssells[]  @relation("crosssells_orderToorder")
+  visitor_order_visitorTovisitor       visitor?      @relation("order_visitorTovisitor", fields: [visitor], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  orderticket_orderticket_orderToorder orderticket[] @relation("orderticket_orderToorder")
+  ticket_ticket_orderToorder           ticket[]      @relation("ticket_orderToorder")
+}
+
+model orderticket {
+  created_at                        DateTime @default(now()) @db.Timestamp(6)
+  updated_at                        DateTime @default(now()) @db.Timestamp(6)
+  id                                String   @id @db.Uuid
+  ticket_type                       String?  @db.VarChar
+  booking_id                        String?  @db.VarChar
+  price                             String?  @db.VarChar
+  hall_section_code                 String?  @db.VarChar
+  order                             String?  @db.Uuid
+  ticket                            String?  @db.Uuid
+  order_orderticket_orderToorder    order?   @relation("orderticket_orderToorder", fields: [order], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ticket_orderticket_ticketToticket ticket?  @relation("orderticket_ticketToticket", fields: [ticket], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model organisations {
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @default(now()) @db.Timestamp(6)
+  id         String   @id @db.Uuid
+  name       String?  @db.VarChar
+}
+
+model price {
+  created_at                           DateTime      @default(now()) @db.Timestamp(6)
+  updated_at                           DateTime      @default(now()) @db.Timestamp(6)
+  id                                   String        @id @db.Uuid
+  type                                 String?       @db.VarChar
+  visibility                           String?       @db.VarChar
+  code                                 String?       @db.VarChar
+  description                          Json?
+  minimum                              Int?
+  maximum                              Int?
+  step                                 Int?
+  order                                Int?
+  auto_select_combo                    Boolean?
+  include_in_price_range               Boolean?
+  cineville_box                        Boolean?
+  membership                           String?       @db.VarChar
+  event_price_event_price_priceToprice event_price[] @relation("event_price_priceToprice")
+  ticket_ticket_priceToprice           ticket[]      @relation("ticket_priceToprice")
+}
+
+model production {
+  created_at                                 DateTime                   @default(now()) @db.Timestamp(6)
+  updated_at                                 DateTime                   @default(now()) @db.Timestamp(6)
+  id                                         String                     @id @db.Uuid
+  vendor_id                                  String?                    @db.VarChar
+  box_office_id                              Int?
+  performer_field                            String?                    @db.VarChar
+  performer_type                             String?                    @db.VarChar
+  attendance_mode                            String?                    @db.VarChar
+  super_title                                Json?
+  title                                      Json?
+  artist                                     Json?
+  meta_title                                 Json?
+  meta_description                           Json?
+  tagline                                    Json?
+  teaser                                     Json?
+  description                                Json?
+  description_extra                          Json?
+  description_2                              Json?
+  video_1                                    Json?
+  video_2                                    Json?
+  quote                                      Json?
+  quote_source                               Json?
+  programme                                  Json?
+  info                                       Json?
+  description_short                          Json?
+  eticket_info                               Json?
+  custom_data                                Json?
+  media_gallery                              String?                    @db.Uuid
+  review_gallery                             String?                    @db.Uuid
+  poster_gallery                             String?                    @db.Uuid
+  uitdatabank_theme                          String?                    @db.Uuid
+  uitdatabank_type                           String?                    @db.Uuid
+  event_event_productionToproduction         event[]                    @relation("event_productionToproduction")
+  genre_production                           genre_production[]
+  gallery_production_media_galleryTogallery  gallery?                   @relation("production_media_galleryTogallery", fields: [media_gallery], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  gallery_production_poster_galleryTogallery gallery?                   @relation("production_poster_galleryTogallery", fields: [poster_gallery], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  gallery_production_review_galleryTogallery gallery?                   @relation("production_review_galleryTogallery", fields: [review_gallery], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  uitdatabank_themes                         uitdatabank_themes?        @relation(fields: [uitdatabank_theme], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  uitdatabank_types                          uitdatabank_types?         @relation(fields: [uitdatabank_type], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  uit_keywords_productions                   uit_keywords_productions[]
+}
+
+model rank {
+  created_at                         DateTime      @default(now()) @db.Timestamp(6)
+  updated_at                         DateTime      @default(now()) @db.Timestamp(6)
+  id                                 String        @id @db.Uuid
+  description                        Json?
+  code                               String?       @db.VarChar
+  position                           Int?
+  sold_out_buffer                    Int?
+  event_price_event_price_rankTorank event_price[] @relation("event_price_rankTorank")
+  ticket_ticket_rankTorank           ticket[]      @relation("ticket_rankTorank")
+}
+
+model space {
+  created_at                        DateTime  @default(now()) @db.Timestamp(6)
+  updated_at                        DateTime  @default(now()) @db.Timestamp(6)
+  id                                String    @id @db.Uuid
+  vendor_id                         String?   @db.VarChar
+  name                              Json?
+  location                          String?   @db.Uuid
+  hall_hall_spaceTospace            hall[]    @relation("hall_spaceTospace")
+  location_space_locationTolocation location? @relation("space_locationTolocation", fields: [location], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model status {
+  created_at                 DateTime @default(now()) @db.Timestamp(6)
+  updated_at                 DateTime @default(now()) @db.Timestamp(6)
+  id                         String   @id @db.Uuid
+  name                       Json?
+  short_name                 String?  @db.VarChar
+  fixed                      Boolean?
+  visible                    Boolean?
+  bookable                   Boolean?
+  event_event_statusTostatus event[]  @relation("event_statusTostatus")
+}
+
+model subscriber {
+  created_at                 DateTime                 @default(now()) @db.Timestamp(6)
+  updated_at                 DateTime                 @default(now()) @db.Timestamp(6)
+  id                         String                   @id @db.Uuid
+  confirmed                  Boolean?
+  bounces                    Int?
+  user                       String?                  @db.Uuid
+  user_subscriber_userTouser user?                    @relation("subscriber_userTouser", fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  subscriber_mailinglist     subscriber_mailinglist[]
+  subscriber_optins          subscriber_optins[]
+}
+
+model subscriber_mailinglist {
+  subscriber_id  String      @db.Uuid
+  mailinglist_id String      @db.Uuid
+  mailinglist    mailinglist @relation(fields: [mailinglist_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  subscriber     subscriber  @relation(fields: [subscriber_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([subscriber_id, mailinglist_id])
+}
+
+model subscriber_optins {
+  subscriber_id String     @db.Uuid
+  optins_id     String     @db.Uuid
+  optins        optins     @relation(fields: [optins_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  subscriber    subscriber @relation(fields: [subscriber_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([subscriber_id, optins_id])
+}
+
+model tag {
+  created_at                   DateTime       @default(now()) @db.Timestamp(6)
+  updated_at                   DateTime       @default(now()) @db.Timestamp(6)
+  id                           String         @id @db.Uuid
+  source                       String?        @db.VarChar
+  sourcetype                   String?        @db.VarChar
+  enable                       String?        @db.VarChar
+  code                         String?        @db.VarChar
+  name                         Json?
+  short_description            Json?
+  url                          String?        @db.VarChar
+  url_title                    Json?
+  expires_after                Int?
+  automatically_assigned       Boolean?
+  external                     Boolean?
+  gallery                      String?        @db.Uuid
+  gallery_tag_galleryTogallery gallery?       @relation("tag_galleryTogallery", fields: [gallery], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  visitor_tags                 visitor_tags[]
+}
+
+model ticket {
+  created_at                             DateTime      @default(now()) @db.Timestamp(6)
+  updated_at                             DateTime      @default(now()) @db.Timestamp(6)
+  id                                     String        @id @db.Uuid
+  available_from                         DateTime?     @db.Timestamp(6)
+  seat_id                                String?       @db.VarChar
+  seat_row                               String?       @db.VarChar
+  seat_description                       String?       @db.VarChar
+  external_data                          String?
+  order                                  String?       @db.Uuid
+  event                                  String?       @db.Uuid
+  price                                  String?       @db.Uuid
+  rank                                   String?       @db.Uuid
+  crosssells_crosssells_ticketToticket   crosssells[]  @relation("crosssells_ticketToticket")
+  orderticket_orderticket_ticketToticket orderticket[] @relation("orderticket_ticketToticket")
+  event_ticket_eventToevent              event?        @relation("ticket_eventToevent", fields: [event], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  order_ticket_orderToorder              order?        @relation("ticket_orderToorder", fields: [order], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  price_ticket_priceToprice              price?        @relation("ticket_priceToprice", fields: [price], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  rank_ticket_rankTorank                 rank?         @relation("ticket_rankTorank", fields: [rank], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model uit_keywords_productions {
+  production_id        String               @db.Uuid
+  uitkeywords_id       String               @db.Uuid
+  production           production           @relation(fields: [production_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  uitdatabank_keywords uitdatabank_keywords @relation(fields: [uitkeywords_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([production_id, uitkeywords_id])
+}
+
+model uitdatabank_keywords {
+  created_at               DateTime                   @default(now()) @db.Timestamp(6)
+  updated_at               DateTime                   @default(now()) @db.Timestamp(6)
+  id                       String                     @id @db.Uuid
+  name                     String?                    @db.VarChar
+  uit_keywords_productions uit_keywords_productions[]
+}
+
+model uitdatabank_themes {
+  created_at DateTime     @default(now()) @db.Timestamp(6)
+  updated_at DateTime     @default(now()) @db.Timestamp(6)
+  id         String       @id @db.Uuid
+  name       String?      @db.VarChar
+  cdb_cat_id String?      @db.VarChar
+  production production[]
+}
+
+model uitdatabank_types {
+  created_at DateTime     @default(now()) @db.Timestamp(6)
+  updated_at DateTime     @default(now()) @db.Timestamp(6)
+  id         String       @id @db.Uuid
+  name       String?      @db.VarChar
+  cdb_cat_id String?      @db.VarChar
+  production production[]
+}
+
+model user {
+  created_at                       DateTime     @default(now()) @db.Timestamp(6)
+  updated_at                       DateTime     @default(now()) @db.Timestamp(6)
+  id                               String       @id @db.Uuid
+  last_active_at                   DateTime?    @db.Timestamp(6)
+  gender                           String?      @db.VarChar
+  initials                         String?      @db.VarChar
+  postcode                         String?      @db.VarChar
+  city                             String?      @db.VarChar
+  country                          String?      @db.VarChar
+  date_of_birth                    DateTime?    @db.Timestamp(6)
+  visitor                          String?      @unique @db.Uuid
+  subscriber_subscriber_userTouser subscriber[] @relation("subscriber_userTouser")
+  visitor_user_visitorTovisitor    visitor?     @relation("user_visitorTovisitor", fields: [visitor], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model visitor {
+  created_at                                 DateTime       @default(now()) @db.Timestamp(6)
+  updated_at                                 DateTime       @default(now()) @db.Timestamp(6)
+  id                                         String         @id @db.Uuid
+  box_office_id                              String?        @db.VarChar
+  optins_chosen                              Boolean?
+  optins_skipped_at                          DateTime?      @db.Timestamp(6)
+  order_order_visitorTovisitor               order[]        @relation("order_visitorTovisitor")
+  user_user_visitorTovisitor                 user?          @relation("user_visitorTovisitor")
+  visitor_tags_visitor_tags_visitorTovisitor visitor_tags[] @relation("visitor_tags_visitorTovisitor")
+}
+
+model visitor_tags {
+  id                                    String    @id @db.Uuid
+  external_data                         String?
+  expires_at                            DateTime? @db.Timestamp(6)
+  visitor                               String?   @db.Uuid
+  tags                                  String?   @db.Uuid
+  tag                                   tag?      @relation(fields: [tags], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  visitor_visitor_tags_visitorTovisitor visitor?  @relation("visitor_tags_visitorTovisitor", fields: [visitor], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
