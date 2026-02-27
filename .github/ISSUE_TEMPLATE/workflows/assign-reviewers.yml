@@ -1,0 +1,57 @@
+name: Assign Reviewers
+
+# Triggers only when a new pull request is opened (not on updates).
+# Automatically picks 2 random reviewers from the team pool,
+# excluding the PR author so they are never asked to review their own work.
+on:
+  pull_request:
+    types: [opened, reopened]
+
+jobs:
+  assign-reviewers:
+    name: Assign 2 random reviewers
+    runs-on: ubuntu-latest
+
+    permissions:
+      pull-requests: write
+
+    steps:
+      - name: Pick and assign reviewers
+        uses: actions/github-script@v7
+        with:
+          # github-token is automatically provided; no extra secret needed
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            // ── TEAM CONFIGURATION ─────────────────────────────────────────────
+            // Replace these placeholder usernames with the actual GitHub usernames
+            // of your team members (without the @ sign).
+            const TEAM = [
+              'laveenae',
+            ];
+            // ───────────────────────────────────────────────────────────────────
+
+            const author = context.payload.pull_request.user.login;
+
+            // Remove the PR author from the eligible pool
+            const eligible = TEAM.filter(user => user !== author);
+
+            if (eligible.length < 2) {
+              core.warning('Not enough eligible reviewers to assign 2 (team too small or all members are the author).');
+              return;
+            }
+
+            // Fisher-Yates shuffle to get a fair random selection
+            for (let i = eligible.length - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              [eligible[i], eligible[j]] = [eligible[j], eligible[i]];
+            }
+
+            const reviewers = eligible.slice(0, 2);
+            core.info(`Assigning reviewers: ${reviewers.join(', ')}`);
+
+            await github.rest.pulls.requestReviewers({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              reviewers,
+            });
