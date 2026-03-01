@@ -1,0 +1,33 @@
+// VIERNULVIER Archive — Prisma Schema
+//
+// The full domain model (production, event, ticket, gallery, etc.)
+// will be added here as the project progresses.
+// For now, only the admin User model is defined.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// Roles available in the system
+enum Role {
+  ADMIN
+}
+
+/// Admin user for the archive management interface
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  username  String   @unique @db.VarChar
+  password  String   @db.VarChar
+  role      Role     @default(ADMIN)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamp(6)
+
+  @@map("users")
+}
+
+// TODO: Add domain models here (production, event, genre, gallery, etc.)
