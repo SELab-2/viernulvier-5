@@ -37,5 +37,9 @@ docker compose -f docker-compose-db.yml up
 ```
 ### prisma
 ```bash
-...
+# Create and apply a new migration
+npx prisma migrate dev --name describe-your-change
+
+# Regenerate the Prisma client (usually automatic after migrate dev)
+npx prisma generate
 ```
