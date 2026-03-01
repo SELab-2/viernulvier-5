@@ -17,21 +17,6 @@ jobs:
       contents: read
       pull-requests: write
 
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_USER: test_user
-          POSTGRES_PASSWORD: test_password
-          POSTGRES_DB: test_db
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -51,9 +36,6 @@ jobs:
         #                       text gives a readable table in the logs as well
         # -- coverageDirectory → write output to ./coverage at the root of the repo
         run: npm test -- --ci --passWithNoTests --coverage --coverageReporters=json-summary --coverageReporters=text --coverageDirectory=./coverage
-        env:
-          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
-          NODE_ENV: test
 
       - name: Post coverage comment on PR
         # This action reads the json-summary report and posts a nicely formatted
