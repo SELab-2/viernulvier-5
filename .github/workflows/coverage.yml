@@ -10,7 +10,7 @@ on:
 jobs:
   coverage:
     name: Coverage
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     # Write permission is needed to post the coverage comment on the PR
     permissions:

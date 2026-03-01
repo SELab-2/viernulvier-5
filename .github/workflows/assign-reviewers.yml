@@ -10,7 +10,7 @@ on:
 jobs:
   assign-reviewers:
     name: Assign 2 random reviewers
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     permissions:
       pull-requests: write
