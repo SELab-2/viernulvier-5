@@ -32,6 +32,11 @@ jobs:
       run:
         working-directory: backend
 
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/viernulvier_test
+      JWT_SECRET: test-secret-for-ci
+      NODE_ENV: test
+
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -45,10 +50,6 @@ jobs:
       - run: npm run lint
       - run: npm run build
       - run: npm test
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/viernulvier_test
-          JWT_SECRET: test-secret-for-ci
-          NODE_ENV: test
 
   frontend:
     name: Frontend (Lint + Test + Build)
