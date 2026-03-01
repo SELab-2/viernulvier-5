@@ -38,7 +38,7 @@ jobs:
 
   test:
     name: Test
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: lint # Only run tests if linting passed; saves time on obvious failures
     
     steps:
