@@ -258,7 +258,7 @@ model price {
 model production {
   created_at                                 DateTime                   @default(now()) @db.Timestamp(6)
   updated_at                                 DateTime                   @default(now()) @db.Timestamp(6)
-  id                                         String                     @id @db.Uuid
+  id                                         String                     @id @db.Uuid @default(uuid())
   vendor_id                                  String?                    @db.VarChar
   box_office_id                              Int?
   performer_field                            String?                    @db.VarChar
