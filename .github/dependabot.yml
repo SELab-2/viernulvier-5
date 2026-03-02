@@ -1,0 +1,66 @@
+# Dependabot Configuration
+#
+# Dependabot has two separate systems that work together:
+#
+#   1. VERSION UPDATES (configured here): Dependabot periodically checks for newer
+#      versions of your dependencies and opens PRs to update them on the schedule below.
+#
+#   2. SECURITY UPDATES (NOT configured here): These are always enabled automatically
+#      by GitHub and cannot be configured in this file. When a vulnerability is found
+#      in one of your dependencies, Dependabot opens a fix PR immediately, regardless
+#      of the schedule below. You can enable/disable this in:
+#      Settings → Code security → Dependabot security updates
+#
+# Docs: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+
+updates:
+  # ── 1. npm dependencies ─────────────────────────────────────────────
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "sunday"     # Run on Sunday nights so a fresh batch is ready Monday morning
+      time: "02:00"     # 02:00 UTC+1 (Central European Time) — quiet hours
+      timezone: "Europe/Brussels"
+    open-pull-requests-limit: 10
+    ignore:
+      # eslint-plugin-react does not yet support ESLint v10.
+      # Remove this once eslint-plugin-react declares support for v10.
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
+    # Group all non-major updates into a single PR to reduce noise.
+    # Major version bumps are kept separate because they may require manual migration.
+    groups:
+      frontend-minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+
+  # ── 2. GitHub Actions ─────────────────────────────────────────────────────────
+  # Keeps your workflow action versions (e.g. actions/checkout) up to date.
+  - package-ecosystem: "github-actions"
+    directory: "/"   # GitHub Actions are always read from the root
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+      time: "02:00"
+      timezone: "Europe/Brussels"
+    open-pull-requests-limit: 5
+    groups:
+      github-actions:
+        update-types:
+          - "minor"
+          - "patch"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "chore(ci)"
+      include: "scope"
