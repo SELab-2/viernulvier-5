@@ -81,7 +81,7 @@ model gallery {
   id                                            String         @id @db.Uuid
   name                                          String?        @db.VarChar
   gallery_item                                  gallery_item[]
-  items                                         item[]         @relation("item_galleryTogallery")
+  items                                         item[]         @relation("item_gallery")
   media_gallery_productions                     production[]   @relation("production_media_gallery")
   poster_gallery_productions                    production[]   @relation("production_poster_gallery")
   review_gallery_productions                    production[]   @relation("production_review_gallery")
@@ -152,7 +152,7 @@ model item {
   crops                         String?        @db.Uuid
   gallery_item                  gallery_item[]
   crop                          crop?          @relation(fields: [crops], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  gallery                       gallery?       @relation("item_galleryTogallery", fields: [gallery_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  gallery                       gallery?       @relation("item_gallery", fields: [gallery_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model location {
@@ -453,7 +453,7 @@ model user {
   date_of_birth                    DateTime?    @db.Timestamp(6)
   visitor_id                       String?      @unique @db.Uuid
   subscribers                      subscriber[] @relation("subscriber_user")
-  visitor                          visitor?     @relation("user_visitor", fields: [visitor_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  visitor                          visitor?     @relation(fields: [visitor_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model visitor {
@@ -464,7 +464,7 @@ model visitor {
   optins_chosen                              Boolean?
   optins_skipped_at                          DateTime?      @db.Timestamp(6)
   orders                                     order[]        @relation("order_visitor")
-  user                                       user?          @relation("user_visitor")
+  user                                       user?          
   visitor_tags                               visitor_tags[] @relation("visitor_tags_visitor")
 }
 
