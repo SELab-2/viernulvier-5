@@ -20,14 +20,14 @@ model crosssells {
   created_at                       DateTime @default(now()) @db.Timestamp(6)
   updated_at                       DateTime @default(now()) @db.Timestamp(6)
   id                               String   @id @db.Uuid
-  ticket                           String?  @db.Uuid
+  ticket_id                        String?  @db.Uuid
   ticket_type                      String?  @db.VarChar
   booking_id                       String?  @db.VarChar
   price                            String?  @db.VarChar
   hall_section_code                String?  @db.VarChar
-  order                            String?  @db.Uuid
-  order_crosssells_orderToorder    order?   @relation("crosssells_orderToorder", fields: [order], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  ticket_crosssells_ticketToticket ticket?  @relation("crosssells_ticketToticket", fields: [ticket], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  order_id                         String?  @db.Uuid
+  order                            order?   @relation("crosssells_order", fields: [order_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ticket                           ticket?  @relation("crosssells_ticketToticket", fields: [ticket_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model event {
@@ -44,18 +44,18 @@ model event {
   uitdatabank_id                          String?       @db.VarChar
   secure                                  Boolean?
   sms_verification                        Boolean?
-  info                                    String?
-  eticket_info                            String?
-  external_order_url                      String?       @db.VarChar
+  info                                    Json?
+  eticket_info                            Json?
+  external_order_url                      Json?
   order_url                               String?       @db.VarChar
-  production                              String?       @db.Uuid
-  status                                  String?       @db.Uuid
-  hall                                    String?       @db.Uuid
-  hall_event_hallTohall                   hall?         @relation("event_hallTohall", fields: [hall], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  production_event_productionToproduction production?   @relation("event_productionToproduction", fields: [production], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  status_event_statusTostatus             status?       @relation("event_statusTostatus", fields: [status], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  event_price                             event_price[]
-  ticket_ticket_eventToevent              ticket[]      @relation("ticket_eventToevent")
+  production_id                           String?       @db.Uuid
+  status_id                               String?       @db.Uuid
+  hall_id                                 String?       @db.Uuid
+  hall                                    hall?         @relation("event_hall", fields: [hall_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  production                              production?   @relation("event_production", fields: [production_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  status                                  status?       @relation("event_status", fields: [status_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  event_prices                            event_price[]
+  tickets                                 ticket[]      @relation("ticket_event")
 }
 
 model event_price {
@@ -68,11 +68,11 @@ model event_price {
   box_office_id                  String?   @db.VarChar
   contigent_id                   Int?
   expires_at                     DateTime? @db.Timestamp(6)
-  price                          String?   @db.Uuid
-  rank                           String?   @db.Uuid
+  price_id                       String?   @db.Uuid
+  rank_id                        String?   @db.Uuid
   event                          event?    @relation(fields: [event_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  price_event_price_priceToprice price?    @relation("event_price_priceToprice", fields: [price], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  rank_event_price_rankTorank    rank?     @relation("event_price_rankTorank", fields: [rank], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  price                          price?    @relation("event_price_price", fields: [price_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  rank                           rank?     @relation("event_price_rank", fields: [rank_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model gallery {
@@ -81,11 +81,11 @@ model gallery {
   id                                            String         @id @db.Uuid
   name                                          String?        @db.VarChar
   gallery_item                                  gallery_item[]
-  item_item_galleryTogallery                    item[]         @relation("item_galleryTogallery")
-  production_production_media_galleryTogallery  production[]   @relation("production_media_galleryTogallery")
-  production_production_poster_galleryTogallery production[]   @relation("production_poster_galleryTogallery")
-  production_production_review_galleryTogallery production[]   @relation("production_review_galleryTogallery")
-  tag_tag_galleryTogallery                      tag[]          @relation("tag_galleryTogallery")
+  items                                         item[]         @relation("item_galleryTogallery")
+  media_gallery_productions                     production[]   @relation("production_media_gallery")
+  poster_gallery_productions                    production[]   @relation("production_poster_gallery")
+  review_gallery_productions                    production[]   @relation("production_review_gallery")
+  tags                                          tag[]          @relation("tag_gallery")
 }
 
 model gallery_item {
@@ -129,9 +129,9 @@ model hall {
   open_seating            String?  @db.VarChar
   name                    Json?
   remark                  Json?
-  space                   String?  @db.Uuid
-  event_event_hallTohall  event[]  @relation("event_hallTohall")
-  space_hall_spaceTospace space?   @relation("hall_spaceTospace", fields: [space], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  space_id                String?  @db.Uuid
+  events                  event[]  @relation("event_hall")
+  space                   space?   @relation("hall_spaceTospace", fields: [space_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model item {
@@ -144,7 +144,7 @@ model item {
   width                         Int?
   height                        Int?
   format                        String?        @db.VarChar
-  gallery                       String?        @db.Uuid
+  gallery_id                    String?        @db.Uuid
   title                         Json?
   description                   Json?
   credits                       Json?
@@ -152,7 +152,7 @@ model item {
   crops                         String?        @db.Uuid
   gallery_item                  gallery_item[]
   crop                          crop?          @relation(fields: [crops], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  gallery_item_galleryTogallery gallery?       @relation("item_galleryTogallery", fields: [gallery], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  gallery                       gallery?       @relation("item_galleryTogallery", fields: [gallery_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model location {
@@ -189,7 +189,7 @@ model optins {
   updated_at        DateTime            @default(now()) @db.Timestamp(6)
   id                String              @id @db.Uuid
   key_name          String?             @db.VarChar
-  name              Json?
+  name              String?             @db.VarChar
   title             Json?
   description       Json?
   provider          String?             @db.VarChar
@@ -205,11 +205,13 @@ model order {
   ordered_at                           DateTime?     @db.Timestamp(6)
   total_amount                         String?       @db.VarChar
   box_office_id                        String?       @db.VarChar
-  visitor                              String?       @db.Uuid
-  crosssells_crosssells_orderToorder   crosssells[]  @relation("crosssells_orderToorder")
-  visitor_order_visitorTovisitor       visitor?      @relation("order_visitorTovisitor", fields: [visitor], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  orderticket_orderticket_orderToorder orderticket[] @relation("orderticket_orderToorder")
-  ticket_ticket_orderToorder           ticket[]      @relation("ticket_orderToorder")
+  visitor_id                           String?       @db.Uuid
+  publiq_statistical_sector_id         String?       @db.VarChar
+
+  crosssells                           crosssells[]  @relation("crosssells_order")
+  visitor                              visitor?      @relation("order_visitor", fields: [visitor_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ordertickets                         orderticket[] @relation("orderticket_order")
+  tickets                              ticket[]      @relation("ticket_order")
 }
 
 model orderticket {
@@ -222,7 +224,7 @@ model orderticket {
   hall_section_code                 String?  @db.VarChar
   order                             String?  @db.Uuid
   ticket                            String?  @db.Uuid
-  order_orderticket_orderToorder    order?   @relation("orderticket_orderToorder", fields: [order], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  order_orderticket_orderToorder    order?   @relation("orderticket_order", fields: [order], references: [id], onDelete: NoAction, onUpdate: NoAction)
   ticket_orderticket_ticketToticket ticket?  @relation("orderticket_ticketToticket", fields: [ticket], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
@@ -249,7 +251,7 @@ model price {
   include_in_price_range               Boolean?
   cineville_box                        Boolean?
   membership                           String?       @db.VarChar
-  event_price_event_price_priceToprice event_price[] @relation("event_price_priceToprice")
+  event_price_event_price_priceToprice event_price[] @relation("event_price_price")
   ticket_ticket_priceToprice           ticket[]      @relation("ticket_priceToprice")
 }
 
@@ -286,11 +288,11 @@ model production {
   poster_gallery                             String?                    @db.Uuid
   uitdatabank_theme                          String?                    @db.Uuid
   uitdatabank_type                           String?                    @db.Uuid
-  event_event_productionToproduction         event[]                    @relation("event_productionToproduction")
+  events                                     event[]                    @relation("event_production")
   genre_production                           genre_production[]
-  gallery_production_media_galleryTogallery  gallery?                   @relation("production_media_galleryTogallery", fields: [media_gallery], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  gallery_production_poster_galleryTogallery gallery?                   @relation("production_poster_galleryTogallery", fields: [poster_gallery], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  gallery_production_review_galleryTogallery gallery?                   @relation("production_review_galleryTogallery", fields: [review_gallery], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  gallery_production_media_galleryTogallery  gallery?                   @relation("production_media_gallery", fields: [media_gallery], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  gallery_production_poster_galleryTogallery gallery?                   @relation("production_poster_gallery", fields: [poster_gallery], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  gallery_production_review_galleryTogallery gallery?                   @relation("production_review_gallery", fields: [review_gallery], references: [id], onDelete: NoAction, onUpdate: NoAction)
   uitdatabank_themes                         uitdatabank_themes?        @relation(fields: [uitdatabank_theme], references: [id], onDelete: NoAction, onUpdate: NoAction)
   uitdatabank_types                          uitdatabank_types?         @relation(fields: [uitdatabank_type], references: [id], onDelete: NoAction, onUpdate: NoAction)
   uit_keywords_productions                   uit_keywords_productions[]
@@ -304,7 +306,7 @@ model rank {
   code                               String?       @db.VarChar
   position                           Int?
   sold_out_buffer                    Int?
-  event_price_event_price_rankTorank event_price[] @relation("event_price_rankTorank")
+  event_price_event_price_rankTorank event_price[] @relation("event_price_rank")
   ticket_ticket_rankTorank           ticket[]      @relation("ticket_rankTorank")
 }
 
@@ -328,7 +330,7 @@ model status {
   fixed                      Boolean?
   visible                    Boolean?
   bookable                   Boolean?
-  event_event_statusTostatus event[]  @relation("event_statusTostatus")
+  event_event_statusTostatus event[]  @relation("event_status")
 }
 
 model subscriber {
@@ -377,7 +379,7 @@ model tag {
   automatically_assigned       Boolean?
   external                     Boolean?
   gallery                      String?        @db.Uuid
-  gallery_tag_galleryTogallery gallery?       @relation("tag_galleryTogallery", fields: [gallery], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  gallery_tag_galleryTogallery gallery?       @relation("tag_gallery", fields: [gallery], references: [id], onDelete: NoAction, onUpdate: NoAction)
   visitor_tags                 visitor_tags[]
 }
 
@@ -396,8 +398,8 @@ model ticket {
   rank                                   String?       @db.Uuid
   crosssells_crosssells_ticketToticket   crosssells[]  @relation("crosssells_ticketToticket")
   orderticket_orderticket_ticketToticket orderticket[] @relation("orderticket_ticketToticket")
-  event_ticket_eventToevent              event?        @relation("ticket_eventToevent", fields: [event], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  order_ticket_orderToorder              order?        @relation("ticket_orderToorder", fields: [order], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  event_ticket_eventToevent              event?        @relation("ticket_event", fields: [event], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  order_ticket_orderToorder              order?        @relation("ticket_order", fields: [order], references: [id], onDelete: NoAction, onUpdate: NoAction)
   price_ticket_priceToprice              price?        @relation("ticket_priceToprice", fields: [price], references: [id], onDelete: NoAction, onUpdate: NoAction)
   rank_ticket_rankTorank                 rank?         @relation("ticket_rankTorank", fields: [rank], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
@@ -460,7 +462,7 @@ model visitor {
   box_office_id                              String?        @db.VarChar
   optins_chosen                              Boolean?
   optins_skipped_at                          DateTime?      @db.Timestamp(6)
-  order_order_visitorTovisitor               order[]        @relation("order_visitorTovisitor")
+  order_order_visitorTovisitor               order[]        @relation("order_visitor")
   user_user_visitorTovisitor                 user?          @relation("user_visitorTovisitor")
   visitor_tags_visitor_tags_visitorTovisitor visitor_tags[] @relation("visitor_tags_visitorTovisitor")
 }
