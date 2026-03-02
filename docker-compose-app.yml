@@ -1,0 +1,12 @@
+services:
+  backend:
+    image: node:25
+    container_name: viernulvier_backend
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB}
+    networks:
+      - vnv_net
+
+networks:
+  vnv_net:
+    external: true
