@@ -18,12 +18,12 @@ async function fetchFromURL(url: string){
                 break;
             }
             const view = data["view"];
-            if (!("next" in view)) {
-                break;
-            }
             const members = data["member"];
             all_data.push(...members);
             console.log(`succesfully retrieved list: ${url}`);
+            if (!("next" in view)) {
+                break;
+            }
             url = data["view"]["next"];
         }else {
             console.log("Error:", response.status);
@@ -118,21 +118,21 @@ export async function fetchUitDatabankTypes(){
 }
 
 
-fetchProductions();
-fetchEvents();
-fetchCrops();
-fetchEventPrices();
-fetchGalleries();
-fetchGenres();
-fetchHalls();
-fetchGalleries();
-fetchGalleryItems();
-fetchLocations();
-fetchPrices();
-fetchRanks();
-fetchSpaces();
-fetchStatuses();
-fetchTags();
-fetchUitDatabankKeywords();
-fetchUitDatabankThemes();
-fetchUitDatabankTypes();
+// fetchProductions();
+// fetchEvents();
+// fetchCrops();
+// fetchEventPrices();
+// fetchGalleries();
+// fetchGenres();
+// fetchHalls();
+// fetchGalleries();
+// fetchGalleryItems();
+// fetchLocations();
+// fetchPrices();
+// fetchRanks();
+// fetchSpaces();
+// fetchStatuses();
+// fetchTags();
+// fetchUitDatabankKeywords();
+// fetchUitDatabankThemes();
+// fetchUitDatabankTypes();
