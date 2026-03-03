@@ -40,9 +40,6 @@ export async function buildApp(opts = {}): Promise<FastifyInstance> {
     await app.register(prismaPlugin)
     await app.register(authPlugin)
 
-    // --- Health check ---
-    app.get('/api/health', async () => ({ status: 'ok' }))
-
     // --- Feature modules ---
     await app.register(archiveRoutes, { prefix: '/api/archive' })
     await app.register(authRoutes, { prefix: '/api/auth' })

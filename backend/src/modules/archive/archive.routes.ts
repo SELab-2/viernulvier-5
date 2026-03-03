@@ -2,6 +2,16 @@ import type { FastifyPluginAsync } from 'fastify'
 import { ArchiveRepository } from './archive.repository.js'
 import { ArchiveService } from './archive.service.js'
 import { ArchiveController } from './archive.controller.js'
+<<<<<<< HEAD
+=======
+import { 
+    paginationQuerySchema, 
+    productionListSchema, 
+    eventListSchema,
+    genreListSchema,
+    locationListSchema 
+} from './archive.schema.js'
+>>>>>>> 45610ee (Events, locations en genre toegevoegd)
 
 /**
  * Archive routes
@@ -20,13 +30,61 @@ const archiveRoutes: FastifyPluginAsync = async (fastify) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Placeholder until concrete handlers are wired.
     const _controller = new ArchiveController(service)
 
+<<<<<<< HEAD
     // Placeholder health check for this module
     fastify.get('/health', {
+=======
+    // GET /api/archive/productions
+    fastify.get('/productions', {
         schema: {
             tags: ['archive'],
-            summary: 'Archive module health check',
+            summary: 'Get a paginated list of productions',
+            querystring: paginationQuerySchema,
+            response: {
+                200: productionListSchema,
+            },
         },
-        handler: async () => ({ module: 'archive', status: 'ok' }),
+        handler: (request, reply) => controller.getProductions(request as any, reply),
+    })
+
+    // GET /api/archive/events
+    fastify.get('/events', {
+>>>>>>> 45610ee (Events, locations en genre toegevoegd)
+        schema: {
+            tags: ['archive'],
+            summary: 'Get a paginated list of events',
+            querystring: paginationQuerySchema,
+            response: {
+                200: eventListSchema,
+            },
+        },
+        handler: (request, reply) => controller.getEvents(request as any, reply),
+    })
+
+    // GET /api/archive/genres
+    fastify.get('/genres', {
+        schema: {
+            tags: ['archive'],
+            summary: 'Get a paginated list of genres',
+            querystring: paginationQuerySchema,
+            response: {
+                200: genreListSchema,
+            },
+        },
+        handler: (request, reply) => controller.getGenres(request as any, reply),
+    })
+
+    // GET /api/archive/locations
+    fastify.get('/locations', {
+        schema: {
+            tags: ['archive'],
+            summary: 'Get a paginated list of locations',
+            querystring: paginationQuerySchema,
+            response: {
+                200: locationListSchema,
+            },
+        },
+        handler: (request, reply) => controller.getLocations(request as any, reply),
     })
 
     // TODO: Add real routes, e.g.:
