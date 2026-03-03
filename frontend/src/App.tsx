@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
 import { lazy, Suspense } from 'react'
+import { getMessages } from './i18n'
 
 // Public pages
 import HomePage from './pages/public/HomePage'
@@ -16,21 +17,23 @@ const ArchiveEditPage = lazy(() => import('./pages/admin/ArchiveEditPage'))
  * Detects subdomain to switch between public and admin views.
  * - archief.viernulvier.be → public archive browser
  * - admin.archief.viernulvier.be → admin management panel
- * - localhost → both available via /admin prefix
+ * - localhost/127.0.0.1 → both available via /admin prefix
  */
 function App() {
     const hostname = window.location.hostname
     const isAdmin = hostname.startsWith('admin.') || false
+    const isLocalDevHost = hostname === 'localhost' || hostname === '127.0.0.1'
+    const messages = getMessages()
 
     return (
-        <Suspense fallback={<div>Laden...</div>}>
+        <Suspense fallback={<div>{messages.common.loading}</div>}>
             <Routes>
                 {/* Public routes — always available */}
                 <Route path="/" element={<HomePage />} />
                 <Route path="/archive/:id" element={<ArchiveDetailPage />} />
 
                 {/* Admin routes — via subdomain or /admin prefix in development */}
-                {(isAdmin || hostname === 'localhost') && (
+                {(isAdmin || isLocalDevHost) && (
                     <>
                         <Route path="/admin/login" element={<LoginPage />} />
                         <Route path="/admin" element={<DashboardPage />} />

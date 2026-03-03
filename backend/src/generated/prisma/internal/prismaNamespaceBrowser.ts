@@ -51,7 +51,40 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
-  User: 'User'
+  crop: 'crop',
+  crosssells: 'crosssells',
+  event: 'event',
+  event_price: 'event_price',
+  gallery: 'gallery',
+  gallery_item: 'gallery_item',
+  genre: 'genre',
+  genre_production: 'genre_production',
+  hall: 'hall',
+  item: 'item',
+  location: 'location',
+  mailinglist: 'mailinglist',
+  optins: 'optins',
+  order: 'order',
+  orderticket: 'orderticket',
+  organisations: 'organisations',
+  price: 'price',
+  production: 'production',
+  rank: 'rank',
+  space: 'space',
+  status: 'status',
+  subscriber: 'subscriber',
+  subscriber_mailinglist: 'subscriber_mailinglist',
+  subscriber_optins: 'subscriber_optins',
+  tag: 'tag',
+  ticket: 'ticket',
+  uit_keywords_productions: 'uit_keywords_productions',
+  uitdatabank_keywords: 'uitdatabank_keywords',
+  uitdatabank_themes: 'uitdatabank_themes',
+  uitdatabank_types: 'uitdatabank_types',
+  user: 'user',
+  visitor: 'visitor',
+  visitor_tags: 'visitor_tags',
+  AdminUser: 'AdminUser'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -70,7 +103,487 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
+export const CropScalarFieldEnum = {
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  id: 'id',
+  name: 'name',
+  url: 'url'
+} as const
+
+export type CropScalarFieldEnum = (typeof CropScalarFieldEnum)[keyof typeof CropScalarFieldEnum]
+
+
+export const CrosssellsScalarFieldEnum = {
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  id: 'id',
+  ticket_id: 'ticket_id',
+  ticket_type: 'ticket_type',
+  booking_id: 'booking_id',
+  price: 'price',
+  hall_section_code: 'hall_section_code',
+  order_id: 'order_id'
+} as const
+
+export type CrosssellsScalarFieldEnum = (typeof CrosssellsScalarFieldEnum)[keyof typeof CrosssellsScalarFieldEnum]
+
+
+export const EventScalarFieldEnum = {
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  id: 'id',
+  starts_at: 'starts_at',
+  ends_at: 'ends_at',
+  intermission_at: 'intermission_at',
+  doors_at: 'doors_at',
+  box_office_id: 'box_office_id',
+  vendor_id: 'vendor_id',
+  max_tickets_per_order: 'max_tickets_per_order',
+  uitdatabank_id: 'uitdatabank_id',
+  secure: 'secure',
+  sms_verification: 'sms_verification',
+  info: 'info',
+  eticket_info: 'eticket_info',
+  external_order_url: 'external_order_url',
+  order_url: 'order_url',
+  production_id: 'production_id',
+  status_id: 'status_id',
+  hall_id: 'hall_id'
+} as const
+
+export type EventScalarFieldEnum = (typeof EventScalarFieldEnum)[keyof typeof EventScalarFieldEnum]
+
+
+export const Event_priceScalarFieldEnum = {
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  id: 'id',
+  event_id: 'event_id',
+  available: 'available',
+  amount: 'amount',
+  box_office_id: 'box_office_id',
+  contigent_id: 'contigent_id',
+  expires_at: 'expires_at',
+  price_id: 'price_id',
+  rank_id: 'rank_id'
+} as const
+
+export type Event_priceScalarFieldEnum = (typeof Event_priceScalarFieldEnum)[keyof typeof Event_priceScalarFieldEnum]
+
+
+export const GalleryScalarFieldEnum = {
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  id: 'id',
+  name: 'name'
+} as const
+
+export type GalleryScalarFieldEnum = (typeof GalleryScalarFieldEnum)[keyof typeof GalleryScalarFieldEnum]
+
+
+export const Gallery_itemScalarFieldEnum = {
+  gallery_id: 'gallery_id',
+  item_id: 'item_id'
+} as const
+
+export type Gallery_itemScalarFieldEnum = (typeof Gallery_itemScalarFieldEnum)[keyof typeof Gallery_itemScalarFieldEnum]
+
+
+export const GenreScalarFieldEnum = {
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  id: 'id',
+  type: 'type',
+  use_as: 'use_as',
+  vendor_id: 'vendor_id',
+  name: 'name',
+  slug: 'slug',
+  description: 'description'
+} as const
+
+export type GenreScalarFieldEnum = (typeof GenreScalarFieldEnum)[keyof typeof GenreScalarFieldEnum]
+
+
+export const Genre_productionScalarFieldEnum = {
+  genre_id: 'genre_id',
+  production_id: 'production_id'
+} as const
+
+export type Genre_productionScalarFieldEnum = (typeof Genre_productionScalarFieldEnum)[keyof typeof Genre_productionScalarFieldEnum]
+
+
+export const HallScalarFieldEnum = {
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  id: 'id',
+  vendor_id: 'vendor_id',
+  box_office_id: 'box_office_id',
+  seat_selection: 'seat_selection',
+  open_seating: 'open_seating',
+  name: 'name',
+  remark: 'remark',
+  space_id: 'space_id'
+} as const
+
+export type HallScalarFieldEnum = (typeof HallScalarFieldEnum)[keyof typeof HallScalarFieldEnum]
+
+
+export const ItemScalarFieldEnum = {
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  id: 'id',
+  type: 'type',
+  original_filename: 'original_filename',
+  position: 'position',
+  width: 'width',
+  height: 'height',
+  format: 'format',
+  gallery_id: 'gallery_id',
+  title: 'title',
+  description: 'description',
+  credits: 'credits',
+  link: 'link',
+  crops: 'crops'
+} as const
+
+export type ItemScalarFieldEnum = (typeof ItemScalarFieldEnum)[keyof typeof ItemScalarFieldEnum]
+
+
+export const LocationScalarFieldEnum = {
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  id: 'id',
+  name: 'name',
+  code: 'code',
+  street: 'street',
+  number: 'number',
+  postal_code: 'postal_code',
+  city: 'city',
+  phone_1: 'phone_1',
+  phone_2: 'phone_2',
+  own_location: 'own_location',
+  country: 'country',
+  uitdatabank_id: 'uitdatabank_id'
+} as const
+
+export type LocationScalarFieldEnum = (typeof LocationScalarFieldEnum)[keyof typeof LocationScalarFieldEnum]
+
+
+export const MailinglistScalarFieldEnum = {
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  id: 'id',
+  name: 'name',
+  type: 'type',
+  public: 'public',
+  one_time: 'one_time'
+} as const
+
+export type MailinglistScalarFieldEnum = (typeof MailinglistScalarFieldEnum)[keyof typeof MailinglistScalarFieldEnum]
+
+
+export const OptinsScalarFieldEnum = {
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  id: 'id',
+  key_name: 'key_name',
+  name: 'name',
+  title: 'title',
+  description: 'description',
+  provider: 'provider',
+  code: 'code',
+  type: 'type'
+} as const
+
+export type OptinsScalarFieldEnum = (typeof OptinsScalarFieldEnum)[keyof typeof OptinsScalarFieldEnum]
+
+
+export const OrderScalarFieldEnum = {
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  id: 'id',
+  ordered_at: 'ordered_at',
+  total_amount: 'total_amount',
+  box_office_id: 'box_office_id',
+  visitor_id: 'visitor_id',
+  publiq_statistical_sector_id: 'publiq_statistical_sector_id'
+} as const
+
+export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum]
+
+
+export const OrderticketScalarFieldEnum = {
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  id: 'id',
+  ticket_type: 'ticket_type',
+  booking_id: 'booking_id',
+  price: 'price',
+  hall_section_code: 'hall_section_code',
+  order_id: 'order_id',
+  ticket_id: 'ticket_id'
+} as const
+
+export type OrderticketScalarFieldEnum = (typeof OrderticketScalarFieldEnum)[keyof typeof OrderticketScalarFieldEnum]
+
+
+export const OrganisationsScalarFieldEnum = {
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  id: 'id',
+  name: 'name'
+} as const
+
+export type OrganisationsScalarFieldEnum = (typeof OrganisationsScalarFieldEnum)[keyof typeof OrganisationsScalarFieldEnum]
+
+
+export const PriceScalarFieldEnum = {
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  id: 'id',
+  type: 'type',
+  visibility: 'visibility',
+  code: 'code',
+  description: 'description',
+  minimum: 'minimum',
+  maximum: 'maximum',
+  step: 'step',
+  order: 'order',
+  auto_select_combo: 'auto_select_combo',
+  include_in_price_range: 'include_in_price_range',
+  cineville_box: 'cineville_box',
+  membership: 'membership'
+} as const
+
+export type PriceScalarFieldEnum = (typeof PriceScalarFieldEnum)[keyof typeof PriceScalarFieldEnum]
+
+
+export const ProductionScalarFieldEnum = {
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  id: 'id',
+  vendor_id: 'vendor_id',
+  box_office_id: 'box_office_id',
+  performer_field: 'performer_field',
+  performer_type: 'performer_type',
+  attendance_mode: 'attendance_mode',
+  super_title: 'super_title',
+  title: 'title',
+  artist: 'artist',
+  meta_title: 'meta_title',
+  meta_description: 'meta_description',
+  tagline: 'tagline',
+  teaser: 'teaser',
+  description: 'description',
+  description_extra: 'description_extra',
+  description_2: 'description_2',
+  video_1: 'video_1',
+  video_2: 'video_2',
+  quote: 'quote',
+  quote_source: 'quote_source',
+  programme: 'programme',
+  info: 'info',
+  description_short: 'description_short',
+  eticket_info: 'eticket_info',
+  custom_data: 'custom_data',
+  media_gallery_id: 'media_gallery_id',
+  review_gallery_id: 'review_gallery_id',
+  poster_gallery_id: 'poster_gallery_id',
+  uitdatabank_theme: 'uitdatabank_theme',
+  uitdatabank_type: 'uitdatabank_type'
+} as const
+
+export type ProductionScalarFieldEnum = (typeof ProductionScalarFieldEnum)[keyof typeof ProductionScalarFieldEnum]
+
+
+export const RankScalarFieldEnum = {
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  id: 'id',
+  description: 'description',
+  code: 'code',
+  position: 'position',
+  sold_out_buffer: 'sold_out_buffer'
+} as const
+
+export type RankScalarFieldEnum = (typeof RankScalarFieldEnum)[keyof typeof RankScalarFieldEnum]
+
+
+export const SpaceScalarFieldEnum = {
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  id: 'id',
+  vendor_id: 'vendor_id',
+  name: 'name',
+  location_id: 'location_id'
+} as const
+
+export type SpaceScalarFieldEnum = (typeof SpaceScalarFieldEnum)[keyof typeof SpaceScalarFieldEnum]
+
+
+export const StatusScalarFieldEnum = {
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  id: 'id',
+  name: 'name',
+  short_name: 'short_name',
+  fixed: 'fixed',
+  visible: 'visible',
+  bookable: 'bookable'
+} as const
+
+export type StatusScalarFieldEnum = (typeof StatusScalarFieldEnum)[keyof typeof StatusScalarFieldEnum]
+
+
+export const SubscriberScalarFieldEnum = {
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  id: 'id',
+  confirmed: 'confirmed',
+  bounces: 'bounces',
+  user_id: 'user_id'
+} as const
+
+export type SubscriberScalarFieldEnum = (typeof SubscriberScalarFieldEnum)[keyof typeof SubscriberScalarFieldEnum]
+
+
+export const Subscriber_mailinglistScalarFieldEnum = {
+  subscriber_id: 'subscriber_id',
+  mailinglist_id: 'mailinglist_id'
+} as const
+
+export type Subscriber_mailinglistScalarFieldEnum = (typeof Subscriber_mailinglistScalarFieldEnum)[keyof typeof Subscriber_mailinglistScalarFieldEnum]
+
+
+export const Subscriber_optinsScalarFieldEnum = {
+  subscriber_id: 'subscriber_id',
+  optins_id: 'optins_id'
+} as const
+
+export type Subscriber_optinsScalarFieldEnum = (typeof Subscriber_optinsScalarFieldEnum)[keyof typeof Subscriber_optinsScalarFieldEnum]
+
+
+export const TagScalarFieldEnum = {
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  id: 'id',
+  source: 'source',
+  sourcetype: 'sourcetype',
+  enable: 'enable',
+  code: 'code',
+  name: 'name',
+  short_description: 'short_description',
+  url: 'url',
+  url_title: 'url_title',
+  expires_after: 'expires_after',
+  automatically_assigned: 'automatically_assigned',
+  external: 'external',
+  gallery_id: 'gallery_id'
+} as const
+
+export type TagScalarFieldEnum = (typeof TagScalarFieldEnum)[keyof typeof TagScalarFieldEnum]
+
+
+export const TicketScalarFieldEnum = {
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  id: 'id',
+  available_from: 'available_from',
+  seat_id: 'seat_id',
+  seat_row: 'seat_row',
+  seat_description: 'seat_description',
+  external_data: 'external_data',
+  order_id: 'order_id',
+  event_id: 'event_id',
+  price_id: 'price_id',
+  rank_id: 'rank_id'
+} as const
+
+export type TicketScalarFieldEnum = (typeof TicketScalarFieldEnum)[keyof typeof TicketScalarFieldEnum]
+
+
+export const Uit_keywords_productionsScalarFieldEnum = {
+  production_id: 'production_id',
+  uitkeywords_id: 'uitkeywords_id'
+} as const
+
+export type Uit_keywords_productionsScalarFieldEnum = (typeof Uit_keywords_productionsScalarFieldEnum)[keyof typeof Uit_keywords_productionsScalarFieldEnum]
+
+
+export const Uitdatabank_keywordsScalarFieldEnum = {
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  id: 'id',
+  name: 'name'
+} as const
+
+export type Uitdatabank_keywordsScalarFieldEnum = (typeof Uitdatabank_keywordsScalarFieldEnum)[keyof typeof Uitdatabank_keywordsScalarFieldEnum]
+
+
+export const Uitdatabank_themesScalarFieldEnum = {
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  id: 'id',
+  name: 'name',
+  cdb_cat_id: 'cdb_cat_id'
+} as const
+
+export type Uitdatabank_themesScalarFieldEnum = (typeof Uitdatabank_themesScalarFieldEnum)[keyof typeof Uitdatabank_themesScalarFieldEnum]
+
+
+export const Uitdatabank_typesScalarFieldEnum = {
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  id: 'id',
+  name: 'name',
+  cdb_cat_id: 'cdb_cat_id'
+} as const
+
+export type Uitdatabank_typesScalarFieldEnum = (typeof Uitdatabank_typesScalarFieldEnum)[keyof typeof Uitdatabank_typesScalarFieldEnum]
+
+
 export const UserScalarFieldEnum = {
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  id: 'id',
+  last_active_at: 'last_active_at',
+  gender: 'gender',
+  initials: 'initials',
+  postcode: 'postcode',
+  city: 'city',
+  country: 'country',
+  date_of_birth: 'date_of_birth',
+  visitor_id: 'visitor_id'
+} as const
+
+export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+export const VisitorScalarFieldEnum = {
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  id: 'id',
+  box_office_id: 'box_office_id',
+  optins_chosen: 'optins_chosen',
+  optins_skipped_at: 'optins_skipped_at'
+} as const
+
+export type VisitorScalarFieldEnum = (typeof VisitorScalarFieldEnum)[keyof typeof VisitorScalarFieldEnum]
+
+
+export const Visitor_tagsScalarFieldEnum = {
+  id: 'id',
+  external_data: 'external_data',
+  expires_at: 'expires_at',
+  visitor_id: 'visitor_id',
+  tags: 'tags'
+} as const
+
+export type Visitor_tagsScalarFieldEnum = (typeof Visitor_tagsScalarFieldEnum)[keyof typeof Visitor_tagsScalarFieldEnum]
+
+
+export const AdminUserScalarFieldEnum = {
   id: 'id',
   username: 'username',
   password: 'password',
@@ -79,7 +592,7 @@ export const UserScalarFieldEnum = {
   updatedAt: 'updatedAt'
 } as const
 
-export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+export type AdminUserScalarFieldEnum = (typeof AdminUserScalarFieldEnum)[keyof typeof AdminUserScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -90,10 +603,35 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
 export const QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
 } as const
 
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 

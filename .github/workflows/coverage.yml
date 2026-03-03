@@ -1,0 +1,75 @@
+name: Coverage Report
+
+# Runs on pull requests so coverage is posted as PR comments.
+# This workflow is informational and does not block merging.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: coverage-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend-coverage:
+    name: Backend Coverage
+    runs-on: self-hosted
+
+    permissions:
+      contents: read
+      pull-requests: write
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm run test:coverage -- --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage
+
+      - name: Post backend coverage comment
+        uses: MishaKav/jest-coverage-comment@v1
+        with:
+          title: "Backend Coverage (Vitest)"
+          coverage-summary-path: backend/coverage/coverage-summary.json
+          unique-id-for-comment: backend-coverage-report
+
+  frontend-coverage:
+    name: Frontend Coverage (Vitest)
+    runs-on: self-hosted
+
+    permissions:
+      contents: read
+      pull-requests: write
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - run: npm ci
+      - run: npm run test:coverage -- --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage
+
+      - name: Post frontend coverage comment
+        uses: MishaKav/jest-coverage-comment@v1
+        with:
+          title: "Frontend Coverage (Vitest)"
+          coverage-summary-path: frontend/coverage/coverage-summary.json
+          unique-id-for-comment: frontend-coverage-report

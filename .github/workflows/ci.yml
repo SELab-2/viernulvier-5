@@ -1,17 +1,22 @@
 name: CI
 
+# Runs on every push to any branch (except main) and on pull request updates.
+# Concurrency ensures stale runs are cancelled when new commits are pushed.
 on:
   push:
-    branches: [main, develop]
+    branches-ignore:
+      - main
   pull_request:
-    branches: [main, develop]
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   backend:
     name: Backend (Lint + Test)
-    runs-on: ubuntu-latest
-    # Use self-hosted runner to save GitHub Actions minutes:
-    # runs-on: self-hosted
+    runs-on: self-hosted
 
     services:
       postgres:
@@ -47,14 +52,14 @@ jobs:
 
       - run: npm ci
       - run: npx prisma generate
-      - run: npm run lint
+      # Fail CI on any lint warning. Placeholder exceptions are handled inline.
+      - run: npm run lint -- --max-warnings=0
       - run: npm run build
       - run: npm test
 
   frontend:
     name: Frontend (Lint + Test + Build)
-    runs-on: ubuntu-latest
-    # runs-on: self-hosted
+    runs-on: self-hosted
 
     defaults:
       run:
@@ -69,6 +74,7 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - run: npm ci
-      - run: npm run lint
+      # Fail CI on any lint warning. Placeholder exceptions are handled inline.
+      - run: npm run lint -- --max-warnings=0
       - run: npm test
       - run: npm run build

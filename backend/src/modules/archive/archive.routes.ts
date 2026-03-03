@@ -17,6 +17,7 @@ const archiveRoutes: FastifyPluginAsync = async (fastify) => {
     // Wire up the dependency chain
     const repository = new ArchiveRepository(fastify.prisma)
     const service = new ArchiveService(repository)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Placeholder until concrete handlers are wired.
     const _controller = new ArchiveController(service)
 
     // Placeholder health check for this module

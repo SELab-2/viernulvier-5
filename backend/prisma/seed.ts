@@ -16,7 +16,7 @@ async function main() {
 
     // Create admin user
     // TODO: Hash this password before production!
-    await prisma.user.upsert({
+    await prisma.adminUser.upsert({
         where: { username: 'admin' },
         update: {},
         create: {

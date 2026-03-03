@@ -40,5 +40,6 @@ The VIERNULVIER archive website follows a layered architecture with clear separa
 - **Repository pattern**: Abstracts database access for testability
 - **JWT in HttpOnly cookies**: Secure, stateless authentication
 - **Single SPA with subdomain detection**: Reduces deployment complexity
+- **i18n scaffold (nl/en)**: Translation structure is prepared in `frontend/src/i18n` for gradual rollout
 
 See [deployment.md](./deployment.md) for deployment instructions.
