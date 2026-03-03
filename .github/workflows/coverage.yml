@@ -23,6 +23,11 @@ jobs:
       run:
         working-directory: backend
 
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/viernulvier_test
+      JWT_SECRET: test-secret-for-ci
+      NODE_ENV: test
+
     steps:
       - uses: actions/checkout@v4
 
@@ -39,12 +44,12 @@ jobs:
       - name: Post backend coverage comment
         uses: MishaKav/jest-coverage-comment@v1
         with:
-          title: "Backend Coverage (Vitest)"
+          title: "Backend Coverage"
           coverage-summary-path: backend/coverage/coverage-summary.json
           unique-id-for-comment: backend-coverage-report
 
   frontend-coverage:
-    name: Frontend Coverage (Vitest)
+    name: Frontend Coverage
     runs-on: self-hosted
 
     permissions:
@@ -70,6 +75,6 @@ jobs:
       - name: Post frontend coverage comment
         uses: MishaKav/jest-coverage-comment@v1
         with:
-          title: "Frontend Coverage (Vitest)"
+          title: "Frontend Coverage"
           coverage-summary-path: frontend/coverage/coverage-summary.json
           unique-id-for-comment: frontend-coverage-report
