@@ -1,0 +1,40 @@
+# CODEOWNERS
+#
+# This file defines who is automatically requested as a reviewer when a pull request
+# touches specific parts of the codebase. GitHub reads this file from top to bottom;
+# the LAST matching rule wins for a given file.
+#
+# Format: <pattern>  <owner1>  <owner2> ...
+# Docs:   https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# ── HOW TO USE ─────────────────────────────────────────────────────────────────
+# Replace dev-user-1 through dev-user-8 with the actual GitHub usernames of your
+# team members (without the @ sign). Adjust ownership per directory as your team
+# naturally divides responsibilities over time.
+# ───────────────────────────────────────────────────────────────────────────────
+
+# Default: any file not matched by a more specific rule below requires
+# a review from at least one of these owners.
+*  
+
+# Application source — UI pages, layouts, styles
+/app/  
+
+# Database schema and Prisma config — changes here affect the data model for
+# the whole team, so everyone should be aware.
+/prisma/  
+prisma.config.ts  
+
+# Tests
+/tests/  @laveenae
+
+# CI / GitHub Actions — changes here affect the whole team's workflow.
+# Consider narrowing this to only the most DevOps-savvy members over time.
+/.github/  @laveenae
+
+# Root config files — changes to these affect every developer's environment
+next.config.ts    
+tsconfig.json     
+eslint.config.mjs 
+jest.config.mjs
+package.json
