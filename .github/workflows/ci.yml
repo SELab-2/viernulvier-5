@@ -1,0 +1,58 @@
+name: CI
+
+# Runs on every push to any branch (gives immediate feedback after committing)
+# and on every pull request event (acts as the merge gate).
+# Concurrency ensures that if you push again before the previous run finishes,
+# the old run is cancelled to save resources.
+on:
+  push:
+    branches-ignore:
+      - main # main is protected; direct pushes are blocked via branch protection rules
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: self-hosted
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js (latest LTS)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+  test:
+    name: Test
+    runs-on: self-hosted
+    needs: lint # Only run tests if linting passed; saves time on obvious failures
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js (latest LTS)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Jest tests
+        run: npm test -- --ci --passWithNoTests

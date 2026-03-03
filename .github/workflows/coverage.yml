@@ -1,0 +1,53 @@
+name: Coverage Report
+
+# Only runs on pull requests so the report is always posted as a PR comment.
+# This is intentionally separate from the main CI workflow so the coverage
+# summary is easy to find and does NOT block merging — it is informational only.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  coverage:
+    name: Coverage
+    runs-on: self-hosted
+
+    # Write permission is needed to post the coverage comment on the PR
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js (latest LTS)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests with coverage
+        # --coverage         → collect coverage data
+        # --coverageReporters → json-summary is required by the comment action below;
+        #                       text gives a readable table in the logs as well
+        # -- coverageDirectory → write output to ./coverage at the root of the repo
+        run: npm test -- --ci --passWithNoTests --coverage --coverageReporters=json-summary --coverageReporters=text --coverageDirectory=./coverage
+
+      - name: Post coverage comment on PR
+        # This action reads the json-summary report and posts a nicely formatted
+        # table as a PR comment. It updates the comment on re-runs instead of
+        # creating a new one each time.
+        # Docs: https://github.com/MishaKav/jest-coverage-comment
+        uses: MishaKav/jest-coverage-comment@v1
+        with:
+          title: "📊 Coverage Report"
+          # The default output path for Jest coverage; adjust if your jest config
+          # sets a different coverageDirectory
+          coverage-summary-path: ./coverage/coverage-summary.json
+          # IMPORTANT: this is set to false — low coverage will NOT fail the pipeline.
+          # It is purely a visual indicator to encourage writing more tests over time.
+          unique-id-for-comment: coverage-report
