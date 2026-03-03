@@ -11,7 +11,10 @@ import securityPlugin from './plugins/security.js'
 import swaggerPlugin from './plugins/swagger.js'
 
 // Modules
-import archiveRoutes from './modules/archive/archive.routes.js'
+import productionsRoutes from './modules/productions/productions.routes.js'
+import eventsRoutes from './modules/events/events.routes.js'
+import taxonomiesRoutes from './modules/taxonomies/taxonomies.routes.js'
+import locationsRoutes from './modules/locations/locations.routes.js'
 import authRoutes from './modules/auth/auth.routes.js'
 
 /**
@@ -41,7 +44,10 @@ export async function buildApp(opts = {}): Promise<FastifyInstance> {
     await app.register(authPlugin)
 
     // --- Feature modules ---
-    await app.register(archiveRoutes, { prefix: '/api/archive' })
+    await app.register(productionsRoutes, { prefix: '/api/archive/productions' })
+    await app.register(eventsRoutes, { prefix: '/api/archive/events' })
+    await app.register(taxonomiesRoutes, { prefix: '/api/archive/genres' })
+    await app.register(locationsRoutes, { prefix: '/api/archive/locations' })
     await app.register(authRoutes, { prefix: '/api/auth' })
 
     return app
