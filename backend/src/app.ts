@@ -15,6 +15,9 @@ import productionsRoutes from './modules/productions/productions.routes.js'
 import eventsRoutes from './modules/events/events.routes.js'
 import taxonomiesRoutes from './modules/taxonomies/taxonomies.routes.js'
 import locationsRoutes from './modules/locations/locations.routes.js'
+import hallsRoutes from './modules/halls/halls.routes.js'
+import spacesRoutes from './modules/spaces/spaces.routes.js'
+import mediaRoutes from './modules/media/media.routes.js'
 import authRoutes from './modules/auth/auth.routes.js'
 
 /**
@@ -48,6 +51,9 @@ export async function buildApp(opts = {}): Promise<FastifyInstance> {
     await app.register(eventsRoutes, { prefix: '/api/archive/events' })
     await app.register(taxonomiesRoutes, { prefix: '/api/archive/genres' })
     await app.register(locationsRoutes, { prefix: '/api/archive/locations' })
+    await app.register(hallsRoutes, { prefix: '/api/archive/halls' })
+    await app.register(spacesRoutes, { prefix: '/api/archive/spaces' })
+    await app.register(mediaRoutes, { prefix: '/api/archive/media' })
     await app.register(authRoutes, { prefix: '/api/auth' })
 
     return app

@@ -9,4 +9,14 @@ export class LocationsController {
         const locations = await this.service.getLocations(request.query)
         return reply.status(200).send(locations)
     }
+
+    async getHalls(request: FastifyRequest<{ Querystring: PaginationQuery }>, reply: FastifyReply) {
+        const halls = await this.service.getHalls(request.query)
+        return reply.status(200).send(halls)
+    }
+
+    async getSpaces(request: FastifyRequest<{ Querystring: PaginationQuery }>, reply: FastifyReply) {
+        const spaces = await this.service.getSpaces(request.query)
+        return reply.status(200).send(spaces)
+    }
 }
