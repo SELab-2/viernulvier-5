@@ -1,6 +1,4 @@
 import { ArchiveRepository } from './archive.repository.js'
-<<<<<<< HEAD
-=======
 import type { 
     PaginationQuery, 
     ProductionListResponse, 
@@ -8,7 +6,6 @@ import type {
     GenreListResponse,
     LocationListResponse 
 } from './archive.schema.js'
->>>>>>> 45610ee (Events, locations en genre toegevoegd)
 
 /**
  * Archive Service
@@ -19,11 +16,6 @@ import type {
 export class ArchiveService {
     constructor(private readonly repository: ArchiveRepository) { }
 
-<<<<<<< HEAD
-    // TODO: implement real business logic methods, e.g.:
-    // async getProductions(options: PaginationQuery) { ... }
-    // async getProductionById(id: string) { ... }
-=======
     /**
      * Business logic for fetching productions with pagination.
      */
@@ -119,5 +111,4 @@ export class ArchiveService {
             },
         }
     }
->>>>>>> 45610ee (Events, locations en genre toegevoegd)
 }

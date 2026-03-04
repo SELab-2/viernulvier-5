@@ -9,11 +9,6 @@ import type { PrismaClient } from '../../generated/prisma/client.js'
 export class ArchiveRepository {
     constructor(private readonly prisma: PrismaClient) { }
 
-<<<<<<< HEAD
-    // TODO: implement real data access methods, e.g.:
-    // async findAllProductions(options: { page: number; limit: number }) { ... }
-    // async findProductionById(id: string) { ... }
-=======
     /**
      * Get a paginated list of productions from the database.
      */
@@ -189,5 +184,4 @@ export class ArchiveRepository {
             where: where as any,
         })
     }
->>>>>>> 45610ee (Events, locations en genre toegevoegd)
 }

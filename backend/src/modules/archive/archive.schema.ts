@@ -18,10 +18,6 @@ export const paginationQuerySchema = z.object({
     productionId: z.string().uuid().optional(),
 })
 
-<<<<<<< HEAD
-export type IdParams = z.infer<typeof idParamsSchema>
-export type PaginationQuery = z.infer<typeof paginationQuerySchema>
-=======
 // Schema for a single production record
 export const productionSchema = z.object({
     id: z.string().uuid(),
@@ -120,4 +116,3 @@ export type GenreResponse = z.infer<typeof genreSchema>
 export type GenreListResponse = z.infer<typeof genreListSchema>
 export type LocationResponse = z.infer<typeof locationSchema>
 export type LocationListResponse = z.infer<typeof locationListSchema>
->>>>>>> 45610ee (Events, locations en genre toegevoegd)

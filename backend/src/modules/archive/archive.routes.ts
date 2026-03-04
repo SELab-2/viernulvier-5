@@ -2,8 +2,6 @@ import type { FastifyPluginAsync } from 'fastify'
 import { ArchiveRepository } from './archive.repository.js'
 import { ArchiveService } from './archive.service.js'
 import { ArchiveController } from './archive.controller.js'
-<<<<<<< HEAD
-=======
 import { 
     paginationQuerySchema, 
     productionListSchema, 
@@ -11,7 +9,6 @@ import {
     genreListSchema,
     locationListSchema 
 } from './archive.schema.js'
->>>>>>> 45610ee (Events, locations en genre toegevoegd)
 
 /**
  * Archive routes
@@ -30,10 +27,6 @@ const archiveRoutes: FastifyPluginAsync = async (fastify) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Placeholder until concrete handlers are wired.
     const _controller = new ArchiveController(service)
 
-<<<<<<< HEAD
-    // Placeholder health check for this module
-    fastify.get('/health', {
-=======
     // GET /api/archive/productions
     fastify.get('/productions', {
         schema: {
@@ -49,7 +42,6 @@ const archiveRoutes: FastifyPluginAsync = async (fastify) => {
 
     // GET /api/archive/events
     fastify.get('/events', {
->>>>>>> 45610ee (Events, locations en genre toegevoegd)
         schema: {
             tags: ['archive'],
             summary: 'Get a paginated list of events',
