@@ -1,5 +1,9 @@
 import { PricesRepository } from './prices.repository.js'
-import type { PaginationQuery, PriceListResponse, RankListResponse } from './prices.schema.js'
+import type { 
+    PaginationQuery, 
+    PriceListResponse, 
+    RankListResponse 
+} from './prices.schema.js'
 
 export class PricesService {
     constructor(private readonly repository: PricesRepository) { }
@@ -8,8 +12,8 @@ export class PricesService {
         const { page, limit, search } = options
 
         const [data, total] = await Promise.all([
-            this.repository.findAllPrices({ page, limit, search }),
-            this.repository.countPrices(search),
+            this.repository.findAll({ page, limit, search }),
+            this.repository.count(search),
         ])
 
         const totalPages = Math.ceil(total / limit)

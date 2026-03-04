@@ -2,14 +2,17 @@ import type { FastifyPluginAsync } from 'fastify'
 import { PricesRepository } from './prices.repository.js'
 import { PricesService } from './prices.service.js'
 import { PricesController } from './prices.controller.js'
-import { paginationQuerySchema, priceListSchema, rankListSchema } from './prices.schema.js'
+import { 
+    paginationQuerySchema, 
+    priceListSchema,
+    rankListSchema
+} from './prices.schema.js'
 
 const pricesRoutes: FastifyPluginAsync = async (fastify) => {
     const repository = new PricesRepository(fastify.prisma)
     const service = new PricesService(repository)
     const controller = new PricesController(service)
 
-    // GET /api/archive/prices
     fastify.get('/', {
         schema: {
             tags: ['prices'],
@@ -22,7 +25,6 @@ const pricesRoutes: FastifyPluginAsync = async (fastify) => {
         handler: (request, reply) => controller.getPrices(request as any, reply),
     })
 
-    // GET /api/archive/prices/ranks
     fastify.get('/ranks', {
         schema: {
             tags: ['prices'],

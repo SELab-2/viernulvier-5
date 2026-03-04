@@ -12,10 +12,10 @@ export const priceSchema = z.object({
     visibility: z.string().nullable(),
     code: z.string().nullable(),
     description: z.any().nullable(),
-    minimum: z.number().nullable(),
-    maximum: z.number().nullable(),
-    step: z.number().nullable(),
-    order: z.number().nullable(),
+    minimum: z.number().int().nullable(),
+    maximum: z.number().int().nullable(),
+    step: z.number().int().nullable(),
+    order: z.number().int().nullable(),
     auto_select_combo: z.boolean().nullable(),
     include_in_price_range: z.boolean().nullable(),
     cineville_box: z.boolean().nullable(),
@@ -25,7 +25,7 @@ export const priceSchema = z.object({
 })
 
 export const priceListSchema = z.object({
-    data: z.array(z.any()), // Use any to match existing pattern for Swagger
+    data: z.array(z.any()),
     meta: z.object({
         total: z.number(),
         page: z.number(),
@@ -38,8 +38,8 @@ export const rankSchema = z.object({
     id: z.string().uuid(),
     description: z.any().nullable(),
     code: z.string().nullable(),
-    position: z.number().nullable(),
-    sold_out_buffer: z.number().nullable(),
+    position: z.number().int().nullable(),
+    sold_out_buffer: z.number().int().nullable(),
     created_at: z.date(),
     updated_at: z.date(),
 })
