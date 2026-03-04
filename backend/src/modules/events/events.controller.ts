@@ -9,4 +9,19 @@ export class EventsController {
         const events = await this.service.getEvents(request.query)
         return reply.status(200).send(events)
     }
+
+    async getPrices(request: FastifyRequest<{ Querystring: PaginationQuery }>, reply: FastifyReply) {
+        const prices = await this.service.getPrices(request.query)
+        return reply.status(200).send(prices)
+    }
+
+    async getStatuses(request: FastifyRequest<{ Querystring: PaginationQuery }>, reply: FastifyReply) {
+        const statuses = await this.service.getStatuses(request.query)
+        return reply.status(200).send(statuses)
+    }
+
+    async getExtras(request: FastifyRequest<{ Querystring: PaginationQuery }>, reply: FastifyReply) {
+        const extras = await this.service.getExtras(request.query)
+        return reply.status(200).send(extras)
+    }
 }

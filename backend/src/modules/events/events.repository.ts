@@ -34,4 +34,133 @@ export class EventsRepository {
             where: where as any,
         })
     }
+
+    async findAllPrices(options: { page: number; limit: number; search?: string }) {
+        const { page, limit, search } = options
+        const skip = (page - 1) * limit
+
+        const where = search ? {
+            OR: [
+                { amount: { contains: search, mode: 'insensitive' } },
+                { box_office_id: { contains: search, mode: 'insensitive' } },
+            ],
+        } : {}
+
+        return this.prisma.event_price.findMany({
+            where: where as any,
+            skip,
+            take: limit,
+            orderBy: { created_at: 'desc' },
+        })
+    }
+
+    async countPrices(search?: string) {
+        const where = search ? {
+            OR: [
+                { amount: { contains: search, mode: 'insensitive' } },
+                { box_office_id: { contains: search, mode: 'insensitive' } },
+            ],
+        } : {}
+
+        return this.prisma.event_price.count({
+            where: where as any,
+        })
+    }
+
+    async findAllStatuses(options: { page: number; limit: number; search?: string }) {
+        const { page, limit, search } = options
+        const skip = (page - 1) * limit
+
+        const where = search ? {
+            OR: [
+                { short_name: { contains: search, mode: 'insensitive' } },
+                {
+                    name: {
+                        path: ['nl'],
+                        string_contains: search,
+                    },
+                },
+            ],
+        } : {}
+
+        return this.prisma.status.findMany({
+            where: where as any,
+            skip,
+            take: limit,
+            orderBy: { created_at: 'desc' },
+        })
+    }
+
+    async countStatuses(search?: string) {
+        const where = search ? {
+            OR: [
+                { short_name: { contains: search, mode: 'insensitive' } },
+                {
+                    name: {
+                        path: ['nl'],
+                        string_contains: search,
+                    },
+                },
+            ],
+        } : {}
+
+        return this.prisma.status.count({
+            where: where as any,
+        })
+    }
+
+    /**
+     * For "extras", we'll return a list of events that have information in their info JSON field.
+     */
+    async findAllExtras(options: { page: number; limit: number; search?: string }) {
+        const { page, limit, search } = options
+        const skip = (page - 1) * limit
+
+        const where = {
+            AND: [
+                { info: { not: null } },
+                ...(search ? [
+                    {
+                        info: {
+                            path: ['nl'],
+                            string_contains: search,
+                        },
+                    }
+                ] : []),
+            ]
+        }
+
+        return this.prisma.event.findMany({
+            where: where as any,
+            skip,
+            take: limit,
+            orderBy: { created_at: 'desc' },
+            select: {
+                id: true,
+                info: true,
+                created_at: true,
+                updated_at: true,
+            },
+        })
+    }
+
+    async countExtras(search?: string) {
+        const where = {
+            AND: [
+                { info: { not: null } },
+                ...(search ? [
+                    {
+                        info: {
+                            path: ['nl'],
+                            string_contains: search,
+                        },
+                    }
+                ] : []),
+            ]
+        }
+
+        return this.prisma.event.count({
+            where: where as any,
+        })
+    }
 }
