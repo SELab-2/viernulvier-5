@@ -18,6 +18,7 @@ import locationsRoutes from './modules/locations/locations.routes.js'
 import hallsRoutes from './modules/halls/halls.routes.js'
 import spacesRoutes from './modules/spaces/spaces.routes.js'
 import mediaRoutes from './modules/media/media.routes.js'
+import organisationsRoutes from './modules/organisations/organisations.routes.js'
 import authRoutes from './modules/auth/auth.routes.js'
 
 /**
@@ -54,6 +55,7 @@ export async function buildApp(opts = {}): Promise<FastifyInstance> {
     await app.register(hallsRoutes, { prefix: '/api/archive/halls' })
     await app.register(spacesRoutes, { prefix: '/api/archive/spaces' })
     await app.register(mediaRoutes, { prefix: '/api/archive/media' })
+    await app.register(organisationsRoutes, { prefix: '/api/archive/organisations' })
     await app.register(authRoutes, { prefix: '/api/auth' })
 
     return app
