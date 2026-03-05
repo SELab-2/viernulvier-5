@@ -28,6 +28,7 @@ export type SpaceMinAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   vendor_id: string | null
   location_id: string | null
 }
@@ -36,6 +37,7 @@ export type SpaceMaxAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   vendor_id: string | null
   location_id: string | null
 }
@@ -44,6 +46,7 @@ export type SpaceCountAggregateOutputType = {
   created_at: number
   updated_at: number
   id: number
+  apiId: number
   vendor_id: number
   name: number
   location_id: number
@@ -55,6 +58,7 @@ export type SpaceMinAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   vendor_id?: true
   location_id?: true
 }
@@ -63,6 +67,7 @@ export type SpaceMaxAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   vendor_id?: true
   location_id?: true
 }
@@ -71,6 +76,7 @@ export type SpaceCountAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   vendor_id?: true
   name?: true
   location_id?: true
@@ -153,6 +159,7 @@ export type SpaceGroupByOutputType = {
   created_at: Date
   updated_at: Date
   id: string
+  apiId: string | null
   vendor_id: string | null
   name: runtime.JsonValue | null
   location_id: string | null
@@ -183,6 +190,7 @@ export type spaceWhereInput = {
   created_at?: Prisma.DateTimeFilter<"space"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"space"> | Date | string
   id?: Prisma.UuidFilter<"space"> | string
+  apiId?: Prisma.StringNullableFilter<"space"> | string | null
   vendor_id?: Prisma.StringNullableFilter<"space"> | string | null
   name?: Prisma.JsonNullableFilter<"space">
   location_id?: Prisma.UuidNullableFilter<"space"> | string | null
@@ -194,6 +202,7 @@ export type spaceOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   vendor_id?: Prisma.SortOrderInput | Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   location_id?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -203,6 +212,7 @@ export type spaceOrderByWithRelationInput = {
 
 export type spaceWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  apiId?: string
   AND?: Prisma.spaceWhereInput | Prisma.spaceWhereInput[]
   OR?: Prisma.spaceWhereInput[]
   NOT?: Prisma.spaceWhereInput | Prisma.spaceWhereInput[]
@@ -213,12 +223,13 @@ export type spaceWhereUniqueInput = Prisma.AtLeast<{
   location_id?: Prisma.UuidNullableFilter<"space"> | string | null
   halls?: Prisma.HallListRelationFilter
   location?: Prisma.XOR<Prisma.LocationNullableScalarRelationFilter, Prisma.locationWhereInput> | null
-}, "id">
+}, "id" | "apiId">
 
 export type spaceOrderByWithAggregationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   vendor_id?: Prisma.SortOrderInput | Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   location_id?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -234,6 +245,7 @@ export type spaceScalarWhereWithAggregatesInput = {
   created_at?: Prisma.DateTimeWithAggregatesFilter<"space"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"space"> | Date | string
   id?: Prisma.UuidWithAggregatesFilter<"space"> | string
+  apiId?: Prisma.StringNullableWithAggregatesFilter<"space"> | string | null
   vendor_id?: Prisma.StringNullableWithAggregatesFilter<"space"> | string | null
   name?: Prisma.JsonNullableWithAggregatesFilter<"space">
   location_id?: Prisma.UuidNullableWithAggregatesFilter<"space"> | string | null
@@ -243,6 +255,7 @@ export type spaceCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   halls?: Prisma.hallCreateNestedManyWithoutSpaceInput
@@ -253,6 +266,7 @@ export type spaceUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   location_id?: string | null
@@ -263,6 +277,7 @@ export type spaceUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   halls?: Prisma.hallUpdateManyWithoutSpaceNestedInput
@@ -273,6 +288,7 @@ export type spaceUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   location_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -283,6 +299,7 @@ export type spaceCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   location_id?: string | null
@@ -292,6 +309,7 @@ export type spaceUpdateManyMutationInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
@@ -300,6 +318,7 @@ export type spaceUncheckedUpdateManyInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   location_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -324,6 +343,7 @@ export type spaceCountOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   vendor_id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   location_id?: Prisma.SortOrder
@@ -333,6 +353,7 @@ export type spaceMaxOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   vendor_id?: Prisma.SortOrder
   location_id?: Prisma.SortOrder
 }
@@ -341,6 +362,7 @@ export type spaceMinOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   vendor_id?: Prisma.SortOrder
   location_id?: Prisma.SortOrder
 }
@@ -407,6 +429,7 @@ export type spaceCreateWithoutHallsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   location?: Prisma.locationCreateNestedOneWithoutSpaceInput
@@ -416,6 +439,7 @@ export type spaceUncheckedCreateWithoutHallsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   location_id?: string | null
@@ -441,6 +465,7 @@ export type spaceUpdateWithoutHallsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   location?: Prisma.locationUpdateOneWithoutSpaceNestedInput
@@ -450,6 +475,7 @@ export type spaceUncheckedUpdateWithoutHallsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   location_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -459,6 +485,7 @@ export type spaceCreateWithoutLocationInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   halls?: Prisma.hallCreateNestedManyWithoutSpaceInput
@@ -468,6 +495,7 @@ export type spaceUncheckedCreateWithoutLocationInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   halls?: Prisma.hallUncheckedCreateNestedManyWithoutSpaceInput
@@ -506,6 +534,7 @@ export type spaceScalarWhereInput = {
   created_at?: Prisma.DateTimeFilter<"space"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"space"> | Date | string
   id?: Prisma.UuidFilter<"space"> | string
+  apiId?: Prisma.StringNullableFilter<"space"> | string | null
   vendor_id?: Prisma.StringNullableFilter<"space"> | string | null
   name?: Prisma.JsonNullableFilter<"space">
   location_id?: Prisma.UuidNullableFilter<"space"> | string | null
@@ -515,6 +544,7 @@ export type spaceCreateManyLocationInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
@@ -523,6 +553,7 @@ export type spaceUpdateWithoutLocationInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   halls?: Prisma.hallUpdateManyWithoutSpaceNestedInput
@@ -532,6 +563,7 @@ export type spaceUncheckedUpdateWithoutLocationInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   halls?: Prisma.hallUncheckedUpdateManyWithoutSpaceNestedInput
@@ -541,6 +573,7 @@ export type spaceUncheckedUpdateManyWithoutLocationInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
@@ -580,6 +613,7 @@ export type spaceSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   vendor_id?: boolean
   name?: boolean
   location_id?: boolean
@@ -592,6 +626,7 @@ export type spaceSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   vendor_id?: boolean
   name?: boolean
   location_id?: boolean
@@ -602,6 +637,7 @@ export type spaceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   vendor_id?: boolean
   name?: boolean
   location_id?: boolean
@@ -612,12 +648,13 @@ export type spaceSelectScalar = {
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   vendor_id?: boolean
   name?: boolean
   location_id?: boolean
 }
 
-export type spaceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "vendor_id" | "name" | "location_id", ExtArgs["result"]["space"]>
+export type spaceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "apiId" | "vendor_id" | "name" | "location_id", ExtArgs["result"]["space"]>
 export type spaceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   halls?: boolean | Prisma.space$hallsArgs<ExtArgs>
   location?: boolean | Prisma.space$locationArgs<ExtArgs>
@@ -640,6 +677,7 @@ export type $spacePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     created_at: Date
     updated_at: Date
     id: string
+    apiId: string | null
     vendor_id: string | null
     name: runtime.JsonValue | null
     location_id: string | null
@@ -1071,6 +1109,7 @@ export interface spaceFieldRefs {
   readonly created_at: Prisma.FieldRef<"space", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"space", 'DateTime'>
   readonly id: Prisma.FieldRef<"space", 'String'>
+  readonly apiId: Prisma.FieldRef<"space", 'String'>
   readonly vendor_id: Prisma.FieldRef<"space", 'String'>
   readonly name: Prisma.FieldRef<"space", 'Json'>
   readonly location_id: Prisma.FieldRef<"space", 'String'>

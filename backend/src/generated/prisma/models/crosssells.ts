@@ -28,6 +28,7 @@ export type CrosssellsMinAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   ticket_id: string | null
   ticket_type: string | null
   booking_id: string | null
@@ -40,6 +41,7 @@ export type CrosssellsMaxAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   ticket_id: string | null
   ticket_type: string | null
   booking_id: string | null
@@ -52,6 +54,7 @@ export type CrosssellsCountAggregateOutputType = {
   created_at: number
   updated_at: number
   id: number
+  apiId: number
   ticket_id: number
   ticket_type: number
   booking_id: number
@@ -66,6 +69,7 @@ export type CrosssellsMinAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   ticket_id?: true
   ticket_type?: true
   booking_id?: true
@@ -78,6 +82,7 @@ export type CrosssellsMaxAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   ticket_id?: true
   ticket_type?: true
   booking_id?: true
@@ -90,6 +95,7 @@ export type CrosssellsCountAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   ticket_id?: true
   ticket_type?: true
   booking_id?: true
@@ -175,6 +181,7 @@ export type CrosssellsGroupByOutputType = {
   created_at: Date
   updated_at: Date
   id: string
+  apiId: string | null
   ticket_id: string | null
   ticket_type: string | null
   booking_id: string | null
@@ -208,6 +215,7 @@ export type crosssellsWhereInput = {
   created_at?: Prisma.DateTimeFilter<"crosssells"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"crosssells"> | Date | string
   id?: Prisma.UuidFilter<"crosssells"> | string
+  apiId?: Prisma.StringNullableFilter<"crosssells"> | string | null
   ticket_id?: Prisma.UuidNullableFilter<"crosssells"> | string | null
   ticket_type?: Prisma.StringNullableFilter<"crosssells"> | string | null
   booking_id?: Prisma.StringNullableFilter<"crosssells"> | string | null
@@ -222,6 +230,7 @@ export type crosssellsOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   ticket_id?: Prisma.SortOrderInput | Prisma.SortOrder
   ticket_type?: Prisma.SortOrderInput | Prisma.SortOrder
   booking_id?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -234,6 +243,7 @@ export type crosssellsOrderByWithRelationInput = {
 
 export type crosssellsWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  apiId?: string
   AND?: Prisma.crosssellsWhereInput | Prisma.crosssellsWhereInput[]
   OR?: Prisma.crosssellsWhereInput[]
   NOT?: Prisma.crosssellsWhereInput | Prisma.crosssellsWhereInput[]
@@ -247,12 +257,13 @@ export type crosssellsWhereUniqueInput = Prisma.AtLeast<{
   order_id?: Prisma.UuidNullableFilter<"crosssells"> | string | null
   order?: Prisma.XOR<Prisma.OrderNullableScalarRelationFilter, Prisma.orderWhereInput> | null
   ticket?: Prisma.XOR<Prisma.TicketNullableScalarRelationFilter, Prisma.ticketWhereInput> | null
-}, "id">
+}, "id" | "apiId">
 
 export type crosssellsOrderByWithAggregationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   ticket_id?: Prisma.SortOrderInput | Prisma.SortOrder
   ticket_type?: Prisma.SortOrderInput | Prisma.SortOrder
   booking_id?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -271,6 +282,7 @@ export type crosssellsScalarWhereWithAggregatesInput = {
   created_at?: Prisma.DateTimeWithAggregatesFilter<"crosssells"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"crosssells"> | Date | string
   id?: Prisma.UuidWithAggregatesFilter<"crosssells"> | string
+  apiId?: Prisma.StringNullableWithAggregatesFilter<"crosssells"> | string | null
   ticket_id?: Prisma.UuidNullableWithAggregatesFilter<"crosssells"> | string | null
   ticket_type?: Prisma.StringNullableWithAggregatesFilter<"crosssells"> | string | null
   booking_id?: Prisma.StringNullableWithAggregatesFilter<"crosssells"> | string | null
@@ -283,6 +295,7 @@ export type crosssellsCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   ticket_type?: string | null
   booking_id?: string | null
   price?: string | null
@@ -295,6 +308,7 @@ export type crosssellsUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   ticket_id?: string | null
   ticket_type?: string | null
   booking_id?: string | null
@@ -307,6 +321,7 @@ export type crosssellsUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ticket_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   booking_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -319,6 +334,7 @@ export type crosssellsUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ticket_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ticket_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   booking_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -331,6 +347,7 @@ export type crosssellsCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   ticket_id?: string | null
   ticket_type?: string | null
   booking_id?: string | null
@@ -343,6 +360,7 @@ export type crosssellsUpdateManyMutationInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ticket_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   booking_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -353,6 +371,7 @@ export type crosssellsUncheckedUpdateManyInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ticket_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ticket_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   booking_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -365,6 +384,7 @@ export type crosssellsCountOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   ticket_id?: Prisma.SortOrder
   ticket_type?: Prisma.SortOrder
   booking_id?: Prisma.SortOrder
@@ -377,6 +397,7 @@ export type crosssellsMaxOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   ticket_id?: Prisma.SortOrder
   ticket_type?: Prisma.SortOrder
   booking_id?: Prisma.SortOrder
@@ -389,6 +410,7 @@ export type crosssellsMinOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   ticket_id?: Prisma.SortOrder
   ticket_type?: Prisma.SortOrder
   booking_id?: Prisma.SortOrder
@@ -495,6 +517,7 @@ export type crosssellsCreateWithoutOrderInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   ticket_type?: string | null
   booking_id?: string | null
   price?: string | null
@@ -506,6 +529,7 @@ export type crosssellsUncheckedCreateWithoutOrderInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   ticket_id?: string | null
   ticket_type?: string | null
   booking_id?: string | null
@@ -546,6 +570,7 @@ export type crosssellsScalarWhereInput = {
   created_at?: Prisma.DateTimeFilter<"crosssells"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"crosssells"> | Date | string
   id?: Prisma.UuidFilter<"crosssells"> | string
+  apiId?: Prisma.StringNullableFilter<"crosssells"> | string | null
   ticket_id?: Prisma.UuidNullableFilter<"crosssells"> | string | null
   ticket_type?: Prisma.StringNullableFilter<"crosssells"> | string | null
   booking_id?: Prisma.StringNullableFilter<"crosssells"> | string | null
@@ -558,6 +583,7 @@ export type crosssellsCreateWithoutTicketInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   ticket_type?: string | null
   booking_id?: string | null
   price?: string | null
@@ -569,6 +595,7 @@ export type crosssellsUncheckedCreateWithoutTicketInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   ticket_type?: string | null
   booking_id?: string | null
   price?: string | null
@@ -606,6 +633,7 @@ export type crosssellsCreateManyOrderInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   ticket_id?: string | null
   ticket_type?: string | null
   booking_id?: string | null
@@ -617,6 +645,7 @@ export type crosssellsUpdateWithoutOrderInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ticket_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   booking_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -628,6 +657,7 @@ export type crosssellsUncheckedUpdateWithoutOrderInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ticket_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ticket_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   booking_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -639,6 +669,7 @@ export type crosssellsUncheckedUpdateManyWithoutOrderInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ticket_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ticket_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   booking_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -650,6 +681,7 @@ export type crosssellsCreateManyTicketInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   ticket_type?: string | null
   booking_id?: string | null
   price?: string | null
@@ -661,6 +693,7 @@ export type crosssellsUpdateWithoutTicketInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ticket_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   booking_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -672,6 +705,7 @@ export type crosssellsUncheckedUpdateWithoutTicketInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ticket_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   booking_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -683,6 +717,7 @@ export type crosssellsUncheckedUpdateManyWithoutTicketInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ticket_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   booking_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -696,6 +731,7 @@ export type crosssellsSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   ticket_id?: boolean
   ticket_type?: boolean
   booking_id?: boolean
@@ -710,6 +746,7 @@ export type crosssellsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   ticket_id?: boolean
   ticket_type?: boolean
   booking_id?: boolean
@@ -724,6 +761,7 @@ export type crosssellsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   ticket_id?: boolean
   ticket_type?: boolean
   booking_id?: boolean
@@ -738,6 +776,7 @@ export type crosssellsSelectScalar = {
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   ticket_id?: boolean
   ticket_type?: boolean
   booking_id?: boolean
@@ -746,7 +785,7 @@ export type crosssellsSelectScalar = {
   order_id?: boolean
 }
 
-export type crosssellsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "ticket_id" | "ticket_type" | "booking_id" | "price" | "hall_section_code" | "order_id", ExtArgs["result"]["crosssells"]>
+export type crosssellsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "apiId" | "ticket_id" | "ticket_type" | "booking_id" | "price" | "hall_section_code" | "order_id", ExtArgs["result"]["crosssells"]>
 export type crosssellsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   order?: boolean | Prisma.crosssells$orderArgs<ExtArgs>
   ticket?: boolean | Prisma.crosssells$ticketArgs<ExtArgs>
@@ -770,6 +809,7 @@ export type $crosssellsPayload<ExtArgs extends runtime.Types.Extensions.Internal
     created_at: Date
     updated_at: Date
     id: string
+    apiId: string | null
     ticket_id: string | null
     ticket_type: string | null
     booking_id: string | null
@@ -1204,6 +1244,7 @@ export interface crosssellsFieldRefs {
   readonly created_at: Prisma.FieldRef<"crosssells", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"crosssells", 'DateTime'>
   readonly id: Prisma.FieldRef<"crosssells", 'String'>
+  readonly apiId: Prisma.FieldRef<"crosssells", 'String'>
   readonly ticket_id: Prisma.FieldRef<"crosssells", 'String'>
   readonly ticket_type: Prisma.FieldRef<"crosssells", 'String'>
   readonly booking_id: Prisma.FieldRef<"crosssells", 'String'>

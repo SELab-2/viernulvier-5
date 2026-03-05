@@ -28,6 +28,7 @@ export type LocationMinAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   code: string | null
   street: string | null
   number: string | null
@@ -44,6 +45,7 @@ export type LocationMaxAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   code: string | null
   street: string | null
   number: string | null
@@ -60,6 +62,7 @@ export type LocationCountAggregateOutputType = {
   created_at: number
   updated_at: number
   id: number
+  apiId: number
   name: number
   code: number
   street: number
@@ -79,6 +82,7 @@ export type LocationMinAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   code?: true
   street?: true
   number?: true
@@ -95,6 +99,7 @@ export type LocationMaxAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   code?: true
   street?: true
   number?: true
@@ -111,6 +116,7 @@ export type LocationCountAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   name?: true
   code?: true
   street?: true
@@ -201,6 +207,7 @@ export type LocationGroupByOutputType = {
   created_at: Date
   updated_at: Date
   id: string
+  apiId: string | null
   name: runtime.JsonValue | null
   code: string | null
   street: string | null
@@ -239,6 +246,7 @@ export type locationWhereInput = {
   created_at?: Prisma.DateTimeFilter<"location"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"location"> | Date | string
   id?: Prisma.UuidFilter<"location"> | string
+  apiId?: Prisma.StringNullableFilter<"location"> | string | null
   name?: Prisma.JsonNullableFilter<"location">
   code?: Prisma.StringNullableFilter<"location"> | string | null
   street?: Prisma.StringNullableFilter<"location"> | string | null
@@ -257,6 +265,7 @@ export type locationOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   code?: Prisma.SortOrderInput | Prisma.SortOrder
   street?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -273,6 +282,7 @@ export type locationOrderByWithRelationInput = {
 
 export type locationWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  apiId?: string
   AND?: Prisma.locationWhereInput | Prisma.locationWhereInput[]
   OR?: Prisma.locationWhereInput[]
   NOT?: Prisma.locationWhereInput | Prisma.locationWhereInput[]
@@ -290,12 +300,13 @@ export type locationWhereUniqueInput = Prisma.AtLeast<{
   country?: Prisma.StringNullableFilter<"location"> | string | null
   uitdatabank_id?: Prisma.StringNullableFilter<"location"> | string | null
   space?: Prisma.SpaceListRelationFilter
-}, "id">
+}, "id" | "apiId">
 
 export type locationOrderByWithAggregationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   code?: Prisma.SortOrderInput | Prisma.SortOrder
   street?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -319,6 +330,7 @@ export type locationScalarWhereWithAggregatesInput = {
   created_at?: Prisma.DateTimeWithAggregatesFilter<"location"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"location"> | Date | string
   id?: Prisma.UuidWithAggregatesFilter<"location"> | string
+  apiId?: Prisma.StringNullableWithAggregatesFilter<"location"> | string | null
   name?: Prisma.JsonNullableWithAggregatesFilter<"location">
   code?: Prisma.StringNullableWithAggregatesFilter<"location"> | string | null
   street?: Prisma.StringNullableWithAggregatesFilter<"location"> | string | null
@@ -336,6 +348,7 @@ export type locationCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   code?: string | null
   street?: string | null
@@ -354,6 +367,7 @@ export type locationUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   code?: string | null
   street?: string | null
@@ -372,6 +386,7 @@ export type locationUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   street?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -390,6 +405,7 @@ export type locationUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   street?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -408,6 +424,7 @@ export type locationCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   code?: string | null
   street?: string | null
@@ -425,6 +442,7 @@ export type locationUpdateManyMutationInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   street?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -442,6 +460,7 @@ export type locationUncheckedUpdateManyInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   street?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -459,6 +478,7 @@ export type locationCountOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   code?: Prisma.SortOrder
   street?: Prisma.SortOrder
@@ -476,6 +496,7 @@ export type locationMaxOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   code?: Prisma.SortOrder
   street?: Prisma.SortOrder
   number?: Prisma.SortOrder
@@ -492,6 +513,7 @@ export type locationMinOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   code?: Prisma.SortOrder
   street?: Prisma.SortOrder
   number?: Prisma.SortOrder
@@ -529,6 +551,7 @@ export type locationCreateWithoutSpaceInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   code?: string | null
   street?: string | null
@@ -546,6 +569,7 @@ export type locationUncheckedCreateWithoutSpaceInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   code?: string | null
   street?: string | null
@@ -579,6 +603,7 @@ export type locationUpdateWithoutSpaceInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   street?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -596,6 +621,7 @@ export type locationUncheckedUpdateWithoutSpaceInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   street?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -644,6 +670,7 @@ export type locationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   name?: boolean
   code?: boolean
   street?: boolean
@@ -663,6 +690,7 @@ export type locationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   name?: boolean
   code?: boolean
   street?: boolean
@@ -680,6 +708,7 @@ export type locationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   name?: boolean
   code?: boolean
   street?: boolean
@@ -697,6 +726,7 @@ export type locationSelectScalar = {
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   name?: boolean
   code?: boolean
   street?: boolean
@@ -710,7 +740,7 @@ export type locationSelectScalar = {
   uitdatabank_id?: boolean
 }
 
-export type locationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "name" | "code" | "street" | "number" | "postal_code" | "city" | "phone_1" | "phone_2" | "own_location" | "country" | "uitdatabank_id", ExtArgs["result"]["location"]>
+export type locationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "apiId" | "name" | "code" | "street" | "number" | "postal_code" | "city" | "phone_1" | "phone_2" | "own_location" | "country" | "uitdatabank_id", ExtArgs["result"]["location"]>
 export type locationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   space?: boolean | Prisma.location$spaceArgs<ExtArgs>
   _count?: boolean | Prisma.LocationCountOutputTypeDefaultArgs<ExtArgs>
@@ -727,6 +757,7 @@ export type $locationPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     created_at: Date
     updated_at: Date
     id: string
+    apiId: string | null
     name: runtime.JsonValue | null
     code: string | null
     street: string | null
@@ -1165,6 +1196,7 @@ export interface locationFieldRefs {
   readonly created_at: Prisma.FieldRef<"location", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"location", 'DateTime'>
   readonly id: Prisma.FieldRef<"location", 'String'>
+  readonly apiId: Prisma.FieldRef<"location", 'String'>
   readonly name: Prisma.FieldRef<"location", 'Json'>
   readonly code: Prisma.FieldRef<"location", 'String'>
   readonly street: Prisma.FieldRef<"location", 'String'>

@@ -40,6 +40,7 @@ export type Event_priceMinAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   event_id: string | null
   available: number | null
   amount: string | null
@@ -54,6 +55,7 @@ export type Event_priceMaxAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   event_id: string | null
   available: number | null
   amount: string | null
@@ -68,6 +70,7 @@ export type Event_priceCountAggregateOutputType = {
   created_at: number
   updated_at: number
   id: number
+  apiId: number
   event_id: number
   available: number
   amount: number
@@ -94,6 +97,7 @@ export type Event_priceMinAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   event_id?: true
   available?: true
   amount?: true
@@ -108,6 +112,7 @@ export type Event_priceMaxAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   event_id?: true
   available?: true
   amount?: true
@@ -122,6 +127,7 @@ export type Event_priceCountAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   event_id?: true
   available?: true
   amount?: true
@@ -223,6 +229,7 @@ export type Event_priceGroupByOutputType = {
   created_at: Date
   updated_at: Date
   id: string
+  apiId: string | null
   event_id: string | null
   available: number | null
   amount: string | null
@@ -260,6 +267,7 @@ export type event_priceWhereInput = {
   created_at?: Prisma.DateTimeFilter<"event_price"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"event_price"> | Date | string
   id?: Prisma.UuidFilter<"event_price"> | string
+  apiId?: Prisma.StringNullableFilter<"event_price"> | string | null
   event_id?: Prisma.UuidNullableFilter<"event_price"> | string | null
   available?: Prisma.IntNullableFilter<"event_price"> | number | null
   amount?: Prisma.StringNullableFilter<"event_price"> | string | null
@@ -277,6 +285,7 @@ export type event_priceOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   event_id?: Prisma.SortOrderInput | Prisma.SortOrder
   available?: Prisma.SortOrderInput | Prisma.SortOrder
   amount?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -292,6 +301,7 @@ export type event_priceOrderByWithRelationInput = {
 
 export type event_priceWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  apiId?: string
   AND?: Prisma.event_priceWhereInput | Prisma.event_priceWhereInput[]
   OR?: Prisma.event_priceWhereInput[]
   NOT?: Prisma.event_priceWhereInput | Prisma.event_priceWhereInput[]
@@ -308,12 +318,13 @@ export type event_priceWhereUniqueInput = Prisma.AtLeast<{
   event?: Prisma.XOR<Prisma.EventNullableScalarRelationFilter, Prisma.eventWhereInput> | null
   price?: Prisma.XOR<Prisma.PriceNullableScalarRelationFilter, Prisma.priceWhereInput> | null
   rank?: Prisma.XOR<Prisma.RankNullableScalarRelationFilter, Prisma.rankWhereInput> | null
-}, "id">
+}, "id" | "apiId">
 
 export type event_priceOrderByWithAggregationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   event_id?: Prisma.SortOrderInput | Prisma.SortOrder
   available?: Prisma.SortOrderInput | Prisma.SortOrder
   amount?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -336,6 +347,7 @@ export type event_priceScalarWhereWithAggregatesInput = {
   created_at?: Prisma.DateTimeWithAggregatesFilter<"event_price"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"event_price"> | Date | string
   id?: Prisma.UuidWithAggregatesFilter<"event_price"> | string
+  apiId?: Prisma.StringNullableWithAggregatesFilter<"event_price"> | string | null
   event_id?: Prisma.UuidNullableWithAggregatesFilter<"event_price"> | string | null
   available?: Prisma.IntNullableWithAggregatesFilter<"event_price"> | number | null
   amount?: Prisma.StringNullableWithAggregatesFilter<"event_price"> | string | null
@@ -350,6 +362,7 @@ export type event_priceCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   available?: number | null
   amount?: string | null
   box_office_id?: string | null
@@ -364,6 +377,7 @@ export type event_priceUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   event_id?: string | null
   available?: number | null
   amount?: string | null
@@ -378,6 +392,7 @@ export type event_priceUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   available?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   amount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -392,6 +407,7 @@ export type event_priceUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   event_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   available?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   amount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -406,6 +422,7 @@ export type event_priceCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   event_id?: string | null
   available?: number | null
   amount?: string | null
@@ -420,6 +437,7 @@ export type event_priceUpdateManyMutationInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   available?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   amount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -431,6 +449,7 @@ export type event_priceUncheckedUpdateManyInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   event_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   available?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   amount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -455,6 +474,7 @@ export type event_priceCountOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   event_id?: Prisma.SortOrder
   available?: Prisma.SortOrder
   amount?: Prisma.SortOrder
@@ -474,6 +494,7 @@ export type event_priceMaxOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   event_id?: Prisma.SortOrder
   available?: Prisma.SortOrder
   amount?: Prisma.SortOrder
@@ -488,6 +509,7 @@ export type event_priceMinOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   event_id?: Prisma.SortOrder
   available?: Prisma.SortOrder
   amount?: Prisma.SortOrder
@@ -633,6 +655,7 @@ export type event_priceCreateWithoutEventInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   available?: number | null
   amount?: string | null
   box_office_id?: string | null
@@ -646,6 +669,7 @@ export type event_priceUncheckedCreateWithoutEventInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   available?: number | null
   amount?: string | null
   box_office_id?: string | null
@@ -688,6 +712,7 @@ export type event_priceScalarWhereInput = {
   created_at?: Prisma.DateTimeFilter<"event_price"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"event_price"> | Date | string
   id?: Prisma.UuidFilter<"event_price"> | string
+  apiId?: Prisma.StringNullableFilter<"event_price"> | string | null
   event_id?: Prisma.UuidNullableFilter<"event_price"> | string | null
   available?: Prisma.IntNullableFilter<"event_price"> | number | null
   amount?: Prisma.StringNullableFilter<"event_price"> | string | null
@@ -702,6 +727,7 @@ export type event_priceCreateWithoutPriceInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   available?: number | null
   amount?: string | null
   box_office_id?: string | null
@@ -715,6 +741,7 @@ export type event_priceUncheckedCreateWithoutPriceInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   event_id?: string | null
   available?: number | null
   amount?: string | null
@@ -754,6 +781,7 @@ export type event_priceCreateWithoutRankInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   available?: number | null
   amount?: string | null
   box_office_id?: string | null
@@ -767,6 +795,7 @@ export type event_priceUncheckedCreateWithoutRankInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   event_id?: string | null
   available?: number | null
   amount?: string | null
@@ -806,6 +835,7 @@ export type event_priceCreateManyEventInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   available?: number | null
   amount?: string | null
   box_office_id?: string | null
@@ -819,6 +849,7 @@ export type event_priceUpdateWithoutEventInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   available?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   amount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -832,6 +863,7 @@ export type event_priceUncheckedUpdateWithoutEventInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   available?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   amount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -845,6 +877,7 @@ export type event_priceUncheckedUpdateManyWithoutEventInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   available?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   amount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -858,6 +891,7 @@ export type event_priceCreateManyPriceInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   event_id?: string | null
   available?: number | null
   amount?: string | null
@@ -871,6 +905,7 @@ export type event_priceUpdateWithoutPriceInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   available?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   amount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -884,6 +919,7 @@ export type event_priceUncheckedUpdateWithoutPriceInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   event_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   available?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   amount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -897,6 +933,7 @@ export type event_priceUncheckedUpdateManyWithoutPriceInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   event_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   available?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   amount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -910,6 +947,7 @@ export type event_priceCreateManyRankInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   event_id?: string | null
   available?: number | null
   amount?: string | null
@@ -923,6 +961,7 @@ export type event_priceUpdateWithoutRankInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   available?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   amount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -936,6 +975,7 @@ export type event_priceUncheckedUpdateWithoutRankInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   event_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   available?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   amount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -949,6 +989,7 @@ export type event_priceUncheckedUpdateManyWithoutRankInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   event_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   available?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   amount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -964,6 +1005,7 @@ export type event_priceSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   event_id?: boolean
   available?: boolean
   amount?: boolean
@@ -981,6 +1023,7 @@ export type event_priceSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   event_id?: boolean
   available?: boolean
   amount?: boolean
@@ -998,6 +1041,7 @@ export type event_priceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   event_id?: boolean
   available?: boolean
   amount?: boolean
@@ -1015,6 +1059,7 @@ export type event_priceSelectScalar = {
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   event_id?: boolean
   available?: boolean
   amount?: boolean
@@ -1025,7 +1070,7 @@ export type event_priceSelectScalar = {
   rank_id?: boolean
 }
 
-export type event_priceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "event_id" | "available" | "amount" | "box_office_id" | "contigent_id" | "expires_at" | "price_id" | "rank_id", ExtArgs["result"]["event_price"]>
+export type event_priceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "apiId" | "event_id" | "available" | "amount" | "box_office_id" | "contigent_id" | "expires_at" | "price_id" | "rank_id", ExtArgs["result"]["event_price"]>
 export type event_priceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   event?: boolean | Prisma.event_price$eventArgs<ExtArgs>
   price?: boolean | Prisma.event_price$priceArgs<ExtArgs>
@@ -1053,6 +1098,7 @@ export type $event_pricePayload<ExtArgs extends runtime.Types.Extensions.Interna
     created_at: Date
     updated_at: Date
     id: string
+    apiId: string | null
     event_id: string | null
     available: number | null
     amount: string | null
@@ -1490,6 +1536,7 @@ export interface event_priceFieldRefs {
   readonly created_at: Prisma.FieldRef<"event_price", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"event_price", 'DateTime'>
   readonly id: Prisma.FieldRef<"event_price", 'String'>
+  readonly apiId: Prisma.FieldRef<"event_price", 'String'>
   readonly event_id: Prisma.FieldRef<"event_price", 'String'>
   readonly available: Prisma.FieldRef<"event_price", 'Int'>
   readonly amount: Prisma.FieldRef<"event_price", 'String'>

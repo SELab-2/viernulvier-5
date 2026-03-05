@@ -28,6 +28,7 @@ export type HallMinAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   vendor_id: string | null
   box_office_id: string | null
   seat_selection: string | null
@@ -39,6 +40,7 @@ export type HallMaxAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   vendor_id: string | null
   box_office_id: string | null
   seat_selection: string | null
@@ -50,6 +52,7 @@ export type HallCountAggregateOutputType = {
   created_at: number
   updated_at: number
   id: number
+  apiId: number
   vendor_id: number
   box_office_id: number
   seat_selection: number
@@ -65,6 +68,7 @@ export type HallMinAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   vendor_id?: true
   box_office_id?: true
   seat_selection?: true
@@ -76,6 +80,7 @@ export type HallMaxAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   vendor_id?: true
   box_office_id?: true
   seat_selection?: true
@@ -87,6 +92,7 @@ export type HallCountAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   vendor_id?: true
   box_office_id?: true
   seat_selection?: true
@@ -173,6 +179,7 @@ export type HallGroupByOutputType = {
   created_at: Date
   updated_at: Date
   id: string
+  apiId: string | null
   vendor_id: string | null
   box_office_id: string | null
   seat_selection: string | null
@@ -207,6 +214,7 @@ export type hallWhereInput = {
   created_at?: Prisma.DateTimeFilter<"hall"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"hall"> | Date | string
   id?: Prisma.UuidFilter<"hall"> | string
+  apiId?: Prisma.StringNullableFilter<"hall"> | string | null
   vendor_id?: Prisma.StringNullableFilter<"hall"> | string | null
   box_office_id?: Prisma.StringNullableFilter<"hall"> | string | null
   seat_selection?: Prisma.StringNullableFilter<"hall"> | string | null
@@ -222,6 +230,7 @@ export type hallOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   vendor_id?: Prisma.SortOrderInput | Prisma.SortOrder
   box_office_id?: Prisma.SortOrderInput | Prisma.SortOrder
   seat_selection?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -235,6 +244,7 @@ export type hallOrderByWithRelationInput = {
 
 export type hallWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  apiId?: string
   AND?: Prisma.hallWhereInput | Prisma.hallWhereInput[]
   OR?: Prisma.hallWhereInput[]
   NOT?: Prisma.hallWhereInput | Prisma.hallWhereInput[]
@@ -249,12 +259,13 @@ export type hallWhereUniqueInput = Prisma.AtLeast<{
   space_id?: Prisma.UuidNullableFilter<"hall"> | string | null
   events?: Prisma.EventListRelationFilter
   space?: Prisma.XOR<Prisma.SpaceNullableScalarRelationFilter, Prisma.spaceWhereInput> | null
-}, "id">
+}, "id" | "apiId">
 
 export type hallOrderByWithAggregationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   vendor_id?: Prisma.SortOrderInput | Prisma.SortOrder
   box_office_id?: Prisma.SortOrderInput | Prisma.SortOrder
   seat_selection?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -274,6 +285,7 @@ export type hallScalarWhereWithAggregatesInput = {
   created_at?: Prisma.DateTimeWithAggregatesFilter<"hall"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"hall"> | Date | string
   id?: Prisma.UuidWithAggregatesFilter<"hall"> | string
+  apiId?: Prisma.StringNullableWithAggregatesFilter<"hall"> | string | null
   vendor_id?: Prisma.StringNullableWithAggregatesFilter<"hall"> | string | null
   box_office_id?: Prisma.StringNullableWithAggregatesFilter<"hall"> | string | null
   seat_selection?: Prisma.StringNullableWithAggregatesFilter<"hall"> | string | null
@@ -287,6 +299,7 @@ export type hallCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   box_office_id?: string | null
   seat_selection?: string | null
@@ -301,6 +314,7 @@ export type hallUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   box_office_id?: string | null
   seat_selection?: string | null
@@ -315,6 +329,7 @@ export type hallUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   seat_selection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -329,6 +344,7 @@ export type hallUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   seat_selection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -343,6 +359,7 @@ export type hallCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   box_office_id?: string | null
   seat_selection?: string | null
@@ -356,6 +373,7 @@ export type hallUpdateManyMutationInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   seat_selection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -368,6 +386,7 @@ export type hallUncheckedUpdateManyInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   seat_selection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -386,6 +405,7 @@ export type hallCountOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   vendor_id?: Prisma.SortOrder
   box_office_id?: Prisma.SortOrder
   seat_selection?: Prisma.SortOrder
@@ -399,6 +419,7 @@ export type hallMaxOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   vendor_id?: Prisma.SortOrder
   box_office_id?: Prisma.SortOrder
   seat_selection?: Prisma.SortOrder
@@ -410,6 +431,7 @@ export type hallMinOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   vendor_id?: Prisma.SortOrder
   box_office_id?: Prisma.SortOrder
   seat_selection?: Prisma.SortOrder
@@ -489,6 +511,7 @@ export type hallCreateWithoutEventsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   box_office_id?: string | null
   seat_selection?: string | null
@@ -502,6 +525,7 @@ export type hallUncheckedCreateWithoutEventsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   box_office_id?: string | null
   seat_selection?: string | null
@@ -531,6 +555,7 @@ export type hallUpdateWithoutEventsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   seat_selection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -544,6 +569,7 @@ export type hallUncheckedUpdateWithoutEventsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   seat_selection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -557,6 +583,7 @@ export type hallCreateWithoutSpaceInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   box_office_id?: string | null
   seat_selection?: string | null
@@ -570,6 +597,7 @@ export type hallUncheckedCreateWithoutSpaceInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   box_office_id?: string | null
   seat_selection?: string | null
@@ -612,6 +640,7 @@ export type hallScalarWhereInput = {
   created_at?: Prisma.DateTimeFilter<"hall"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"hall"> | Date | string
   id?: Prisma.UuidFilter<"hall"> | string
+  apiId?: Prisma.StringNullableFilter<"hall"> | string | null
   vendor_id?: Prisma.StringNullableFilter<"hall"> | string | null
   box_office_id?: Prisma.StringNullableFilter<"hall"> | string | null
   seat_selection?: Prisma.StringNullableFilter<"hall"> | string | null
@@ -625,6 +654,7 @@ export type hallCreateManySpaceInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   box_office_id?: string | null
   seat_selection?: string | null
@@ -637,6 +667,7 @@ export type hallUpdateWithoutSpaceInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   seat_selection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -650,6 +681,7 @@ export type hallUncheckedUpdateWithoutSpaceInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   seat_selection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -663,6 +695,7 @@ export type hallUncheckedUpdateManyWithoutSpaceInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   seat_selection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -706,6 +739,7 @@ export type hallSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   vendor_id?: boolean
   box_office_id?: boolean
   seat_selection?: boolean
@@ -722,6 +756,7 @@ export type hallSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   vendor_id?: boolean
   box_office_id?: boolean
   seat_selection?: boolean
@@ -736,6 +771,7 @@ export type hallSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   vendor_id?: boolean
   box_office_id?: boolean
   seat_selection?: boolean
@@ -750,6 +786,7 @@ export type hallSelectScalar = {
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   vendor_id?: boolean
   box_office_id?: boolean
   seat_selection?: boolean
@@ -759,7 +796,7 @@ export type hallSelectScalar = {
   space_id?: boolean
 }
 
-export type hallOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "vendor_id" | "box_office_id" | "seat_selection" | "open_seating" | "name" | "remark" | "space_id", ExtArgs["result"]["hall"]>
+export type hallOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "apiId" | "vendor_id" | "box_office_id" | "seat_selection" | "open_seating" | "name" | "remark" | "space_id", ExtArgs["result"]["hall"]>
 export type hallInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   events?: boolean | Prisma.hall$eventsArgs<ExtArgs>
   space?: boolean | Prisma.hall$spaceArgs<ExtArgs>
@@ -782,6 +819,7 @@ export type $hallPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     created_at: Date
     updated_at: Date
     id: string
+    apiId: string | null
     vendor_id: string | null
     box_office_id: string | null
     seat_selection: string | null
@@ -1217,6 +1255,7 @@ export interface hallFieldRefs {
   readonly created_at: Prisma.FieldRef<"hall", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"hall", 'DateTime'>
   readonly id: Prisma.FieldRef<"hall", 'String'>
+  readonly apiId: Prisma.FieldRef<"hall", 'String'>
   readonly vendor_id: Prisma.FieldRef<"hall", 'String'>
   readonly box_office_id: Prisma.FieldRef<"hall", 'String'>
   readonly seat_selection: Prisma.FieldRef<"hall", 'String'>

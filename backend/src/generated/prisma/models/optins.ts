@@ -28,6 +28,7 @@ export type OptinsMinAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   key_name: string | null
   name: string | null
   provider: string | null
@@ -39,6 +40,7 @@ export type OptinsMaxAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   key_name: string | null
   name: string | null
   provider: string | null
@@ -50,6 +52,7 @@ export type OptinsCountAggregateOutputType = {
   created_at: number
   updated_at: number
   id: number
+  apiId: number
   key_name: number
   name: number
   title: number
@@ -65,6 +68,7 @@ export type OptinsMinAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   key_name?: true
   name?: true
   provider?: true
@@ -76,6 +80,7 @@ export type OptinsMaxAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   key_name?: true
   name?: true
   provider?: true
@@ -87,6 +92,7 @@ export type OptinsCountAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   key_name?: true
   name?: true
   title?: true
@@ -173,6 +179,7 @@ export type OptinsGroupByOutputType = {
   created_at: Date
   updated_at: Date
   id: string
+  apiId: string | null
   key_name: string | null
   name: string | null
   title: runtime.JsonValue | null
@@ -207,6 +214,7 @@ export type optinsWhereInput = {
   created_at?: Prisma.DateTimeFilter<"optins"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"optins"> | Date | string
   id?: Prisma.UuidFilter<"optins"> | string
+  apiId?: Prisma.StringNullableFilter<"optins"> | string | null
   key_name?: Prisma.StringNullableFilter<"optins"> | string | null
   name?: Prisma.StringNullableFilter<"optins"> | string | null
   title?: Prisma.JsonNullableFilter<"optins">
@@ -221,6 +229,7 @@ export type optinsOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   key_name?: Prisma.SortOrderInput | Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   title?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -233,6 +242,7 @@ export type optinsOrderByWithRelationInput = {
 
 export type optinsWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  apiId?: string
   AND?: Prisma.optinsWhereInput | Prisma.optinsWhereInput[]
   OR?: Prisma.optinsWhereInput[]
   NOT?: Prisma.optinsWhereInput | Prisma.optinsWhereInput[]
@@ -246,12 +256,13 @@ export type optinsWhereUniqueInput = Prisma.AtLeast<{
   code?: Prisma.StringNullableFilter<"optins"> | string | null
   type?: Prisma.StringNullableFilter<"optins"> | string | null
   subscriber_optins?: Prisma.Subscriber_optinsListRelationFilter
-}, "id">
+}, "id" | "apiId">
 
 export type optinsOrderByWithAggregationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   key_name?: Prisma.SortOrderInput | Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   title?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -271,6 +282,7 @@ export type optinsScalarWhereWithAggregatesInput = {
   created_at?: Prisma.DateTimeWithAggregatesFilter<"optins"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"optins"> | Date | string
   id?: Prisma.UuidWithAggregatesFilter<"optins"> | string
+  apiId?: Prisma.StringNullableWithAggregatesFilter<"optins"> | string | null
   key_name?: Prisma.StringNullableWithAggregatesFilter<"optins"> | string | null
   name?: Prisma.StringNullableWithAggregatesFilter<"optins"> | string | null
   title?: Prisma.JsonNullableWithAggregatesFilter<"optins">
@@ -284,6 +296,7 @@ export type optinsCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   key_name?: string | null
   name?: string | null
   title?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -298,6 +311,7 @@ export type optinsUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   key_name?: string | null
   name?: string | null
   title?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -312,6 +326,7 @@ export type optinsUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   key_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -326,6 +341,7 @@ export type optinsUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   key_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -340,6 +356,7 @@ export type optinsCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   key_name?: string | null
   name?: string | null
   title?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -353,6 +370,7 @@ export type optinsUpdateManyMutationInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   key_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -366,6 +384,7 @@ export type optinsUncheckedUpdateManyInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   key_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -379,6 +398,7 @@ export type optinsCountOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   key_name?: Prisma.SortOrder
   name?: Prisma.SortOrder
   title?: Prisma.SortOrder
@@ -392,6 +412,7 @@ export type optinsMaxOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   key_name?: Prisma.SortOrder
   name?: Prisma.SortOrder
   provider?: Prisma.SortOrder
@@ -403,6 +424,7 @@ export type optinsMinOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   key_name?: Prisma.SortOrder
   name?: Prisma.SortOrder
   provider?: Prisma.SortOrder
@@ -433,6 +455,7 @@ export type optinsCreateWithoutSubscriber_optinsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   key_name?: string | null
   name?: string | null
   title?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -446,6 +469,7 @@ export type optinsUncheckedCreateWithoutSubscriber_optinsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   key_name?: string | null
   name?: string | null
   title?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -475,6 +499,7 @@ export type optinsUpdateWithoutSubscriber_optinsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   key_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -488,6 +513,7 @@ export type optinsUncheckedUpdateWithoutSubscriber_optinsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   key_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -532,6 +558,7 @@ export type optinsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   key_name?: boolean
   name?: boolean
   title?: boolean
@@ -547,6 +574,7 @@ export type optinsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   key_name?: boolean
   name?: boolean
   title?: boolean
@@ -560,6 +588,7 @@ export type optinsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   key_name?: boolean
   name?: boolean
   title?: boolean
@@ -573,6 +602,7 @@ export type optinsSelectScalar = {
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   key_name?: boolean
   name?: boolean
   title?: boolean
@@ -582,7 +612,7 @@ export type optinsSelectScalar = {
   type?: boolean
 }
 
-export type optinsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "key_name" | "name" | "title" | "description" | "provider" | "code" | "type", ExtArgs["result"]["optins"]>
+export type optinsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "apiId" | "key_name" | "name" | "title" | "description" | "provider" | "code" | "type", ExtArgs["result"]["optins"]>
 export type optinsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   subscriber_optins?: boolean | Prisma.optins$subscriber_optinsArgs<ExtArgs>
   _count?: boolean | Prisma.OptinsCountOutputTypeDefaultArgs<ExtArgs>
@@ -599,6 +629,7 @@ export type $optinsPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     created_at: Date
     updated_at: Date
     id: string
+    apiId: string | null
     key_name: string | null
     name: string | null
     title: runtime.JsonValue | null
@@ -1033,6 +1064,7 @@ export interface optinsFieldRefs {
   readonly created_at: Prisma.FieldRef<"optins", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"optins", 'DateTime'>
   readonly id: Prisma.FieldRef<"optins", 'String'>
+  readonly apiId: Prisma.FieldRef<"optins", 'String'>
   readonly key_name: Prisma.FieldRef<"optins", 'String'>
   readonly name: Prisma.FieldRef<"optins", 'String'>
   readonly title: Prisma.FieldRef<"optins", 'Json'>

@@ -28,6 +28,7 @@ export type StatusMinAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   short_name: string | null
   fixed: boolean | null
   visible: boolean | null
@@ -38,6 +39,7 @@ export type StatusMaxAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   short_name: string | null
   fixed: boolean | null
   visible: boolean | null
@@ -48,6 +50,7 @@ export type StatusCountAggregateOutputType = {
   created_at: number
   updated_at: number
   id: number
+  apiId: number
   name: number
   short_name: number
   fixed: number
@@ -61,6 +64,7 @@ export type StatusMinAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   short_name?: true
   fixed?: true
   visible?: true
@@ -71,6 +75,7 @@ export type StatusMaxAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   short_name?: true
   fixed?: true
   visible?: true
@@ -81,6 +86,7 @@ export type StatusCountAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   name?: true
   short_name?: true
   fixed?: true
@@ -165,6 +171,7 @@ export type StatusGroupByOutputType = {
   created_at: Date
   updated_at: Date
   id: string
+  apiId: string | null
   name: runtime.JsonValue | null
   short_name: string | null
   fixed: boolean | null
@@ -197,6 +204,7 @@ export type statusWhereInput = {
   created_at?: Prisma.DateTimeFilter<"status"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"status"> | Date | string
   id?: Prisma.UuidFilter<"status"> | string
+  apiId?: Prisma.StringNullableFilter<"status"> | string | null
   name?: Prisma.JsonNullableFilter<"status">
   short_name?: Prisma.StringNullableFilter<"status"> | string | null
   fixed?: Prisma.BoolNullableFilter<"status"> | boolean | null
@@ -209,6 +217,7 @@ export type statusOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   short_name?: Prisma.SortOrderInput | Prisma.SortOrder
   fixed?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -219,6 +228,7 @@ export type statusOrderByWithRelationInput = {
 
 export type statusWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  apiId?: string
   AND?: Prisma.statusWhereInput | Prisma.statusWhereInput[]
   OR?: Prisma.statusWhereInput[]
   NOT?: Prisma.statusWhereInput | Prisma.statusWhereInput[]
@@ -230,12 +240,13 @@ export type statusWhereUniqueInput = Prisma.AtLeast<{
   visible?: Prisma.BoolNullableFilter<"status"> | boolean | null
   bookable?: Prisma.BoolNullableFilter<"status"> | boolean | null
   events?: Prisma.EventListRelationFilter
-}, "id">
+}, "id" | "apiId">
 
 export type statusOrderByWithAggregationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   short_name?: Prisma.SortOrderInput | Prisma.SortOrder
   fixed?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -253,6 +264,7 @@ export type statusScalarWhereWithAggregatesInput = {
   created_at?: Prisma.DateTimeWithAggregatesFilter<"status"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"status"> | Date | string
   id?: Prisma.UuidWithAggregatesFilter<"status"> | string
+  apiId?: Prisma.StringNullableWithAggregatesFilter<"status"> | string | null
   name?: Prisma.JsonNullableWithAggregatesFilter<"status">
   short_name?: Prisma.StringNullableWithAggregatesFilter<"status"> | string | null
   fixed?: Prisma.BoolNullableWithAggregatesFilter<"status"> | boolean | null
@@ -264,6 +276,7 @@ export type statusCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   short_name?: string | null
   fixed?: boolean | null
@@ -276,6 +289,7 @@ export type statusUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   short_name?: string | null
   fixed?: boolean | null
@@ -288,6 +302,7 @@ export type statusUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   short_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fixed?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
@@ -300,6 +315,7 @@ export type statusUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   short_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fixed?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
@@ -312,6 +328,7 @@ export type statusCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   short_name?: string | null
   fixed?: boolean | null
@@ -323,6 +340,7 @@ export type statusUpdateManyMutationInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   short_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fixed?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
@@ -334,6 +352,7 @@ export type statusUncheckedUpdateManyInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   short_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fixed?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
@@ -350,6 +369,7 @@ export type statusCountOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   short_name?: Prisma.SortOrder
   fixed?: Prisma.SortOrder
@@ -361,6 +381,7 @@ export type statusMaxOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   short_name?: Prisma.SortOrder
   fixed?: Prisma.SortOrder
   visible?: Prisma.SortOrder
@@ -371,6 +392,7 @@ export type statusMinOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   short_name?: Prisma.SortOrder
   fixed?: Prisma.SortOrder
   visible?: Prisma.SortOrder
@@ -397,6 +419,7 @@ export type statusCreateWithoutEventsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   short_name?: string | null
   fixed?: boolean | null
@@ -408,6 +431,7 @@ export type statusUncheckedCreateWithoutEventsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   short_name?: string | null
   fixed?: boolean | null
@@ -435,6 +459,7 @@ export type statusUpdateWithoutEventsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   short_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fixed?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
@@ -446,6 +471,7 @@ export type statusUncheckedUpdateWithoutEventsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   short_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fixed?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
@@ -488,6 +514,7 @@ export type statusSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   name?: boolean
   short_name?: boolean
   fixed?: boolean
@@ -501,6 +528,7 @@ export type statusSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   name?: boolean
   short_name?: boolean
   fixed?: boolean
@@ -512,6 +540,7 @@ export type statusSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   name?: boolean
   short_name?: boolean
   fixed?: boolean
@@ -523,6 +552,7 @@ export type statusSelectScalar = {
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   name?: boolean
   short_name?: boolean
   fixed?: boolean
@@ -530,7 +560,7 @@ export type statusSelectScalar = {
   bookable?: boolean
 }
 
-export type statusOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "name" | "short_name" | "fixed" | "visible" | "bookable", ExtArgs["result"]["status"]>
+export type statusOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "apiId" | "name" | "short_name" | "fixed" | "visible" | "bookable", ExtArgs["result"]["status"]>
 export type statusInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   events?: boolean | Prisma.status$eventsArgs<ExtArgs>
   _count?: boolean | Prisma.StatusCountOutputTypeDefaultArgs<ExtArgs>
@@ -547,6 +577,7 @@ export type $statusPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     created_at: Date
     updated_at: Date
     id: string
+    apiId: string | null
     name: runtime.JsonValue | null
     short_name: string | null
     fixed: boolean | null
@@ -979,6 +1010,7 @@ export interface statusFieldRefs {
   readonly created_at: Prisma.FieldRef<"status", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"status", 'DateTime'>
   readonly id: Prisma.FieldRef<"status", 'String'>
+  readonly apiId: Prisma.FieldRef<"status", 'String'>
   readonly name: Prisma.FieldRef<"status", 'Json'>
   readonly short_name: Prisma.FieldRef<"status", 'String'>
   readonly fixed: Prisma.FieldRef<"status", 'Boolean'>

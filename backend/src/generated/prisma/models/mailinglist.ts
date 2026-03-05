@@ -28,6 +28,7 @@ export type MailinglistMinAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   name: string | null
   type: string | null
   public: string | null
@@ -38,6 +39,7 @@ export type MailinglistMaxAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   name: string | null
   type: string | null
   public: string | null
@@ -48,6 +50,7 @@ export type MailinglistCountAggregateOutputType = {
   created_at: number
   updated_at: number
   id: number
+  apiId: number
   name: number
   type: number
   public: number
@@ -60,6 +63,7 @@ export type MailinglistMinAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   name?: true
   type?: true
   public?: true
@@ -70,6 +74,7 @@ export type MailinglistMaxAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   name?: true
   type?: true
   public?: true
@@ -80,6 +85,7 @@ export type MailinglistCountAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   name?: true
   type?: true
   public?: true
@@ -163,6 +169,7 @@ export type MailinglistGroupByOutputType = {
   created_at: Date
   updated_at: Date
   id: string
+  apiId: string | null
   name: string | null
   type: string | null
   public: string | null
@@ -194,6 +201,7 @@ export type mailinglistWhereInput = {
   created_at?: Prisma.DateTimeFilter<"mailinglist"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"mailinglist"> | Date | string
   id?: Prisma.UuidFilter<"mailinglist"> | string
+  apiId?: Prisma.StringNullableFilter<"mailinglist"> | string | null
   name?: Prisma.StringNullableFilter<"mailinglist"> | string | null
   type?: Prisma.StringNullableFilter<"mailinglist"> | string | null
   public?: Prisma.StringNullableFilter<"mailinglist"> | string | null
@@ -205,6 +213,7 @@ export type mailinglistOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   type?: Prisma.SortOrderInput | Prisma.SortOrder
   public?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -214,6 +223,7 @@ export type mailinglistOrderByWithRelationInput = {
 
 export type mailinglistWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  apiId?: string
   AND?: Prisma.mailinglistWhereInput | Prisma.mailinglistWhereInput[]
   OR?: Prisma.mailinglistWhereInput[]
   NOT?: Prisma.mailinglistWhereInput | Prisma.mailinglistWhereInput[]
@@ -224,12 +234,13 @@ export type mailinglistWhereUniqueInput = Prisma.AtLeast<{
   public?: Prisma.StringNullableFilter<"mailinglist"> | string | null
   one_time?: Prisma.StringNullableFilter<"mailinglist"> | string | null
   subscriber_mailinglist?: Prisma.Subscriber_mailinglistListRelationFilter
-}, "id">
+}, "id" | "apiId">
 
 export type mailinglistOrderByWithAggregationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   type?: Prisma.SortOrderInput | Prisma.SortOrder
   public?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -246,6 +257,7 @@ export type mailinglistScalarWhereWithAggregatesInput = {
   created_at?: Prisma.DateTimeWithAggregatesFilter<"mailinglist"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"mailinglist"> | Date | string
   id?: Prisma.UuidWithAggregatesFilter<"mailinglist"> | string
+  apiId?: Prisma.StringNullableWithAggregatesFilter<"mailinglist"> | string | null
   name?: Prisma.StringNullableWithAggregatesFilter<"mailinglist"> | string | null
   type?: Prisma.StringNullableWithAggregatesFilter<"mailinglist"> | string | null
   public?: Prisma.StringNullableWithAggregatesFilter<"mailinglist"> | string | null
@@ -256,6 +268,7 @@ export type mailinglistCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
   type?: string | null
   public?: string | null
@@ -267,6 +280,7 @@ export type mailinglistUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
   type?: string | null
   public?: string | null
@@ -278,6 +292,7 @@ export type mailinglistUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   public?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -289,6 +304,7 @@ export type mailinglistUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   public?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -300,6 +316,7 @@ export type mailinglistCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
   type?: string | null
   public?: string | null
@@ -310,6 +327,7 @@ export type mailinglistUpdateManyMutationInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   public?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -320,6 +338,7 @@ export type mailinglistUncheckedUpdateManyInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   public?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -330,6 +349,7 @@ export type mailinglistCountOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   type?: Prisma.SortOrder
   public?: Prisma.SortOrder
@@ -340,6 +360,7 @@ export type mailinglistMaxOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   type?: Prisma.SortOrder
   public?: Prisma.SortOrder
@@ -350,6 +371,7 @@ export type mailinglistMinOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   type?: Prisma.SortOrder
   public?: Prisma.SortOrder
@@ -379,6 +401,7 @@ export type mailinglistCreateWithoutSubscriber_mailinglistInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
   type?: string | null
   public?: string | null
@@ -389,6 +412,7 @@ export type mailinglistUncheckedCreateWithoutSubscriber_mailinglistInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
   type?: string | null
   public?: string | null
@@ -415,6 +439,7 @@ export type mailinglistUpdateWithoutSubscriber_mailinglistInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   public?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -425,6 +450,7 @@ export type mailinglistUncheckedUpdateWithoutSubscriber_mailinglistInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   public?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -466,6 +492,7 @@ export type mailinglistSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   name?: boolean
   type?: boolean
   public?: boolean
@@ -478,6 +505,7 @@ export type mailinglistSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   name?: boolean
   type?: boolean
   public?: boolean
@@ -488,6 +516,7 @@ export type mailinglistSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   name?: boolean
   type?: boolean
   public?: boolean
@@ -498,13 +527,14 @@ export type mailinglistSelectScalar = {
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   name?: boolean
   type?: boolean
   public?: boolean
   one_time?: boolean
 }
 
-export type mailinglistOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "name" | "type" | "public" | "one_time", ExtArgs["result"]["mailinglist"]>
+export type mailinglistOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "apiId" | "name" | "type" | "public" | "one_time", ExtArgs["result"]["mailinglist"]>
 export type mailinglistInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   subscriber_mailinglist?: boolean | Prisma.mailinglist$subscriber_mailinglistArgs<ExtArgs>
   _count?: boolean | Prisma.MailinglistCountOutputTypeDefaultArgs<ExtArgs>
@@ -521,6 +551,7 @@ export type $mailinglistPayload<ExtArgs extends runtime.Types.Extensions.Interna
     created_at: Date
     updated_at: Date
     id: string
+    apiId: string | null
     name: string | null
     type: string | null
     public: string | null
@@ -952,6 +983,7 @@ export interface mailinglistFieldRefs {
   readonly created_at: Prisma.FieldRef<"mailinglist", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"mailinglist", 'DateTime'>
   readonly id: Prisma.FieldRef<"mailinglist", 'String'>
+  readonly apiId: Prisma.FieldRef<"mailinglist", 'String'>
   readonly name: Prisma.FieldRef<"mailinglist", 'String'>
   readonly type: Prisma.FieldRef<"mailinglist", 'String'>
   readonly public: Prisma.FieldRef<"mailinglist", 'String'>

@@ -28,6 +28,7 @@ export type TicketMinAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   available_from: Date | null
   seat_id: string | null
   seat_row: string | null
@@ -43,6 +44,7 @@ export type TicketMaxAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   available_from: Date | null
   seat_id: string | null
   seat_row: string | null
@@ -58,6 +60,7 @@ export type TicketCountAggregateOutputType = {
   created_at: number
   updated_at: number
   id: number
+  apiId: number
   available_from: number
   seat_id: number
   seat_row: number
@@ -75,6 +78,7 @@ export type TicketMinAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   available_from?: true
   seat_id?: true
   seat_row?: true
@@ -90,6 +94,7 @@ export type TicketMaxAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   available_from?: true
   seat_id?: true
   seat_row?: true
@@ -105,6 +110,7 @@ export type TicketCountAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   available_from?: true
   seat_id?: true
   seat_row?: true
@@ -193,6 +199,7 @@ export type TicketGroupByOutputType = {
   created_at: Date
   updated_at: Date
   id: string
+  apiId: string | null
   available_from: Date | null
   seat_id: string | null
   seat_row: string | null
@@ -229,6 +236,7 @@ export type ticketWhereInput = {
   created_at?: Prisma.DateTimeFilter<"ticket"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"ticket"> | Date | string
   id?: Prisma.UuidFilter<"ticket"> | string
+  apiId?: Prisma.StringNullableFilter<"ticket"> | string | null
   available_from?: Prisma.DateTimeNullableFilter<"ticket"> | Date | string | null
   seat_id?: Prisma.StringNullableFilter<"ticket"> | string | null
   seat_row?: Prisma.StringNullableFilter<"ticket"> | string | null
@@ -250,6 +258,7 @@ export type ticketOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   available_from?: Prisma.SortOrderInput | Prisma.SortOrder
   seat_id?: Prisma.SortOrderInput | Prisma.SortOrder
   seat_row?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -269,6 +278,7 @@ export type ticketOrderByWithRelationInput = {
 
 export type ticketWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  apiId?: string
   AND?: Prisma.ticketWhereInput | Prisma.ticketWhereInput[]
   OR?: Prisma.ticketWhereInput[]
   NOT?: Prisma.ticketWhereInput | Prisma.ticketWhereInput[]
@@ -289,12 +299,13 @@ export type ticketWhereUniqueInput = Prisma.AtLeast<{
   order?: Prisma.XOR<Prisma.OrderNullableScalarRelationFilter, Prisma.orderWhereInput> | null
   price?: Prisma.XOR<Prisma.PriceNullableScalarRelationFilter, Prisma.priceWhereInput> | null
   rank?: Prisma.XOR<Prisma.RankNullableScalarRelationFilter, Prisma.rankWhereInput> | null
-}, "id">
+}, "id" | "apiId">
 
 export type ticketOrderByWithAggregationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   available_from?: Prisma.SortOrderInput | Prisma.SortOrder
   seat_id?: Prisma.SortOrderInput | Prisma.SortOrder
   seat_row?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -316,6 +327,7 @@ export type ticketScalarWhereWithAggregatesInput = {
   created_at?: Prisma.DateTimeWithAggregatesFilter<"ticket"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"ticket"> | Date | string
   id?: Prisma.UuidWithAggregatesFilter<"ticket"> | string
+  apiId?: Prisma.StringNullableWithAggregatesFilter<"ticket"> | string | null
   available_from?: Prisma.DateTimeNullableWithAggregatesFilter<"ticket"> | Date | string | null
   seat_id?: Prisma.StringNullableWithAggregatesFilter<"ticket"> | string | null
   seat_row?: Prisma.StringNullableWithAggregatesFilter<"ticket"> | string | null
@@ -331,6 +343,7 @@ export type ticketCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   available_from?: Date | string | null
   seat_id?: string | null
   seat_row?: string | null
@@ -348,6 +361,7 @@ export type ticketUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   available_from?: Date | string | null
   seat_id?: string | null
   seat_row?: string | null
@@ -365,6 +379,7 @@ export type ticketUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   available_from?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   seat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   seat_row?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -382,6 +397,7 @@ export type ticketUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   available_from?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   seat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   seat_row?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -399,6 +415,7 @@ export type ticketCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   available_from?: Date | string | null
   seat_id?: string | null
   seat_row?: string | null
@@ -414,6 +431,7 @@ export type ticketUpdateManyMutationInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   available_from?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   seat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   seat_row?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -425,6 +443,7 @@ export type ticketUncheckedUpdateManyInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   available_from?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   seat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   seat_row?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -455,6 +474,7 @@ export type ticketCountOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   available_from?: Prisma.SortOrder
   seat_id?: Prisma.SortOrder
   seat_row?: Prisma.SortOrder
@@ -470,6 +490,7 @@ export type ticketMaxOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   available_from?: Prisma.SortOrder
   seat_id?: Prisma.SortOrder
   seat_row?: Prisma.SortOrder
@@ -485,6 +506,7 @@ export type ticketMinOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   available_from?: Prisma.SortOrder
   seat_id?: Prisma.SortOrder
   seat_row?: Prisma.SortOrder
@@ -700,6 +722,7 @@ export type ticketCreateWithoutCrosssellsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   available_from?: Date | string | null
   seat_id?: string | null
   seat_row?: string | null
@@ -716,6 +739,7 @@ export type ticketUncheckedCreateWithoutCrosssellsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   available_from?: Date | string | null
   seat_id?: string | null
   seat_row?: string | null
@@ -748,6 +772,7 @@ export type ticketUpdateWithoutCrosssellsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   available_from?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   seat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   seat_row?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -764,6 +789,7 @@ export type ticketUncheckedUpdateWithoutCrosssellsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   available_from?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   seat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   seat_row?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -780,6 +806,7 @@ export type ticketCreateWithoutEventInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   available_from?: Date | string | null
   seat_id?: string | null
   seat_row?: string | null
@@ -796,6 +823,7 @@ export type ticketUncheckedCreateWithoutEventInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   available_from?: Date | string | null
   seat_id?: string | null
   seat_row?: string | null
@@ -841,6 +869,7 @@ export type ticketScalarWhereInput = {
   created_at?: Prisma.DateTimeFilter<"ticket"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"ticket"> | Date | string
   id?: Prisma.UuidFilter<"ticket"> | string
+  apiId?: Prisma.StringNullableFilter<"ticket"> | string | null
   available_from?: Prisma.DateTimeNullableFilter<"ticket"> | Date | string | null
   seat_id?: Prisma.StringNullableFilter<"ticket"> | string | null
   seat_row?: Prisma.StringNullableFilter<"ticket"> | string | null
@@ -856,6 +885,7 @@ export type ticketCreateWithoutOrderInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   available_from?: Date | string | null
   seat_id?: string | null
   seat_row?: string | null
@@ -872,6 +902,7 @@ export type ticketUncheckedCreateWithoutOrderInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   available_from?: Date | string | null
   seat_id?: string | null
   seat_row?: string | null
@@ -914,6 +945,7 @@ export type ticketCreateWithoutOrderticketsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   available_from?: Date | string | null
   seat_id?: string | null
   seat_row?: string | null
@@ -930,6 +962,7 @@ export type ticketUncheckedCreateWithoutOrderticketsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   available_from?: Date | string | null
   seat_id?: string | null
   seat_row?: string | null
@@ -962,6 +995,7 @@ export type ticketUpdateWithoutOrderticketsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   available_from?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   seat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   seat_row?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -978,6 +1012,7 @@ export type ticketUncheckedUpdateWithoutOrderticketsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   available_from?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   seat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   seat_row?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -994,6 +1029,7 @@ export type ticketCreateWithoutPriceInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   available_from?: Date | string | null
   seat_id?: string | null
   seat_row?: string | null
@@ -1010,6 +1046,7 @@ export type ticketUncheckedCreateWithoutPriceInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   available_from?: Date | string | null
   seat_id?: string | null
   seat_row?: string | null
@@ -1052,6 +1089,7 @@ export type ticketCreateWithoutRankInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   available_from?: Date | string | null
   seat_id?: string | null
   seat_row?: string | null
@@ -1068,6 +1106,7 @@ export type ticketUncheckedCreateWithoutRankInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   available_from?: Date | string | null
   seat_id?: string | null
   seat_row?: string | null
@@ -1110,6 +1149,7 @@ export type ticketCreateManyEventInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   available_from?: Date | string | null
   seat_id?: string | null
   seat_row?: string | null
@@ -1124,6 +1164,7 @@ export type ticketUpdateWithoutEventInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   available_from?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   seat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   seat_row?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1140,6 +1181,7 @@ export type ticketUncheckedUpdateWithoutEventInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   available_from?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   seat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   seat_row?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1156,6 +1198,7 @@ export type ticketUncheckedUpdateManyWithoutEventInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   available_from?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   seat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   seat_row?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1170,6 +1213,7 @@ export type ticketCreateManyOrderInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   available_from?: Date | string | null
   seat_id?: string | null
   seat_row?: string | null
@@ -1184,6 +1228,7 @@ export type ticketUpdateWithoutOrderInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   available_from?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   seat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   seat_row?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1200,6 +1245,7 @@ export type ticketUncheckedUpdateWithoutOrderInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   available_from?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   seat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   seat_row?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1216,6 +1262,7 @@ export type ticketUncheckedUpdateManyWithoutOrderInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   available_from?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   seat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   seat_row?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1230,6 +1277,7 @@ export type ticketCreateManyPriceInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   available_from?: Date | string | null
   seat_id?: string | null
   seat_row?: string | null
@@ -1244,6 +1292,7 @@ export type ticketUpdateWithoutPriceInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   available_from?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   seat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   seat_row?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1260,6 +1309,7 @@ export type ticketUncheckedUpdateWithoutPriceInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   available_from?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   seat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   seat_row?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1276,6 +1326,7 @@ export type ticketUncheckedUpdateManyWithoutPriceInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   available_from?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   seat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   seat_row?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1290,6 +1341,7 @@ export type ticketCreateManyRankInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   available_from?: Date | string | null
   seat_id?: string | null
   seat_row?: string | null
@@ -1304,6 +1356,7 @@ export type ticketUpdateWithoutRankInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   available_from?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   seat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   seat_row?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1320,6 +1373,7 @@ export type ticketUncheckedUpdateWithoutRankInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   available_from?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   seat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   seat_row?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1336,6 +1390,7 @@ export type ticketUncheckedUpdateManyWithoutRankInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   available_from?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   seat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   seat_row?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1390,6 +1445,7 @@ export type ticketSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   available_from?: boolean
   seat_id?: boolean
   seat_row?: boolean
@@ -1412,6 +1468,7 @@ export type ticketSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   available_from?: boolean
   seat_id?: boolean
   seat_row?: boolean
@@ -1431,6 +1488,7 @@ export type ticketSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   available_from?: boolean
   seat_id?: boolean
   seat_row?: boolean
@@ -1450,6 +1508,7 @@ export type ticketSelectScalar = {
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   available_from?: boolean
   seat_id?: boolean
   seat_row?: boolean
@@ -1461,7 +1520,7 @@ export type ticketSelectScalar = {
   rank_id?: boolean
 }
 
-export type ticketOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "available_from" | "seat_id" | "seat_row" | "seat_description" | "external_data" | "order_id" | "event_id" | "price_id" | "rank_id", ExtArgs["result"]["ticket"]>
+export type ticketOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "apiId" | "available_from" | "seat_id" | "seat_row" | "seat_description" | "external_data" | "order_id" | "event_id" | "price_id" | "rank_id", ExtArgs["result"]["ticket"]>
 export type ticketInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   crosssells?: boolean | Prisma.ticket$crosssellsArgs<ExtArgs>
   ordertickets?: boolean | Prisma.ticket$orderticketsArgs<ExtArgs>
@@ -1498,6 +1557,7 @@ export type $ticketPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     created_at: Date
     updated_at: Date
     id: string
+    apiId: string | null
     available_from: Date | null
     seat_id: string | null
     seat_row: string | null
@@ -1939,6 +1999,7 @@ export interface ticketFieldRefs {
   readonly created_at: Prisma.FieldRef<"ticket", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"ticket", 'DateTime'>
   readonly id: Prisma.FieldRef<"ticket", 'String'>
+  readonly apiId: Prisma.FieldRef<"ticket", 'String'>
   readonly available_from: Prisma.FieldRef<"ticket", 'DateTime'>
   readonly seat_id: Prisma.FieldRef<"ticket", 'String'>
   readonly seat_row: Prisma.FieldRef<"ticket", 'String'>

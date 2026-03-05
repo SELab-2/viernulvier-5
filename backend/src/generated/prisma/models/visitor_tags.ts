@@ -26,6 +26,7 @@ export type AggregateVisitor_tags = {
 
 export type Visitor_tagsMinAggregateOutputType = {
   id: string | null
+  apiId: string | null
   external_data: string | null
   expires_at: Date | null
   visitor_id: string | null
@@ -34,6 +35,7 @@ export type Visitor_tagsMinAggregateOutputType = {
 
 export type Visitor_tagsMaxAggregateOutputType = {
   id: string | null
+  apiId: string | null
   external_data: string | null
   expires_at: Date | null
   visitor_id: string | null
@@ -42,6 +44,7 @@ export type Visitor_tagsMaxAggregateOutputType = {
 
 export type Visitor_tagsCountAggregateOutputType = {
   id: number
+  apiId: number
   external_data: number
   expires_at: number
   visitor_id: number
@@ -52,6 +55,7 @@ export type Visitor_tagsCountAggregateOutputType = {
 
 export type Visitor_tagsMinAggregateInputType = {
   id?: true
+  apiId?: true
   external_data?: true
   expires_at?: true
   visitor_id?: true
@@ -60,6 +64,7 @@ export type Visitor_tagsMinAggregateInputType = {
 
 export type Visitor_tagsMaxAggregateInputType = {
   id?: true
+  apiId?: true
   external_data?: true
   expires_at?: true
   visitor_id?: true
@@ -68,6 +73,7 @@ export type Visitor_tagsMaxAggregateInputType = {
 
 export type Visitor_tagsCountAggregateInputType = {
   id?: true
+  apiId?: true
   external_data?: true
   expires_at?: true
   visitor_id?: true
@@ -149,6 +155,7 @@ export type visitor_tagsGroupByArgs<ExtArgs extends runtime.Types.Extensions.Int
 
 export type Visitor_tagsGroupByOutputType = {
   id: string
+  apiId: string | null
   external_data: string | null
   expires_at: Date | null
   visitor_id: string | null
@@ -178,6 +185,7 @@ export type visitor_tagsWhereInput = {
   OR?: Prisma.visitor_tagsWhereInput[]
   NOT?: Prisma.visitor_tagsWhereInput | Prisma.visitor_tagsWhereInput[]
   id?: Prisma.UuidFilter<"visitor_tags"> | string
+  apiId?: Prisma.StringNullableFilter<"visitor_tags"> | string | null
   external_data?: Prisma.StringNullableFilter<"visitor_tags"> | string | null
   expires_at?: Prisma.DateTimeNullableFilter<"visitor_tags"> | Date | string | null
   visitor_id?: Prisma.UuidNullableFilter<"visitor_tags"> | string | null
@@ -188,6 +196,7 @@ export type visitor_tagsWhereInput = {
 
 export type visitor_tagsOrderByWithRelationInput = {
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   external_data?: Prisma.SortOrderInput | Prisma.SortOrder
   expires_at?: Prisma.SortOrderInput | Prisma.SortOrder
   visitor_id?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -198,6 +207,7 @@ export type visitor_tagsOrderByWithRelationInput = {
 
 export type visitor_tagsWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  apiId?: string
   AND?: Prisma.visitor_tagsWhereInput | Prisma.visitor_tagsWhereInput[]
   OR?: Prisma.visitor_tagsWhereInput[]
   NOT?: Prisma.visitor_tagsWhereInput | Prisma.visitor_tagsWhereInput[]
@@ -207,10 +217,11 @@ export type visitor_tagsWhereUniqueInput = Prisma.AtLeast<{
   tags?: Prisma.UuidNullableFilter<"visitor_tags"> | string | null
   tag?: Prisma.XOR<Prisma.TagNullableScalarRelationFilter, Prisma.tagWhereInput> | null
   visitor?: Prisma.XOR<Prisma.VisitorNullableScalarRelationFilter, Prisma.visitorWhereInput> | null
-}, "id">
+}, "id" | "apiId">
 
 export type visitor_tagsOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   external_data?: Prisma.SortOrderInput | Prisma.SortOrder
   expires_at?: Prisma.SortOrderInput | Prisma.SortOrder
   visitor_id?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -225,6 +236,7 @@ export type visitor_tagsScalarWhereWithAggregatesInput = {
   OR?: Prisma.visitor_tagsScalarWhereWithAggregatesInput[]
   NOT?: Prisma.visitor_tagsScalarWhereWithAggregatesInput | Prisma.visitor_tagsScalarWhereWithAggregatesInput[]
   id?: Prisma.UuidWithAggregatesFilter<"visitor_tags"> | string
+  apiId?: Prisma.StringNullableWithAggregatesFilter<"visitor_tags"> | string | null
   external_data?: Prisma.StringNullableWithAggregatesFilter<"visitor_tags"> | string | null
   expires_at?: Prisma.DateTimeNullableWithAggregatesFilter<"visitor_tags"> | Date | string | null
   visitor_id?: Prisma.UuidNullableWithAggregatesFilter<"visitor_tags"> | string | null
@@ -233,6 +245,7 @@ export type visitor_tagsScalarWhereWithAggregatesInput = {
 
 export type visitor_tagsCreateInput = {
   id?: string
+  apiId?: string | null
   external_data?: string | null
   expires_at?: Date | string | null
   tag?: Prisma.tagCreateNestedOneWithoutVisitor_tagsInput
@@ -241,6 +254,7 @@ export type visitor_tagsCreateInput = {
 
 export type visitor_tagsUncheckedCreateInput = {
   id?: string
+  apiId?: string | null
   external_data?: string | null
   expires_at?: Date | string | null
   visitor_id?: string | null
@@ -249,6 +263,7 @@ export type visitor_tagsUncheckedCreateInput = {
 
 export type visitor_tagsUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   external_data?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tag?: Prisma.tagUpdateOneWithoutVisitor_tagsNestedInput
@@ -257,6 +272,7 @@ export type visitor_tagsUpdateInput = {
 
 export type visitor_tagsUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   external_data?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   visitor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -265,6 +281,7 @@ export type visitor_tagsUncheckedUpdateInput = {
 
 export type visitor_tagsCreateManyInput = {
   id?: string
+  apiId?: string | null
   external_data?: string | null
   expires_at?: Date | string | null
   visitor_id?: string | null
@@ -273,12 +290,14 @@ export type visitor_tagsCreateManyInput = {
 
 export type visitor_tagsUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   external_data?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type visitor_tagsUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   external_data?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   visitor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -297,6 +316,7 @@ export type visitor_tagsOrderByRelationAggregateInput = {
 
 export type visitor_tagsCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   external_data?: Prisma.SortOrder
   expires_at?: Prisma.SortOrder
   visitor_id?: Prisma.SortOrder
@@ -305,6 +325,7 @@ export type visitor_tagsCountOrderByAggregateInput = {
 
 export type visitor_tagsMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   external_data?: Prisma.SortOrder
   expires_at?: Prisma.SortOrder
   visitor_id?: Prisma.SortOrder
@@ -313,6 +334,7 @@ export type visitor_tagsMaxOrderByAggregateInput = {
 
 export type visitor_tagsMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   external_data?: Prisma.SortOrder
   expires_at?: Prisma.SortOrder
   visitor_id?: Prisma.SortOrder
@@ -405,6 +427,7 @@ export type visitor_tagsUncheckedUpdateManyWithoutVisitorNestedInput = {
 
 export type visitor_tagsCreateWithoutTagInput = {
   id?: string
+  apiId?: string | null
   external_data?: string | null
   expires_at?: Date | string | null
   visitor?: Prisma.visitorCreateNestedOneWithoutVisitor_tagsInput
@@ -412,6 +435,7 @@ export type visitor_tagsCreateWithoutTagInput = {
 
 export type visitor_tagsUncheckedCreateWithoutTagInput = {
   id?: string
+  apiId?: string | null
   external_data?: string | null
   expires_at?: Date | string | null
   visitor_id?: string | null
@@ -448,6 +472,7 @@ export type visitor_tagsScalarWhereInput = {
   OR?: Prisma.visitor_tagsScalarWhereInput[]
   NOT?: Prisma.visitor_tagsScalarWhereInput | Prisma.visitor_tagsScalarWhereInput[]
   id?: Prisma.UuidFilter<"visitor_tags"> | string
+  apiId?: Prisma.StringNullableFilter<"visitor_tags"> | string | null
   external_data?: Prisma.StringNullableFilter<"visitor_tags"> | string | null
   expires_at?: Prisma.DateTimeNullableFilter<"visitor_tags"> | Date | string | null
   visitor_id?: Prisma.UuidNullableFilter<"visitor_tags"> | string | null
@@ -456,6 +481,7 @@ export type visitor_tagsScalarWhereInput = {
 
 export type visitor_tagsCreateWithoutVisitorInput = {
   id?: string
+  apiId?: string | null
   external_data?: string | null
   expires_at?: Date | string | null
   tag?: Prisma.tagCreateNestedOneWithoutVisitor_tagsInput
@@ -463,6 +489,7 @@ export type visitor_tagsCreateWithoutVisitorInput = {
 
 export type visitor_tagsUncheckedCreateWithoutVisitorInput = {
   id?: string
+  apiId?: string | null
   external_data?: string | null
   expires_at?: Date | string | null
   tags?: string | null
@@ -496,6 +523,7 @@ export type visitor_tagsUpdateManyWithWhereWithoutVisitorInput = {
 
 export type visitor_tagsCreateManyTagInput = {
   id?: string
+  apiId?: string | null
   external_data?: string | null
   expires_at?: Date | string | null
   visitor_id?: string | null
@@ -503,6 +531,7 @@ export type visitor_tagsCreateManyTagInput = {
 
 export type visitor_tagsUpdateWithoutTagInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   external_data?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   visitor?: Prisma.visitorUpdateOneWithoutVisitor_tagsNestedInput
@@ -510,6 +539,7 @@ export type visitor_tagsUpdateWithoutTagInput = {
 
 export type visitor_tagsUncheckedUpdateWithoutTagInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   external_data?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   visitor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -517,6 +547,7 @@ export type visitor_tagsUncheckedUpdateWithoutTagInput = {
 
 export type visitor_tagsUncheckedUpdateManyWithoutTagInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   external_data?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   visitor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -524,6 +555,7 @@ export type visitor_tagsUncheckedUpdateManyWithoutTagInput = {
 
 export type visitor_tagsCreateManyVisitorInput = {
   id?: string
+  apiId?: string | null
   external_data?: string | null
   expires_at?: Date | string | null
   tags?: string | null
@@ -531,6 +563,7 @@ export type visitor_tagsCreateManyVisitorInput = {
 
 export type visitor_tagsUpdateWithoutVisitorInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   external_data?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tag?: Prisma.tagUpdateOneWithoutVisitor_tagsNestedInput
@@ -538,6 +571,7 @@ export type visitor_tagsUpdateWithoutVisitorInput = {
 
 export type visitor_tagsUncheckedUpdateWithoutVisitorInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   external_data?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tags?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -545,6 +579,7 @@ export type visitor_tagsUncheckedUpdateWithoutVisitorInput = {
 
 export type visitor_tagsUncheckedUpdateManyWithoutVisitorInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   external_data?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tags?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -554,6 +589,7 @@ export type visitor_tagsUncheckedUpdateManyWithoutVisitorInput = {
 
 export type visitor_tagsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  apiId?: boolean
   external_data?: boolean
   expires_at?: boolean
   visitor_id?: boolean
@@ -564,6 +600,7 @@ export type visitor_tagsSelect<ExtArgs extends runtime.Types.Extensions.Internal
 
 export type visitor_tagsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  apiId?: boolean
   external_data?: boolean
   expires_at?: boolean
   visitor_id?: boolean
@@ -574,6 +611,7 @@ export type visitor_tagsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
 
 export type visitor_tagsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  apiId?: boolean
   external_data?: boolean
   expires_at?: boolean
   visitor_id?: boolean
@@ -584,13 +622,14 @@ export type visitor_tagsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
 
 export type visitor_tagsSelectScalar = {
   id?: boolean
+  apiId?: boolean
   external_data?: boolean
   expires_at?: boolean
   visitor_id?: boolean
   tags?: boolean
 }
 
-export type visitor_tagsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "external_data" | "expires_at" | "visitor_id" | "tags", ExtArgs["result"]["visitor_tags"]>
+export type visitor_tagsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "apiId" | "external_data" | "expires_at" | "visitor_id" | "tags", ExtArgs["result"]["visitor_tags"]>
 export type visitor_tagsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tag?: boolean | Prisma.visitor_tags$tagArgs<ExtArgs>
   visitor?: boolean | Prisma.visitor_tags$visitorArgs<ExtArgs>
@@ -612,6 +651,7 @@ export type $visitor_tagsPayload<ExtArgs extends runtime.Types.Extensions.Intern
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
+    apiId: string | null
     external_data: string | null
     expires_at: Date | null
     visitor_id: string | null
@@ -1042,6 +1082,7 @@ export interface Prisma__visitor_tagsClient<T, Null = never, ExtArgs extends run
  */
 export interface visitor_tagsFieldRefs {
   readonly id: Prisma.FieldRef<"visitor_tags", 'String'>
+  readonly apiId: Prisma.FieldRef<"visitor_tags", 'String'>
   readonly external_data: Prisma.FieldRef<"visitor_tags", 'String'>
   readonly expires_at: Prisma.FieldRef<"visitor_tags", 'DateTime'>
   readonly visitor_id: Prisma.FieldRef<"visitor_tags", 'String'>

@@ -40,6 +40,7 @@ export type RankMinAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   code: string | null
   position: number | null
   sold_out_buffer: number | null
@@ -49,6 +50,7 @@ export type RankMaxAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   code: string | null
   position: number | null
   sold_out_buffer: number | null
@@ -58,6 +60,7 @@ export type RankCountAggregateOutputType = {
   created_at: number
   updated_at: number
   id: number
+  apiId: number
   description: number
   code: number
   position: number
@@ -80,6 +83,7 @@ export type RankMinAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   code?: true
   position?: true
   sold_out_buffer?: true
@@ -89,6 +93,7 @@ export type RankMaxAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   code?: true
   position?: true
   sold_out_buffer?: true
@@ -98,6 +103,7 @@ export type RankCountAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   description?: true
   code?: true
   position?: true
@@ -195,6 +201,7 @@ export type RankGroupByOutputType = {
   created_at: Date
   updated_at: Date
   id: string
+  apiId: string | null
   description: runtime.JsonValue | null
   code: string | null
   position: number | null
@@ -228,6 +235,7 @@ export type rankWhereInput = {
   created_at?: Prisma.DateTimeFilter<"rank"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"rank"> | Date | string
   id?: Prisma.UuidFilter<"rank"> | string
+  apiId?: Prisma.StringNullableFilter<"rank"> | string | null
   description?: Prisma.JsonNullableFilter<"rank">
   code?: Prisma.StringNullableFilter<"rank"> | string | null
   position?: Prisma.IntNullableFilter<"rank"> | number | null
@@ -240,6 +248,7 @@ export type rankOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   code?: Prisma.SortOrderInput | Prisma.SortOrder
   position?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -250,6 +259,7 @@ export type rankOrderByWithRelationInput = {
 
 export type rankWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  apiId?: string
   AND?: Prisma.rankWhereInput | Prisma.rankWhereInput[]
   OR?: Prisma.rankWhereInput[]
   NOT?: Prisma.rankWhereInput | Prisma.rankWhereInput[]
@@ -261,12 +271,13 @@ export type rankWhereUniqueInput = Prisma.AtLeast<{
   sold_out_buffer?: Prisma.IntNullableFilter<"rank"> | number | null
   event_prices?: Prisma.Event_priceListRelationFilter
   tickets?: Prisma.TicketListRelationFilter
-}, "id">
+}, "id" | "apiId">
 
 export type rankOrderByWithAggregationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   code?: Prisma.SortOrderInput | Prisma.SortOrder
   position?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -285,6 +296,7 @@ export type rankScalarWhereWithAggregatesInput = {
   created_at?: Prisma.DateTimeWithAggregatesFilter<"rank"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"rank"> | Date | string
   id?: Prisma.UuidWithAggregatesFilter<"rank"> | string
+  apiId?: Prisma.StringNullableWithAggregatesFilter<"rank"> | string | null
   description?: Prisma.JsonNullableWithAggregatesFilter<"rank">
   code?: Prisma.StringNullableWithAggregatesFilter<"rank"> | string | null
   position?: Prisma.IntNullableWithAggregatesFilter<"rank"> | number | null
@@ -295,6 +307,7 @@ export type rankCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   code?: string | null
   position?: number | null
@@ -307,6 +320,7 @@ export type rankUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   code?: string | null
   position?: number | null
@@ -319,6 +333,7 @@ export type rankUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   position?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -331,6 +346,7 @@ export type rankUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   position?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -343,6 +359,7 @@ export type rankCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   code?: string | null
   position?: number | null
@@ -353,6 +370,7 @@ export type rankUpdateManyMutationInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   position?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -363,6 +381,7 @@ export type rankUncheckedUpdateManyInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   position?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -378,6 +397,7 @@ export type rankCountOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   description?: Prisma.SortOrder
   code?: Prisma.SortOrder
   position?: Prisma.SortOrder
@@ -393,6 +413,7 @@ export type rankMaxOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   code?: Prisma.SortOrder
   position?: Prisma.SortOrder
   sold_out_buffer?: Prisma.SortOrder
@@ -402,6 +423,7 @@ export type rankMinOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   code?: Prisma.SortOrder
   position?: Prisma.SortOrder
   sold_out_buffer?: Prisma.SortOrder
@@ -448,6 +470,7 @@ export type rankCreateWithoutEvent_pricesInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   code?: string | null
   position?: number | null
@@ -459,6 +482,7 @@ export type rankUncheckedCreateWithoutEvent_pricesInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   code?: string | null
   position?: number | null
@@ -486,6 +510,7 @@ export type rankUpdateWithoutEvent_pricesInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   position?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -497,6 +522,7 @@ export type rankUncheckedUpdateWithoutEvent_pricesInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   position?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -508,6 +534,7 @@ export type rankCreateWithoutTicketsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   code?: string | null
   position?: number | null
@@ -519,6 +546,7 @@ export type rankUncheckedCreateWithoutTicketsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   code?: string | null
   position?: number | null
@@ -546,6 +574,7 @@ export type rankUpdateWithoutTicketsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   position?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -557,6 +586,7 @@ export type rankUncheckedUpdateWithoutTicketsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   position?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -608,6 +638,7 @@ export type rankSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   description?: boolean
   code?: boolean
   position?: boolean
@@ -621,6 +652,7 @@ export type rankSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   description?: boolean
   code?: boolean
   position?: boolean
@@ -631,6 +663,7 @@ export type rankSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   description?: boolean
   code?: boolean
   position?: boolean
@@ -641,13 +674,14 @@ export type rankSelectScalar = {
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   description?: boolean
   code?: boolean
   position?: boolean
   sold_out_buffer?: boolean
 }
 
-export type rankOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "description" | "code" | "position" | "sold_out_buffer", ExtArgs["result"]["rank"]>
+export type rankOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "apiId" | "description" | "code" | "position" | "sold_out_buffer", ExtArgs["result"]["rank"]>
 export type rankInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   event_prices?: boolean | Prisma.rank$event_pricesArgs<ExtArgs>
   tickets?: boolean | Prisma.rank$ticketsArgs<ExtArgs>
@@ -666,6 +700,7 @@ export type $rankPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     created_at: Date
     updated_at: Date
     id: string
+    apiId: string | null
     description: runtime.JsonValue | null
     code: string | null
     position: number | null
@@ -1098,6 +1133,7 @@ export interface rankFieldRefs {
   readonly created_at: Prisma.FieldRef<"rank", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"rank", 'DateTime'>
   readonly id: Prisma.FieldRef<"rank", 'String'>
+  readonly apiId: Prisma.FieldRef<"rank", 'String'>
   readonly description: Prisma.FieldRef<"rank", 'Json'>
   readonly code: Prisma.FieldRef<"rank", 'String'>
   readonly position: Prisma.FieldRef<"rank", 'Int'>

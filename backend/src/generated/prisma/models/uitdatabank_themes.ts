@@ -28,6 +28,7 @@ export type Uitdatabank_themesMinAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   name: string | null
   cdb_cat_id: string | null
 }
@@ -36,6 +37,7 @@ export type Uitdatabank_themesMaxAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   name: string | null
   cdb_cat_id: string | null
 }
@@ -44,6 +46,7 @@ export type Uitdatabank_themesCountAggregateOutputType = {
   created_at: number
   updated_at: number
   id: number
+  apiId: number
   name: number
   cdb_cat_id: number
   _all: number
@@ -54,6 +57,7 @@ export type Uitdatabank_themesMinAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   name?: true
   cdb_cat_id?: true
 }
@@ -62,6 +66,7 @@ export type Uitdatabank_themesMaxAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   name?: true
   cdb_cat_id?: true
 }
@@ -70,6 +75,7 @@ export type Uitdatabank_themesCountAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   name?: true
   cdb_cat_id?: true
   _all?: true
@@ -151,6 +157,7 @@ export type Uitdatabank_themesGroupByOutputType = {
   created_at: Date
   updated_at: Date
   id: string
+  apiId: string | null
   name: string | null
   cdb_cat_id: string | null
   _count: Uitdatabank_themesCountAggregateOutputType | null
@@ -180,6 +187,7 @@ export type uitdatabank_themesWhereInput = {
   created_at?: Prisma.DateTimeFilter<"uitdatabank_themes"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"uitdatabank_themes"> | Date | string
   id?: Prisma.UuidFilter<"uitdatabank_themes"> | string
+  apiId?: Prisma.StringNullableFilter<"uitdatabank_themes"> | string | null
   name?: Prisma.StringNullableFilter<"uitdatabank_themes"> | string | null
   cdb_cat_id?: Prisma.StringNullableFilter<"uitdatabank_themes"> | string | null
   production?: Prisma.ProductionListRelationFilter
@@ -189,6 +197,7 @@ export type uitdatabank_themesOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   cdb_cat_id?: Prisma.SortOrderInput | Prisma.SortOrder
   production?: Prisma.productionOrderByRelationAggregateInput
@@ -196,6 +205,7 @@ export type uitdatabank_themesOrderByWithRelationInput = {
 
 export type uitdatabank_themesWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  apiId?: string
   AND?: Prisma.uitdatabank_themesWhereInput | Prisma.uitdatabank_themesWhereInput[]
   OR?: Prisma.uitdatabank_themesWhereInput[]
   NOT?: Prisma.uitdatabank_themesWhereInput | Prisma.uitdatabank_themesWhereInput[]
@@ -204,12 +214,13 @@ export type uitdatabank_themesWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringNullableFilter<"uitdatabank_themes"> | string | null
   cdb_cat_id?: Prisma.StringNullableFilter<"uitdatabank_themes"> | string | null
   production?: Prisma.ProductionListRelationFilter
-}, "id">
+}, "id" | "apiId">
 
 export type uitdatabank_themesOrderByWithAggregationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   cdb_cat_id?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.uitdatabank_themesCountOrderByAggregateInput
@@ -224,6 +235,7 @@ export type uitdatabank_themesScalarWhereWithAggregatesInput = {
   created_at?: Prisma.DateTimeWithAggregatesFilter<"uitdatabank_themes"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"uitdatabank_themes"> | Date | string
   id?: Prisma.UuidWithAggregatesFilter<"uitdatabank_themes"> | string
+  apiId?: Prisma.StringNullableWithAggregatesFilter<"uitdatabank_themes"> | string | null
   name?: Prisma.StringNullableWithAggregatesFilter<"uitdatabank_themes"> | string | null
   cdb_cat_id?: Prisma.StringNullableWithAggregatesFilter<"uitdatabank_themes"> | string | null
 }
@@ -232,6 +244,7 @@ export type uitdatabank_themesCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
   cdb_cat_id?: string | null
   production?: Prisma.productionCreateNestedManyWithoutUitdatabank_themesInput
@@ -241,6 +254,7 @@ export type uitdatabank_themesUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
   cdb_cat_id?: string | null
   production?: Prisma.productionUncheckedCreateNestedManyWithoutUitdatabank_themesInput
@@ -250,6 +264,7 @@ export type uitdatabank_themesUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cdb_cat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   production?: Prisma.productionUpdateManyWithoutUitdatabank_themesNestedInput
@@ -259,6 +274,7 @@ export type uitdatabank_themesUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cdb_cat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   production?: Prisma.productionUncheckedUpdateManyWithoutUitdatabank_themesNestedInput
@@ -268,6 +284,7 @@ export type uitdatabank_themesCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
   cdb_cat_id?: string | null
 }
@@ -276,6 +293,7 @@ export type uitdatabank_themesUpdateManyMutationInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cdb_cat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -284,6 +302,7 @@ export type uitdatabank_themesUncheckedUpdateManyInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cdb_cat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -297,6 +316,7 @@ export type uitdatabank_themesCountOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   cdb_cat_id?: Prisma.SortOrder
 }
@@ -305,6 +325,7 @@ export type uitdatabank_themesMaxOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   cdb_cat_id?: Prisma.SortOrder
 }
@@ -313,6 +334,7 @@ export type uitdatabank_themesMinOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   cdb_cat_id?: Prisma.SortOrder
 }
@@ -337,6 +359,7 @@ export type uitdatabank_themesCreateWithoutProductionInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
   cdb_cat_id?: string | null
 }
@@ -345,6 +368,7 @@ export type uitdatabank_themesUncheckedCreateWithoutProductionInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
   cdb_cat_id?: string | null
 }
@@ -369,6 +393,7 @@ export type uitdatabank_themesUpdateWithoutProductionInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cdb_cat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -377,6 +402,7 @@ export type uitdatabank_themesUncheckedUpdateWithoutProductionInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cdb_cat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -416,6 +442,7 @@ export type uitdatabank_themesSelect<ExtArgs extends runtime.Types.Extensions.In
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   name?: boolean
   cdb_cat_id?: boolean
   production?: boolean | Prisma.uitdatabank_themes$productionArgs<ExtArgs>
@@ -426,6 +453,7 @@ export type uitdatabank_themesSelectCreateManyAndReturn<ExtArgs extends runtime.
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   name?: boolean
   cdb_cat_id?: boolean
 }, ExtArgs["result"]["uitdatabank_themes"]>
@@ -434,6 +462,7 @@ export type uitdatabank_themesSelectUpdateManyAndReturn<ExtArgs extends runtime.
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   name?: boolean
   cdb_cat_id?: boolean
 }, ExtArgs["result"]["uitdatabank_themes"]>
@@ -442,11 +471,12 @@ export type uitdatabank_themesSelectScalar = {
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   name?: boolean
   cdb_cat_id?: boolean
 }
 
-export type uitdatabank_themesOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "name" | "cdb_cat_id", ExtArgs["result"]["uitdatabank_themes"]>
+export type uitdatabank_themesOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "apiId" | "name" | "cdb_cat_id", ExtArgs["result"]["uitdatabank_themes"]>
 export type uitdatabank_themesInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   production?: boolean | Prisma.uitdatabank_themes$productionArgs<ExtArgs>
   _count?: boolean | Prisma.Uitdatabank_themesCountOutputTypeDefaultArgs<ExtArgs>
@@ -463,6 +493,7 @@ export type $uitdatabank_themesPayload<ExtArgs extends runtime.Types.Extensions.
     created_at: Date
     updated_at: Date
     id: string
+    apiId: string | null
     name: string | null
     cdb_cat_id: string | null
   }, ExtArgs["result"]["uitdatabank_themes"]>
@@ -892,6 +923,7 @@ export interface uitdatabank_themesFieldRefs {
   readonly created_at: Prisma.FieldRef<"uitdatabank_themes", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"uitdatabank_themes", 'DateTime'>
   readonly id: Prisma.FieldRef<"uitdatabank_themes", 'String'>
+  readonly apiId: Prisma.FieldRef<"uitdatabank_themes", 'String'>
   readonly name: Prisma.FieldRef<"uitdatabank_themes", 'String'>
   readonly cdb_cat_id: Prisma.FieldRef<"uitdatabank_themes", 'String'>
 }

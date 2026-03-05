@@ -28,6 +28,7 @@ export type OrganisationsMinAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   name: string | null
 }
 
@@ -35,6 +36,7 @@ export type OrganisationsMaxAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   name: string | null
 }
 
@@ -42,6 +44,7 @@ export type OrganisationsCountAggregateOutputType = {
   created_at: number
   updated_at: number
   id: number
+  apiId: number
   name: number
   _all: number
 }
@@ -51,6 +54,7 @@ export type OrganisationsMinAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   name?: true
 }
 
@@ -58,6 +62,7 @@ export type OrganisationsMaxAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   name?: true
 }
 
@@ -65,6 +70,7 @@ export type OrganisationsCountAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   name?: true
   _all?: true
 }
@@ -145,6 +151,7 @@ export type OrganisationsGroupByOutputType = {
   created_at: Date
   updated_at: Date
   id: string
+  apiId: string | null
   name: string | null
   _count: OrganisationsCountAggregateOutputType | null
   _min: OrganisationsMinAggregateOutputType | null
@@ -173,6 +180,7 @@ export type organisationsWhereInput = {
   created_at?: Prisma.DateTimeFilter<"organisations"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"organisations"> | Date | string
   id?: Prisma.UuidFilter<"organisations"> | string
+  apiId?: Prisma.StringNullableFilter<"organisations"> | string | null
   name?: Prisma.StringNullableFilter<"organisations"> | string | null
 }
 
@@ -180,23 +188,26 @@ export type organisationsOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
 }
 
 export type organisationsWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  apiId?: string
   AND?: Prisma.organisationsWhereInput | Prisma.organisationsWhereInput[]
   OR?: Prisma.organisationsWhereInput[]
   NOT?: Prisma.organisationsWhereInput | Prisma.organisationsWhereInput[]
   created_at?: Prisma.DateTimeFilter<"organisations"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"organisations"> | Date | string
   name?: Prisma.StringNullableFilter<"organisations"> | string | null
-}, "id">
+}, "id" | "apiId">
 
 export type organisationsOrderByWithAggregationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.organisationsCountOrderByAggregateInput
   _max?: Prisma.organisationsMaxOrderByAggregateInput
@@ -210,6 +221,7 @@ export type organisationsScalarWhereWithAggregatesInput = {
   created_at?: Prisma.DateTimeWithAggregatesFilter<"organisations"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"organisations"> | Date | string
   id?: Prisma.UuidWithAggregatesFilter<"organisations"> | string
+  apiId?: Prisma.StringNullableWithAggregatesFilter<"organisations"> | string | null
   name?: Prisma.StringNullableWithAggregatesFilter<"organisations"> | string | null
 }
 
@@ -217,6 +229,7 @@ export type organisationsCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
 }
 
@@ -224,6 +237,7 @@ export type organisationsUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
 }
 
@@ -231,6 +245,7 @@ export type organisationsUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -238,6 +253,7 @@ export type organisationsUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -245,6 +261,7 @@ export type organisationsCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
 }
 
@@ -252,6 +269,7 @@ export type organisationsUpdateManyMutationInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -259,6 +277,7 @@ export type organisationsUncheckedUpdateManyInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -266,6 +285,7 @@ export type organisationsCountOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   name?: Prisma.SortOrder
 }
 
@@ -273,6 +293,7 @@ export type organisationsMaxOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   name?: Prisma.SortOrder
 }
 
@@ -280,6 +301,7 @@ export type organisationsMinOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   name?: Prisma.SortOrder
 }
 
@@ -289,6 +311,7 @@ export type organisationsSelect<ExtArgs extends runtime.Types.Extensions.Interna
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   name?: boolean
 }, ExtArgs["result"]["organisations"]>
 
@@ -296,6 +319,7 @@ export type organisationsSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   name?: boolean
 }, ExtArgs["result"]["organisations"]>
 
@@ -303,6 +327,7 @@ export type organisationsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   name?: boolean
 }, ExtArgs["result"]["organisations"]>
 
@@ -310,10 +335,11 @@ export type organisationsSelectScalar = {
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   name?: boolean
 }
 
-export type organisationsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "name", ExtArgs["result"]["organisations"]>
+export type organisationsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "apiId" | "name", ExtArgs["result"]["organisations"]>
 
 export type $organisationsPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "organisations"
@@ -322,6 +348,7 @@ export type $organisationsPayload<ExtArgs extends runtime.Types.Extensions.Inter
     created_at: Date
     updated_at: Date
     id: string
+    apiId: string | null
     name: string | null
   }, ExtArgs["result"]["organisations"]>
   composites: {}
@@ -749,6 +776,7 @@ export interface organisationsFieldRefs {
   readonly created_at: Prisma.FieldRef<"organisations", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"organisations", 'DateTime'>
   readonly id: Prisma.FieldRef<"organisations", 'String'>
+  readonly apiId: Prisma.FieldRef<"organisations", 'String'>
   readonly name: Prisma.FieldRef<"organisations", 'String'>
 }
     

@@ -28,6 +28,7 @@ export type GalleryMinAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   name: string | null
 }
 
@@ -35,6 +36,7 @@ export type GalleryMaxAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   name: string | null
 }
 
@@ -42,6 +44,7 @@ export type GalleryCountAggregateOutputType = {
   created_at: number
   updated_at: number
   id: number
+  apiId: number
   name: number
   _all: number
 }
@@ -51,6 +54,7 @@ export type GalleryMinAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   name?: true
 }
 
@@ -58,6 +62,7 @@ export type GalleryMaxAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   name?: true
 }
 
@@ -65,6 +70,7 @@ export type GalleryCountAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   name?: true
   _all?: true
 }
@@ -145,6 +151,7 @@ export type GalleryGroupByOutputType = {
   created_at: Date
   updated_at: Date
   id: string
+  apiId: string | null
   name: string | null
   _count: GalleryCountAggregateOutputType | null
   _min: GalleryMinAggregateOutputType | null
@@ -173,6 +180,7 @@ export type galleryWhereInput = {
   created_at?: Prisma.DateTimeFilter<"gallery"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"gallery"> | Date | string
   id?: Prisma.UuidFilter<"gallery"> | string
+  apiId?: Prisma.StringNullableFilter<"gallery"> | string | null
   name?: Prisma.StringNullableFilter<"gallery"> | string | null
   gallery_item?: Prisma.Gallery_itemListRelationFilter
   items?: Prisma.ItemListRelationFilter
@@ -186,6 +194,7 @@ export type galleryOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   gallery_item?: Prisma.gallery_itemOrderByRelationAggregateInput
   items?: Prisma.itemOrderByRelationAggregateInput
@@ -197,6 +206,7 @@ export type galleryOrderByWithRelationInput = {
 
 export type galleryWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  apiId?: string
   AND?: Prisma.galleryWhereInput | Prisma.galleryWhereInput[]
   OR?: Prisma.galleryWhereInput[]
   NOT?: Prisma.galleryWhereInput | Prisma.galleryWhereInput[]
@@ -209,12 +219,13 @@ export type galleryWhereUniqueInput = Prisma.AtLeast<{
   poster_gallery_productions?: Prisma.ProductionListRelationFilter
   review_gallery_productions?: Prisma.ProductionListRelationFilter
   tags?: Prisma.TagListRelationFilter
-}, "id">
+}, "id" | "apiId">
 
 export type galleryOrderByWithAggregationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.galleryCountOrderByAggregateInput
   _max?: Prisma.galleryMaxOrderByAggregateInput
@@ -228,6 +239,7 @@ export type galleryScalarWhereWithAggregatesInput = {
   created_at?: Prisma.DateTimeWithAggregatesFilter<"gallery"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"gallery"> | Date | string
   id?: Prisma.UuidWithAggregatesFilter<"gallery"> | string
+  apiId?: Prisma.StringNullableWithAggregatesFilter<"gallery"> | string | null
   name?: Prisma.StringNullableWithAggregatesFilter<"gallery"> | string | null
 }
 
@@ -235,6 +247,7 @@ export type galleryCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
   gallery_item?: Prisma.gallery_itemCreateNestedManyWithoutGalleryInput
   items?: Prisma.itemCreateNestedManyWithoutGalleryInput
@@ -248,6 +261,7 @@ export type galleryUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
   gallery_item?: Prisma.gallery_itemUncheckedCreateNestedManyWithoutGalleryInput
   items?: Prisma.itemUncheckedCreateNestedManyWithoutGalleryInput
@@ -261,6 +275,7 @@ export type galleryUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gallery_item?: Prisma.gallery_itemUpdateManyWithoutGalleryNestedInput
   items?: Prisma.itemUpdateManyWithoutGalleryNestedInput
@@ -274,6 +289,7 @@ export type galleryUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gallery_item?: Prisma.gallery_itemUncheckedUpdateManyWithoutGalleryNestedInput
   items?: Prisma.itemUncheckedUpdateManyWithoutGalleryNestedInput
@@ -287,6 +303,7 @@ export type galleryCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
 }
 
@@ -294,6 +311,7 @@ export type galleryUpdateManyMutationInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -301,6 +319,7 @@ export type galleryUncheckedUpdateManyInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -308,6 +327,7 @@ export type galleryCountOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   name?: Prisma.SortOrder
 }
 
@@ -315,6 +335,7 @@ export type galleryMaxOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   name?: Prisma.SortOrder
 }
 
@@ -322,6 +343,7 @@ export type galleryMinOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   name?: Prisma.SortOrder
 }
 
@@ -433,6 +455,7 @@ export type galleryCreateWithoutGallery_itemInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
   items?: Prisma.itemCreateNestedManyWithoutGalleryInput
   media_gallery_productions?: Prisma.productionCreateNestedManyWithoutMedia_galleryInput
@@ -445,6 +468,7 @@ export type galleryUncheckedCreateWithoutGallery_itemInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
   items?: Prisma.itemUncheckedCreateNestedManyWithoutGalleryInput
   media_gallery_productions?: Prisma.productionUncheckedCreateNestedManyWithoutMedia_galleryInput
@@ -473,6 +497,7 @@ export type galleryUpdateWithoutGallery_itemInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   items?: Prisma.itemUpdateManyWithoutGalleryNestedInput
   media_gallery_productions?: Prisma.productionUpdateManyWithoutMedia_galleryNestedInput
@@ -485,6 +510,7 @@ export type galleryUncheckedUpdateWithoutGallery_itemInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   items?: Prisma.itemUncheckedUpdateManyWithoutGalleryNestedInput
   media_gallery_productions?: Prisma.productionUncheckedUpdateManyWithoutMedia_galleryNestedInput
@@ -497,6 +523,7 @@ export type galleryCreateWithoutItemsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
   gallery_item?: Prisma.gallery_itemCreateNestedManyWithoutGalleryInput
   media_gallery_productions?: Prisma.productionCreateNestedManyWithoutMedia_galleryInput
@@ -509,6 +536,7 @@ export type galleryUncheckedCreateWithoutItemsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
   gallery_item?: Prisma.gallery_itemUncheckedCreateNestedManyWithoutGalleryInput
   media_gallery_productions?: Prisma.productionUncheckedCreateNestedManyWithoutMedia_galleryInput
@@ -537,6 +565,7 @@ export type galleryUpdateWithoutItemsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gallery_item?: Prisma.gallery_itemUpdateManyWithoutGalleryNestedInput
   media_gallery_productions?: Prisma.productionUpdateManyWithoutMedia_galleryNestedInput
@@ -549,6 +578,7 @@ export type galleryUncheckedUpdateWithoutItemsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gallery_item?: Prisma.gallery_itemUncheckedUpdateManyWithoutGalleryNestedInput
   media_gallery_productions?: Prisma.productionUncheckedUpdateManyWithoutMedia_galleryNestedInput
@@ -561,6 +591,7 @@ export type galleryCreateWithoutMedia_gallery_productionsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
   gallery_item?: Prisma.gallery_itemCreateNestedManyWithoutGalleryInput
   items?: Prisma.itemCreateNestedManyWithoutGalleryInput
@@ -573,6 +604,7 @@ export type galleryUncheckedCreateWithoutMedia_gallery_productionsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
   gallery_item?: Prisma.gallery_itemUncheckedCreateNestedManyWithoutGalleryInput
   items?: Prisma.itemUncheckedCreateNestedManyWithoutGalleryInput
@@ -590,6 +622,7 @@ export type galleryCreateWithoutPoster_gallery_productionsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
   gallery_item?: Prisma.gallery_itemCreateNestedManyWithoutGalleryInput
   items?: Prisma.itemCreateNestedManyWithoutGalleryInput
@@ -602,6 +635,7 @@ export type galleryUncheckedCreateWithoutPoster_gallery_productionsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
   gallery_item?: Prisma.gallery_itemUncheckedCreateNestedManyWithoutGalleryInput
   items?: Prisma.itemUncheckedCreateNestedManyWithoutGalleryInput
@@ -619,6 +653,7 @@ export type galleryCreateWithoutReview_gallery_productionsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
   gallery_item?: Prisma.gallery_itemCreateNestedManyWithoutGalleryInput
   items?: Prisma.itemCreateNestedManyWithoutGalleryInput
@@ -631,6 +666,7 @@ export type galleryUncheckedCreateWithoutReview_gallery_productionsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
   gallery_item?: Prisma.gallery_itemUncheckedCreateNestedManyWithoutGalleryInput
   items?: Prisma.itemUncheckedCreateNestedManyWithoutGalleryInput
@@ -659,6 +695,7 @@ export type galleryUpdateWithoutMedia_gallery_productionsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gallery_item?: Prisma.gallery_itemUpdateManyWithoutGalleryNestedInput
   items?: Prisma.itemUpdateManyWithoutGalleryNestedInput
@@ -671,6 +708,7 @@ export type galleryUncheckedUpdateWithoutMedia_gallery_productionsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gallery_item?: Prisma.gallery_itemUncheckedUpdateManyWithoutGalleryNestedInput
   items?: Prisma.itemUncheckedUpdateManyWithoutGalleryNestedInput
@@ -694,6 +732,7 @@ export type galleryUpdateWithoutPoster_gallery_productionsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gallery_item?: Prisma.gallery_itemUpdateManyWithoutGalleryNestedInput
   items?: Prisma.itemUpdateManyWithoutGalleryNestedInput
@@ -706,6 +745,7 @@ export type galleryUncheckedUpdateWithoutPoster_gallery_productionsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gallery_item?: Prisma.gallery_itemUncheckedUpdateManyWithoutGalleryNestedInput
   items?: Prisma.itemUncheckedUpdateManyWithoutGalleryNestedInput
@@ -729,6 +769,7 @@ export type galleryUpdateWithoutReview_gallery_productionsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gallery_item?: Prisma.gallery_itemUpdateManyWithoutGalleryNestedInput
   items?: Prisma.itemUpdateManyWithoutGalleryNestedInput
@@ -741,6 +782,7 @@ export type galleryUncheckedUpdateWithoutReview_gallery_productionsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gallery_item?: Prisma.gallery_itemUncheckedUpdateManyWithoutGalleryNestedInput
   items?: Prisma.itemUncheckedUpdateManyWithoutGalleryNestedInput
@@ -753,6 +795,7 @@ export type galleryCreateWithoutTagsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
   gallery_item?: Prisma.gallery_itemCreateNestedManyWithoutGalleryInput
   items?: Prisma.itemCreateNestedManyWithoutGalleryInput
@@ -765,6 +808,7 @@ export type galleryUncheckedCreateWithoutTagsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
   gallery_item?: Prisma.gallery_itemUncheckedCreateNestedManyWithoutGalleryInput
   items?: Prisma.itemUncheckedCreateNestedManyWithoutGalleryInput
@@ -793,6 +837,7 @@ export type galleryUpdateWithoutTagsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gallery_item?: Prisma.gallery_itemUpdateManyWithoutGalleryNestedInput
   items?: Prisma.itemUpdateManyWithoutGalleryNestedInput
@@ -805,6 +850,7 @@ export type galleryUncheckedUpdateWithoutTagsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gallery_item?: Prisma.gallery_itemUncheckedUpdateManyWithoutGalleryNestedInput
   items?: Prisma.itemUncheckedUpdateManyWithoutGalleryNestedInput
@@ -893,6 +939,7 @@ export type gallerySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   name?: boolean
   gallery_item?: boolean | Prisma.gallery$gallery_itemArgs<ExtArgs>
   items?: boolean | Prisma.gallery$itemsArgs<ExtArgs>
@@ -907,6 +954,7 @@ export type gallerySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   name?: boolean
 }, ExtArgs["result"]["gallery"]>
 
@@ -914,6 +962,7 @@ export type gallerySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   name?: boolean
 }, ExtArgs["result"]["gallery"]>
 
@@ -921,10 +970,11 @@ export type gallerySelectScalar = {
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   name?: boolean
 }
 
-export type galleryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "name", ExtArgs["result"]["gallery"]>
+export type galleryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "apiId" | "name", ExtArgs["result"]["gallery"]>
 export type galleryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   gallery_item?: boolean | Prisma.gallery$gallery_itemArgs<ExtArgs>
   items?: boolean | Prisma.gallery$itemsArgs<ExtArgs>
@@ -951,6 +1001,7 @@ export type $galleryPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     created_at: Date
     updated_at: Date
     id: string
+    apiId: string | null
     name: string | null
   }, ExtArgs["result"]["gallery"]>
   composites: {}
@@ -1384,6 +1435,7 @@ export interface galleryFieldRefs {
   readonly created_at: Prisma.FieldRef<"gallery", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"gallery", 'DateTime'>
   readonly id: Prisma.FieldRef<"gallery", 'String'>
+  readonly apiId: Prisma.FieldRef<"gallery", 'String'>
   readonly name: Prisma.FieldRef<"gallery", 'String'>
 }
     

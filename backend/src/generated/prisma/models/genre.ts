@@ -28,6 +28,7 @@ export type GenreMinAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   type: string | null
   use_as: string | null
   vendor_id: string | null
@@ -37,6 +38,7 @@ export type GenreMaxAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   type: string | null
   use_as: string | null
   vendor_id: string | null
@@ -46,6 +48,7 @@ export type GenreCountAggregateOutputType = {
   created_at: number
   updated_at: number
   id: number
+  apiId: number
   type: number
   use_as: number
   vendor_id: number
@@ -60,6 +63,7 @@ export type GenreMinAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   type?: true
   use_as?: true
   vendor_id?: true
@@ -69,6 +73,7 @@ export type GenreMaxAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   type?: true
   use_as?: true
   vendor_id?: true
@@ -78,6 +83,7 @@ export type GenreCountAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   type?: true
   use_as?: true
   vendor_id?: true
@@ -163,6 +169,7 @@ export type GenreGroupByOutputType = {
   created_at: Date
   updated_at: Date
   id: string
+  apiId: string | null
   type: string | null
   use_as: string | null
   vendor_id: string | null
@@ -196,6 +203,7 @@ export type genreWhereInput = {
   created_at?: Prisma.DateTimeFilter<"genre"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"genre"> | Date | string
   id?: Prisma.UuidFilter<"genre"> | string
+  apiId?: Prisma.StringNullableFilter<"genre"> | string | null
   type?: Prisma.StringNullableFilter<"genre"> | string | null
   use_as?: Prisma.StringNullableFilter<"genre"> | string | null
   vendor_id?: Prisma.StringNullableFilter<"genre"> | string | null
@@ -209,6 +217,7 @@ export type genreOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   type?: Prisma.SortOrderInput | Prisma.SortOrder
   use_as?: Prisma.SortOrderInput | Prisma.SortOrder
   vendor_id?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -220,6 +229,7 @@ export type genreOrderByWithRelationInput = {
 
 export type genreWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  apiId?: string
   AND?: Prisma.genreWhereInput | Prisma.genreWhereInput[]
   OR?: Prisma.genreWhereInput[]
   NOT?: Prisma.genreWhereInput | Prisma.genreWhereInput[]
@@ -232,12 +242,13 @@ export type genreWhereUniqueInput = Prisma.AtLeast<{
   slug?: Prisma.JsonNullableFilter<"genre">
   description?: Prisma.JsonNullableFilter<"genre">
   genre_production?: Prisma.Genre_productionListRelationFilter
-}, "id">
+}, "id" | "apiId">
 
 export type genreOrderByWithAggregationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   type?: Prisma.SortOrderInput | Prisma.SortOrder
   use_as?: Prisma.SortOrderInput | Prisma.SortOrder
   vendor_id?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -256,6 +267,7 @@ export type genreScalarWhereWithAggregatesInput = {
   created_at?: Prisma.DateTimeWithAggregatesFilter<"genre"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"genre"> | Date | string
   id?: Prisma.UuidWithAggregatesFilter<"genre"> | string
+  apiId?: Prisma.StringNullableWithAggregatesFilter<"genre"> | string | null
   type?: Prisma.StringNullableWithAggregatesFilter<"genre"> | string | null
   use_as?: Prisma.StringNullableWithAggregatesFilter<"genre"> | string | null
   vendor_id?: Prisma.StringNullableWithAggregatesFilter<"genre"> | string | null
@@ -268,6 +280,7 @@ export type genreCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   type?: string | null
   use_as?: string | null
   vendor_id?: string | null
@@ -281,6 +294,7 @@ export type genreUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   type?: string | null
   use_as?: string | null
   vendor_id?: string | null
@@ -294,6 +308,7 @@ export type genreUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   use_as?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -307,6 +322,7 @@ export type genreUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   use_as?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -320,6 +336,7 @@ export type genreCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   type?: string | null
   use_as?: string | null
   vendor_id?: string | null
@@ -332,6 +349,7 @@ export type genreUpdateManyMutationInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   use_as?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -344,6 +362,7 @@ export type genreUncheckedUpdateManyInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   use_as?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -356,6 +375,7 @@ export type genreCountOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   use_as?: Prisma.SortOrder
   vendor_id?: Prisma.SortOrder
@@ -368,6 +388,7 @@ export type genreMaxOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   use_as?: Prisma.SortOrder
   vendor_id?: Prisma.SortOrder
@@ -377,6 +398,7 @@ export type genreMinOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   use_as?: Prisma.SortOrder
   vendor_id?: Prisma.SortOrder
@@ -405,6 +427,7 @@ export type genreCreateWithoutGenre_productionInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   type?: string | null
   use_as?: string | null
   vendor_id?: string | null
@@ -417,6 +440,7 @@ export type genreUncheckedCreateWithoutGenre_productionInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   type?: string | null
   use_as?: string | null
   vendor_id?: string | null
@@ -445,6 +469,7 @@ export type genreUpdateWithoutGenre_productionInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   use_as?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -457,6 +482,7 @@ export type genreUncheckedUpdateWithoutGenre_productionInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   use_as?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -500,6 +526,7 @@ export type genreSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   type?: boolean
   use_as?: boolean
   vendor_id?: boolean
@@ -514,6 +541,7 @@ export type genreSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   type?: boolean
   use_as?: boolean
   vendor_id?: boolean
@@ -526,6 +554,7 @@ export type genreSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   type?: boolean
   use_as?: boolean
   vendor_id?: boolean
@@ -538,6 +567,7 @@ export type genreSelectScalar = {
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   type?: boolean
   use_as?: boolean
   vendor_id?: boolean
@@ -546,7 +576,7 @@ export type genreSelectScalar = {
   description?: boolean
 }
 
-export type genreOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "type" | "use_as" | "vendor_id" | "name" | "slug" | "description", ExtArgs["result"]["genre"]>
+export type genreOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "apiId" | "type" | "use_as" | "vendor_id" | "name" | "slug" | "description", ExtArgs["result"]["genre"]>
 export type genreInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   genre_production?: boolean | Prisma.genre$genre_productionArgs<ExtArgs>
   _count?: boolean | Prisma.GenreCountOutputTypeDefaultArgs<ExtArgs>
@@ -563,6 +593,7 @@ export type $genrePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     created_at: Date
     updated_at: Date
     id: string
+    apiId: string | null
     type: string | null
     use_as: string | null
     vendor_id: string | null
@@ -996,6 +1027,7 @@ export interface genreFieldRefs {
   readonly created_at: Prisma.FieldRef<"genre", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"genre", 'DateTime'>
   readonly id: Prisma.FieldRef<"genre", 'String'>
+  readonly apiId: Prisma.FieldRef<"genre", 'String'>
   readonly type: Prisma.FieldRef<"genre", 'String'>
   readonly use_as: Prisma.FieldRef<"genre", 'String'>
   readonly vendor_id: Prisma.FieldRef<"genre", 'String'>

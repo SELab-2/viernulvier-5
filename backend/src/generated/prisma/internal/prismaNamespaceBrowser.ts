@@ -107,6 +107,7 @@ export const CropScalarFieldEnum = {
   created_at: 'created_at',
   updated_at: 'updated_at',
   id: 'id',
+  apiId: 'apiId',
   name: 'name',
   url: 'url'
 } as const
@@ -118,6 +119,7 @@ export const CrosssellsScalarFieldEnum = {
   created_at: 'created_at',
   updated_at: 'updated_at',
   id: 'id',
+  apiId: 'apiId',
   ticket_id: 'ticket_id',
   ticket_type: 'ticket_type',
   booking_id: 'booking_id',
@@ -133,6 +135,7 @@ export const EventScalarFieldEnum = {
   created_at: 'created_at',
   updated_at: 'updated_at',
   id: 'id',
+  apiId: 'apiId',
   starts_at: 'starts_at',
   ends_at: 'ends_at',
   intermission_at: 'intermission_at',
@@ -159,6 +162,7 @@ export const Event_priceScalarFieldEnum = {
   created_at: 'created_at',
   updated_at: 'updated_at',
   id: 'id',
+  apiId: 'apiId',
   event_id: 'event_id',
   available: 'available',
   amount: 'amount',
@@ -176,6 +180,7 @@ export const GalleryScalarFieldEnum = {
   created_at: 'created_at',
   updated_at: 'updated_at',
   id: 'id',
+  apiId: 'apiId',
   name: 'name'
 } as const
 
@@ -194,6 +199,7 @@ export const GenreScalarFieldEnum = {
   created_at: 'created_at',
   updated_at: 'updated_at',
   id: 'id',
+  apiId: 'apiId',
   type: 'type',
   use_as: 'use_as',
   vendor_id: 'vendor_id',
@@ -217,6 +223,7 @@ export const HallScalarFieldEnum = {
   created_at: 'created_at',
   updated_at: 'updated_at',
   id: 'id',
+  apiId: 'apiId',
   vendor_id: 'vendor_id',
   box_office_id: 'box_office_id',
   seat_selection: 'seat_selection',
@@ -233,6 +240,7 @@ export const ItemScalarFieldEnum = {
   created_at: 'created_at',
   updated_at: 'updated_at',
   id: 'id',
+  apiId: 'apiId',
   type: 'type',
   original_filename: 'original_filename',
   position: 'position',
@@ -254,6 +262,7 @@ export const LocationScalarFieldEnum = {
   created_at: 'created_at',
   updated_at: 'updated_at',
   id: 'id',
+  apiId: 'apiId',
   name: 'name',
   code: 'code',
   street: 'street',
@@ -274,6 +283,7 @@ export const MailinglistScalarFieldEnum = {
   created_at: 'created_at',
   updated_at: 'updated_at',
   id: 'id',
+  apiId: 'apiId',
   name: 'name',
   type: 'type',
   public: 'public',
@@ -287,6 +297,7 @@ export const OptinsScalarFieldEnum = {
   created_at: 'created_at',
   updated_at: 'updated_at',
   id: 'id',
+  apiId: 'apiId',
   key_name: 'key_name',
   name: 'name',
   title: 'title',
@@ -303,6 +314,7 @@ export const OrderScalarFieldEnum = {
   created_at: 'created_at',
   updated_at: 'updated_at',
   id: 'id',
+  apiId: 'apiId',
   ordered_at: 'ordered_at',
   total_amount: 'total_amount',
   box_office_id: 'box_office_id',
@@ -317,6 +329,7 @@ export const OrderticketScalarFieldEnum = {
   created_at: 'created_at',
   updated_at: 'updated_at',
   id: 'id',
+  apiId: 'apiId',
   ticket_type: 'ticket_type',
   booking_id: 'booking_id',
   price: 'price',
@@ -332,6 +345,7 @@ export const OrganisationsScalarFieldEnum = {
   created_at: 'created_at',
   updated_at: 'updated_at',
   id: 'id',
+  apiId: 'apiId',
   name: 'name'
 } as const
 
@@ -342,6 +356,7 @@ export const PriceScalarFieldEnum = {
   created_at: 'created_at',
   updated_at: 'updated_at',
   id: 'id',
+  apiId: 'apiId',
   type: 'type',
   visibility: 'visibility',
   code: 'code',
@@ -363,6 +378,7 @@ export const ProductionScalarFieldEnum = {
   created_at: 'created_at',
   updated_at: 'updated_at',
   id: 'id',
+  apiId: 'apiId',
   vendor_id: 'vendor_id',
   box_office_id: 'box_office_id',
   performer_field: 'performer_field',
@@ -401,6 +417,7 @@ export const RankScalarFieldEnum = {
   created_at: 'created_at',
   updated_at: 'updated_at',
   id: 'id',
+  apiId: 'apiId',
   description: 'description',
   code: 'code',
   position: 'position',
@@ -414,6 +431,7 @@ export const SpaceScalarFieldEnum = {
   created_at: 'created_at',
   updated_at: 'updated_at',
   id: 'id',
+  apiId: 'apiId',
   vendor_id: 'vendor_id',
   name: 'name',
   location_id: 'location_id'
@@ -426,6 +444,7 @@ export const StatusScalarFieldEnum = {
   created_at: 'created_at',
   updated_at: 'updated_at',
   id: 'id',
+  apiId: 'apiId',
   name: 'name',
   short_name: 'short_name',
   fixed: 'fixed',
@@ -440,6 +459,7 @@ export const SubscriberScalarFieldEnum = {
   created_at: 'created_at',
   updated_at: 'updated_at',
   id: 'id',
+  apiId: 'apiId',
   confirmed: 'confirmed',
   bounces: 'bounces',
   user_id: 'user_id'
@@ -468,6 +488,7 @@ export const TagScalarFieldEnum = {
   created_at: 'created_at',
   updated_at: 'updated_at',
   id: 'id',
+  apiId: 'apiId',
   source: 'source',
   sourcetype: 'sourcetype',
   enable: 'enable',
@@ -489,6 +510,7 @@ export const TicketScalarFieldEnum = {
   created_at: 'created_at',
   updated_at: 'updated_at',
   id: 'id',
+  apiId: 'apiId',
   available_from: 'available_from',
   seat_id: 'seat_id',
   seat_row: 'seat_row',
@@ -515,6 +537,7 @@ export const Uitdatabank_keywordsScalarFieldEnum = {
   created_at: 'created_at',
   updated_at: 'updated_at',
   id: 'id',
+  apiId: 'apiId',
   name: 'name'
 } as const
 
@@ -525,6 +548,7 @@ export const Uitdatabank_themesScalarFieldEnum = {
   created_at: 'created_at',
   updated_at: 'updated_at',
   id: 'id',
+  apiId: 'apiId',
   name: 'name',
   cdb_cat_id: 'cdb_cat_id'
 } as const
@@ -536,6 +560,7 @@ export const Uitdatabank_typesScalarFieldEnum = {
   created_at: 'created_at',
   updated_at: 'updated_at',
   id: 'id',
+  apiId: 'apiId',
   name: 'name',
   cdb_cat_id: 'cdb_cat_id'
 } as const
@@ -547,6 +572,7 @@ export const UserScalarFieldEnum = {
   created_at: 'created_at',
   updated_at: 'updated_at',
   id: 'id',
+  apiId: 'apiId',
   last_active_at: 'last_active_at',
   gender: 'gender',
   initials: 'initials',
@@ -564,6 +590,7 @@ export const VisitorScalarFieldEnum = {
   created_at: 'created_at',
   updated_at: 'updated_at',
   id: 'id',
+  apiId: 'apiId',
   box_office_id: 'box_office_id',
   optins_chosen: 'optins_chosen',
   optins_skipped_at: 'optins_skipped_at'
@@ -574,6 +601,7 @@ export type VisitorScalarFieldEnum = (typeof VisitorScalarFieldEnum)[keyof typeo
 
 export const Visitor_tagsScalarFieldEnum = {
   id: 'id',
+  apiId: 'apiId',
   external_data: 'external_data',
   expires_at: 'expires_at',
   visitor_id: 'visitor_id',

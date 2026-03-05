@@ -28,6 +28,7 @@ export type Uitdatabank_typesMinAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   name: string | null
   cdb_cat_id: string | null
 }
@@ -36,6 +37,7 @@ export type Uitdatabank_typesMaxAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   name: string | null
   cdb_cat_id: string | null
 }
@@ -44,6 +46,7 @@ export type Uitdatabank_typesCountAggregateOutputType = {
   created_at: number
   updated_at: number
   id: number
+  apiId: number
   name: number
   cdb_cat_id: number
   _all: number
@@ -54,6 +57,7 @@ export type Uitdatabank_typesMinAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   name?: true
   cdb_cat_id?: true
 }
@@ -62,6 +66,7 @@ export type Uitdatabank_typesMaxAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   name?: true
   cdb_cat_id?: true
 }
@@ -70,6 +75,7 @@ export type Uitdatabank_typesCountAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   name?: true
   cdb_cat_id?: true
   _all?: true
@@ -151,6 +157,7 @@ export type Uitdatabank_typesGroupByOutputType = {
   created_at: Date
   updated_at: Date
   id: string
+  apiId: string | null
   name: string | null
   cdb_cat_id: string | null
   _count: Uitdatabank_typesCountAggregateOutputType | null
@@ -180,6 +187,7 @@ export type uitdatabank_typesWhereInput = {
   created_at?: Prisma.DateTimeFilter<"uitdatabank_types"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"uitdatabank_types"> | Date | string
   id?: Prisma.UuidFilter<"uitdatabank_types"> | string
+  apiId?: Prisma.StringNullableFilter<"uitdatabank_types"> | string | null
   name?: Prisma.StringNullableFilter<"uitdatabank_types"> | string | null
   cdb_cat_id?: Prisma.StringNullableFilter<"uitdatabank_types"> | string | null
   production?: Prisma.ProductionListRelationFilter
@@ -189,6 +197,7 @@ export type uitdatabank_typesOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   cdb_cat_id?: Prisma.SortOrderInput | Prisma.SortOrder
   production?: Prisma.productionOrderByRelationAggregateInput
@@ -196,6 +205,7 @@ export type uitdatabank_typesOrderByWithRelationInput = {
 
 export type uitdatabank_typesWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  apiId?: string
   AND?: Prisma.uitdatabank_typesWhereInput | Prisma.uitdatabank_typesWhereInput[]
   OR?: Prisma.uitdatabank_typesWhereInput[]
   NOT?: Prisma.uitdatabank_typesWhereInput | Prisma.uitdatabank_typesWhereInput[]
@@ -204,12 +214,13 @@ export type uitdatabank_typesWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringNullableFilter<"uitdatabank_types"> | string | null
   cdb_cat_id?: Prisma.StringNullableFilter<"uitdatabank_types"> | string | null
   production?: Prisma.ProductionListRelationFilter
-}, "id">
+}, "id" | "apiId">
 
 export type uitdatabank_typesOrderByWithAggregationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   cdb_cat_id?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.uitdatabank_typesCountOrderByAggregateInput
@@ -224,6 +235,7 @@ export type uitdatabank_typesScalarWhereWithAggregatesInput = {
   created_at?: Prisma.DateTimeWithAggregatesFilter<"uitdatabank_types"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"uitdatabank_types"> | Date | string
   id?: Prisma.UuidWithAggregatesFilter<"uitdatabank_types"> | string
+  apiId?: Prisma.StringNullableWithAggregatesFilter<"uitdatabank_types"> | string | null
   name?: Prisma.StringNullableWithAggregatesFilter<"uitdatabank_types"> | string | null
   cdb_cat_id?: Prisma.StringNullableWithAggregatesFilter<"uitdatabank_types"> | string | null
 }
@@ -232,6 +244,7 @@ export type uitdatabank_typesCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
   cdb_cat_id?: string | null
   production?: Prisma.productionCreateNestedManyWithoutUitdatabank_typesInput
@@ -241,6 +254,7 @@ export type uitdatabank_typesUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
   cdb_cat_id?: string | null
   production?: Prisma.productionUncheckedCreateNestedManyWithoutUitdatabank_typesInput
@@ -250,6 +264,7 @@ export type uitdatabank_typesUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cdb_cat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   production?: Prisma.productionUpdateManyWithoutUitdatabank_typesNestedInput
@@ -259,6 +274,7 @@ export type uitdatabank_typesUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cdb_cat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   production?: Prisma.productionUncheckedUpdateManyWithoutUitdatabank_typesNestedInput
@@ -268,6 +284,7 @@ export type uitdatabank_typesCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
   cdb_cat_id?: string | null
 }
@@ -276,6 +293,7 @@ export type uitdatabank_typesUpdateManyMutationInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cdb_cat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -284,6 +302,7 @@ export type uitdatabank_typesUncheckedUpdateManyInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cdb_cat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -297,6 +316,7 @@ export type uitdatabank_typesCountOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   cdb_cat_id?: Prisma.SortOrder
 }
@@ -305,6 +325,7 @@ export type uitdatabank_typesMaxOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   cdb_cat_id?: Prisma.SortOrder
 }
@@ -313,6 +334,7 @@ export type uitdatabank_typesMinOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   cdb_cat_id?: Prisma.SortOrder
 }
@@ -337,6 +359,7 @@ export type uitdatabank_typesCreateWithoutProductionInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
   cdb_cat_id?: string | null
 }
@@ -345,6 +368,7 @@ export type uitdatabank_typesUncheckedCreateWithoutProductionInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
   cdb_cat_id?: string | null
 }
@@ -369,6 +393,7 @@ export type uitdatabank_typesUpdateWithoutProductionInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cdb_cat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -377,6 +402,7 @@ export type uitdatabank_typesUncheckedUpdateWithoutProductionInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cdb_cat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -416,6 +442,7 @@ export type uitdatabank_typesSelect<ExtArgs extends runtime.Types.Extensions.Int
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   name?: boolean
   cdb_cat_id?: boolean
   production?: boolean | Prisma.uitdatabank_types$productionArgs<ExtArgs>
@@ -426,6 +453,7 @@ export type uitdatabank_typesSelectCreateManyAndReturn<ExtArgs extends runtime.T
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   name?: boolean
   cdb_cat_id?: boolean
 }, ExtArgs["result"]["uitdatabank_types"]>
@@ -434,6 +462,7 @@ export type uitdatabank_typesSelectUpdateManyAndReturn<ExtArgs extends runtime.T
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   name?: boolean
   cdb_cat_id?: boolean
 }, ExtArgs["result"]["uitdatabank_types"]>
@@ -442,11 +471,12 @@ export type uitdatabank_typesSelectScalar = {
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   name?: boolean
   cdb_cat_id?: boolean
 }
 
-export type uitdatabank_typesOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "name" | "cdb_cat_id", ExtArgs["result"]["uitdatabank_types"]>
+export type uitdatabank_typesOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "apiId" | "name" | "cdb_cat_id", ExtArgs["result"]["uitdatabank_types"]>
 export type uitdatabank_typesInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   production?: boolean | Prisma.uitdatabank_types$productionArgs<ExtArgs>
   _count?: boolean | Prisma.Uitdatabank_typesCountOutputTypeDefaultArgs<ExtArgs>
@@ -463,6 +493,7 @@ export type $uitdatabank_typesPayload<ExtArgs extends runtime.Types.Extensions.I
     created_at: Date
     updated_at: Date
     id: string
+    apiId: string | null
     name: string | null
     cdb_cat_id: string | null
   }, ExtArgs["result"]["uitdatabank_types"]>
@@ -892,6 +923,7 @@ export interface uitdatabank_typesFieldRefs {
   readonly created_at: Prisma.FieldRef<"uitdatabank_types", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"uitdatabank_types", 'DateTime'>
   readonly id: Prisma.FieldRef<"uitdatabank_types", 'String'>
+  readonly apiId: Prisma.FieldRef<"uitdatabank_types", 'String'>
   readonly name: Prisma.FieldRef<"uitdatabank_types", 'String'>
   readonly cdb_cat_id: Prisma.FieldRef<"uitdatabank_types", 'String'>
 }

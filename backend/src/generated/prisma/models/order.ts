@@ -28,6 +28,7 @@ export type OrderMinAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   ordered_at: Date | null
   total_amount: string | null
   box_office_id: string | null
@@ -39,6 +40,7 @@ export type OrderMaxAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   ordered_at: Date | null
   total_amount: string | null
   box_office_id: string | null
@@ -50,6 +52,7 @@ export type OrderCountAggregateOutputType = {
   created_at: number
   updated_at: number
   id: number
+  apiId: number
   ordered_at: number
   total_amount: number
   box_office_id: number
@@ -63,6 +66,7 @@ export type OrderMinAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   ordered_at?: true
   total_amount?: true
   box_office_id?: true
@@ -74,6 +78,7 @@ export type OrderMaxAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   ordered_at?: true
   total_amount?: true
   box_office_id?: true
@@ -85,6 +90,7 @@ export type OrderCountAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   ordered_at?: true
   total_amount?: true
   box_office_id?: true
@@ -169,6 +175,7 @@ export type OrderGroupByOutputType = {
   created_at: Date
   updated_at: Date
   id: string
+  apiId: string | null
   ordered_at: Date | null
   total_amount: string | null
   box_office_id: string | null
@@ -201,6 +208,7 @@ export type orderWhereInput = {
   created_at?: Prisma.DateTimeFilter<"order"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"order"> | Date | string
   id?: Prisma.UuidFilter<"order"> | string
+  apiId?: Prisma.StringNullableFilter<"order"> | string | null
   ordered_at?: Prisma.DateTimeNullableFilter<"order"> | Date | string | null
   total_amount?: Prisma.StringNullableFilter<"order"> | string | null
   box_office_id?: Prisma.StringNullableFilter<"order"> | string | null
@@ -216,6 +224,7 @@ export type orderOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   ordered_at?: Prisma.SortOrderInput | Prisma.SortOrder
   total_amount?: Prisma.SortOrderInput | Prisma.SortOrder
   box_office_id?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -229,6 +238,7 @@ export type orderOrderByWithRelationInput = {
 
 export type orderWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  apiId?: string
   AND?: Prisma.orderWhereInput | Prisma.orderWhereInput[]
   OR?: Prisma.orderWhereInput[]
   NOT?: Prisma.orderWhereInput | Prisma.orderWhereInput[]
@@ -243,12 +253,13 @@ export type orderWhereUniqueInput = Prisma.AtLeast<{
   visitor?: Prisma.XOR<Prisma.VisitorNullableScalarRelationFilter, Prisma.visitorWhereInput> | null
   ordertickets?: Prisma.OrderticketListRelationFilter
   tickets?: Prisma.TicketListRelationFilter
-}, "id">
+}, "id" | "apiId">
 
 export type orderOrderByWithAggregationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   ordered_at?: Prisma.SortOrderInput | Prisma.SortOrder
   total_amount?: Prisma.SortOrderInput | Prisma.SortOrder
   box_office_id?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -266,6 +277,7 @@ export type orderScalarWhereWithAggregatesInput = {
   created_at?: Prisma.DateTimeWithAggregatesFilter<"order"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"order"> | Date | string
   id?: Prisma.UuidWithAggregatesFilter<"order"> | string
+  apiId?: Prisma.StringNullableWithAggregatesFilter<"order"> | string | null
   ordered_at?: Prisma.DateTimeNullableWithAggregatesFilter<"order"> | Date | string | null
   total_amount?: Prisma.StringNullableWithAggregatesFilter<"order"> | string | null
   box_office_id?: Prisma.StringNullableWithAggregatesFilter<"order"> | string | null
@@ -277,6 +289,7 @@ export type orderCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   ordered_at?: Date | string | null
   total_amount?: string | null
   box_office_id?: string | null
@@ -291,6 +304,7 @@ export type orderUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   ordered_at?: Date | string | null
   total_amount?: string | null
   box_office_id?: string | null
@@ -305,6 +319,7 @@ export type orderUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ordered_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   total_amount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -319,6 +334,7 @@ export type orderUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ordered_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   total_amount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -333,6 +349,7 @@ export type orderCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   ordered_at?: Date | string | null
   total_amount?: string | null
   box_office_id?: string | null
@@ -344,6 +361,7 @@ export type orderUpdateManyMutationInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ordered_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   total_amount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -354,6 +372,7 @@ export type orderUncheckedUpdateManyInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ordered_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   total_amount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -370,6 +389,7 @@ export type orderCountOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   ordered_at?: Prisma.SortOrder
   total_amount?: Prisma.SortOrder
   box_office_id?: Prisma.SortOrder
@@ -381,6 +401,7 @@ export type orderMaxOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   ordered_at?: Prisma.SortOrder
   total_amount?: Prisma.SortOrder
   box_office_id?: Prisma.SortOrder
@@ -392,6 +413,7 @@ export type orderMinOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   ordered_at?: Prisma.SortOrder
   total_amount?: Prisma.SortOrder
   box_office_id?: Prisma.SortOrder
@@ -503,6 +525,7 @@ export type orderCreateWithoutCrosssellsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   ordered_at?: Date | string | null
   total_amount?: string | null
   box_office_id?: string | null
@@ -516,6 +539,7 @@ export type orderUncheckedCreateWithoutCrosssellsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   ordered_at?: Date | string | null
   total_amount?: string | null
   box_office_id?: string | null
@@ -545,6 +569,7 @@ export type orderUpdateWithoutCrosssellsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ordered_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   total_amount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -558,6 +583,7 @@ export type orderUncheckedUpdateWithoutCrosssellsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ordered_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   total_amount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -571,6 +597,7 @@ export type orderCreateWithoutOrderticketsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   ordered_at?: Date | string | null
   total_amount?: string | null
   box_office_id?: string | null
@@ -584,6 +611,7 @@ export type orderUncheckedCreateWithoutOrderticketsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   ordered_at?: Date | string | null
   total_amount?: string | null
   box_office_id?: string | null
@@ -613,6 +641,7 @@ export type orderUpdateWithoutOrderticketsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ordered_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   total_amount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -626,6 +655,7 @@ export type orderUncheckedUpdateWithoutOrderticketsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ordered_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   total_amount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -639,6 +669,7 @@ export type orderCreateWithoutTicketsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   ordered_at?: Date | string | null
   total_amount?: string | null
   box_office_id?: string | null
@@ -652,6 +683,7 @@ export type orderUncheckedCreateWithoutTicketsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   ordered_at?: Date | string | null
   total_amount?: string | null
   box_office_id?: string | null
@@ -681,6 +713,7 @@ export type orderUpdateWithoutTicketsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ordered_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   total_amount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -694,6 +727,7 @@ export type orderUncheckedUpdateWithoutTicketsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ordered_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   total_amount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -707,6 +741,7 @@ export type orderCreateWithoutVisitorInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   ordered_at?: Date | string | null
   total_amount?: string | null
   box_office_id?: string | null
@@ -720,6 +755,7 @@ export type orderUncheckedCreateWithoutVisitorInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   ordered_at?: Date | string | null
   total_amount?: string | null
   box_office_id?: string | null
@@ -762,6 +798,7 @@ export type orderScalarWhereInput = {
   created_at?: Prisma.DateTimeFilter<"order"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"order"> | Date | string
   id?: Prisma.UuidFilter<"order"> | string
+  apiId?: Prisma.StringNullableFilter<"order"> | string | null
   ordered_at?: Prisma.DateTimeNullableFilter<"order"> | Date | string | null
   total_amount?: Prisma.StringNullableFilter<"order"> | string | null
   box_office_id?: Prisma.StringNullableFilter<"order"> | string | null
@@ -773,6 +810,7 @@ export type orderCreateManyVisitorInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   ordered_at?: Date | string | null
   total_amount?: string | null
   box_office_id?: string | null
@@ -783,6 +821,7 @@ export type orderUpdateWithoutVisitorInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ordered_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   total_amount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -796,6 +835,7 @@ export type orderUncheckedUpdateWithoutVisitorInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ordered_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   total_amount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -809,6 +849,7 @@ export type orderUncheckedUpdateManyWithoutVisitorInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ordered_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   total_amount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -868,6 +909,7 @@ export type orderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   ordered_at?: boolean
   total_amount?: boolean
   box_office_id?: boolean
@@ -884,6 +926,7 @@ export type orderSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   ordered_at?: boolean
   total_amount?: boolean
   box_office_id?: boolean
@@ -896,6 +939,7 @@ export type orderSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   ordered_at?: boolean
   total_amount?: boolean
   box_office_id?: boolean
@@ -908,6 +952,7 @@ export type orderSelectScalar = {
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   ordered_at?: boolean
   total_amount?: boolean
   box_office_id?: boolean
@@ -915,7 +960,7 @@ export type orderSelectScalar = {
   publiq_statistical_sector_id?: boolean
 }
 
-export type orderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "ordered_at" | "total_amount" | "box_office_id" | "visitor_id" | "publiq_statistical_sector_id", ExtArgs["result"]["order"]>
+export type orderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "apiId" | "ordered_at" | "total_amount" | "box_office_id" | "visitor_id" | "publiq_statistical_sector_id", ExtArgs["result"]["order"]>
 export type orderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   crosssells?: boolean | Prisma.order$crosssellsArgs<ExtArgs>
   visitor?: boolean | Prisma.order$visitorArgs<ExtArgs>
@@ -942,6 +987,7 @@ export type $orderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     created_at: Date
     updated_at: Date
     id: string
+    apiId: string | null
     ordered_at: Date | null
     total_amount: string | null
     box_office_id: string | null
@@ -1377,6 +1423,7 @@ export interface orderFieldRefs {
   readonly created_at: Prisma.FieldRef<"order", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"order", 'DateTime'>
   readonly id: Prisma.FieldRef<"order", 'String'>
+  readonly apiId: Prisma.FieldRef<"order", 'String'>
   readonly ordered_at: Prisma.FieldRef<"order", 'DateTime'>
   readonly total_amount: Prisma.FieldRef<"order", 'String'>
   readonly box_office_id: Prisma.FieldRef<"order", 'String'>

@@ -28,6 +28,7 @@ export type VisitorMinAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   box_office_id: string | null
   optins_chosen: boolean | null
   optins_skipped_at: Date | null
@@ -37,6 +38,7 @@ export type VisitorMaxAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   box_office_id: string | null
   optins_chosen: boolean | null
   optins_skipped_at: Date | null
@@ -46,6 +48,7 @@ export type VisitorCountAggregateOutputType = {
   created_at: number
   updated_at: number
   id: number
+  apiId: number
   box_office_id: number
   optins_chosen: number
   optins_skipped_at: number
@@ -57,6 +60,7 @@ export type VisitorMinAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   box_office_id?: true
   optins_chosen?: true
   optins_skipped_at?: true
@@ -66,6 +70,7 @@ export type VisitorMaxAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   box_office_id?: true
   optins_chosen?: true
   optins_skipped_at?: true
@@ -75,6 +80,7 @@ export type VisitorCountAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   box_office_id?: true
   optins_chosen?: true
   optins_skipped_at?: true
@@ -157,6 +163,7 @@ export type VisitorGroupByOutputType = {
   created_at: Date
   updated_at: Date
   id: string
+  apiId: string | null
   box_office_id: string | null
   optins_chosen: boolean | null
   optins_skipped_at: Date | null
@@ -187,6 +194,7 @@ export type visitorWhereInput = {
   created_at?: Prisma.DateTimeFilter<"visitor"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"visitor"> | Date | string
   id?: Prisma.UuidFilter<"visitor"> | string
+  apiId?: Prisma.StringNullableFilter<"visitor"> | string | null
   box_office_id?: Prisma.StringNullableFilter<"visitor"> | string | null
   optins_chosen?: Prisma.BoolNullableFilter<"visitor"> | boolean | null
   optins_skipped_at?: Prisma.DateTimeNullableFilter<"visitor"> | Date | string | null
@@ -199,6 +207,7 @@ export type visitorOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   box_office_id?: Prisma.SortOrderInput | Prisma.SortOrder
   optins_chosen?: Prisma.SortOrderInput | Prisma.SortOrder
   optins_skipped_at?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -209,6 +218,7 @@ export type visitorOrderByWithRelationInput = {
 
 export type visitorWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  apiId?: string
   AND?: Prisma.visitorWhereInput | Prisma.visitorWhereInput[]
   OR?: Prisma.visitorWhereInput[]
   NOT?: Prisma.visitorWhereInput | Prisma.visitorWhereInput[]
@@ -220,12 +230,13 @@ export type visitorWhereUniqueInput = Prisma.AtLeast<{
   orders?: Prisma.OrderListRelationFilter
   user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.userWhereInput> | null
   visitor_tags?: Prisma.Visitor_tagsListRelationFilter
-}, "id">
+}, "id" | "apiId">
 
 export type visitorOrderByWithAggregationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   box_office_id?: Prisma.SortOrderInput | Prisma.SortOrder
   optins_chosen?: Prisma.SortOrderInput | Prisma.SortOrder
   optins_skipped_at?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -241,6 +252,7 @@ export type visitorScalarWhereWithAggregatesInput = {
   created_at?: Prisma.DateTimeWithAggregatesFilter<"visitor"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"visitor"> | Date | string
   id?: Prisma.UuidWithAggregatesFilter<"visitor"> | string
+  apiId?: Prisma.StringNullableWithAggregatesFilter<"visitor"> | string | null
   box_office_id?: Prisma.StringNullableWithAggregatesFilter<"visitor"> | string | null
   optins_chosen?: Prisma.BoolNullableWithAggregatesFilter<"visitor"> | boolean | null
   optins_skipped_at?: Prisma.DateTimeNullableWithAggregatesFilter<"visitor"> | Date | string | null
@@ -250,6 +262,7 @@ export type visitorCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   box_office_id?: string | null
   optins_chosen?: boolean | null
   optins_skipped_at?: Date | string | null
@@ -262,6 +275,7 @@ export type visitorUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   box_office_id?: string | null
   optins_chosen?: boolean | null
   optins_skipped_at?: Date | string | null
@@ -274,6 +288,7 @@ export type visitorUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   optins_chosen?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   optins_skipped_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -286,6 +301,7 @@ export type visitorUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   optins_chosen?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   optins_skipped_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -298,6 +314,7 @@ export type visitorCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   box_office_id?: string | null
   optins_chosen?: boolean | null
   optins_skipped_at?: Date | string | null
@@ -307,6 +324,7 @@ export type visitorUpdateManyMutationInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   optins_chosen?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   optins_skipped_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -316,6 +334,7 @@ export type visitorUncheckedUpdateManyInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   optins_chosen?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   optins_skipped_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -330,6 +349,7 @@ export type visitorCountOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   box_office_id?: Prisma.SortOrder
   optins_chosen?: Prisma.SortOrder
   optins_skipped_at?: Prisma.SortOrder
@@ -339,6 +359,7 @@ export type visitorMaxOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   box_office_id?: Prisma.SortOrder
   optins_chosen?: Prisma.SortOrder
   optins_skipped_at?: Prisma.SortOrder
@@ -348,6 +369,7 @@ export type visitorMinOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   box_office_id?: Prisma.SortOrder
   optins_chosen?: Prisma.SortOrder
   optins_skipped_at?: Prisma.SortOrder
@@ -405,6 +427,7 @@ export type visitorCreateWithoutOrdersInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   box_office_id?: string | null
   optins_chosen?: boolean | null
   optins_skipped_at?: Date | string | null
@@ -416,6 +439,7 @@ export type visitorUncheckedCreateWithoutOrdersInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   box_office_id?: string | null
   optins_chosen?: boolean | null
   optins_skipped_at?: Date | string | null
@@ -443,6 +467,7 @@ export type visitorUpdateWithoutOrdersInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   optins_chosen?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   optins_skipped_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -454,6 +479,7 @@ export type visitorUncheckedUpdateWithoutOrdersInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   optins_chosen?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   optins_skipped_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -465,6 +491,7 @@ export type visitorCreateWithoutUserInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   box_office_id?: string | null
   optins_chosen?: boolean | null
   optins_skipped_at?: Date | string | null
@@ -476,6 +503,7 @@ export type visitorUncheckedCreateWithoutUserInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   box_office_id?: string | null
   optins_chosen?: boolean | null
   optins_skipped_at?: Date | string | null
@@ -503,6 +531,7 @@ export type visitorUpdateWithoutUserInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   optins_chosen?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   optins_skipped_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -514,6 +543,7 @@ export type visitorUncheckedUpdateWithoutUserInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   optins_chosen?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   optins_skipped_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -525,6 +555,7 @@ export type visitorCreateWithoutVisitor_tagsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   box_office_id?: string | null
   optins_chosen?: boolean | null
   optins_skipped_at?: Date | string | null
@@ -536,6 +567,7 @@ export type visitorUncheckedCreateWithoutVisitor_tagsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   box_office_id?: string | null
   optins_chosen?: boolean | null
   optins_skipped_at?: Date | string | null
@@ -563,6 +595,7 @@ export type visitorUpdateWithoutVisitor_tagsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   optins_chosen?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   optins_skipped_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -574,6 +607,7 @@ export type visitorUncheckedUpdateWithoutVisitor_tagsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   optins_chosen?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   optins_skipped_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -625,6 +659,7 @@ export type visitorSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   box_office_id?: boolean
   optins_chosen?: boolean
   optins_skipped_at?: boolean
@@ -638,6 +673,7 @@ export type visitorSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   box_office_id?: boolean
   optins_chosen?: boolean
   optins_skipped_at?: boolean
@@ -647,6 +683,7 @@ export type visitorSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   box_office_id?: boolean
   optins_chosen?: boolean
   optins_skipped_at?: boolean
@@ -656,12 +693,13 @@ export type visitorSelectScalar = {
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   box_office_id?: boolean
   optins_chosen?: boolean
   optins_skipped_at?: boolean
 }
 
-export type visitorOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "box_office_id" | "optins_chosen" | "optins_skipped_at", ExtArgs["result"]["visitor"]>
+export type visitorOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "apiId" | "box_office_id" | "optins_chosen" | "optins_skipped_at", ExtArgs["result"]["visitor"]>
 export type visitorInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   orders?: boolean | Prisma.visitor$ordersArgs<ExtArgs>
   user?: boolean | Prisma.visitor$userArgs<ExtArgs>
@@ -682,6 +720,7 @@ export type $visitorPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     created_at: Date
     updated_at: Date
     id: string
+    apiId: string | null
     box_office_id: string | null
     optins_chosen: boolean | null
     optins_skipped_at: Date | null
@@ -1114,6 +1153,7 @@ export interface visitorFieldRefs {
   readonly created_at: Prisma.FieldRef<"visitor", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"visitor", 'DateTime'>
   readonly id: Prisma.FieldRef<"visitor", 'String'>
+  readonly apiId: Prisma.FieldRef<"visitor", 'String'>
   readonly box_office_id: Prisma.FieldRef<"visitor", 'String'>
   readonly optins_chosen: Prisma.FieldRef<"visitor", 'Boolean'>
   readonly optins_skipped_at: Prisma.FieldRef<"visitor", 'DateTime'>

@@ -28,6 +28,7 @@ export type Uitdatabank_keywordsMinAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   name: string | null
 }
 
@@ -35,6 +36,7 @@ export type Uitdatabank_keywordsMaxAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   name: string | null
 }
 
@@ -42,6 +44,7 @@ export type Uitdatabank_keywordsCountAggregateOutputType = {
   created_at: number
   updated_at: number
   id: number
+  apiId: number
   name: number
   _all: number
 }
@@ -51,6 +54,7 @@ export type Uitdatabank_keywordsMinAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   name?: true
 }
 
@@ -58,6 +62,7 @@ export type Uitdatabank_keywordsMaxAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   name?: true
 }
 
@@ -65,6 +70,7 @@ export type Uitdatabank_keywordsCountAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   name?: true
   _all?: true
 }
@@ -145,6 +151,7 @@ export type Uitdatabank_keywordsGroupByOutputType = {
   created_at: Date
   updated_at: Date
   id: string
+  apiId: string | null
   name: string | null
   _count: Uitdatabank_keywordsCountAggregateOutputType | null
   _min: Uitdatabank_keywordsMinAggregateOutputType | null
@@ -173,6 +180,7 @@ export type uitdatabank_keywordsWhereInput = {
   created_at?: Prisma.DateTimeFilter<"uitdatabank_keywords"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"uitdatabank_keywords"> | Date | string
   id?: Prisma.UuidFilter<"uitdatabank_keywords"> | string
+  apiId?: Prisma.StringNullableFilter<"uitdatabank_keywords"> | string | null
   name?: Prisma.StringNullableFilter<"uitdatabank_keywords"> | string | null
   uit_keywords_productions?: Prisma.Uit_keywords_productionsListRelationFilter
 }
@@ -181,12 +189,14 @@ export type uitdatabank_keywordsOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   uit_keywords_productions?: Prisma.uit_keywords_productionsOrderByRelationAggregateInput
 }
 
 export type uitdatabank_keywordsWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  apiId?: string
   AND?: Prisma.uitdatabank_keywordsWhereInput | Prisma.uitdatabank_keywordsWhereInput[]
   OR?: Prisma.uitdatabank_keywordsWhereInput[]
   NOT?: Prisma.uitdatabank_keywordsWhereInput | Prisma.uitdatabank_keywordsWhereInput[]
@@ -194,12 +204,13 @@ export type uitdatabank_keywordsWhereUniqueInput = Prisma.AtLeast<{
   updated_at?: Prisma.DateTimeFilter<"uitdatabank_keywords"> | Date | string
   name?: Prisma.StringNullableFilter<"uitdatabank_keywords"> | string | null
   uit_keywords_productions?: Prisma.Uit_keywords_productionsListRelationFilter
-}, "id">
+}, "id" | "apiId">
 
 export type uitdatabank_keywordsOrderByWithAggregationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.uitdatabank_keywordsCountOrderByAggregateInput
   _max?: Prisma.uitdatabank_keywordsMaxOrderByAggregateInput
@@ -213,6 +224,7 @@ export type uitdatabank_keywordsScalarWhereWithAggregatesInput = {
   created_at?: Prisma.DateTimeWithAggregatesFilter<"uitdatabank_keywords"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"uitdatabank_keywords"> | Date | string
   id?: Prisma.UuidWithAggregatesFilter<"uitdatabank_keywords"> | string
+  apiId?: Prisma.StringNullableWithAggregatesFilter<"uitdatabank_keywords"> | string | null
   name?: Prisma.StringNullableWithAggregatesFilter<"uitdatabank_keywords"> | string | null
 }
 
@@ -220,6 +232,7 @@ export type uitdatabank_keywordsCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
   uit_keywords_productions?: Prisma.uit_keywords_productionsCreateNestedManyWithoutUitdatabank_keywordsInput
 }
@@ -228,6 +241,7 @@ export type uitdatabank_keywordsUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
   uit_keywords_productions?: Prisma.uit_keywords_productionsUncheckedCreateNestedManyWithoutUitdatabank_keywordsInput
 }
@@ -236,6 +250,7 @@ export type uitdatabank_keywordsUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uit_keywords_productions?: Prisma.uit_keywords_productionsUpdateManyWithoutUitdatabank_keywordsNestedInput
 }
@@ -244,6 +259,7 @@ export type uitdatabank_keywordsUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uit_keywords_productions?: Prisma.uit_keywords_productionsUncheckedUpdateManyWithoutUitdatabank_keywordsNestedInput
 }
@@ -252,6 +268,7 @@ export type uitdatabank_keywordsCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
 }
 
@@ -259,6 +276,7 @@ export type uitdatabank_keywordsUpdateManyMutationInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -266,6 +284,7 @@ export type uitdatabank_keywordsUncheckedUpdateManyInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -278,6 +297,7 @@ export type uitdatabank_keywordsCountOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   name?: Prisma.SortOrder
 }
 
@@ -285,6 +305,7 @@ export type uitdatabank_keywordsMaxOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   name?: Prisma.SortOrder
 }
 
@@ -292,6 +313,7 @@ export type uitdatabank_keywordsMinOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   name?: Prisma.SortOrder
 }
 
@@ -313,6 +335,7 @@ export type uitdatabank_keywordsCreateWithoutUit_keywords_productionsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
 }
 
@@ -320,6 +343,7 @@ export type uitdatabank_keywordsUncheckedCreateWithoutUit_keywords_productionsIn
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
 }
 
@@ -343,6 +367,7 @@ export type uitdatabank_keywordsUpdateWithoutUit_keywords_productionsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -350,6 +375,7 @@ export type uitdatabank_keywordsUncheckedUpdateWithoutUit_keywords_productionsIn
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -388,6 +414,7 @@ export type uitdatabank_keywordsSelect<ExtArgs extends runtime.Types.Extensions.
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   name?: boolean
   uit_keywords_productions?: boolean | Prisma.uitdatabank_keywords$uit_keywords_productionsArgs<ExtArgs>
   _count?: boolean | Prisma.Uitdatabank_keywordsCountOutputTypeDefaultArgs<ExtArgs>
@@ -397,6 +424,7 @@ export type uitdatabank_keywordsSelectCreateManyAndReturn<ExtArgs extends runtim
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   name?: boolean
 }, ExtArgs["result"]["uitdatabank_keywords"]>
 
@@ -404,6 +432,7 @@ export type uitdatabank_keywordsSelectUpdateManyAndReturn<ExtArgs extends runtim
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   name?: boolean
 }, ExtArgs["result"]["uitdatabank_keywords"]>
 
@@ -411,10 +440,11 @@ export type uitdatabank_keywordsSelectScalar = {
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   name?: boolean
 }
 
-export type uitdatabank_keywordsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "name", ExtArgs["result"]["uitdatabank_keywords"]>
+export type uitdatabank_keywordsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "apiId" | "name", ExtArgs["result"]["uitdatabank_keywords"]>
 export type uitdatabank_keywordsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   uit_keywords_productions?: boolean | Prisma.uitdatabank_keywords$uit_keywords_productionsArgs<ExtArgs>
   _count?: boolean | Prisma.Uitdatabank_keywordsCountOutputTypeDefaultArgs<ExtArgs>
@@ -431,6 +461,7 @@ export type $uitdatabank_keywordsPayload<ExtArgs extends runtime.Types.Extension
     created_at: Date
     updated_at: Date
     id: string
+    apiId: string | null
     name: string | null
   }, ExtArgs["result"]["uitdatabank_keywords"]>
   composites: {}
@@ -859,6 +890,7 @@ export interface uitdatabank_keywordsFieldRefs {
   readonly created_at: Prisma.FieldRef<"uitdatabank_keywords", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"uitdatabank_keywords", 'DateTime'>
   readonly id: Prisma.FieldRef<"uitdatabank_keywords", 'String'>
+  readonly apiId: Prisma.FieldRef<"uitdatabank_keywords", 'String'>
   readonly name: Prisma.FieldRef<"uitdatabank_keywords", 'String'>
 }
     

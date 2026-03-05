@@ -28,6 +28,7 @@ export type CropMinAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   name: string | null
   url: string | null
 }
@@ -36,6 +37,7 @@ export type CropMaxAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   name: string | null
   url: string | null
 }
@@ -44,6 +46,7 @@ export type CropCountAggregateOutputType = {
   created_at: number
   updated_at: number
   id: number
+  apiId: number
   name: number
   url: number
   _all: number
@@ -54,6 +57,7 @@ export type CropMinAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   name?: true
   url?: true
 }
@@ -62,6 +66,7 @@ export type CropMaxAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   name?: true
   url?: true
 }
@@ -70,6 +75,7 @@ export type CropCountAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   name?: true
   url?: true
   _all?: true
@@ -151,6 +157,7 @@ export type CropGroupByOutputType = {
   created_at: Date
   updated_at: Date
   id: string
+  apiId: string | null
   name: string | null
   url: string | null
   _count: CropCountAggregateOutputType | null
@@ -180,6 +187,7 @@ export type cropWhereInput = {
   created_at?: Prisma.DateTimeFilter<"crop"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"crop"> | Date | string
   id?: Prisma.UuidFilter<"crop"> | string
+  apiId?: Prisma.StringNullableFilter<"crop"> | string | null
   name?: Prisma.StringNullableFilter<"crop"> | string | null
   url?: Prisma.StringNullableFilter<"crop"> | string | null
   item?: Prisma.ItemListRelationFilter
@@ -189,6 +197,7 @@ export type cropOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   url?: Prisma.SortOrderInput | Prisma.SortOrder
   item?: Prisma.itemOrderByRelationAggregateInput
@@ -196,6 +205,7 @@ export type cropOrderByWithRelationInput = {
 
 export type cropWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  apiId?: string
   AND?: Prisma.cropWhereInput | Prisma.cropWhereInput[]
   OR?: Prisma.cropWhereInput[]
   NOT?: Prisma.cropWhereInput | Prisma.cropWhereInput[]
@@ -204,12 +214,13 @@ export type cropWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringNullableFilter<"crop"> | string | null
   url?: Prisma.StringNullableFilter<"crop"> | string | null
   item?: Prisma.ItemListRelationFilter
-}, "id">
+}, "id" | "apiId">
 
 export type cropOrderByWithAggregationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   url?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.cropCountOrderByAggregateInput
@@ -224,6 +235,7 @@ export type cropScalarWhereWithAggregatesInput = {
   created_at?: Prisma.DateTimeWithAggregatesFilter<"crop"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"crop"> | Date | string
   id?: Prisma.UuidWithAggregatesFilter<"crop"> | string
+  apiId?: Prisma.StringNullableWithAggregatesFilter<"crop"> | string | null
   name?: Prisma.StringNullableWithAggregatesFilter<"crop"> | string | null
   url?: Prisma.StringNullableWithAggregatesFilter<"crop"> | string | null
 }
@@ -232,6 +244,7 @@ export type cropCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
   url?: string | null
   item?: Prisma.itemCreateNestedManyWithoutCropInput
@@ -241,6 +254,7 @@ export type cropUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
   url?: string | null
   item?: Prisma.itemUncheckedCreateNestedManyWithoutCropInput
@@ -250,6 +264,7 @@ export type cropUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   item?: Prisma.itemUpdateManyWithoutCropNestedInput
@@ -259,6 +274,7 @@ export type cropUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   item?: Prisma.itemUncheckedUpdateManyWithoutCropNestedInput
@@ -268,6 +284,7 @@ export type cropCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
   url?: string | null
 }
@@ -276,6 +293,7 @@ export type cropUpdateManyMutationInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -284,6 +302,7 @@ export type cropUncheckedUpdateManyInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -292,6 +311,7 @@ export type cropCountOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   url?: Prisma.SortOrder
 }
@@ -300,6 +320,7 @@ export type cropMaxOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   url?: Prisma.SortOrder
 }
@@ -308,6 +329,7 @@ export type cropMinOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   url?: Prisma.SortOrder
 }
@@ -349,6 +371,7 @@ export type cropCreateWithoutItemInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
   url?: string | null
 }
@@ -357,6 +380,7 @@ export type cropUncheckedCreateWithoutItemInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   name?: string | null
   url?: string | null
 }
@@ -381,6 +405,7 @@ export type cropUpdateWithoutItemInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -389,6 +414,7 @@ export type cropUncheckedUpdateWithoutItemInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -428,6 +454,7 @@ export type cropSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   name?: boolean
   url?: boolean
   item?: boolean | Prisma.crop$itemArgs<ExtArgs>
@@ -438,6 +465,7 @@ export type cropSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   name?: boolean
   url?: boolean
 }, ExtArgs["result"]["crop"]>
@@ -446,6 +474,7 @@ export type cropSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   name?: boolean
   url?: boolean
 }, ExtArgs["result"]["crop"]>
@@ -454,11 +483,12 @@ export type cropSelectScalar = {
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   name?: boolean
   url?: boolean
 }
 
-export type cropOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "name" | "url", ExtArgs["result"]["crop"]>
+export type cropOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "apiId" | "name" | "url", ExtArgs["result"]["crop"]>
 export type cropInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   item?: boolean | Prisma.crop$itemArgs<ExtArgs>
   _count?: boolean | Prisma.CropCountOutputTypeDefaultArgs<ExtArgs>
@@ -475,6 +505,7 @@ export type $cropPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     created_at: Date
     updated_at: Date
     id: string
+    apiId: string | null
     name: string | null
     url: string | null
   }, ExtArgs["result"]["crop"]>
@@ -904,6 +935,7 @@ export interface cropFieldRefs {
   readonly created_at: Prisma.FieldRef<"crop", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"crop", 'DateTime'>
   readonly id: Prisma.FieldRef<"crop", 'String'>
+  readonly apiId: Prisma.FieldRef<"crop", 'String'>
   readonly name: Prisma.FieldRef<"crop", 'String'>
   readonly url: Prisma.FieldRef<"crop", 'String'>
 }

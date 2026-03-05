@@ -38,6 +38,7 @@ export type TagMinAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   source: string | null
   sourcetype: string | null
   enable: string | null
@@ -53,6 +54,7 @@ export type TagMaxAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   source: string | null
   sourcetype: string | null
   enable: string | null
@@ -68,6 +70,7 @@ export type TagCountAggregateOutputType = {
   created_at: number
   updated_at: number
   id: number
+  apiId: number
   source: number
   sourcetype: number
   enable: number
@@ -96,6 +99,7 @@ export type TagMinAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   source?: true
   sourcetype?: true
   enable?: true
@@ -111,6 +115,7 @@ export type TagMaxAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   source?: true
   sourcetype?: true
   enable?: true
@@ -126,6 +131,7 @@ export type TagCountAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   source?: true
   sourcetype?: true
   enable?: true
@@ -231,6 +237,7 @@ export type TagGroupByOutputType = {
   created_at: Date
   updated_at: Date
   id: string
+  apiId: string | null
   source: string | null
   sourcetype: string | null
   enable: string | null
@@ -272,6 +279,7 @@ export type tagWhereInput = {
   created_at?: Prisma.DateTimeFilter<"tag"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"tag"> | Date | string
   id?: Prisma.UuidFilter<"tag"> | string
+  apiId?: Prisma.StringNullableFilter<"tag"> | string | null
   source?: Prisma.StringNullableFilter<"tag"> | string | null
   sourcetype?: Prisma.StringNullableFilter<"tag"> | string | null
   enable?: Prisma.StringNullableFilter<"tag"> | string | null
@@ -292,6 +300,7 @@ export type tagOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   source?: Prisma.SortOrderInput | Prisma.SortOrder
   sourcetype?: Prisma.SortOrderInput | Prisma.SortOrder
   enable?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -310,6 +319,7 @@ export type tagOrderByWithRelationInput = {
 
 export type tagWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  apiId?: string
   AND?: Prisma.tagWhereInput | Prisma.tagWhereInput[]
   OR?: Prisma.tagWhereInput[]
   NOT?: Prisma.tagWhereInput | Prisma.tagWhereInput[]
@@ -329,12 +339,13 @@ export type tagWhereUniqueInput = Prisma.AtLeast<{
   gallery_id?: Prisma.UuidNullableFilter<"tag"> | string | null
   gallery?: Prisma.XOR<Prisma.GalleryNullableScalarRelationFilter, Prisma.galleryWhereInput> | null
   visitor_tags?: Prisma.Visitor_tagsListRelationFilter
-}, "id">
+}, "id" | "apiId">
 
 export type tagOrderByWithAggregationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   source?: Prisma.SortOrderInput | Prisma.SortOrder
   sourcetype?: Prisma.SortOrderInput | Prisma.SortOrder
   enable?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -361,6 +372,7 @@ export type tagScalarWhereWithAggregatesInput = {
   created_at?: Prisma.DateTimeWithAggregatesFilter<"tag"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"tag"> | Date | string
   id?: Prisma.UuidWithAggregatesFilter<"tag"> | string
+  apiId?: Prisma.StringNullableWithAggregatesFilter<"tag"> | string | null
   source?: Prisma.StringNullableWithAggregatesFilter<"tag"> | string | null
   sourcetype?: Prisma.StringNullableWithAggregatesFilter<"tag"> | string | null
   enable?: Prisma.StringNullableWithAggregatesFilter<"tag"> | string | null
@@ -379,6 +391,7 @@ export type tagCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   source?: string | null
   sourcetype?: string | null
   enable?: string | null
@@ -398,6 +411,7 @@ export type tagUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   source?: string | null
   sourcetype?: string | null
   enable?: string | null
@@ -417,6 +431,7 @@ export type tagUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcetype?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   enable?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -436,6 +451,7 @@ export type tagUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcetype?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   enable?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -455,6 +471,7 @@ export type tagCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   source?: string | null
   sourcetype?: string | null
   enable?: string | null
@@ -473,6 +490,7 @@ export type tagUpdateManyMutationInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcetype?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   enable?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -490,6 +508,7 @@ export type tagUncheckedUpdateManyInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcetype?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   enable?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -518,6 +537,7 @@ export type tagCountOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   source?: Prisma.SortOrder
   sourcetype?: Prisma.SortOrder
   enable?: Prisma.SortOrder
@@ -540,6 +560,7 @@ export type tagMaxOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   source?: Prisma.SortOrder
   sourcetype?: Prisma.SortOrder
   enable?: Prisma.SortOrder
@@ -555,6 +576,7 @@ export type tagMinOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   source?: Prisma.SortOrder
   sourcetype?: Prisma.SortOrder
   enable?: Prisma.SortOrder
@@ -637,6 +659,7 @@ export type tagCreateWithoutGalleryInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   source?: string | null
   sourcetype?: string | null
   enable?: string | null
@@ -655,6 +678,7 @@ export type tagUncheckedCreateWithoutGalleryInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   source?: string | null
   sourcetype?: string | null
   enable?: string | null
@@ -702,6 +726,7 @@ export type tagScalarWhereInput = {
   created_at?: Prisma.DateTimeFilter<"tag"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"tag"> | Date | string
   id?: Prisma.UuidFilter<"tag"> | string
+  apiId?: Prisma.StringNullableFilter<"tag"> | string | null
   source?: Prisma.StringNullableFilter<"tag"> | string | null
   sourcetype?: Prisma.StringNullableFilter<"tag"> | string | null
   enable?: Prisma.StringNullableFilter<"tag"> | string | null
@@ -720,6 +745,7 @@ export type tagCreateWithoutVisitor_tagsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   source?: string | null
   sourcetype?: string | null
   enable?: string | null
@@ -738,6 +764,7 @@ export type tagUncheckedCreateWithoutVisitor_tagsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   source?: string | null
   sourcetype?: string | null
   enable?: string | null
@@ -772,6 +799,7 @@ export type tagUpdateWithoutVisitor_tagsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcetype?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   enable?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -790,6 +818,7 @@ export type tagUncheckedUpdateWithoutVisitor_tagsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcetype?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   enable?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -808,6 +837,7 @@ export type tagCreateManyGalleryInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   source?: string | null
   sourcetype?: string | null
   enable?: string | null
@@ -825,6 +855,7 @@ export type tagUpdateWithoutGalleryInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcetype?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   enable?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -843,6 +874,7 @@ export type tagUncheckedUpdateWithoutGalleryInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcetype?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   enable?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -861,6 +893,7 @@ export type tagUncheckedUpdateManyWithoutGalleryInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcetype?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   enable?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -909,6 +942,7 @@ export type tagSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = ru
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   source?: boolean
   sourcetype?: boolean
   enable?: boolean
@@ -930,6 +964,7 @@ export type tagSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extension
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   source?: boolean
   sourcetype?: boolean
   enable?: boolean
@@ -949,6 +984,7 @@ export type tagSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extension
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   source?: boolean
   sourcetype?: boolean
   enable?: boolean
@@ -968,6 +1004,7 @@ export type tagSelectScalar = {
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   source?: boolean
   sourcetype?: boolean
   enable?: boolean
@@ -982,7 +1019,7 @@ export type tagSelectScalar = {
   gallery_id?: boolean
 }
 
-export type tagOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "source" | "sourcetype" | "enable" | "code" | "name" | "short_description" | "url" | "url_title" | "expires_after" | "automatically_assigned" | "external" | "gallery_id", ExtArgs["result"]["tag"]>
+export type tagOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "apiId" | "source" | "sourcetype" | "enable" | "code" | "name" | "short_description" | "url" | "url_title" | "expires_after" | "automatically_assigned" | "external" | "gallery_id", ExtArgs["result"]["tag"]>
 export type tagInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   gallery?: boolean | Prisma.tag$galleryArgs<ExtArgs>
   visitor_tags?: boolean | Prisma.tag$visitor_tagsArgs<ExtArgs>
@@ -1005,6 +1042,7 @@ export type $tagPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
     created_at: Date
     updated_at: Date
     id: string
+    apiId: string | null
     source: string | null
     sourcetype: string | null
     enable: string | null
@@ -1445,6 +1483,7 @@ export interface tagFieldRefs {
   readonly created_at: Prisma.FieldRef<"tag", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"tag", 'DateTime'>
   readonly id: Prisma.FieldRef<"tag", 'String'>
+  readonly apiId: Prisma.FieldRef<"tag", 'String'>
   readonly source: Prisma.FieldRef<"tag", 'String'>
   readonly sourcetype: Prisma.FieldRef<"tag", 'String'>
   readonly enable: Prisma.FieldRef<"tag", 'String'>

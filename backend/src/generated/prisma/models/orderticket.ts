@@ -28,6 +28,7 @@ export type OrderticketMinAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   ticket_type: string | null
   booking_id: string | null
   price: string | null
@@ -40,6 +41,7 @@ export type OrderticketMaxAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   ticket_type: string | null
   booking_id: string | null
   price: string | null
@@ -52,6 +54,7 @@ export type OrderticketCountAggregateOutputType = {
   created_at: number
   updated_at: number
   id: number
+  apiId: number
   ticket_type: number
   booking_id: number
   price: number
@@ -66,6 +69,7 @@ export type OrderticketMinAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   ticket_type?: true
   booking_id?: true
   price?: true
@@ -78,6 +82,7 @@ export type OrderticketMaxAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   ticket_type?: true
   booking_id?: true
   price?: true
@@ -90,6 +95,7 @@ export type OrderticketCountAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   ticket_type?: true
   booking_id?: true
   price?: true
@@ -175,6 +181,7 @@ export type OrderticketGroupByOutputType = {
   created_at: Date
   updated_at: Date
   id: string
+  apiId: string | null
   ticket_type: string | null
   booking_id: string | null
   price: string | null
@@ -208,6 +215,7 @@ export type orderticketWhereInput = {
   created_at?: Prisma.DateTimeFilter<"orderticket"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"orderticket"> | Date | string
   id?: Prisma.UuidFilter<"orderticket"> | string
+  apiId?: Prisma.StringNullableFilter<"orderticket"> | string | null
   ticket_type?: Prisma.StringNullableFilter<"orderticket"> | string | null
   booking_id?: Prisma.StringNullableFilter<"orderticket"> | string | null
   price?: Prisma.StringNullableFilter<"orderticket"> | string | null
@@ -222,6 +230,7 @@ export type orderticketOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   ticket_type?: Prisma.SortOrderInput | Prisma.SortOrder
   booking_id?: Prisma.SortOrderInput | Prisma.SortOrder
   price?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -234,6 +243,7 @@ export type orderticketOrderByWithRelationInput = {
 
 export type orderticketWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  apiId?: string
   AND?: Prisma.orderticketWhereInput | Prisma.orderticketWhereInput[]
   OR?: Prisma.orderticketWhereInput[]
   NOT?: Prisma.orderticketWhereInput | Prisma.orderticketWhereInput[]
@@ -247,12 +257,13 @@ export type orderticketWhereUniqueInput = Prisma.AtLeast<{
   ticket_id?: Prisma.UuidNullableFilter<"orderticket"> | string | null
   order?: Prisma.XOR<Prisma.OrderNullableScalarRelationFilter, Prisma.orderWhereInput> | null
   ticket?: Prisma.XOR<Prisma.TicketNullableScalarRelationFilter, Prisma.ticketWhereInput> | null
-}, "id">
+}, "id" | "apiId">
 
 export type orderticketOrderByWithAggregationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   ticket_type?: Prisma.SortOrderInput | Prisma.SortOrder
   booking_id?: Prisma.SortOrderInput | Prisma.SortOrder
   price?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -271,6 +282,7 @@ export type orderticketScalarWhereWithAggregatesInput = {
   created_at?: Prisma.DateTimeWithAggregatesFilter<"orderticket"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"orderticket"> | Date | string
   id?: Prisma.UuidWithAggregatesFilter<"orderticket"> | string
+  apiId?: Prisma.StringNullableWithAggregatesFilter<"orderticket"> | string | null
   ticket_type?: Prisma.StringNullableWithAggregatesFilter<"orderticket"> | string | null
   booking_id?: Prisma.StringNullableWithAggregatesFilter<"orderticket"> | string | null
   price?: Prisma.StringNullableWithAggregatesFilter<"orderticket"> | string | null
@@ -283,6 +295,7 @@ export type orderticketCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   ticket_type?: string | null
   booking_id?: string | null
   price?: string | null
@@ -295,6 +308,7 @@ export type orderticketUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   ticket_type?: string | null
   booking_id?: string | null
   price?: string | null
@@ -307,6 +321,7 @@ export type orderticketUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ticket_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   booking_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -319,6 +334,7 @@ export type orderticketUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ticket_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   booking_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -331,6 +347,7 @@ export type orderticketCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   ticket_type?: string | null
   booking_id?: string | null
   price?: string | null
@@ -343,6 +360,7 @@ export type orderticketUpdateManyMutationInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ticket_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   booking_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -353,6 +371,7 @@ export type orderticketUncheckedUpdateManyInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ticket_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   booking_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -375,6 +394,7 @@ export type orderticketCountOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   ticket_type?: Prisma.SortOrder
   booking_id?: Prisma.SortOrder
   price?: Prisma.SortOrder
@@ -387,6 +407,7 @@ export type orderticketMaxOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   ticket_type?: Prisma.SortOrder
   booking_id?: Prisma.SortOrder
   price?: Prisma.SortOrder
@@ -399,6 +420,7 @@ export type orderticketMinOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   ticket_type?: Prisma.SortOrder
   booking_id?: Prisma.SortOrder
   price?: Prisma.SortOrder
@@ -495,6 +517,7 @@ export type orderticketCreateWithoutOrderInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   ticket_type?: string | null
   booking_id?: string | null
   price?: string | null
@@ -506,6 +529,7 @@ export type orderticketUncheckedCreateWithoutOrderInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   ticket_type?: string | null
   booking_id?: string | null
   price?: string | null
@@ -546,6 +570,7 @@ export type orderticketScalarWhereInput = {
   created_at?: Prisma.DateTimeFilter<"orderticket"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"orderticket"> | Date | string
   id?: Prisma.UuidFilter<"orderticket"> | string
+  apiId?: Prisma.StringNullableFilter<"orderticket"> | string | null
   ticket_type?: Prisma.StringNullableFilter<"orderticket"> | string | null
   booking_id?: Prisma.StringNullableFilter<"orderticket"> | string | null
   price?: Prisma.StringNullableFilter<"orderticket"> | string | null
@@ -558,6 +583,7 @@ export type orderticketCreateWithoutTicketInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   ticket_type?: string | null
   booking_id?: string | null
   price?: string | null
@@ -569,6 +595,7 @@ export type orderticketUncheckedCreateWithoutTicketInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   ticket_type?: string | null
   booking_id?: string | null
   price?: string | null
@@ -606,6 +633,7 @@ export type orderticketCreateManyOrderInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   ticket_type?: string | null
   booking_id?: string | null
   price?: string | null
@@ -617,6 +645,7 @@ export type orderticketUpdateWithoutOrderInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ticket_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   booking_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -628,6 +657,7 @@ export type orderticketUncheckedUpdateWithoutOrderInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ticket_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   booking_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -639,6 +669,7 @@ export type orderticketUncheckedUpdateManyWithoutOrderInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ticket_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   booking_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -650,6 +681,7 @@ export type orderticketCreateManyTicketInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   ticket_type?: string | null
   booking_id?: string | null
   price?: string | null
@@ -661,6 +693,7 @@ export type orderticketUpdateWithoutTicketInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ticket_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   booking_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -672,6 +705,7 @@ export type orderticketUncheckedUpdateWithoutTicketInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ticket_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   booking_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -683,6 +717,7 @@ export type orderticketUncheckedUpdateManyWithoutTicketInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ticket_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   booking_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -696,6 +731,7 @@ export type orderticketSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   ticket_type?: boolean
   booking_id?: boolean
   price?: boolean
@@ -710,6 +746,7 @@ export type orderticketSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   ticket_type?: boolean
   booking_id?: boolean
   price?: boolean
@@ -724,6 +761,7 @@ export type orderticketSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   ticket_type?: boolean
   booking_id?: boolean
   price?: boolean
@@ -738,6 +776,7 @@ export type orderticketSelectScalar = {
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   ticket_type?: boolean
   booking_id?: boolean
   price?: boolean
@@ -746,7 +785,7 @@ export type orderticketSelectScalar = {
   ticket_id?: boolean
 }
 
-export type orderticketOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "ticket_type" | "booking_id" | "price" | "hall_section_code" | "order_id" | "ticket_id", ExtArgs["result"]["orderticket"]>
+export type orderticketOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "apiId" | "ticket_type" | "booking_id" | "price" | "hall_section_code" | "order_id" | "ticket_id", ExtArgs["result"]["orderticket"]>
 export type orderticketInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   order?: boolean | Prisma.orderticket$orderArgs<ExtArgs>
   ticket?: boolean | Prisma.orderticket$ticketArgs<ExtArgs>
@@ -770,6 +809,7 @@ export type $orderticketPayload<ExtArgs extends runtime.Types.Extensions.Interna
     created_at: Date
     updated_at: Date
     id: string
+    apiId: string | null
     ticket_type: string | null
     booking_id: string | null
     price: string | null
@@ -1204,6 +1244,7 @@ export interface orderticketFieldRefs {
   readonly created_at: Prisma.FieldRef<"orderticket", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"orderticket", 'DateTime'>
   readonly id: Prisma.FieldRef<"orderticket", 'String'>
+  readonly apiId: Prisma.FieldRef<"orderticket", 'String'>
   readonly ticket_type: Prisma.FieldRef<"orderticket", 'String'>
   readonly booking_id: Prisma.FieldRef<"orderticket", 'String'>
   readonly price: Prisma.FieldRef<"orderticket", 'String'>

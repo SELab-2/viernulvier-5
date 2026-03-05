@@ -7,6 +7,77 @@ const headers = {
 const api = `https://www.viernulvier.gent{url}`;
 
 
+
+/*
+--------------------------------------
+--------------TYPES-------------------
+--------------------------------------
+
+*/
+
+
+export type LocalizedString = {
+  nl?: string;
+  en?: string;
+  fr?: string;
+};
+
+export type APIProduction = {
+    "@context":string;
+    "@id": string;
+    "@type": string;
+
+    created_at: string;
+    updated_at: string;
+
+    vendor_id: string;
+    box_office_id:number;
+    
+    performer_field:string;
+    performer_type: string;
+    attendance_mode: string;
+
+    supertitle: LocalizedString;
+    title: LocalizedString;
+    artist: LocalizedString;
+    meta_title: LocalizedString;
+    meta_description: LocalizedString;
+    tagline:LocalizedString;
+    teaser:LocalizedString;
+    description:LocalizedString;
+    description_extra:LocalizedString;
+    description_2:LocalizedString;
+    quote:LocalizedString;
+    quote_source:LocalizedString;
+    programme:LocalizedString;
+    info:LocalizedString;
+    description_short:LocalizedString;
+    eticket_info:LocalizedString;
+    custom_data:LocalizedString;
+    
+    video_1:LocalizedString;
+    video_2: LocalizedString;
+
+    genres: string[];
+
+    events: string[];
+    
+    media_gallery:string;
+    review_gallery:string;
+    poster_gallery:string;
+
+    uitdatabank_keywords: string[];
+    uitdatabank_theme:string;
+    uitdatabank_type:string;
+};
+
+/*
+--------------------------------------
+--------------TYPES-------------------
+--------------------------------------
+
+*/
+
 async function fetchFromURL(url: string){
     const all_data= []
     while (true){
@@ -33,9 +104,35 @@ async function fetchFromURL(url: string){
     }
     return all_data
 }
+
+async function fetchSinglePageFromURL(url: string) {
+
+    const link = api.replace("{url}", url)
+    const response = await axios.get(link, {headers: headers});
+    if (response.status === 200){
+        const data = response.data;
+        if (data.view === undefined){
+            return data;
+        }
+        const view = data["view"];
+        const members = data["member"];
+
+        console.log(`succesfully retrieved list: ${url}`);
+        
+        return members;
+        //url = data["view"]["next"];
+    }else {
+        console.log("Error:", response.status);
+        console.log(response.statusText);
+        return [];
+    }
+}
+
 export async function fetchProductions() {
     const url = "/api/v1/productions?page=1"
-    return fetchFromURL(url);
+    //return fetchFromURL(url);
+    const data:APIProduction[] = await fetchSinglePageFromURL(url);
+    return data
 }
 
 export async function fetchEvents(){

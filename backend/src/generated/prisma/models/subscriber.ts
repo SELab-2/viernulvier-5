@@ -38,6 +38,7 @@ export type SubscriberMinAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   confirmed: boolean | null
   bounces: number | null
   user_id: string | null
@@ -47,6 +48,7 @@ export type SubscriberMaxAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   confirmed: boolean | null
   bounces: number | null
   user_id: string | null
@@ -56,6 +58,7 @@ export type SubscriberCountAggregateOutputType = {
   created_at: number
   updated_at: number
   id: number
+  apiId: number
   confirmed: number
   bounces: number
   user_id: number
@@ -75,6 +78,7 @@ export type SubscriberMinAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   confirmed?: true
   bounces?: true
   user_id?: true
@@ -84,6 +88,7 @@ export type SubscriberMaxAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   confirmed?: true
   bounces?: true
   user_id?: true
@@ -93,6 +98,7 @@ export type SubscriberCountAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   confirmed?: true
   bounces?: true
   user_id?: true
@@ -189,6 +195,7 @@ export type SubscriberGroupByOutputType = {
   created_at: Date
   updated_at: Date
   id: string
+  apiId: string | null
   confirmed: boolean | null
   bounces: number | null
   user_id: string | null
@@ -221,6 +228,7 @@ export type subscriberWhereInput = {
   created_at?: Prisma.DateTimeFilter<"subscriber"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"subscriber"> | Date | string
   id?: Prisma.UuidFilter<"subscriber"> | string
+  apiId?: Prisma.StringNullableFilter<"subscriber"> | string | null
   confirmed?: Prisma.BoolNullableFilter<"subscriber"> | boolean | null
   bounces?: Prisma.IntNullableFilter<"subscriber"> | number | null
   user_id?: Prisma.UuidNullableFilter<"subscriber"> | string | null
@@ -233,6 +241,7 @@ export type subscriberOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   confirmed?: Prisma.SortOrderInput | Prisma.SortOrder
   bounces?: Prisma.SortOrderInput | Prisma.SortOrder
   user_id?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -243,6 +252,7 @@ export type subscriberOrderByWithRelationInput = {
 
 export type subscriberWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  apiId?: string
   AND?: Prisma.subscriberWhereInput | Prisma.subscriberWhereInput[]
   OR?: Prisma.subscriberWhereInput[]
   NOT?: Prisma.subscriberWhereInput | Prisma.subscriberWhereInput[]
@@ -254,12 +264,13 @@ export type subscriberWhereUniqueInput = Prisma.AtLeast<{
   user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.userWhereInput> | null
   subscriber_mailinglist?: Prisma.Subscriber_mailinglistListRelationFilter
   subscriber_optins?: Prisma.Subscriber_optinsListRelationFilter
-}, "id">
+}, "id" | "apiId">
 
 export type subscriberOrderByWithAggregationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   confirmed?: Prisma.SortOrderInput | Prisma.SortOrder
   bounces?: Prisma.SortOrderInput | Prisma.SortOrder
   user_id?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -277,6 +288,7 @@ export type subscriberScalarWhereWithAggregatesInput = {
   created_at?: Prisma.DateTimeWithAggregatesFilter<"subscriber"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"subscriber"> | Date | string
   id?: Prisma.UuidWithAggregatesFilter<"subscriber"> | string
+  apiId?: Prisma.StringNullableWithAggregatesFilter<"subscriber"> | string | null
   confirmed?: Prisma.BoolNullableWithAggregatesFilter<"subscriber"> | boolean | null
   bounces?: Prisma.IntNullableWithAggregatesFilter<"subscriber"> | number | null
   user_id?: Prisma.UuidNullableWithAggregatesFilter<"subscriber"> | string | null
@@ -286,6 +298,7 @@ export type subscriberCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   confirmed?: boolean | null
   bounces?: number | null
   user?: Prisma.userCreateNestedOneWithoutSubscribersInput
@@ -297,6 +310,7 @@ export type subscriberUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   confirmed?: boolean | null
   bounces?: number | null
   user_id?: string | null
@@ -308,6 +322,7 @@ export type subscriberUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   bounces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   user?: Prisma.userUpdateOneWithoutSubscribersNestedInput
@@ -319,6 +334,7 @@ export type subscriberUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   bounces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -330,6 +346,7 @@ export type subscriberCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   confirmed?: boolean | null
   bounces?: number | null
   user_id?: string | null
@@ -339,6 +356,7 @@ export type subscriberUpdateManyMutationInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   bounces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
@@ -347,6 +365,7 @@ export type subscriberUncheckedUpdateManyInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   bounces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -356,6 +375,7 @@ export type subscriberCountOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   confirmed?: Prisma.SortOrder
   bounces?: Prisma.SortOrder
   user_id?: Prisma.SortOrder
@@ -369,6 +389,7 @@ export type subscriberMaxOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   confirmed?: Prisma.SortOrder
   bounces?: Prisma.SortOrder
   user_id?: Prisma.SortOrder
@@ -378,6 +399,7 @@ export type subscriberMinOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   confirmed?: Prisma.SortOrder
   bounces?: Prisma.SortOrder
   user_id?: Prisma.SortOrder
@@ -476,6 +498,7 @@ export type subscriberCreateWithoutSubscriber_mailinglistInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   confirmed?: boolean | null
   bounces?: number | null
   user?: Prisma.userCreateNestedOneWithoutSubscribersInput
@@ -486,6 +509,7 @@ export type subscriberUncheckedCreateWithoutSubscriber_mailinglistInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   confirmed?: boolean | null
   bounces?: number | null
   user_id?: string | null
@@ -512,6 +536,7 @@ export type subscriberUpdateWithoutSubscriber_mailinglistInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   bounces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   user?: Prisma.userUpdateOneWithoutSubscribersNestedInput
@@ -522,6 +547,7 @@ export type subscriberUncheckedUpdateWithoutSubscriber_mailinglistInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   bounces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -532,6 +558,7 @@ export type subscriberCreateWithoutSubscriber_optinsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   confirmed?: boolean | null
   bounces?: number | null
   user?: Prisma.userCreateNestedOneWithoutSubscribersInput
@@ -542,6 +569,7 @@ export type subscriberUncheckedCreateWithoutSubscriber_optinsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   confirmed?: boolean | null
   bounces?: number | null
   user_id?: string | null
@@ -568,6 +596,7 @@ export type subscriberUpdateWithoutSubscriber_optinsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   bounces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   user?: Prisma.userUpdateOneWithoutSubscribersNestedInput
@@ -578,6 +607,7 @@ export type subscriberUncheckedUpdateWithoutSubscriber_optinsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   bounces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -588,6 +618,7 @@ export type subscriberCreateWithoutUserInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   confirmed?: boolean | null
   bounces?: number | null
   subscriber_mailinglist?: Prisma.subscriber_mailinglistCreateNestedManyWithoutSubscriberInput
@@ -598,6 +629,7 @@ export type subscriberUncheckedCreateWithoutUserInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   confirmed?: boolean | null
   bounces?: number | null
   subscriber_mailinglist?: Prisma.subscriber_mailinglistUncheckedCreateNestedManyWithoutSubscriberInput
@@ -637,6 +669,7 @@ export type subscriberScalarWhereInput = {
   created_at?: Prisma.DateTimeFilter<"subscriber"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"subscriber"> | Date | string
   id?: Prisma.UuidFilter<"subscriber"> | string
+  apiId?: Prisma.StringNullableFilter<"subscriber"> | string | null
   confirmed?: Prisma.BoolNullableFilter<"subscriber"> | boolean | null
   bounces?: Prisma.IntNullableFilter<"subscriber"> | number | null
   user_id?: Prisma.UuidNullableFilter<"subscriber"> | string | null
@@ -646,6 +679,7 @@ export type subscriberCreateManyUserInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   confirmed?: boolean | null
   bounces?: number | null
 }
@@ -654,6 +688,7 @@ export type subscriberUpdateWithoutUserInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   bounces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   subscriber_mailinglist?: Prisma.subscriber_mailinglistUpdateManyWithoutSubscriberNestedInput
@@ -664,6 +699,7 @@ export type subscriberUncheckedUpdateWithoutUserInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   bounces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   subscriber_mailinglist?: Prisma.subscriber_mailinglistUncheckedUpdateManyWithoutSubscriberNestedInput
@@ -674,6 +710,7 @@ export type subscriberUncheckedUpdateManyWithoutUserInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmed?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   bounces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
@@ -722,6 +759,7 @@ export type subscriberSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   confirmed?: boolean
   bounces?: boolean
   user_id?: boolean
@@ -735,6 +773,7 @@ export type subscriberSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   confirmed?: boolean
   bounces?: boolean
   user_id?: boolean
@@ -745,6 +784,7 @@ export type subscriberSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   confirmed?: boolean
   bounces?: boolean
   user_id?: boolean
@@ -755,12 +795,13 @@ export type subscriberSelectScalar = {
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   confirmed?: boolean
   bounces?: boolean
   user_id?: boolean
 }
 
-export type subscriberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "confirmed" | "bounces" | "user_id", ExtArgs["result"]["subscriber"]>
+export type subscriberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "apiId" | "confirmed" | "bounces" | "user_id", ExtArgs["result"]["subscriber"]>
 export type subscriberInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.subscriber$userArgs<ExtArgs>
   subscriber_mailinglist?: boolean | Prisma.subscriber$subscriber_mailinglistArgs<ExtArgs>
@@ -785,6 +826,7 @@ export type $subscriberPayload<ExtArgs extends runtime.Types.Extensions.Internal
     created_at: Date
     updated_at: Date
     id: string
+    apiId: string | null
     confirmed: boolean | null
     bounces: number | null
     user_id: string | null
@@ -1217,6 +1259,7 @@ export interface subscriberFieldRefs {
   readonly created_at: Prisma.FieldRef<"subscriber", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"subscriber", 'DateTime'>
   readonly id: Prisma.FieldRef<"subscriber", 'String'>
+  readonly apiId: Prisma.FieldRef<"subscriber", 'String'>
   readonly confirmed: Prisma.FieldRef<"subscriber", 'Boolean'>
   readonly bounces: Prisma.FieldRef<"subscriber", 'Int'>
   readonly user_id: Prisma.FieldRef<"subscriber", 'String'>

@@ -38,6 +38,7 @@ export type ProductionMinAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   vendor_id: string | null
   box_office_id: number | null
   performer_field: string | null
@@ -54,6 +55,7 @@ export type ProductionMaxAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   vendor_id: string | null
   box_office_id: number | null
   performer_field: string | null
@@ -70,6 +72,7 @@ export type ProductionCountAggregateOutputType = {
   created_at: number
   updated_at: number
   id: number
+  apiId: number
   vendor_id: number
   box_office_id: number
   performer_field: number
@@ -115,6 +118,7 @@ export type ProductionMinAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   vendor_id?: true
   box_office_id?: true
   performer_field?: true
@@ -131,6 +135,7 @@ export type ProductionMaxAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   vendor_id?: true
   box_office_id?: true
   performer_field?: true
@@ -147,6 +152,7 @@ export type ProductionCountAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   vendor_id?: true
   box_office_id?: true
   performer_field?: true
@@ -269,6 +275,7 @@ export type ProductionGroupByOutputType = {
   created_at: Date
   updated_at: Date
   id: string
+  apiId: string | null
   vendor_id: string | null
   box_office_id: number | null
   performer_field: string | null
@@ -327,6 +334,7 @@ export type productionWhereInput = {
   created_at?: Prisma.DateTimeFilter<"production"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"production"> | Date | string
   id?: Prisma.UuidFilter<"production"> | string
+  apiId?: Prisma.StringNullableFilter<"production"> | string | null
   vendor_id?: Prisma.StringNullableFilter<"production"> | string | null
   box_office_id?: Prisma.IntNullableFilter<"production"> | number | null
   performer_field?: Prisma.StringNullableFilter<"production"> | string | null
@@ -370,6 +378,7 @@ export type productionOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   vendor_id?: Prisma.SortOrderInput | Prisma.SortOrder
   box_office_id?: Prisma.SortOrderInput | Prisma.SortOrder
   performer_field?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -411,6 +420,7 @@ export type productionOrderByWithRelationInput = {
 
 export type productionWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  apiId?: string
   AND?: Prisma.productionWhereInput | Prisma.productionWhereInput[]
   OR?: Prisma.productionWhereInput[]
   NOT?: Prisma.productionWhereInput | Prisma.productionWhereInput[]
@@ -453,12 +463,13 @@ export type productionWhereUniqueInput = Prisma.AtLeast<{
   uitdatabank_themes?: Prisma.XOR<Prisma.Uitdatabank_themesNullableScalarRelationFilter, Prisma.uitdatabank_themesWhereInput> | null
   uitdatabank_types?: Prisma.XOR<Prisma.Uitdatabank_typesNullableScalarRelationFilter, Prisma.uitdatabank_typesWhereInput> | null
   uit_keywords_productions?: Prisma.Uit_keywords_productionsListRelationFilter
-}, "id">
+}, "id" | "apiId">
 
 export type productionOrderByWithAggregationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   vendor_id?: Prisma.SortOrderInput | Prisma.SortOrder
   box_office_id?: Prisma.SortOrderInput | Prisma.SortOrder
   performer_field?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -502,6 +513,7 @@ export type productionScalarWhereWithAggregatesInput = {
   created_at?: Prisma.DateTimeWithAggregatesFilter<"production"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"production"> | Date | string
   id?: Prisma.UuidWithAggregatesFilter<"production"> | string
+  apiId?: Prisma.StringNullableWithAggregatesFilter<"production"> | string | null
   vendor_id?: Prisma.StringNullableWithAggregatesFilter<"production"> | string | null
   box_office_id?: Prisma.IntNullableWithAggregatesFilter<"production"> | number | null
   performer_field?: Prisma.StringNullableWithAggregatesFilter<"production"> | string | null
@@ -537,6 +549,7 @@ export type productionCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -575,6 +588,7 @@ export type productionUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -613,6 +627,7 @@ export type productionUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   performer_field?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -651,6 +666,7 @@ export type productionUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   performer_field?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -689,6 +705,7 @@ export type productionCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -724,6 +741,7 @@ export type productionUpdateManyMutationInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   performer_field?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -754,6 +772,7 @@ export type productionUncheckedUpdateManyInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   performer_field?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -809,6 +828,7 @@ export type productionCountOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   vendor_id?: Prisma.SortOrder
   box_office_id?: Prisma.SortOrder
   performer_field?: Prisma.SortOrder
@@ -848,6 +868,7 @@ export type productionMaxOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   vendor_id?: Prisma.SortOrder
   box_office_id?: Prisma.SortOrder
   performer_field?: Prisma.SortOrder
@@ -864,6 +885,7 @@ export type productionMinOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   vendor_id?: Prisma.SortOrder
   box_office_id?: Prisma.SortOrder
   performer_field?: Prisma.SortOrder
@@ -1138,6 +1160,7 @@ export type productionCreateWithoutEventsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -1175,6 +1198,7 @@ export type productionUncheckedCreateWithoutEventsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -1228,6 +1252,7 @@ export type productionUpdateWithoutEventsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   performer_field?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1265,6 +1290,7 @@ export type productionUncheckedUpdateWithoutEventsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   performer_field?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1302,6 +1328,7 @@ export type productionCreateWithoutMedia_galleryInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -1339,6 +1366,7 @@ export type productionUncheckedCreateWithoutMedia_galleryInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -1386,6 +1414,7 @@ export type productionCreateWithoutPoster_galleryInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -1423,6 +1452,7 @@ export type productionUncheckedCreateWithoutPoster_galleryInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -1470,6 +1500,7 @@ export type productionCreateWithoutReview_galleryInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -1507,6 +1538,7 @@ export type productionUncheckedCreateWithoutReview_galleryInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -1573,6 +1605,7 @@ export type productionScalarWhereInput = {
   created_at?: Prisma.DateTimeFilter<"production"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"production"> | Date | string
   id?: Prisma.UuidFilter<"production"> | string
+  apiId?: Prisma.StringNullableFilter<"production"> | string | null
   vendor_id?: Prisma.StringNullableFilter<"production"> | string | null
   box_office_id?: Prisma.IntNullableFilter<"production"> | number | null
   performer_field?: Prisma.StringNullableFilter<"production"> | string | null
@@ -1640,6 +1673,7 @@ export type productionCreateWithoutGenre_productionInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -1677,6 +1711,7 @@ export type productionUncheckedCreateWithoutGenre_productionInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -1730,6 +1765,7 @@ export type productionUpdateWithoutGenre_productionInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   performer_field?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1767,6 +1803,7 @@ export type productionUncheckedUpdateWithoutGenre_productionInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   performer_field?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1804,6 +1841,7 @@ export type productionCreateWithoutUit_keywords_productionsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -1841,6 +1879,7 @@ export type productionUncheckedCreateWithoutUit_keywords_productionsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -1894,6 +1933,7 @@ export type productionUpdateWithoutUit_keywords_productionsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   performer_field?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1931,6 +1971,7 @@ export type productionUncheckedUpdateWithoutUit_keywords_productionsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   performer_field?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1968,6 +2009,7 @@ export type productionCreateWithoutUitdatabank_themesInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -2005,6 +2047,7 @@ export type productionUncheckedCreateWithoutUitdatabank_themesInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -2068,6 +2111,7 @@ export type productionCreateWithoutUitdatabank_typesInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -2105,6 +2149,7 @@ export type productionUncheckedCreateWithoutUitdatabank_typesInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -2168,6 +2213,7 @@ export type productionCreateManyMedia_galleryInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -2202,6 +2248,7 @@ export type productionCreateManyPoster_galleryInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -2236,6 +2283,7 @@ export type productionCreateManyReview_galleryInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -2270,6 +2318,7 @@ export type productionUpdateWithoutMedia_galleryInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   performer_field?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2307,6 +2356,7 @@ export type productionUncheckedUpdateWithoutMedia_galleryInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   performer_field?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2344,6 +2394,7 @@ export type productionUncheckedUpdateManyWithoutMedia_galleryInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   performer_field?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2378,6 +2429,7 @@ export type productionUpdateWithoutPoster_galleryInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   performer_field?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2415,6 +2467,7 @@ export type productionUncheckedUpdateWithoutPoster_galleryInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   performer_field?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2452,6 +2505,7 @@ export type productionUncheckedUpdateManyWithoutPoster_galleryInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   performer_field?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2486,6 +2540,7 @@ export type productionUpdateWithoutReview_galleryInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   performer_field?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2523,6 +2578,7 @@ export type productionUncheckedUpdateWithoutReview_galleryInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   performer_field?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2560,6 +2616,7 @@ export type productionUncheckedUpdateManyWithoutReview_galleryInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   performer_field?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2594,6 +2651,7 @@ export type productionCreateManyUitdatabank_themesInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -2628,6 +2686,7 @@ export type productionUpdateWithoutUitdatabank_themesInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   performer_field?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2665,6 +2724,7 @@ export type productionUncheckedUpdateWithoutUitdatabank_themesInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   performer_field?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2702,6 +2762,7 @@ export type productionUncheckedUpdateManyWithoutUitdatabank_themesInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   performer_field?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2736,6 +2797,7 @@ export type productionCreateManyUitdatabank_typesInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -2770,6 +2832,7 @@ export type productionUpdateWithoutUitdatabank_typesInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   performer_field?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2807,6 +2870,7 @@ export type productionUncheckedUpdateWithoutUitdatabank_typesInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   performer_field?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2844,6 +2908,7 @@ export type productionUncheckedUpdateManyWithoutUitdatabank_typesInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   box_office_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   performer_field?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2927,6 +2992,7 @@ export type productionSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   vendor_id?: boolean
   box_office_id?: boolean
   performer_field?: boolean
@@ -2971,6 +3037,7 @@ export type productionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   vendor_id?: boolean
   box_office_id?: boolean
   performer_field?: boolean
@@ -3011,6 +3078,7 @@ export type productionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   vendor_id?: boolean
   box_office_id?: boolean
   performer_field?: boolean
@@ -3051,6 +3119,7 @@ export type productionSelectScalar = {
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   vendor_id?: boolean
   box_office_id?: boolean
   performer_field?: boolean
@@ -3082,7 +3151,7 @@ export type productionSelectScalar = {
   uitdatabank_type?: boolean
 }
 
-export type productionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "vendor_id" | "box_office_id" | "performer_field" | "performer_type" | "attendance_mode" | "super_title" | "title" | "artist" | "meta_title" | "meta_description" | "tagline" | "teaser" | "description" | "description_extra" | "description_2" | "video_1" | "video_2" | "quote" | "quote_source" | "programme" | "info" | "description_short" | "eticket_info" | "custom_data" | "media_gallery_id" | "review_gallery_id" | "poster_gallery_id" | "uitdatabank_theme" | "uitdatabank_type", ExtArgs["result"]["production"]>
+export type productionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "apiId" | "vendor_id" | "box_office_id" | "performer_field" | "performer_type" | "attendance_mode" | "super_title" | "title" | "artist" | "meta_title" | "meta_description" | "tagline" | "teaser" | "description" | "description_extra" | "description_2" | "video_1" | "video_2" | "quote" | "quote_source" | "programme" | "info" | "description_short" | "eticket_info" | "custom_data" | "media_gallery_id" | "review_gallery_id" | "poster_gallery_id" | "uitdatabank_theme" | "uitdatabank_type", ExtArgs["result"]["production"]>
 export type productionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   events?: boolean | Prisma.production$eventsArgs<ExtArgs>
   genre_production?: boolean | Prisma.production$genre_productionArgs<ExtArgs>
@@ -3125,6 +3194,7 @@ export type $productionPayload<ExtArgs extends runtime.Types.Extensions.Internal
     created_at: Date
     updated_at: Date
     id: string
+    apiId: string | null
     vendor_id: string | null
     box_office_id: number | null
     performer_field: string | null
@@ -3588,6 +3658,7 @@ export interface productionFieldRefs {
   readonly created_at: Prisma.FieldRef<"production", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"production", 'DateTime'>
   readonly id: Prisma.FieldRef<"production", 'String'>
+  readonly apiId: Prisma.FieldRef<"production", 'String'>
   readonly vendor_id: Prisma.FieldRef<"production", 'String'>
   readonly box_office_id: Prisma.FieldRef<"production", 'Int'>
   readonly performer_field: Prisma.FieldRef<"production", 'String'>

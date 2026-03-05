@@ -42,6 +42,7 @@ export type ItemMinAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   type: string | null
   original_filename: string | null
   position: number | null
@@ -56,6 +57,7 @@ export type ItemMaxAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   id: string | null
+  apiId: string | null
   type: string | null
   original_filename: string | null
   position: number | null
@@ -70,6 +72,7 @@ export type ItemCountAggregateOutputType = {
   created_at: number
   updated_at: number
   id: number
+  apiId: number
   type: number
   original_filename: number
   position: number
@@ -102,6 +105,7 @@ export type ItemMinAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   type?: true
   original_filename?: true
   position?: true
@@ -116,6 +120,7 @@ export type ItemMaxAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   type?: true
   original_filename?: true
   position?: true
@@ -130,6 +135,7 @@ export type ItemCountAggregateInputType = {
   created_at?: true
   updated_at?: true
   id?: true
+  apiId?: true
   type?: true
   original_filename?: true
   position?: true
@@ -235,6 +241,7 @@ export type ItemGroupByOutputType = {
   created_at: Date
   updated_at: Date
   id: string
+  apiId: string | null
   type: string | null
   original_filename: string | null
   position: number | null
@@ -276,6 +283,7 @@ export type itemWhereInput = {
   created_at?: Prisma.DateTimeFilter<"item"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"item"> | Date | string
   id?: Prisma.UuidFilter<"item"> | string
+  apiId?: Prisma.StringNullableFilter<"item"> | string | null
   type?: Prisma.StringNullableFilter<"item"> | string | null
   original_filename?: Prisma.StringNullableFilter<"item"> | string | null
   position?: Prisma.IntNullableFilter<"item"> | number | null
@@ -297,6 +305,7 @@ export type itemOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   type?: Prisma.SortOrderInput | Prisma.SortOrder
   original_filename?: Prisma.SortOrderInput | Prisma.SortOrder
   position?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -316,6 +325,7 @@ export type itemOrderByWithRelationInput = {
 
 export type itemWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  apiId?: string
   AND?: Prisma.itemWhereInput | Prisma.itemWhereInput[]
   OR?: Prisma.itemWhereInput[]
   NOT?: Prisma.itemWhereInput | Prisma.itemWhereInput[]
@@ -336,12 +346,13 @@ export type itemWhereUniqueInput = Prisma.AtLeast<{
   gallery_item?: Prisma.Gallery_itemListRelationFilter
   crop?: Prisma.XOR<Prisma.CropNullableScalarRelationFilter, Prisma.cropWhereInput> | null
   gallery?: Prisma.XOR<Prisma.GalleryNullableScalarRelationFilter, Prisma.galleryWhereInput> | null
-}, "id">
+}, "id" | "apiId">
 
 export type itemOrderByWithAggregationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   type?: Prisma.SortOrderInput | Prisma.SortOrder
   original_filename?: Prisma.SortOrderInput | Prisma.SortOrder
   position?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -368,6 +379,7 @@ export type itemScalarWhereWithAggregatesInput = {
   created_at?: Prisma.DateTimeWithAggregatesFilter<"item"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"item"> | Date | string
   id?: Prisma.UuidWithAggregatesFilter<"item"> | string
+  apiId?: Prisma.StringNullableWithAggregatesFilter<"item"> | string | null
   type?: Prisma.StringNullableWithAggregatesFilter<"item"> | string | null
   original_filename?: Prisma.StringNullableWithAggregatesFilter<"item"> | string | null
   position?: Prisma.IntNullableWithAggregatesFilter<"item"> | number | null
@@ -386,6 +398,7 @@ export type itemCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   type?: string | null
   original_filename?: string | null
   position?: number | null
@@ -405,6 +418,7 @@ export type itemUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   type?: string | null
   original_filename?: string | null
   position?: number | null
@@ -424,6 +438,7 @@ export type itemUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   original_filename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   position?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -443,6 +458,7 @@ export type itemUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   original_filename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   position?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -462,6 +478,7 @@ export type itemCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   type?: string | null
   original_filename?: string | null
   position?: number | null
@@ -480,6 +497,7 @@ export type itemUpdateManyMutationInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   original_filename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   position?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -496,6 +514,7 @@ export type itemUncheckedUpdateManyInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   original_filename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   position?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -529,6 +548,7 @@ export type itemCountOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   original_filename?: Prisma.SortOrder
   position?: Prisma.SortOrder
@@ -553,6 +573,7 @@ export type itemMaxOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   original_filename?: Prisma.SortOrder
   position?: Prisma.SortOrder
@@ -567,6 +588,7 @@ export type itemMinOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   id?: Prisma.SortOrder
+  apiId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   original_filename?: Prisma.SortOrder
   position?: Prisma.SortOrder
@@ -685,6 +707,7 @@ export type itemCreateWithoutCropInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   type?: string | null
   original_filename?: string | null
   position?: number | null
@@ -703,6 +726,7 @@ export type itemUncheckedCreateWithoutCropInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   type?: string | null
   original_filename?: string | null
   position?: number | null
@@ -750,6 +774,7 @@ export type itemScalarWhereInput = {
   created_at?: Prisma.DateTimeFilter<"item"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"item"> | Date | string
   id?: Prisma.UuidFilter<"item"> | string
+  apiId?: Prisma.StringNullableFilter<"item"> | string | null
   type?: Prisma.StringNullableFilter<"item"> | string | null
   original_filename?: Prisma.StringNullableFilter<"item"> | string | null
   position?: Prisma.IntNullableFilter<"item"> | number | null
@@ -768,6 +793,7 @@ export type itemCreateWithoutGalleryInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   type?: string | null
   original_filename?: string | null
   position?: number | null
@@ -786,6 +812,7 @@ export type itemUncheckedCreateWithoutGalleryInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   type?: string | null
   original_filename?: string | null
   position?: number | null
@@ -830,6 +857,7 @@ export type itemCreateWithoutGallery_itemInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   type?: string | null
   original_filename?: string | null
   position?: number | null
@@ -848,6 +876,7 @@ export type itemUncheckedCreateWithoutGallery_itemInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   type?: string | null
   original_filename?: string | null
   position?: number | null
@@ -882,6 +911,7 @@ export type itemUpdateWithoutGallery_itemInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   original_filename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   position?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -900,6 +930,7 @@ export type itemUncheckedUpdateWithoutGallery_itemInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   original_filename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   position?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -918,6 +949,7 @@ export type itemCreateManyCropInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   type?: string | null
   original_filename?: string | null
   position?: number | null
@@ -935,6 +967,7 @@ export type itemUpdateWithoutCropInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   original_filename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   position?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -953,6 +986,7 @@ export type itemUncheckedUpdateWithoutCropInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   original_filename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   position?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -971,6 +1005,7 @@ export type itemUncheckedUpdateManyWithoutCropInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   original_filename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   position?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -988,6 +1023,7 @@ export type itemCreateManyGalleryInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
+  apiId?: string | null
   type?: string | null
   original_filename?: string | null
   position?: number | null
@@ -1005,6 +1041,7 @@ export type itemUpdateWithoutGalleryInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   original_filename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   position?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1023,6 +1060,7 @@ export type itemUncheckedUpdateWithoutGalleryInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   original_filename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   position?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1041,6 +1079,7 @@ export type itemUncheckedUpdateManyWithoutGalleryInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   original_filename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   position?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1089,6 +1128,7 @@ export type itemSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   type?: boolean
   original_filename?: boolean
   position?: boolean
@@ -1111,6 +1151,7 @@ export type itemSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   type?: boolean
   original_filename?: boolean
   position?: boolean
@@ -1131,6 +1172,7 @@ export type itemSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   type?: boolean
   original_filename?: boolean
   position?: boolean
@@ -1151,6 +1193,7 @@ export type itemSelectScalar = {
   created_at?: boolean
   updated_at?: boolean
   id?: boolean
+  apiId?: boolean
   type?: boolean
   original_filename?: boolean
   position?: boolean
@@ -1165,7 +1208,7 @@ export type itemSelectScalar = {
   crops?: boolean
 }
 
-export type itemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "type" | "original_filename" | "position" | "width" | "height" | "format" | "gallery_id" | "title" | "description" | "credits" | "link" | "crops", ExtArgs["result"]["item"]>
+export type itemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "apiId" | "type" | "original_filename" | "position" | "width" | "height" | "format" | "gallery_id" | "title" | "description" | "credits" | "link" | "crops", ExtArgs["result"]["item"]>
 export type itemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   gallery_item?: boolean | Prisma.item$gallery_itemArgs<ExtArgs>
   crop?: boolean | Prisma.item$cropArgs<ExtArgs>
@@ -1192,6 +1235,7 @@ export type $itemPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     created_at: Date
     updated_at: Date
     id: string
+    apiId: string | null
     type: string | null
     original_filename: string | null
     position: number | null
@@ -1633,6 +1677,7 @@ export interface itemFieldRefs {
   readonly created_at: Prisma.FieldRef<"item", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"item", 'DateTime'>
   readonly id: Prisma.FieldRef<"item", 'String'>
+  readonly apiId: Prisma.FieldRef<"item", 'String'>
   readonly type: Prisma.FieldRef<"item", 'String'>
   readonly original_filename: Prisma.FieldRef<"item", 'String'>
   readonly position: Prisma.FieldRef<"item", 'Int'>
