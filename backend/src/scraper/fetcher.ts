@@ -3,14 +3,9 @@ import axios from "axios";
 import type {
   APIProduction,
   APIEvent,
-  APIEventPrice,
-  APIRank,
   APISpace,
   APIHall,
   APILocation,
-  APIPriceType,
-  APIStatus,
-  LocalizedString
 } from "./APItypes";
 
 const api_key = "60d4b42665b2251a14ac5c5bf5adabab3673bcdfbc68"

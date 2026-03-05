@@ -5,15 +5,10 @@ import * as Fetcher from "./fetcher"
 import type {
   APIProduction,
   APIEvent,
-  APIEventPrice,
-  APIRank,
   APISpace,
   APIHall,
   APILocation,
-  APIPriceType,
   APIStatus,
-  LocalizedString,
-  foreignKey
 } from "./APItypes";
 
 /*
