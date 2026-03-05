@@ -1,4 +1,18 @@
 import axios from "axios";
+
+import type {
+  APIProduction,
+  APIEvent,
+  APIEventPrice,
+  APIRank,
+  APISpace,
+  APIHall,
+  APILocation,
+  APIPriceType,
+  APIStatus,
+  LocalizedString
+} from "./APItypes";
+
 const api_key = "60d4b42665b2251a14ac5c5bf5adabab3673bcdfbc68"
 const headers = {
     "Accept": "application/ld+json",
@@ -7,76 +21,6 @@ const headers = {
 const api = `https://www.viernulvier.gent{url}`;
 
 
-
-/*
---------------------------------------
---------------TYPES-------------------
---------------------------------------
-
-*/
-
-
-export type LocalizedString = {
-  nl?: string;
-  en?: string;
-  fr?: string;
-};
-
-export type APIProduction = {
-    "@context":string;
-    "@id": string;
-    "@type": string;
-
-    created_at: string;
-    updated_at: string;
-
-    vendor_id: string;
-    box_office_id:number;
-    
-    performer_field:string;
-    performer_type: string;
-    attendance_mode: string;
-
-    supertitle: LocalizedString;
-    title: LocalizedString;
-    artist: LocalizedString;
-    meta_title: LocalizedString;
-    meta_description: LocalizedString;
-    tagline:LocalizedString;
-    teaser:LocalizedString;
-    description:LocalizedString;
-    description_extra:LocalizedString;
-    description_2:LocalizedString;
-    quote:LocalizedString;
-    quote_source:LocalizedString;
-    programme:LocalizedString;
-    info:LocalizedString;
-    description_short:LocalizedString;
-    eticket_info:LocalizedString;
-    custom_data:LocalizedString;
-    
-    video_1:LocalizedString;
-    video_2: LocalizedString;
-
-    genres: string[];
-
-    events: string[];
-    
-    media_gallery:string;
-    review_gallery:string;
-    poster_gallery:string;
-
-    uitdatabank_keywords: string[];
-    uitdatabank_theme:string;
-    uitdatabank_type:string;
-};
-
-/*
---------------------------------------
---------------TYPES-------------------
---------------------------------------
-
-*/
 
 async function fetchFromURL(url: string){
     const all_data= []
@@ -132,12 +76,15 @@ export async function fetchProductions() {
     const url = "/api/v1/productions?page=1"
     //return fetchFromURL(url);
     const data:APIProduction[] = await fetchSinglePageFromURL(url);
-    return data
+    return data;
 }
 
 export async function fetchEvents(){
     const url = "/api/v1/events?page=1"
-    return fetchFromURL(url);
+    const data:APIEvent[] = await fetchSinglePageFromURL(url);
+
+    return data;
+    //return fetchFromURL(url);
 }
 
 export async function fetchCrops(){

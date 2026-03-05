@@ -2,7 +2,22 @@ import { prisma } from "./prisma";
 
 import * as Fetcher from "./fetcher"
 import { id } from "zod/v4/locales";
+import { create } from "domain";
 
+import type {
+  APIProduction,
+  APIEvent,
+  APIEventPrice,
+  APIRank,
+  APISpace,
+  APIHall,
+  APILocation,
+  APIPriceType,
+  APIStatus,
+  LocalizedString,
+  foreignKey
+} from "./APItypes";
+import { uuid } from "zod/v4";
 /*
 
 This script will sync the database with the api 
@@ -10,8 +25,41 @@ run with:
 npx tsx scraper.ts
 */
 
+function mapEvent(event: APIEvent) {
+  /*
+    Maps an event from the API to the event schema used by Prisma.
+    Only scalar fields are included; foreign keys (production_id, status_id, hall_id)
+    must be linked separately via their apiId values.
+  */
 
-function mapProduction(prod: Fetcher.APIProduction) {
+  return {
+    apiId: event["@id"],
+    created_at: event.created_at,
+    updated_at: event.updated_at,
+    starts_at: event.starts_at,
+    ends_at: event.ends_at,
+    intermission_at: event.intermission_at,
+    doors_at: event.doors_at,
+    box_office_id: event.box_office_id || undefined,
+    vendor_id: event.vendor_id || undefined,
+    max_tickets_per_order: event.max_tickets_per_order || undefined,
+    uitdatabank_id: event.uitdatabank_id || undefined,
+    secure: event.secure || undefined,
+    sms_verification: event.sms_verification || undefined,
+    info: event.info || null,
+    eticket_info: event.eticket_info || null,
+    external_order_url: event.external_order_url || null,
+    order_url: event.order_url || undefined,
+    
+    // Foreign keys are linked separately:
+    // production_id: looked up via event.production (apiId string)
+    // status_id: looked up via event.status["@id"] (apiId string)
+    // hall_id: looked up via event.hall["@id"] (apiId string)
+  };
+}
+
+
+function mapProduction(prod: APIProduction) {
   /*
     Maps a production from the API to the production schema used by Prisma.
     Only scalar fields that exist on the `production` table are returned;
@@ -55,55 +103,65 @@ function mapProduction(prod: Fetcher.APIProduction) {
   };
 }
 
+async function sync_events() {
+
+  const events = await Fetcher.fetchEvents();
+
+  console.log(`Fetched ${events.length} events`);
+
+  await prisma.$transaction(async (tx) => {
+    for (const event of events) {
+
+      // to link the production
+      const production = await prisma.production.findUnique({
+        where: { apiId: event.production["@id"] }
+      });
+      
+      await tx.event.upsert({
+        where: { apiId: event["@id"] },
+        update: {
+          ...mapEvent(event),
+          production_id: production?.id
+        },
+        create: {
+          ...mapEvent(event),
+          production_id: production?.id
+        }
+      });
+    }
+  });
+}
+
 async function sync_productions() {
   
   const productions = await Fetcher.fetchProductions();
 
   console.log(`Fetched ${productions.length} productions`);
 
-  const ids = productions.map(e => e["@id"]);
 
-  const existing = await prisma.production.findMany({
-  where: {
-    apiId: { in: productions.map(e => e["@id"]) }
-  },
-    select: { apiId: true }
-  });
-  
-  const existingIds = new Set(existing.map(e => e.apiId));
-  
-  const toCreate = [];
-  const toUpdate = [];
-
-  for (const production of productions) {
-  if (existingIds.has(production["@id"])) {
-    toUpdate.push(production);
-  } else {
-    toCreate.push(production);
-  }
-  }
-  console.log(toCreate.length);
-  console.log(toUpdate.length);
-  
-  await prisma.production.createMany({
-    data: toCreate.map(mapProduction)
-  });
-
-
-  await Promise.all(
-  toUpdate.map(production =>
-      prisma.production.update({
-        where: { apiId: production["@id"] },
-        data: mapProduction(production)
+  // we use upsert because it wil create if a production with the same apiID doesn't exist, else it will update
+  await prisma.$transaction(
+    productions.map(production =>
+      prisma.production.upsert({
+      where: {apiId: production["@id"]},
+      update: mapProduction(production),
+      create: mapProduction(production),
       })
     )
   );
+
+  //Link events
+
+
+  
   
 }
 
 
 async function main() {
+  // ORDER is important here!!!! 
   await sync_productions();
+  await sync_events();
 }
 
 main()
