@@ -70,6 +70,26 @@ export const eventStatusListSchema = z.object({
     }),
 })
 
+export const updateEventSchema = z.object({
+    starts_at: z.coerce.date().optional(),
+    ends_at: z.coerce.date().optional(),
+    doors_at: z.coerce.date().optional(),
+    production_id: z.string().uuid().optional(),
+    info: z.any().optional(),
+})
+
+export const updateEventParamsSchema = z.object({
+    id: z.string().uuid(),
+})
+
+export const createEventSchema = z.object({
+    starts_at: z.coerce.date().nullable().optional(),
+    ends_at: z.coerce.date().nullable().optional(),
+    doors_at: z.coerce.date().nullable().optional(),
+    production_id: z.string().uuid().nullable().optional(),
+    info: z.any().nullable().optional(),
+})
+
 export type PaginationQuery = z.infer<typeof paginationQuerySchema>
 export type EventResponse = z.infer<typeof eventSchema>
 export type EventListResponse = z.infer<typeof eventListSchema>
@@ -77,3 +97,5 @@ export type EventPriceResponse = z.infer<typeof eventPriceSchema>
 export type EventPriceListResponse = z.infer<typeof eventPriceListSchema>
 export type EventStatusResponse = z.infer<typeof eventStatusSchema>
 export type EventStatusListResponse = z.infer<typeof eventStatusListSchema>
+export type UpdateEventInput = z.infer<typeof updateEventSchema>
+export type CreateEventInput = z.infer<typeof createEventSchema>

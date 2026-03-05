@@ -10,6 +10,8 @@ const envSchema = z.object({
     PORT: z.coerce.number().default(3001),
     HOST: z.string().default('0.0.0.0'),
     JWT_SECRET: z.string().min(8),
+    ADMIN_USERNAME: z.string().min(3),
+    ADMIN_PASSWORD: z.string().min(8),
     NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
 })
 

@@ -1,5 +1,11 @@
 import { ProductionsRepository } from './productions.repository.js'
-import type { PaginationQuery, ProductionListResponse } from './productions.schema.js'
+import type { 
+    PaginationQuery, 
+    ProductionListResponse, 
+    UpdateProductionInput, 
+    ProductionResponse,
+    CreateProductionInput 
+} from './productions.schema.js'
 
 export class ProductionsService {
     constructor(private readonly repository: ProductionsRepository) { }
@@ -23,5 +29,13 @@ export class ProductionsService {
                 totalPages,
             },
         }
+    }
+
+    async createProduction(data: CreateProductionInput): Promise<ProductionResponse> {
+        return this.repository.create(data) as any
+    }
+
+    async updateProduction(id: string, data: UpdateProductionInput): Promise<ProductionResponse> {
+        return this.repository.update(id, data) as any
     }
 }

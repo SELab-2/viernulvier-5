@@ -6,8 +6,13 @@ import {
     paginationQuerySchema, 
     eventListSchema,
     eventPriceListSchema,
-    eventStatusListSchema
+    eventStatusListSchema,
+    eventSchema,
+    updateEventSchema,
+    updateEventParamsSchema,
+    createEventSchema
 } from './events.schema.js'
+import { requireAuth } from '../../hooks/require-auth.js'
 
 const eventsRoutes: FastifyPluginAsync = async (fastify) => {
     const repository = new EventsRepository(fastify.prisma)
@@ -48,6 +53,35 @@ const eventsRoutes: FastifyPluginAsync = async (fastify) => {
             },
         },
         handler: (request, reply) => controller.getStatuses(request as any, reply),
+    })
+
+    // POST /api/archive/events
+    fastify.post('/', {
+        preHandler: [requireAuth],
+        schema: {
+            tags: ['events'],
+            summary: 'Create a new event',
+            body: createEventSchema,
+            response: {
+                201: eventSchema,
+            },
+        },
+        handler: (request, reply) => controller.createEvent(request as any, reply),
+    })
+
+    // PUT /api/archive/events/:id
+    fastify.put('/:id', {
+        preHandler: [requireAuth],
+        schema: {
+            tags: ['events'],
+            summary: 'Update an event',
+            params: updateEventParamsSchema,
+            body: updateEventSchema,
+            response: {
+                200: eventSchema,
+            },
+        },
+        handler: (request, reply) => controller.updateEvent(request as any, reply),
     })
 }
 

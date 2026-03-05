@@ -108,4 +108,17 @@ export class EventsRepository {
             where: where as any,
         })
     }
+
+    async create(data: any) {
+        return this.prisma.event.create({
+            data,
+        })
+    }
+
+    async update(id: string, data: any) {
+        return this.prisma.event.update({
+            where: { id },
+            data,
+        })
+    }
 }

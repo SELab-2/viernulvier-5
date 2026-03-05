@@ -25,6 +25,24 @@ export const productionListSchema = z.object({
     }),
 })
 
+export const updateProductionSchema = z.object({
+    title: z.any().optional(),
+    artist: z.any().optional(),
+    description: z.any().optional(),
+})
+
+export const updateProductionParamsSchema = z.object({
+    id: z.string().uuid(),
+})
+
+export const createProductionSchema = z.object({
+    title: z.any().nullable().optional(),
+    artist: z.any().nullable().optional(),
+    description: z.any().nullable().optional(),
+})
+
 export type PaginationQuery = z.infer<typeof paginationQuerySchema>
 export type ProductionResponse = z.infer<typeof productionSchema>
 export type ProductionListResponse = z.infer<typeof productionListSchema>
+export type UpdateProductionInput = z.infer<typeof updateProductionSchema>
+export type CreateProductionInput = z.infer<typeof createProductionSchema>

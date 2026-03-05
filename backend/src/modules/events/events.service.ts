@@ -3,7 +3,10 @@ import type {
     PaginationQuery, 
     EventListResponse, 
     EventPriceListResponse,
-    EventStatusListResponse
+    EventStatusListResponse,
+    UpdateEventInput,
+    EventResponse,
+    CreateEventInput
 } from './events.schema.js'
 
 export class EventsService {
@@ -70,5 +73,13 @@ export class EventsService {
                 totalPages,
             },
         }
+    }
+
+    async createEvent(data: CreateEventInput): Promise<EventResponse> {
+        return this.repository.create(data) as any
+    }
+
+    async updateEvent(id: string, data: UpdateEventInput): Promise<EventResponse> {
+        return this.repository.update(id, data) as any
     }
 }

@@ -42,4 +42,17 @@ export class ProductionsRepository {
             where: where as any,
         })
     }
+
+    async create(data: any) {
+        return this.prisma.production.create({
+            data,
+        })
+    }
+
+    async update(id: string, data: any) {
+        return this.prisma.production.update({
+            where: { id },
+            data,
+        })
+    }
 }

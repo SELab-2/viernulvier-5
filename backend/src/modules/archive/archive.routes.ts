@@ -6,7 +6,6 @@ import {
     paginationQuerySchema, 
     productionListSchema, 
     eventListSchema,
-    genreListSchema,
     locationListSchema 
 } from './archive.schema.js'
 
@@ -36,7 +35,7 @@ const archiveRoutes: FastifyPluginAsync = async (fastify) => {
                 200: productionListSchema,
             },
         },
-        handler: (request, reply) => controller.getProductions(request as any, reply),
+        handler: (request, reply) => controller.getProductions(request, reply),
     })
 
     // GET /api/archive/events
@@ -49,7 +48,7 @@ const archiveRoutes: FastifyPluginAsync = async (fastify) => {
                 200: eventListSchema,
             },
         },
-        handler: (request, reply) => controller.getEvents(request as any, reply),
+        handler: (request, reply) => controller.getEvents(request, reply),
     })
 
     // GET /api/archive/locations
@@ -62,7 +61,7 @@ const archiveRoutes: FastifyPluginAsync = async (fastify) => {
                 200: locationListSchema,
             },
         },
-        handler: (request, reply) => controller.getLocations(request as any, reply),
+        handler: (request, reply) => controller.getLocations(request, reply),
     })
 }
 
