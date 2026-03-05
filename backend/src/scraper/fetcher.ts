@@ -53,7 +53,7 @@ async function fetchSinglePageFromURL(url: string) {
         if (data.view === undefined){
             return data;
         }
-        const view = data["view"];
+        //const view = data["view"];
         const members = data["member"];
 
         console.log(`succesfully retrieved list: ${url}`);
