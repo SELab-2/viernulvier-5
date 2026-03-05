@@ -1,8 +1,6 @@
 import { prisma } from "./prisma";
 
 import * as Fetcher from "./fetcher"
-import { id } from "zod/v4/locales";
-import { create } from "domain";
 
 import type {
   APIProduction,
@@ -17,13 +15,41 @@ import type {
   LocalizedString,
   foreignKey
 } from "./APItypes";
-import { uuid } from "zod/v4";
+
 /*
 
 This script will sync the database with the api 
 run with:
 npx tsx scraper.ts
 */
+
+/**
+ * Validates and sanitizes timestamps from API data.
+ * If the timestamp has an invalid or negative year, uses a fallback date.
+ * @param timestamp - The timestamp string from API
+ * @param fallbackDate - Fallback date to use if validation fails (default: 1970-01-01)
+ * @returns A valid ISO 8601 timestamp string
+ */
+function sanitizeTimestamp(timestamp: string | undefined | null, fallbackDate: string = "1970-01-01T00:00:00Z"): string {
+  if (!timestamp) {
+    return fallbackDate;
+  }
+
+  try {
+    const date = new Date(timestamp);
+    
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      console.warn(`Invalid timestamp "${timestamp}", using fallback`);
+      return fallbackDate;
+    }
+
+    return date.toISOString();
+  } catch (error) {
+    console.warn(`Error parsing timestamp "${timestamp}": ${error}, using fallback`);
+    return fallbackDate;
+  }
+}
 
 function mapEvent(event: APIEvent) {
   /*
@@ -34,12 +60,12 @@ function mapEvent(event: APIEvent) {
 
   return {
     apiId: event["@id"],
-    created_at: event.created_at,
-    updated_at: event.updated_at,
-    starts_at: event.starts_at,
-    ends_at: event.ends_at,
-    intermission_at: event.intermission_at,
-    doors_at: event.doors_at,
+    created_at: sanitizeTimestamp(event.created_at),
+    updated_at: sanitizeTimestamp(event.updated_at),
+    starts_at: sanitizeTimestamp(event.starts_at),
+    ends_at: sanitizeTimestamp(event.ends_at),
+    intermission_at: sanitizeTimestamp(event.intermission_at),
+    doors_at: sanitizeTimestamp(event.doors_at),
     box_office_id: event.box_office_id || undefined,
     vendor_id: event.vendor_id || undefined,
     max_tickets_per_order: event.max_tickets_per_order || undefined,
@@ -68,8 +94,8 @@ function mapProduction(prod: APIProduction) {
   */
 
   return {
-      created_at: prod.created_at,
-      updated_at: prod.updated_at,
+      created_at: sanitizeTimestamp(prod.created_at),
+      updated_at: sanitizeTimestamp(prod.updated_at),
       apiId: prod["@id"],
       vendor_id: prod.vendor_id,
       box_office_id: prod.box_office_id,
@@ -103,6 +129,176 @@ function mapProduction(prod: APIProduction) {
   };
 }
 
+function mapLocation(location:APILocation) {
+  /*
+    Maps a location from the API to the location schema used by Prisma.
+    Only scalar fields are included.
+  */
+  return {
+    created_at: sanitizeTimestamp(location.created_at),
+    updated_at: sanitizeTimestamp(location.updated_at),
+    apiId: location["@id"],
+    name: location.name,
+    code: location.code,
+    street: location.street,
+    number: location.number,
+    postal_code: location.postal_code,
+    city: location.city,
+    phone_1: location.phone_1,
+    phone_2: location.phone_2,
+    own_location: location.own_location,
+    country: location.country,
+    uitdatabank_id: location.uitdatabank_id,
+  };
+}
+
+function mapSpace(space: APISpace) {
+  /*
+    Maps a space from the API to the space schema used by Prisma.
+    location_id will be looked up via the location apiId.
+  */
+  return {
+    created_at: sanitizeTimestamp(space.created_at),
+    updated_at: sanitizeTimestamp(space.updated_at),
+    apiId: space["@id"],
+    vendor_id: space.vendor_id,
+    name: space.name,
+    // location_id: looked up via space.location["@id"] (apiId string)
+  };
+}
+
+function mapHall(hall: APIHall) {
+  /*
+    Maps a hall from the API to the hall schema used by Prisma.
+    space_id will be looked up via the space apiId.
+  */
+  return {
+    created_at: sanitizeTimestamp(hall.created_at),
+    updated_at: sanitizeTimestamp(hall.updated_at),
+    apiId: hall["@id"],
+    vendor_id: hall.vendor_id,
+    box_office_id: hall.box_office_id,
+    seat_selection: hall.seat_selection,
+    open_seating: hall.open_seating,
+    name: hall.name,
+    remark: hall.remark,
+    // space_id: looked up via hall.space["@id"] (apiId string)
+  };
+}
+
+function mapStatus(status: APIStatus) {
+  /*
+    Maps a status from the API to the status schema used by Prisma.
+    Only scalar fields are included.
+  */
+  return {
+    created_at: sanitizeTimestamp(status.created_at),
+    updated_at: sanitizeTimestamp(status.updated_at),
+    apiId: status["@id"],
+    name: status.name,
+    short_name: status.short_name,
+    fixed: status.fixed,
+    visible: status.visible,
+    bookable: status.bookable,
+  };
+}
+
+
+async function sync_locations() {
+
+  const locations = await Fetcher.fetchLocations();
+
+  console.log(`Fetched ${locations.length} locations`);
+
+  await prisma.$transaction(locations.map((location) => prisma.location.upsert(
+    {
+      where: {apiId: location["@id"]},
+      update: mapLocation(location),
+      create: mapLocation(location),
+    }
+  )));
+}
+
+async function sync_hall() {
+
+  const halls = await Fetcher.fetchHalls();
+
+  console.log(`Fetched ${halls.length} halls`);
+
+  await prisma.$transaction(async (tx) => {
+    for (const hall of halls) {
+
+      // link the space
+      const spaceApiId = hall.space;
+      
+      let space = null;
+      if (spaceApiId) {
+        space = await tx.space.findUnique({
+          where: { apiId: spaceApiId }
+        });
+      }
+      
+      await tx.hall.upsert({
+        where: { apiId: hall["@id"] },
+        update: {
+          ...mapHall(hall),
+          space_id: space?.id || null
+        },
+        create: {
+          ...mapHall(hall),
+          space_id: space?.id || null
+        }
+      });
+    }
+  });
+}
+
+async function sync_spaces() {
+
+  const spaces = await Fetcher.fetchSpaces();
+
+  console.log(`Fetched ${spaces.length} spaces`);
+
+  await prisma.$transaction(async (tx) => {
+    for (const space of spaces) {
+
+      // to link the location
+      const location = await prisma.location.findUnique({
+        where: { apiId: space.location }
+      });
+      
+      await tx.space.upsert({
+        where: { apiId: space["@id"] },
+        update: {
+          ...mapSpace(space),
+          location_id: location?.id
+        },
+        create: {
+          ...mapSpace(space),
+          location_id: location?.id
+        }
+      });
+    }
+  });
+}
+
+async function sync_status() {
+
+  const statuses = await Fetcher.fetchStatuses();
+
+  console.log(`Fetched ${statuses.length} statuses`);
+
+  await prisma.$transaction(
+    statuses.map(status =>
+      prisma.status.upsert({
+        where: { apiId: status["@id"] },
+        update: mapStatus(status),
+        create: mapStatus(status),
+      })
+    )
+  );
+}
+
 async function sync_events() {
 
   const events = await Fetcher.fetchEvents();
@@ -113,19 +309,31 @@ async function sync_events() {
     for (const event of events) {
 
       // to link the production
-      const production = await prisma.production.findUnique({
+      const production = await tx.production.findUnique({
         where: { apiId: event.production["@id"] }
       });
       
+      const hall = await tx.hall.findUnique({
+        where: { apiId: event.hall }
+      });
+
+      const status = await tx.status.findUnique({
+        where: { apiId: event.status }
+      });
+
       await tx.event.upsert({
         where: { apiId: event["@id"] },
         update: {
           ...mapEvent(event),
-          production_id: production?.id
+          production_id: production?.id,
+          hall_id: hall?.id,
+          status_id: status?.id
         },
         create: {
           ...mapEvent(event),
-          production_id: production?.id
+          production_id: production?.id,
+          hall_id: hall?.id,
+          status_id: status?.id
         }
       });
     }
@@ -150,16 +358,20 @@ async function sync_productions() {
     )
   );
 
-  //Link events
-
-
-  
-  
+  //Link events 
 }
 
 
 async function main() {
-  // ORDER is important here!!!! 
+  // locations
+  await sync_locations();
+  await sync_spaces();
+  await sync_hall();
+
+  // statuses
+  await sync_status();
+
+  // proodcutions
   await sync_productions();
   await sync_events();
 }

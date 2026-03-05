@@ -93,7 +93,7 @@ export type APISpace = {
   updated_at: string;
   vendor_id: string;
   name: LocalizedString;
-  location: APILocation;
+  location: string;
 };
 
 export type APIHall = {
@@ -108,7 +108,7 @@ export type APIHall = {
   open_seating: string;
   name: LocalizedString;
   remark: LocalizedString;
-  space: APISpace;
+  space: string;
 };
 
 export type APIStatus = {

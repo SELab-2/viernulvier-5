@@ -109,7 +109,8 @@ export async function fetchGenres(){
 
 export async function fetchHalls(){
     const url = "/api/v1/halls?page=1";
-    return fetchFromURL(url);
+    const data:APIHall[] = await fetchFromURL(url);
+    return data;
 }
 
 export async function fetchGalleryItems(){
@@ -119,7 +120,8 @@ export async function fetchGalleryItems(){
 
 export async function fetchLocations(){
     const url = "/api/v1/locations?page=1";
-    return fetchFromURL(url);
+    const data:APILocation[] = await fetchFromURL(url);
+    return data;
 }
 
 export async function fetchPrices(){
@@ -134,7 +136,8 @@ export async function fetchRanks(){
 
 export async function fetchSpaces(){
     const url = "/api/v1/spaces?page=1";
-    return fetchFromURL(url);
+    const data:APISpace[] = await fetchFromURL(url);
+    return data
 }
 
 export async function fetchStatuses(){
