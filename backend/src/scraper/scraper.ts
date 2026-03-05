@@ -19,13 +19,13 @@ npx tsx scraper.ts
 */
 
 /**
- * Validates and sanitizes timestamps from API data.
- * If the timestamp has an invalid or negative year, uses a fallback date.
+ * Validates and sanitizes required timestamps (created_at, updated_at).
+ * Always returns a valid date - never returns null.
  * @param timestamp - The timestamp string from API
  * @param fallbackDate - Fallback date to use if validation fails (default: 1970-01-01)
- * @returns A valid ISO 8601 timestamp string
+ * @returns A valid ISO 8601 timestamp string (never null)
  */
-function sanitizeTimestamp(timestamp: string | undefined | null, fallbackDate: string = "1970-01-01T00:00:00Z"): string {
+function sanitizeTimestampRequired(timestamp: string | undefined | null, fallbackDate: string = "1970-01-01T00:00:00Z"): string {
   if (!timestamp) {
     return fallbackDate;
   }
@@ -36,6 +36,48 @@ function sanitizeTimestamp(timestamp: string | undefined | null, fallbackDate: s
     // Check if date is valid
     if (isNaN(date.getTime())) {
       console.warn(`Invalid timestamp "${timestamp}", using fallback`);
+      return fallbackDate;
+    }
+
+    // Check if year is 0, negative, or unreasonable (before year 1)
+    const year = date.getFullYear();
+    if (year < 1) {
+      console.warn(`Timestamp "${timestamp}" has invalid year ${year}, using fallback`);
+      return fallbackDate;
+    }
+
+    return date.toISOString();
+  } catch (error) {
+    console.warn(`Error parsing timestamp "${timestamp}": ${error}, using fallback`);
+    return fallbackDate;
+  }
+}
+
+/**
+ * Validates and sanitizes optional timestamps (starts_at, ends_at, etc.).
+ * Can return null if the timestamp is invalid.
+ * @param timestamp - The timestamp string from API
+ * @param fallbackDate - Fallback date to use if validation fails (default: null)
+ * @returns A valid ISO 8601 timestamp string or null
+ */
+function sanitizeTimestampOptional(timestamp: string | undefined | null, fallbackDate: string | null = null): string | null {
+  if (!timestamp) {
+    return fallbackDate;
+  }
+
+  try {
+    const date = new Date(timestamp);
+    
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      console.warn(`Invalid timestamp "${timestamp}", using fallback`);
+      return fallbackDate;
+    }
+
+    // Check if year is 0, negative, or unreasonable (before year 1)
+    const year = date.getFullYear();
+    if (year < 1) {
+      console.warn(`Timestamp "${timestamp}" has invalid year ${year}, using fallback`);
       return fallbackDate;
     }
 
@@ -55,12 +97,12 @@ function mapEvent(event: APIEvent) {
 
   return {
     apiId: event["@id"],
-    created_at: sanitizeTimestamp(event.created_at),
-    updated_at: sanitizeTimestamp(event.updated_at),
-    starts_at: sanitizeTimestamp(event.starts_at),
-    ends_at: sanitizeTimestamp(event.ends_at),
-    intermission_at: sanitizeTimestamp(event.intermission_at),
-    doors_at: sanitizeTimestamp(event.doors_at),
+    created_at: sanitizeTimestampRequired(event.created_at),
+    updated_at: sanitizeTimestampRequired(event.updated_at),
+    starts_at: sanitizeTimestampOptional(event.starts_at),
+    ends_at: sanitizeTimestampOptional(event.ends_at),
+    intermission_at: sanitizeTimestampOptional(event.intermission_at),
+    doors_at: sanitizeTimestampOptional(event.doors_at),
     box_office_id: event.box_office_id || undefined,
     vendor_id: event.vendor_id || undefined,
     max_tickets_per_order: event.max_tickets_per_order || undefined,
@@ -89,8 +131,8 @@ function mapProduction(prod: APIProduction) {
   */
 
   return {
-      created_at: sanitizeTimestamp(prod.created_at),
-      updated_at: sanitizeTimestamp(prod.updated_at),
+      created_at: sanitizeTimestampRequired(prod.created_at),
+      updated_at: sanitizeTimestampRequired(prod.updated_at),
       apiId: prod["@id"],
       vendor_id: prod.vendor_id,
       box_office_id: prod.box_office_id,
@@ -130,8 +172,8 @@ function mapLocation(location:APILocation) {
     Only scalar fields are included.
   */
   return {
-    created_at: sanitizeTimestamp(location.created_at),
-    updated_at: sanitizeTimestamp(location.updated_at),
+    created_at: sanitizeTimestampRequired(location.created_at),
+    updated_at: sanitizeTimestampRequired(location.updated_at),
     apiId: location["@id"],
     name: location.name,
     code: location.code,
@@ -153,8 +195,8 @@ function mapSpace(space: APISpace) {
     location_id will be looked up via the location apiId.
   */
   return {
-    created_at: sanitizeTimestamp(space.created_at),
-    updated_at: sanitizeTimestamp(space.updated_at),
+    created_at: sanitizeTimestampRequired(space.created_at),
+    updated_at: sanitizeTimestampRequired(space.updated_at),
     apiId: space["@id"],
     vendor_id: space.vendor_id,
     name: space.name,
@@ -168,8 +210,8 @@ function mapHall(hall: APIHall) {
     space_id will be looked up via the space apiId.
   */
   return {
-    created_at: sanitizeTimestamp(hall.created_at),
-    updated_at: sanitizeTimestamp(hall.updated_at),
+    created_at: sanitizeTimestampRequired(hall.created_at),
+    updated_at: sanitizeTimestampRequired(hall.updated_at),
     apiId: hall["@id"],
     vendor_id: hall.vendor_id,
     box_office_id: hall.box_office_id,
@@ -187,8 +229,8 @@ function mapStatus(status: APIStatus) {
     Only scalar fields are included.
   */
   return {
-    created_at: sanitizeTimestamp(status.created_at),
-    updated_at: sanitizeTimestamp(status.updated_at),
+    created_at: sanitizeTimestampRequired(status.created_at),
+    updated_at: sanitizeTimestampRequired(status.updated_at),
     apiId: status["@id"],
     name: status.name,
     short_name: status.short_name,
@@ -201,159 +243,217 @@ function mapStatus(status: APIStatus) {
 
 async function sync_locations() {
 
-  const locations = await Fetcher.fetchLocations();
+  let totalProcessed = 0;
+  let pageCount = 0;
 
-  console.log(`Fetched ${locations.length} locations`);
+  for await (const page of Fetcher.fetchLocationsPages()) {
+    pageCount++;
+    console.log(`Processing page ${pageCount} with ${page.length} locations`);
 
-  await prisma.$transaction(locations.map((location) => prisma.location.upsert(
-    {
-      where: {apiId: location["@id"]},
-      update: mapLocation(location),
-      create: mapLocation(location),
-    }
-  )));
+    if (page.length === 0) break;
+
+    await prisma.$transaction(
+      page.map(location =>
+        prisma.location.upsert({
+          where: { apiId: location["@id"] },
+          update: mapLocation(location),
+          create: mapLocation(location),
+        })
+      )
+    );
+
+    totalProcessed += page.length;
+  }
+
+  console.log(`Completed syncing ${totalProcessed} locations from ${pageCount} pages`);
 }
 
 async function sync_hall() {
 
-  const halls = await Fetcher.fetchHalls();
+  let totalProcessed = 0;
+  let pageCount = 0;
 
-  console.log(`Fetched ${halls.length} halls`);
+  for await (const page of Fetcher.fetchHallsPages()) {
+    pageCount++;
+    console.log(`Processing page ${pageCount} with ${page.length} halls`);
 
-  await prisma.$transaction(async (tx) => {
-    for (const hall of halls) {
+    if (page.length === 0) break;
 
-      // link the space
-      const spaceApiId = hall.space;
-      
-      let space = null;
-      if (spaceApiId) {
-        space = await tx.space.findUnique({
-          where: { apiId: spaceApiId }
+    await prisma.$transaction(async (tx) => {
+      for (const hall of page) {
+
+        // link the space
+        const spaceApiId = hall.space;
+
+        let space = null;
+        if (spaceApiId) {
+          space = await tx.space.findUnique({
+            where: { apiId: spaceApiId }
+          });
+        }
+
+        await tx.hall.upsert({
+          where: { apiId: hall["@id"] },
+          update: {
+            ...mapHall(hall),
+            space_id: space?.id || null
+          },
+          create: {
+            ...mapHall(hall),
+            space_id: space?.id || null
+          }
         });
       }
-      
-      await tx.hall.upsert({
-        where: { apiId: hall["@id"] },
-        update: {
-          ...mapHall(hall),
-          space_id: space?.id || null
-        },
-        create: {
-          ...mapHall(hall),
-          space_id: space?.id || null
-        }
-      });
-    }
-  });
+    });
+
+    totalProcessed += page.length;
+  }
+
+  console.log(`Completed syncing ${totalProcessed} halls from ${pageCount} pages`);
 }
 
 async function sync_spaces() {
 
-  const spaces = await Fetcher.fetchSpaces();
+  let totalProcessed = 0;
+  let pageCount = 0;
 
-  console.log(`Fetched ${spaces.length} spaces`);
+  for await (const page of Fetcher.fetchSpacesPages()) {
+    pageCount++;
+    console.log(`Processing page ${pageCount} with ${page.length} spaces`);
 
-  await prisma.$transaction(async (tx) => {
-    for (const space of spaces) {
+    if (page.length === 0) break;
 
-      // to link the location
-      const location = await prisma.location.findUnique({
-        where: { apiId: space.location }
-      });
-      
-      await tx.space.upsert({
-        where: { apiId: space["@id"] },
-        update: {
-          ...mapSpace(space),
-          location_id: location?.id
-        },
-        create: {
-          ...mapSpace(space),
-          location_id: location?.id
-        }
-      });
-    }
-  });
+    await prisma.$transaction(async (tx) => {
+      for (const space of page) {
+
+        // to link the location
+        const location = await tx.location.findUnique({
+          where: { apiId: space.location }
+        });
+
+        await tx.space.upsert({
+          where: { apiId: space["@id"] },
+          update: {
+            ...mapSpace(space),
+            location_id: location?.id
+          },
+          create: {
+            ...mapSpace(space),
+            location_id: location?.id
+          }
+        });
+      }
+    });
+
+    totalProcessed += page.length;
+  }
+
+  console.log(`Completed syncing ${totalProcessed} spaces from ${pageCount} pages`);
 }
 
 async function sync_status() {
 
-  const statuses = await Fetcher.fetchStatuses();
+  let totalProcessed = 0;
+  let pageCount = 0;
 
-  console.log(`Fetched ${statuses.length} statuses`);
+  for await (const page of Fetcher.fetchStatusesPages()) {
+    pageCount++;
+    console.log(`Processing page ${pageCount} with ${page.length} statuses`);
 
-  await prisma.$transaction(
-    statuses.map(status =>
-      prisma.status.upsert({
-        where: { apiId: status["@id"] },
-        update: mapStatus(status),
-        create: mapStatus(status),
-      })
-    )
-  );
+    if (page.length === 0) break;
+
+    await prisma.$transaction(
+      page.map(status =>
+        prisma.status.upsert({
+          where: { apiId: status["@id"] },
+          update: mapStatus(status),
+          create: mapStatus(status),
+        })
+      )
+    );
+
+    totalProcessed += page.length;
+  }
+
+  console.log(`Completed syncing ${totalProcessed} statuses from ${pageCount} pages`);
 }
 
 async function sync_events() {
 
-  const events = await Fetcher.fetchEvents();
+  let totalProcessed = 0;
+  let pageCount = 0;
 
-  console.log(`Fetched ${events.length} events`);
+  for await (const page of Fetcher.fetchEventsPages()) {
+    pageCount++;
+    console.log(`Processing page ${pageCount} with ${page.length} events`);
 
-  await prisma.$transaction(async (tx) => {
-    for (const event of events) {
+    if (page.length === 0) break;
 
-      // to link the production
-      const production = await tx.production.findUnique({
-        where: { apiId: event.production["@id"] }
-      });
-      
-      const hall = await tx.hall.findUnique({
-        where: { apiId: event.hall }
-      });
+    await prisma.$transaction(async (tx) => {
+      for (const event of page) {
 
-      const status = await tx.status.findUnique({
-        where: { apiId: event.status }
-      });
+        // to link the production
+        const production = await tx.production.findUnique({
+          where: { apiId: event.production["@id"] }
+        });
 
-      await tx.event.upsert({
-        where: { apiId: event["@id"] },
-        update: {
-          ...mapEvent(event),
-          production_id: production?.id,
-          hall_id: hall?.id,
-          status_id: status?.id
-        },
-        create: {
-          ...mapEvent(event),
-          production_id: production?.id,
-          hall_id: hall?.id,
-          status_id: status?.id
-        }
-      });
-    }
-  });
+        const hall = await tx.hall.findUnique({
+          where: { apiId: event.hall }
+        });
+
+        const status = await tx.status.findUnique({
+          where: { apiId: event.status }
+        });
+
+        await tx.event.upsert({
+          where: { apiId: event["@id"] },
+          update: {
+            ...mapEvent(event),
+            production_id: production?.id,
+            hall_id: hall?.id,
+            status_id: status?.id
+          },
+          create: {
+            ...mapEvent(event),
+            production_id: production?.id,
+            hall_id: hall?.id,
+            status_id: status?.id
+          }
+        });
+      }
+    });
+
+    totalProcessed += page.length;
+  }
+
+  console.log(`Completed syncing ${totalProcessed} events from ${pageCount} pages`);
 }
 
 async function sync_productions() {
-  
-  const productions = await Fetcher.fetchProductions();
 
-  console.log(`Fetched ${productions.length} productions`);
+  let totalProcessed = 0;
+  let pageCount = 0;
 
+  for await (const page of Fetcher.fetchProductionsPages()) {
+    pageCount++;
+    console.log(`Processing page ${pageCount} with ${page.length} productions`);
 
-  // we use upsert because it wil create if a production with the same apiID doesn't exist, else it will update
-  await prisma.$transaction(
-    productions.map(production =>
-      prisma.production.upsert({
-      where: {apiId: production["@id"]},
-      update: mapProduction(production),
-      create: mapProduction(production),
-      })
-    )
-  );
+    if (page.length === 0) break;
 
-  //Link events 
+    await prisma.$transaction(
+      page.map(production =>
+        prisma.production.upsert({
+          where: { apiId: production["@id"] },
+          update: mapProduction(production),
+          create: mapProduction(production),
+        })
+      )
+    );
+
+    totalProcessed += page.length;
+  }
+
+  console.log(`Completed syncing ${totalProcessed} productions from ${pageCount} pages`);
 }
 
 

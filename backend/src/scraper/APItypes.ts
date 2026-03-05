@@ -6,11 +6,13 @@
 
 */
 
+// Sometimes tables referebnce eachother like this
 export type foreignKey = {
     "@type":string;
     "@id": string;
 }
 
+// For fields with multiple translations
 export type LocalizedString = {
   nl?: string;
   en?: string;

@@ -6,6 +6,7 @@ import type {
   APISpace,
   APIHall,
   APILocation,
+  APIStatus,
 } from "./APItypes";
 
 const api_key = "60d4b42665b2251a14ac5c5bf5adabab3673bcdfbc68"
@@ -17,34 +18,40 @@ const api = `https://www.viernulvier.gent{url}`;
 
 
 
-async function fetchFromURL(url: string){
-    const all_data= []
-    while (true){
-        const link = api.replace("{url}", url)
-        const response = await axios.get(link, {headers: headers});
-        if (response.status === 200){
-            const data = response.data;
-            if (data.view === undefined){
-                break;
-            }
-            const view = data["view"];
-            const members = data["member"];
-            all_data.push(...members);
-            console.log(`succesfully retrieved list: ${url}`);
-            if (!("next" in view)) {
-                break;
-            }
-            url = data["view"]["next"];
-        }else {
-            console.log("Error:", response.status);
-            console.log(response.statusText);
+async function* fetchPagesFromURL<T = any>(url: string): AsyncGenerator<T[]> {
+    let currentUrl = url;
+    while (true) {
+        const link = api.replace("{url}", currentUrl);
+        const response = await axios.get(link, { headers: headers });
+        
+        if (response.status !== 200) {
+            console.error("Error:", response.status, response.statusText);
             break;
         }
+        
+        const data = response.data;
+        
+        // If no view, this is a single item response
+        if (data.view === undefined) {
+            yield data.member || [data];
+            break;
+        }
+        
+        const view = data["view"];
+        const members = data["member"];
+        
+        console.log(`Fetched page with ${members.length} items: ${currentUrl}`);
+        yield members;
+        
+        if (!("next" in view)) {
+            break;
+        }
+        
+        currentUrl = view.next;
     }
-    return all_data
 }
 
-async function fetchSinglePageFromURL(url: string) {
+async function fetchSinglePageFromURL<T = any>(url: string): Promise<T[]> {
 
     const link = api.replace("{url}", url)
     const response = await axios.get(link, {headers: headers});
@@ -67,100 +74,45 @@ async function fetchSinglePageFromURL(url: string) {
     }
 }
 
-export async function fetchProductions() {
+export async function fetchProductions(): Promise<APIProduction[]> {
     const url = "/api/v1/productions?page=1"
     //return fetchFromURL(url);
-    const data:APIProduction[] = await fetchSinglePageFromURL(url);
+    const data: APIProduction[] = await fetchSinglePageFromURL<APIProduction>(url);
     return data;
 }
 
-export async function fetchEvents(){
+export async function fetchEvents(): Promise<APIEvent[]> {
     const url = "/api/v1/events?page=1"
-    const data:APIEvent[] = await fetchSinglePageFromURL(url);
+    const data: APIEvent[] = await fetchSinglePageFromURL<APIEvent>(url);
 
     return data;
     //return fetchFromURL(url);
 }
 
-export async function fetchCrops(){
-    const url = "/api/v1/media/items/crops?page=1"
-    return fetchFromURL(url);
+// Paginated versions that yield pages one at a time
+export async function* fetchProductionsPages(): AsyncGenerator<APIProduction[]> {
+    yield* fetchPagesFromURL<APIProduction>("/api/v1/productions?page=1");
 }
 
-export async function fetchEventPrices(){
-    const url = "/api/v1/events/prices?page=1"
-    return fetchFromURL(url);
+export async function* fetchEventsPages(): AsyncGenerator<APIEvent[]> {
+    yield* fetchPagesFromURL<APIEvent>("/api/v1/events?page=1");
 }
 
-export async function fetchGalleries(){
-    const url = "/api/v1/media/galleries?page=1";
-    return fetchFromURL(url);
+export async function* fetchLocationsPages(): AsyncGenerator<APILocation[]> {
+    yield* fetchPagesFromURL<APILocation>("/api/v1/locations?page=1");
 }
 
-export async function fetchGenres(){
-    const url = "/api/v1/genres?page=1";
-    return fetchFromURL(url);
+export async function* fetchSpacesPages(): AsyncGenerator<APISpace[]> {
+    yield* fetchPagesFromURL<APISpace>("/api/v1/spaces?page=1");
 }
 
-export async function fetchHalls(){
-    const url = "/api/v1/halls?page=1";
-    const data:APIHall[] = await fetchFromURL(url);
-    return data;
+export async function* fetchHallsPages(): AsyncGenerator<APIHall[]> {
+    yield* fetchPagesFromURL<APIHall>("/api/v1/halls?page=1");
 }
 
-export async function fetchGalleryItems(){
-    const url = "/api/v1/media/items?page=1";
-    return fetchFromURL(url);
+export async function* fetchStatusesPages(): AsyncGenerator<APIStatus[]> {
+    yield* fetchPagesFromURL<APIStatus>("/api/v1/events/statuses?page=1");
 }
-
-export async function fetchLocations(){
-    const url = "/api/v1/locations?page=1";
-    const data:APILocation[] = await fetchFromURL(url);
-    return data;
-}
-
-export async function fetchPrices(){
-    const url = "/api/v1/prices?page=1";
-    return fetchFromURL(url);
-}
-
-export async function fetchRanks(){
-    const url = "/api/v1/prices/ranks?page=1";
-    return fetchFromURL(url);
-}
-
-export async function fetchSpaces(){
-    const url = "/api/v1/spaces?page=1";
-    const data:APISpace[] = await fetchFromURL(url);
-    return data
-}
-
-export async function fetchStatuses(){
-    const url = "/api/v1/events/statuses?page=1";
-    return fetchFromURL(url);
-}
-
-export async function fetchTags(){
-    const url = "/api/v1/tags?page=1";
-    return fetchFromURL(url);
-}
-export async function fetchUitDatabankKeywords(){
-    const url = "/api/v1/uitdatabank/keywords?page=1";
-    return fetchFromURL(url);
-}
-
-export async function fetchUitDatabankThemes(){
-    const url = "/api/v1/uitdatabank/themes?page=1";
-    return fetchFromURL(url);
-}
-
-export async function fetchUitDatabankTypes(){
-    const url = "/api/v1/uitdatabank/types?page=1";
-    return fetchFromURL(url);
-}
-
-
-// fetchProductions();
 // fetchEvents();
 // fetchCrops();
 // fetchEventPrices();
