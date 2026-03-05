@@ -4,7 +4,8 @@ import type {
     ProductionListResponse, 
     EventListResponse,
     GenreListResponse,
-    LocationListResponse 
+    LocationListResponse,
+    TagListResponse
 } from './archive.schema.js'
 
 /**
@@ -97,6 +98,30 @@ export class ArchiveService {
         const [data, total] = await Promise.all([
             this.repository.findAllLocations({ page, limit, search }),
             this.repository.countLocations(search),
+        ])
+
+        const totalPages = Math.ceil(total / limit)
+
+        return {
+            data: data as any,
+            meta: {
+                total,
+                page,
+                limit,
+                totalPages,
+            },
+        }
+    }
+
+    /**
+     * Business logic for fetching tags with pagination.
+     */
+    async getTags(options: PaginationQuery): Promise<TagListResponse> {
+        const { page, limit, search } = options
+
+        const [data, total] = await Promise.all([
+            this.repository.findAllTags({ page, limit, search }),
+            this.repository.countTags(search),
         ])
 
         const totalPages = Math.ceil(total / limit)

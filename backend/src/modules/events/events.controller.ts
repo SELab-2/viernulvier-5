@@ -19,9 +19,4 @@ export class EventsController {
         const statuses = await this.service.getStatuses(request.query)
         return reply.status(200).send(statuses)
     }
-
-    async getExtras(request: FastifyRequest<{ Querystring: PaginationQuery }>, reply: FastifyReply) {
-        const extras = await this.service.getExtras(request.query)
-        return reply.status(200).send(extras)
-    }
 }

@@ -86,33 +86,4 @@ describe('Events Routes', () => {
             expect(body).toHaveProperty('data')
         })
     })
-
-    describe('GET /api/archive/events/extras', () => {
-        it('should return a paginated list of event extras with 200 OK', async () => {
-            const response = await app.inject({
-                method: 'GET',
-                url: '/api/archive/events/extras',
-                query: { page: '1', limit: '10' }
-            })
-
-            const body = JSON.parse(response.payload)
-
-            expect(response.statusCode).toBe(200)
-            expect(body).toHaveProperty('data')
-            expect(body).toHaveProperty('meta')
-            expect(Array.isArray(body.data)).toBe(true)
-        })
-
-        it('should work with a search query for extras', async () => {
-            const response = await app.inject({
-                method: 'GET',
-                url: '/api/archive/events/extras',
-                query: { search: 'info' }
-            })
-
-            expect(response.statusCode).toBe(200)
-            const body = JSON.parse(response.payload)
-            expect(body).toHaveProperty('data')
-        })
-    })
 })

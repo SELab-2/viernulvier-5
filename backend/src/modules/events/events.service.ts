@@ -3,8 +3,7 @@ import type {
     PaginationQuery, 
     EventListResponse, 
     EventPriceListResponse,
-    EventStatusListResponse,
-    EventExtraListResponse
+    EventStatusListResponse
 } from './events.schema.js'
 
 export class EventsService {
@@ -58,27 +57,6 @@ export class EventsService {
         const [data, total] = await Promise.all([
             this.repository.findAllStatuses({ page, limit, search }),
             this.repository.countStatuses(search),
-        ])
-
-        const totalPages = Math.ceil(total / limit)
-
-        return {
-            data: data as any,
-            meta: {
-                total,
-                page,
-                limit,
-                totalPages,
-            },
-        }
-    }
-
-    async getExtras(options: PaginationQuery): Promise<EventExtraListResponse> {
-        const { page, limit, search } = options
-
-        const [data, total] = await Promise.all([
-            this.repository.findAllExtras({ page, limit, search }),
-            this.repository.countExtras(search),
         ])
 
         const totalPages = Math.ceil(total / limit)

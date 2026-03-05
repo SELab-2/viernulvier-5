@@ -26,4 +26,18 @@ describe('Taxonomies Routes', () => {
             expect(body).toHaveProperty('data')
         })
     })
+
+    describe('GET /api/archive/tags', () => {
+        it('should return a paginated list of tags with 200 OK', async () => {
+            const response = await app.inject({
+                method: 'GET',
+                url: '/api/archive/tags',
+            })
+
+            const body = JSON.parse(response.payload)
+
+            expect(response.statusCode).toBe(200)
+            expect(body).toHaveProperty('data')
+        })
+    })
 })

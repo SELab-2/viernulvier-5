@@ -3,7 +3,7 @@ import type { PrismaClient } from '../../generated/prisma/client.js'
 export class TaxonomiesRepository {
     constructor(private readonly prisma: PrismaClient) { }
 
-    async findAll(options: { page: number; limit: number; search?: string }) {
+    async findAllGenres(options: { page: number; limit: number; search?: string }) {
         const { page, limit, search } = options
         const skip = (page - 1) * limit
 
@@ -30,7 +30,7 @@ export class TaxonomiesRepository {
         })
     }
 
-    async count(search?: string) {
+    async countGenres(search?: string) {
         const where = search ? {
             name: {
                 path: ['nl'],
@@ -42,4 +42,50 @@ export class TaxonomiesRepository {
             where: where as any,
         })
     }
-}
+
+    /**
+     * Get a paginated list of tags from the database.
+     */
+    async findAllTags(options: { page: number; limit: number; search?: string }) {
+        const { page, limit, search } = options
+        const skip = (page - 1) * limit
+
+        const where = search ? {
+            name: {
+                path: ['nl'],
+                string_contains: search,
+            },
+        } : {}
+
+        return this.prisma.tag.findMany({
+            where: where as any,
+            skip,
+            take: limit,
+            orderBy: { created_at: 'desc' },
+            select: {
+                id: true,
+                code: true,
+                name: true,
+                created_at: true,
+                updated_at: true,
+            },
+        })
+    }
+
+    /**
+     * Count total number of tags for pagination metadata.
+     */
+    async countTags(search?: string) {
+        const where = search ? {
+            name: {
+                path: ['nl'],
+                string_contains: search,
+            },
+        } : {}
+
+        return this.prisma.tag.count({
+            where: where as any,
+        })
+    }
+    }
+

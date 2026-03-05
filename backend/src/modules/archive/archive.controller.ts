@@ -36,4 +36,12 @@ export class ArchiveController {
         const locations = await this.service.getLocations(request.query)
         return reply.status(200).send(locations)
     }
+
+    /**
+     * Handle HTTP GET request for tag list.
+     */
+    async getTags(request: FastifyRequest<{ Querystring: PaginationQuery }>, reply: FastifyReply) {
+        const tags = await this.service.getTags(request.query)
+        return reply.status(200).send(tags)
+    }
 }

@@ -128,4 +128,21 @@ describe('Archive Routes', () => {
             expect(Array.isArray(body.data)).toBe(true)
         })
     })
+
+    describe('GET /api/archive/tags', () => {
+        it('should return a paginated list of tags with 200 OK', async () => {
+            const response = await app.inject({
+                method: 'GET',
+                url: '/api/archive/tags',
+                query: { page: '1', limit: '10' }
+            })
+
+            const body = JSON.parse(response.payload)
+
+            expect(response.statusCode).toBe(200)
+            expect(body).toHaveProperty('data')
+            expect(body).toHaveProperty('meta')
+            expect(Array.isArray(body.data)).toBe(true)
+        })
+    })
 })

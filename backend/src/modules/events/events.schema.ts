@@ -70,16 +70,6 @@ export const eventStatusListSchema = z.object({
     }),
 })
 
-export const eventExtraListSchema = z.object({
-    data: z.array(z.any()),
-    meta: z.object({
-        total: z.number(),
-        page: z.number(),
-        limit: z.number(),
-        totalPages: z.number(),
-    }),
-})
-
 export type PaginationQuery = z.infer<typeof paginationQuerySchema>
 export type EventResponse = z.infer<typeof eventSchema>
 export type EventListResponse = z.infer<typeof eventListSchema>
@@ -87,4 +77,3 @@ export type EventPriceResponse = z.infer<typeof eventPriceSchema>
 export type EventPriceListResponse = z.infer<typeof eventPriceListSchema>
 export type EventStatusResponse = z.infer<typeof eventStatusSchema>
 export type EventStatusListResponse = z.infer<typeof eventStatusListSchema>
-export type EventExtraListResponse = z.infer<typeof eventExtraListSchema>

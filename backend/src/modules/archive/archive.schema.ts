@@ -116,3 +116,26 @@ export type GenreResponse = z.infer<typeof genreSchema>
 export type GenreListResponse = z.infer<typeof genreListSchema>
 export type LocationResponse = z.infer<typeof locationSchema>
 export type LocationListResponse = z.infer<typeof locationListSchema>
+
+// Schema for a single tag record
+export const tagSchema = z.object({
+    id: z.string().uuid(),
+    code: z.string().nullable(),
+    name: z.any().nullable(),
+    created_at: z.date(),
+    updated_at: z.date(),
+})
+
+// Schema for a paginated list of tags
+export const tagListSchema = z.object({
+    data: z.array(z.any()),
+    meta: z.object({
+        total: z.number(),
+        page: z.number(),
+        limit: z.number(),
+        totalPages: z.number(),
+    }),
+})
+
+export type TagResponse = z.infer<typeof tagSchema>
+export type TagListResponse = z.infer<typeof tagListSchema>

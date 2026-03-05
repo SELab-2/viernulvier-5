@@ -24,8 +24,7 @@ const archiveRoutes: FastifyPluginAsync = async (fastify) => {
     // Wire up the dependency chain
     const repository = new ArchiveRepository(fastify.prisma)
     const service = new ArchiveService(repository)
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Placeholder until concrete handlers are wired.
-    const _controller = new ArchiveController(service)
+    const controller = new ArchiveController(service)
 
     // GET /api/archive/productions
     fastify.get('/productions', {
@@ -53,19 +52,6 @@ const archiveRoutes: FastifyPluginAsync = async (fastify) => {
         handler: (request, reply) => controller.getEvents(request as any, reply),
     })
 
-    // GET /api/archive/genres
-    fastify.get('/genres', {
-        schema: {
-            tags: ['archive'],
-            summary: 'Get a paginated list of genres',
-            querystring: paginationQuerySchema,
-            response: {
-                200: genreListSchema,
-            },
-        },
-        handler: (request, reply) => controller.getGenres(request as any, reply),
-    })
-
     // GET /api/archive/locations
     fastify.get('/locations', {
         schema: {
@@ -78,17 +64,6 @@ const archiveRoutes: FastifyPluginAsync = async (fastify) => {
         },
         handler: (request, reply) => controller.getLocations(request as any, reply),
     })
-
-    // TODO: Add real routes, e.g.:
-    //
-    // Public (read-only):
-    //   fastify.get('/', handler)                → list productions
-    //   fastify.get('/:id', handler)             → get production detail
-    //
-    // Admin (auth required):
-    //   fastify.post('/', { preHandler: [requireAuth] }, handler)
-    //   fastify.put('/:id', { preHandler: [requireAuth] }, handler)
-    //   fastify.delete('/:id', { preHandler: [requireAuth] }, handler)
 }
 
 export default archiveRoutes

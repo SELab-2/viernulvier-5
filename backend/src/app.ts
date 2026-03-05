@@ -49,10 +49,14 @@ export async function buildApp(opts = {}): Promise<FastifyInstance> {
     await app.register(authPlugin)
 
     // --- Feature modules ---
+    // Register specific modules at their respective prefixes to preserve sub-routes
     await app.register(productionsRoutes, { prefix: '/api/archive/productions' })
     await app.register(eventsRoutes, { prefix: '/api/archive/events' })
-    await app.register(taxonomiesRoutes, { prefix: '/api/archive/genres' })
     await app.register(locationsRoutes, { prefix: '/api/archive/locations' })
+    
+    // Taxonomies handles both /genres and /tags under /api/archive
+    await app.register(taxonomiesRoutes, { prefix: '/api/archive' })
+    
     await app.register(hallsRoutes, { prefix: '/api/archive/halls' })
     await app.register(spacesRoutes, { prefix: '/api/archive/spaces' })
     await app.register(mediaRoutes, { prefix: '/api/archive/media' })

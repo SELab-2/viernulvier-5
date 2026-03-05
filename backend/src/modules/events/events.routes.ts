@@ -6,8 +6,7 @@ import {
     paginationQuerySchema, 
     eventListSchema,
     eventPriceListSchema,
-    eventStatusListSchema,
-    eventExtraListSchema
+    eventStatusListSchema
 } from './events.schema.js'
 
 const eventsRoutes: FastifyPluginAsync = async (fastify) => {
@@ -49,18 +48,6 @@ const eventsRoutes: FastifyPluginAsync = async (fastify) => {
             },
         },
         handler: (request, reply) => controller.getStatuses(request as any, reply),
-    })
-
-    fastify.get('/extras', {
-        schema: {
-            tags: ['events'],
-            summary: 'Get a paginated list of event extras',
-            querystring: paginationQuerySchema,
-            response: {
-                200: eventExtraListSchema,
-            },
-        },
-        handler: (request, reply) => controller.getExtras(request as any, reply),
     })
 }
 

@@ -9,4 +9,9 @@ export class TaxonomiesController {
         const genres = await this.service.getGenres(request.query)
         return reply.status(200).send(genres)
     }
+
+    async getTags(request: FastifyRequest<{ Querystring: PaginationQuery }>, reply: FastifyReply) {
+        const tags = await this.service.getTags(request.query)
+        return reply.status(200).send(tags)
+    }
 }
