@@ -11,18 +11,29 @@
 ### 1. Start the database
 
 ```bash
-docker compose up -d
+# make sure you create a network for the container if not done yet
+docker network create vnv_net
+
+# start the database container
+docker compose -f docker-compose-db.yml up -d
 ```
 
 ### 2. Backend setup
 
 ```bash
-cd backend
-cp .env.example .env       # Edit values as needed
-npm install
-npx prisma migrate dev     # Create tables
-npx prisma db seed         # Seed sample data (optional)
-npm run dev                # Start Fastify on :3001
+cp ./backend/.env.example ./backend/.env        # Edit values as needed
+
+# build and start the backend container
+docker compose -f docker-compose-app.yml up -d --build
+
+# migrate prisma in docker
+docker exec vnv_backend npx prisma migrate dev
+
+# seed database
+docker exec vnv_backend npx prisma db seed      # optional
+
+# run backend
+docker exec vnv_backend npm run dev             # now Fastify should be running on port :3001
 ```
 
 ### 3. Frontend setup
