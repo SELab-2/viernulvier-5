@@ -398,7 +398,7 @@ export type priceScalarWhereWithAggregatesInput = {
 export type priceCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   type?: string | null
   visibility?: string | null
   code?: string | null
@@ -418,7 +418,7 @@ export type priceCreateInput = {
 export type priceUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   type?: string | null
   visibility?: string | null
   code?: string | null
@@ -478,7 +478,7 @@ export type priceUncheckedUpdateInput = {
 export type priceCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   type?: string | null
   visibility?: string | null
   code?: string | null
@@ -635,7 +635,7 @@ export type priceUpdateOneWithoutTicketsNestedInput = {
 export type priceCreateWithoutEvent_pricesInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   type?: string | null
   visibility?: string | null
   code?: string | null
@@ -654,7 +654,7 @@ export type priceCreateWithoutEvent_pricesInput = {
 export type priceUncheckedCreateWithoutEvent_pricesInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   type?: string | null
   visibility?: string | null
   code?: string | null
@@ -727,7 +727,7 @@ export type priceUncheckedUpdateWithoutEvent_pricesInput = {
 export type priceCreateWithoutTicketsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   type?: string | null
   visibility?: string | null
   code?: string | null
@@ -746,7 +746,7 @@ export type priceCreateWithoutTicketsInput = {
 export type priceUncheckedCreateWithoutTicketsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   type?: string | null
   visibility?: string | null
   code?: string | null
@@ -1620,7 +1620,7 @@ export type priceCreateArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
   /**
    * The data needed to create a price.
    */
-  data: Prisma.XOR<Prisma.priceCreateInput, Prisma.priceUncheckedCreateInput>
+  data?: Prisma.XOR<Prisma.priceCreateInput, Prisma.priceUncheckedCreateInput>
 }
 
 /**

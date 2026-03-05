@@ -282,7 +282,7 @@ export type orderticketScalarWhereWithAggregatesInput = {
 export type orderticketCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   ticket_type?: string | null
   booking_id?: string | null
   price?: string | null
@@ -294,7 +294,7 @@ export type orderticketCreateInput = {
 export type orderticketUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   ticket_type?: string | null
   booking_id?: string | null
   price?: string | null
@@ -330,7 +330,7 @@ export type orderticketUncheckedUpdateInput = {
 export type orderticketCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   ticket_type?: string | null
   booking_id?: string | null
   price?: string | null
@@ -494,7 +494,7 @@ export type orderticketUncheckedUpdateManyWithoutTicketNestedInput = {
 export type orderticketCreateWithoutOrderInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   ticket_type?: string | null
   booking_id?: string | null
   price?: string | null
@@ -505,7 +505,7 @@ export type orderticketCreateWithoutOrderInput = {
 export type orderticketUncheckedCreateWithoutOrderInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   ticket_type?: string | null
   booking_id?: string | null
   price?: string | null
@@ -557,7 +557,7 @@ export type orderticketScalarWhereInput = {
 export type orderticketCreateWithoutTicketInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   ticket_type?: string | null
   booking_id?: string | null
   price?: string | null
@@ -568,7 +568,7 @@ export type orderticketCreateWithoutTicketInput = {
 export type orderticketUncheckedCreateWithoutTicketInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   ticket_type?: string | null
   booking_id?: string | null
   price?: string | null
@@ -605,7 +605,7 @@ export type orderticketUpdateManyWithWhereWithoutTicketInput = {
 export type orderticketCreateManyOrderInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   ticket_type?: string | null
   booking_id?: string | null
   price?: string | null
@@ -649,7 +649,7 @@ export type orderticketUncheckedUpdateManyWithoutOrderInput = {
 export type orderticketCreateManyTicketInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   ticket_type?: string | null
   booking_id?: string | null
   price?: string | null
@@ -1428,7 +1428,7 @@ export type orderticketCreateArgs<ExtArgs extends runtime.Types.Extensions.Inter
   /**
    * The data needed to create a orderticket.
    */
-  data: Prisma.XOR<Prisma.orderticketCreateInput, Prisma.orderticketUncheckedCreateInput>
+  data?: Prisma.XOR<Prisma.orderticketCreateInput, Prisma.orderticketUncheckedCreateInput>
 }
 
 /**

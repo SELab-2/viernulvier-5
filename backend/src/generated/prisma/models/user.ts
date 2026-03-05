@@ -306,7 +306,7 @@ export type userScalarWhereWithAggregatesInput = {
 export type userCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   last_active_at?: Date | string | null
   gender?: string | null
   initials?: string | null
@@ -321,7 +321,7 @@ export type userCreateInput = {
 export type userUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   last_active_at?: Date | string | null
   gender?: string | null
   initials?: string | null
@@ -366,7 +366,7 @@ export type userUncheckedUpdateInput = {
 export type userCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   last_active_at?: Date | string | null
   gender?: string | null
   initials?: string | null
@@ -502,7 +502,7 @@ export type userUncheckedUpdateOneWithoutVisitorNestedInput = {
 export type userCreateWithoutSubscribersInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   last_active_at?: Date | string | null
   gender?: string | null
   initials?: string | null
@@ -516,7 +516,7 @@ export type userCreateWithoutSubscribersInput = {
 export type userUncheckedCreateWithoutSubscribersInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   last_active_at?: Date | string | null
   gender?: string | null
   initials?: string | null
@@ -574,7 +574,7 @@ export type userUncheckedUpdateWithoutSubscribersInput = {
 export type userCreateWithoutVisitorInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   last_active_at?: Date | string | null
   gender?: string | null
   initials?: string | null
@@ -588,7 +588,7 @@ export type userCreateWithoutVisitorInput = {
 export type userUncheckedCreateWithoutVisitorInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   last_active_at?: Date | string | null
   gender?: string | null
   initials?: string | null
@@ -1420,7 +1420,7 @@ export type userCreateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
   /**
    * The data needed to create a user.
    */
-  data: Prisma.XOR<Prisma.userCreateInput, Prisma.userUncheckedCreateInput>
+  data?: Prisma.XOR<Prisma.userCreateInput, Prisma.userUncheckedCreateInput>
 }
 
 /**

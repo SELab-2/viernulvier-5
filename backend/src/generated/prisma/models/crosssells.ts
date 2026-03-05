@@ -282,7 +282,7 @@ export type crosssellsScalarWhereWithAggregatesInput = {
 export type crosssellsCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   ticket_type?: string | null
   booking_id?: string | null
   price?: string | null
@@ -294,7 +294,7 @@ export type crosssellsCreateInput = {
 export type crosssellsUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   ticket_id?: string | null
   ticket_type?: string | null
   booking_id?: string | null
@@ -330,7 +330,7 @@ export type crosssellsUncheckedUpdateInput = {
 export type crosssellsCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   ticket_id?: string | null
   ticket_type?: string | null
   booking_id?: string | null
@@ -494,7 +494,7 @@ export type crosssellsUncheckedUpdateManyWithoutTicketNestedInput = {
 export type crosssellsCreateWithoutOrderInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   ticket_type?: string | null
   booking_id?: string | null
   price?: string | null
@@ -505,7 +505,7 @@ export type crosssellsCreateWithoutOrderInput = {
 export type crosssellsUncheckedCreateWithoutOrderInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   ticket_id?: string | null
   ticket_type?: string | null
   booking_id?: string | null
@@ -557,7 +557,7 @@ export type crosssellsScalarWhereInput = {
 export type crosssellsCreateWithoutTicketInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   ticket_type?: string | null
   booking_id?: string | null
   price?: string | null
@@ -568,7 +568,7 @@ export type crosssellsCreateWithoutTicketInput = {
 export type crosssellsUncheckedCreateWithoutTicketInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   ticket_type?: string | null
   booking_id?: string | null
   price?: string | null
@@ -605,7 +605,7 @@ export type crosssellsUpdateManyWithWhereWithoutTicketInput = {
 export type crosssellsCreateManyOrderInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   ticket_id?: string | null
   ticket_type?: string | null
   booking_id?: string | null
@@ -649,7 +649,7 @@ export type crosssellsUncheckedUpdateManyWithoutOrderInput = {
 export type crosssellsCreateManyTicketInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   ticket_type?: string | null
   booking_id?: string | null
   price?: string | null
@@ -1428,7 +1428,7 @@ export type crosssellsCreateArgs<ExtArgs extends runtime.Types.Extensions.Intern
   /**
    * The data needed to create a crosssells.
    */
-  data: Prisma.XOR<Prisma.crosssellsCreateInput, Prisma.crosssellsUncheckedCreateInput>
+  data?: Prisma.XOR<Prisma.crosssellsCreateInput, Prisma.crosssellsUncheckedCreateInput>
 }
 
 /**

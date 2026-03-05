@@ -255,7 +255,7 @@ export type mailinglistScalarWhereWithAggregatesInput = {
 export type mailinglistCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
   type?: string | null
   public?: string | null
@@ -266,7 +266,7 @@ export type mailinglistCreateInput = {
 export type mailinglistUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
   type?: string | null
   public?: string | null
@@ -299,7 +299,7 @@ export type mailinglistUncheckedUpdateInput = {
 export type mailinglistCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
   type?: string | null
   public?: string | null
@@ -378,7 +378,7 @@ export type mailinglistUpdateOneRequiredWithoutSubscriber_mailinglistNestedInput
 export type mailinglistCreateWithoutSubscriber_mailinglistInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
   type?: string | null
   public?: string | null
@@ -388,7 +388,7 @@ export type mailinglistCreateWithoutSubscriber_mailinglistInput = {
 export type mailinglistUncheckedCreateWithoutSubscriber_mailinglistInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
   type?: string | null
   public?: string | null
@@ -1174,7 +1174,7 @@ export type mailinglistCreateArgs<ExtArgs extends runtime.Types.Extensions.Inter
   /**
    * The data needed to create a mailinglist.
    */
-  data: Prisma.XOR<Prisma.mailinglistCreateInput, Prisma.mailinglistUncheckedCreateInput>
+  data?: Prisma.XOR<Prisma.mailinglistCreateInput, Prisma.mailinglistUncheckedCreateInput>
 }
 
 /**

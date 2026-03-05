@@ -219,7 +219,7 @@ export type uitdatabank_keywordsScalarWhereWithAggregatesInput = {
 export type uitdatabank_keywordsCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
   uit_keywords_productions?: Prisma.uit_keywords_productionsCreateNestedManyWithoutUitdatabank_keywordsInput
 }
@@ -227,7 +227,7 @@ export type uitdatabank_keywordsCreateInput = {
 export type uitdatabank_keywordsUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
   uit_keywords_productions?: Prisma.uit_keywords_productionsUncheckedCreateNestedManyWithoutUitdatabank_keywordsInput
 }
@@ -251,7 +251,7 @@ export type uitdatabank_keywordsUncheckedUpdateInput = {
 export type uitdatabank_keywordsCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
 }
 
@@ -312,14 +312,14 @@ export type uitdatabank_keywordsUpdateOneRequiredWithoutUit_keywords_productions
 export type uitdatabank_keywordsCreateWithoutUit_keywords_productionsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
 }
 
 export type uitdatabank_keywordsUncheckedCreateWithoutUit_keywords_productionsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
 }
 
@@ -1078,7 +1078,7 @@ export type uitdatabank_keywordsCreateArgs<ExtArgs extends runtime.Types.Extensi
   /**
    * The data needed to create a uitdatabank_keywords.
    */
-  data: Prisma.XOR<Prisma.uitdatabank_keywordsCreateInput, Prisma.uitdatabank_keywordsUncheckedCreateInput>
+  data?: Prisma.XOR<Prisma.uitdatabank_keywordsCreateInput, Prisma.uitdatabank_keywordsUncheckedCreateInput>
 }
 
 /**

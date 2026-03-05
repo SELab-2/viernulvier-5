@@ -242,7 +242,7 @@ export type spaceScalarWhereWithAggregatesInput = {
 export type spaceCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   halls?: Prisma.hallCreateNestedManyWithoutSpaceInput
@@ -252,7 +252,7 @@ export type spaceCreateInput = {
 export type spaceUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   location_id?: string | null
@@ -282,7 +282,7 @@ export type spaceUncheckedUpdateInput = {
 export type spaceCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   location_id?: string | null
@@ -406,7 +406,7 @@ export type spaceUncheckedUpdateManyWithoutLocationNestedInput = {
 export type spaceCreateWithoutHallsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   location?: Prisma.locationCreateNestedOneWithoutSpaceInput
@@ -415,7 +415,7 @@ export type spaceCreateWithoutHallsInput = {
 export type spaceUncheckedCreateWithoutHallsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   location_id?: string | null
@@ -458,7 +458,7 @@ export type spaceUncheckedUpdateWithoutHallsInput = {
 export type spaceCreateWithoutLocationInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   halls?: Prisma.hallCreateNestedManyWithoutSpaceInput
@@ -467,7 +467,7 @@ export type spaceCreateWithoutLocationInput = {
 export type spaceUncheckedCreateWithoutLocationInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   halls?: Prisma.hallUncheckedCreateNestedManyWithoutSpaceInput
@@ -514,7 +514,7 @@ export type spaceScalarWhereInput = {
 export type spaceCreateManyLocationInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
@@ -1292,7 +1292,7 @@ export type spaceCreateArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
   /**
    * The data needed to create a space.
    */
-  data: Prisma.XOR<Prisma.spaceCreateInput, Prisma.spaceUncheckedCreateInput>
+  data?: Prisma.XOR<Prisma.spaceCreateInput, Prisma.spaceUncheckedCreateInput>
 }
 
 /**

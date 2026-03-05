@@ -385,7 +385,7 @@ export type itemScalarWhereWithAggregatesInput = {
 export type itemCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   type?: string | null
   original_filename?: string | null
   position?: number | null
@@ -404,7 +404,7 @@ export type itemCreateInput = {
 export type itemUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   type?: string | null
   original_filename?: string | null
   position?: number | null
@@ -461,7 +461,7 @@ export type itemUncheckedUpdateInput = {
 export type itemCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   type?: string | null
   original_filename?: string | null
   position?: number | null
@@ -684,7 +684,7 @@ export type itemUpdateOneRequiredWithoutGallery_itemNestedInput = {
 export type itemCreateWithoutCropInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   type?: string | null
   original_filename?: string | null
   position?: number | null
@@ -702,7 +702,7 @@ export type itemCreateWithoutCropInput = {
 export type itemUncheckedCreateWithoutCropInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   type?: string | null
   original_filename?: string | null
   position?: number | null
@@ -767,7 +767,7 @@ export type itemScalarWhereInput = {
 export type itemCreateWithoutGalleryInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   type?: string | null
   original_filename?: string | null
   position?: number | null
@@ -785,7 +785,7 @@ export type itemCreateWithoutGalleryInput = {
 export type itemUncheckedCreateWithoutGalleryInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   type?: string | null
   original_filename?: string | null
   position?: number | null
@@ -829,7 +829,7 @@ export type itemUpdateManyWithWhereWithoutGalleryInput = {
 export type itemCreateWithoutGallery_itemInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   type?: string | null
   original_filename?: string | null
   position?: number | null
@@ -847,7 +847,7 @@ export type itemCreateWithoutGallery_itemInput = {
 export type itemUncheckedCreateWithoutGallery_itemInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   type?: string | null
   original_filename?: string | null
   position?: number | null
@@ -917,7 +917,7 @@ export type itemUncheckedUpdateWithoutGallery_itemInput = {
 export type itemCreateManyCropInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   type?: string | null
   original_filename?: string | null
   position?: number | null
@@ -987,7 +987,7 @@ export type itemUncheckedUpdateManyWithoutCropInput = {
 export type itemCreateManyGalleryInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   type?: string | null
   original_filename?: string | null
   position?: number | null
@@ -1863,7 +1863,7 @@ export type itemCreateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
   /**
    * The data needed to create a item.
    */
-  data: Prisma.XOR<Prisma.itemCreateInput, Prisma.itemUncheckedCreateInput>
+  data?: Prisma.XOR<Prisma.itemCreateInput, Prisma.itemUncheckedCreateInput>
 }
 
 /**

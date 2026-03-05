@@ -349,7 +349,7 @@ export type event_priceScalarWhereWithAggregatesInput = {
 export type event_priceCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   available?: number | null
   amount?: string | null
   box_office_id?: string | null
@@ -363,7 +363,7 @@ export type event_priceCreateInput = {
 export type event_priceUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   event_id?: string | null
   available?: number | null
   amount?: string | null
@@ -405,7 +405,7 @@ export type event_priceUncheckedUpdateInput = {
 export type event_priceCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   event_id?: string | null
   available?: number | null
   amount?: string | null
@@ -632,7 +632,7 @@ export type event_priceUncheckedUpdateManyWithoutRankNestedInput = {
 export type event_priceCreateWithoutEventInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   available?: number | null
   amount?: string | null
   box_office_id?: string | null
@@ -645,7 +645,7 @@ export type event_priceCreateWithoutEventInput = {
 export type event_priceUncheckedCreateWithoutEventInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   available?: number | null
   amount?: string | null
   box_office_id?: string | null
@@ -701,7 +701,7 @@ export type event_priceScalarWhereInput = {
 export type event_priceCreateWithoutPriceInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   available?: number | null
   amount?: string | null
   box_office_id?: string | null
@@ -714,7 +714,7 @@ export type event_priceCreateWithoutPriceInput = {
 export type event_priceUncheckedCreateWithoutPriceInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   event_id?: string | null
   available?: number | null
   amount?: string | null
@@ -753,7 +753,7 @@ export type event_priceUpdateManyWithWhereWithoutPriceInput = {
 export type event_priceCreateWithoutRankInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   available?: number | null
   amount?: string | null
   box_office_id?: string | null
@@ -766,7 +766,7 @@ export type event_priceCreateWithoutRankInput = {
 export type event_priceUncheckedCreateWithoutRankInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   event_id?: string | null
   available?: number | null
   amount?: string | null
@@ -805,7 +805,7 @@ export type event_priceUpdateManyWithWhereWithoutRankInput = {
 export type event_priceCreateManyEventInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   available?: number | null
   amount?: string | null
   box_office_id?: string | null
@@ -857,7 +857,7 @@ export type event_priceUncheckedUpdateManyWithoutEventInput = {
 export type event_priceCreateManyPriceInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   event_id?: string | null
   available?: number | null
   amount?: string | null
@@ -909,7 +909,7 @@ export type event_priceUncheckedUpdateManyWithoutPriceInput = {
 export type event_priceCreateManyRankInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   event_id?: string | null
   available?: number | null
   amount?: string | null
@@ -1716,7 +1716,7 @@ export type event_priceCreateArgs<ExtArgs extends runtime.Types.Extensions.Inter
   /**
    * The data needed to create a event_price.
    */
-  data: Prisma.XOR<Prisma.event_priceCreateInput, Prisma.event_priceUncheckedCreateInput>
+  data?: Prisma.XOR<Prisma.event_priceCreateInput, Prisma.event_priceUncheckedCreateInput>
 }
 
 /**

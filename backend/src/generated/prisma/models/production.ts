@@ -536,7 +536,7 @@ export type productionScalarWhereWithAggregatesInput = {
 export type productionCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -574,7 +574,7 @@ export type productionCreateInput = {
 export type productionUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -688,7 +688,7 @@ export type productionUncheckedUpdateInput = {
 export type productionCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -1137,7 +1137,7 @@ export type productionUncheckedUpdateManyWithoutUitdatabank_typesNestedInput = {
 export type productionCreateWithoutEventsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -1174,7 +1174,7 @@ export type productionCreateWithoutEventsInput = {
 export type productionUncheckedCreateWithoutEventsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -1301,7 +1301,7 @@ export type productionUncheckedUpdateWithoutEventsInput = {
 export type productionCreateWithoutMedia_galleryInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -1338,7 +1338,7 @@ export type productionCreateWithoutMedia_galleryInput = {
 export type productionUncheckedCreateWithoutMedia_galleryInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -1385,7 +1385,7 @@ export type productionCreateManyMedia_galleryInputEnvelope = {
 export type productionCreateWithoutPoster_galleryInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -1422,7 +1422,7 @@ export type productionCreateWithoutPoster_galleryInput = {
 export type productionUncheckedCreateWithoutPoster_galleryInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -1469,7 +1469,7 @@ export type productionCreateManyPoster_galleryInputEnvelope = {
 export type productionCreateWithoutReview_galleryInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -1506,7 +1506,7 @@ export type productionCreateWithoutReview_galleryInput = {
 export type productionUncheckedCreateWithoutReview_galleryInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -1639,7 +1639,7 @@ export type productionUpdateManyWithWhereWithoutReview_galleryInput = {
 export type productionCreateWithoutGenre_productionInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -1676,7 +1676,7 @@ export type productionCreateWithoutGenre_productionInput = {
 export type productionUncheckedCreateWithoutGenre_productionInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -1803,7 +1803,7 @@ export type productionUncheckedUpdateWithoutGenre_productionInput = {
 export type productionCreateWithoutUit_keywords_productionsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -1840,7 +1840,7 @@ export type productionCreateWithoutUit_keywords_productionsInput = {
 export type productionUncheckedCreateWithoutUit_keywords_productionsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -1967,7 +1967,7 @@ export type productionUncheckedUpdateWithoutUit_keywords_productionsInput = {
 export type productionCreateWithoutUitdatabank_themesInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -2004,7 +2004,7 @@ export type productionCreateWithoutUitdatabank_themesInput = {
 export type productionUncheckedCreateWithoutUitdatabank_themesInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -2067,7 +2067,7 @@ export type productionUpdateManyWithWhereWithoutUitdatabank_themesInput = {
 export type productionCreateWithoutUitdatabank_typesInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -2104,7 +2104,7 @@ export type productionCreateWithoutUitdatabank_typesInput = {
 export type productionUncheckedCreateWithoutUitdatabank_typesInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -2167,7 +2167,7 @@ export type productionUpdateManyWithWhereWithoutUitdatabank_typesInput = {
 export type productionCreateManyMedia_galleryInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -2201,7 +2201,7 @@ export type productionCreateManyMedia_galleryInput = {
 export type productionCreateManyPoster_galleryInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -2235,7 +2235,7 @@ export type productionCreateManyPoster_galleryInput = {
 export type productionCreateManyReview_galleryInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -2593,7 +2593,7 @@ export type productionUncheckedUpdateManyWithoutReview_galleryInput = {
 export type productionCreateManyUitdatabank_themesInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -2735,7 +2735,7 @@ export type productionUncheckedUpdateManyWithoutUitdatabank_themesInput = {
 export type productionCreateManyUitdatabank_typesInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   box_office_id?: number | null
   performer_field?: string | null
@@ -3835,7 +3835,7 @@ export type productionCreateArgs<ExtArgs extends runtime.Types.Extensions.Intern
   /**
    * The data needed to create a production.
    */
-  data: Prisma.XOR<Prisma.productionCreateInput, Prisma.productionUncheckedCreateInput>
+  data?: Prisma.XOR<Prisma.productionCreateInput, Prisma.productionUncheckedCreateInput>
 }
 
 /**

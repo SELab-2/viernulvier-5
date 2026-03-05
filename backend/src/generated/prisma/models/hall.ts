@@ -286,7 +286,7 @@ export type hallScalarWhereWithAggregatesInput = {
 export type hallCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   box_office_id?: string | null
   seat_selection?: string | null
@@ -300,7 +300,7 @@ export type hallCreateInput = {
 export type hallUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   box_office_id?: string | null
   seat_selection?: string | null
@@ -342,7 +342,7 @@ export type hallUncheckedUpdateInput = {
 export type hallCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   box_office_id?: string | null
   seat_selection?: string | null
@@ -488,7 +488,7 @@ export type hallUncheckedUpdateManyWithoutSpaceNestedInput = {
 export type hallCreateWithoutEventsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   box_office_id?: string | null
   seat_selection?: string | null
@@ -501,7 +501,7 @@ export type hallCreateWithoutEventsInput = {
 export type hallUncheckedCreateWithoutEventsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   box_office_id?: string | null
   seat_selection?: string | null
@@ -556,7 +556,7 @@ export type hallUncheckedUpdateWithoutEventsInput = {
 export type hallCreateWithoutSpaceInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   box_office_id?: string | null
   seat_selection?: string | null
@@ -569,7 +569,7 @@ export type hallCreateWithoutSpaceInput = {
 export type hallUncheckedCreateWithoutSpaceInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   box_office_id?: string | null
   seat_selection?: string | null
@@ -624,7 +624,7 @@ export type hallScalarWhereInput = {
 export type hallCreateManySpaceInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   vendor_id?: string | null
   box_office_id?: string | null
   seat_selection?: string | null
@@ -1442,7 +1442,7 @@ export type hallCreateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
   /**
    * The data needed to create a hall.
    */
-  data: Prisma.XOR<Prisma.hallCreateInput, Prisma.hallUncheckedCreateInput>
+  data?: Prisma.XOR<Prisma.hallCreateInput, Prisma.hallUncheckedCreateInput>
 }
 
 /**

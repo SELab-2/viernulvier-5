@@ -231,7 +231,7 @@ export type uitdatabank_themesScalarWhereWithAggregatesInput = {
 export type uitdatabank_themesCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
   cdb_cat_id?: string | null
   production?: Prisma.productionCreateNestedManyWithoutUitdatabank_themesInput
@@ -240,7 +240,7 @@ export type uitdatabank_themesCreateInput = {
 export type uitdatabank_themesUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
   cdb_cat_id?: string | null
   production?: Prisma.productionUncheckedCreateNestedManyWithoutUitdatabank_themesInput
@@ -267,7 +267,7 @@ export type uitdatabank_themesUncheckedUpdateInput = {
 export type uitdatabank_themesCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
   cdb_cat_id?: string | null
 }
@@ -336,7 +336,7 @@ export type uitdatabank_themesUpdateOneWithoutProductionNestedInput = {
 export type uitdatabank_themesCreateWithoutProductionInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
   cdb_cat_id?: string | null
 }
@@ -344,7 +344,7 @@ export type uitdatabank_themesCreateWithoutProductionInput = {
 export type uitdatabank_themesUncheckedCreateWithoutProductionInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
   cdb_cat_id?: string | null
 }
@@ -1112,7 +1112,7 @@ export type uitdatabank_themesCreateArgs<ExtArgs extends runtime.Types.Extension
   /**
    * The data needed to create a uitdatabank_themes.
    */
-  data: Prisma.XOR<Prisma.uitdatabank_themesCreateInput, Prisma.uitdatabank_themesUncheckedCreateInput>
+  data?: Prisma.XOR<Prisma.uitdatabank_themesCreateInput, Prisma.uitdatabank_themesUncheckedCreateInput>
 }
 
 /**

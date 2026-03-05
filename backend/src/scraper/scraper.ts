@@ -1,11 +1,9 @@
-import { title } from "process";
-import { prisma } from "./app/prisma";
-import { json } from "stream/consumers";
-import { randomUUID } from "crypto";
+import { prisma } from "./prisma";
+
 
 /*
-This script will add an Production with performerfield = test
 
+This script will sync the database with the api 
 run with:
 npx tsx scraper.ts
 */

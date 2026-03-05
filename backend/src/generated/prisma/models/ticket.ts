@@ -330,7 +330,7 @@ export type ticketScalarWhereWithAggregatesInput = {
 export type ticketCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   available_from?: Date | string | null
   seat_id?: string | null
   seat_row?: string | null
@@ -347,7 +347,7 @@ export type ticketCreateInput = {
 export type ticketUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   available_from?: Date | string | null
   seat_id?: string | null
   seat_row?: string | null
@@ -398,7 +398,7 @@ export type ticketUncheckedUpdateInput = {
 export type ticketCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   available_from?: Date | string | null
   seat_id?: string | null
   seat_row?: string | null
@@ -699,7 +699,7 @@ export type ticketUncheckedUpdateManyWithoutRankNestedInput = {
 export type ticketCreateWithoutCrosssellsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   available_from?: Date | string | null
   seat_id?: string | null
   seat_row?: string | null
@@ -715,7 +715,7 @@ export type ticketCreateWithoutCrosssellsInput = {
 export type ticketUncheckedCreateWithoutCrosssellsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   available_from?: Date | string | null
   seat_id?: string | null
   seat_row?: string | null
@@ -779,7 +779,7 @@ export type ticketUncheckedUpdateWithoutCrosssellsInput = {
 export type ticketCreateWithoutEventInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   available_from?: Date | string | null
   seat_id?: string | null
   seat_row?: string | null
@@ -795,7 +795,7 @@ export type ticketCreateWithoutEventInput = {
 export type ticketUncheckedCreateWithoutEventInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   available_from?: Date | string | null
   seat_id?: string | null
   seat_row?: string | null
@@ -855,7 +855,7 @@ export type ticketScalarWhereInput = {
 export type ticketCreateWithoutOrderInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   available_from?: Date | string | null
   seat_id?: string | null
   seat_row?: string | null
@@ -871,7 +871,7 @@ export type ticketCreateWithoutOrderInput = {
 export type ticketUncheckedCreateWithoutOrderInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   available_from?: Date | string | null
   seat_id?: string | null
   seat_row?: string | null
@@ -913,7 +913,7 @@ export type ticketUpdateManyWithWhereWithoutOrderInput = {
 export type ticketCreateWithoutOrderticketsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   available_from?: Date | string | null
   seat_id?: string | null
   seat_row?: string | null
@@ -929,7 +929,7 @@ export type ticketCreateWithoutOrderticketsInput = {
 export type ticketUncheckedCreateWithoutOrderticketsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   available_from?: Date | string | null
   seat_id?: string | null
   seat_row?: string | null
@@ -993,7 +993,7 @@ export type ticketUncheckedUpdateWithoutOrderticketsInput = {
 export type ticketCreateWithoutPriceInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   available_from?: Date | string | null
   seat_id?: string | null
   seat_row?: string | null
@@ -1009,7 +1009,7 @@ export type ticketCreateWithoutPriceInput = {
 export type ticketUncheckedCreateWithoutPriceInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   available_from?: Date | string | null
   seat_id?: string | null
   seat_row?: string | null
@@ -1051,7 +1051,7 @@ export type ticketUpdateManyWithWhereWithoutPriceInput = {
 export type ticketCreateWithoutRankInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   available_from?: Date | string | null
   seat_id?: string | null
   seat_row?: string | null
@@ -1067,7 +1067,7 @@ export type ticketCreateWithoutRankInput = {
 export type ticketUncheckedCreateWithoutRankInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   available_from?: Date | string | null
   seat_id?: string | null
   seat_row?: string | null
@@ -1109,7 +1109,7 @@ export type ticketUpdateManyWithWhereWithoutRankInput = {
 export type ticketCreateManyEventInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   available_from?: Date | string | null
   seat_id?: string | null
   seat_row?: string | null
@@ -1169,7 +1169,7 @@ export type ticketUncheckedUpdateManyWithoutEventInput = {
 export type ticketCreateManyOrderInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   available_from?: Date | string | null
   seat_id?: string | null
   seat_row?: string | null
@@ -1229,7 +1229,7 @@ export type ticketUncheckedUpdateManyWithoutOrderInput = {
 export type ticketCreateManyPriceInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   available_from?: Date | string | null
   seat_id?: string | null
   seat_row?: string | null
@@ -1289,7 +1289,7 @@ export type ticketUncheckedUpdateManyWithoutPriceInput = {
 export type ticketCreateManyRankInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   available_from?: Date | string | null
   seat_id?: string | null
   seat_row?: string | null
@@ -2166,7 +2166,7 @@ export type ticketCreateArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
   /**
    * The data needed to create a ticket.
    */
-  data: Prisma.XOR<Prisma.ticketCreateInput, Prisma.ticketUncheckedCreateInput>
+  data?: Prisma.XOR<Prisma.ticketCreateInput, Prisma.ticketUncheckedCreateInput>
 }
 
 /**

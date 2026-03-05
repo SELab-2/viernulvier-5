@@ -263,7 +263,7 @@ export type statusScalarWhereWithAggregatesInput = {
 export type statusCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   short_name?: string | null
   fixed?: boolean | null
@@ -275,7 +275,7 @@ export type statusCreateInput = {
 export type statusUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   short_name?: string | null
   fixed?: boolean | null
@@ -311,7 +311,7 @@ export type statusUncheckedUpdateInput = {
 export type statusCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   short_name?: string | null
   fixed?: boolean | null
@@ -396,7 +396,7 @@ export type statusUpdateOneWithoutEventsNestedInput = {
 export type statusCreateWithoutEventsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   short_name?: string | null
   fixed?: boolean | null
@@ -407,7 +407,7 @@ export type statusCreateWithoutEventsInput = {
 export type statusUncheckedCreateWithoutEventsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   short_name?: string | null
   fixed?: boolean | null
@@ -1202,7 +1202,7 @@ export type statusCreateArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
   /**
    * The data needed to create a status.
    */
-  data: Prisma.XOR<Prisma.statusCreateInput, Prisma.statusUncheckedCreateInput>
+  data?: Prisma.XOR<Prisma.statusCreateInput, Prisma.statusUncheckedCreateInput>
 }
 
 /**

@@ -378,7 +378,7 @@ export type tagScalarWhereWithAggregatesInput = {
 export type tagCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   source?: string | null
   sourcetype?: string | null
   enable?: string | null
@@ -397,7 +397,7 @@ export type tagCreateInput = {
 export type tagUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   source?: string | null
   sourcetype?: string | null
   enable?: string | null
@@ -454,7 +454,7 @@ export type tagUncheckedUpdateInput = {
 export type tagCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   source?: string | null
   sourcetype?: string | null
   enable?: string | null
@@ -636,7 +636,7 @@ export type tagUpdateOneWithoutVisitor_tagsNestedInput = {
 export type tagCreateWithoutGalleryInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   source?: string | null
   sourcetype?: string | null
   enable?: string | null
@@ -654,7 +654,7 @@ export type tagCreateWithoutGalleryInput = {
 export type tagUncheckedCreateWithoutGalleryInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   source?: string | null
   sourcetype?: string | null
   enable?: string | null
@@ -719,7 +719,7 @@ export type tagScalarWhereInput = {
 export type tagCreateWithoutVisitor_tagsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   source?: string | null
   sourcetype?: string | null
   enable?: string | null
@@ -737,7 +737,7 @@ export type tagCreateWithoutVisitor_tagsInput = {
 export type tagUncheckedCreateWithoutVisitor_tagsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   source?: string | null
   sourcetype?: string | null
   enable?: string | null
@@ -807,7 +807,7 @@ export type tagUncheckedUpdateWithoutVisitor_tagsInput = {
 export type tagCreateManyGalleryInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   source?: string | null
   sourcetype?: string | null
   enable?: string | null
@@ -1675,7 +1675,7 @@ export type tagCreateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   /**
    * The data needed to create a tag.
    */
-  data: Prisma.XOR<Prisma.tagCreateInput, Prisma.tagUncheckedCreateInput>
+  data?: Prisma.XOR<Prisma.tagCreateInput, Prisma.tagUncheckedCreateInput>
 }
 
 /**
