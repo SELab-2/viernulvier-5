@@ -21,7 +21,6 @@ const authRoutes: FastifyPluginAsync = async (fastify) => {
             tags: ['auth'],
             summary: 'Admin login',
         },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Placeholder typing while auth flow is scaffolded.
         handler: (req, reply) => controller.login(req as any, reply),
     })
 
