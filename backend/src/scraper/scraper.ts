@@ -20,6 +20,15 @@ import type {
   APIUitType,
 } from "./APItypes";
 
+
+export default {
+    sync_locations,
+    sync_events,
+    sync_hall,
+    sync_productions,
+    sync_spaces,
+    sync_status,
+};
 /*
 
 This script will sync the database with the api 
@@ -128,6 +137,7 @@ function mapProduction(prod: APIProduction) {
       vendor_id: prod.vendor_id,
       box_office_id: prod.box_office_id,
       performer_field: prod.performer_field,
+      performer_type: prod.performer_type,
       attendance_mode: prod.attendance_mode,
       super_title: prod.supertitle,
       title: prod.title,
