@@ -232,7 +232,7 @@ export type visitor_tagsScalarWhereWithAggregatesInput = {
 }
 
 export type visitor_tagsCreateInput = {
-  id: string
+  id?: string
   external_data?: string | null
   expires_at?: Date | string | null
   tag?: Prisma.tagCreateNestedOneWithoutVisitor_tagsInput
@@ -240,7 +240,7 @@ export type visitor_tagsCreateInput = {
 }
 
 export type visitor_tagsUncheckedCreateInput = {
-  id: string
+  id?: string
   external_data?: string | null
   expires_at?: Date | string | null
   visitor_id?: string | null
@@ -264,7 +264,7 @@ export type visitor_tagsUncheckedUpdateInput = {
 }
 
 export type visitor_tagsCreateManyInput = {
-  id: string
+  id?: string
   external_data?: string | null
   expires_at?: Date | string | null
   visitor_id?: string | null
@@ -404,14 +404,14 @@ export type visitor_tagsUncheckedUpdateManyWithoutVisitorNestedInput = {
 }
 
 export type visitor_tagsCreateWithoutTagInput = {
-  id: string
+  id?: string
   external_data?: string | null
   expires_at?: Date | string | null
   visitor?: Prisma.visitorCreateNestedOneWithoutVisitor_tagsInput
 }
 
 export type visitor_tagsUncheckedCreateWithoutTagInput = {
-  id: string
+  id?: string
   external_data?: string | null
   expires_at?: Date | string | null
   visitor_id?: string | null
@@ -455,14 +455,14 @@ export type visitor_tagsScalarWhereInput = {
 }
 
 export type visitor_tagsCreateWithoutVisitorInput = {
-  id: string
+  id?: string
   external_data?: string | null
   expires_at?: Date | string | null
   tag?: Prisma.tagCreateNestedOneWithoutVisitor_tagsInput
 }
 
 export type visitor_tagsUncheckedCreateWithoutVisitorInput = {
-  id: string
+  id?: string
   external_data?: string | null
   expires_at?: Date | string | null
   tags?: string | null
@@ -495,7 +495,7 @@ export type visitor_tagsUpdateManyWithWhereWithoutVisitorInput = {
 }
 
 export type visitor_tagsCreateManyTagInput = {
-  id: string
+  id?: string
   external_data?: string | null
   expires_at?: Date | string | null
   visitor_id?: string | null
@@ -523,7 +523,7 @@ export type visitor_tagsUncheckedUpdateManyWithoutTagInput = {
 }
 
 export type visitor_tagsCreateManyVisitorInput = {
-  id: string
+  id?: string
   external_data?: string | null
   expires_at?: Date | string | null
   tags?: string | null
@@ -1264,7 +1264,7 @@ export type visitor_tagsCreateArgs<ExtArgs extends runtime.Types.Extensions.Inte
   /**
    * The data needed to create a visitor_tags.
    */
-  data: Prisma.XOR<Prisma.visitor_tagsCreateInput, Prisma.visitor_tagsUncheckedCreateInput>
+  data?: Prisma.XOR<Prisma.visitor_tagsCreateInput, Prisma.visitor_tagsUncheckedCreateInput>
 }
 
 /**

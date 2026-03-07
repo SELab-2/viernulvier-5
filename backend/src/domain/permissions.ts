@@ -20,6 +20,11 @@ export const rolePermissions: Record<Role, Permission[]> = {
         Permission.ARCHIVE_UPDATE,
         Permission.ARCHIVE_DELETE,
     ],
+    [Role.EDITOR]: [
+        Permission.ARCHIVE_READ,
+        Permission.ARCHIVE_CREATE,
+        Permission.ARCHIVE_UPDATE,
+    ],
 }
 
 /**

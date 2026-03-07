@@ -335,7 +335,7 @@ export type locationScalarWhereWithAggregatesInput = {
 export type locationCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   code?: string | null
   street?: string | null
@@ -353,7 +353,7 @@ export type locationCreateInput = {
 export type locationUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   code?: string | null
   street?: string | null
@@ -407,7 +407,7 @@ export type locationUncheckedUpdateInput = {
 export type locationCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   code?: string | null
   street?: string | null
@@ -528,7 +528,7 @@ export type locationUpdateOneWithoutSpaceNestedInput = {
 export type locationCreateWithoutSpaceInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   code?: string | null
   street?: string | null
@@ -545,7 +545,7 @@ export type locationCreateWithoutSpaceInput = {
 export type locationUncheckedCreateWithoutSpaceInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   code?: string | null
   street?: string | null
@@ -1394,7 +1394,7 @@ export type locationCreateArgs<ExtArgs extends runtime.Types.Extensions.Internal
   /**
    * The data needed to create a location.
    */
-  data: Prisma.XOR<Prisma.locationCreateInput, Prisma.locationUncheckedCreateInput>
+  data?: Prisma.XOR<Prisma.locationCreateInput, Prisma.locationUncheckedCreateInput>
 }
 
 /**

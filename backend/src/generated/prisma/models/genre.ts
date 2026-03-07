@@ -267,7 +267,7 @@ export type genreScalarWhereWithAggregatesInput = {
 export type genreCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   type?: string | null
   use_as?: string | null
   vendor_id?: string | null
@@ -280,7 +280,7 @@ export type genreCreateInput = {
 export type genreUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   type?: string | null
   use_as?: string | null
   vendor_id?: string | null
@@ -319,7 +319,7 @@ export type genreUncheckedUpdateInput = {
 export type genreCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   type?: string | null
   use_as?: string | null
   vendor_id?: string | null
@@ -404,7 +404,7 @@ export type genreUpdateOneRequiredWithoutGenre_productionNestedInput = {
 export type genreCreateWithoutGenre_productionInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   type?: string | null
   use_as?: string | null
   vendor_id?: string | null
@@ -416,7 +416,7 @@ export type genreCreateWithoutGenre_productionInput = {
 export type genreUncheckedCreateWithoutGenre_productionInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   type?: string | null
   use_as?: string | null
   vendor_id?: string | null
@@ -1220,7 +1220,7 @@ export type genreCreateArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
   /**
    * The data needed to create a genre.
    */
-  data: Prisma.XOR<Prisma.genreCreateInput, Prisma.genreUncheckedCreateInput>
+  data?: Prisma.XOR<Prisma.genreCreateInput, Prisma.genreUncheckedCreateInput>
 }
 
 /**

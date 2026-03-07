@@ -231,7 +231,7 @@ export type cropScalarWhereWithAggregatesInput = {
 export type cropCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
   url?: string | null
   item?: Prisma.itemCreateNestedManyWithoutCropInput
@@ -240,7 +240,7 @@ export type cropCreateInput = {
 export type cropUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
   url?: string | null
   item?: Prisma.itemUncheckedCreateNestedManyWithoutCropInput
@@ -267,7 +267,7 @@ export type cropUncheckedUpdateInput = {
 export type cropCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
   url?: string | null
 }
@@ -348,7 +348,7 @@ export type cropUpdateOneWithoutItemNestedInput = {
 export type cropCreateWithoutItemInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
   url?: string | null
 }
@@ -356,7 +356,7 @@ export type cropCreateWithoutItemInput = {
 export type cropUncheckedCreateWithoutItemInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
   url?: string | null
 }
@@ -1124,7 +1124,7 @@ export type cropCreateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
   /**
    * The data needed to create a crop.
    */
-  data: Prisma.XOR<Prisma.cropCreateInput, Prisma.cropUncheckedCreateInput>
+  data?: Prisma.XOR<Prisma.cropCreateInput, Prisma.cropUncheckedCreateInput>
 }
 
 /**

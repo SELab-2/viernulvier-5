@@ -9,4 +9,11 @@ describe('Permissions', () => {
         expect(hasPermission(Role.ADMIN, Permission.ARCHIVE_UPDATE)).toBe(true)
         expect(hasPermission(Role.ADMIN, Permission.ARCHIVE_DELETE)).toBe(true)
     })
+
+    it('EDITOR should be able to read and write but not delete', () => {
+        expect(hasPermission(Role.EDITOR, Permission.ARCHIVE_READ)).toBe(true)
+        expect(hasPermission(Role.EDITOR, Permission.ARCHIVE_CREATE)).toBe(true)
+        expect(hasPermission(Role.EDITOR, Permission.ARCHIVE_UPDATE)).toBe(true)
+        expect(hasPermission(Role.EDITOR, Permission.ARCHIVE_DELETE)).toBe(false)
+    })
 })

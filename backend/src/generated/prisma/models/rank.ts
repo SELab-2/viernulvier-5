@@ -294,7 +294,7 @@ export type rankScalarWhereWithAggregatesInput = {
 export type rankCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   code?: string | null
   position?: number | null
@@ -306,7 +306,7 @@ export type rankCreateInput = {
 export type rankUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   code?: string | null
   position?: number | null
@@ -342,7 +342,7 @@ export type rankUncheckedUpdateInput = {
 export type rankCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   code?: string | null
   position?: number | null
@@ -447,7 +447,7 @@ export type rankUpdateOneWithoutTicketsNestedInput = {
 export type rankCreateWithoutEvent_pricesInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   code?: string | null
   position?: number | null
@@ -458,7 +458,7 @@ export type rankCreateWithoutEvent_pricesInput = {
 export type rankUncheckedCreateWithoutEvent_pricesInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   code?: string | null
   position?: number | null
@@ -507,7 +507,7 @@ export type rankUncheckedUpdateWithoutEvent_pricesInput = {
 export type rankCreateWithoutTicketsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   code?: string | null
   position?: number | null
@@ -518,7 +518,7 @@ export type rankCreateWithoutTicketsInput = {
 export type rankUncheckedCreateWithoutTicketsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   code?: string | null
   position?: number | null
@@ -1320,7 +1320,7 @@ export type rankCreateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
   /**
    * The data needed to create a rank.
    */
-  data: Prisma.XOR<Prisma.rankCreateInput, Prisma.rankUncheckedCreateInput>
+  data?: Prisma.XOR<Prisma.rankCreateInput, Prisma.rankUncheckedCreateInput>
 }
 
 /**

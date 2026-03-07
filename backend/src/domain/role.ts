@@ -6,7 +6,7 @@
  */
 export enum Role {
     ADMIN = 'ADMIN',
+    EDITOR = 'EDITOR',
     // Future roles can be added here:
-    // EDITOR = 'EDITOR',
     // VIEWER = 'VIEWER',
 }

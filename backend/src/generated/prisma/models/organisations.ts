@@ -216,14 +216,14 @@ export type organisationsScalarWhereWithAggregatesInput = {
 export type organisationsCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
 }
 
 export type organisationsUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
 }
 
@@ -244,7 +244,7 @@ export type organisationsUncheckedUpdateInput = {
 export type organisationsCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
 }
 
@@ -944,7 +944,7 @@ export type organisationsCreateArgs<ExtArgs extends runtime.Types.Extensions.Int
   /**
    * The data needed to create a organisations.
    */
-  data: Prisma.XOR<Prisma.organisationsCreateInput, Prisma.organisationsUncheckedCreateInput>
+  data?: Prisma.XOR<Prisma.organisationsCreateInput, Prisma.organisationsUncheckedCreateInput>
 }
 
 /**

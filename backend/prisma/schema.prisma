@@ -481,12 +481,13 @@ model visitor_tags {
 // Scaffold-specific admin model for dashboard authentication.
 enum AdminRole {
   ADMIN
+  EDITOR
 }
 
 model AdminUser {
   id        String    @id @default(uuid()) @db.Uuid
   username  String    @unique @db.VarChar
-  password  String    @db.VarChar
+  passwordHash String @map("password_hash") @db.VarChar
   role      AdminRole @default(ADMIN)
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt DateTime  @default(now()) @map("updated_at") @db.Timestamp(6)

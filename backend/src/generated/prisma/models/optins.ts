@@ -283,7 +283,7 @@ export type optinsScalarWhereWithAggregatesInput = {
 export type optinsCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   key_name?: string | null
   name?: string | null
   title?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -297,7 +297,7 @@ export type optinsCreateInput = {
 export type optinsUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   key_name?: string | null
   name?: string | null
   title?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -339,7 +339,7 @@ export type optinsUncheckedUpdateInput = {
 export type optinsCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   key_name?: string | null
   name?: string | null
   title?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -432,7 +432,7 @@ export type optinsUpdateOneRequiredWithoutSubscriber_optinsNestedInput = {
 export type optinsCreateWithoutSubscriber_optinsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   key_name?: string | null
   name?: string | null
   title?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -445,7 +445,7 @@ export type optinsCreateWithoutSubscriber_optinsInput = {
 export type optinsUncheckedCreateWithoutSubscriber_optinsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   key_name?: string | null
   name?: string | null
   title?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -1258,7 +1258,7 @@ export type optinsCreateArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
   /**
    * The data needed to create a optins.
    */
-  data: Prisma.XOR<Prisma.optinsCreateInput, Prisma.optinsUncheckedCreateInput>
+  data?: Prisma.XOR<Prisma.optinsCreateInput, Prisma.optinsUncheckedCreateInput>
 }
 
 /**

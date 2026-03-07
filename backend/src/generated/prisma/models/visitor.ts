@@ -249,7 +249,7 @@ export type visitorScalarWhereWithAggregatesInput = {
 export type visitorCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   box_office_id?: string | null
   optins_chosen?: boolean | null
   optins_skipped_at?: Date | string | null
@@ -261,7 +261,7 @@ export type visitorCreateInput = {
 export type visitorUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   box_office_id?: string | null
   optins_chosen?: boolean | null
   optins_skipped_at?: Date | string | null
@@ -297,7 +297,7 @@ export type visitorUncheckedUpdateInput = {
 export type visitorCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   box_office_id?: string | null
   optins_chosen?: boolean | null
   optins_skipped_at?: Date | string | null
@@ -404,7 +404,7 @@ export type visitorUpdateOneWithoutVisitor_tagsNestedInput = {
 export type visitorCreateWithoutOrdersInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   box_office_id?: string | null
   optins_chosen?: boolean | null
   optins_skipped_at?: Date | string | null
@@ -415,7 +415,7 @@ export type visitorCreateWithoutOrdersInput = {
 export type visitorUncheckedCreateWithoutOrdersInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   box_office_id?: string | null
   optins_chosen?: boolean | null
   optins_skipped_at?: Date | string | null
@@ -464,7 +464,7 @@ export type visitorUncheckedUpdateWithoutOrdersInput = {
 export type visitorCreateWithoutUserInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   box_office_id?: string | null
   optins_chosen?: boolean | null
   optins_skipped_at?: Date | string | null
@@ -475,7 +475,7 @@ export type visitorCreateWithoutUserInput = {
 export type visitorUncheckedCreateWithoutUserInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   box_office_id?: string | null
   optins_chosen?: boolean | null
   optins_skipped_at?: Date | string | null
@@ -524,7 +524,7 @@ export type visitorUncheckedUpdateWithoutUserInput = {
 export type visitorCreateWithoutVisitor_tagsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   box_office_id?: string | null
   optins_chosen?: boolean | null
   optins_skipped_at?: Date | string | null
@@ -535,7 +535,7 @@ export type visitorCreateWithoutVisitor_tagsInput = {
 export type visitorUncheckedCreateWithoutVisitor_tagsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   box_office_id?: string | null
   optins_chosen?: boolean | null
   optins_skipped_at?: Date | string | null
@@ -1335,7 +1335,7 @@ export type visitorCreateArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   /**
    * The data needed to create a visitor.
    */
-  data: Prisma.XOR<Prisma.visitorCreateInput, Prisma.visitorUncheckedCreateInput>
+  data?: Prisma.XOR<Prisma.visitorCreateInput, Prisma.visitorUncheckedCreateInput>
 }
 
 /**

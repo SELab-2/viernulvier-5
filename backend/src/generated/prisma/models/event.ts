@@ -447,7 +447,7 @@ export type eventScalarWhereWithAggregatesInput = {
 export type eventCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   starts_at?: Date | string | null
   ends_at?: Date | string | null
   intermission_at?: Date | string | null
@@ -472,7 +472,7 @@ export type eventCreateInput = {
 export type eventUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   starts_at?: Date | string | null
   ends_at?: Date | string | null
   intermission_at?: Date | string | null
@@ -547,7 +547,7 @@ export type eventUncheckedUpdateInput = {
 export type eventCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   starts_at?: Date | string | null
   ends_at?: Date | string | null
   intermission_at?: Date | string | null
@@ -873,7 +873,7 @@ export type eventUpdateOneWithoutTicketsNestedInput = {
 export type eventCreateWithoutEvent_pricesInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   starts_at?: Date | string | null
   ends_at?: Date | string | null
   intermission_at?: Date | string | null
@@ -897,7 +897,7 @@ export type eventCreateWithoutEvent_pricesInput = {
 export type eventUncheckedCreateWithoutEvent_pricesInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   starts_at?: Date | string | null
   ends_at?: Date | string | null
   intermission_at?: Date | string | null
@@ -985,7 +985,7 @@ export type eventUncheckedUpdateWithoutEvent_pricesInput = {
 export type eventCreateWithoutHallInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   starts_at?: Date | string | null
   ends_at?: Date | string | null
   intermission_at?: Date | string | null
@@ -1009,7 +1009,7 @@ export type eventCreateWithoutHallInput = {
 export type eventUncheckedCreateWithoutHallInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   starts_at?: Date | string | null
   ends_at?: Date | string | null
   intermission_at?: Date | string | null
@@ -1085,7 +1085,7 @@ export type eventScalarWhereInput = {
 export type eventCreateWithoutProductionInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   starts_at?: Date | string | null
   ends_at?: Date | string | null
   intermission_at?: Date | string | null
@@ -1109,7 +1109,7 @@ export type eventCreateWithoutProductionInput = {
 export type eventUncheckedCreateWithoutProductionInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   starts_at?: Date | string | null
   ends_at?: Date | string | null
   intermission_at?: Date | string | null
@@ -1159,7 +1159,7 @@ export type eventUpdateManyWithWhereWithoutProductionInput = {
 export type eventCreateWithoutStatusInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   starts_at?: Date | string | null
   ends_at?: Date | string | null
   intermission_at?: Date | string | null
@@ -1183,7 +1183,7 @@ export type eventCreateWithoutStatusInput = {
 export type eventUncheckedCreateWithoutStatusInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   starts_at?: Date | string | null
   ends_at?: Date | string | null
   intermission_at?: Date | string | null
@@ -1233,7 +1233,7 @@ export type eventUpdateManyWithWhereWithoutStatusInput = {
 export type eventCreateWithoutTicketsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   starts_at?: Date | string | null
   ends_at?: Date | string | null
   intermission_at?: Date | string | null
@@ -1257,7 +1257,7 @@ export type eventCreateWithoutTicketsInput = {
 export type eventUncheckedCreateWithoutTicketsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   starts_at?: Date | string | null
   ends_at?: Date | string | null
   intermission_at?: Date | string | null
@@ -1345,7 +1345,7 @@ export type eventUncheckedUpdateWithoutTicketsInput = {
 export type eventCreateManyHallInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   starts_at?: Date | string | null
   ends_at?: Date | string | null
   intermission_at?: Date | string | null
@@ -1437,7 +1437,7 @@ export type eventUncheckedUpdateManyWithoutHallInput = {
 export type eventCreateManyProductionInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   starts_at?: Date | string | null
   ends_at?: Date | string | null
   intermission_at?: Date | string | null
@@ -1529,7 +1529,7 @@ export type eventUncheckedUpdateManyWithoutProductionInput = {
 export type eventCreateManyStatusInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   starts_at?: Date | string | null
   ends_at?: Date | string | null
   intermission_at?: Date | string | null
@@ -2478,7 +2478,7 @@ export type eventCreateArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
   /**
    * The data needed to create a event.
    */
-  data: Prisma.XOR<Prisma.eventCreateInput, Prisma.eventUncheckedCreateInput>
+  data?: Prisma.XOR<Prisma.eventCreateInput, Prisma.eventUncheckedCreateInput>
 }
 
 /**

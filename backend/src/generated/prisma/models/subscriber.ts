@@ -285,7 +285,7 @@ export type subscriberScalarWhereWithAggregatesInput = {
 export type subscriberCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   confirmed?: boolean | null
   bounces?: number | null
   user?: Prisma.userCreateNestedOneWithoutSubscribersInput
@@ -296,7 +296,7 @@ export type subscriberCreateInput = {
 export type subscriberUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   confirmed?: boolean | null
   bounces?: number | null
   user_id?: string | null
@@ -329,7 +329,7 @@ export type subscriberUncheckedUpdateInput = {
 export type subscriberCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   confirmed?: boolean | null
   bounces?: number | null
   user_id?: string | null
@@ -475,7 +475,7 @@ export type subscriberUncheckedUpdateManyWithoutUserNestedInput = {
 export type subscriberCreateWithoutSubscriber_mailinglistInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   confirmed?: boolean | null
   bounces?: number | null
   user?: Prisma.userCreateNestedOneWithoutSubscribersInput
@@ -485,7 +485,7 @@ export type subscriberCreateWithoutSubscriber_mailinglistInput = {
 export type subscriberUncheckedCreateWithoutSubscriber_mailinglistInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   confirmed?: boolean | null
   bounces?: number | null
   user_id?: string | null
@@ -531,7 +531,7 @@ export type subscriberUncheckedUpdateWithoutSubscriber_mailinglistInput = {
 export type subscriberCreateWithoutSubscriber_optinsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   confirmed?: boolean | null
   bounces?: number | null
   user?: Prisma.userCreateNestedOneWithoutSubscribersInput
@@ -541,7 +541,7 @@ export type subscriberCreateWithoutSubscriber_optinsInput = {
 export type subscriberUncheckedCreateWithoutSubscriber_optinsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   confirmed?: boolean | null
   bounces?: number | null
   user_id?: string | null
@@ -587,7 +587,7 @@ export type subscriberUncheckedUpdateWithoutSubscriber_optinsInput = {
 export type subscriberCreateWithoutUserInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   confirmed?: boolean | null
   bounces?: number | null
   subscriber_mailinglist?: Prisma.subscriber_mailinglistCreateNestedManyWithoutSubscriberInput
@@ -597,7 +597,7 @@ export type subscriberCreateWithoutUserInput = {
 export type subscriberUncheckedCreateWithoutUserInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   confirmed?: boolean | null
   bounces?: number | null
   subscriber_mailinglist?: Prisma.subscriber_mailinglistUncheckedCreateNestedManyWithoutSubscriberInput
@@ -645,7 +645,7 @@ export type subscriberScalarWhereInput = {
 export type subscriberCreateManyUserInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   confirmed?: boolean | null
   bounces?: number | null
 }
@@ -1438,7 +1438,7 @@ export type subscriberCreateArgs<ExtArgs extends runtime.Types.Extensions.Intern
   /**
    * The data needed to create a subscriber.
    */
-  data: Prisma.XOR<Prisma.subscriberCreateInput, Prisma.subscriberUncheckedCreateInput>
+  data?: Prisma.XOR<Prisma.subscriberCreateInput, Prisma.subscriberUncheckedCreateInput>
 }
 
 /**

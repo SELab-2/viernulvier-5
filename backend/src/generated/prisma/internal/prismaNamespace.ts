@@ -3475,7 +3475,7 @@ export type Visitor_tagsScalarFieldEnum = (typeof Visitor_tagsScalarFieldEnum)[k
 export const AdminUserScalarFieldEnum = {
   id: 'id',
   username: 'username',
-  password: 'password',
+  passwordHash: 'passwordHash',
   role: 'role',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

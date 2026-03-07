@@ -234,7 +234,7 @@ export type galleryScalarWhereWithAggregatesInput = {
 export type galleryCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
   gallery_item?: Prisma.gallery_itemCreateNestedManyWithoutGalleryInput
   items?: Prisma.itemCreateNestedManyWithoutGalleryInput
@@ -247,7 +247,7 @@ export type galleryCreateInput = {
 export type galleryUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
   gallery_item?: Prisma.gallery_itemUncheckedCreateNestedManyWithoutGalleryInput
   items?: Prisma.itemUncheckedCreateNestedManyWithoutGalleryInput
@@ -286,7 +286,7 @@ export type galleryUncheckedUpdateInput = {
 export type galleryCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
 }
 
@@ -432,7 +432,7 @@ export type galleryUpdateOneWithoutTagsNestedInput = {
 export type galleryCreateWithoutGallery_itemInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
   items?: Prisma.itemCreateNestedManyWithoutGalleryInput
   media_gallery_productions?: Prisma.productionCreateNestedManyWithoutMedia_galleryInput
@@ -444,7 +444,7 @@ export type galleryCreateWithoutGallery_itemInput = {
 export type galleryUncheckedCreateWithoutGallery_itemInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
   items?: Prisma.itemUncheckedCreateNestedManyWithoutGalleryInput
   media_gallery_productions?: Prisma.productionUncheckedCreateNestedManyWithoutMedia_galleryInput
@@ -496,7 +496,7 @@ export type galleryUncheckedUpdateWithoutGallery_itemInput = {
 export type galleryCreateWithoutItemsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
   gallery_item?: Prisma.gallery_itemCreateNestedManyWithoutGalleryInput
   media_gallery_productions?: Prisma.productionCreateNestedManyWithoutMedia_galleryInput
@@ -508,7 +508,7 @@ export type galleryCreateWithoutItemsInput = {
 export type galleryUncheckedCreateWithoutItemsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
   gallery_item?: Prisma.gallery_itemUncheckedCreateNestedManyWithoutGalleryInput
   media_gallery_productions?: Prisma.productionUncheckedCreateNestedManyWithoutMedia_galleryInput
@@ -560,7 +560,7 @@ export type galleryUncheckedUpdateWithoutItemsInput = {
 export type galleryCreateWithoutMedia_gallery_productionsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
   gallery_item?: Prisma.gallery_itemCreateNestedManyWithoutGalleryInput
   items?: Prisma.itemCreateNestedManyWithoutGalleryInput
@@ -572,7 +572,7 @@ export type galleryCreateWithoutMedia_gallery_productionsInput = {
 export type galleryUncheckedCreateWithoutMedia_gallery_productionsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
   gallery_item?: Prisma.gallery_itemUncheckedCreateNestedManyWithoutGalleryInput
   items?: Prisma.itemUncheckedCreateNestedManyWithoutGalleryInput
@@ -589,7 +589,7 @@ export type galleryCreateOrConnectWithoutMedia_gallery_productionsInput = {
 export type galleryCreateWithoutPoster_gallery_productionsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
   gallery_item?: Prisma.gallery_itemCreateNestedManyWithoutGalleryInput
   items?: Prisma.itemCreateNestedManyWithoutGalleryInput
@@ -601,7 +601,7 @@ export type galleryCreateWithoutPoster_gallery_productionsInput = {
 export type galleryUncheckedCreateWithoutPoster_gallery_productionsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
   gallery_item?: Prisma.gallery_itemUncheckedCreateNestedManyWithoutGalleryInput
   items?: Prisma.itemUncheckedCreateNestedManyWithoutGalleryInput
@@ -618,7 +618,7 @@ export type galleryCreateOrConnectWithoutPoster_gallery_productionsInput = {
 export type galleryCreateWithoutReview_gallery_productionsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
   gallery_item?: Prisma.gallery_itemCreateNestedManyWithoutGalleryInput
   items?: Prisma.itemCreateNestedManyWithoutGalleryInput
@@ -630,7 +630,7 @@ export type galleryCreateWithoutReview_gallery_productionsInput = {
 export type galleryUncheckedCreateWithoutReview_gallery_productionsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
   gallery_item?: Prisma.gallery_itemUncheckedCreateNestedManyWithoutGalleryInput
   items?: Prisma.itemUncheckedCreateNestedManyWithoutGalleryInput
@@ -752,7 +752,7 @@ export type galleryUncheckedUpdateWithoutReview_gallery_productionsInput = {
 export type galleryCreateWithoutTagsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
   gallery_item?: Prisma.gallery_itemCreateNestedManyWithoutGalleryInput
   items?: Prisma.itemCreateNestedManyWithoutGalleryInput
@@ -764,7 +764,7 @@ export type galleryCreateWithoutTagsInput = {
 export type galleryUncheckedCreateWithoutTagsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
   gallery_item?: Prisma.gallery_itemUncheckedCreateNestedManyWithoutGalleryInput
   items?: Prisma.itemUncheckedCreateNestedManyWithoutGalleryInput
@@ -1603,7 +1603,7 @@ export type galleryCreateArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   /**
    * The data needed to create a gallery.
    */
-  data: Prisma.XOR<Prisma.galleryCreateInput, Prisma.galleryUncheckedCreateInput>
+  data?: Prisma.XOR<Prisma.galleryCreateInput, Prisma.galleryUncheckedCreateInput>
 }
 
 /**

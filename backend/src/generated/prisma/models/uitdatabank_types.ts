@@ -231,7 +231,7 @@ export type uitdatabank_typesScalarWhereWithAggregatesInput = {
 export type uitdatabank_typesCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
   cdb_cat_id?: string | null
   production?: Prisma.productionCreateNestedManyWithoutUitdatabank_typesInput
@@ -240,7 +240,7 @@ export type uitdatabank_typesCreateInput = {
 export type uitdatabank_typesUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
   cdb_cat_id?: string | null
   production?: Prisma.productionUncheckedCreateNestedManyWithoutUitdatabank_typesInput
@@ -267,7 +267,7 @@ export type uitdatabank_typesUncheckedUpdateInput = {
 export type uitdatabank_typesCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
   cdb_cat_id?: string | null
 }
@@ -336,7 +336,7 @@ export type uitdatabank_typesUpdateOneWithoutProductionNestedInput = {
 export type uitdatabank_typesCreateWithoutProductionInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
   cdb_cat_id?: string | null
 }
@@ -344,7 +344,7 @@ export type uitdatabank_typesCreateWithoutProductionInput = {
 export type uitdatabank_typesUncheckedCreateWithoutProductionInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   name?: string | null
   cdb_cat_id?: string | null
 }
@@ -1112,7 +1112,7 @@ export type uitdatabank_typesCreateArgs<ExtArgs extends runtime.Types.Extensions
   /**
    * The data needed to create a uitdatabank_types.
    */
-  data: Prisma.XOR<Prisma.uitdatabank_typesCreateInput, Prisma.uitdatabank_typesUncheckedCreateInput>
+  data?: Prisma.XOR<Prisma.uitdatabank_typesCreateInput, Prisma.uitdatabank_typesUncheckedCreateInput>
 }
 
 /**

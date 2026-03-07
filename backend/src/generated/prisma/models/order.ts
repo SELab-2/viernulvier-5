@@ -276,7 +276,7 @@ export type orderScalarWhereWithAggregatesInput = {
 export type orderCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   ordered_at?: Date | string | null
   total_amount?: string | null
   box_office_id?: string | null
@@ -290,7 +290,7 @@ export type orderCreateInput = {
 export type orderUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   ordered_at?: Date | string | null
   total_amount?: string | null
   box_office_id?: string | null
@@ -332,7 +332,7 @@ export type orderUncheckedUpdateInput = {
 export type orderCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   ordered_at?: Date | string | null
   total_amount?: string | null
   box_office_id?: string | null
@@ -502,7 +502,7 @@ export type orderUncheckedUpdateManyWithoutVisitorNestedInput = {
 export type orderCreateWithoutCrosssellsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   ordered_at?: Date | string | null
   total_amount?: string | null
   box_office_id?: string | null
@@ -515,7 +515,7 @@ export type orderCreateWithoutCrosssellsInput = {
 export type orderUncheckedCreateWithoutCrosssellsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   ordered_at?: Date | string | null
   total_amount?: string | null
   box_office_id?: string | null
@@ -570,7 +570,7 @@ export type orderUncheckedUpdateWithoutCrosssellsInput = {
 export type orderCreateWithoutOrderticketsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   ordered_at?: Date | string | null
   total_amount?: string | null
   box_office_id?: string | null
@@ -583,7 +583,7 @@ export type orderCreateWithoutOrderticketsInput = {
 export type orderUncheckedCreateWithoutOrderticketsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   ordered_at?: Date | string | null
   total_amount?: string | null
   box_office_id?: string | null
@@ -638,7 +638,7 @@ export type orderUncheckedUpdateWithoutOrderticketsInput = {
 export type orderCreateWithoutTicketsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   ordered_at?: Date | string | null
   total_amount?: string | null
   box_office_id?: string | null
@@ -651,7 +651,7 @@ export type orderCreateWithoutTicketsInput = {
 export type orderUncheckedCreateWithoutTicketsInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   ordered_at?: Date | string | null
   total_amount?: string | null
   box_office_id?: string | null
@@ -706,7 +706,7 @@ export type orderUncheckedUpdateWithoutTicketsInput = {
 export type orderCreateWithoutVisitorInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   ordered_at?: Date | string | null
   total_amount?: string | null
   box_office_id?: string | null
@@ -719,7 +719,7 @@ export type orderCreateWithoutVisitorInput = {
 export type orderUncheckedCreateWithoutVisitorInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   ordered_at?: Date | string | null
   total_amount?: string | null
   box_office_id?: string | null
@@ -772,7 +772,7 @@ export type orderScalarWhereInput = {
 export type orderCreateManyVisitorInput = {
   created_at?: Date | string
   updated_at?: Date | string
-  id: string
+  id?: string
   ordered_at?: Date | string | null
   total_amount?: string | null
   box_office_id?: string | null
@@ -1600,7 +1600,7 @@ export type orderCreateArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
   /**
    * The data needed to create a order.
    */
-  data: Prisma.XOR<Prisma.orderCreateInput, Prisma.orderUncheckedCreateInput>
+  data?: Prisma.XOR<Prisma.orderCreateInput, Prisma.orderUncheckedCreateInput>
 }
 
 /**

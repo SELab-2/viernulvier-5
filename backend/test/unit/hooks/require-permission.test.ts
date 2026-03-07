@@ -1,0 +1,63 @@
+import Fastify from 'fastify'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+
+describe('requirePermission', () => {
+    let app: Awaited<ReturnType<typeof Fastify>>
+
+    beforeEach(async () => {
+        process.env.JWT_SECRET = 'test-jwt-secret'
+        process.env.DATABASE_URL = 'postgresql://postgres:postgres@localhost:5432/viernulvier'
+        process.env.NODE_ENV = 'test'
+
+        const authPlugin = (await import('../../../src/plugins/auth.js')).default
+        const { requirePermission } = await import('../../../src/hooks/require-permission.js')
+        const { Permission } = await import('../../../src/domain/permissions.js')
+
+        app = Fastify({ logger: false })
+        await app.register(authPlugin)
+
+        app.get('/write', {
+            preHandler: [requirePermission(Permission.ARCHIVE_DELETE)],
+            handler: async () => ({ success: true }),
+        })
+    })
+
+    afterEach(async () => {
+        await app.close()
+    })
+
+    it('returns 401 without a token', async () => {
+        const response = await app.inject({
+            method: 'GET',
+            url: '/write',
+        })
+
+        expect(response.statusCode).toBe(401)
+    })
+
+    it('allows an ADMIN token through', async () => {
+        const response = await app.inject({
+            method: 'GET',
+            url: '/write',
+            cookies: {
+                token: app.jwt.sign({ sub: 'admin-id', username: 'admin', role: 'ADMIN' }),
+            },
+        })
+
+        expect(response.statusCode).toBe(200)
+        expect(response.json()).toEqual({ success: true })
+    })
+
+    it('rejects an EDITOR token without the needed permission', async () => {
+        const response = await app.inject({
+            method: 'GET',
+            url: '/write',
+            cookies: {
+                token: app.jwt.sign({ sub: 'editor-id', username: 'editor', role: 'EDITOR' }),
+            },
+        })
+
+        expect(response.statusCode).toBe(403)
+        expect(response.json()).toEqual({ error: 'Forbidden' })
+    })
+})
