@@ -241,7 +241,6 @@ export type rankWhereInput = {
   position?: Prisma.IntNullableFilter<"rank"> | number | null
   sold_out_buffer?: Prisma.IntNullableFilter<"rank"> | number | null
   event_prices?: Prisma.Event_priceListRelationFilter
-  tickets?: Prisma.TicketListRelationFilter
 }
 
 export type rankOrderByWithRelationInput = {
@@ -254,7 +253,6 @@ export type rankOrderByWithRelationInput = {
   position?: Prisma.SortOrderInput | Prisma.SortOrder
   sold_out_buffer?: Prisma.SortOrderInput | Prisma.SortOrder
   event_prices?: Prisma.event_priceOrderByRelationAggregateInput
-  tickets?: Prisma.ticketOrderByRelationAggregateInput
 }
 
 export type rankWhereUniqueInput = Prisma.AtLeast<{
@@ -270,7 +268,6 @@ export type rankWhereUniqueInput = Prisma.AtLeast<{
   position?: Prisma.IntNullableFilter<"rank"> | number | null
   sold_out_buffer?: Prisma.IntNullableFilter<"rank"> | number | null
   event_prices?: Prisma.Event_priceListRelationFilter
-  tickets?: Prisma.TicketListRelationFilter
 }, "id" | "apiId">
 
 export type rankOrderByWithAggregationInput = {
@@ -313,7 +310,6 @@ export type rankCreateInput = {
   position?: number | null
   sold_out_buffer?: number | null
   event_prices?: Prisma.event_priceCreateNestedManyWithoutRankInput
-  tickets?: Prisma.ticketCreateNestedManyWithoutRankInput
 }
 
 export type rankUncheckedCreateInput = {
@@ -326,7 +322,6 @@ export type rankUncheckedCreateInput = {
   position?: number | null
   sold_out_buffer?: number | null
   event_prices?: Prisma.event_priceUncheckedCreateNestedManyWithoutRankInput
-  tickets?: Prisma.ticketUncheckedCreateNestedManyWithoutRankInput
 }
 
 export type rankUpdateInput = {
@@ -339,7 +334,6 @@ export type rankUpdateInput = {
   position?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   sold_out_buffer?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   event_prices?: Prisma.event_priceUpdateManyWithoutRankNestedInput
-  tickets?: Prisma.ticketUpdateManyWithoutRankNestedInput
 }
 
 export type rankUncheckedUpdateInput = {
@@ -352,7 +346,6 @@ export type rankUncheckedUpdateInput = {
   position?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   sold_out_buffer?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   event_prices?: Prisma.event_priceUncheckedUpdateManyWithoutRankNestedInput
-  tickets?: Prisma.ticketUncheckedUpdateManyWithoutRankNestedInput
 }
 
 export type rankCreateManyInput = {
@@ -450,22 +443,6 @@ export type rankUpdateOneWithoutEvent_pricesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.rankUpdateToOneWithWhereWithoutEvent_pricesInput, Prisma.rankUpdateWithoutEvent_pricesInput>, Prisma.rankUncheckedUpdateWithoutEvent_pricesInput>
 }
 
-export type rankCreateNestedOneWithoutTicketsInput = {
-  create?: Prisma.XOR<Prisma.rankCreateWithoutTicketsInput, Prisma.rankUncheckedCreateWithoutTicketsInput>
-  connectOrCreate?: Prisma.rankCreateOrConnectWithoutTicketsInput
-  connect?: Prisma.rankWhereUniqueInput
-}
-
-export type rankUpdateOneWithoutTicketsNestedInput = {
-  create?: Prisma.XOR<Prisma.rankCreateWithoutTicketsInput, Prisma.rankUncheckedCreateWithoutTicketsInput>
-  connectOrCreate?: Prisma.rankCreateOrConnectWithoutTicketsInput
-  upsert?: Prisma.rankUpsertWithoutTicketsInput
-  disconnect?: Prisma.rankWhereInput | boolean
-  delete?: Prisma.rankWhereInput | boolean
-  connect?: Prisma.rankWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.rankUpdateToOneWithWhereWithoutTicketsInput, Prisma.rankUpdateWithoutTicketsInput>, Prisma.rankUncheckedUpdateWithoutTicketsInput>
-}
-
 export type rankCreateWithoutEvent_pricesInput = {
   created_at?: Date | string
   updated_at?: Date | string
@@ -475,7 +452,6 @@ export type rankCreateWithoutEvent_pricesInput = {
   code?: string | null
   position?: number | null
   sold_out_buffer?: number | null
-  tickets?: Prisma.ticketCreateNestedManyWithoutRankInput
 }
 
 export type rankUncheckedCreateWithoutEvent_pricesInput = {
@@ -487,7 +463,6 @@ export type rankUncheckedCreateWithoutEvent_pricesInput = {
   code?: string | null
   position?: number | null
   sold_out_buffer?: number | null
-  tickets?: Prisma.ticketUncheckedCreateNestedManyWithoutRankInput
 }
 
 export type rankCreateOrConnectWithoutEvent_pricesInput = {
@@ -515,7 +490,6 @@ export type rankUpdateWithoutEvent_pricesInput = {
   code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   position?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   sold_out_buffer?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  tickets?: Prisma.ticketUpdateManyWithoutRankNestedInput
 }
 
 export type rankUncheckedUpdateWithoutEvent_pricesInput = {
@@ -527,71 +501,6 @@ export type rankUncheckedUpdateWithoutEvent_pricesInput = {
   code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   position?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   sold_out_buffer?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  tickets?: Prisma.ticketUncheckedUpdateManyWithoutRankNestedInput
-}
-
-export type rankCreateWithoutTicketsInput = {
-  created_at?: Date | string
-  updated_at?: Date | string
-  id?: string
-  apiId?: string | null
-  description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  code?: string | null
-  position?: number | null
-  sold_out_buffer?: number | null
-  event_prices?: Prisma.event_priceCreateNestedManyWithoutRankInput
-}
-
-export type rankUncheckedCreateWithoutTicketsInput = {
-  created_at?: Date | string
-  updated_at?: Date | string
-  id?: string
-  apiId?: string | null
-  description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  code?: string | null
-  position?: number | null
-  sold_out_buffer?: number | null
-  event_prices?: Prisma.event_priceUncheckedCreateNestedManyWithoutRankInput
-}
-
-export type rankCreateOrConnectWithoutTicketsInput = {
-  where: Prisma.rankWhereUniqueInput
-  create: Prisma.XOR<Prisma.rankCreateWithoutTicketsInput, Prisma.rankUncheckedCreateWithoutTicketsInput>
-}
-
-export type rankUpsertWithoutTicketsInput = {
-  update: Prisma.XOR<Prisma.rankUpdateWithoutTicketsInput, Prisma.rankUncheckedUpdateWithoutTicketsInput>
-  create: Prisma.XOR<Prisma.rankCreateWithoutTicketsInput, Prisma.rankUncheckedCreateWithoutTicketsInput>
-  where?: Prisma.rankWhereInput
-}
-
-export type rankUpdateToOneWithWhereWithoutTicketsInput = {
-  where?: Prisma.rankWhereInput
-  data: Prisma.XOR<Prisma.rankUpdateWithoutTicketsInput, Prisma.rankUncheckedUpdateWithoutTicketsInput>
-}
-
-export type rankUpdateWithoutTicketsInput = {
-  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  position?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  sold_out_buffer?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  event_prices?: Prisma.event_priceUpdateManyWithoutRankNestedInput
-}
-
-export type rankUncheckedUpdateWithoutTicketsInput = {
-  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  position?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  sold_out_buffer?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  event_prices?: Prisma.event_priceUncheckedUpdateManyWithoutRankNestedInput
 }
 
 
@@ -601,12 +510,10 @@ export type rankUncheckedUpdateWithoutTicketsInput = {
 
 export type RankCountOutputType = {
   event_prices: number
-  tickets: number
 }
 
 export type RankCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   event_prices?: boolean | RankCountOutputTypeCountEvent_pricesArgs
-  tickets?: boolean | RankCountOutputTypeCountTicketsArgs
 }
 
 /**
@@ -626,13 +533,6 @@ export type RankCountOutputTypeCountEvent_pricesArgs<ExtArgs extends runtime.Typ
   where?: Prisma.event_priceWhereInput
 }
 
-/**
- * RankCountOutputType without action
- */
-export type RankCountOutputTypeCountTicketsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.ticketWhereInput
-}
-
 
 export type rankSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   created_at?: boolean
@@ -644,7 +544,6 @@ export type rankSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   position?: boolean
   sold_out_buffer?: boolean
   event_prices?: boolean | Prisma.rank$event_pricesArgs<ExtArgs>
-  tickets?: boolean | Prisma.rank$ticketsArgs<ExtArgs>
   _count?: boolean | Prisma.RankCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["rank"]>
 
@@ -684,7 +583,6 @@ export type rankSelectScalar = {
 export type rankOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "apiId" | "description" | "code" | "position" | "sold_out_buffer", ExtArgs["result"]["rank"]>
 export type rankInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   event_prices?: boolean | Prisma.rank$event_pricesArgs<ExtArgs>
-  tickets?: boolean | Prisma.rank$ticketsArgs<ExtArgs>
   _count?: boolean | Prisma.RankCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type rankIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -694,7 +592,6 @@ export type $rankPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   name: "rank"
   objects: {
     event_prices: Prisma.$event_pricePayload<ExtArgs>[]
-    tickets: Prisma.$ticketPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     created_at: Date
@@ -1100,7 +997,6 @@ readonly fields: rankFieldRefs;
 export interface Prisma__rankClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   event_prices<T extends Prisma.rank$event_pricesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.rank$event_pricesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$event_pricePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  tickets<T extends Prisma.rank$ticketsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.rank$ticketsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ticketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1547,30 +1443,6 @@ export type rank$event_pricesArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.Event_priceScalarFieldEnum | Prisma.Event_priceScalarFieldEnum[]
-}
-
-/**
- * rank.tickets
- */
-export type rank$ticketsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the ticket
-   */
-  select?: Prisma.ticketSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the ticket
-   */
-  omit?: Prisma.ticketOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.ticketInclude<ExtArgs> | null
-  where?: Prisma.ticketWhereInput
-  orderBy?: Prisma.ticketOrderByWithRelationInput | Prisma.ticketOrderByWithRelationInput[]
-  cursor?: Prisma.ticketWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.TicketScalarFieldEnum | Prisma.TicketScalarFieldEnum[]
 }
 
 /**

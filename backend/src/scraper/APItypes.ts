@@ -199,6 +199,50 @@ export type APIEvent = {
   order_url: string;
 };
 
+export type APIGenre = {
+    "@context": string;
+    "@id": string;
+    "@type": string;
+    created_at: string;
+    updated_at: string;
+    type: string;
+    use_as: string;
+    vendor_id: string;
+    name: LocalizedString;
+    slug: LocalizedString;
+    description: LocalizedString;
+};
+
+export type APIGallery = {
+    "@context": string;
+    "@id": string;
+    "@type": string;
+    created_at: string;
+    updated_at: string;
+    name: string;
+    items: string[];
+}
+
+export type APIItem = {
+    "@context": string;
+    "@id": string;
+    "@type": string;
+    created_at: string;
+    updated_at: string;
+    type: string;
+    original_filename: string;
+    position: number;
+    width: number;
+    height: number;
+    format: string;
+    gallery: string;
+    title: LocalizedString;
+    description: LocalizedString;
+    credits: LocalizedString;
+    link: LocalizedString;
+    crops: string[] // reference crops
+}
+
 /*
 --------------------------------------
 --------------TYPES-------------------

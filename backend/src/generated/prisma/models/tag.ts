@@ -293,7 +293,6 @@ export type tagWhereInput = {
   external?: Prisma.BoolNullableFilter<"tag"> | boolean | null
   gallery_id?: Prisma.UuidNullableFilter<"tag"> | string | null
   gallery?: Prisma.XOR<Prisma.GalleryNullableScalarRelationFilter, Prisma.galleryWhereInput> | null
-  visitor_tags?: Prisma.Visitor_tagsListRelationFilter
 }
 
 export type tagOrderByWithRelationInput = {
@@ -314,7 +313,6 @@ export type tagOrderByWithRelationInput = {
   external?: Prisma.SortOrderInput | Prisma.SortOrder
   gallery_id?: Prisma.SortOrderInput | Prisma.SortOrder
   gallery?: Prisma.galleryOrderByWithRelationInput
-  visitor_tags?: Prisma.visitor_tagsOrderByRelationAggregateInput
 }
 
 export type tagWhereUniqueInput = Prisma.AtLeast<{
@@ -338,7 +336,6 @@ export type tagWhereUniqueInput = Prisma.AtLeast<{
   external?: Prisma.BoolNullableFilter<"tag"> | boolean | null
   gallery_id?: Prisma.UuidNullableFilter<"tag"> | string | null
   gallery?: Prisma.XOR<Prisma.GalleryNullableScalarRelationFilter, Prisma.galleryWhereInput> | null
-  visitor_tags?: Prisma.Visitor_tagsListRelationFilter
 }, "id" | "apiId">
 
 export type tagOrderByWithAggregationInput = {
@@ -404,7 +401,6 @@ export type tagCreateInput = {
   automatically_assigned?: boolean | null
   external?: boolean | null
   gallery?: Prisma.galleryCreateNestedOneWithoutTagsInput
-  visitor_tags?: Prisma.visitor_tagsCreateNestedManyWithoutTagInput
 }
 
 export type tagUncheckedCreateInput = {
@@ -424,7 +420,6 @@ export type tagUncheckedCreateInput = {
   automatically_assigned?: boolean | null
   external?: boolean | null
   gallery_id?: string | null
-  visitor_tags?: Prisma.visitor_tagsUncheckedCreateNestedManyWithoutTagInput
 }
 
 export type tagUpdateInput = {
@@ -444,7 +439,6 @@ export type tagUpdateInput = {
   automatically_assigned?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   external?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   gallery?: Prisma.galleryUpdateOneWithoutTagsNestedInput
-  visitor_tags?: Prisma.visitor_tagsUpdateManyWithoutTagNestedInput
 }
 
 export type tagUncheckedUpdateInput = {
@@ -464,7 +458,6 @@ export type tagUncheckedUpdateInput = {
   automatically_assigned?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   external?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   gallery_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  visitor_tags?: Prisma.visitor_tagsUncheckedUpdateManyWithoutTagNestedInput
 }
 
 export type tagCreateManyInput = {
@@ -592,11 +585,6 @@ export type tagSumOrderByAggregateInput = {
   expires_after?: Prisma.SortOrder
 }
 
-export type TagNullableScalarRelationFilter = {
-  is?: Prisma.tagWhereInput | null
-  isNot?: Prisma.tagWhereInput | null
-}
-
 export type tagCreateNestedManyWithoutGalleryInput = {
   create?: Prisma.XOR<Prisma.tagCreateWithoutGalleryInput, Prisma.tagUncheckedCreateWithoutGalleryInput> | Prisma.tagCreateWithoutGalleryInput[] | Prisma.tagUncheckedCreateWithoutGalleryInput[]
   connectOrCreate?: Prisma.tagCreateOrConnectWithoutGalleryInput | Prisma.tagCreateOrConnectWithoutGalleryInput[]
@@ -639,22 +627,6 @@ export type tagUncheckedUpdateManyWithoutGalleryNestedInput = {
   deleteMany?: Prisma.tagScalarWhereInput | Prisma.tagScalarWhereInput[]
 }
 
-export type tagCreateNestedOneWithoutVisitor_tagsInput = {
-  create?: Prisma.XOR<Prisma.tagCreateWithoutVisitor_tagsInput, Prisma.tagUncheckedCreateWithoutVisitor_tagsInput>
-  connectOrCreate?: Prisma.tagCreateOrConnectWithoutVisitor_tagsInput
-  connect?: Prisma.tagWhereUniqueInput
-}
-
-export type tagUpdateOneWithoutVisitor_tagsNestedInput = {
-  create?: Prisma.XOR<Prisma.tagCreateWithoutVisitor_tagsInput, Prisma.tagUncheckedCreateWithoutVisitor_tagsInput>
-  connectOrCreate?: Prisma.tagCreateOrConnectWithoutVisitor_tagsInput
-  upsert?: Prisma.tagUpsertWithoutVisitor_tagsInput
-  disconnect?: Prisma.tagWhereInput | boolean
-  delete?: Prisma.tagWhereInput | boolean
-  connect?: Prisma.tagWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.tagUpdateToOneWithWhereWithoutVisitor_tagsInput, Prisma.tagUpdateWithoutVisitor_tagsInput>, Prisma.tagUncheckedUpdateWithoutVisitor_tagsInput>
-}
-
 export type tagCreateWithoutGalleryInput = {
   created_at?: Date | string
   updated_at?: Date | string
@@ -671,7 +643,6 @@ export type tagCreateWithoutGalleryInput = {
   expires_after?: number | null
   automatically_assigned?: boolean | null
   external?: boolean | null
-  visitor_tags?: Prisma.visitor_tagsCreateNestedManyWithoutTagInput
 }
 
 export type tagUncheckedCreateWithoutGalleryInput = {
@@ -690,7 +661,6 @@ export type tagUncheckedCreateWithoutGalleryInput = {
   expires_after?: number | null
   automatically_assigned?: boolean | null
   external?: boolean | null
-  visitor_tags?: Prisma.visitor_tagsUncheckedCreateNestedManyWithoutTagInput
 }
 
 export type tagCreateOrConnectWithoutGalleryInput = {
@@ -741,98 +711,6 @@ export type tagScalarWhereInput = {
   gallery_id?: Prisma.UuidNullableFilter<"tag"> | string | null
 }
 
-export type tagCreateWithoutVisitor_tagsInput = {
-  created_at?: Date | string
-  updated_at?: Date | string
-  id?: string
-  apiId?: string | null
-  source?: string | null
-  sourcetype?: string | null
-  enable?: string | null
-  code?: string | null
-  name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  short_description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  url?: string | null
-  url_title?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  expires_after?: number | null
-  automatically_assigned?: boolean | null
-  external?: boolean | null
-  gallery?: Prisma.galleryCreateNestedOneWithoutTagsInput
-}
-
-export type tagUncheckedCreateWithoutVisitor_tagsInput = {
-  created_at?: Date | string
-  updated_at?: Date | string
-  id?: string
-  apiId?: string | null
-  source?: string | null
-  sourcetype?: string | null
-  enable?: string | null
-  code?: string | null
-  name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  short_description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  url?: string | null
-  url_title?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  expires_after?: number | null
-  automatically_assigned?: boolean | null
-  external?: boolean | null
-  gallery_id?: string | null
-}
-
-export type tagCreateOrConnectWithoutVisitor_tagsInput = {
-  where: Prisma.tagWhereUniqueInput
-  create: Prisma.XOR<Prisma.tagCreateWithoutVisitor_tagsInput, Prisma.tagUncheckedCreateWithoutVisitor_tagsInput>
-}
-
-export type tagUpsertWithoutVisitor_tagsInput = {
-  update: Prisma.XOR<Prisma.tagUpdateWithoutVisitor_tagsInput, Prisma.tagUncheckedUpdateWithoutVisitor_tagsInput>
-  create: Prisma.XOR<Prisma.tagCreateWithoutVisitor_tagsInput, Prisma.tagUncheckedCreateWithoutVisitor_tagsInput>
-  where?: Prisma.tagWhereInput
-}
-
-export type tagUpdateToOneWithWhereWithoutVisitor_tagsInput = {
-  where?: Prisma.tagWhereInput
-  data: Prisma.XOR<Prisma.tagUpdateWithoutVisitor_tagsInput, Prisma.tagUncheckedUpdateWithoutVisitor_tagsInput>
-}
-
-export type tagUpdateWithoutVisitor_tagsInput = {
-  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourcetype?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enable?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  short_description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  url_title?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  expires_after?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  automatically_assigned?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
-  external?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
-  gallery?: Prisma.galleryUpdateOneWithoutTagsNestedInput
-}
-
-export type tagUncheckedUpdateWithoutVisitor_tagsInput = {
-  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourcetype?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enable?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  short_description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  url_title?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  expires_after?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  automatically_assigned?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
-  external?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
-  gallery_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-}
-
 export type tagCreateManyGalleryInput = {
   created_at?: Date | string
   updated_at?: Date | string
@@ -867,7 +745,6 @@ export type tagUpdateWithoutGalleryInput = {
   expires_after?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   automatically_assigned?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   external?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
-  visitor_tags?: Prisma.visitor_tagsUpdateManyWithoutTagNestedInput
 }
 
 export type tagUncheckedUpdateWithoutGalleryInput = {
@@ -886,7 +763,6 @@ export type tagUncheckedUpdateWithoutGalleryInput = {
   expires_after?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   automatically_assigned?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   external?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
-  visitor_tags?: Prisma.visitor_tagsUncheckedUpdateManyWithoutTagNestedInput
 }
 
 export type tagUncheckedUpdateManyWithoutGalleryInput = {
@@ -908,35 +784,6 @@ export type tagUncheckedUpdateManyWithoutGalleryInput = {
 }
 
 
-/**
- * Count Type TagCountOutputType
- */
-
-export type TagCountOutputType = {
-  visitor_tags: number
-}
-
-export type TagCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  visitor_tags?: boolean | TagCountOutputTypeCountVisitor_tagsArgs
-}
-
-/**
- * TagCountOutputType without action
- */
-export type TagCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the TagCountOutputType
-   */
-  select?: Prisma.TagCountOutputTypeSelect<ExtArgs> | null
-}
-
-/**
- * TagCountOutputType without action
- */
-export type TagCountOutputTypeCountVisitor_tagsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.visitor_tagsWhereInput
-}
-
 
 export type tagSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   created_at?: boolean
@@ -956,8 +803,6 @@ export type tagSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = ru
   external?: boolean
   gallery_id?: boolean
   gallery?: boolean | Prisma.tag$galleryArgs<ExtArgs>
-  visitor_tags?: boolean | Prisma.tag$visitor_tagsArgs<ExtArgs>
-  _count?: boolean | Prisma.TagCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["tag"]>
 
 export type tagSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1022,8 +867,6 @@ export type tagSelectScalar = {
 export type tagOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "apiId" | "source" | "sourcetype" | "enable" | "code" | "name" | "short_description" | "url" | "url_title" | "expires_after" | "automatically_assigned" | "external" | "gallery_id", ExtArgs["result"]["tag"]>
 export type tagInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   gallery?: boolean | Prisma.tag$galleryArgs<ExtArgs>
-  visitor_tags?: boolean | Prisma.tag$visitor_tagsArgs<ExtArgs>
-  _count?: boolean | Prisma.TagCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type tagIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   gallery?: boolean | Prisma.tag$galleryArgs<ExtArgs>
@@ -1036,7 +879,6 @@ export type $tagPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   name: "tag"
   objects: {
     gallery: Prisma.$galleryPayload<ExtArgs> | null
-    visitor_tags: Prisma.$visitor_tagsPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     created_at: Date
@@ -1450,7 +1292,6 @@ readonly fields: tagFieldRefs;
 export interface Prisma__tagClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   gallery<T extends Prisma.tag$galleryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.tag$galleryArgs<ExtArgs>>): Prisma.Prisma__galleryClient<runtime.Types.Result.GetResult<Prisma.$galleryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-  visitor_tags<T extends Prisma.tag$visitor_tagsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.tag$visitor_tagsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$visitor_tagsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1908,30 +1749,6 @@ export type tag$galleryArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
    */
   include?: Prisma.galleryInclude<ExtArgs> | null
   where?: Prisma.galleryWhereInput
-}
-
-/**
- * tag.visitor_tags
- */
-export type tag$visitor_tagsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the visitor_tags
-   */
-  select?: Prisma.visitor_tagsSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the visitor_tags
-   */
-  omit?: Prisma.visitor_tagsOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.visitor_tagsInclude<ExtArgs> | null
-  where?: Prisma.visitor_tagsWhereInput
-  orderBy?: Prisma.visitor_tagsOrderByWithRelationInput | Prisma.visitor_tagsOrderByWithRelationInput[]
-  cursor?: Prisma.visitor_tagsWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.Visitor_tagsScalarFieldEnum | Prisma.Visitor_tagsScalarFieldEnum[]
 }
 
 /**

@@ -334,9 +334,7 @@ export type eventWhereInput = {
   hall_id?: Prisma.UuidNullableFilter<"event"> | string | null
   hall?: Prisma.XOR<Prisma.HallNullableScalarRelationFilter, Prisma.hallWhereInput> | null
   production?: Prisma.XOR<Prisma.ProductionNullableScalarRelationFilter, Prisma.productionWhereInput> | null
-  status?: Prisma.XOR<Prisma.StatusNullableScalarRelationFilter, Prisma.statusWhereInput> | null
   event_prices?: Prisma.Event_priceListRelationFilter
-  tickets?: Prisma.TicketListRelationFilter
 }
 
 export type eventOrderByWithRelationInput = {
@@ -363,9 +361,7 @@ export type eventOrderByWithRelationInput = {
   hall_id?: Prisma.SortOrderInput | Prisma.SortOrder
   hall?: Prisma.hallOrderByWithRelationInput
   production?: Prisma.productionOrderByWithRelationInput
-  status?: Prisma.statusOrderByWithRelationInput
   event_prices?: Prisma.event_priceOrderByRelationAggregateInput
-  tickets?: Prisma.ticketOrderByRelationAggregateInput
 }
 
 export type eventWhereUniqueInput = Prisma.AtLeast<{
@@ -395,9 +391,7 @@ export type eventWhereUniqueInput = Prisma.AtLeast<{
   hall_id?: Prisma.UuidNullableFilter<"event"> | string | null
   hall?: Prisma.XOR<Prisma.HallNullableScalarRelationFilter, Prisma.hallWhereInput> | null
   production?: Prisma.XOR<Prisma.ProductionNullableScalarRelationFilter, Prisma.productionWhereInput> | null
-  status?: Prisma.XOR<Prisma.StatusNullableScalarRelationFilter, Prisma.statusWhereInput> | null
   event_prices?: Prisma.Event_priceListRelationFilter
-  tickets?: Prisma.TicketListRelationFilter
 }, "id" | "apiId">
 
 export type eventOrderByWithAggregationInput = {
@@ -475,11 +469,10 @@ export type eventCreateInput = {
   eticket_info?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   external_order_url?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   order_url?: string | null
+  status_id?: string | null
   hall?: Prisma.hallCreateNestedOneWithoutEventsInput
   production?: Prisma.productionCreateNestedOneWithoutEventsInput
-  status?: Prisma.statusCreateNestedOneWithoutEventsInput
   event_prices?: Prisma.event_priceCreateNestedManyWithoutEventInput
-  tickets?: Prisma.ticketCreateNestedManyWithoutEventInput
 }
 
 export type eventUncheckedCreateInput = {
@@ -505,7 +498,6 @@ export type eventUncheckedCreateInput = {
   status_id?: string | null
   hall_id?: string | null
   event_prices?: Prisma.event_priceUncheckedCreateNestedManyWithoutEventInput
-  tickets?: Prisma.ticketUncheckedCreateNestedManyWithoutEventInput
 }
 
 export type eventUpdateInput = {
@@ -527,11 +519,10 @@ export type eventUpdateInput = {
   eticket_info?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   external_order_url?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   order_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hall?: Prisma.hallUpdateOneWithoutEventsNestedInput
   production?: Prisma.productionUpdateOneWithoutEventsNestedInput
-  status?: Prisma.statusUpdateOneWithoutEventsNestedInput
   event_prices?: Prisma.event_priceUpdateManyWithoutEventNestedInput
-  tickets?: Prisma.ticketUpdateManyWithoutEventNestedInput
 }
 
 export type eventUncheckedUpdateInput = {
@@ -557,7 +548,6 @@ export type eventUncheckedUpdateInput = {
   status_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hall_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   event_prices?: Prisma.event_priceUncheckedUpdateManyWithoutEventNestedInput
-  tickets?: Prisma.ticketUncheckedUpdateManyWithoutEventNestedInput
 }
 
 export type eventCreateManyInput = {
@@ -603,6 +593,7 @@ export type eventUpdateManyMutationInput = {
   eticket_info?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   external_order_url?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   order_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type eventUncheckedUpdateManyInput = {
@@ -834,64 +825,6 @@ export type eventUncheckedUpdateManyWithoutProductionNestedInput = {
   deleteMany?: Prisma.eventScalarWhereInput | Prisma.eventScalarWhereInput[]
 }
 
-export type eventCreateNestedManyWithoutStatusInput = {
-  create?: Prisma.XOR<Prisma.eventCreateWithoutStatusInput, Prisma.eventUncheckedCreateWithoutStatusInput> | Prisma.eventCreateWithoutStatusInput[] | Prisma.eventUncheckedCreateWithoutStatusInput[]
-  connectOrCreate?: Prisma.eventCreateOrConnectWithoutStatusInput | Prisma.eventCreateOrConnectWithoutStatusInput[]
-  createMany?: Prisma.eventCreateManyStatusInputEnvelope
-  connect?: Prisma.eventWhereUniqueInput | Prisma.eventWhereUniqueInput[]
-}
-
-export type eventUncheckedCreateNestedManyWithoutStatusInput = {
-  create?: Prisma.XOR<Prisma.eventCreateWithoutStatusInput, Prisma.eventUncheckedCreateWithoutStatusInput> | Prisma.eventCreateWithoutStatusInput[] | Prisma.eventUncheckedCreateWithoutStatusInput[]
-  connectOrCreate?: Prisma.eventCreateOrConnectWithoutStatusInput | Prisma.eventCreateOrConnectWithoutStatusInput[]
-  createMany?: Prisma.eventCreateManyStatusInputEnvelope
-  connect?: Prisma.eventWhereUniqueInput | Prisma.eventWhereUniqueInput[]
-}
-
-export type eventUpdateManyWithoutStatusNestedInput = {
-  create?: Prisma.XOR<Prisma.eventCreateWithoutStatusInput, Prisma.eventUncheckedCreateWithoutStatusInput> | Prisma.eventCreateWithoutStatusInput[] | Prisma.eventUncheckedCreateWithoutStatusInput[]
-  connectOrCreate?: Prisma.eventCreateOrConnectWithoutStatusInput | Prisma.eventCreateOrConnectWithoutStatusInput[]
-  upsert?: Prisma.eventUpsertWithWhereUniqueWithoutStatusInput | Prisma.eventUpsertWithWhereUniqueWithoutStatusInput[]
-  createMany?: Prisma.eventCreateManyStatusInputEnvelope
-  set?: Prisma.eventWhereUniqueInput | Prisma.eventWhereUniqueInput[]
-  disconnect?: Prisma.eventWhereUniqueInput | Prisma.eventWhereUniqueInput[]
-  delete?: Prisma.eventWhereUniqueInput | Prisma.eventWhereUniqueInput[]
-  connect?: Prisma.eventWhereUniqueInput | Prisma.eventWhereUniqueInput[]
-  update?: Prisma.eventUpdateWithWhereUniqueWithoutStatusInput | Prisma.eventUpdateWithWhereUniqueWithoutStatusInput[]
-  updateMany?: Prisma.eventUpdateManyWithWhereWithoutStatusInput | Prisma.eventUpdateManyWithWhereWithoutStatusInput[]
-  deleteMany?: Prisma.eventScalarWhereInput | Prisma.eventScalarWhereInput[]
-}
-
-export type eventUncheckedUpdateManyWithoutStatusNestedInput = {
-  create?: Prisma.XOR<Prisma.eventCreateWithoutStatusInput, Prisma.eventUncheckedCreateWithoutStatusInput> | Prisma.eventCreateWithoutStatusInput[] | Prisma.eventUncheckedCreateWithoutStatusInput[]
-  connectOrCreate?: Prisma.eventCreateOrConnectWithoutStatusInput | Prisma.eventCreateOrConnectWithoutStatusInput[]
-  upsert?: Prisma.eventUpsertWithWhereUniqueWithoutStatusInput | Prisma.eventUpsertWithWhereUniqueWithoutStatusInput[]
-  createMany?: Prisma.eventCreateManyStatusInputEnvelope
-  set?: Prisma.eventWhereUniqueInput | Prisma.eventWhereUniqueInput[]
-  disconnect?: Prisma.eventWhereUniqueInput | Prisma.eventWhereUniqueInput[]
-  delete?: Prisma.eventWhereUniqueInput | Prisma.eventWhereUniqueInput[]
-  connect?: Prisma.eventWhereUniqueInput | Prisma.eventWhereUniqueInput[]
-  update?: Prisma.eventUpdateWithWhereUniqueWithoutStatusInput | Prisma.eventUpdateWithWhereUniqueWithoutStatusInput[]
-  updateMany?: Prisma.eventUpdateManyWithWhereWithoutStatusInput | Prisma.eventUpdateManyWithWhereWithoutStatusInput[]
-  deleteMany?: Prisma.eventScalarWhereInput | Prisma.eventScalarWhereInput[]
-}
-
-export type eventCreateNestedOneWithoutTicketsInput = {
-  create?: Prisma.XOR<Prisma.eventCreateWithoutTicketsInput, Prisma.eventUncheckedCreateWithoutTicketsInput>
-  connectOrCreate?: Prisma.eventCreateOrConnectWithoutTicketsInput
-  connect?: Prisma.eventWhereUniqueInput
-}
-
-export type eventUpdateOneWithoutTicketsNestedInput = {
-  create?: Prisma.XOR<Prisma.eventCreateWithoutTicketsInput, Prisma.eventUncheckedCreateWithoutTicketsInput>
-  connectOrCreate?: Prisma.eventCreateOrConnectWithoutTicketsInput
-  upsert?: Prisma.eventUpsertWithoutTicketsInput
-  disconnect?: Prisma.eventWhereInput | boolean
-  delete?: Prisma.eventWhereInput | boolean
-  connect?: Prisma.eventWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.eventUpdateToOneWithWhereWithoutTicketsInput, Prisma.eventUpdateWithoutTicketsInput>, Prisma.eventUncheckedUpdateWithoutTicketsInput>
-}
-
 export type eventCreateWithoutEvent_pricesInput = {
   created_at?: Date | string
   updated_at?: Date | string
@@ -911,10 +844,9 @@ export type eventCreateWithoutEvent_pricesInput = {
   eticket_info?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   external_order_url?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   order_url?: string | null
+  status_id?: string | null
   hall?: Prisma.hallCreateNestedOneWithoutEventsInput
   production?: Prisma.productionCreateNestedOneWithoutEventsInput
-  status?: Prisma.statusCreateNestedOneWithoutEventsInput
-  tickets?: Prisma.ticketCreateNestedManyWithoutEventInput
 }
 
 export type eventUncheckedCreateWithoutEvent_pricesInput = {
@@ -939,7 +871,6 @@ export type eventUncheckedCreateWithoutEvent_pricesInput = {
   production_id?: string | null
   status_id?: string | null
   hall_id?: string | null
-  tickets?: Prisma.ticketUncheckedCreateNestedManyWithoutEventInput
 }
 
 export type eventCreateOrConnectWithoutEvent_pricesInput = {
@@ -977,10 +908,9 @@ export type eventUpdateWithoutEvent_pricesInput = {
   eticket_info?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   external_order_url?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   order_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hall?: Prisma.hallUpdateOneWithoutEventsNestedInput
   production?: Prisma.productionUpdateOneWithoutEventsNestedInput
-  status?: Prisma.statusUpdateOneWithoutEventsNestedInput
-  tickets?: Prisma.ticketUpdateManyWithoutEventNestedInput
 }
 
 export type eventUncheckedUpdateWithoutEvent_pricesInput = {
@@ -1005,7 +935,6 @@ export type eventUncheckedUpdateWithoutEvent_pricesInput = {
   production_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hall_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  tickets?: Prisma.ticketUncheckedUpdateManyWithoutEventNestedInput
 }
 
 export type eventCreateWithoutHallInput = {
@@ -1027,10 +956,9 @@ export type eventCreateWithoutHallInput = {
   eticket_info?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   external_order_url?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   order_url?: string | null
+  status_id?: string | null
   production?: Prisma.productionCreateNestedOneWithoutEventsInput
-  status?: Prisma.statusCreateNestedOneWithoutEventsInput
   event_prices?: Prisma.event_priceCreateNestedManyWithoutEventInput
-  tickets?: Prisma.ticketCreateNestedManyWithoutEventInput
 }
 
 export type eventUncheckedCreateWithoutHallInput = {
@@ -1055,7 +983,6 @@ export type eventUncheckedCreateWithoutHallInput = {
   production_id?: string | null
   status_id?: string | null
   event_prices?: Prisma.event_priceUncheckedCreateNestedManyWithoutEventInput
-  tickets?: Prisma.ticketUncheckedCreateNestedManyWithoutEventInput
 }
 
 export type eventCreateOrConnectWithoutHallInput = {
@@ -1130,10 +1057,9 @@ export type eventCreateWithoutProductionInput = {
   eticket_info?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   external_order_url?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   order_url?: string | null
+  status_id?: string | null
   hall?: Prisma.hallCreateNestedOneWithoutEventsInput
-  status?: Prisma.statusCreateNestedOneWithoutEventsInput
   event_prices?: Prisma.event_priceCreateNestedManyWithoutEventInput
-  tickets?: Prisma.ticketCreateNestedManyWithoutEventInput
 }
 
 export type eventUncheckedCreateWithoutProductionInput = {
@@ -1158,7 +1084,6 @@ export type eventUncheckedCreateWithoutProductionInput = {
   status_id?: string | null
   hall_id?: string | null
   event_prices?: Prisma.event_priceUncheckedCreateNestedManyWithoutEventInput
-  tickets?: Prisma.ticketUncheckedCreateNestedManyWithoutEventInput
 }
 
 export type eventCreateOrConnectWithoutProductionInput = {
@@ -1185,198 +1110,6 @@ export type eventUpdateWithWhereUniqueWithoutProductionInput = {
 export type eventUpdateManyWithWhereWithoutProductionInput = {
   where: Prisma.eventScalarWhereInput
   data: Prisma.XOR<Prisma.eventUpdateManyMutationInput, Prisma.eventUncheckedUpdateManyWithoutProductionInput>
-}
-
-export type eventCreateWithoutStatusInput = {
-  created_at?: Date | string
-  updated_at?: Date | string
-  id?: string
-  apiId?: string | null
-  starts_at?: Date | string | null
-  ends_at?: Date | string | null
-  intermission_at?: Date | string | null
-  doors_at?: Date | string | null
-  box_office_id?: string | null
-  vendor_id?: string | null
-  max_tickets_per_order?: number | null
-  uitdatabank_id?: string | null
-  secure?: boolean | null
-  sms_verification?: boolean | null
-  info?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  eticket_info?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  external_order_url?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  order_url?: string | null
-  hall?: Prisma.hallCreateNestedOneWithoutEventsInput
-  production?: Prisma.productionCreateNestedOneWithoutEventsInput
-  event_prices?: Prisma.event_priceCreateNestedManyWithoutEventInput
-  tickets?: Prisma.ticketCreateNestedManyWithoutEventInput
-}
-
-export type eventUncheckedCreateWithoutStatusInput = {
-  created_at?: Date | string
-  updated_at?: Date | string
-  id?: string
-  apiId?: string | null
-  starts_at?: Date | string | null
-  ends_at?: Date | string | null
-  intermission_at?: Date | string | null
-  doors_at?: Date | string | null
-  box_office_id?: string | null
-  vendor_id?: string | null
-  max_tickets_per_order?: number | null
-  uitdatabank_id?: string | null
-  secure?: boolean | null
-  sms_verification?: boolean | null
-  info?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  eticket_info?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  external_order_url?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  order_url?: string | null
-  production_id?: string | null
-  hall_id?: string | null
-  event_prices?: Prisma.event_priceUncheckedCreateNestedManyWithoutEventInput
-  tickets?: Prisma.ticketUncheckedCreateNestedManyWithoutEventInput
-}
-
-export type eventCreateOrConnectWithoutStatusInput = {
-  where: Prisma.eventWhereUniqueInput
-  create: Prisma.XOR<Prisma.eventCreateWithoutStatusInput, Prisma.eventUncheckedCreateWithoutStatusInput>
-}
-
-export type eventCreateManyStatusInputEnvelope = {
-  data: Prisma.eventCreateManyStatusInput | Prisma.eventCreateManyStatusInput[]
-  skipDuplicates?: boolean
-}
-
-export type eventUpsertWithWhereUniqueWithoutStatusInput = {
-  where: Prisma.eventWhereUniqueInput
-  update: Prisma.XOR<Prisma.eventUpdateWithoutStatusInput, Prisma.eventUncheckedUpdateWithoutStatusInput>
-  create: Prisma.XOR<Prisma.eventCreateWithoutStatusInput, Prisma.eventUncheckedCreateWithoutStatusInput>
-}
-
-export type eventUpdateWithWhereUniqueWithoutStatusInput = {
-  where: Prisma.eventWhereUniqueInput
-  data: Prisma.XOR<Prisma.eventUpdateWithoutStatusInput, Prisma.eventUncheckedUpdateWithoutStatusInput>
-}
-
-export type eventUpdateManyWithWhereWithoutStatusInput = {
-  where: Prisma.eventScalarWhereInput
-  data: Prisma.XOR<Prisma.eventUpdateManyMutationInput, Prisma.eventUncheckedUpdateManyWithoutStatusInput>
-}
-
-export type eventCreateWithoutTicketsInput = {
-  created_at?: Date | string
-  updated_at?: Date | string
-  id?: string
-  apiId?: string | null
-  starts_at?: Date | string | null
-  ends_at?: Date | string | null
-  intermission_at?: Date | string | null
-  doors_at?: Date | string | null
-  box_office_id?: string | null
-  vendor_id?: string | null
-  max_tickets_per_order?: number | null
-  uitdatabank_id?: string | null
-  secure?: boolean | null
-  sms_verification?: boolean | null
-  info?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  eticket_info?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  external_order_url?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  order_url?: string | null
-  hall?: Prisma.hallCreateNestedOneWithoutEventsInput
-  production?: Prisma.productionCreateNestedOneWithoutEventsInput
-  status?: Prisma.statusCreateNestedOneWithoutEventsInput
-  event_prices?: Prisma.event_priceCreateNestedManyWithoutEventInput
-}
-
-export type eventUncheckedCreateWithoutTicketsInput = {
-  created_at?: Date | string
-  updated_at?: Date | string
-  id?: string
-  apiId?: string | null
-  starts_at?: Date | string | null
-  ends_at?: Date | string | null
-  intermission_at?: Date | string | null
-  doors_at?: Date | string | null
-  box_office_id?: string | null
-  vendor_id?: string | null
-  max_tickets_per_order?: number | null
-  uitdatabank_id?: string | null
-  secure?: boolean | null
-  sms_verification?: boolean | null
-  info?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  eticket_info?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  external_order_url?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  order_url?: string | null
-  production_id?: string | null
-  status_id?: string | null
-  hall_id?: string | null
-  event_prices?: Prisma.event_priceUncheckedCreateNestedManyWithoutEventInput
-}
-
-export type eventCreateOrConnectWithoutTicketsInput = {
-  where: Prisma.eventWhereUniqueInput
-  create: Prisma.XOR<Prisma.eventCreateWithoutTicketsInput, Prisma.eventUncheckedCreateWithoutTicketsInput>
-}
-
-export type eventUpsertWithoutTicketsInput = {
-  update: Prisma.XOR<Prisma.eventUpdateWithoutTicketsInput, Prisma.eventUncheckedUpdateWithoutTicketsInput>
-  create: Prisma.XOR<Prisma.eventCreateWithoutTicketsInput, Prisma.eventUncheckedCreateWithoutTicketsInput>
-  where?: Prisma.eventWhereInput
-}
-
-export type eventUpdateToOneWithWhereWithoutTicketsInput = {
-  where?: Prisma.eventWhereInput
-  data: Prisma.XOR<Prisma.eventUpdateWithoutTicketsInput, Prisma.eventUncheckedUpdateWithoutTicketsInput>
-}
-
-export type eventUpdateWithoutTicketsInput = {
-  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  starts_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  ends_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  intermission_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  doors_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  max_tickets_per_order?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  uitdatabank_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  secure?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
-  sms_verification?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
-  info?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  eticket_info?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  external_order_url?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  order_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  hall?: Prisma.hallUpdateOneWithoutEventsNestedInput
-  production?: Prisma.productionUpdateOneWithoutEventsNestedInput
-  status?: Prisma.statusUpdateOneWithoutEventsNestedInput
-  event_prices?: Prisma.event_priceUpdateManyWithoutEventNestedInput
-}
-
-export type eventUncheckedUpdateWithoutTicketsInput = {
-  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  starts_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  ends_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  intermission_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  doors_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  max_tickets_per_order?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  uitdatabank_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  secure?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
-  sms_verification?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
-  info?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  eticket_info?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  external_order_url?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  order_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  production_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  hall_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  event_prices?: Prisma.event_priceUncheckedUpdateManyWithoutEventNestedInput
 }
 
 export type eventCreateManyHallInput = {
@@ -1421,10 +1154,9 @@ export type eventUpdateWithoutHallInput = {
   eticket_info?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   external_order_url?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   order_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   production?: Prisma.productionUpdateOneWithoutEventsNestedInput
-  status?: Prisma.statusUpdateOneWithoutEventsNestedInput
   event_prices?: Prisma.event_priceUpdateManyWithoutEventNestedInput
-  tickets?: Prisma.ticketUpdateManyWithoutEventNestedInput
 }
 
 export type eventUncheckedUpdateWithoutHallInput = {
@@ -1449,7 +1181,6 @@ export type eventUncheckedUpdateWithoutHallInput = {
   production_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   event_prices?: Prisma.event_priceUncheckedUpdateManyWithoutEventNestedInput
-  tickets?: Prisma.ticketUncheckedUpdateManyWithoutEventNestedInput
 }
 
 export type eventUncheckedUpdateManyWithoutHallInput = {
@@ -1517,10 +1248,9 @@ export type eventUpdateWithoutProductionInput = {
   eticket_info?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   external_order_url?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   order_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hall?: Prisma.hallUpdateOneWithoutEventsNestedInput
-  status?: Prisma.statusUpdateOneWithoutEventsNestedInput
   event_prices?: Prisma.event_priceUpdateManyWithoutEventNestedInput
-  tickets?: Prisma.ticketUpdateManyWithoutEventNestedInput
 }
 
 export type eventUncheckedUpdateWithoutProductionInput = {
@@ -1545,7 +1275,6 @@ export type eventUncheckedUpdateWithoutProductionInput = {
   status_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hall_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   event_prices?: Prisma.event_priceUncheckedUpdateManyWithoutEventNestedInput
-  tickets?: Prisma.ticketUncheckedUpdateManyWithoutEventNestedInput
 }
 
 export type eventUncheckedUpdateManyWithoutProductionInput = {
@@ -1571,102 +1300,6 @@ export type eventUncheckedUpdateManyWithoutProductionInput = {
   hall_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
-export type eventCreateManyStatusInput = {
-  created_at?: Date | string
-  updated_at?: Date | string
-  id?: string
-  apiId?: string | null
-  starts_at?: Date | string | null
-  ends_at?: Date | string | null
-  intermission_at?: Date | string | null
-  doors_at?: Date | string | null
-  box_office_id?: string | null
-  vendor_id?: string | null
-  max_tickets_per_order?: number | null
-  uitdatabank_id?: string | null
-  secure?: boolean | null
-  sms_verification?: boolean | null
-  info?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  eticket_info?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  external_order_url?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  order_url?: string | null
-  production_id?: string | null
-  hall_id?: string | null
-}
-
-export type eventUpdateWithoutStatusInput = {
-  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  starts_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  ends_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  intermission_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  doors_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  max_tickets_per_order?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  uitdatabank_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  secure?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
-  sms_verification?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
-  info?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  eticket_info?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  external_order_url?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  order_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  hall?: Prisma.hallUpdateOneWithoutEventsNestedInput
-  production?: Prisma.productionUpdateOneWithoutEventsNestedInput
-  event_prices?: Prisma.event_priceUpdateManyWithoutEventNestedInput
-  tickets?: Prisma.ticketUpdateManyWithoutEventNestedInput
-}
-
-export type eventUncheckedUpdateWithoutStatusInput = {
-  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  starts_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  ends_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  intermission_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  doors_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  max_tickets_per_order?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  uitdatabank_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  secure?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
-  sms_verification?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
-  info?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  eticket_info?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  external_order_url?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  order_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  production_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  hall_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  event_prices?: Prisma.event_priceUncheckedUpdateManyWithoutEventNestedInput
-  tickets?: Prisma.ticketUncheckedUpdateManyWithoutEventNestedInput
-}
-
-export type eventUncheckedUpdateManyWithoutStatusInput = {
-  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  starts_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  ends_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  intermission_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  doors_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  box_office_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  max_tickets_per_order?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  uitdatabank_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  secure?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
-  sms_verification?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
-  info?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  eticket_info?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  external_order_url?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  order_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  production_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  hall_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-}
-
 
 /**
  * Count Type EventCountOutputType
@@ -1674,12 +1307,10 @@ export type eventUncheckedUpdateManyWithoutStatusInput = {
 
 export type EventCountOutputType = {
   event_prices: number
-  tickets: number
 }
 
 export type EventCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   event_prices?: boolean | EventCountOutputTypeCountEvent_pricesArgs
-  tickets?: boolean | EventCountOutputTypeCountTicketsArgs
 }
 
 /**
@@ -1697,13 +1328,6 @@ export type EventCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extens
  */
 export type EventCountOutputTypeCountEvent_pricesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.event_priceWhereInput
-}
-
-/**
- * EventCountOutputType without action
- */
-export type EventCountOutputTypeCountTicketsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.ticketWhereInput
 }
 
 
@@ -1731,9 +1355,7 @@ export type eventSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   hall_id?: boolean
   hall?: boolean | Prisma.event$hallArgs<ExtArgs>
   production?: boolean | Prisma.event$productionArgs<ExtArgs>
-  status?: boolean | Prisma.event$statusArgs<ExtArgs>
   event_prices?: boolean | Prisma.event$event_pricesArgs<ExtArgs>
-  tickets?: boolean | Prisma.event$ticketsArgs<ExtArgs>
   _count?: boolean | Prisma.EventCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["event"]>
 
@@ -1761,7 +1383,6 @@ export type eventSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   hall_id?: boolean
   hall?: boolean | Prisma.event$hallArgs<ExtArgs>
   production?: boolean | Prisma.event$productionArgs<ExtArgs>
-  status?: boolean | Prisma.event$statusArgs<ExtArgs>
 }, ExtArgs["result"]["event"]>
 
 export type eventSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1788,7 +1409,6 @@ export type eventSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   hall_id?: boolean
   hall?: boolean | Prisma.event$hallArgs<ExtArgs>
   production?: boolean | Prisma.event$productionArgs<ExtArgs>
-  status?: boolean | Prisma.event$statusArgs<ExtArgs>
 }, ExtArgs["result"]["event"]>
 
 export type eventSelectScalar = {
@@ -1819,20 +1439,16 @@ export type eventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = ru
 export type eventInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   hall?: boolean | Prisma.event$hallArgs<ExtArgs>
   production?: boolean | Prisma.event$productionArgs<ExtArgs>
-  status?: boolean | Prisma.event$statusArgs<ExtArgs>
   event_prices?: boolean | Prisma.event$event_pricesArgs<ExtArgs>
-  tickets?: boolean | Prisma.event$ticketsArgs<ExtArgs>
   _count?: boolean | Prisma.EventCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type eventIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   hall?: boolean | Prisma.event$hallArgs<ExtArgs>
   production?: boolean | Prisma.event$productionArgs<ExtArgs>
-  status?: boolean | Prisma.event$statusArgs<ExtArgs>
 }
 export type eventIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   hall?: boolean | Prisma.event$hallArgs<ExtArgs>
   production?: boolean | Prisma.event$productionArgs<ExtArgs>
-  status?: boolean | Prisma.event$statusArgs<ExtArgs>
 }
 
 export type $eventPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1840,9 +1456,7 @@ export type $eventPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   objects: {
     hall: Prisma.$hallPayload<ExtArgs> | null
     production: Prisma.$productionPayload<ExtArgs> | null
-    status: Prisma.$statusPayload<ExtArgs> | null
     event_prices: Prisma.$event_pricePayload<ExtArgs>[]
-    tickets: Prisma.$ticketPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     created_at: Date
@@ -2262,9 +1876,7 @@ export interface Prisma__eventClient<T, Null = never, ExtArgs extends runtime.Ty
   readonly [Symbol.toStringTag]: "PrismaPromise"
   hall<T extends Prisma.event$hallArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.event$hallArgs<ExtArgs>>): Prisma.Prisma__hallClient<runtime.Types.Result.GetResult<Prisma.$hallPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   production<T extends Prisma.event$productionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.event$productionArgs<ExtArgs>>): Prisma.Prisma__productionClient<runtime.Types.Result.GetResult<Prisma.$productionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-  status<T extends Prisma.event$statusArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.event$statusArgs<ExtArgs>>): Prisma.Prisma__statusClient<runtime.Types.Result.GetResult<Prisma.$statusPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   event_prices<T extends Prisma.event$event_pricesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.event$event_pricesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$event_pricePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  tickets<T extends Prisma.event$ticketsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.event$ticketsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ticketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2749,25 +2361,6 @@ export type event$productionArgs<ExtArgs extends runtime.Types.Extensions.Intern
 }
 
 /**
- * event.status
- */
-export type event$statusArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the status
-   */
-  select?: Prisma.statusSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the status
-   */
-  omit?: Prisma.statusOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.statusInclude<ExtArgs> | null
-  where?: Prisma.statusWhereInput
-}
-
-/**
  * event.event_prices
  */
 export type event$event_pricesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2789,30 +2382,6 @@ export type event$event_pricesArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.Event_priceScalarFieldEnum | Prisma.Event_priceScalarFieldEnum[]
-}
-
-/**
- * event.tickets
- */
-export type event$ticketsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the ticket
-   */
-  select?: Prisma.ticketSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the ticket
-   */
-  omit?: Prisma.ticketOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.ticketInclude<ExtArgs> | null
-  where?: Prisma.ticketWhereInput
-  orderBy?: Prisma.ticketOrderByWithRelationInput | Prisma.ticketOrderByWithRelationInput[]
-  cursor?: Prisma.ticketWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.TicketScalarFieldEnum | Prisma.TicketScalarFieldEnum[]
 }
 
 /**

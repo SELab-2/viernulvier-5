@@ -23,11 +23,6 @@ export * from './enums';
  */
 export type crop = Prisma.cropModel
 /**
- * Model crosssells
- * 
- */
-export type crosssells = Prisma.crosssellsModel
-/**
  * Model event
  * 
  */
@@ -73,26 +68,6 @@ export type item = Prisma.itemModel
  */
 export type location = Prisma.locationModel
 /**
- * Model mailinglist
- * 
- */
-export type mailinglist = Prisma.mailinglistModel
-/**
- * Model optins
- * 
- */
-export type optins = Prisma.optinsModel
-/**
- * Model order
- * 
- */
-export type order = Prisma.orderModel
-/**
- * Model orderticket
- * 
- */
-export type orderticket = Prisma.orderticketModel
-/**
  * Model organisations
  * 
  */
@@ -118,35 +93,10 @@ export type rank = Prisma.rankModel
  */
 export type space = Prisma.spaceModel
 /**
- * Model status
- * 
- */
-export type status = Prisma.statusModel
-/**
- * Model subscriber
- * 
- */
-export type subscriber = Prisma.subscriberModel
-/**
- * Model subscriber_mailinglist
- * 
- */
-export type subscriber_mailinglist = Prisma.subscriber_mailinglistModel
-/**
- * Model subscriber_optins
- * 
- */
-export type subscriber_optins = Prisma.subscriber_optinsModel
-/**
  * Model tag
  * 
  */
 export type tag = Prisma.tagModel
-/**
- * Model ticket
- * 
- */
-export type ticket = Prisma.ticketModel
 /**
  * Model uit_keywords_productions
  * 
@@ -167,21 +117,6 @@ export type uitdatabank_themes = Prisma.uitdatabank_themesModel
  * 
  */
 export type uitdatabank_types = Prisma.uitdatabank_typesModel
-/**
- * Model user
- * 
- */
-export type user = Prisma.userModel
-/**
- * Model visitor
- * 
- */
-export type visitor = Prisma.visitorModel
-/**
- * Model visitor_tags
- * 
- */
-export type visitor_tags = Prisma.visitor_tagsModel
 /**
  * Model AdminUser
  * 

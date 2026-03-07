@@ -1,15 +1,17 @@
+import "dotenv/config";
 import axios from "axios";
 
 import type {
-  APIProduction,
-  APIEvent,
-  APISpace,
-  APIHall,
-  APILocation,
-  APIStatus,
+    APIProduction,
+    APIEvent,
+    APISpace,
+    APIHall,
+    APILocation,
+    APIGenre, APIGallery, APIItem,
+
 } from "./APItypes";
 
-const api_key = "60d4b42665b2251a14ac5c5bf5adabab3673bcdfbc68"
+const api_key = process.env.API_KEY;
 const headers = {
     "Accept": "application/ld+json",
     "X-AUTH-TOKEN": api_key
@@ -51,44 +53,6 @@ async function* fetchPagesFromURL<T = any>(url: string): AsyncGenerator<T[]> {
     }
 }
 
-async function fetchSinglePageFromURL<T = any>(url: string): Promise<T[]> {
-
-    const link = api.replace("{url}", url)
-    const response = await axios.get(link, {headers: headers});
-    if (response.status === 200){
-        const data = response.data;
-        if (data.view === undefined){
-            return data;
-        }
-        //const view = data["view"];
-        const members = data["member"];
-
-        console.log(`succesfully retrieved list: ${url}`);
-        
-        return members;
-        //url = data["view"]["next"];
-    }else {
-        console.log("Error:", response.status);
-        console.log(response.statusText);
-        return [];
-    }
-}
-
-export async function fetchProductions(): Promise<APIProduction[]> {
-    const url = "/api/v1/productions?page=1"
-    //return fetchFromURL(url);
-    const data: APIProduction[] = await fetchSinglePageFromURL<APIProduction>(url);
-    return data;
-}
-
-export async function fetchEvents(): Promise<APIEvent[]> {
-    const url = "/api/v1/events?page=1"
-    const data: APIEvent[] = await fetchSinglePageFromURL<APIEvent>(url);
-
-    return data;
-    //return fetchFromURL(url);
-}
-
 // Paginated versions that yield pages one at a time
 export async function* fetchProductionsPages(): AsyncGenerator<APIProduction[]> {
     yield* fetchPagesFromURL<APIProduction>("/api/v1/productions?page=1");
@@ -110,9 +74,24 @@ export async function* fetchHallsPages(): AsyncGenerator<APIHall[]> {
     yield* fetchPagesFromURL<APIHall>("/api/v1/halls?page=1");
 }
 
-export async function* fetchStatusesPages(): AsyncGenerator<APIStatus[]> {
-    yield* fetchPagesFromURL<APIStatus>("/api/v1/events/statuses?page=1");
+export async function* fetchGenrePages(): AsyncGenerator<APIGenre[]> {
+    yield* fetchPagesFromURL<APIGenre>("/api/v1/genres?page=1");
 }
+export async function* fetchGalleryPages(): AsyncGenerator<APIGallery[]> {
+    yield* fetchPagesFromURL<APIGallery>("/api/v1/media/galleries?page=1");
+}
+
+export async function* fetchItemPages(): AsyncGenerator<APIItem[]> {
+    yield* fetchPagesFromURL<APIItem>("/api/v1/media/items?page=1");
+}
+
+
+
+// export async function* fetchStatusesPages(): AsyncGenerator<APIStatus[]> {
+//     yield* fetchPagesFromURL<APIStatus>("/api/v1/events/statuses?page=1");
+// }
+
+
 // fetchEvents();
 // fetchCrops();
 // fetchEventPrices();

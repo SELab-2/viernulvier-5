@@ -17,21 +17,6 @@ model crop {
   item       item[]
 }
 
-model crosssells {
-  created_at                       DateTime @default(now()) @db.Timestamp(6)
-  updated_at                       DateTime @default(now()) @db.Timestamp(6)
-  id                               String   @id @db.Uuid @default(uuid())
-  apiId                            String?  @db.VarChar @unique
-  ticket_id                        String?  @db.Uuid
-  ticket_type                      String?  @db.VarChar
-  booking_id                       String?  @db.VarChar
-  price                            String?  @db.VarChar
-  hall_section_code                String?  @db.VarChar
-  order_id                         String?  @db.Uuid
-  order                            order?   @relation("crosssells_order", fields: [order_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  ticket                           ticket?  @relation("crosssells_ticket", fields: [ticket_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-}
-
 model event {
   created_at                              DateTime      @default(now()) @db.Timestamp(6)
   updated_at                              DateTime      @default(now()) @db.Timestamp(6)
@@ -56,9 +41,7 @@ model event {
   hall_id                                 String?       @db.Uuid
   hall                                    hall?         @relation("event_hall", fields: [hall_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   production                              production?   @relation("event_production", fields: [production_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  status                                  status?       @relation("event_status", fields: [status_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   event_prices                            event_price[]
-  tickets                                 ticket[]      @relation("ticket_event")
 }
 
 model event_price {
@@ -182,65 +165,6 @@ model location {
   space                          space[]  @relation("space_location")
 }
 
-model mailinglist {
-  created_at             DateTime                 @default(now()) @db.Timestamp(6)
-  updated_at             DateTime                 @default(now()) @db.Timestamp(6)
-  id                     String                    @id @db.Uuid @default(uuid())
-  apiId                  String?                  @db.VarChar @unique
-  name                   String?                  @db.VarChar
-  type                   String?                  @db.VarChar
-  public                 String?                  @db.VarChar
-  one_time               String?                  @db.VarChar
-  subscriber_mailinglist subscriber_mailinglist[]
-}
-
-model optins {
-  created_at        DateTime            @default(now()) @db.Timestamp(6)
-  updated_at        DateTime            @default(now()) @db.Timestamp(6)
-  id                String               @id @db.Uuid @default(uuid())
-  apiId             String?             @db.VarChar @unique
-  key_name          String?             @db.VarChar
-  name              String?             @db.VarChar
-  title             Json?
-  description       Json?
-  provider          String?             @db.VarChar
-  code              String?             @db.VarChar
-  type              String?             @db.VarChar
-  subscriber_optins subscriber_optins[]
-}
-
-model order {
-  created_at                           DateTime      @default(now()) @db.Timestamp(6)
-  updated_at                           DateTime      @default(now()) @db.Timestamp(6)
-  id                                   String         @id @db.Uuid @default(uuid())
-  apiId                                String?       @db.VarChar @unique
-  ordered_at                           DateTime?     @db.Timestamp(6)
-  total_amount                         String?       @db.VarChar
-  box_office_id                        String?       @db.VarChar
-  visitor_id                           String?       @db.Uuid
-  publiq_statistical_sector_id         String?       @db.VarChar
-
-  crosssells                           crosssells[]  @relation("crosssells_order")
-  visitor                              visitor?      @relation("order_visitor", fields: [visitor_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  ordertickets                         orderticket[] @relation("orderticket_order")
-  tickets                              ticket[]      @relation("ticket_order")
-}
-
-model orderticket {
-  created_at                        DateTime @default(now()) @db.Timestamp(6)
-  updated_at                        DateTime @default(now()) @db.Timestamp(6)
-  id                                String    @id @db.Uuid @default(uuid())
-  apiId                             String?  @db.VarChar @unique
-  ticket_type                       String?  @db.VarChar
-  booking_id                        String?  @db.VarChar
-  price                             String?  @db.VarChar
-  hall_section_code                 String?  @db.VarChar
-  order_id                          String?  @db.Uuid
-  ticket_id                         String?  @db.Uuid
-  order                             order?   @relation("orderticket_order", fields: [order_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  ticket                            ticket?  @relation("orderticket_ticket", fields: [ticket_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-}
-
 model organisations {
   created_at DateTime @default(now()) @db.Timestamp(6)
   updated_at DateTime @default(now()) @db.Timestamp(6)
@@ -267,7 +191,6 @@ model price {
   cineville_box                        Boolean?
   membership                           String?       @db.VarChar
   event_prices                         event_price[] @relation("event_price_price")
-  tickets                              ticket[]      @relation("ticket_price")
 }
 
 model production {
@@ -324,7 +247,6 @@ model rank {
   position                           Int?
   sold_out_buffer                    Int?
   event_prices                       event_price[] @relation("event_price_rank")
-  tickets                            ticket[]      @relation("ticket_rank")
 }
 
 model space {
@@ -337,50 +259,6 @@ model space {
   location_id                       String?   @db.Uuid
   halls                             hall[]    @relation("hall_space")
   location                          location? @relation("space_location", fields: [location_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-}
-
-model status {
-  created_at                 DateTime @default(now()) @db.Timestamp(6)
-  updated_at                 DateTime @default(now()) @db.Timestamp(6)
-  id                         String    @id @db.Uuid @default(uuid())
-  apiId                      String?  @db.VarChar @unique
-  name                       Json?
-  short_name                 String?  @db.VarChar
-  fixed                      Boolean?
-  visible                    Boolean?
-  bookable                   Boolean?
-  events                     event[]  @relation("event_status")
-}
-
-model subscriber {
-  created_at                 DateTime                 @default(now()) @db.Timestamp(6)
-  updated_at                 DateTime                 @default(now()) @db.Timestamp(6)
-  id                         String                   @id @db.Uuid @default(uuid())
-  apiId                      String?                  @db.VarChar @unique
-  confirmed                  Boolean?
-  bounces                    Int?
-  user_id                    String?                  @db.Uuid
-  user                       user?                    @relation("subscriber_user", fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  subscriber_mailinglist     subscriber_mailinglist[]
-  subscriber_optins          subscriber_optins[]
-}
-
-model subscriber_mailinglist {
-  subscriber_id  String      @db.Uuid
-  mailinglist_id String      @db.Uuid
-  mailinglist    mailinglist @relation(fields: [mailinglist_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  subscriber     subscriber  @relation(fields: [subscriber_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-
-  @@id([subscriber_id, mailinglist_id])
-}
-
-model subscriber_optins {
-  subscriber_id String     @db.Uuid
-  optins_id     String     @db.Uuid
-  optins        optins     @relation(fields: [optins_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  subscriber    subscriber @relation(fields: [subscriber_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-
-  @@id([subscriber_id, optins_id])
 }
 
 model tag {
@@ -401,30 +279,6 @@ model tag {
   external                     Boolean?
   gallery_id                   String?        @db.Uuid
   gallery                      gallery?       @relation("tag_gallery", fields: [gallery_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  visitor_tags                 visitor_tags[]
-}
-
-model ticket {
-  created_at                             DateTime      @default(now()) @db.Timestamp(6)
-  updated_at                             DateTime      @default(now()) @db.Timestamp(6)
-  id                                     String         @id @db.Uuid @default(uuid())
-  apiId                                  String?       @db.VarChar @unique
-  available_from                         DateTime?     @db.Timestamp(6)
-  seat_id                                String?       @db.VarChar
-  seat_row                               String?       @db.VarChar
-  seat_description                       String?       @db.VarChar
-  external_data                          String?
-  order_id                               String?       @db.Uuid
-  event_id                               String?       @db.Uuid
-  price_id                               String?       @db.Uuid
-  rank_id                                String?       @db.Uuid
-
-  crosssells                             crosssells[]  @relation("crosssells_ticket")
-  ordertickets                           orderticket[] @relation("orderticket_ticket")
-  event                                  event?        @relation("ticket_event", fields: [event_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  order                                  order?        @relation("ticket_order", fields: [order_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  price                                  price?        @relation("ticket_price", fields: [price_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  rank                                   rank?         @relation("ticket_rank", fields: [rank_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model uit_keywords_productions {
@@ -458,52 +312,11 @@ model uitdatabank_themes {
 model uitdatabank_types {
   created_at DateTime     @default(now()) @db.Timestamp(6)
   updated_at DateTime     @default(now()) @db.Timestamp(6)
-  id         String        @id @db.Uuid @default(uuid())
-  apiId      String?      @db.VarChar @unique
+  id         String       @id @default(uuid()) @db.Uuid
+  apiId      String?      @unique @db.VarChar
   name       String?      @db.VarChar
   cdb_cat_id String?      @db.VarChar
   production production[]
-}
-
-model user {
-  created_at                       DateTime     @default(now()) @db.Timestamp(6)
-  updated_at                       DateTime     @default(now()) @db.Timestamp(6)
-  id                               String        @id @db.Uuid @default(uuid())
-  apiId                            String?      @db.VarChar @unique
-  last_active_at                   DateTime?    @db.Timestamp(6)
-  gender                           String?      @db.VarChar
-  initials                         String?      @db.VarChar
-  postcode                         String?      @db.VarChar
-  city                             String?      @db.VarChar
-  country                          String?      @db.VarChar
-  date_of_birth                    DateTime?    @db.Timestamp(6)
-  visitor_id                       String?      @unique @db.Uuid
-  subscribers                      subscriber[] @relation("subscriber_user")
-  visitor                          visitor?     @relation(fields: [visitor_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-}
-
-model visitor {
-  created_at                                 DateTime       @default(now()) @db.Timestamp(6)
-  updated_at                                 DateTime       @default(now()) @db.Timestamp(6)
-  id                                         String          @id @db.Uuid @default(uuid())
-  apiId                                      String?        @db.VarChar @unique
-  box_office_id                              String?        @db.VarChar
-  optins_chosen                              Boolean?
-  optins_skipped_at                          DateTime?      @db.Timestamp(6)
-  orders                                     order[]        @relation("order_visitor")
-  user                                       user?          
-  visitor_tags                               visitor_tags[] @relation("visitor_tags_visitor")
-}
-
-model visitor_tags {
-  id                                    String     @id @db.Uuid @default(uuid())
-  apiId                                 String?   @db.VarChar @unique
-  external_data                         String?
-  expires_at                            DateTime? @db.Timestamp(6)
-  visitor_id                            String?   @db.Uuid
-  tags                                  String?   @db.Uuid
-  tag                                   tag?      @relation(fields: [tags], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  visitor                               visitor?  @relation("visitor_tags_visitor", fields: [visitor_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 // Scaffold-specific admin model for dashboard authentication.

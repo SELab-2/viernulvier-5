@@ -313,7 +313,6 @@ export type priceWhereInput = {
   cineville_box?: Prisma.BoolNullableFilter<"price"> | boolean | null
   membership?: Prisma.StringNullableFilter<"price"> | string | null
   event_prices?: Prisma.Event_priceListRelationFilter
-  tickets?: Prisma.TicketListRelationFilter
 }
 
 export type priceOrderByWithRelationInput = {
@@ -334,7 +333,6 @@ export type priceOrderByWithRelationInput = {
   cineville_box?: Prisma.SortOrderInput | Prisma.SortOrder
   membership?: Prisma.SortOrderInput | Prisma.SortOrder
   event_prices?: Prisma.event_priceOrderByRelationAggregateInput
-  tickets?: Prisma.ticketOrderByRelationAggregateInput
 }
 
 export type priceWhereUniqueInput = Prisma.AtLeast<{
@@ -358,7 +356,6 @@ export type priceWhereUniqueInput = Prisma.AtLeast<{
   cineville_box?: Prisma.BoolNullableFilter<"price"> | boolean | null
   membership?: Prisma.StringNullableFilter<"price"> | string | null
   event_prices?: Prisma.Event_priceListRelationFilter
-  tickets?: Prisma.TicketListRelationFilter
 }, "id" | "apiId">
 
 export type priceOrderByWithAggregationInput = {
@@ -425,7 +422,6 @@ export type priceCreateInput = {
   cineville_box?: boolean | null
   membership?: string | null
   event_prices?: Prisma.event_priceCreateNestedManyWithoutPriceInput
-  tickets?: Prisma.ticketCreateNestedManyWithoutPriceInput
 }
 
 export type priceUncheckedCreateInput = {
@@ -446,7 +442,6 @@ export type priceUncheckedCreateInput = {
   cineville_box?: boolean | null
   membership?: string | null
   event_prices?: Prisma.event_priceUncheckedCreateNestedManyWithoutPriceInput
-  tickets?: Prisma.ticketUncheckedCreateNestedManyWithoutPriceInput
 }
 
 export type priceUpdateInput = {
@@ -467,7 +462,6 @@ export type priceUpdateInput = {
   cineville_box?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   membership?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   event_prices?: Prisma.event_priceUpdateManyWithoutPriceNestedInput
-  tickets?: Prisma.ticketUpdateManyWithoutPriceNestedInput
 }
 
 export type priceUncheckedUpdateInput = {
@@ -488,7 +482,6 @@ export type priceUncheckedUpdateInput = {
   cineville_box?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   membership?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   event_prices?: Prisma.event_priceUncheckedUpdateManyWithoutPriceNestedInput
-  tickets?: Prisma.ticketUncheckedUpdateManyWithoutPriceNestedInput
 }
 
 export type priceCreateManyInput = {
@@ -638,22 +631,6 @@ export type priceUpdateOneWithoutEvent_pricesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.priceUpdateToOneWithWhereWithoutEvent_pricesInput, Prisma.priceUpdateWithoutEvent_pricesInput>, Prisma.priceUncheckedUpdateWithoutEvent_pricesInput>
 }
 
-export type priceCreateNestedOneWithoutTicketsInput = {
-  create?: Prisma.XOR<Prisma.priceCreateWithoutTicketsInput, Prisma.priceUncheckedCreateWithoutTicketsInput>
-  connectOrCreate?: Prisma.priceCreateOrConnectWithoutTicketsInput
-  connect?: Prisma.priceWhereUniqueInput
-}
-
-export type priceUpdateOneWithoutTicketsNestedInput = {
-  create?: Prisma.XOR<Prisma.priceCreateWithoutTicketsInput, Prisma.priceUncheckedCreateWithoutTicketsInput>
-  connectOrCreate?: Prisma.priceCreateOrConnectWithoutTicketsInput
-  upsert?: Prisma.priceUpsertWithoutTicketsInput
-  disconnect?: Prisma.priceWhereInput | boolean
-  delete?: Prisma.priceWhereInput | boolean
-  connect?: Prisma.priceWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.priceUpdateToOneWithWhereWithoutTicketsInput, Prisma.priceUpdateWithoutTicketsInput>, Prisma.priceUncheckedUpdateWithoutTicketsInput>
-}
-
 export type priceCreateWithoutEvent_pricesInput = {
   created_at?: Date | string
   updated_at?: Date | string
@@ -671,7 +648,6 @@ export type priceCreateWithoutEvent_pricesInput = {
   include_in_price_range?: boolean | null
   cineville_box?: boolean | null
   membership?: string | null
-  tickets?: Prisma.ticketCreateNestedManyWithoutPriceInput
 }
 
 export type priceUncheckedCreateWithoutEvent_pricesInput = {
@@ -691,7 +667,6 @@ export type priceUncheckedCreateWithoutEvent_pricesInput = {
   include_in_price_range?: boolean | null
   cineville_box?: boolean | null
   membership?: string | null
-  tickets?: Prisma.ticketUncheckedCreateNestedManyWithoutPriceInput
 }
 
 export type priceCreateOrConnectWithoutEvent_pricesInput = {
@@ -727,7 +702,6 @@ export type priceUpdateWithoutEvent_pricesInput = {
   include_in_price_range?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   cineville_box?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   membership?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  tickets?: Prisma.ticketUpdateManyWithoutPriceNestedInput
 }
 
 export type priceUncheckedUpdateWithoutEvent_pricesInput = {
@@ -747,103 +721,6 @@ export type priceUncheckedUpdateWithoutEvent_pricesInput = {
   include_in_price_range?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   cineville_box?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   membership?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  tickets?: Prisma.ticketUncheckedUpdateManyWithoutPriceNestedInput
-}
-
-export type priceCreateWithoutTicketsInput = {
-  created_at?: Date | string
-  updated_at?: Date | string
-  id?: string
-  apiId?: string | null
-  type?: string | null
-  visibility?: string | null
-  code?: string | null
-  description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  minimum?: number | null
-  maximum?: number | null
-  step?: number | null
-  order?: number | null
-  auto_select_combo?: boolean | null
-  include_in_price_range?: boolean | null
-  cineville_box?: boolean | null
-  membership?: string | null
-  event_prices?: Prisma.event_priceCreateNestedManyWithoutPriceInput
-}
-
-export type priceUncheckedCreateWithoutTicketsInput = {
-  created_at?: Date | string
-  updated_at?: Date | string
-  id?: string
-  apiId?: string | null
-  type?: string | null
-  visibility?: string | null
-  code?: string | null
-  description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  minimum?: number | null
-  maximum?: number | null
-  step?: number | null
-  order?: number | null
-  auto_select_combo?: boolean | null
-  include_in_price_range?: boolean | null
-  cineville_box?: boolean | null
-  membership?: string | null
-  event_prices?: Prisma.event_priceUncheckedCreateNestedManyWithoutPriceInput
-}
-
-export type priceCreateOrConnectWithoutTicketsInput = {
-  where: Prisma.priceWhereUniqueInput
-  create: Prisma.XOR<Prisma.priceCreateWithoutTicketsInput, Prisma.priceUncheckedCreateWithoutTicketsInput>
-}
-
-export type priceUpsertWithoutTicketsInput = {
-  update: Prisma.XOR<Prisma.priceUpdateWithoutTicketsInput, Prisma.priceUncheckedUpdateWithoutTicketsInput>
-  create: Prisma.XOR<Prisma.priceCreateWithoutTicketsInput, Prisma.priceUncheckedCreateWithoutTicketsInput>
-  where?: Prisma.priceWhereInput
-}
-
-export type priceUpdateToOneWithWhereWithoutTicketsInput = {
-  where?: Prisma.priceWhereInput
-  data: Prisma.XOR<Prisma.priceUpdateWithoutTicketsInput, Prisma.priceUncheckedUpdateWithoutTicketsInput>
-}
-
-export type priceUpdateWithoutTicketsInput = {
-  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  visibility?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  minimum?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  maximum?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  step?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  order?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  auto_select_combo?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
-  include_in_price_range?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
-  cineville_box?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
-  membership?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  event_prices?: Prisma.event_priceUpdateManyWithoutPriceNestedInput
-}
-
-export type priceUncheckedUpdateWithoutTicketsInput = {
-  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  visibility?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  minimum?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  maximum?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  step?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  order?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  auto_select_combo?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
-  include_in_price_range?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
-  cineville_box?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
-  membership?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  event_prices?: Prisma.event_priceUncheckedUpdateManyWithoutPriceNestedInput
 }
 
 
@@ -853,12 +730,10 @@ export type priceUncheckedUpdateWithoutTicketsInput = {
 
 export type PriceCountOutputType = {
   event_prices: number
-  tickets: number
 }
 
 export type PriceCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   event_prices?: boolean | PriceCountOutputTypeCountEvent_pricesArgs
-  tickets?: boolean | PriceCountOutputTypeCountTicketsArgs
 }
 
 /**
@@ -876,13 +751,6 @@ export type PriceCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extens
  */
 export type PriceCountOutputTypeCountEvent_pricesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.event_priceWhereInput
-}
-
-/**
- * PriceCountOutputType without action
- */
-export type PriceCountOutputTypeCountTicketsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.ticketWhereInput
 }
 
 
@@ -904,7 +772,6 @@ export type priceSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   cineville_box?: boolean
   membership?: boolean
   event_prices?: boolean | Prisma.price$event_pricesArgs<ExtArgs>
-  tickets?: boolean | Prisma.price$ticketsArgs<ExtArgs>
   _count?: boolean | Prisma.PriceCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["price"]>
 
@@ -968,7 +835,6 @@ export type priceSelectScalar = {
 export type priceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "apiId" | "type" | "visibility" | "code" | "description" | "minimum" | "maximum" | "step" | "order" | "auto_select_combo" | "include_in_price_range" | "cineville_box" | "membership", ExtArgs["result"]["price"]>
 export type priceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   event_prices?: boolean | Prisma.price$event_pricesArgs<ExtArgs>
-  tickets?: boolean | Prisma.price$ticketsArgs<ExtArgs>
   _count?: boolean | Prisma.PriceCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type priceIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -978,7 +844,6 @@ export type $pricePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   name: "price"
   objects: {
     event_prices: Prisma.$event_pricePayload<ExtArgs>[]
-    tickets: Prisma.$ticketPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     created_at: Date
@@ -1392,7 +1257,6 @@ readonly fields: priceFieldRefs;
 export interface Prisma__priceClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   event_prices<T extends Prisma.price$event_pricesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.price$event_pricesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$event_pricePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  tickets<T extends Prisma.price$ticketsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.price$ticketsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ticketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1847,30 +1711,6 @@ export type price$event_pricesArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.Event_priceScalarFieldEnum | Prisma.Event_priceScalarFieldEnum[]
-}
-
-/**
- * price.tickets
- */
-export type price$ticketsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the ticket
-   */
-  select?: Prisma.ticketSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the ticket
-   */
-  omit?: Prisma.ticketOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.ticketInclude<ExtArgs> | null
-  where?: Prisma.ticketWhereInput
-  orderBy?: Prisma.ticketOrderByWithRelationInput | Prisma.ticketOrderByWithRelationInput[]
-  cursor?: Prisma.ticketWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.TicketScalarFieldEnum | Prisma.TicketScalarFieldEnum[]
 }
 
 /**

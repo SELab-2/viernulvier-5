@@ -7,8 +7,7 @@ import type {
   APIEvent,
   APISpace,
   APIHall,
-  APILocation,
-  APIStatus,
+  APILocation, APIGenre, APIGallery, APIItem,
 } from "./APItypes";
 
 /*
@@ -26,31 +25,7 @@ npx tsx scraper.ts
  * @returns A valid ISO 8601 timestamp string (never null)
  */
 function sanitizeTimestampRequired(timestamp: string | undefined | null, fallbackDate: string = "1970-01-01T00:00:00Z"): string {
-  if (!timestamp) {
-    return fallbackDate;
-  }
-
-  try {
-    const date = new Date(timestamp);
-    
-    // Check if date is valid
-    if (isNaN(date.getTime())) {
-      console.warn(`Invalid timestamp "${timestamp}", using fallback`);
-      return fallbackDate;
-    }
-
-    // Check if year is 0, negative, or unreasonable (before year 1)
-    const year = date.getFullYear();
-    if (year < 1) {
-      console.warn(`Timestamp "${timestamp}" has invalid year ${year}, using fallback`);
-      return fallbackDate;
-    }
-
-    return date.toISOString();
-  } catch (error) {
-    console.warn(`Error parsing timestamp "${timestamp}": ${error}, using fallback`);
-    return fallbackDate;
-  }
+  return <string>sanitizeTimestamp(timestamp, fallbackDate);
 }
 
 /**
@@ -61,13 +36,17 @@ function sanitizeTimestampRequired(timestamp: string | undefined | null, fallbac
  * @returns A valid ISO 8601 timestamp string or null
  */
 function sanitizeTimestampOptional(timestamp: string | undefined | null, fallbackDate: string | null = null): string | null {
+  return sanitizeTimestamp(timestamp, fallbackDate);
+}
+
+function sanitizeTimestamp(timestamp: string | undefined | null, fallbackDate: string | null = null): string | null {
   if (!timestamp) {
     return fallbackDate;
   }
 
   try {
     const date = new Date(timestamp);
-    
+
     // Check if date is valid
     if (isNaN(date.getTime())) {
       console.warn(`Invalid timestamp "${timestamp}", using fallback`);
@@ -87,6 +66,7 @@ function sanitizeTimestampOptional(timestamp: string | undefined | null, fallbac
     return fallbackDate;
   }
 }
+
 
 function mapEvent(event: APIEvent) {
   /*
@@ -158,9 +138,9 @@ function mapProduction(prod: APIProduction) {
       eticket_info: prod.eticket_info,
       custom_data: prod.custom_data,
 
-      // media_gallery_id: prod.media_gallery,
-      // review_gallery_id: prod.review_gallery,
-      // poster_gallery_id: prod.poster_gallery,
+      media_gallery_id: prod.media_gallery,
+      review_gallery_id: prod.review_gallery,
+      poster_gallery_id: prod.poster_gallery,
 
     // uitdatabank_type/theme or keyword relations are handled separately.
   };
@@ -223,22 +203,76 @@ function mapHall(hall: APIHall) {
   };
 }
 
-function mapStatus(status: APIStatus) {
-  /*
-    Maps a status from the API to the status schema used by Prisma.
-    Only scalar fields are included.
-  */
+function mapGenre(genre: APIGenre){
   return {
-    created_at: sanitizeTimestampRequired(status.created_at),
-    updated_at: sanitizeTimestampRequired(status.updated_at),
-    apiId: status["@id"],
-    name: status.name,
-    short_name: status.short_name,
-    fixed: status.fixed,
-    visible: status.visible,
-    bookable: status.bookable,
+    created_at: sanitizeTimestampRequired(genre.created_at),
+    updated_at: sanitizeTimestampRequired(genre.updated_at),
+    apiId: genre["@id"],
+    type: genre.type,
+    use_as: genre.use_as,
+    vendor_id: genre.vendor_id,
+    name: genre.name,
+    slug: genre.slug,
+    description: genre.description,
+
+    // genre_production link moet nog gemaakt worden
+
   };
 }
+
+
+function mapGallery(gallery: APIGallery){
+  return {
+    created_at: sanitizeTimestampRequired(gallery.created_at),
+    updated_at: sanitizeTimestampRequired(gallery.updated_at),
+    apiId: gallery["@id"],
+    name: gallery.name,
+    // gallery_item moet nog gemaakt worden
+
+  };
+}
+
+function mapItem(item: APIItem) {
+  return {
+    created_at: sanitizeTimestampRequired(item.created_at),
+    updated_at: sanitizeTimestampRequired(item.updated_at),
+    apiId: item["@id"],
+    type: item.type,
+    original_filename: item.original_filename,
+    position: item.position,
+    width: item.width,
+    height: item.height,
+    format: item.format,
+    //gallery: item.gallery, // this is something different than the APIs gallery?
+    title: item.title,
+    description: item.description,
+    credits: item.credits,
+    link: item.link,
+    // crops have to be separate
+    // gallery_items still have to be created
+  }
+}
+
+
+
+
+
+// function mapStatus(status: APIStatus) {
+//   /*
+//     Maps a status from the API to the status schema used by Prisma.
+//     Only scalar fields are included.
+//   */
+//   return {
+//     created_at: sanitizeTimestampRequired(status.created_at),
+//     updated_at: sanitizeTimestampRequired(status.updated_at),
+//     apiId: status["@id"],
+//     name: status.name,
+//     short_name: status.short_name,
+//     fixed: status.fixed,
+//     visible: status.visible,
+//     bookable: status.bookable,
+//   };
+// }
 
 
 async function sync_locations() {
@@ -350,33 +384,33 @@ async function sync_spaces() {
 
   console.log(`Completed syncing ${totalProcessed} spaces from ${pageCount} pages`);
 }
-
-async function sync_status() {
-
-  let totalProcessed = 0;
-  let pageCount = 0;
-
-  for await (const page of Fetcher.fetchStatusesPages()) {
-    pageCount++;
-    console.log(`Processing page ${pageCount} with ${page.length} statuses`);
-
-    if (page.length === 0) break;
-
-    await prisma.$transaction(
-      page.map(status =>
-        prisma.status.upsert({
-          where: { apiId: status["@id"] },
-          update: mapStatus(status),
-          create: mapStatus(status),
-        })
-      )
-    );
-
-    totalProcessed += page.length;
-  }
-
-  console.log(`Completed syncing ${totalProcessed} statuses from ${pageCount} pages`);
-}
+//
+// async function sync_status() {
+//
+//   let totalProcessed = 0;
+//   let pageCount = 0;
+//
+//   for await (const page of Fetcher.fetchStatusesPages()) {
+//     pageCount++;
+//     console.log(`Processing page ${pageCount} with ${page.length} statuses`);
+//
+//     if (page.length === 0) break;
+//
+//     await prisma.$transaction(
+//       page.map(status =>
+//         prisma.status.upsert({
+//           where: { apiId: status["@id"] },
+//           update: mapStatus(status),
+//           create: mapStatus(status),
+//         })
+//       )
+//     );
+//
+//     totalProcessed += page.length;
+//   }
+//
+//   console.log(`Completed syncing ${totalProcessed} statuses from ${pageCount} pages`);
+// }
 
 async function sync_events() {
 
@@ -401,9 +435,9 @@ async function sync_events() {
           where: { apiId: event.hall }
         });
 
-        const status = await tx.status.findUnique({
-          where: { apiId: event.status }
-        });
+        // const status = await tx.status.findUnique({
+        //   where: { apiId: event.status }
+        // });
 
         await tx.event.upsert({
           where: { apiId: event["@id"] },
@@ -411,13 +445,13 @@ async function sync_events() {
             ...mapEvent(event),
             production_id: production?.id,
             hall_id: hall?.id,
-            status_id: status?.id
+            // status_id: status?.id
           },
           create: {
             ...mapEvent(event),
             production_id: production?.id,
             hall_id: hall?.id,
-            status_id: status?.id
+            // status_id: status?.id
           }
         });
       }
@@ -440,21 +474,167 @@ async function sync_productions() {
 
     if (page.length === 0) break;
 
-    await prisma.$transaction(
-      page.map(production =>
-        prisma.production.upsert({
-          where: { apiId: production["@id"] },
-          update: mapProduction(production),
-          create: mapProduction(production),
+    await prisma.$transaction(async (tx) => {
+      for (const production of page) {
+
+        let media_gallery = null
+        if (production.media_gallery) {
+            media_gallery = await tx.gallery.findUnique({
+            where: {apiId: production.media_gallery}
+          });
+        }
+
+        let poster_gallery = null
+        if (production.poster_gallery) {
+          poster_gallery = await tx.gallery.findUnique({
+            where: {apiId: production.poster_gallery}
+          });
+        }
+
+        let review_gallery = null
+        if (production.review_gallery) {
+            review_gallery = await tx.gallery.findUnique({
+            where: {apiId: production.review_gallery}
+          });
+        }
+
+
+        await tx.production.upsert({
+          where: {apiId: production["@id"]},
+          update: {
+            ...mapProduction(production),
+            media_gallery_id: media_gallery?.id || null,
+            poster_gallery_id: poster_gallery?.id || null,
+            review_gallery_id: review_gallery?.id || null,
+          },
+
+          create: {
+            ...mapProduction(production),
+            media_gallery_id: media_gallery?.id || null,
+            poster_gallery_id: poster_gallery?.id || null,
+            review_gallery_id: review_gallery?.id || null,
+          },
         })
-      )
-    );
+      }
+    });
 
     totalProcessed += page.length;
   }
 
   console.log(`Completed syncing ${totalProcessed} productions from ${pageCount} pages`);
 }
+
+async function sync_genres(){
+  let totalProcessed = 0;
+  let pageCount = 0;
+
+  for await (const page of Fetcher.fetchGenrePages()) {
+    pageCount++;
+    console.log(`Processing page ${pageCount} with ${page.length} genres`);
+
+    if (page.length === 0) break;
+
+    await prisma.$transaction(
+        page.map(genre =>
+            prisma.genre.upsert({
+              where: { apiId: genre["@id"] },
+              update: mapGenre(genre),
+              create: mapGenre(genre),
+            })
+        )
+    );
+
+    totalProcessed += page.length;
+  }
+
+  console.log(`Completed syncing ${totalProcessed} genres from ${pageCount} pages`);
+}
+
+
+async function sync_galleries(){
+  let totalProcessed = 0;
+  let pageCount = 0;
+
+  for await (const page of Fetcher.fetchGalleryPages()) {
+    pageCount++;
+    console.log(`Processing page ${pageCount} with ${page.length} galleries`);
+
+    if (page.length === 0) break;
+
+    await prisma.$transaction(async (tx) => {
+      for (const gallery of page) {
+
+
+        const items = await tx.item.findMany({
+          where: {apiId: { in: gallery.items}},
+          select: { id: true },
+        });
+
+
+
+        const db_gallery = await prisma.gallery.upsert({
+          where: {apiId: gallery["@id"]},
+          update: mapGallery(gallery),
+          create: mapGallery(gallery),
+        })
+
+        // gallery_item table
+        if (items.length !== 0) {
+          for (const item of items) {
+            await prisma.gallery_item.upsert({
+              where: {
+                gallery_id_item_id: {
+                  gallery_id: db_gallery.id,
+                  item_id: item.id,
+                },
+              },
+              update: {}, // if theyre already connected you don't have to update them//}
+              create: {
+                gallery_id: db_gallery.id,
+                item_id: item.id,
+              },
+            });
+          }
+        }
+      }
+    });
+
+
+
+
+    totalProcessed += page.length;
+  }
+
+  console.log(`Completed syncing ${totalProcessed} galleries from ${pageCount} pages`);
+}
+
+async function sync_items(){
+  let totalProcessed = 0;
+  let pageCount = 0;
+
+  for await (const page of Fetcher.fetchItemPages()) {
+    pageCount++;
+    console.log(`Processing page ${pageCount} with ${page.length} items`);
+
+    if (page.length === 0) break;
+
+    await prisma.$transaction(
+        page.map(item =>
+            prisma.item.upsert({
+              where: { apiId: item["@id"] },
+              update: mapItem(item),
+              create: mapItem(item),
+            })
+        )
+    );
+
+    totalProcessed += page.length;
+  }
+
+  console.log(`Completed syncing ${totalProcessed} items from ${pageCount} pages`);
+}
+
+
 
 
 async function main() {
@@ -464,11 +644,15 @@ async function main() {
   await sync_hall();
 
   // statuses
-  await sync_status();
+  // await sync_status();
 
-  // proodcutions
+  // productions
+  await sync_items()
+  await sync_galleries()
   await sync_productions();
   await sync_events();
+  await sync_genres();
+
 }
 
 main()
