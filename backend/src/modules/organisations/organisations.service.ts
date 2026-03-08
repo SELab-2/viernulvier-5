@@ -1,5 +1,11 @@
 import { OrganisationsRepository } from './organisations.repository.js'
-import type { PaginationQuery, OrganisationListResponse, OrganisationResponse } from './organisations.schema.js'
+import type { 
+    PaginationQuery, 
+    OrganisationListResponse, 
+    OrganisationResponse,
+    CreateOrganisationInput,
+    UpdateOrganisationInput
+} from './organisations.schema.js'
 
 export class OrganisationsService {
     constructor(private readonly repository: OrganisationsRepository) { }
@@ -27,5 +33,17 @@ export class OrganisationsService {
 
     async getOrganisation(id: string): Promise<OrganisationResponse | null> {
         return this.repository.findById(id) as any
+    }
+
+    async createOrganisation(data: CreateOrganisationInput): Promise<OrganisationResponse> {
+        return this.repository.create(data) as any
+    }
+
+    async updateOrganisation(id: string, data: UpdateOrganisationInput): Promise<OrganisationResponse> {
+        return this.repository.update(id, data) as any
+    }
+
+    async deleteOrganisation(id: string): Promise<void> {
+        await this.repository.delete(id)
     }
 }

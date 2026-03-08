@@ -47,4 +47,10 @@ export class EventsController {
         const event = await this.service.updateEvent(id, request.body)
         return reply.status(200).send(event)
     }
+
+    async deleteEvent(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
+        const { id } = request.params
+        await this.service.deleteEvent(id)
+        return reply.status(204).send()
+    }
 }

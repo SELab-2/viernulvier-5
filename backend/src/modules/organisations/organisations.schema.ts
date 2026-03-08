@@ -31,6 +31,16 @@ export const organisationListSchema = z.object({
     }),
 })
 
+export const createOrganisationSchema = z.object({
+    name: z.string(),
+})
+
+export const updateOrganisationSchema = z.object({
+    name: z.string().optional(),
+})
+
 export type PaginationQuery = z.infer<typeof paginationQuerySchema>
 export type OrganisationResponse = z.infer<typeof organisationSchema>
 export type OrganisationListResponse = z.infer<typeof organisationListSchema>
+export type CreateOrganisationInput = z.infer<typeof createOrganisationSchema>
+export type UpdateOrganisationInput = z.infer<typeof updateOrganisationSchema>

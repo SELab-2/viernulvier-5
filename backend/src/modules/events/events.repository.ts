@@ -101,4 +101,10 @@ export class EventsRepository {
             data,
         })
     }
+
+    async delete(id: string) {
+        return this.prisma.event.delete({
+            where: { id }
+        })
+    }
 }

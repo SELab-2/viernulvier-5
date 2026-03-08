@@ -166,4 +166,34 @@ describe('Productions Routes', () => {
             expect(response.statusCode).toBe(401)
         })
     })
+
+    describe('DELETE /api/archive/productions/:id', () => {
+        it('should return 401 when no token provided', async () => {
+            const response = await app.inject({
+                method: 'DELETE',
+                url: '/api/archive/productions/00000000-0000-0000-0000-000000000000'
+            })
+            expect(response.statusCode).toBe(401)
+        })
+
+        it('should delete a production', async () => {
+            const production = await app.prisma.production.create({
+                data: { title: { nl: 'To Be Deleted' } }
+            })
+
+            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+            const response = await app.inject({
+                method: 'DELETE',
+                url: `/api/archive/productions/${production.id}`,
+                headers: { authorization: `Bearer ${token}` }
+            })
+
+            expect(response.statusCode).toBe(204)
+
+            const dbRecord = await app.prisma.production.findUnique({
+                where: { id: production.id }
+            })
+            expect(dbRecord).toBeNull()
+        })
+    })
 })

@@ -69,4 +69,10 @@ export class ProductionsRepository {
             data,
         })
     }
+
+    async delete(id: string) {
+        return this.prisma.production.delete({
+            where: { id }
+        })
+    }
 }

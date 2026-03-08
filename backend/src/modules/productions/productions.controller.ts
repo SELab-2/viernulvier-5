@@ -31,4 +31,10 @@ export class ProductionsController {
         const production = await this.service.updateProduction(id, request.body)
         return reply.status(200).send(production)
     }
+
+    async deleteProduction(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
+        const { id } = request.params
+        await this.service.deleteProduction(id)
+        return reply.status(204).send()
+    }
 }

@@ -1,6 +1,6 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { OrganisationsService } from './organisations.service.js'
-import type { PaginationQuery } from './organisations.schema.js'
+import type { PaginationQuery, CreateOrganisationInput, UpdateOrganisationInput } from './organisations.schema.js'
 
 export class OrganisationsController {
     constructor(private readonly service: OrganisationsService) { }
@@ -19,5 +19,22 @@ export class OrganisationsController {
         }
 
         return reply.status(200).send(organisation)
+    }
+
+    async createOrganisation(request: FastifyRequest<{ Body: CreateOrganisationInput }>, reply: FastifyReply) {
+        const organisation = await this.service.createOrganisation(request.body)
+        return reply.status(201).send(organisation)
+    }
+
+    async updateOrganisation(request: FastifyRequest<{ Params: { id: string }, Body: UpdateOrganisationInput }>, reply: FastifyReply) {
+        const { id } = request.params
+        const organisation = await this.service.updateOrganisation(id, request.body)
+        return reply.status(200).send(organisation)
+    }
+
+    async deleteOrganisation(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
+        const { id } = request.params
+        await this.service.deleteOrganisation(id)
+        return reply.status(204).send()
     }
 }

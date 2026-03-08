@@ -69,4 +69,8 @@ export class EventsService {
     async updateEvent(id: string, data: UpdateEventInput): Promise<EventResponse> {
         return this.repository.update(id, data) as any
     }
+
+    async deleteEvent(id: string): Promise<void> {
+        await this.repository.delete(id)
+    }
 }

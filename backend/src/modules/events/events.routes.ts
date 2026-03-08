@@ -2,6 +2,7 @@ import type { FastifyPluginAsync } from 'fastify'
 import { EventsRepository } from './events.repository.js'
 import { EventsService } from './events.service.js'
 import { EventsController } from './events.controller.js'
+import { z } from 'zod'
 import { 
     paginationQuerySchema, 
     eventListSchema,
@@ -97,6 +98,20 @@ const eventsRoutes: FastifyPluginAsync = async (fastify) => {
             },
         },
         handler: (request, reply) => controller.updateEvent(request as any, reply),
+    })
+
+    fastify.delete('/:id', {
+        preHandler: [requireAuth],
+        schema: {
+            tags: ['events'],
+            summary: 'Delete an event',
+            params: updateEventParamsSchema,
+            response: {
+                204: z.null(),
+                404: errorSchema
+            },
+        },
+        handler: (request, reply) => controller.deleteEvent(request as any, reply),
     })
 }
 

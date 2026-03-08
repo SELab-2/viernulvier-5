@@ -2,6 +2,7 @@ import type { FastifyPluginAsync } from 'fastify'
 import { ProductionsRepository } from './productions.repository.js'
 import { ProductionsService } from './productions.service.js'
 import { ProductionsController } from './productions.controller.js'
+import { z } from 'zod'
 import { 
     paginationQuerySchema, 
     productionListSchema, 
@@ -72,6 +73,20 @@ const productionsRoutes: FastifyPluginAsync = async (fastify) => {
             },
         },
         handler: (request, reply) => controller.updateProduction(request as any, reply),
+    })
+
+    fastify.delete('/:id', {
+        preHandler: [requireAuth],
+        schema: {
+            tags: ['productions'],
+            summary: 'Delete a production',
+            params: updateProductionParamsSchema,
+            response: {
+                204: z.null(),
+                404: errorSchema
+            },
+        },
+        handler: (request, reply) => controller.deleteProduction(request as any, reply),
     })
 }
 

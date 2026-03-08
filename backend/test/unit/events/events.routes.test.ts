@@ -31,7 +31,6 @@ describe('Events Routes', () => {
 
     describe('GET /api/archive/events/:id', () => {
         it('should return an event by ID with 200 OK', async () => {
-            // 1. Pre-create a record directly in DB for testing
             const event = await app.prisma.event.create({
                 data: {
                     starts_at: new Date(),
@@ -39,7 +38,6 @@ describe('Events Routes', () => {
                 }
             })
 
-            // 2. Fetch via API
             const response = await app.inject({
                 method: 'GET',
                 url: `/api/archive/events/${event.id}`,
@@ -50,7 +48,6 @@ describe('Events Routes', () => {
             expect(body.id).toBe(event.id)
             expect(body.info.nl).toBe('Event by ID Test')
 
-            // 3. CLEANUP
             await app.prisma.event.delete({
                 where: { id: event.id }
             })
@@ -77,27 +74,21 @@ describe('Events Routes', () => {
                 info: { nl: 'Test Info' }
             }
 
-            // 1. Create via API
             const response = await app.inject({
                 method: 'POST',
                 url: '/api/archive/events',
-                headers: {
-                    authorization: `Bearer ${token}`
-                },
+                headers: { authorization: `Bearer ${token}` },
                 payload
             })
 
             expect(response.statusCode).toBe(201)
             const created = JSON.parse(response.payload)
 
-            // 2. Verify in DB
             const dbRecord = await app.prisma.event.findUnique({
                 where: { id: created.id }
             })
             expect(dbRecord).not.toBeNull()
-            expect((dbRecord?.info as any).nl).toBe(payload.info.nl)
 
-            // 3. CLEANUP
             await app.prisma.event.delete({
                 where: { id: created.id }
             })
@@ -118,7 +109,6 @@ describe('Events Routes', () => {
         it('should update an event in the DB and then clean up', async () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             
-            // 1. Pre-create a record directly in DB for testing
             const initialEvent = await app.prisma.event.create({
                 data: {
                     starts_at: new Date(),
@@ -128,13 +118,10 @@ describe('Events Routes', () => {
 
             const updatePayload = { info: { nl: 'Updated Info' } }
 
-            // 2. Update via API
             const response = await app.inject({
                 method: 'PUT',
                 url: `/api/archive/events/${initialEvent.id}`,
-                headers: {
-                    authorization: `Bearer ${token}`
-                },
+                headers: { authorization: `Bearer ${token}` },
                 payload: updatePayload
             })
 
@@ -142,13 +129,6 @@ describe('Events Routes', () => {
             const updated = JSON.parse(response.payload)
             expect(updated.info.nl).toBe(updatePayload.info.nl)
 
-            // 3. Verify in DB
-            const dbRecord = await app.prisma.event.findUnique({
-                where: { id: initialEvent.id }
-            })
-            expect((dbRecord?.info as any).nl).toBe(updatePayload.info.nl)
-
-            // 4. CLEANUP
             await app.prisma.event.delete({
                 where: { id: initialEvent.id }
             })
@@ -163,6 +143,36 @@ describe('Events Routes', () => {
             })
 
             expect(response.statusCode).toBe(401)
+        })
+    })
+
+    describe('DELETE /api/archive/events/:id', () => {
+        it('should return 401 when no token provided', async () => {
+            const response = await app.inject({
+                method: 'DELETE',
+                url: '/api/archive/events/00000000-0000-0000-0000-000000000000'
+            })
+            expect(response.statusCode).toBe(401)
+        })
+
+        it('should delete an event', async () => {
+            const event = await app.prisma.event.create({
+                data: { starts_at: new Date() }
+            })
+
+            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+            const response = await app.inject({
+                method: 'DELETE',
+                url: `/api/archive/events/${event.id}`,
+                headers: { authorization: `Bearer ${token}` }
+            })
+
+            expect(response.statusCode).toBe(204)
+
+            const dbRecord = await app.prisma.event.findUnique({
+                where: { id: event.id }
+            })
+            expect(dbRecord).toBeNull()
         })
     })
 

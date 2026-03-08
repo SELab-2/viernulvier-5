@@ -42,4 +42,8 @@ export class ProductionsService {
     async updateProduction(id: string, data: UpdateProductionInput): Promise<ProductionResponse> {
         return this.repository.update(id, data) as any
     }
+
+    async deleteProduction(id: string): Promise<void> {
+        await this.repository.delete(id)
+    }
 }
