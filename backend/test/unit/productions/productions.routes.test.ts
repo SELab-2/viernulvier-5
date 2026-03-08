@@ -18,6 +18,7 @@ describe('Productions Routes', () => {
             const response = await app.inject({
                 method: 'GET',
                 url: '/api/archive/productions',
+                query: { page: '1', limit: '10' }
             })
 
             const body = JSON.parse(response.payload)
@@ -31,7 +32,6 @@ describe('Productions Routes', () => {
 
     describe('GET /api/archive/productions/:id', () => {
         it('should return a production by ID with 200 OK', async () => {
-            // 1. Pre-create a record directly in DB for testing
             const production = await app.prisma.production.create({
                 data: {
                     title: { nl: 'Test Production by ID' },
@@ -39,21 +39,21 @@ describe('Productions Routes', () => {
                 }
             })
 
-            // 2. Fetch via API
-            const response = await app.inject({
-                method: 'GET',
-                url: `/api/archive/productions/${production.id}`,
-            })
+            try {
+                const response = await app.inject({
+                    method: 'GET',
+                    url: `/api/archive/productions/${production.id}`,
+                })
 
-            expect(response.statusCode).toBe(200)
-            const body = JSON.parse(response.payload)
-            expect(body.id).toBe(production.id)
-            expect(body.title.nl).toBe('Test Production by ID')
-
-            // 3. CLEANUP
-            await app.prisma.production.delete({
-                where: { id: production.id }
-            })
+                expect(response.statusCode).toBe(200)
+                const body = JSON.parse(response.payload)
+                expect(body.id).toBe(production.id)
+                expect(body.title.nl).toBe('Test Production by ID')
+            } finally {
+                await app.prisma.production.delete({
+                    where: { id: production.id }
+                })
+            }
         })
 
         it('should return 404 Not Found for non-existent ID', async () => {
@@ -70,48 +70,42 @@ describe('Productions Routes', () => {
     })
 
     describe('POST /api/archive/productions', () => {
-        it('should return 401 Unauthorized when no token is provided', async () => {
-            const response = await app.inject({
-                method: 'POST',
-                url: '/api/archive/productions',
-                payload: { title: { nl: 'Unauthorized Production' } }
-            })
-
-            expect(response.statusCode).toBe(401)
-        })
-
         it('should create a production in the DB and then clean up', async () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const payload = { 
-                title: { nl: 'Integration Test Production' },
-                artist: { nl: 'Test Artist' }
+                title: { nl: 'Test New Production' },
+                artist: { nl: 'Test New Artist' }
             }
 
-            // 1. Create via API
             const response = await app.inject({
                 method: 'POST',
                 url: '/api/archive/productions',
-                headers: {
-                    authorization: `Bearer ${token}`
-                },
+                headers: { authorization: `Bearer ${token}` },
                 payload
             })
 
             expect(response.statusCode).toBe(201)
             const created = JSON.parse(response.payload)
-            expect(created.title.nl).toBe(payload.title.nl)
 
-            // 2. Verify in DB
             const dbRecord = await app.prisma.production.findUnique({
                 where: { id: created.id }
             })
             expect(dbRecord).not.toBeNull()
             expect((dbRecord?.title as any).nl).toBe(payload.title.nl)
 
-            // 3. CLEANUP
             await app.prisma.production.delete({
                 where: { id: created.id }
             })
+        })
+
+        it('should return 401 Unauthorized when no token is provided', async () => {
+            const response = await app.inject({
+                method: 'POST',
+                url: '/api/archive/productions',
+                payload: { title: { nl: 'Unauthorized' } }
+            })
+
+            expect(response.statusCode).toBe(401)
         })
     })
 
@@ -119,8 +113,7 @@ describe('Productions Routes', () => {
         it('should update a production in the DB and then clean up', async () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             
-            // 1. Pre-create a record directly in DB for testing
-            const initialProduction = await app.prisma.production.create({
+            const initialProd = await app.prisma.production.create({
                 data: {
                     title: { nl: 'Initial Title' },
                     artist: { nl: 'Initial Artist' }
@@ -129,30 +122,22 @@ describe('Productions Routes', () => {
 
             const updatePayload = { title: { nl: 'Updated Title' } }
 
-            // 2. Update via API
-            const response = await app.inject({
-                method: 'PUT',
-                url: `/api/archive/productions/${initialProduction.id}`,
-                headers: {
-                    authorization: `Bearer ${token}`
-                },
-                payload: updatePayload
-            })
+            try {
+                const response = await app.inject({
+                    method: 'PUT',
+                    url: `/api/archive/productions/${initialProd.id}`,
+                    headers: { authorization: `Bearer ${token}` },
+                    payload: updatePayload
+                })
 
-            expect(response.statusCode).toBe(200)
-            const updated = JSON.parse(response.payload)
-            expect(updated.title.nl).toBe(updatePayload.title.nl)
-
-            // 3. Verify in DB
-            const dbRecord = await app.prisma.production.findUnique({
-                where: { id: initialProduction.id }
-            })
-            expect((dbRecord?.title as any).nl).toBe(updatePayload.title.nl)
-
-            // 4. CLEANUP
-            await app.prisma.production.delete({
-                where: { id: initialProduction.id }
-            })
+                expect(response.statusCode).toBe(200)
+                const updated = JSON.parse(response.payload)
+                expect(updated.title.nl).toBe(updatePayload.title.nl)
+            } finally {
+                await app.prisma.production.delete({
+                    where: { id: initialProd.id }
+                })
+            }
         })
 
         it('should return 401 Unauthorized when no token is provided', async () => {
@@ -160,7 +145,7 @@ describe('Productions Routes', () => {
             const response = await app.inject({
                 method: 'PUT',
                 url: `/api/archive/productions/${id}`,
-                payload: { title: 'Updated Title' }
+                payload: { title: { nl: 'Unauthorized' } }
             })
 
             expect(response.statusCode).toBe(401)

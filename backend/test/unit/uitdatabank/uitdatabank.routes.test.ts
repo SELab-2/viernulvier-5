@@ -30,28 +30,28 @@ describe('UIT Databank Routes', () => {
         })
 
         it('should filter keywords by search term', async () => {
-             // 1. Create a keyword directly in DB
              const keyword = await app.prisma.uitdatabank_keywords.create({
                 data: {
                     name: 'TestKeywordUnique'
                 }
             })
 
-            const response = await app.inject({
-                method: 'GET',
-                url: '/api/archive/uitdatabank/keywords',
-                query: { search: 'TestKeywordUnique' }
-            })
+            try {
+                const response = await app.inject({
+                    method: 'GET',
+                    url: '/api/archive/uitdatabank/keywords',
+                    query: { search: 'TestKeywordUnique' }
+                })
 
-            const body = JSON.parse(response.payload)
-            expect(response.statusCode).toBe(200)
-            expect(body.data.length).toBeGreaterThanOrEqual(1)
-            expect(body.data[0].name).toBe('TestKeywordUnique')
-
-            // Cleanup
-            await app.prisma.uitdatabank_keywords.delete({
-                where: { id: keyword.id }
-            })
+                const body = JSON.parse(response.payload)
+                expect(response.statusCode).toBe(200)
+                expect(body.data.length).toBeGreaterThanOrEqual(1)
+                expect(body.data[0].name).toBe('TestKeywordUnique')
+            } finally {
+                await app.prisma.uitdatabank_keywords.delete({
+                    where: { id: keyword.id }
+                })
+            }
         })
     })
 
@@ -60,11 +60,14 @@ describe('UIT Databank Routes', () => {
             const keyword = await app.prisma.uitdatabank_keywords.create({
                 data: { name: 'Test Keyword' }
             })
-            const response = await app.inject({ method: 'GET', url: `/api/archive/uitdatabank/keywords/${keyword.id}` })
-            expect(response.statusCode).toBe(200)
-            const body = JSON.parse(response.payload)
-            expect(body.id).toBe(keyword.id)
-            await app.prisma.uitdatabank_keywords.delete({ where: { id: keyword.id } })
+            try {
+                const response = await app.inject({ method: 'GET', url: `/api/archive/uitdatabank/keywords/${keyword.id}` })
+                expect(response.statusCode).toBe(200)
+                const body = JSON.parse(response.payload)
+                expect(body.id).toBe(keyword.id)
+            } finally {
+                await app.prisma.uitdatabank_keywords.delete({ where: { id: keyword.id } })
+            }
         })
 
         it('should return 404 for non-existent keyword', async () => {
@@ -95,11 +98,14 @@ describe('UIT Databank Routes', () => {
             const theme = await app.prisma.uitdatabank_themes.create({
                 data: { name: 'Test Theme' }
             })
-            const response = await app.inject({ method: 'GET', url: `/api/archive/uitdatabank/themes/${theme.id}` })
-            expect(response.statusCode).toBe(200)
-            const body = JSON.parse(response.payload)
-            expect(body.id).toBe(theme.id)
-            await app.prisma.uitdatabank_themes.delete({ where: { id: theme.id } })
+            try {
+                const response = await app.inject({ method: 'GET', url: `/api/archive/uitdatabank/themes/${theme.id}` })
+                expect(response.statusCode).toBe(200)
+                const body = JSON.parse(response.payload)
+                expect(body.id).toBe(theme.id)
+            } finally {
+                await app.prisma.uitdatabank_themes.delete({ where: { id: theme.id } })
+            }
         })
 
         it('should return 404 for non-existent theme', async () => {
@@ -130,11 +136,14 @@ describe('UIT Databank Routes', () => {
             const type = await app.prisma.uitdatabank_types.create({
                 data: { name: 'Test Type' }
             })
-            const response = await app.inject({ method: 'GET', url: `/api/archive/uitdatabank/types/${type.id}` })
-            expect(response.statusCode).toBe(200)
-            const body = JSON.parse(response.payload)
-            expect(body.id).toBe(type.id)
-            await app.prisma.uitdatabank_types.delete({ where: { id: type.id } })
+            try {
+                const response = await app.inject({ method: 'GET', url: `/api/archive/uitdatabank/types/${type.id}` })
+                expect(response.statusCode).toBe(200)
+                const body = JSON.parse(response.payload)
+                expect(body.id).toBe(type.id)
+            } finally {
+                await app.prisma.uitdatabank_types.delete({ where: { id: type.id } })
+            }
         })
 
         it('should return 404 for non-existent type', async () => {

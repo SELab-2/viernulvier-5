@@ -38,19 +38,21 @@ describe('Events Routes', () => {
                 }
             })
 
-            const response = await app.inject({
-                method: 'GET',
-                url: `/api/archive/events/${event.id}`,
-            })
+            try {
+                const response = await app.inject({
+                    method: 'GET',
+                    url: `/api/archive/events/${event.id}`,
+                })
 
-            expect(response.statusCode).toBe(200)
-            const body = JSON.parse(response.payload)
-            expect(body.id).toBe(event.id)
-            expect(body.info.nl).toBe('Event by ID Test')
-
-            await app.prisma.event.delete({
-                where: { id: event.id }
-            })
+                expect(response.statusCode).toBe(200)
+                const body = JSON.parse(response.payload)
+                expect(body.id).toBe(event.id)
+                expect(body.info.nl).toBe('Event by ID Test')
+            } finally {
+                await app.prisma.event.delete({
+                    where: { id: event.id }
+                })
+            }
         })
 
         it('should return 404 Not Found for non-existent ID', async () => {
@@ -118,20 +120,22 @@ describe('Events Routes', () => {
 
             const updatePayload = { info: { nl: 'Updated Info' } }
 
-            const response = await app.inject({
-                method: 'PUT',
-                url: `/api/archive/events/${initialEvent.id}`,
-                headers: { authorization: `Bearer ${token}` },
-                payload: updatePayload
-            })
+            try {
+                const response = await app.inject({
+                    method: 'PUT',
+                    url: `/api/archive/events/${initialEvent.id}`,
+                    headers: { authorization: `Bearer ${token}` },
+                    payload: updatePayload
+                })
 
-            expect(response.statusCode).toBe(200)
-            const updated = JSON.parse(response.payload)
-            expect(updated.info.nl).toBe(updatePayload.info.nl)
-
-            await app.prisma.event.delete({
-                where: { id: initialEvent.id }
-            })
+                expect(response.statusCode).toBe(200)
+                const updated = JSON.parse(response.payload)
+                expect(updated.info.nl).toBe(updatePayload.info.nl)
+            } finally {
+                await app.prisma.event.delete({
+                    where: { id: initialEvent.id }
+                })
+            }
         })
 
         it('should return 401 Unauthorized when no token is provided', async () => {
@@ -202,16 +206,18 @@ describe('Events Routes', () => {
                 }
             })
 
-            const response = await app.inject({
-                method: 'GET',
-                url: `/api/archive/events/prices/${price.id}`
-            })
+            try {
+                const response = await app.inject({
+                    method: 'GET',
+                    url: `/api/archive/events/prices/${price.id}`
+                })
 
-            expect(response.statusCode).toBe(200)
-            const body = JSON.parse(response.payload)
-            expect(body.id).toBe(price.id)
-
-            await app.prisma.event_price.delete({ where: { id: price.id } })
+                expect(response.statusCode).toBe(200)
+                const body = JSON.parse(response.payload)
+                expect(body.id).toBe(price.id)
+            } finally {
+                await app.prisma.event_price.delete({ where: { id: price.id } })
+            }
         })
 
         it('should return 404 for non-existent price', async () => {

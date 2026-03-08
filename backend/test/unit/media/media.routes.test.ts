@@ -33,11 +33,14 @@ describe('Media Routes', () => {
             const gallery = await app.prisma.gallery.create({
                 data: { name: 'Test Gallery' }
             })
-            const response = await app.inject({ method: 'GET', url: `/api/archive/media/galleries/${gallery.id}` })
-            expect(response.statusCode).toBe(200)
-            const body = JSON.parse(response.payload)
-            expect(body.id).toBe(gallery.id)
-            await app.prisma.gallery.delete({ where: { id: gallery.id } })
+            try {
+                const response = await app.inject({ method: 'GET', url: `/api/archive/media/galleries/${gallery.id}` })
+                expect(response.statusCode).toBe(200)
+                const body = JSON.parse(response.payload)
+                expect(body.id).toBe(gallery.id)
+            } finally {
+                await app.prisma.gallery.delete({ where: { id: gallery.id } })
+            }
         })
 
         it('should return 404 for non-existent gallery', async () => {
@@ -51,11 +54,14 @@ describe('Media Routes', () => {
             const item = await app.prisma.item.create({
                 data: { type: 'image', original_filename: 'test.jpg' }
             })
-            const response = await app.inject({ method: 'GET', url: `/api/archive/media/items/${item.id}` })
-            expect(response.statusCode).toBe(200)
-            const body = JSON.parse(response.payload)
-            expect(body.id).toBe(item.id)
-            await app.prisma.item.delete({ where: { id: item.id } })
+            try {
+                const response = await app.inject({ method: 'GET', url: `/api/archive/media/items/${item.id}` })
+                expect(response.statusCode).toBe(200)
+                const body = JSON.parse(response.payload)
+                expect(body.id).toBe(item.id)
+            } finally {
+                await app.prisma.item.delete({ where: { id: item.id } })
+            }
         })
 
         it('should return 404 for non-existent item', async () => {
@@ -69,11 +75,14 @@ describe('Media Routes', () => {
             const crop = await app.prisma.crop.create({
                 data: { name: 'test-crop', url: 'http://test.com/crop.jpg' }
             })
-            const response = await app.inject({ method: 'GET', url: `/api/archive/media/items/crops/${crop.id}` })
-            expect(response.statusCode).toBe(200)
-            const body = JSON.parse(response.payload)
-            expect(body.id).toBe(crop.id)
-            await app.prisma.crop.delete({ where: { id: crop.id } })
+            try {
+                const response = await app.inject({ method: 'GET', url: `/api/archive/media/items/crops/${crop.id}` })
+                expect(response.statusCode).toBe(200)
+                const body = JSON.parse(response.payload)
+                expect(body.id).toBe(crop.id)
+            } finally {
+                await app.prisma.crop.delete({ where: { id: crop.id } })
+            }
         })
 
         it('should return 404 for non-existent crop', async () => {
@@ -101,17 +110,20 @@ describe('Media Routes', () => {
     describe('PUT /api/archive/media/galleries/:id', () => {
         it('should update a gallery and clean up', async () => {
             const gallery = await app.prisma.gallery.create({ data: { name: 'Old Name' } })
-            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
-            const response = await app.inject({
-                method: 'PUT',
-                url: `/api/archive/media/galleries/${gallery.id}`,
-                headers: { authorization: `Bearer ${token}` },
-                payload: { name: 'Updated Name' }
-            })
-            expect(response.statusCode).toBe(200)
-            const body = JSON.parse(response.payload)
-            expect(body.name).toBe('Updated Name')
-            await app.prisma.gallery.delete({ where: { id: gallery.id } })
+            try {
+                const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+                const response = await app.inject({
+                    method: 'PUT',
+                    url: `/api/archive/media/galleries/${gallery.id}`,
+                    headers: { authorization: `Bearer ${token}` },
+                    payload: { name: 'Updated Name' }
+                })
+                expect(response.statusCode).toBe(200)
+                const body = JSON.parse(response.payload)
+                expect(body.name).toBe('Updated Name')
+            } finally {
+                await app.prisma.gallery.delete({ where: { id: gallery.id } })
+            }
         })
     })
 
@@ -149,17 +161,20 @@ describe('Media Routes', () => {
     describe('PUT /api/archive/media/items/:id', () => {
         it('should update an item and clean up', async () => {
             const item = await app.prisma.item.create({ data: { type: 'image', original_filename: 'old.jpg' } })
-            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
-            const response = await app.inject({
-                method: 'PUT',
-                url: `/api/archive/media/items/${item.id}`,
-                headers: { authorization: `Bearer ${token}` },
-                payload: { original_filename: 'updated.jpg' }
-            })
-            expect(response.statusCode).toBe(200)
-            const body = JSON.parse(response.payload)
-            expect(body.original_filename).toBe('updated.jpg')
-            await app.prisma.item.delete({ where: { id: item.id } })
+            try {
+                const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+                const response = await app.inject({
+                    method: 'PUT',
+                    url: `/api/archive/media/items/${item.id}`,
+                    headers: { authorization: `Bearer ${token}` },
+                    payload: { original_filename: 'updated.jpg' }
+                })
+                expect(response.statusCode).toBe(200)
+                const body = JSON.parse(response.payload)
+                expect(body.original_filename).toBe('updated.jpg')
+            } finally {
+                await app.prisma.item.delete({ where: { id: item.id } })
+            }
         })
     })
 
@@ -197,17 +212,20 @@ describe('Media Routes', () => {
     describe('PUT /api/archive/media/items/crops/:id', () => {
         it('should update a crop and clean up', async () => {
             const crop = await app.prisma.crop.create({ data: { name: 'Old Crop', url: 'http://test.com/old.jpg' } })
-            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
-            const response = await app.inject({
-                method: 'PUT',
-                url: `/api/archive/media/items/crops/${crop.id}`,
-                headers: { authorization: `Bearer ${token}` },
-                payload: { name: 'Updated Crop' }
-            })
-            expect(response.statusCode).toBe(200)
-            const body = JSON.parse(response.payload)
-            expect(body.name).toBe('Updated Crop')
-            await app.prisma.crop.delete({ where: { id: crop.id } })
+            try {
+                const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+                const response = await app.inject({
+                    method: 'PUT',
+                    url: `/api/archive/media/items/crops/${crop.id}`,
+                    headers: { authorization: `Bearer ${token}` },
+                    payload: { name: 'Updated Crop' }
+                })
+                expect(response.statusCode).toBe(200)
+                const body = JSON.parse(response.payload)
+                expect(body.name).toBe('Updated Crop')
+            } finally {
+                await app.prisma.crop.delete({ where: { id: crop.id } })
+            }
         })
     })
 

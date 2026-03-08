@@ -28,16 +28,18 @@ describe('Organisations Routes', () => {
                 data: { name: 'Test Organisation' }
             })
 
-            const response = await app.inject({
-                method: 'GET',
-                url: `/api/archive/organisations/${organisation.id}`
-            })
+            try {
+                const response = await app.inject({
+                    method: 'GET',
+                    url: `/api/archive/organisations/${organisation.id}`
+                })
 
-            expect(response.statusCode).toBe(200)
-            const body = JSON.parse(response.payload)
-            expect(body.id).toBe(organisation.id)
-
-            await app.prisma.organisations.delete({ where: { id: organisation.id } })
+                expect(response.statusCode).toBe(200)
+                const body = JSON.parse(response.payload)
+                expect(body.id).toBe(organisation.id)
+            } finally {
+                await app.prisma.organisations.delete({ where: { id: organisation.id } })
+            }
         })
 
         it('should return 404 for non-existent organisation', async () => {
@@ -91,19 +93,21 @@ describe('Organisations Routes', () => {
                 data: { name: 'Original Name' }
             })
 
-            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
-            const response = await app.inject({
-                method: 'PUT',
-                url: `/api/archive/organisations/${organisation.id}`,
-                headers: { authorization: `Bearer ${token}` },
-                payload: { name: 'Updated Name' }
-            })
+            try {
+                const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+                const response = await app.inject({
+                    method: 'PUT',
+                    url: `/api/archive/organisations/${organisation.id}`,
+                    headers: { authorization: `Bearer ${token}` },
+                    payload: { name: 'Updated Name' }
+                })
 
-            expect(response.statusCode).toBe(200)
-            const body = JSON.parse(response.payload)
-            expect(body.name).toBe('Updated Name')
-
-            await app.prisma.organisations.delete({ where: { id: organisation.id } })
+                expect(response.statusCode).toBe(200)
+                const body = JSON.parse(response.payload)
+                expect(body.name).toBe('Updated Name')
+            } finally {
+                await app.prisma.organisations.delete({ where: { id: organisation.id } })
+            }
         })
     })
 

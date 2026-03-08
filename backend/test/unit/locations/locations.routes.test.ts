@@ -23,17 +23,19 @@ describe('Locations Routes', () => {
             data: { name: { nl: 'Searchable Location' }, city: 'Search City' }
         })
 
-        const response = await app.inject({
-            method: 'GET',
-            url: '/api/archive/locations',
-            query: { search: 'Searchable' }
-        })
+        try {
+            const response = await app.inject({
+                method: 'GET',
+                url: '/api/archive/locations',
+                query: { search: 'Searchable' }
+            })
 
-        expect(response.statusCode).toBe(200)
-        const body = JSON.parse(response.payload)
-        expect(body.data.length).toBeGreaterThanOrEqual(1)
-
-        await app.prisma.location.delete({ where: { id: location.id } })
+            expect(response.statusCode).toBe(200)
+            const body = JSON.parse(response.payload)
+            expect(body.data.length).toBeGreaterThanOrEqual(1)
+        } finally {
+            await app.prisma.location.delete({ where: { id: location.id } })
+        }
     })
 
     describe('GET /api/archive/locations/:id', () => {
@@ -45,16 +47,18 @@ describe('Locations Routes', () => {
                 }
             })
 
-            const response = await app.inject({
-                method: 'GET',
-                url: `/api/archive/locations/${location.id}`
-            })
+            try {
+                const response = await app.inject({
+                    method: 'GET',
+                    url: `/api/archive/locations/${location.id}`
+                })
 
-            expect(response.statusCode).toBe(200)
-            const body = JSON.parse(response.payload)
-            expect(body.id).toBe(location.id)
-
-            await app.prisma.location.delete({ where: { id: location.id } })
+                expect(response.statusCode).toBe(200)
+                const body = JSON.parse(response.payload)
+                expect(body.id).toBe(location.id)
+            } finally {
+                await app.prisma.location.delete({ where: { id: location.id } })
+            }
         })
 
         it('should return 404 for non-existent location', async () => {
@@ -90,19 +94,21 @@ describe('Locations Routes', () => {
                 data: { city: 'Original City' }
             })
 
-            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
-            const response = await app.inject({
-                method: 'PUT',
-                url: `/api/archive/locations/${location.id}`,
-                headers: { authorization: `Bearer ${token}` },
-                payload: { city: 'Updated City' }
-            })
+            try {
+                const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+                const response = await app.inject({
+                    method: 'PUT',
+                    url: `/api/archive/locations/${location.id}`,
+                    headers: { authorization: `Bearer ${token}` },
+                    payload: { city: 'Updated City' }
+                })
 
-            expect(response.statusCode).toBe(200)
-            const body = JSON.parse(response.payload)
-            expect(body.city).toBe('Updated City')
-
-            await app.prisma.location.delete({ where: { id: location.id } })
+                expect(response.statusCode).toBe(200)
+                const body = JSON.parse(response.payload)
+                expect(body.city).toBe('Updated City')
+            } finally {
+                await app.prisma.location.delete({ where: { id: location.id } })
+            }
         })
     })
 

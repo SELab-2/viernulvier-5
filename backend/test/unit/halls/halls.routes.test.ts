@@ -26,16 +26,18 @@ describe('Halls Routes', () => {
                 }
             })
 
-            const response = await app.inject({
-                method: 'GET',
-                url: `/api/archive/halls/${hall.id}`
-            })
+            try {
+                const response = await app.inject({
+                    method: 'GET',
+                    url: `/api/archive/halls/${hall.id}`
+                })
 
-            expect(response.statusCode).toBe(200)
-            const body = JSON.parse(response.payload)
-            expect(body.id).toBe(hall.id)
-
-            await app.prisma.hall.delete({ where: { id: hall.id } })
+                expect(response.statusCode).toBe(200)
+                const body = JSON.parse(response.payload)
+                expect(body.id).toBe(hall.id)
+            } finally {
+                await app.prisma.hall.delete({ where: { id: hall.id } })
+            }
         })
 
         it('should return 404 for non-existent hall', async () => {
@@ -71,19 +73,21 @@ describe('Halls Routes', () => {
                 data: { name: { nl: 'Original Hall' } }
             })
 
-            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
-            const response = await app.inject({
-                method: 'PUT',
-                url: `/api/archive/halls/${hall.id}`,
-                headers: { authorization: `Bearer ${token}` },
-                payload: { name: { nl: 'Updated Hall' } }
-            })
+            try {
+                const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+                const response = await app.inject({
+                    method: 'PUT',
+                    url: `/api/archive/halls/${hall.id}`,
+                    headers: { authorization: `Bearer ${token}` },
+                    payload: { name: { nl: 'Updated Hall' } }
+                })
 
-            expect(response.statusCode).toBe(200)
-            const body = JSON.parse(response.payload)
-            expect(body.name.nl).toBe('Updated Hall')
-
-            await app.prisma.hall.delete({ where: { id: hall.id } })
+                expect(response.statusCode).toBe(200)
+                const body = JSON.parse(response.payload)
+                expect(body.name.nl).toBe('Updated Hall')
+            } finally {
+                await app.prisma.hall.delete({ where: { id: hall.id } })
+            }
         })
     })
 

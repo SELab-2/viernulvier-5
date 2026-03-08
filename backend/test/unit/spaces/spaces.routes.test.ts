@@ -26,16 +26,18 @@ describe('Spaces Routes', () => {
                 }
             })
 
-            const response = await app.inject({
-                method: 'GET',
-                url: `/api/archive/spaces/${space.id}`
-            })
+            try {
+                const response = await app.inject({
+                    method: 'GET',
+                    url: `/api/archive/spaces/${space.id}`
+                })
 
-            expect(response.statusCode).toBe(200)
-            const body = JSON.parse(response.payload)
-            expect(body.id).toBe(space.id)
-
-            await app.prisma.space.delete({ where: { id: space.id } })
+                expect(response.statusCode).toBe(200)
+                const body = JSON.parse(response.payload)
+                expect(body.id).toBe(space.id)
+            } finally {
+                await app.prisma.space.delete({ where: { id: space.id } })
+            }
         })
 
         it('should return 404 for non-existent space', async () => {
@@ -71,19 +73,21 @@ describe('Spaces Routes', () => {
                 data: { name: { nl: 'Original Space' } }
             })
 
-            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
-            const response = await app.inject({
-                method: 'PUT',
-                url: `/api/archive/spaces/${space.id}`,
-                headers: { authorization: `Bearer ${token}` },
-                payload: { name: { nl: 'Updated Space' } }
-            })
+            try {
+                const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+                const response = await app.inject({
+                    method: 'PUT',
+                    url: `/api/archive/spaces/${space.id}`,
+                    headers: { authorization: `Bearer ${token}` },
+                    payload: { name: { nl: 'Updated Space' } }
+                })
 
-            expect(response.statusCode).toBe(200)
-            const body = JSON.parse(response.payload)
-            expect(body.name.nl).toBe('Updated Space')
-
-            await app.prisma.space.delete({ where: { id: space.id } })
+                expect(response.statusCode).toBe(200)
+                const body = JSON.parse(response.payload)
+                expect(body.name.nl).toBe('Updated Space')
+            } finally {
+                await app.prisma.space.delete({ where: { id: space.id } })
+            }
         })
     })
 
