@@ -115,51 +115,6 @@ export type APIHall = {
   space: string;
 };
 
-export type APIStatus = {
-  "@context": string;
-  "@id": string;
-  "@type": string;
-  created_at: string;
-  updated_at: string;
-  name: LocalizedString;
-  short_name: string;
-  fixed: boolean;
-  visible: boolean;
-  bookable: boolean;
-};
-
-export type APIPriceType = {
-  "@context": string;
-  "@id": string;
-  "@type": string;
-  created_at: string;
-  updated_at: string;
-  type: string;
-  visibility: string;
-  code: string;
-  description: LocalizedString;
-  minimum: number;
-  maximum: number;
-  step: number;
-  order: number;
-  auto_select_combo: boolean;
-  include_in_price_range: boolean;
-  cineville_box: boolean;
-  membership: string;
-};
-
-export type APIRank = {
-  "@context": string;
-  "@id": string;
-  "@type": string;
-  created_at: string;
-  updated_at: string;
-  description: LocalizedString;
-  code: string;
-  position: number;
-  sold_out_buffer: number;
-};
-
 export type APIEvent = {
   "@context": string;
   "@id": string;
@@ -228,26 +183,6 @@ export type APIItem = {
     credits: LocalizedString;
     link: LocalizedString;
     crops: foreignKey[] // reference crops
-}
-
-export type APIPrice = {
-    "@context": string;
-    "@id": string;
-    "@type": string;
-    created_at: string;
-    updated_at: string;
-    "type": string;
-    "visibility": string;
-    "code": string;
-    description: LocalizedString;
-    minimum: number;
-    maximum: number;
-    step: number;
-    order: number;
-    auto_select_combo: boolean;
-    include_in_price_range: boolean;
-    cineville_box: boolean;
-    membership: string;
 }
 
 export type APIEventPrice = {

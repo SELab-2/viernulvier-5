@@ -92,20 +92,10 @@ export type location = Prisma.locationModel
  */
 export type organisations = Prisma.organisationsModel
 /**
- * Model price
- * 
- */
-export type price = Prisma.priceModel
-/**
  * Model production
  * 
  */
 export type production = Prisma.productionModel
-/**
- * Model rank
- * 
- */
-export type rank = Prisma.rankModel
 /**
  * Model space
  * 

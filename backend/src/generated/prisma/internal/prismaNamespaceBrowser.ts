@@ -61,9 +61,7 @@ export const ModelName = {
   item: 'item',
   location: 'location',
   organisations: 'organisations',
-  price: 'price',
   production: 'production',
-  rank: 'rank',
   space: 'space',
   tag: 'tag',
   uit_keywords_production: 'uit_keywords_production',
@@ -139,9 +137,7 @@ export const Event_priceScalarFieldEnum = {
   amount: 'amount',
   box_office_id: 'box_office_id',
   contigent_id: 'contigent_id',
-  expires_at: 'expires_at',
-  price_id: 'price_id',
-  rank_id: 'rank_id'
+  expires_at: 'expires_at'
 } as const
 
 export type Event_priceScalarFieldEnum = (typeof Event_priceScalarFieldEnum)[keyof typeof Event_priceScalarFieldEnum]
@@ -252,28 +248,6 @@ export const OrganisationsScalarFieldEnum = {
 export type OrganisationsScalarFieldEnum = (typeof OrganisationsScalarFieldEnum)[keyof typeof OrganisationsScalarFieldEnum]
 
 
-export const PriceScalarFieldEnum = {
-  created_at: 'created_at',
-  updated_at: 'updated_at',
-  id: 'id',
-  apiId: 'apiId',
-  type: 'type',
-  visibility: 'visibility',
-  code: 'code',
-  description: 'description',
-  minimum: 'minimum',
-  maximum: 'maximum',
-  step: 'step',
-  order: 'order',
-  auto_select_combo: 'auto_select_combo',
-  include_in_price_range: 'include_in_price_range',
-  cineville_box: 'cineville_box',
-  membership: 'membership'
-} as const
-
-export type PriceScalarFieldEnum = (typeof PriceScalarFieldEnum)[keyof typeof PriceScalarFieldEnum]
-
-
 export const ProductionScalarFieldEnum = {
   created_at: 'created_at',
   updated_at: 'updated_at',
@@ -311,20 +285,6 @@ export const ProductionScalarFieldEnum = {
 } as const
 
 export type ProductionScalarFieldEnum = (typeof ProductionScalarFieldEnum)[keyof typeof ProductionScalarFieldEnum]
-
-
-export const RankScalarFieldEnum = {
-  created_at: 'created_at',
-  updated_at: 'updated_at',
-  id: 'id',
-  apiId: 'apiId',
-  description: 'description',
-  code: 'code',
-  position: 'position',
-  sold_out_buffer: 'sold_out_buffer'
-} as const
-
-export type RankScalarFieldEnum = (typeof RankScalarFieldEnum)[keyof typeof RankScalarFieldEnum]
 
 
 export const SpaceScalarFieldEnum = {

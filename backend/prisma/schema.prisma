@@ -56,11 +56,7 @@ model event_price {
   box_office_id                  String?   @db.VarChar
   contigent_id                   Int?
   expires_at                     DateTime? @db.Timestamp(6)
-  price_id                       String?   @db.Uuid
-  rank_id                        String?   @db.Uuid
   event                          event?    @relation(fields: [event_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  price                          price?    @relation("event_price_price", fields: [price_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  rank                           rank?     @relation("event_price_rank", fields: [rank_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model gallery {
@@ -166,26 +162,6 @@ model organisations {
   name       String?  @db.VarChar
 }
 
-model price {
-  created_at                           DateTime      @default(now()) @db.Timestamp(6)
-  updated_at                           DateTime      @default(now()) @db.Timestamp(6)
-  id                                   String         @id @db.Uuid @default(uuid())
-  apiId                                String?       @db.VarChar @unique
-  type                                 String?       @db.VarChar
-  visibility                           String?       @db.VarChar
-  code                                 String?       @db.VarChar
-  description                          Json?
-  minimum                              Int?
-  maximum                              Int?
-  step                                 Int?
-  order                                Int?
-  auto_select_combo                    Boolean?
-  include_in_price_range               Boolean?
-  cineville_box                        Boolean?
-  membership                           String?       @db.VarChar
-  event_prices                         event_price[] @relation("event_price_price")
-}
-
 model production {
   created_at                                 DateTime                   @default(now()) @db.Timestamp(6)
   updated_at                                 DateTime                   @default(now()) @db.Timestamp(6)
@@ -228,18 +204,6 @@ model production {
   uitdatabank_themes                         uitdatabank_theme?        @relation(fields: [uitdatabank_theme], references: [id], onDelete: NoAction, onUpdate: NoAction)
   uitdatabank_types                          uitdatabank_type?         @relation(fields: [uitdatabank_type], references: [id], onDelete: NoAction, onUpdate: NoAction)
   uit_keywords_productions                   uit_keywords_production[]
-}
-
-model rank {
-  created_at                         DateTime      @default(now()) @db.Timestamp(6)
-  updated_at                         DateTime      @default(now()) @db.Timestamp(6)
-  id                                 String         @id @db.Uuid @default(uuid())
-  apiId                              String?       @db.VarChar @unique
-  description                        Json?
-  code                               String?       @db.VarChar
-  position                           Int?
-  sold_out_buffer                    Int?
-  event_prices                       event_price[] @relation("event_price_rank")
 }
 
 model space {

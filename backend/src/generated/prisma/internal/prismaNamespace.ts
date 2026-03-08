@@ -394,9 +394,7 @@ export const ModelName = {
   item: 'item',
   location: 'location',
   organisations: 'organisations',
-  price: 'price',
   production: 'production',
-  rank: 'rank',
   space: 'space',
   tag: 'tag',
   uit_keywords_production: 'uit_keywords_production',
@@ -419,7 +417,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "crop" | "event" | "event_price" | "gallery" | "genre" | "genre_production" | "hall" | "item" | "location" | "organisations" | "price" | "production" | "rank" | "space" | "tag" | "uit_keywords_production" | "uitdatabank_keyword" | "uitdatabank_theme" | "uitdatabank_type" | "adminUser"
+    modelProps: "crop" | "event" | "event_price" | "gallery" | "genre" | "genre_production" | "hall" | "item" | "location" | "organisations" | "production" | "space" | "tag" | "uit_keywords_production" | "uitdatabank_keyword" | "uitdatabank_theme" | "uitdatabank_type" | "adminUser"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1163,80 +1161,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
-    price: {
-      payload: Prisma.$pricePayload<ExtArgs>
-      fields: Prisma.priceFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.priceFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$pricePayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.priceFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$pricePayload>
-        }
-        findFirst: {
-          args: Prisma.priceFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$pricePayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.priceFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$pricePayload>
-        }
-        findMany: {
-          args: Prisma.priceFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$pricePayload>[]
-        }
-        create: {
-          args: Prisma.priceCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$pricePayload>
-        }
-        createMany: {
-          args: Prisma.priceCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.priceCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$pricePayload>[]
-        }
-        delete: {
-          args: Prisma.priceDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$pricePayload>
-        }
-        update: {
-          args: Prisma.priceUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$pricePayload>
-        }
-        deleteMany: {
-          args: Prisma.priceDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.priceUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.priceUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$pricePayload>[]
-        }
-        upsert: {
-          args: Prisma.priceUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$pricePayload>
-        }
-        aggregate: {
-          args: Prisma.PriceAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregatePrice>
-        }
-        groupBy: {
-          args: Prisma.priceGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.PriceGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.priceCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.PriceCountAggregateOutputType> | number
-        }
-      }
-    }
     production: {
       payload: Prisma.$productionPayload<ExtArgs>
       fields: Prisma.productionFieldRefs
@@ -1308,80 +1232,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.productionCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.ProductionCountAggregateOutputType> | number
-        }
-      }
-    }
-    rank: {
-      payload: Prisma.$rankPayload<ExtArgs>
-      fields: Prisma.rankFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.rankFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$rankPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.rankFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$rankPayload>
-        }
-        findFirst: {
-          args: Prisma.rankFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$rankPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.rankFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$rankPayload>
-        }
-        findMany: {
-          args: Prisma.rankFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$rankPayload>[]
-        }
-        create: {
-          args: Prisma.rankCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$rankPayload>
-        }
-        createMany: {
-          args: Prisma.rankCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.rankCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$rankPayload>[]
-        }
-        delete: {
-          args: Prisma.rankDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$rankPayload>
-        }
-        update: {
-          args: Prisma.rankUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$rankPayload>
-        }
-        deleteMany: {
-          args: Prisma.rankDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.rankUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.rankUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$rankPayload>[]
-        }
-        upsert: {
-          args: Prisma.rankUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$rankPayload>
-        }
-        aggregate: {
-          args: Prisma.RankAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateRank>
-        }
-        groupBy: {
-          args: Prisma.rankGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.RankGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.rankCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.RankCountAggregateOutputType> | number
         }
       }
     }
@@ -1992,9 +1842,7 @@ export const Event_priceScalarFieldEnum = {
   amount: 'amount',
   box_office_id: 'box_office_id',
   contigent_id: 'contigent_id',
-  expires_at: 'expires_at',
-  price_id: 'price_id',
-  rank_id: 'rank_id'
+  expires_at: 'expires_at'
 } as const
 
 export type Event_priceScalarFieldEnum = (typeof Event_priceScalarFieldEnum)[keyof typeof Event_priceScalarFieldEnum]
@@ -2105,28 +1953,6 @@ export const OrganisationsScalarFieldEnum = {
 export type OrganisationsScalarFieldEnum = (typeof OrganisationsScalarFieldEnum)[keyof typeof OrganisationsScalarFieldEnum]
 
 
-export const PriceScalarFieldEnum = {
-  created_at: 'created_at',
-  updated_at: 'updated_at',
-  id: 'id',
-  apiId: 'apiId',
-  type: 'type',
-  visibility: 'visibility',
-  code: 'code',
-  description: 'description',
-  minimum: 'minimum',
-  maximum: 'maximum',
-  step: 'step',
-  order: 'order',
-  auto_select_combo: 'auto_select_combo',
-  include_in_price_range: 'include_in_price_range',
-  cineville_box: 'cineville_box',
-  membership: 'membership'
-} as const
-
-export type PriceScalarFieldEnum = (typeof PriceScalarFieldEnum)[keyof typeof PriceScalarFieldEnum]
-
-
 export const ProductionScalarFieldEnum = {
   created_at: 'created_at',
   updated_at: 'updated_at',
@@ -2164,20 +1990,6 @@ export const ProductionScalarFieldEnum = {
 } as const
 
 export type ProductionScalarFieldEnum = (typeof ProductionScalarFieldEnum)[keyof typeof ProductionScalarFieldEnum]
-
-
-export const RankScalarFieldEnum = {
-  created_at: 'created_at',
-  updated_at: 'updated_at',
-  id: 'id',
-  apiId: 'apiId',
-  description: 'description',
-  code: 'code',
-  position: 'position',
-  sold_out_buffer: 'sold_out_buffer'
-} as const
-
-export type RankScalarFieldEnum = (typeof RankScalarFieldEnum)[keyof typeof RankScalarFieldEnum]
 
 
 export const SpaceScalarFieldEnum = {
@@ -2512,9 +2324,7 @@ export type GlobalOmitConfig = {
   item?: Prisma.itemOmit
   location?: Prisma.locationOmit
   organisations?: Prisma.organisationsOmit
-  price?: Prisma.priceOmit
   production?: Prisma.productionOmit
-  rank?: Prisma.rankOmit
   space?: Prisma.spaceOmit
   tag?: Prisma.tagOmit
   uit_keywords_production?: Prisma.uit_keywords_productionOmit

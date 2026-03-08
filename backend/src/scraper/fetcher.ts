@@ -7,7 +7,7 @@ import type {
     APISpace,
     APIHall,
     APILocation,
-    APIGenre, APIGallery, APIItem, APIPrice, APIEventPrice, APITag, APICrop, APIUitKeyword, APIUitTheme, APIUitType,
+    APIGenre, APIGallery, APIItem, APIEventPrice, APITag, APICrop, APIUitKeyword, APIUitTheme, APIUitType,
 
 } from "./APItypes";
 
@@ -107,10 +107,6 @@ export async function* fetchItemPages(): AsyncGenerator<APIItem[]> {
     // depending on per page or per item, the 'crop' field will be absent.
 }
 
-// export async function* fetchPricePages(): AsyncGenerator<APIPrice[]>{
-//     yield* fetchPagesFromURL<APIPrice>("/api/v1/prices?page=1");
-// }
-
 export async function* fetchEventPricePages(): AsyncGenerator<APIEventPrice[]>{
     yield* fetchPagesFromURL<APIEventPrice>("/api/v1/events/prices?page=1");
     // depending on per page or per item, the 'event', 'price', 'rank' fields will have a string or be filled in
@@ -136,26 +132,3 @@ export async function* fetchUitThemePages(): AsyncGenerator<APIUitTheme[]>{
 export async function* fetchUitTypePages(): AsyncGenerator<APIUitType[]>{
     yield* fetchPagesFromURL<APIUitType>("/api/v1/uitdatabank/types?page=1");
 }
-
-// export async function* fetchStatusesPages(): AsyncGenerator<APIStatus[]> {
-//     yield* fetchPagesFromURL<APIStatus>("/api/v1/events/statuses?page=1");
-// }
-
-
-// fetchEvents();
-// fetchCrops();
-// fetchEventPrices();
-// fetchGalleries();
-// fetchGenres();
-// fetchHalls();
-// fetchGalleries();
-// fetchGalleryItems();
-// fetchLocations();
-// fetchPrices();
-// fetchRanks();
-// fetchSpaces();
-// fetchStatuses();
-// fetchTags();
-// fetchUitDatabankKeywords();
-// fetchUitDatabankThemes();
-// fetchUitDatabankTypes();

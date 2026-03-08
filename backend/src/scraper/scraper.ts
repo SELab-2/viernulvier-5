@@ -252,7 +252,7 @@ function mapItem(item: APIItem) {
     width: item.width,
     height: item.height,
     format: item.format,
-    //gallery: item.gallery, // this is something different than the APIs gallery?
+    //gallery: item.gallery, // is this something different than the APIs gallery?
     title: item.title,
     description: item.description,
     credits: item.credits,
@@ -261,26 +261,6 @@ function mapItem(item: APIItem) {
     // gallery_items still have to be created
   }
 }
-
-// function mapPrice(price: APIPrice){
-//   return {
-//     created_at: sanitizeTimestampRequired(price.created_at),
-//     updated_at: sanitizeTimestampRequired(price.updated_at),
-//     apiId: price["@id"],
-//     type: price.type,
-//     visibility: price.visibility,
-//     code: price.code,
-//     description: price.description,
-//     minimum: price.minimum,
-//     maximum: price.maximum,
-//     step: price.step,
-//     order: price.order,
-//     auto_select_combo: price.auto_select_combo,
-//     include_in_price_range: price.include_in_price_range,
-//     cineville_box: price.cineville_box,
-//     membership: price.membership,
-//   }
-// }
 
 function mapEventPrice(price: APIEventPrice){
   return {
@@ -292,8 +272,6 @@ function mapEventPrice(price: APIEventPrice){
     box_office_id: price.box_office_id,
     contingent_id: price.contingent_id,
     expires_at: sanitizeTimestampOptional(price.expires_at),
-    // event_id will be done separately
-    // rank and price to be discussed
   }
 }
 
@@ -538,38 +516,17 @@ async function sync_events() {
           where: { apiId: event.hall}
         });
 
-        let db_prices = undefined
-        if (event.prices) {
-            db_prices = await tx.item.findMany({
-            where: {apiId: {in: event.prices}},
-          });
-        }
-
-
-        // const status = await tx.status.findUnique({
-        //   where: { apiId: event.status }
-        // });
-
         await tx.event.upsert({
           where: { apiId: event["@id"] },
           update: {
             ...mapEvent(event),
             production_id: production?.id,
             hall_id: hall?.id,
-            event_prices: db_prices
-                ? {connect: db_prices.map((price) => ({ id: price.id }))}
-                : undefined
-
-            // status_id: status?.id
           },
           create: {
             ...mapEvent(event),
             production_id: production?.id,
             hall_id: hall?.id,
-            event_prices: db_prices
-                ? {connect: db_prices.map((price) => ({ id: price.id }))}
-                : undefined
-            // status_id: status?.id
           }
         });
       }
@@ -819,32 +776,6 @@ async function sync_items(){
   console.log(`Completed syncing ${totalProcessed} items from ${pageCount} pages`);
 }
 
-// async function sync_prices(){
-//   let totalProcessed = 0;
-//   let pageCount = 0;
-//
-//   for await (const page of Fetcher.fetchPricePages()) {
-//     pageCount++;
-//     console.log(`Processing page ${pageCount} with ${page.length} prices`);
-//
-//     if (page.length === 0) break;
-//
-//     await prisma.$transaction(
-//         page.map(price =>
-//             prisma.price.upsert({
-//               where: { apiId: price["@id"] },
-//               update: mapItem(price),
-//               create: mapItem(price),
-//             })
-//         )
-//     );
-//
-//     totalProcessed += page.length;
-//   }
-//
-//   console.log(`Completed syncing ${totalProcessed} prices from ${pageCount} pages`);
-// }
-
 async function sync_event_prices(){
   let totalProcessed = 0;
   let pageCount = 0;
@@ -1047,9 +978,6 @@ async function main() {
   await sync_locations();
   await sync_spaces();
   await sync_hall();
-
-  // statuses
-  // await sync_status();
 
   // Uitdatabank
   await sync_uit_keywords();
