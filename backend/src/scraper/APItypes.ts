@@ -85,6 +85,7 @@ export type APILocation = {
   own_location: string;
   country: string;
   uitdatabank_id: string;
+  spaces: string[];
 };
 
 export type APISpace = {
@@ -96,6 +97,7 @@ export type APISpace = {
   vendor_id: string;
   name: LocalizedString;
   location: string;
+  halls: string[];
 };
 
 export type APIHall = {
@@ -156,21 +158,6 @@ export type APIRank = {
   code: string;
   position: number;
   sold_out_buffer: number;
-};
-
-export type APIEventPrice = {
-  "@context": string;
-  "@id": string;
-  "@type": string;
-  created_at: string;
-  updated_at: string;
-  available: number;
-  amount: string;
-  box_office_id: string;
-  contingent_id: number;
-  expires_at: string;
-  price: APIPriceType;
-  rank: APIRank;
 };
 
 export type APIEvent = {
@@ -240,7 +227,103 @@ export type APIItem = {
     description: LocalizedString;
     credits: LocalizedString;
     link: LocalizedString;
-    crops: string[] // reference crops
+    crops: foreignKey[] // reference crops
+}
+
+export type APIPrice = {
+    "@context": string;
+    "@id": string;
+    "@type": string;
+    created_at: string;
+    updated_at: string;
+    "type": string;
+    "visibility": string;
+    "code": string;
+    description: LocalizedString;
+    minimum: number;
+    maximum: number;
+    step: number;
+    order: number;
+    auto_select_combo: boolean;
+    include_in_price_range: boolean;
+    cineville_box: boolean;
+    membership: string;
+}
+
+export type APIEventPrice = {
+    "@context": string;
+    "@id": string;
+    "@type": string;
+    created_at: string;
+    updated_at: string;
+    available: number;
+    amount: string;
+    box_office_id: string;
+    contingent_id: number;
+    expires_at: string;
+    event: string; // reference to event
+    price: string; // reference to price
+    rank: string; // reference to rank
+
+}
+
+export type APITag = {
+    "@context": string;
+    "@id": string;
+    "@type": string;
+    created_at: string;
+    updated_at: string;
+    source: string;
+    sourceType: string;
+    enable: string;
+    code: string;
+    name: LocalizedString;
+    short_description: LocalizedString;
+    url: string;
+    url_title: LocalizedString;
+    gallery: string;
+    expires_after: number;
+    automatically_assigned: boolean;
+    external: boolean;
+}
+
+export type APICrop = {
+    "@context": string;
+    "@id": string;
+    "@type": string;
+    created_at: string;
+    updated_at: string;
+    name: string;
+    url: string;
+}
+
+export type APIUitKeyword = {
+    "@context": string;
+    "@id": string;
+    "@type": string;
+    created_at: string;
+    updated_at: string;
+    name: string;
+}
+
+export type APIUitTheme = {
+    "@context": string;
+    "@id": string;
+    "@type": string;
+    created_at: string;
+    updated_at: string;
+    name: string;
+    cdb_cat_id: string;
+}
+
+export type APIUitType = {
+    "@context": string;
+    "@id": string;
+    "@type": string;
+    created_at: string;
+    updated_at: string;
+    name: string;
+    cdb_cat_id: string;
 }
 
 /*

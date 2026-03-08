@@ -369,9 +369,9 @@ export type productionWhereInput = {
   media_gallery?: Prisma.XOR<Prisma.GalleryNullableScalarRelationFilter, Prisma.galleryWhereInput> | null
   poster_gallery?: Prisma.XOR<Prisma.GalleryNullableScalarRelationFilter, Prisma.galleryWhereInput> | null
   review_gallery?: Prisma.XOR<Prisma.GalleryNullableScalarRelationFilter, Prisma.galleryWhereInput> | null
-  uitdatabank_themes?: Prisma.XOR<Prisma.Uitdatabank_themesNullableScalarRelationFilter, Prisma.uitdatabank_themesWhereInput> | null
-  uitdatabank_types?: Prisma.XOR<Prisma.Uitdatabank_typesNullableScalarRelationFilter, Prisma.uitdatabank_typesWhereInput> | null
-  uit_keywords_productions?: Prisma.Uit_keywords_productionsListRelationFilter
+  uitdatabank_themes?: Prisma.XOR<Prisma.Uitdatabank_themeNullableScalarRelationFilter, Prisma.uitdatabank_themeWhereInput> | null
+  uitdatabank_types?: Prisma.XOR<Prisma.Uitdatabank_typeNullableScalarRelationFilter, Prisma.uitdatabank_typeWhereInput> | null
+  uit_keywords_productions?: Prisma.Uit_keywords_productionListRelationFilter
 }
 
 export type productionOrderByWithRelationInput = {
@@ -413,9 +413,9 @@ export type productionOrderByWithRelationInput = {
   media_gallery?: Prisma.galleryOrderByWithRelationInput
   poster_gallery?: Prisma.galleryOrderByWithRelationInput
   review_gallery?: Prisma.galleryOrderByWithRelationInput
-  uitdatabank_themes?: Prisma.uitdatabank_themesOrderByWithRelationInput
-  uitdatabank_types?: Prisma.uitdatabank_typesOrderByWithRelationInput
-  uit_keywords_productions?: Prisma.uit_keywords_productionsOrderByRelationAggregateInput
+  uitdatabank_themes?: Prisma.uitdatabank_themeOrderByWithRelationInput
+  uitdatabank_types?: Prisma.uitdatabank_typeOrderByWithRelationInput
+  uit_keywords_productions?: Prisma.uit_keywords_productionOrderByRelationAggregateInput
 }
 
 export type productionWhereUniqueInput = Prisma.AtLeast<{
@@ -460,9 +460,9 @@ export type productionWhereUniqueInput = Prisma.AtLeast<{
   media_gallery?: Prisma.XOR<Prisma.GalleryNullableScalarRelationFilter, Prisma.galleryWhereInput> | null
   poster_gallery?: Prisma.XOR<Prisma.GalleryNullableScalarRelationFilter, Prisma.galleryWhereInput> | null
   review_gallery?: Prisma.XOR<Prisma.GalleryNullableScalarRelationFilter, Prisma.galleryWhereInput> | null
-  uitdatabank_themes?: Prisma.XOR<Prisma.Uitdatabank_themesNullableScalarRelationFilter, Prisma.uitdatabank_themesWhereInput> | null
-  uitdatabank_types?: Prisma.XOR<Prisma.Uitdatabank_typesNullableScalarRelationFilter, Prisma.uitdatabank_typesWhereInput> | null
-  uit_keywords_productions?: Prisma.Uit_keywords_productionsListRelationFilter
+  uitdatabank_themes?: Prisma.XOR<Prisma.Uitdatabank_themeNullableScalarRelationFilter, Prisma.uitdatabank_themeWhereInput> | null
+  uitdatabank_types?: Prisma.XOR<Prisma.Uitdatabank_typeNullableScalarRelationFilter, Prisma.uitdatabank_typeWhereInput> | null
+  uit_keywords_productions?: Prisma.Uit_keywords_productionListRelationFilter
 }, "id" | "apiId">
 
 export type productionOrderByWithAggregationInput = {
@@ -579,9 +579,9 @@ export type productionCreateInput = {
   media_gallery?: Prisma.galleryCreateNestedOneWithoutMedia_gallery_productionsInput
   poster_gallery?: Prisma.galleryCreateNestedOneWithoutPoster_gallery_productionsInput
   review_gallery?: Prisma.galleryCreateNestedOneWithoutReview_gallery_productionsInput
-  uitdatabank_themes?: Prisma.uitdatabank_themesCreateNestedOneWithoutProductionInput
-  uitdatabank_types?: Prisma.uitdatabank_typesCreateNestedOneWithoutProductionInput
-  uit_keywords_productions?: Prisma.uit_keywords_productionsCreateNestedManyWithoutProductionInput
+  uitdatabank_themes?: Prisma.uitdatabank_themeCreateNestedOneWithoutProductionInput
+  uitdatabank_types?: Prisma.uitdatabank_typeCreateNestedOneWithoutProductionInput
+  uit_keywords_productions?: Prisma.uit_keywords_productionCreateNestedManyWithoutProductionInput
 }
 
 export type productionUncheckedCreateInput = {
@@ -620,7 +620,7 @@ export type productionUncheckedCreateInput = {
   uitdatabank_type?: string | null
   events?: Prisma.eventUncheckedCreateNestedManyWithoutProductionInput
   genre_production?: Prisma.genre_productionUncheckedCreateNestedManyWithoutProductionInput
-  uit_keywords_productions?: Prisma.uit_keywords_productionsUncheckedCreateNestedManyWithoutProductionInput
+  uit_keywords_productions?: Prisma.uit_keywords_productionUncheckedCreateNestedManyWithoutProductionInput
 }
 
 export type productionUpdateInput = {
@@ -657,9 +657,9 @@ export type productionUpdateInput = {
   media_gallery?: Prisma.galleryUpdateOneWithoutMedia_gallery_productionsNestedInput
   poster_gallery?: Prisma.galleryUpdateOneWithoutPoster_gallery_productionsNestedInput
   review_gallery?: Prisma.galleryUpdateOneWithoutReview_gallery_productionsNestedInput
-  uitdatabank_themes?: Prisma.uitdatabank_themesUpdateOneWithoutProductionNestedInput
-  uitdatabank_types?: Prisma.uitdatabank_typesUpdateOneWithoutProductionNestedInput
-  uit_keywords_productions?: Prisma.uit_keywords_productionsUpdateManyWithoutProductionNestedInput
+  uitdatabank_themes?: Prisma.uitdatabank_themeUpdateOneWithoutProductionNestedInput
+  uitdatabank_types?: Prisma.uitdatabank_typeUpdateOneWithoutProductionNestedInput
+  uit_keywords_productions?: Prisma.uit_keywords_productionUpdateManyWithoutProductionNestedInput
 }
 
 export type productionUncheckedUpdateInput = {
@@ -698,7 +698,7 @@ export type productionUncheckedUpdateInput = {
   uitdatabank_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.eventUncheckedUpdateManyWithoutProductionNestedInput
   genre_production?: Prisma.genre_productionUncheckedUpdateManyWithoutProductionNestedInput
-  uit_keywords_productions?: Prisma.uit_keywords_productionsUncheckedUpdateManyWithoutProductionNestedInput
+  uit_keywords_productions?: Prisma.uit_keywords_productionUncheckedUpdateManyWithoutProductionNestedInput
 }
 
 export type productionCreateManyInput = {
@@ -1189,9 +1189,9 @@ export type productionCreateWithoutEventsInput = {
   media_gallery?: Prisma.galleryCreateNestedOneWithoutMedia_gallery_productionsInput
   poster_gallery?: Prisma.galleryCreateNestedOneWithoutPoster_gallery_productionsInput
   review_gallery?: Prisma.galleryCreateNestedOneWithoutReview_gallery_productionsInput
-  uitdatabank_themes?: Prisma.uitdatabank_themesCreateNestedOneWithoutProductionInput
-  uitdatabank_types?: Prisma.uitdatabank_typesCreateNestedOneWithoutProductionInput
-  uit_keywords_productions?: Prisma.uit_keywords_productionsCreateNestedManyWithoutProductionInput
+  uitdatabank_themes?: Prisma.uitdatabank_themeCreateNestedOneWithoutProductionInput
+  uitdatabank_types?: Prisma.uitdatabank_typeCreateNestedOneWithoutProductionInput
+  uit_keywords_productions?: Prisma.uit_keywords_productionCreateNestedManyWithoutProductionInput
 }
 
 export type productionUncheckedCreateWithoutEventsInput = {
@@ -1229,7 +1229,7 @@ export type productionUncheckedCreateWithoutEventsInput = {
   uitdatabank_theme?: string | null
   uitdatabank_type?: string | null
   genre_production?: Prisma.genre_productionUncheckedCreateNestedManyWithoutProductionInput
-  uit_keywords_productions?: Prisma.uit_keywords_productionsUncheckedCreateNestedManyWithoutProductionInput
+  uit_keywords_productions?: Prisma.uit_keywords_productionUncheckedCreateNestedManyWithoutProductionInput
 }
 
 export type productionCreateOrConnectWithoutEventsInput = {
@@ -1281,9 +1281,9 @@ export type productionUpdateWithoutEventsInput = {
   media_gallery?: Prisma.galleryUpdateOneWithoutMedia_gallery_productionsNestedInput
   poster_gallery?: Prisma.galleryUpdateOneWithoutPoster_gallery_productionsNestedInput
   review_gallery?: Prisma.galleryUpdateOneWithoutReview_gallery_productionsNestedInput
-  uitdatabank_themes?: Prisma.uitdatabank_themesUpdateOneWithoutProductionNestedInput
-  uitdatabank_types?: Prisma.uitdatabank_typesUpdateOneWithoutProductionNestedInput
-  uit_keywords_productions?: Prisma.uit_keywords_productionsUpdateManyWithoutProductionNestedInput
+  uitdatabank_themes?: Prisma.uitdatabank_themeUpdateOneWithoutProductionNestedInput
+  uitdatabank_types?: Prisma.uitdatabank_typeUpdateOneWithoutProductionNestedInput
+  uit_keywords_productions?: Prisma.uit_keywords_productionUpdateManyWithoutProductionNestedInput
 }
 
 export type productionUncheckedUpdateWithoutEventsInput = {
@@ -1321,7 +1321,7 @@ export type productionUncheckedUpdateWithoutEventsInput = {
   uitdatabank_theme?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uitdatabank_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   genre_production?: Prisma.genre_productionUncheckedUpdateManyWithoutProductionNestedInput
-  uit_keywords_productions?: Prisma.uit_keywords_productionsUncheckedUpdateManyWithoutProductionNestedInput
+  uit_keywords_productions?: Prisma.uit_keywords_productionUncheckedUpdateManyWithoutProductionNestedInput
 }
 
 export type productionCreateWithoutMedia_galleryInput = {
@@ -1357,9 +1357,9 @@ export type productionCreateWithoutMedia_galleryInput = {
   genre_production?: Prisma.genre_productionCreateNestedManyWithoutProductionInput
   poster_gallery?: Prisma.galleryCreateNestedOneWithoutPoster_gallery_productionsInput
   review_gallery?: Prisma.galleryCreateNestedOneWithoutReview_gallery_productionsInput
-  uitdatabank_themes?: Prisma.uitdatabank_themesCreateNestedOneWithoutProductionInput
-  uitdatabank_types?: Prisma.uitdatabank_typesCreateNestedOneWithoutProductionInput
-  uit_keywords_productions?: Prisma.uit_keywords_productionsCreateNestedManyWithoutProductionInput
+  uitdatabank_themes?: Prisma.uitdatabank_themeCreateNestedOneWithoutProductionInput
+  uitdatabank_types?: Prisma.uitdatabank_typeCreateNestedOneWithoutProductionInput
+  uit_keywords_productions?: Prisma.uit_keywords_productionCreateNestedManyWithoutProductionInput
 }
 
 export type productionUncheckedCreateWithoutMedia_galleryInput = {
@@ -1397,7 +1397,7 @@ export type productionUncheckedCreateWithoutMedia_galleryInput = {
   uitdatabank_type?: string | null
   events?: Prisma.eventUncheckedCreateNestedManyWithoutProductionInput
   genre_production?: Prisma.genre_productionUncheckedCreateNestedManyWithoutProductionInput
-  uit_keywords_productions?: Prisma.uit_keywords_productionsUncheckedCreateNestedManyWithoutProductionInput
+  uit_keywords_productions?: Prisma.uit_keywords_productionUncheckedCreateNestedManyWithoutProductionInput
 }
 
 export type productionCreateOrConnectWithoutMedia_galleryInput = {
@@ -1443,9 +1443,9 @@ export type productionCreateWithoutPoster_galleryInput = {
   genre_production?: Prisma.genre_productionCreateNestedManyWithoutProductionInput
   media_gallery?: Prisma.galleryCreateNestedOneWithoutMedia_gallery_productionsInput
   review_gallery?: Prisma.galleryCreateNestedOneWithoutReview_gallery_productionsInput
-  uitdatabank_themes?: Prisma.uitdatabank_themesCreateNestedOneWithoutProductionInput
-  uitdatabank_types?: Prisma.uitdatabank_typesCreateNestedOneWithoutProductionInput
-  uit_keywords_productions?: Prisma.uit_keywords_productionsCreateNestedManyWithoutProductionInput
+  uitdatabank_themes?: Prisma.uitdatabank_themeCreateNestedOneWithoutProductionInput
+  uitdatabank_types?: Prisma.uitdatabank_typeCreateNestedOneWithoutProductionInput
+  uit_keywords_productions?: Prisma.uit_keywords_productionCreateNestedManyWithoutProductionInput
 }
 
 export type productionUncheckedCreateWithoutPoster_galleryInput = {
@@ -1483,7 +1483,7 @@ export type productionUncheckedCreateWithoutPoster_galleryInput = {
   uitdatabank_type?: string | null
   events?: Prisma.eventUncheckedCreateNestedManyWithoutProductionInput
   genre_production?: Prisma.genre_productionUncheckedCreateNestedManyWithoutProductionInput
-  uit_keywords_productions?: Prisma.uit_keywords_productionsUncheckedCreateNestedManyWithoutProductionInput
+  uit_keywords_productions?: Prisma.uit_keywords_productionUncheckedCreateNestedManyWithoutProductionInput
 }
 
 export type productionCreateOrConnectWithoutPoster_galleryInput = {
@@ -1529,9 +1529,9 @@ export type productionCreateWithoutReview_galleryInput = {
   genre_production?: Prisma.genre_productionCreateNestedManyWithoutProductionInput
   media_gallery?: Prisma.galleryCreateNestedOneWithoutMedia_gallery_productionsInput
   poster_gallery?: Prisma.galleryCreateNestedOneWithoutPoster_gallery_productionsInput
-  uitdatabank_themes?: Prisma.uitdatabank_themesCreateNestedOneWithoutProductionInput
-  uitdatabank_types?: Prisma.uitdatabank_typesCreateNestedOneWithoutProductionInput
-  uit_keywords_productions?: Prisma.uit_keywords_productionsCreateNestedManyWithoutProductionInput
+  uitdatabank_themes?: Prisma.uitdatabank_themeCreateNestedOneWithoutProductionInput
+  uitdatabank_types?: Prisma.uitdatabank_typeCreateNestedOneWithoutProductionInput
+  uit_keywords_productions?: Prisma.uit_keywords_productionCreateNestedManyWithoutProductionInput
 }
 
 export type productionUncheckedCreateWithoutReview_galleryInput = {
@@ -1569,7 +1569,7 @@ export type productionUncheckedCreateWithoutReview_galleryInput = {
   uitdatabank_type?: string | null
   events?: Prisma.eventUncheckedCreateNestedManyWithoutProductionInput
   genre_production?: Prisma.genre_productionUncheckedCreateNestedManyWithoutProductionInput
-  uit_keywords_productions?: Prisma.uit_keywords_productionsUncheckedCreateNestedManyWithoutProductionInput
+  uit_keywords_productions?: Prisma.uit_keywords_productionUncheckedCreateNestedManyWithoutProductionInput
 }
 
 export type productionCreateOrConnectWithoutReview_galleryInput = {
@@ -1702,9 +1702,9 @@ export type productionCreateWithoutGenre_productionInput = {
   media_gallery?: Prisma.galleryCreateNestedOneWithoutMedia_gallery_productionsInput
   poster_gallery?: Prisma.galleryCreateNestedOneWithoutPoster_gallery_productionsInput
   review_gallery?: Prisma.galleryCreateNestedOneWithoutReview_gallery_productionsInput
-  uitdatabank_themes?: Prisma.uitdatabank_themesCreateNestedOneWithoutProductionInput
-  uitdatabank_types?: Prisma.uitdatabank_typesCreateNestedOneWithoutProductionInput
-  uit_keywords_productions?: Prisma.uit_keywords_productionsCreateNestedManyWithoutProductionInput
+  uitdatabank_themes?: Prisma.uitdatabank_themeCreateNestedOneWithoutProductionInput
+  uitdatabank_types?: Prisma.uitdatabank_typeCreateNestedOneWithoutProductionInput
+  uit_keywords_productions?: Prisma.uit_keywords_productionCreateNestedManyWithoutProductionInput
 }
 
 export type productionUncheckedCreateWithoutGenre_productionInput = {
@@ -1742,7 +1742,7 @@ export type productionUncheckedCreateWithoutGenre_productionInput = {
   uitdatabank_theme?: string | null
   uitdatabank_type?: string | null
   events?: Prisma.eventUncheckedCreateNestedManyWithoutProductionInput
-  uit_keywords_productions?: Prisma.uit_keywords_productionsUncheckedCreateNestedManyWithoutProductionInput
+  uit_keywords_productions?: Prisma.uit_keywords_productionUncheckedCreateNestedManyWithoutProductionInput
 }
 
 export type productionCreateOrConnectWithoutGenre_productionInput = {
@@ -1794,9 +1794,9 @@ export type productionUpdateWithoutGenre_productionInput = {
   media_gallery?: Prisma.galleryUpdateOneWithoutMedia_gallery_productionsNestedInput
   poster_gallery?: Prisma.galleryUpdateOneWithoutPoster_gallery_productionsNestedInput
   review_gallery?: Prisma.galleryUpdateOneWithoutReview_gallery_productionsNestedInput
-  uitdatabank_themes?: Prisma.uitdatabank_themesUpdateOneWithoutProductionNestedInput
-  uitdatabank_types?: Prisma.uitdatabank_typesUpdateOneWithoutProductionNestedInput
-  uit_keywords_productions?: Prisma.uit_keywords_productionsUpdateManyWithoutProductionNestedInput
+  uitdatabank_themes?: Prisma.uitdatabank_themeUpdateOneWithoutProductionNestedInput
+  uitdatabank_types?: Prisma.uitdatabank_typeUpdateOneWithoutProductionNestedInput
+  uit_keywords_productions?: Prisma.uit_keywords_productionUpdateManyWithoutProductionNestedInput
 }
 
 export type productionUncheckedUpdateWithoutGenre_productionInput = {
@@ -1834,7 +1834,7 @@ export type productionUncheckedUpdateWithoutGenre_productionInput = {
   uitdatabank_theme?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uitdatabank_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.eventUncheckedUpdateManyWithoutProductionNestedInput
-  uit_keywords_productions?: Prisma.uit_keywords_productionsUncheckedUpdateManyWithoutProductionNestedInput
+  uit_keywords_productions?: Prisma.uit_keywords_productionUncheckedUpdateManyWithoutProductionNestedInput
 }
 
 export type productionCreateWithoutUit_keywords_productionsInput = {
@@ -1871,8 +1871,8 @@ export type productionCreateWithoutUit_keywords_productionsInput = {
   media_gallery?: Prisma.galleryCreateNestedOneWithoutMedia_gallery_productionsInput
   poster_gallery?: Prisma.galleryCreateNestedOneWithoutPoster_gallery_productionsInput
   review_gallery?: Prisma.galleryCreateNestedOneWithoutReview_gallery_productionsInput
-  uitdatabank_themes?: Prisma.uitdatabank_themesCreateNestedOneWithoutProductionInput
-  uitdatabank_types?: Prisma.uitdatabank_typesCreateNestedOneWithoutProductionInput
+  uitdatabank_themes?: Prisma.uitdatabank_themeCreateNestedOneWithoutProductionInput
+  uitdatabank_types?: Prisma.uitdatabank_typeCreateNestedOneWithoutProductionInput
 }
 
 export type productionUncheckedCreateWithoutUit_keywords_productionsInput = {
@@ -1963,8 +1963,8 @@ export type productionUpdateWithoutUit_keywords_productionsInput = {
   media_gallery?: Prisma.galleryUpdateOneWithoutMedia_gallery_productionsNestedInput
   poster_gallery?: Prisma.galleryUpdateOneWithoutPoster_gallery_productionsNestedInput
   review_gallery?: Prisma.galleryUpdateOneWithoutReview_gallery_productionsNestedInput
-  uitdatabank_themes?: Prisma.uitdatabank_themesUpdateOneWithoutProductionNestedInput
-  uitdatabank_types?: Prisma.uitdatabank_typesUpdateOneWithoutProductionNestedInput
+  uitdatabank_themes?: Prisma.uitdatabank_themeUpdateOneWithoutProductionNestedInput
+  uitdatabank_types?: Prisma.uitdatabank_typeUpdateOneWithoutProductionNestedInput
 }
 
 export type productionUncheckedUpdateWithoutUit_keywords_productionsInput = {
@@ -2039,8 +2039,8 @@ export type productionCreateWithoutUitdatabank_themesInput = {
   media_gallery?: Prisma.galleryCreateNestedOneWithoutMedia_gallery_productionsInput
   poster_gallery?: Prisma.galleryCreateNestedOneWithoutPoster_gallery_productionsInput
   review_gallery?: Prisma.galleryCreateNestedOneWithoutReview_gallery_productionsInput
-  uitdatabank_types?: Prisma.uitdatabank_typesCreateNestedOneWithoutProductionInput
-  uit_keywords_productions?: Prisma.uit_keywords_productionsCreateNestedManyWithoutProductionInput
+  uitdatabank_types?: Prisma.uitdatabank_typeCreateNestedOneWithoutProductionInput
+  uit_keywords_productions?: Prisma.uit_keywords_productionCreateNestedManyWithoutProductionInput
 }
 
 export type productionUncheckedCreateWithoutUitdatabank_themesInput = {
@@ -2078,7 +2078,7 @@ export type productionUncheckedCreateWithoutUitdatabank_themesInput = {
   uitdatabank_type?: string | null
   events?: Prisma.eventUncheckedCreateNestedManyWithoutProductionInput
   genre_production?: Prisma.genre_productionUncheckedCreateNestedManyWithoutProductionInput
-  uit_keywords_productions?: Prisma.uit_keywords_productionsUncheckedCreateNestedManyWithoutProductionInput
+  uit_keywords_productions?: Prisma.uit_keywords_productionUncheckedCreateNestedManyWithoutProductionInput
 }
 
 export type productionCreateOrConnectWithoutUitdatabank_themesInput = {
@@ -2141,8 +2141,8 @@ export type productionCreateWithoutUitdatabank_typesInput = {
   media_gallery?: Prisma.galleryCreateNestedOneWithoutMedia_gallery_productionsInput
   poster_gallery?: Prisma.galleryCreateNestedOneWithoutPoster_gallery_productionsInput
   review_gallery?: Prisma.galleryCreateNestedOneWithoutReview_gallery_productionsInput
-  uitdatabank_themes?: Prisma.uitdatabank_themesCreateNestedOneWithoutProductionInput
-  uit_keywords_productions?: Prisma.uit_keywords_productionsCreateNestedManyWithoutProductionInput
+  uitdatabank_themes?: Prisma.uitdatabank_themeCreateNestedOneWithoutProductionInput
+  uit_keywords_productions?: Prisma.uit_keywords_productionCreateNestedManyWithoutProductionInput
 }
 
 export type productionUncheckedCreateWithoutUitdatabank_typesInput = {
@@ -2180,7 +2180,7 @@ export type productionUncheckedCreateWithoutUitdatabank_typesInput = {
   uitdatabank_theme?: string | null
   events?: Prisma.eventUncheckedCreateNestedManyWithoutProductionInput
   genre_production?: Prisma.genre_productionUncheckedCreateNestedManyWithoutProductionInput
-  uit_keywords_productions?: Prisma.uit_keywords_productionsUncheckedCreateNestedManyWithoutProductionInput
+  uit_keywords_productions?: Prisma.uit_keywords_productionUncheckedCreateNestedManyWithoutProductionInput
 }
 
 export type productionCreateOrConnectWithoutUitdatabank_typesInput = {
@@ -2347,9 +2347,9 @@ export type productionUpdateWithoutMedia_galleryInput = {
   genre_production?: Prisma.genre_productionUpdateManyWithoutProductionNestedInput
   poster_gallery?: Prisma.galleryUpdateOneWithoutPoster_gallery_productionsNestedInput
   review_gallery?: Prisma.galleryUpdateOneWithoutReview_gallery_productionsNestedInput
-  uitdatabank_themes?: Prisma.uitdatabank_themesUpdateOneWithoutProductionNestedInput
-  uitdatabank_types?: Prisma.uitdatabank_typesUpdateOneWithoutProductionNestedInput
-  uit_keywords_productions?: Prisma.uit_keywords_productionsUpdateManyWithoutProductionNestedInput
+  uitdatabank_themes?: Prisma.uitdatabank_themeUpdateOneWithoutProductionNestedInput
+  uitdatabank_types?: Prisma.uitdatabank_typeUpdateOneWithoutProductionNestedInput
+  uit_keywords_productions?: Prisma.uit_keywords_productionUpdateManyWithoutProductionNestedInput
 }
 
 export type productionUncheckedUpdateWithoutMedia_galleryInput = {
@@ -2387,7 +2387,7 @@ export type productionUncheckedUpdateWithoutMedia_galleryInput = {
   uitdatabank_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.eventUncheckedUpdateManyWithoutProductionNestedInput
   genre_production?: Prisma.genre_productionUncheckedUpdateManyWithoutProductionNestedInput
-  uit_keywords_productions?: Prisma.uit_keywords_productionsUncheckedUpdateManyWithoutProductionNestedInput
+  uit_keywords_productions?: Prisma.uit_keywords_productionUncheckedUpdateManyWithoutProductionNestedInput
 }
 
 export type productionUncheckedUpdateManyWithoutMedia_galleryInput = {
@@ -2458,9 +2458,9 @@ export type productionUpdateWithoutPoster_galleryInput = {
   genre_production?: Prisma.genre_productionUpdateManyWithoutProductionNestedInput
   media_gallery?: Prisma.galleryUpdateOneWithoutMedia_gallery_productionsNestedInput
   review_gallery?: Prisma.galleryUpdateOneWithoutReview_gallery_productionsNestedInput
-  uitdatabank_themes?: Prisma.uitdatabank_themesUpdateOneWithoutProductionNestedInput
-  uitdatabank_types?: Prisma.uitdatabank_typesUpdateOneWithoutProductionNestedInput
-  uit_keywords_productions?: Prisma.uit_keywords_productionsUpdateManyWithoutProductionNestedInput
+  uitdatabank_themes?: Prisma.uitdatabank_themeUpdateOneWithoutProductionNestedInput
+  uitdatabank_types?: Prisma.uitdatabank_typeUpdateOneWithoutProductionNestedInput
+  uit_keywords_productions?: Prisma.uit_keywords_productionUpdateManyWithoutProductionNestedInput
 }
 
 export type productionUncheckedUpdateWithoutPoster_galleryInput = {
@@ -2498,7 +2498,7 @@ export type productionUncheckedUpdateWithoutPoster_galleryInput = {
   uitdatabank_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.eventUncheckedUpdateManyWithoutProductionNestedInput
   genre_production?: Prisma.genre_productionUncheckedUpdateManyWithoutProductionNestedInput
-  uit_keywords_productions?: Prisma.uit_keywords_productionsUncheckedUpdateManyWithoutProductionNestedInput
+  uit_keywords_productions?: Prisma.uit_keywords_productionUncheckedUpdateManyWithoutProductionNestedInput
 }
 
 export type productionUncheckedUpdateManyWithoutPoster_galleryInput = {
@@ -2569,9 +2569,9 @@ export type productionUpdateWithoutReview_galleryInput = {
   genre_production?: Prisma.genre_productionUpdateManyWithoutProductionNestedInput
   media_gallery?: Prisma.galleryUpdateOneWithoutMedia_gallery_productionsNestedInput
   poster_gallery?: Prisma.galleryUpdateOneWithoutPoster_gallery_productionsNestedInput
-  uitdatabank_themes?: Prisma.uitdatabank_themesUpdateOneWithoutProductionNestedInput
-  uitdatabank_types?: Prisma.uitdatabank_typesUpdateOneWithoutProductionNestedInput
-  uit_keywords_productions?: Prisma.uit_keywords_productionsUpdateManyWithoutProductionNestedInput
+  uitdatabank_themes?: Prisma.uitdatabank_themeUpdateOneWithoutProductionNestedInput
+  uitdatabank_types?: Prisma.uitdatabank_typeUpdateOneWithoutProductionNestedInput
+  uit_keywords_productions?: Prisma.uit_keywords_productionUpdateManyWithoutProductionNestedInput
 }
 
 export type productionUncheckedUpdateWithoutReview_galleryInput = {
@@ -2609,7 +2609,7 @@ export type productionUncheckedUpdateWithoutReview_galleryInput = {
   uitdatabank_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.eventUncheckedUpdateManyWithoutProductionNestedInput
   genre_production?: Prisma.genre_productionUncheckedUpdateManyWithoutProductionNestedInput
-  uit_keywords_productions?: Prisma.uit_keywords_productionsUncheckedUpdateManyWithoutProductionNestedInput
+  uit_keywords_productions?: Prisma.uit_keywords_productionUncheckedUpdateManyWithoutProductionNestedInput
 }
 
 export type productionUncheckedUpdateManyWithoutReview_galleryInput = {
@@ -2716,8 +2716,8 @@ export type productionUpdateWithoutUitdatabank_themesInput = {
   media_gallery?: Prisma.galleryUpdateOneWithoutMedia_gallery_productionsNestedInput
   poster_gallery?: Prisma.galleryUpdateOneWithoutPoster_gallery_productionsNestedInput
   review_gallery?: Prisma.galleryUpdateOneWithoutReview_gallery_productionsNestedInput
-  uitdatabank_types?: Prisma.uitdatabank_typesUpdateOneWithoutProductionNestedInput
-  uit_keywords_productions?: Prisma.uit_keywords_productionsUpdateManyWithoutProductionNestedInput
+  uitdatabank_types?: Prisma.uitdatabank_typeUpdateOneWithoutProductionNestedInput
+  uit_keywords_productions?: Prisma.uit_keywords_productionUpdateManyWithoutProductionNestedInput
 }
 
 export type productionUncheckedUpdateWithoutUitdatabank_themesInput = {
@@ -2755,7 +2755,7 @@ export type productionUncheckedUpdateWithoutUitdatabank_themesInput = {
   uitdatabank_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.eventUncheckedUpdateManyWithoutProductionNestedInput
   genre_production?: Prisma.genre_productionUncheckedUpdateManyWithoutProductionNestedInput
-  uit_keywords_productions?: Prisma.uit_keywords_productionsUncheckedUpdateManyWithoutProductionNestedInput
+  uit_keywords_productions?: Prisma.uit_keywords_productionUncheckedUpdateManyWithoutProductionNestedInput
 }
 
 export type productionUncheckedUpdateManyWithoutUitdatabank_themesInput = {
@@ -2862,8 +2862,8 @@ export type productionUpdateWithoutUitdatabank_typesInput = {
   media_gallery?: Prisma.galleryUpdateOneWithoutMedia_gallery_productionsNestedInput
   poster_gallery?: Prisma.galleryUpdateOneWithoutPoster_gallery_productionsNestedInput
   review_gallery?: Prisma.galleryUpdateOneWithoutReview_gallery_productionsNestedInput
-  uitdatabank_themes?: Prisma.uitdatabank_themesUpdateOneWithoutProductionNestedInput
-  uit_keywords_productions?: Prisma.uit_keywords_productionsUpdateManyWithoutProductionNestedInput
+  uitdatabank_themes?: Prisma.uitdatabank_themeUpdateOneWithoutProductionNestedInput
+  uit_keywords_productions?: Prisma.uit_keywords_productionUpdateManyWithoutProductionNestedInput
 }
 
 export type productionUncheckedUpdateWithoutUitdatabank_typesInput = {
@@ -2901,7 +2901,7 @@ export type productionUncheckedUpdateWithoutUitdatabank_typesInput = {
   uitdatabank_theme?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.eventUncheckedUpdateManyWithoutProductionNestedInput
   genre_production?: Prisma.genre_productionUncheckedUpdateManyWithoutProductionNestedInput
-  uit_keywords_productions?: Prisma.uit_keywords_productionsUncheckedUpdateManyWithoutProductionNestedInput
+  uit_keywords_productions?: Prisma.uit_keywords_productionUncheckedUpdateManyWithoutProductionNestedInput
 }
 
 export type productionUncheckedUpdateManyWithoutUitdatabank_typesInput = {
@@ -2984,7 +2984,7 @@ export type ProductionCountOutputTypeCountGenre_productionArgs<ExtArgs extends r
  * ProductionCountOutputType without action
  */
 export type ProductionCountOutputTypeCountUit_keywords_productionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.uit_keywords_productionsWhereInput
+  where?: Prisma.uit_keywords_productionWhereInput
 }
 
 
@@ -3186,9 +3186,9 @@ export type $productionPayload<ExtArgs extends runtime.Types.Extensions.Internal
     media_gallery: Prisma.$galleryPayload<ExtArgs> | null
     poster_gallery: Prisma.$galleryPayload<ExtArgs> | null
     review_gallery: Prisma.$galleryPayload<ExtArgs> | null
-    uitdatabank_themes: Prisma.$uitdatabank_themesPayload<ExtArgs> | null
-    uitdatabank_types: Prisma.$uitdatabank_typesPayload<ExtArgs> | null
-    uit_keywords_productions: Prisma.$uit_keywords_productionsPayload<ExtArgs>[]
+    uitdatabank_themes: Prisma.$uitdatabank_themePayload<ExtArgs> | null
+    uitdatabank_types: Prisma.$uitdatabank_typePayload<ExtArgs> | null
+    uit_keywords_productions: Prisma.$uit_keywords_productionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     created_at: Date
@@ -3623,9 +3623,9 @@ export interface Prisma__productionClient<T, Null = never, ExtArgs extends runti
   media_gallery<T extends Prisma.production$media_galleryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.production$media_galleryArgs<ExtArgs>>): Prisma.Prisma__galleryClient<runtime.Types.Result.GetResult<Prisma.$galleryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   poster_gallery<T extends Prisma.production$poster_galleryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.production$poster_galleryArgs<ExtArgs>>): Prisma.Prisma__galleryClient<runtime.Types.Result.GetResult<Prisma.$galleryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   review_gallery<T extends Prisma.production$review_galleryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.production$review_galleryArgs<ExtArgs>>): Prisma.Prisma__galleryClient<runtime.Types.Result.GetResult<Prisma.$galleryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-  uitdatabank_themes<T extends Prisma.production$uitdatabank_themesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.production$uitdatabank_themesArgs<ExtArgs>>): Prisma.Prisma__uitdatabank_themesClient<runtime.Types.Result.GetResult<Prisma.$uitdatabank_themesPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-  uitdatabank_types<T extends Prisma.production$uitdatabank_typesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.production$uitdatabank_typesArgs<ExtArgs>>): Prisma.Prisma__uitdatabank_typesClient<runtime.Types.Result.GetResult<Prisma.$uitdatabank_typesPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-  uit_keywords_productions<T extends Prisma.production$uit_keywords_productionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.production$uit_keywords_productionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$uit_keywords_productionsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  uitdatabank_themes<T extends Prisma.production$uitdatabank_themesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.production$uitdatabank_themesArgs<ExtArgs>>): Prisma.Prisma__uitdatabank_themeClient<runtime.Types.Result.GetResult<Prisma.$uitdatabank_themePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  uitdatabank_types<T extends Prisma.production$uitdatabank_typesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.production$uitdatabank_typesArgs<ExtArgs>>): Prisma.Prisma__uitdatabank_typeClient<runtime.Types.Result.GetResult<Prisma.$uitdatabank_typePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  uit_keywords_productions<T extends Prisma.production$uit_keywords_productionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.production$uit_keywords_productionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$uit_keywords_productionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4193,18 +4193,18 @@ export type production$review_galleryArgs<ExtArgs extends runtime.Types.Extensio
  */
 export type production$uitdatabank_themesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the uitdatabank_themes
+   * Select specific fields to fetch from the uitdatabank_theme
    */
-  select?: Prisma.uitdatabank_themesSelect<ExtArgs> | null
+  select?: Prisma.uitdatabank_themeSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the uitdatabank_themes
+   * Omit specific fields from the uitdatabank_theme
    */
-  omit?: Prisma.uitdatabank_themesOmit<ExtArgs> | null
+  omit?: Prisma.uitdatabank_themeOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.uitdatabank_themesInclude<ExtArgs> | null
-  where?: Prisma.uitdatabank_themesWhereInput
+  include?: Prisma.uitdatabank_themeInclude<ExtArgs> | null
+  where?: Prisma.uitdatabank_themeWhereInput
 }
 
 /**
@@ -4212,18 +4212,18 @@ export type production$uitdatabank_themesArgs<ExtArgs extends runtime.Types.Exte
  */
 export type production$uitdatabank_typesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the uitdatabank_types
+   * Select specific fields to fetch from the uitdatabank_type
    */
-  select?: Prisma.uitdatabank_typesSelect<ExtArgs> | null
+  select?: Prisma.uitdatabank_typeSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the uitdatabank_types
+   * Omit specific fields from the uitdatabank_type
    */
-  omit?: Prisma.uitdatabank_typesOmit<ExtArgs> | null
+  omit?: Prisma.uitdatabank_typeOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.uitdatabank_typesInclude<ExtArgs> | null
-  where?: Prisma.uitdatabank_typesWhereInput
+  include?: Prisma.uitdatabank_typeInclude<ExtArgs> | null
+  where?: Prisma.uitdatabank_typeWhereInput
 }
 
 /**
@@ -4231,23 +4231,23 @@ export type production$uitdatabank_typesArgs<ExtArgs extends runtime.Types.Exten
  */
 export type production$uit_keywords_productionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the uit_keywords_productions
+   * Select specific fields to fetch from the uit_keywords_production
    */
-  select?: Prisma.uit_keywords_productionsSelect<ExtArgs> | null
+  select?: Prisma.uit_keywords_productionSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the uit_keywords_productions
+   * Omit specific fields from the uit_keywords_production
    */
-  omit?: Prisma.uit_keywords_productionsOmit<ExtArgs> | null
+  omit?: Prisma.uit_keywords_productionOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.uit_keywords_productionsInclude<ExtArgs> | null
-  where?: Prisma.uit_keywords_productionsWhereInput
-  orderBy?: Prisma.uit_keywords_productionsOrderByWithRelationInput | Prisma.uit_keywords_productionsOrderByWithRelationInput[]
-  cursor?: Prisma.uit_keywords_productionsWhereUniqueInput
+  include?: Prisma.uit_keywords_productionInclude<ExtArgs> | null
+  where?: Prisma.uit_keywords_productionWhereInput
+  orderBy?: Prisma.uit_keywords_productionOrderByWithRelationInput | Prisma.uit_keywords_productionOrderByWithRelationInput[]
+  cursor?: Prisma.uit_keywords_productionWhereUniqueInput
   take?: number
   skip?: number
-  distinct?: Prisma.Uit_keywords_productionsScalarFieldEnum | Prisma.Uit_keywords_productionsScalarFieldEnum[]
+  distinct?: Prisma.Uit_keywords_productionScalarFieldEnum | Prisma.Uit_keywords_productionScalarFieldEnum[]
 }
 
 /**

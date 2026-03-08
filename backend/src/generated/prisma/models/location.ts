@@ -258,7 +258,7 @@ export type locationWhereInput = {
   own_location?: Prisma.StringNullableFilter<"location"> | string | null
   country?: Prisma.StringNullableFilter<"location"> | string | null
   uitdatabank_id?: Prisma.StringNullableFilter<"location"> | string | null
-  space?: Prisma.SpaceListRelationFilter
+  spaces?: Prisma.SpaceListRelationFilter
 }
 
 export type locationOrderByWithRelationInput = {
@@ -277,7 +277,7 @@ export type locationOrderByWithRelationInput = {
   own_location?: Prisma.SortOrderInput | Prisma.SortOrder
   country?: Prisma.SortOrderInput | Prisma.SortOrder
   uitdatabank_id?: Prisma.SortOrderInput | Prisma.SortOrder
-  space?: Prisma.spaceOrderByRelationAggregateInput
+  spaces?: Prisma.spaceOrderByRelationAggregateInput
 }
 
 export type locationWhereUniqueInput = Prisma.AtLeast<{
@@ -299,7 +299,7 @@ export type locationWhereUniqueInput = Prisma.AtLeast<{
   own_location?: Prisma.StringNullableFilter<"location"> | string | null
   country?: Prisma.StringNullableFilter<"location"> | string | null
   uitdatabank_id?: Prisma.StringNullableFilter<"location"> | string | null
-  space?: Prisma.SpaceListRelationFilter
+  spaces?: Prisma.SpaceListRelationFilter
 }, "id" | "apiId">
 
 export type locationOrderByWithAggregationInput = {
@@ -360,7 +360,7 @@ export type locationCreateInput = {
   own_location?: string | null
   country?: string | null
   uitdatabank_id?: string | null
-  space?: Prisma.spaceCreateNestedManyWithoutLocationInput
+  spaces?: Prisma.spaceCreateNestedManyWithoutLocationInput
 }
 
 export type locationUncheckedCreateInput = {
@@ -379,7 +379,7 @@ export type locationUncheckedCreateInput = {
   own_location?: string | null
   country?: string | null
   uitdatabank_id?: string | null
-  space?: Prisma.spaceUncheckedCreateNestedManyWithoutLocationInput
+  spaces?: Prisma.spaceUncheckedCreateNestedManyWithoutLocationInput
 }
 
 export type locationUpdateInput = {
@@ -398,7 +398,7 @@ export type locationUpdateInput = {
   own_location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uitdatabank_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  space?: Prisma.spaceUpdateManyWithoutLocationNestedInput
+  spaces?: Prisma.spaceUpdateManyWithoutLocationNestedInput
 }
 
 export type locationUncheckedUpdateInput = {
@@ -417,7 +417,7 @@ export type locationUncheckedUpdateInput = {
   own_location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uitdatabank_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  space?: Prisma.spaceUncheckedUpdateManyWithoutLocationNestedInput
+  spaces?: Prisma.spaceUncheckedUpdateManyWithoutLocationNestedInput
 }
 
 export type locationCreateManyInput = {
@@ -531,23 +531,23 @@ export type LocationNullableScalarRelationFilter = {
   isNot?: Prisma.locationWhereInput | null
 }
 
-export type locationCreateNestedOneWithoutSpaceInput = {
-  create?: Prisma.XOR<Prisma.locationCreateWithoutSpaceInput, Prisma.locationUncheckedCreateWithoutSpaceInput>
-  connectOrCreate?: Prisma.locationCreateOrConnectWithoutSpaceInput
+export type locationCreateNestedOneWithoutSpacesInput = {
+  create?: Prisma.XOR<Prisma.locationCreateWithoutSpacesInput, Prisma.locationUncheckedCreateWithoutSpacesInput>
+  connectOrCreate?: Prisma.locationCreateOrConnectWithoutSpacesInput
   connect?: Prisma.locationWhereUniqueInput
 }
 
-export type locationUpdateOneWithoutSpaceNestedInput = {
-  create?: Prisma.XOR<Prisma.locationCreateWithoutSpaceInput, Prisma.locationUncheckedCreateWithoutSpaceInput>
-  connectOrCreate?: Prisma.locationCreateOrConnectWithoutSpaceInput
-  upsert?: Prisma.locationUpsertWithoutSpaceInput
+export type locationUpdateOneWithoutSpacesNestedInput = {
+  create?: Prisma.XOR<Prisma.locationCreateWithoutSpacesInput, Prisma.locationUncheckedCreateWithoutSpacesInput>
+  connectOrCreate?: Prisma.locationCreateOrConnectWithoutSpacesInput
+  upsert?: Prisma.locationUpsertWithoutSpacesInput
   disconnect?: Prisma.locationWhereInput | boolean
   delete?: Prisma.locationWhereInput | boolean
   connect?: Prisma.locationWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.locationUpdateToOneWithWhereWithoutSpaceInput, Prisma.locationUpdateWithoutSpaceInput>, Prisma.locationUncheckedUpdateWithoutSpaceInput>
+  update?: Prisma.XOR<Prisma.XOR<Prisma.locationUpdateToOneWithWhereWithoutSpacesInput, Prisma.locationUpdateWithoutSpacesInput>, Prisma.locationUncheckedUpdateWithoutSpacesInput>
 }
 
-export type locationCreateWithoutSpaceInput = {
+export type locationCreateWithoutSpacesInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
@@ -565,7 +565,7 @@ export type locationCreateWithoutSpaceInput = {
   uitdatabank_id?: string | null
 }
 
-export type locationUncheckedCreateWithoutSpaceInput = {
+export type locationUncheckedCreateWithoutSpacesInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
@@ -583,23 +583,23 @@ export type locationUncheckedCreateWithoutSpaceInput = {
   uitdatabank_id?: string | null
 }
 
-export type locationCreateOrConnectWithoutSpaceInput = {
+export type locationCreateOrConnectWithoutSpacesInput = {
   where: Prisma.locationWhereUniqueInput
-  create: Prisma.XOR<Prisma.locationCreateWithoutSpaceInput, Prisma.locationUncheckedCreateWithoutSpaceInput>
+  create: Prisma.XOR<Prisma.locationCreateWithoutSpacesInput, Prisma.locationUncheckedCreateWithoutSpacesInput>
 }
 
-export type locationUpsertWithoutSpaceInput = {
-  update: Prisma.XOR<Prisma.locationUpdateWithoutSpaceInput, Prisma.locationUncheckedUpdateWithoutSpaceInput>
-  create: Prisma.XOR<Prisma.locationCreateWithoutSpaceInput, Prisma.locationUncheckedCreateWithoutSpaceInput>
+export type locationUpsertWithoutSpacesInput = {
+  update: Prisma.XOR<Prisma.locationUpdateWithoutSpacesInput, Prisma.locationUncheckedUpdateWithoutSpacesInput>
+  create: Prisma.XOR<Prisma.locationCreateWithoutSpacesInput, Prisma.locationUncheckedCreateWithoutSpacesInput>
   where?: Prisma.locationWhereInput
 }
 
-export type locationUpdateToOneWithWhereWithoutSpaceInput = {
+export type locationUpdateToOneWithWhereWithoutSpacesInput = {
   where?: Prisma.locationWhereInput
-  data: Prisma.XOR<Prisma.locationUpdateWithoutSpaceInput, Prisma.locationUncheckedUpdateWithoutSpaceInput>
+  data: Prisma.XOR<Prisma.locationUpdateWithoutSpacesInput, Prisma.locationUncheckedUpdateWithoutSpacesInput>
 }
 
-export type locationUpdateWithoutSpaceInput = {
+export type locationUpdateWithoutSpacesInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
@@ -617,7 +617,7 @@ export type locationUpdateWithoutSpaceInput = {
   uitdatabank_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
-export type locationUncheckedUpdateWithoutSpaceInput = {
+export type locationUncheckedUpdateWithoutSpacesInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
@@ -641,11 +641,11 @@ export type locationUncheckedUpdateWithoutSpaceInput = {
  */
 
 export type LocationCountOutputType = {
-  space: number
+  spaces: number
 }
 
 export type LocationCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  space?: boolean | LocationCountOutputTypeCountSpaceArgs
+  spaces?: boolean | LocationCountOutputTypeCountSpacesArgs
 }
 
 /**
@@ -661,7 +661,7 @@ export type LocationCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Ext
 /**
  * LocationCountOutputType without action
  */
-export type LocationCountOutputTypeCountSpaceArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type LocationCountOutputTypeCountSpacesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.spaceWhereInput
 }
 
@@ -682,7 +682,7 @@ export type locationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   own_location?: boolean
   country?: boolean
   uitdatabank_id?: boolean
-  space?: boolean | Prisma.location$spaceArgs<ExtArgs>
+  spaces?: boolean | Prisma.location$spacesArgs<ExtArgs>
   _count?: boolean | Prisma.LocationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["location"]>
 
@@ -742,7 +742,7 @@ export type locationSelectScalar = {
 
 export type locationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "apiId" | "name" | "code" | "street" | "number" | "postal_code" | "city" | "phone_1" | "phone_2" | "own_location" | "country" | "uitdatabank_id", ExtArgs["result"]["location"]>
 export type locationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  space?: boolean | Prisma.location$spaceArgs<ExtArgs>
+  spaces?: boolean | Prisma.location$spacesArgs<ExtArgs>
   _count?: boolean | Prisma.LocationCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type locationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -751,7 +751,7 @@ export type locationIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
 export type $locationPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "location"
   objects: {
-    space: Prisma.$spacePayload<ExtArgs>[]
+    spaces: Prisma.$spacePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     created_at: Date
@@ -1163,7 +1163,7 @@ readonly fields: locationFieldRefs;
  */
 export interface Prisma__locationClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  space<T extends Prisma.location$spaceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.location$spaceArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$spacePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  spaces<T extends Prisma.location$spacesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.location$spacesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$spacePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1596,9 +1596,9 @@ export type locationDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
 }
 
 /**
- * location.space
+ * location.spaces
  */
-export type location$spaceArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type location$spacesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
    * Select specific fields to fetch from the space
    */

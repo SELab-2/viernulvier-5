@@ -7,7 +7,16 @@ import type {
   APIEvent,
   APISpace,
   APIHall,
-  APILocation, APIGenre, APIGallery, APIItem,
+  APILocation,
+  APIGenre,
+  APIGallery,
+  APIItem,
+  APIEventPrice,
+  APITag,
+  APICrop,
+  APIUitKeyword,
+  APIUitTheme,
+  APIUitType,
 } from "./APItypes";
 
 /*
@@ -253,6 +262,99 @@ function mapItem(item: APIItem) {
   }
 }
 
+// function mapPrice(price: APIPrice){
+//   return {
+//     created_at: sanitizeTimestampRequired(price.created_at),
+//     updated_at: sanitizeTimestampRequired(price.updated_at),
+//     apiId: price["@id"],
+//     type: price.type,
+//     visibility: price.visibility,
+//     code: price.code,
+//     description: price.description,
+//     minimum: price.minimum,
+//     maximum: price.maximum,
+//     step: price.step,
+//     order: price.order,
+//     auto_select_combo: price.auto_select_combo,
+//     include_in_price_range: price.include_in_price_range,
+//     cineville_box: price.cineville_box,
+//     membership: price.membership,
+//   }
+// }
+
+function mapEventPrice(price: APIEventPrice){
+  return {
+    created_at: sanitizeTimestampRequired(price.created_at),
+    updated_at: sanitizeTimestampRequired(price.updated_at),
+    apiId: price["@id"],
+    available: price.available,
+    amount: price.amount,
+    box_office_id: price.box_office_id,
+    contingent_id: price.contingent_id,
+    expires_at: sanitizeTimestampOptional(price.expires_at),
+    // event_id will be done separately
+    // rank and price to be discussed
+  }
+}
+
+function mapTag(tag: APITag){
+  return {
+    created_at: sanitizeTimestampRequired(tag.created_at),
+    updated_at: sanitizeTimestampRequired(tag.updated_at),
+    apiId: tag["@id"],
+    source: tag.source,
+    sourcetype: tag.sourceType,
+    enable: tag.enable,
+    code: tag.code,
+    name: tag.name,
+    short_description: tag.short_description,
+    url: tag.url,
+    tag: tag.url_title,
+    expires_after: tag.expires_after,
+    automatically_assigned: tag.automatically_assigned,
+    external: tag.external,
+    // gallery_id: done separately inside function
+  }
+}
+
+function mapCrop(crop: APICrop){
+  return {
+    created_at: sanitizeTimestampRequired(crop.created_at),
+    updated_at: sanitizeTimestampRequired(crop.updated_at),
+    apiId: crop["@id"],
+    name: crop.name,
+    url: crop.url,
+    // item: link items in function
+  }
+}
+
+function mapUitKeyword(keyword: APIUitKeyword){
+  return {
+    created_at: sanitizeTimestampRequired(keyword.created_at),
+    updated_at: sanitizeTimestampRequired(keyword.updated_at),
+    apiId: keyword["@id"],
+    name: keyword.name,
+  }
+}
+
+function mapUitTheme(theme: APIUitTheme){
+  return {
+    created_at: sanitizeTimestampRequired(theme.created_at),
+    updated_at: sanitizeTimestampRequired(theme.updated_at),
+    apiId: theme["@id"],
+    name: theme.name,
+    cdb_cat_id: theme.cdb_cat_id,
+  }
+}
+function mapUitType(type: APIUitType){
+  return {
+    created_at: sanitizeTimestampRequired(type.created_at),
+    updated_at: sanitizeTimestampRequired(type.updated_at),
+    apiId: type["@id"],
+    name: type.name,
+    cdb_cat_id: type.cdb_cat_id,
+  }
+}
 
 
 
@@ -286,15 +388,17 @@ async function sync_locations() {
 
     if (page.length === 0) break;
 
-    await prisma.$transaction(
-      page.map(location =>
-        prisma.location.upsert({
-          where: { apiId: location["@id"] },
+    await prisma.$transaction(async (tx) => {
+      for (const location of page) {
+
+
+        await tx.location.upsert({
+          where: {apiId: location["@id"]},
           update: mapLocation(location),
           create: mapLocation(location),
-        })
-      )
-    );
+        });
+      }
+    });
 
     totalProcessed += page.length;
   }
@@ -317,12 +421,10 @@ async function sync_hall() {
       for (const hall of page) {
 
         // link the space
-        const spaceApiId = hall.space;
-
         let space = null;
-        if (spaceApiId) {
+        if (hall.space) {
           space = await tx.space.findUnique({
-            where: { apiId: spaceApiId }
+            where: { apiId: hall.space}
           });
         }
 
@@ -362,18 +464,19 @@ async function sync_spaces() {
 
         // to link the location
         const location = await tx.location.findUnique({
-          where: { apiId: space.location }
+          where: { apiId: space.location}
         });
+
 
         await tx.space.upsert({
           where: { apiId: space["@id"] },
           update: {
             ...mapSpace(space),
-            location_id: location?.id
+            location_id: location?.id,
           },
           create: {
             ...mapSpace(space),
-            location_id: location?.id
+            location_id: location?.id,
           }
         });
       }
@@ -432,8 +535,16 @@ async function sync_events() {
         });
 
         const hall = await tx.hall.findUnique({
-          where: { apiId: event.hall }
+          where: { apiId: event.hall}
         });
+
+        let db_prices = undefined
+        if (event.prices) {
+            db_prices = await tx.item.findMany({
+            where: {apiId: {in: event.prices}},
+          });
+        }
+
 
         // const status = await tx.status.findUnique({
         //   where: { apiId: event.status }
@@ -445,12 +556,19 @@ async function sync_events() {
             ...mapEvent(event),
             production_id: production?.id,
             hall_id: hall?.id,
+            event_prices: db_prices
+                ? {connect: db_prices.map((price) => ({ id: price.id }))}
+                : undefined
+
             // status_id: status?.id
           },
           create: {
             ...mapEvent(event),
             production_id: production?.id,
             hall_id: hall?.id,
+            event_prices: db_prices
+                ? {connect: db_prices.map((price) => ({ id: price.id }))}
+                : undefined
             // status_id: status?.id
           }
         });
@@ -479,7 +597,7 @@ async function sync_productions() {
 
         let media_gallery = null
         if (production.media_gallery) {
-            media_gallery = await tx.gallery.findUnique({
+          media_gallery = await tx.gallery.findUnique({
             where: {apiId: production.media_gallery}
           });
         }
@@ -493,33 +611,76 @@ async function sync_productions() {
 
         let review_gallery = null
         if (production.review_gallery) {
-            review_gallery = await tx.gallery.findUnique({
+          review_gallery = await tx.gallery.findUnique({
             where: {apiId: production.review_gallery}
           });
         }
 
+        let uitdatabank_theme = null
+        if (production.uitdatabank_theme) {
+          uitdatabank_theme = await tx.uitdatabank_theme.findUnique({
+            where: {apiId: production.uitdatabank_theme}
+          });
+        }
 
-        await tx.production.upsert({
+        let uitdatabank_type = null
+        if (production.uitdatabank_type) {
+          uitdatabank_type = await tx.uitdatabank_type.findUnique({
+            where: {apiId: production.uitdatabank_type}
+          });
+        }
+
+
+        const db_production = await tx.production.upsert({
           where: {apiId: production["@id"]},
           update: {
             ...mapProduction(production),
             media_gallery_id: media_gallery?.id || null,
             poster_gallery_id: poster_gallery?.id || null,
             review_gallery_id: review_gallery?.id || null,
+            uitdatabank_theme: uitdatabank_theme?.id || null,
+            uitdatabank_type: uitdatabank_type?.id || null,
           },
-
           create: {
             ...mapProduction(production),
             media_gallery_id: media_gallery?.id || null,
             poster_gallery_id: poster_gallery?.id || null,
             review_gallery_id: review_gallery?.id || null,
+            uitdatabank_theme: uitdatabank_theme?.id || null,
+            uitdatabank_type: uitdatabank_type?.id || null,
           },
         })
+
+        //uit_keywords_production table
+        for (const keyword of production.uitdatabank_keywords) {
+          let uitdatabank_keyword = undefined
+          if (production.uitdatabank_type) {
+            uitdatabank_keyword = await tx.uitdatabank_keyword.findUnique({
+              where: {apiId: keyword}
+            });
+          }
+
+          if (uitdatabank_keyword !== undefined) {
+            await tx.uit_keywords_production.upsert({
+              where: {
+                production_id_uitkeywords_id: {
+                  production_id: db_production.id,
+                  uitkeywords_id: uitdatabank_keyword!.id
+                }
+              },
+              update: {}, // if it already exists, you don't need to update it
+              create: {
+                production_id: db_production.id,
+                uitkeywords_id: uitdatabank_keyword!.id
+              },
+            });
+          }
+        }
       }
     });
 
     totalProcessed += page.length;
-  }
+    }
 
   console.log(`Completed syncing ${totalProcessed} productions from ${pageCount} pages`);
 }
@@ -565,37 +726,32 @@ async function sync_galleries(){
       for (const gallery of page) {
 
 
-        const items = await tx.item.findMany({
-          where: {apiId: { in: gallery.items}},
-          select: { id: true },
-        });
+        let db_items = null;
+        if (gallery.items) {
+            db_items = await tx.item.findMany({
+            where: {apiId: {in: gallery.items}},
+          });
+        }
 
 
 
-        const db_gallery = await prisma.gallery.upsert({
+        await prisma.gallery.upsert({
           where: {apiId: gallery["@id"]},
-          update: mapGallery(gallery),
-          create: mapGallery(gallery),
+          update: {
+            ...mapGallery(gallery),
+            items: db_items
+                ? {connect: db_items.map((item) => ({ id: item.id }))}
+                : undefined,
+          },
+          create: {
+            ...mapGallery(gallery),
+            items: db_items
+                ? {connect: db_items.map((item) => ({ id: item.id }))}
+                : undefined,
+          }
         })
 
-        // gallery_item table
-        if (items.length !== 0) {
-          for (const item of items) {
-            await prisma.gallery_item.upsert({
-              where: {
-                gallery_id_item_id: {
-                  gallery_id: db_gallery.id,
-                  item_id: item.id,
-                },
-              },
-              update: {}, // if theyre already connected you don't have to update them//}
-              create: {
-                gallery_id: db_gallery.id,
-                item_id: item.id,
-              },
-            });
-          }
-        }
+
       }
     });
 
@@ -608,6 +764,7 @@ async function sync_galleries(){
   console.log(`Completed syncing ${totalProcessed} galleries from ${pageCount} pages`);
 }
 
+
 async function sync_items(){
   let totalProcessed = 0;
   let pageCount = 0;
@@ -618,21 +775,269 @@ async function sync_items(){
 
     if (page.length === 0) break;
 
-    await prisma.$transaction(
-        page.map(item =>
-            prisma.item.upsert({
-              where: { apiId: item["@id"] },
-              update: mapItem(item),
-              create: mapItem(item),
-            })
-        )
+
+    await prisma.$transaction(async (tx) => {
+      for (const item of page) {
+
+
+        const apiIds = item.crops.map(crop => crop["@id"]);
+        let db_crops: any[] = [];
+        if (item.crops && item.crops.length !== 0) {
+           db_crops = await tx.crop.findMany({
+            where: {apiId: {in: apiIds}},
+            select: {id: true},
+          });
+
+
+        }
+
+        await prisma.item.upsert({
+          where: {apiId: item["@id"]},
+          update: {
+            ...mapItem(item),
+            crops: db_crops.length > 0
+                ? {connect: db_crops.map((crop) => ({ id: crop.id }))}
+                : undefined
+
+          },
+          create: {
+            ...mapItem(item),
+            crops: db_crops.length > 0
+                ? {connect: db_crops.map((crop) => ({ id: crop.id }))}
+                : undefined
+          }
+        });
+
+
+      }
+    });
+
+    totalProcessed += page.length;
+
+  }
+
+  console.log(`Completed syncing ${totalProcessed} items from ${pageCount} pages`);
+}
+
+// async function sync_prices(){
+//   let totalProcessed = 0;
+//   let pageCount = 0;
+//
+//   for await (const page of Fetcher.fetchPricePages()) {
+//     pageCount++;
+//     console.log(`Processing page ${pageCount} with ${page.length} prices`);
+//
+//     if (page.length === 0) break;
+//
+//     await prisma.$transaction(
+//         page.map(price =>
+//             prisma.price.upsert({
+//               where: { apiId: price["@id"] },
+//               update: mapItem(price),
+//               create: mapItem(price),
+//             })
+//         )
+//     );
+//
+//     totalProcessed += page.length;
+//   }
+//
+//   console.log(`Completed syncing ${totalProcessed} prices from ${pageCount} pages`);
+// }
+
+async function sync_event_prices(){
+  let totalProcessed = 0;
+  let pageCount = 0;
+
+  for await (const page of Fetcher.fetchEventPricePages()) {
+    pageCount++;
+    console.log(`Processing page ${pageCount} with ${page.length} event_prices`);
+
+    if (page.length === 0) break;
+
+
+    await prisma.$transaction(async (tx) => {
+          for (const price of page) {
+
+            let event = null
+            if (price.event) {
+                event = await tx.event.findUnique({
+                where: {apiId: price.event}
+              });
+            }
+
+            prisma.event_price.upsert({
+              where: {apiId: price["@id"]},
+              update: {
+                ...mapEventPrice(price),
+                event_id: event?.id || null,
+              },
+              create: {
+                ...mapEventPrice(price),
+                event_id: event?.id || null,
+              },
+            });
+          }
+        }
     );
 
     totalProcessed += page.length;
   }
 
-  console.log(`Completed syncing ${totalProcessed} items from ${pageCount} pages`);
+  console.log(`Completed syncing ${totalProcessed} event_prices from ${pageCount} pages`);
 }
+
+async function sync_tags(){
+  let totalProcessed = 0;
+  let pageCount = 0;
+
+  for await (const page of Fetcher.fetchTagPages()) {
+    pageCount++;
+    console.log(`Processing page ${pageCount} with ${page.length} tags`);
+
+    if (page.length === 0) break;
+
+    await prisma.$transaction(async (tx) => {
+          for (const tag of page) {
+
+            let gallery = null;
+            if (tag.gallery) {
+                gallery = await tx.gallery.findUnique({
+                where: {apiId: tag.gallery}
+              });
+            }
+
+            prisma.event_price.upsert({
+              where: {apiId: tag["@id"]},
+              update: {
+                ...mapTag(tag),
+                event_id: gallery?.id || null,
+              },
+              create: {
+                ...mapTag(tag),
+                event_id: gallery?.id || null,
+              },
+            });
+          }
+        }
+    );
+
+    totalProcessed += page.length;
+  }
+
+  console.log(`Completed syncing ${totalProcessed} tags from ${pageCount} pages`);
+}
+
+async function sync_crops(){
+  let totalProcessed = 0;
+  let pageCount = 0;
+
+  for await (const page of Fetcher.fetchCropPages()) {
+    pageCount++;
+    console.log(`Processing page ${pageCount} with ${page.length} crops`);
+
+    if (page.length === 0) break;
+
+    await prisma.$transaction(
+        page.map(crop =>
+            prisma.crop.upsert({
+              where: {apiId: crop["@id"]},
+              update: mapCrop(crop),
+              create: mapCrop(crop),
+            })
+        )
+    );
+
+
+    totalProcessed += page.length;
+  }
+
+  console.log(`Completed syncing ${totalProcessed} crops from ${pageCount} pages`);
+}
+
+async function sync_uit_keywords(){
+  let totalProcessed = 0;
+  let pageCount = 0;
+
+  for await (const page of Fetcher.fetchUitKeywordPages()) {
+    pageCount++;
+    console.log(`Processing page ${pageCount} with ${page.length} keywords`);
+
+    if (page.length === 0) break;
+
+    await prisma.$transaction(
+        page.map(keyword =>
+            prisma.uitdatabank_keyword.upsert({
+              where: {apiId: keyword["@id"]},
+              update: mapUitKeyword(keyword),
+              create: mapUitKeyword(keyword),
+            })
+        )
+    );
+
+
+    totalProcessed += page.length;
+  }
+
+  console.log(`Completed syncing ${totalProcessed} keywords from ${pageCount} pages`);
+}
+
+
+async function sync_uit_themes(){
+  let totalProcessed = 0;
+  let pageCount = 0;
+
+  for await (const page of Fetcher.fetchUitThemePages()) {
+    pageCount++;
+    console.log(`Processing page ${pageCount} with ${page.length} themes`);
+
+    if (page.length === 0) break;
+
+    await prisma.$transaction(
+        page.map(theme =>
+            prisma.uitdatabank_theme.upsert({
+              where: {apiId: theme["@id"]},
+              update: mapUitTheme(theme),
+              create: mapUitTheme(theme),
+            })
+        )
+    );
+
+
+    totalProcessed += page.length;
+  }
+
+  console.log(`Completed syncing ${totalProcessed} themes from ${pageCount} pages`);
+}
+
+
+async function sync_uit_types(){
+  let totalProcessed = 0;
+  let pageCount = 0;
+
+  for await (const page of Fetcher.fetchUitTypePages()) {
+    pageCount++;
+    console.log(`Processing page ${pageCount} with ${page.length} themes`);
+
+    if (page.length === 0) break;
+
+    await prisma.$transaction(
+        page.map(type =>
+            prisma.uitdatabank_type.upsert({
+              where: {apiId: type["@id"]},
+              update: mapUitType(type),
+              create: mapUitType(type),
+            })
+        )
+    );
+
+
+    totalProcessed += page.length;
+  }
+
+  console.log(`Completed syncing ${totalProcessed} themes from ${pageCount} pages`);
+}
+
 
 
 
@@ -646,12 +1051,21 @@ async function main() {
   // statuses
   // await sync_status();
 
+  // Uitdatabank
+  await sync_uit_keywords();
+  await sync_uit_themes();
+  await sync_uit_types();
+
+
   // productions
-  await sync_items()
+  await sync_crops();
+  await sync_items();
   await sync_galleries()
   await sync_productions();
   await sync_events();
   await sync_genres();
+  await sync_event_prices();
+  await sync_tags();
 
 }
 

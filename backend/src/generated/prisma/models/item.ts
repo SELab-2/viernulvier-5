@@ -50,7 +50,6 @@ export type ItemMinAggregateOutputType = {
   height: number | null
   format: string | null
   gallery_id: string | null
-  crops: string | null
 }
 
 export type ItemMaxAggregateOutputType = {
@@ -65,7 +64,6 @@ export type ItemMaxAggregateOutputType = {
   height: number | null
   format: string | null
   gallery_id: string | null
-  crops: string | null
 }
 
 export type ItemCountAggregateOutputType = {
@@ -84,7 +82,6 @@ export type ItemCountAggregateOutputType = {
   description: number
   credits: number
   link: number
-  crops: number
   _all: number
 }
 
@@ -113,7 +110,6 @@ export type ItemMinAggregateInputType = {
   height?: true
   format?: true
   gallery_id?: true
-  crops?: true
 }
 
 export type ItemMaxAggregateInputType = {
@@ -128,7 +124,6 @@ export type ItemMaxAggregateInputType = {
   height?: true
   format?: true
   gallery_id?: true
-  crops?: true
 }
 
 export type ItemCountAggregateInputType = {
@@ -147,7 +142,6 @@ export type ItemCountAggregateInputType = {
   description?: true
   credits?: true
   link?: true
-  crops?: true
   _all?: true
 }
 
@@ -253,7 +247,6 @@ export type ItemGroupByOutputType = {
   description: runtime.JsonValue | null
   credits: runtime.JsonValue | null
   link: runtime.JsonValue | null
-  crops: string | null
   _count: ItemCountAggregateOutputType | null
   _avg: ItemAvgAggregateOutputType | null
   _sum: ItemSumAggregateOutputType | null
@@ -295,9 +288,7 @@ export type itemWhereInput = {
   description?: Prisma.JsonNullableFilter<"item">
   credits?: Prisma.JsonNullableFilter<"item">
   link?: Prisma.JsonNullableFilter<"item">
-  crops?: Prisma.UuidNullableFilter<"item"> | string | null
-  gallery_item?: Prisma.Gallery_itemListRelationFilter
-  crop?: Prisma.XOR<Prisma.CropNullableScalarRelationFilter, Prisma.cropWhereInput> | null
+  crops?: Prisma.CropListRelationFilter
   gallery?: Prisma.XOR<Prisma.GalleryNullableScalarRelationFilter, Prisma.galleryWhereInput> | null
 }
 
@@ -317,9 +308,7 @@ export type itemOrderByWithRelationInput = {
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   credits?: Prisma.SortOrderInput | Prisma.SortOrder
   link?: Prisma.SortOrderInput | Prisma.SortOrder
-  crops?: Prisma.SortOrderInput | Prisma.SortOrder
-  gallery_item?: Prisma.gallery_itemOrderByRelationAggregateInput
-  crop?: Prisma.cropOrderByWithRelationInput
+  crops?: Prisma.cropOrderByRelationAggregateInput
   gallery?: Prisma.galleryOrderByWithRelationInput
 }
 
@@ -342,9 +331,7 @@ export type itemWhereUniqueInput = Prisma.AtLeast<{
   description?: Prisma.JsonNullableFilter<"item">
   credits?: Prisma.JsonNullableFilter<"item">
   link?: Prisma.JsonNullableFilter<"item">
-  crops?: Prisma.UuidNullableFilter<"item"> | string | null
-  gallery_item?: Prisma.Gallery_itemListRelationFilter
-  crop?: Prisma.XOR<Prisma.CropNullableScalarRelationFilter, Prisma.cropWhereInput> | null
+  crops?: Prisma.CropListRelationFilter
   gallery?: Prisma.XOR<Prisma.GalleryNullableScalarRelationFilter, Prisma.galleryWhereInput> | null
 }, "id" | "apiId">
 
@@ -364,7 +351,6 @@ export type itemOrderByWithAggregationInput = {
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   credits?: Prisma.SortOrderInput | Prisma.SortOrder
   link?: Prisma.SortOrderInput | Prisma.SortOrder
-  crops?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.itemCountOrderByAggregateInput
   _avg?: Prisma.itemAvgOrderByAggregateInput
   _max?: Prisma.itemMaxOrderByAggregateInput
@@ -391,7 +377,6 @@ export type itemScalarWhereWithAggregatesInput = {
   description?: Prisma.JsonNullableWithAggregatesFilter<"item">
   credits?: Prisma.JsonNullableWithAggregatesFilter<"item">
   link?: Prisma.JsonNullableWithAggregatesFilter<"item">
-  crops?: Prisma.UuidNullableWithAggregatesFilter<"item"> | string | null
 }
 
 export type itemCreateInput = {
@@ -409,8 +394,7 @@ export type itemCreateInput = {
   description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   credits?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   link?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  gallery_item?: Prisma.gallery_itemCreateNestedManyWithoutItemInput
-  crop?: Prisma.cropCreateNestedOneWithoutItemInput
+  crops?: Prisma.cropCreateNestedManyWithoutItemInput
   gallery?: Prisma.galleryCreateNestedOneWithoutItemsInput
 }
 
@@ -430,8 +414,7 @@ export type itemUncheckedCreateInput = {
   description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   credits?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   link?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  crops?: string | null
-  gallery_item?: Prisma.gallery_itemUncheckedCreateNestedManyWithoutItemInput
+  crops?: Prisma.cropUncheckedCreateNestedManyWithoutItemInput
 }
 
 export type itemUpdateInput = {
@@ -449,8 +432,7 @@ export type itemUpdateInput = {
   description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   credits?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   link?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  gallery_item?: Prisma.gallery_itemUpdateManyWithoutItemNestedInput
-  crop?: Prisma.cropUpdateOneWithoutItemNestedInput
+  crops?: Prisma.cropUpdateManyWithoutItemNestedInput
   gallery?: Prisma.galleryUpdateOneWithoutItemsNestedInput
 }
 
@@ -470,8 +452,7 @@ export type itemUncheckedUpdateInput = {
   description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   credits?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   link?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  crops?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gallery_item?: Prisma.gallery_itemUncheckedUpdateManyWithoutItemNestedInput
+  crops?: Prisma.cropUncheckedUpdateManyWithoutItemNestedInput
 }
 
 export type itemCreateManyInput = {
@@ -490,7 +471,6 @@ export type itemCreateManyInput = {
   description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   credits?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   link?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  crops?: string | null
 }
 
 export type itemUpdateManyMutationInput = {
@@ -526,7 +506,11 @@ export type itemUncheckedUpdateManyInput = {
   description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   credits?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   link?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  crops?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type ItemNullableScalarRelationFilter = {
+  is?: Prisma.itemWhereInput | null
+  isNot?: Prisma.itemWhereInput | null
 }
 
 export type ItemListRelationFilter = {
@@ -537,11 +521,6 @@ export type ItemListRelationFilter = {
 
 export type itemOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type ItemScalarRelationFilter = {
-  is?: Prisma.itemWhereInput
-  isNot?: Prisma.itemWhereInput
 }
 
 export type itemCountOrderByAggregateInput = {
@@ -560,7 +539,6 @@ export type itemCountOrderByAggregateInput = {
   description?: Prisma.SortOrder
   credits?: Prisma.SortOrder
   link?: Prisma.SortOrder
-  crops?: Prisma.SortOrder
 }
 
 export type itemAvgOrderByAggregateInput = {
@@ -581,7 +559,6 @@ export type itemMaxOrderByAggregateInput = {
   height?: Prisma.SortOrder
   format?: Prisma.SortOrder
   gallery_id?: Prisma.SortOrder
-  crops?: Prisma.SortOrder
 }
 
 export type itemMinOrderByAggregateInput = {
@@ -596,7 +573,6 @@ export type itemMinOrderByAggregateInput = {
   height?: Prisma.SortOrder
   format?: Prisma.SortOrder
   gallery_id?: Prisma.SortOrder
-  crops?: Prisma.SortOrder
 }
 
 export type itemSumOrderByAggregateInput = {
@@ -605,46 +581,20 @@ export type itemSumOrderByAggregateInput = {
   height?: Prisma.SortOrder
 }
 
-export type itemCreateNestedManyWithoutCropInput = {
-  create?: Prisma.XOR<Prisma.itemCreateWithoutCropInput, Prisma.itemUncheckedCreateWithoutCropInput> | Prisma.itemCreateWithoutCropInput[] | Prisma.itemUncheckedCreateWithoutCropInput[]
-  connectOrCreate?: Prisma.itemCreateOrConnectWithoutCropInput | Prisma.itemCreateOrConnectWithoutCropInput[]
-  createMany?: Prisma.itemCreateManyCropInputEnvelope
-  connect?: Prisma.itemWhereUniqueInput | Prisma.itemWhereUniqueInput[]
+export type itemCreateNestedOneWithoutCropsInput = {
+  create?: Prisma.XOR<Prisma.itemCreateWithoutCropsInput, Prisma.itemUncheckedCreateWithoutCropsInput>
+  connectOrCreate?: Prisma.itemCreateOrConnectWithoutCropsInput
+  connect?: Prisma.itemWhereUniqueInput
 }
 
-export type itemUncheckedCreateNestedManyWithoutCropInput = {
-  create?: Prisma.XOR<Prisma.itemCreateWithoutCropInput, Prisma.itemUncheckedCreateWithoutCropInput> | Prisma.itemCreateWithoutCropInput[] | Prisma.itemUncheckedCreateWithoutCropInput[]
-  connectOrCreate?: Prisma.itemCreateOrConnectWithoutCropInput | Prisma.itemCreateOrConnectWithoutCropInput[]
-  createMany?: Prisma.itemCreateManyCropInputEnvelope
-  connect?: Prisma.itemWhereUniqueInput | Prisma.itemWhereUniqueInput[]
-}
-
-export type itemUpdateManyWithoutCropNestedInput = {
-  create?: Prisma.XOR<Prisma.itemCreateWithoutCropInput, Prisma.itemUncheckedCreateWithoutCropInput> | Prisma.itemCreateWithoutCropInput[] | Prisma.itemUncheckedCreateWithoutCropInput[]
-  connectOrCreate?: Prisma.itemCreateOrConnectWithoutCropInput | Prisma.itemCreateOrConnectWithoutCropInput[]
-  upsert?: Prisma.itemUpsertWithWhereUniqueWithoutCropInput | Prisma.itemUpsertWithWhereUniqueWithoutCropInput[]
-  createMany?: Prisma.itemCreateManyCropInputEnvelope
-  set?: Prisma.itemWhereUniqueInput | Prisma.itemWhereUniqueInput[]
-  disconnect?: Prisma.itemWhereUniqueInput | Prisma.itemWhereUniqueInput[]
-  delete?: Prisma.itemWhereUniqueInput | Prisma.itemWhereUniqueInput[]
-  connect?: Prisma.itemWhereUniqueInput | Prisma.itemWhereUniqueInput[]
-  update?: Prisma.itemUpdateWithWhereUniqueWithoutCropInput | Prisma.itemUpdateWithWhereUniqueWithoutCropInput[]
-  updateMany?: Prisma.itemUpdateManyWithWhereWithoutCropInput | Prisma.itemUpdateManyWithWhereWithoutCropInput[]
-  deleteMany?: Prisma.itemScalarWhereInput | Prisma.itemScalarWhereInput[]
-}
-
-export type itemUncheckedUpdateManyWithoutCropNestedInput = {
-  create?: Prisma.XOR<Prisma.itemCreateWithoutCropInput, Prisma.itemUncheckedCreateWithoutCropInput> | Prisma.itemCreateWithoutCropInput[] | Prisma.itemUncheckedCreateWithoutCropInput[]
-  connectOrCreate?: Prisma.itemCreateOrConnectWithoutCropInput | Prisma.itemCreateOrConnectWithoutCropInput[]
-  upsert?: Prisma.itemUpsertWithWhereUniqueWithoutCropInput | Prisma.itemUpsertWithWhereUniqueWithoutCropInput[]
-  createMany?: Prisma.itemCreateManyCropInputEnvelope
-  set?: Prisma.itemWhereUniqueInput | Prisma.itemWhereUniqueInput[]
-  disconnect?: Prisma.itemWhereUniqueInput | Prisma.itemWhereUniqueInput[]
-  delete?: Prisma.itemWhereUniqueInput | Prisma.itemWhereUniqueInput[]
-  connect?: Prisma.itemWhereUniqueInput | Prisma.itemWhereUniqueInput[]
-  update?: Prisma.itemUpdateWithWhereUniqueWithoutCropInput | Prisma.itemUpdateWithWhereUniqueWithoutCropInput[]
-  updateMany?: Prisma.itemUpdateManyWithWhereWithoutCropInput | Prisma.itemUpdateManyWithWhereWithoutCropInput[]
-  deleteMany?: Prisma.itemScalarWhereInput | Prisma.itemScalarWhereInput[]
+export type itemUpdateOneWithoutCropsNestedInput = {
+  create?: Prisma.XOR<Prisma.itemCreateWithoutCropsInput, Prisma.itemUncheckedCreateWithoutCropsInput>
+  connectOrCreate?: Prisma.itemCreateOrConnectWithoutCropsInput
+  upsert?: Prisma.itemUpsertWithoutCropsInput
+  disconnect?: Prisma.itemWhereInput | boolean
+  delete?: Prisma.itemWhereInput | boolean
+  connect?: Prisma.itemWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.itemUpdateToOneWithWhereWithoutCropsInput, Prisma.itemUpdateWithoutCropsInput>, Prisma.itemUncheckedUpdateWithoutCropsInput>
 }
 
 export type itemCreateNestedManyWithoutGalleryInput = {
@@ -689,21 +639,7 @@ export type itemUncheckedUpdateManyWithoutGalleryNestedInput = {
   deleteMany?: Prisma.itemScalarWhereInput | Prisma.itemScalarWhereInput[]
 }
 
-export type itemCreateNestedOneWithoutGallery_itemInput = {
-  create?: Prisma.XOR<Prisma.itemCreateWithoutGallery_itemInput, Prisma.itemUncheckedCreateWithoutGallery_itemInput>
-  connectOrCreate?: Prisma.itemCreateOrConnectWithoutGallery_itemInput
-  connect?: Prisma.itemWhereUniqueInput
-}
-
-export type itemUpdateOneRequiredWithoutGallery_itemNestedInput = {
-  create?: Prisma.XOR<Prisma.itemCreateWithoutGallery_itemInput, Prisma.itemUncheckedCreateWithoutGallery_itemInput>
-  connectOrCreate?: Prisma.itemCreateOrConnectWithoutGallery_itemInput
-  upsert?: Prisma.itemUpsertWithoutGallery_itemInput
-  connect?: Prisma.itemWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.itemUpdateToOneWithWhereWithoutGallery_itemInput, Prisma.itemUpdateWithoutGallery_itemInput>, Prisma.itemUncheckedUpdateWithoutGallery_itemInput>
-}
-
-export type itemCreateWithoutCropInput = {
+export type itemCreateWithoutCropsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
@@ -718,11 +654,10 @@ export type itemCreateWithoutCropInput = {
   description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   credits?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   link?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  gallery_item?: Prisma.gallery_itemCreateNestedManyWithoutItemInput
   gallery?: Prisma.galleryCreateNestedOneWithoutItemsInput
 }
 
-export type itemUncheckedCreateWithoutCropInput = {
+export type itemUncheckedCreateWithoutCropsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   id?: string
@@ -738,55 +673,58 @@ export type itemUncheckedCreateWithoutCropInput = {
   description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   credits?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   link?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  gallery_item?: Prisma.gallery_itemUncheckedCreateNestedManyWithoutItemInput
 }
 
-export type itemCreateOrConnectWithoutCropInput = {
+export type itemCreateOrConnectWithoutCropsInput = {
   where: Prisma.itemWhereUniqueInput
-  create: Prisma.XOR<Prisma.itemCreateWithoutCropInput, Prisma.itemUncheckedCreateWithoutCropInput>
+  create: Prisma.XOR<Prisma.itemCreateWithoutCropsInput, Prisma.itemUncheckedCreateWithoutCropsInput>
 }
 
-export type itemCreateManyCropInputEnvelope = {
-  data: Prisma.itemCreateManyCropInput | Prisma.itemCreateManyCropInput[]
-  skipDuplicates?: boolean
+export type itemUpsertWithoutCropsInput = {
+  update: Prisma.XOR<Prisma.itemUpdateWithoutCropsInput, Prisma.itemUncheckedUpdateWithoutCropsInput>
+  create: Prisma.XOR<Prisma.itemCreateWithoutCropsInput, Prisma.itemUncheckedCreateWithoutCropsInput>
+  where?: Prisma.itemWhereInput
 }
 
-export type itemUpsertWithWhereUniqueWithoutCropInput = {
-  where: Prisma.itemWhereUniqueInput
-  update: Prisma.XOR<Prisma.itemUpdateWithoutCropInput, Prisma.itemUncheckedUpdateWithoutCropInput>
-  create: Prisma.XOR<Prisma.itemCreateWithoutCropInput, Prisma.itemUncheckedCreateWithoutCropInput>
+export type itemUpdateToOneWithWhereWithoutCropsInput = {
+  where?: Prisma.itemWhereInput
+  data: Prisma.XOR<Prisma.itemUpdateWithoutCropsInput, Prisma.itemUncheckedUpdateWithoutCropsInput>
 }
 
-export type itemUpdateWithWhereUniqueWithoutCropInput = {
-  where: Prisma.itemWhereUniqueInput
-  data: Prisma.XOR<Prisma.itemUpdateWithoutCropInput, Prisma.itemUncheckedUpdateWithoutCropInput>
+export type itemUpdateWithoutCropsInput = {
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  original_filename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  width?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  height?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  format?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  title?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  credits?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  link?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  gallery?: Prisma.galleryUpdateOneWithoutItemsNestedInput
 }
 
-export type itemUpdateManyWithWhereWithoutCropInput = {
-  where: Prisma.itemScalarWhereInput
-  data: Prisma.XOR<Prisma.itemUpdateManyMutationInput, Prisma.itemUncheckedUpdateManyWithoutCropInput>
-}
-
-export type itemScalarWhereInput = {
-  AND?: Prisma.itemScalarWhereInput | Prisma.itemScalarWhereInput[]
-  OR?: Prisma.itemScalarWhereInput[]
-  NOT?: Prisma.itemScalarWhereInput | Prisma.itemScalarWhereInput[]
-  created_at?: Prisma.DateTimeFilter<"item"> | Date | string
-  updated_at?: Prisma.DateTimeFilter<"item"> | Date | string
-  id?: Prisma.UuidFilter<"item"> | string
-  apiId?: Prisma.StringNullableFilter<"item"> | string | null
-  type?: Prisma.StringNullableFilter<"item"> | string | null
-  original_filename?: Prisma.StringNullableFilter<"item"> | string | null
-  position?: Prisma.IntNullableFilter<"item"> | number | null
-  width?: Prisma.IntNullableFilter<"item"> | number | null
-  height?: Prisma.IntNullableFilter<"item"> | number | null
-  format?: Prisma.StringNullableFilter<"item"> | string | null
-  gallery_id?: Prisma.UuidNullableFilter<"item"> | string | null
-  title?: Prisma.JsonNullableFilter<"item">
-  description?: Prisma.JsonNullableFilter<"item">
-  credits?: Prisma.JsonNullableFilter<"item">
-  link?: Prisma.JsonNullableFilter<"item">
-  crops?: Prisma.UuidNullableFilter<"item"> | string | null
+export type itemUncheckedUpdateWithoutCropsInput = {
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  original_filename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  width?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  height?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  format?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gallery_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  title?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  credits?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  link?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type itemCreateWithoutGalleryInput = {
@@ -804,8 +742,7 @@ export type itemCreateWithoutGalleryInput = {
   description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   credits?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   link?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  gallery_item?: Prisma.gallery_itemCreateNestedManyWithoutItemInput
-  crop?: Prisma.cropCreateNestedOneWithoutItemInput
+  crops?: Prisma.cropCreateNestedManyWithoutItemInput
 }
 
 export type itemUncheckedCreateWithoutGalleryInput = {
@@ -823,8 +760,7 @@ export type itemUncheckedCreateWithoutGalleryInput = {
   description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   credits?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   link?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  crops?: string | null
-  gallery_item?: Prisma.gallery_itemUncheckedCreateNestedManyWithoutItemInput
+  crops?: Prisma.cropUncheckedCreateNestedManyWithoutItemInput
 }
 
 export type itemCreateOrConnectWithoutGalleryInput = {
@@ -853,170 +789,25 @@ export type itemUpdateManyWithWhereWithoutGalleryInput = {
   data: Prisma.XOR<Prisma.itemUpdateManyMutationInput, Prisma.itemUncheckedUpdateManyWithoutGalleryInput>
 }
 
-export type itemCreateWithoutGallery_itemInput = {
-  created_at?: Date | string
-  updated_at?: Date | string
-  id?: string
-  apiId?: string | null
-  type?: string | null
-  original_filename?: string | null
-  position?: number | null
-  width?: number | null
-  height?: number | null
-  format?: string | null
-  title?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  credits?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  link?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  crop?: Prisma.cropCreateNestedOneWithoutItemInput
-  gallery?: Prisma.galleryCreateNestedOneWithoutItemsInput
-}
-
-export type itemUncheckedCreateWithoutGallery_itemInput = {
-  created_at?: Date | string
-  updated_at?: Date | string
-  id?: string
-  apiId?: string | null
-  type?: string | null
-  original_filename?: string | null
-  position?: number | null
-  width?: number | null
-  height?: number | null
-  format?: string | null
-  gallery_id?: string | null
-  title?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  credits?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  link?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  crops?: string | null
-}
-
-export type itemCreateOrConnectWithoutGallery_itemInput = {
-  where: Prisma.itemWhereUniqueInput
-  create: Prisma.XOR<Prisma.itemCreateWithoutGallery_itemInput, Prisma.itemUncheckedCreateWithoutGallery_itemInput>
-}
-
-export type itemUpsertWithoutGallery_itemInput = {
-  update: Prisma.XOR<Prisma.itemUpdateWithoutGallery_itemInput, Prisma.itemUncheckedUpdateWithoutGallery_itemInput>
-  create: Prisma.XOR<Prisma.itemCreateWithoutGallery_itemInput, Prisma.itemUncheckedCreateWithoutGallery_itemInput>
-  where?: Prisma.itemWhereInput
-}
-
-export type itemUpdateToOneWithWhereWithoutGallery_itemInput = {
-  where?: Prisma.itemWhereInput
-  data: Prisma.XOR<Prisma.itemUpdateWithoutGallery_itemInput, Prisma.itemUncheckedUpdateWithoutGallery_itemInput>
-}
-
-export type itemUpdateWithoutGallery_itemInput = {
-  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  original_filename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  position?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  width?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  height?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  format?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  title?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  credits?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  link?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  crop?: Prisma.cropUpdateOneWithoutItemNestedInput
-  gallery?: Prisma.galleryUpdateOneWithoutItemsNestedInput
-}
-
-export type itemUncheckedUpdateWithoutGallery_itemInput = {
-  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  original_filename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  position?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  width?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  height?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  format?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gallery_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  title?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  credits?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  link?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  crops?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-}
-
-export type itemCreateManyCropInput = {
-  created_at?: Date | string
-  updated_at?: Date | string
-  id?: string
-  apiId?: string | null
-  type?: string | null
-  original_filename?: string | null
-  position?: number | null
-  width?: number | null
-  height?: number | null
-  format?: string | null
-  gallery_id?: string | null
-  title?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  credits?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  link?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-}
-
-export type itemUpdateWithoutCropInput = {
-  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  original_filename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  position?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  width?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  height?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  format?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  title?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  credits?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  link?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  gallery_item?: Prisma.gallery_itemUpdateManyWithoutItemNestedInput
-  gallery?: Prisma.galleryUpdateOneWithoutItemsNestedInput
-}
-
-export type itemUncheckedUpdateWithoutCropInput = {
-  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  original_filename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  position?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  width?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  height?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  format?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gallery_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  title?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  credits?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  link?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  gallery_item?: Prisma.gallery_itemUncheckedUpdateManyWithoutItemNestedInput
-}
-
-export type itemUncheckedUpdateManyWithoutCropInput = {
-  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  original_filename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  position?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  width?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  height?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  format?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gallery_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  title?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  credits?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  link?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+export type itemScalarWhereInput = {
+  AND?: Prisma.itemScalarWhereInput | Prisma.itemScalarWhereInput[]
+  OR?: Prisma.itemScalarWhereInput[]
+  NOT?: Prisma.itemScalarWhereInput | Prisma.itemScalarWhereInput[]
+  created_at?: Prisma.DateTimeFilter<"item"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"item"> | Date | string
+  id?: Prisma.UuidFilter<"item"> | string
+  apiId?: Prisma.StringNullableFilter<"item"> | string | null
+  type?: Prisma.StringNullableFilter<"item"> | string | null
+  original_filename?: Prisma.StringNullableFilter<"item"> | string | null
+  position?: Prisma.IntNullableFilter<"item"> | number | null
+  width?: Prisma.IntNullableFilter<"item"> | number | null
+  height?: Prisma.IntNullableFilter<"item"> | number | null
+  format?: Prisma.StringNullableFilter<"item"> | string | null
+  gallery_id?: Prisma.UuidNullableFilter<"item"> | string | null
+  title?: Prisma.JsonNullableFilter<"item">
+  description?: Prisma.JsonNullableFilter<"item">
+  credits?: Prisma.JsonNullableFilter<"item">
+  link?: Prisma.JsonNullableFilter<"item">
 }
 
 export type itemCreateManyGalleryInput = {
@@ -1034,7 +825,6 @@ export type itemCreateManyGalleryInput = {
   description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   credits?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   link?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  crops?: string | null
 }
 
 export type itemUpdateWithoutGalleryInput = {
@@ -1052,8 +842,7 @@ export type itemUpdateWithoutGalleryInput = {
   description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   credits?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   link?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  gallery_item?: Prisma.gallery_itemUpdateManyWithoutItemNestedInput
-  crop?: Prisma.cropUpdateOneWithoutItemNestedInput
+  crops?: Prisma.cropUpdateManyWithoutItemNestedInput
 }
 
 export type itemUncheckedUpdateWithoutGalleryInput = {
@@ -1071,8 +860,7 @@ export type itemUncheckedUpdateWithoutGalleryInput = {
   description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   credits?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   link?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  crops?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gallery_item?: Prisma.gallery_itemUncheckedUpdateManyWithoutItemNestedInput
+  crops?: Prisma.cropUncheckedUpdateManyWithoutItemNestedInput
 }
 
 export type itemUncheckedUpdateManyWithoutGalleryInput = {
@@ -1090,7 +878,6 @@ export type itemUncheckedUpdateManyWithoutGalleryInput = {
   description?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   credits?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   link?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  crops?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -1099,11 +886,11 @@ export type itemUncheckedUpdateManyWithoutGalleryInput = {
  */
 
 export type ItemCountOutputType = {
-  gallery_item: number
+  crops: number
 }
 
 export type ItemCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  gallery_item?: boolean | ItemCountOutputTypeCountGallery_itemArgs
+  crops?: boolean | ItemCountOutputTypeCountCropsArgs
 }
 
 /**
@@ -1119,8 +906,8 @@ export type ItemCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensi
 /**
  * ItemCountOutputType without action
  */
-export type ItemCountOutputTypeCountGallery_itemArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.gallery_itemWhereInput
+export type ItemCountOutputTypeCountCropsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.cropWhereInput
 }
 
 
@@ -1140,9 +927,7 @@ export type itemSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   description?: boolean
   credits?: boolean
   link?: boolean
-  crops?: boolean
-  gallery_item?: boolean | Prisma.item$gallery_itemArgs<ExtArgs>
-  crop?: boolean | Prisma.item$cropArgs<ExtArgs>
+  crops?: boolean | Prisma.item$cropsArgs<ExtArgs>
   gallery?: boolean | Prisma.item$galleryArgs<ExtArgs>
   _count?: boolean | Prisma.ItemCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["item"]>
@@ -1163,8 +948,6 @@ export type itemSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   description?: boolean
   credits?: boolean
   link?: boolean
-  crops?: boolean
-  crop?: boolean | Prisma.item$cropArgs<ExtArgs>
   gallery?: boolean | Prisma.item$galleryArgs<ExtArgs>
 }, ExtArgs["result"]["item"]>
 
@@ -1184,8 +967,6 @@ export type itemSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   description?: boolean
   credits?: boolean
   link?: boolean
-  crops?: boolean
-  crop?: boolean | Prisma.item$cropArgs<ExtArgs>
   gallery?: boolean | Prisma.item$galleryArgs<ExtArgs>
 }, ExtArgs["result"]["item"]>
 
@@ -1205,30 +986,25 @@ export type itemSelectScalar = {
   description?: boolean
   credits?: boolean
   link?: boolean
-  crops?: boolean
 }
 
-export type itemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "apiId" | "type" | "original_filename" | "position" | "width" | "height" | "format" | "gallery_id" | "title" | "description" | "credits" | "link" | "crops", ExtArgs["result"]["item"]>
+export type itemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "apiId" | "type" | "original_filename" | "position" | "width" | "height" | "format" | "gallery_id" | "title" | "description" | "credits" | "link", ExtArgs["result"]["item"]>
 export type itemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  gallery_item?: boolean | Prisma.item$gallery_itemArgs<ExtArgs>
-  crop?: boolean | Prisma.item$cropArgs<ExtArgs>
+  crops?: boolean | Prisma.item$cropsArgs<ExtArgs>
   gallery?: boolean | Prisma.item$galleryArgs<ExtArgs>
   _count?: boolean | Prisma.ItemCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type itemIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  crop?: boolean | Prisma.item$cropArgs<ExtArgs>
   gallery?: boolean | Prisma.item$galleryArgs<ExtArgs>
 }
 export type itemIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  crop?: boolean | Prisma.item$cropArgs<ExtArgs>
   gallery?: boolean | Prisma.item$galleryArgs<ExtArgs>
 }
 
 export type $itemPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "item"
   objects: {
-    gallery_item: Prisma.$gallery_itemPayload<ExtArgs>[]
-    crop: Prisma.$cropPayload<ExtArgs> | null
+    crops: Prisma.$cropPayload<ExtArgs>[]
     gallery: Prisma.$galleryPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1247,7 +1023,6 @@ export type $itemPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     description: runtime.JsonValue | null
     credits: runtime.JsonValue | null
     link: runtime.JsonValue | null
-    crops: string | null
   }, ExtArgs["result"]["item"]>
   composites: {}
 }
@@ -1642,8 +1417,7 @@ readonly fields: itemFieldRefs;
  */
 export interface Prisma__itemClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  gallery_item<T extends Prisma.item$gallery_itemArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.item$gallery_itemArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$gallery_itemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  crop<T extends Prisma.item$cropArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.item$cropArgs<ExtArgs>>): Prisma.Prisma__cropClient<runtime.Types.Result.GetResult<Prisma.$cropPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  crops<T extends Prisma.item$cropsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.item$cropsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$cropPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   gallery<T extends Prisma.item$galleryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.item$galleryArgs<ExtArgs>>): Prisma.Prisma__galleryClient<runtime.Types.Result.GetResult<Prisma.$galleryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1689,7 +1463,6 @@ export interface itemFieldRefs {
   readonly description: Prisma.FieldRef<"item", 'Json'>
   readonly credits: Prisma.FieldRef<"item", 'Json'>
   readonly link: Prisma.FieldRef<"item", 'Json'>
-  readonly crops: Prisma.FieldRef<"item", 'String'>
 }
     
 
@@ -2086,33 +1859,9 @@ export type itemDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
 }
 
 /**
- * item.gallery_item
+ * item.crops
  */
-export type item$gallery_itemArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the gallery_item
-   */
-  select?: Prisma.gallery_itemSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the gallery_item
-   */
-  omit?: Prisma.gallery_itemOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.gallery_itemInclude<ExtArgs> | null
-  where?: Prisma.gallery_itemWhereInput
-  orderBy?: Prisma.gallery_itemOrderByWithRelationInput | Prisma.gallery_itemOrderByWithRelationInput[]
-  cursor?: Prisma.gallery_itemWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.Gallery_itemScalarFieldEnum | Prisma.Gallery_itemScalarFieldEnum[]
-}
-
-/**
- * item.crop
- */
-export type item$cropArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type item$cropsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
    * Select specific fields to fetch from the crop
    */
@@ -2126,6 +1875,11 @@ export type item$cropArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs 
    */
   include?: Prisma.cropInclude<ExtArgs> | null
   where?: Prisma.cropWhereInput
+  orderBy?: Prisma.cropOrderByWithRelationInput | Prisma.cropOrderByWithRelationInput[]
+  cursor?: Prisma.cropWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CropScalarFieldEnum | Prisma.CropScalarFieldEnum[]
 }
 
 /**

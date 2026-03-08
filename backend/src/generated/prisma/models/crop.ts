@@ -31,6 +31,7 @@ export type CropMinAggregateOutputType = {
   apiId: string | null
   name: string | null
   url: string | null
+  item_id: string | null
 }
 
 export type CropMaxAggregateOutputType = {
@@ -40,6 +41,7 @@ export type CropMaxAggregateOutputType = {
   apiId: string | null
   name: string | null
   url: string | null
+  item_id: string | null
 }
 
 export type CropCountAggregateOutputType = {
@@ -49,6 +51,7 @@ export type CropCountAggregateOutputType = {
   apiId: number
   name: number
   url: number
+  item_id: number
   _all: number
 }
 
@@ -60,6 +63,7 @@ export type CropMinAggregateInputType = {
   apiId?: true
   name?: true
   url?: true
+  item_id?: true
 }
 
 export type CropMaxAggregateInputType = {
@@ -69,6 +73,7 @@ export type CropMaxAggregateInputType = {
   apiId?: true
   name?: true
   url?: true
+  item_id?: true
 }
 
 export type CropCountAggregateInputType = {
@@ -78,6 +83,7 @@ export type CropCountAggregateInputType = {
   apiId?: true
   name?: true
   url?: true
+  item_id?: true
   _all?: true
 }
 
@@ -160,6 +166,7 @@ export type CropGroupByOutputType = {
   apiId: string | null
   name: string | null
   url: string | null
+  item_id: string | null
   _count: CropCountAggregateOutputType | null
   _min: CropMinAggregateOutputType | null
   _max: CropMaxAggregateOutputType | null
@@ -190,7 +197,8 @@ export type cropWhereInput = {
   apiId?: Prisma.StringNullableFilter<"crop"> | string | null
   name?: Prisma.StringNullableFilter<"crop"> | string | null
   url?: Prisma.StringNullableFilter<"crop"> | string | null
-  item?: Prisma.ItemListRelationFilter
+  item_id?: Prisma.UuidNullableFilter<"crop"> | string | null
+  item?: Prisma.XOR<Prisma.ItemNullableScalarRelationFilter, Prisma.itemWhereInput> | null
 }
 
 export type cropOrderByWithRelationInput = {
@@ -200,7 +208,8 @@ export type cropOrderByWithRelationInput = {
   apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   url?: Prisma.SortOrderInput | Prisma.SortOrder
-  item?: Prisma.itemOrderByRelationAggregateInput
+  item_id?: Prisma.SortOrderInput | Prisma.SortOrder
+  item?: Prisma.itemOrderByWithRelationInput
 }
 
 export type cropWhereUniqueInput = Prisma.AtLeast<{
@@ -213,7 +222,8 @@ export type cropWhereUniqueInput = Prisma.AtLeast<{
   updated_at?: Prisma.DateTimeFilter<"crop"> | Date | string
   name?: Prisma.StringNullableFilter<"crop"> | string | null
   url?: Prisma.StringNullableFilter<"crop"> | string | null
-  item?: Prisma.ItemListRelationFilter
+  item_id?: Prisma.UuidNullableFilter<"crop"> | string | null
+  item?: Prisma.XOR<Prisma.ItemNullableScalarRelationFilter, Prisma.itemWhereInput> | null
 }, "id" | "apiId">
 
 export type cropOrderByWithAggregationInput = {
@@ -223,6 +233,7 @@ export type cropOrderByWithAggregationInput = {
   apiId?: Prisma.SortOrderInput | Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   url?: Prisma.SortOrderInput | Prisma.SortOrder
+  item_id?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.cropCountOrderByAggregateInput
   _max?: Prisma.cropMaxOrderByAggregateInput
   _min?: Prisma.cropMinOrderByAggregateInput
@@ -238,6 +249,7 @@ export type cropScalarWhereWithAggregatesInput = {
   apiId?: Prisma.StringNullableWithAggregatesFilter<"crop"> | string | null
   name?: Prisma.StringNullableWithAggregatesFilter<"crop"> | string | null
   url?: Prisma.StringNullableWithAggregatesFilter<"crop"> | string | null
+  item_id?: Prisma.UuidNullableWithAggregatesFilter<"crop"> | string | null
 }
 
 export type cropCreateInput = {
@@ -247,7 +259,7 @@ export type cropCreateInput = {
   apiId?: string | null
   name?: string | null
   url?: string | null
-  item?: Prisma.itemCreateNestedManyWithoutCropInput
+  item?: Prisma.itemCreateNestedOneWithoutCropsInput
 }
 
 export type cropUncheckedCreateInput = {
@@ -257,7 +269,7 @@ export type cropUncheckedCreateInput = {
   apiId?: string | null
   name?: string | null
   url?: string | null
-  item?: Prisma.itemUncheckedCreateNestedManyWithoutCropInput
+  item_id?: string | null
 }
 
 export type cropUpdateInput = {
@@ -267,7 +279,7 @@ export type cropUpdateInput = {
   apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  item?: Prisma.itemUpdateManyWithoutCropNestedInput
+  item?: Prisma.itemUpdateOneWithoutCropsNestedInput
 }
 
 export type cropUncheckedUpdateInput = {
@@ -277,7 +289,7 @@ export type cropUncheckedUpdateInput = {
   apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  item?: Prisma.itemUncheckedUpdateManyWithoutCropNestedInput
+  item_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type cropCreateManyInput = {
@@ -287,6 +299,7 @@ export type cropCreateManyInput = {
   apiId?: string | null
   name?: string | null
   url?: string | null
+  item_id?: string | null
 }
 
 export type cropUpdateManyMutationInput = {
@@ -305,6 +318,7 @@ export type cropUncheckedUpdateManyInput = {
   apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  item_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type cropCountOrderByAggregateInput = {
@@ -314,6 +328,7 @@ export type cropCountOrderByAggregateInput = {
   apiId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   url?: Prisma.SortOrder
+  item_id?: Prisma.SortOrder
 }
 
 export type cropMaxOrderByAggregateInput = {
@@ -323,6 +338,7 @@ export type cropMaxOrderByAggregateInput = {
   apiId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   url?: Prisma.SortOrder
+  item_id?: Prisma.SortOrder
 }
 
 export type cropMinOrderByAggregateInput = {
@@ -332,11 +348,17 @@ export type cropMinOrderByAggregateInput = {
   apiId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   url?: Prisma.SortOrder
+  item_id?: Prisma.SortOrder
 }
 
-export type CropNullableScalarRelationFilter = {
-  is?: Prisma.cropWhereInput | null
-  isNot?: Prisma.cropWhereInput | null
+export type CropListRelationFilter = {
+  every?: Prisma.cropWhereInput
+  some?: Prisma.cropWhereInput
+  none?: Prisma.cropWhereInput
+}
+
+export type cropOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type DateTimeFieldUpdateOperationsInput = {
@@ -351,20 +373,46 @@ export type NullableStringFieldUpdateOperationsInput = {
   set?: string | null
 }
 
-export type cropCreateNestedOneWithoutItemInput = {
-  create?: Prisma.XOR<Prisma.cropCreateWithoutItemInput, Prisma.cropUncheckedCreateWithoutItemInput>
-  connectOrCreate?: Prisma.cropCreateOrConnectWithoutItemInput
-  connect?: Prisma.cropWhereUniqueInput
+export type cropCreateNestedManyWithoutItemInput = {
+  create?: Prisma.XOR<Prisma.cropCreateWithoutItemInput, Prisma.cropUncheckedCreateWithoutItemInput> | Prisma.cropCreateWithoutItemInput[] | Prisma.cropUncheckedCreateWithoutItemInput[]
+  connectOrCreate?: Prisma.cropCreateOrConnectWithoutItemInput | Prisma.cropCreateOrConnectWithoutItemInput[]
+  createMany?: Prisma.cropCreateManyItemInputEnvelope
+  connect?: Prisma.cropWhereUniqueInput | Prisma.cropWhereUniqueInput[]
 }
 
-export type cropUpdateOneWithoutItemNestedInput = {
-  create?: Prisma.XOR<Prisma.cropCreateWithoutItemInput, Prisma.cropUncheckedCreateWithoutItemInput>
-  connectOrCreate?: Prisma.cropCreateOrConnectWithoutItemInput
-  upsert?: Prisma.cropUpsertWithoutItemInput
-  disconnect?: Prisma.cropWhereInput | boolean
-  delete?: Prisma.cropWhereInput | boolean
-  connect?: Prisma.cropWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.cropUpdateToOneWithWhereWithoutItemInput, Prisma.cropUpdateWithoutItemInput>, Prisma.cropUncheckedUpdateWithoutItemInput>
+export type cropUncheckedCreateNestedManyWithoutItemInput = {
+  create?: Prisma.XOR<Prisma.cropCreateWithoutItemInput, Prisma.cropUncheckedCreateWithoutItemInput> | Prisma.cropCreateWithoutItemInput[] | Prisma.cropUncheckedCreateWithoutItemInput[]
+  connectOrCreate?: Prisma.cropCreateOrConnectWithoutItemInput | Prisma.cropCreateOrConnectWithoutItemInput[]
+  createMany?: Prisma.cropCreateManyItemInputEnvelope
+  connect?: Prisma.cropWhereUniqueInput | Prisma.cropWhereUniqueInput[]
+}
+
+export type cropUpdateManyWithoutItemNestedInput = {
+  create?: Prisma.XOR<Prisma.cropCreateWithoutItemInput, Prisma.cropUncheckedCreateWithoutItemInput> | Prisma.cropCreateWithoutItemInput[] | Prisma.cropUncheckedCreateWithoutItemInput[]
+  connectOrCreate?: Prisma.cropCreateOrConnectWithoutItemInput | Prisma.cropCreateOrConnectWithoutItemInput[]
+  upsert?: Prisma.cropUpsertWithWhereUniqueWithoutItemInput | Prisma.cropUpsertWithWhereUniqueWithoutItemInput[]
+  createMany?: Prisma.cropCreateManyItemInputEnvelope
+  set?: Prisma.cropWhereUniqueInput | Prisma.cropWhereUniqueInput[]
+  disconnect?: Prisma.cropWhereUniqueInput | Prisma.cropWhereUniqueInput[]
+  delete?: Prisma.cropWhereUniqueInput | Prisma.cropWhereUniqueInput[]
+  connect?: Prisma.cropWhereUniqueInput | Prisma.cropWhereUniqueInput[]
+  update?: Prisma.cropUpdateWithWhereUniqueWithoutItemInput | Prisma.cropUpdateWithWhereUniqueWithoutItemInput[]
+  updateMany?: Prisma.cropUpdateManyWithWhereWithoutItemInput | Prisma.cropUpdateManyWithWhereWithoutItemInput[]
+  deleteMany?: Prisma.cropScalarWhereInput | Prisma.cropScalarWhereInput[]
+}
+
+export type cropUncheckedUpdateManyWithoutItemNestedInput = {
+  create?: Prisma.XOR<Prisma.cropCreateWithoutItemInput, Prisma.cropUncheckedCreateWithoutItemInput> | Prisma.cropCreateWithoutItemInput[] | Prisma.cropUncheckedCreateWithoutItemInput[]
+  connectOrCreate?: Prisma.cropCreateOrConnectWithoutItemInput | Prisma.cropCreateOrConnectWithoutItemInput[]
+  upsert?: Prisma.cropUpsertWithWhereUniqueWithoutItemInput | Prisma.cropUpsertWithWhereUniqueWithoutItemInput[]
+  createMany?: Prisma.cropCreateManyItemInputEnvelope
+  set?: Prisma.cropWhereUniqueInput | Prisma.cropWhereUniqueInput[]
+  disconnect?: Prisma.cropWhereUniqueInput | Prisma.cropWhereUniqueInput[]
+  delete?: Prisma.cropWhereUniqueInput | Prisma.cropWhereUniqueInput[]
+  connect?: Prisma.cropWhereUniqueInput | Prisma.cropWhereUniqueInput[]
+  update?: Prisma.cropUpdateWithWhereUniqueWithoutItemInput | Prisma.cropUpdateWithWhereUniqueWithoutItemInput[]
+  updateMany?: Prisma.cropUpdateManyWithWhereWithoutItemInput | Prisma.cropUpdateManyWithWhereWithoutItemInput[]
+  deleteMany?: Prisma.cropScalarWhereInput | Prisma.cropScalarWhereInput[]
 }
 
 export type cropCreateWithoutItemInput = {
@@ -390,15 +438,47 @@ export type cropCreateOrConnectWithoutItemInput = {
   create: Prisma.XOR<Prisma.cropCreateWithoutItemInput, Prisma.cropUncheckedCreateWithoutItemInput>
 }
 
-export type cropUpsertWithoutItemInput = {
-  update: Prisma.XOR<Prisma.cropUpdateWithoutItemInput, Prisma.cropUncheckedUpdateWithoutItemInput>
-  create: Prisma.XOR<Prisma.cropCreateWithoutItemInput, Prisma.cropUncheckedCreateWithoutItemInput>
-  where?: Prisma.cropWhereInput
+export type cropCreateManyItemInputEnvelope = {
+  data: Prisma.cropCreateManyItemInput | Prisma.cropCreateManyItemInput[]
+  skipDuplicates?: boolean
 }
 
-export type cropUpdateToOneWithWhereWithoutItemInput = {
-  where?: Prisma.cropWhereInput
+export type cropUpsertWithWhereUniqueWithoutItemInput = {
+  where: Prisma.cropWhereUniqueInput
+  update: Prisma.XOR<Prisma.cropUpdateWithoutItemInput, Prisma.cropUncheckedUpdateWithoutItemInput>
+  create: Prisma.XOR<Prisma.cropCreateWithoutItemInput, Prisma.cropUncheckedCreateWithoutItemInput>
+}
+
+export type cropUpdateWithWhereUniqueWithoutItemInput = {
+  where: Prisma.cropWhereUniqueInput
   data: Prisma.XOR<Prisma.cropUpdateWithoutItemInput, Prisma.cropUncheckedUpdateWithoutItemInput>
+}
+
+export type cropUpdateManyWithWhereWithoutItemInput = {
+  where: Prisma.cropScalarWhereInput
+  data: Prisma.XOR<Prisma.cropUpdateManyMutationInput, Prisma.cropUncheckedUpdateManyWithoutItemInput>
+}
+
+export type cropScalarWhereInput = {
+  AND?: Prisma.cropScalarWhereInput | Prisma.cropScalarWhereInput[]
+  OR?: Prisma.cropScalarWhereInput[]
+  NOT?: Prisma.cropScalarWhereInput | Prisma.cropScalarWhereInput[]
+  created_at?: Prisma.DateTimeFilter<"crop"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"crop"> | Date | string
+  id?: Prisma.UuidFilter<"crop"> | string
+  apiId?: Prisma.StringNullableFilter<"crop"> | string | null
+  name?: Prisma.StringNullableFilter<"crop"> | string | null
+  url?: Prisma.StringNullableFilter<"crop"> | string | null
+  item_id?: Prisma.UuidNullableFilter<"crop"> | string | null
+}
+
+export type cropCreateManyItemInput = {
+  created_at?: Date | string
+  updated_at?: Date | string
+  id?: string
+  apiId?: string | null
+  name?: string | null
+  url?: string | null
 }
 
 export type cropUpdateWithoutItemInput = {
@@ -419,35 +499,15 @@ export type cropUncheckedUpdateWithoutItemInput = {
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
-
-/**
- * Count Type CropCountOutputType
- */
-
-export type CropCountOutputType = {
-  item: number
+export type cropUncheckedUpdateManyWithoutItemInput = {
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
-export type CropCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  item?: boolean | CropCountOutputTypeCountItemArgs
-}
-
-/**
- * CropCountOutputType without action
- */
-export type CropCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the CropCountOutputType
-   */
-  select?: Prisma.CropCountOutputTypeSelect<ExtArgs> | null
-}
-
-/**
- * CropCountOutputType without action
- */
-export type CropCountOutputTypeCountItemArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.itemWhereInput
-}
 
 
 export type cropSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -457,8 +517,8 @@ export type cropSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   apiId?: boolean
   name?: boolean
   url?: boolean
+  item_id?: boolean
   item?: boolean | Prisma.crop$itemArgs<ExtArgs>
-  _count?: boolean | Prisma.CropCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["crop"]>
 
 export type cropSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -468,6 +528,8 @@ export type cropSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   apiId?: boolean
   name?: boolean
   url?: boolean
+  item_id?: boolean
+  item?: boolean | Prisma.crop$itemArgs<ExtArgs>
 }, ExtArgs["result"]["crop"]>
 
 export type cropSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -477,6 +539,8 @@ export type cropSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   apiId?: boolean
   name?: boolean
   url?: boolean
+  item_id?: boolean
+  item?: boolean | Prisma.crop$itemArgs<ExtArgs>
 }, ExtArgs["result"]["crop"]>
 
 export type cropSelectScalar = {
@@ -486,20 +550,24 @@ export type cropSelectScalar = {
   apiId?: boolean
   name?: boolean
   url?: boolean
+  item_id?: boolean
 }
 
-export type cropOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "apiId" | "name" | "url", ExtArgs["result"]["crop"]>
+export type cropOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"created_at" | "updated_at" | "id" | "apiId" | "name" | "url" | "item_id", ExtArgs["result"]["crop"]>
 export type cropInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   item?: boolean | Prisma.crop$itemArgs<ExtArgs>
-  _count?: boolean | Prisma.CropCountOutputTypeDefaultArgs<ExtArgs>
 }
-export type cropIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
-export type cropIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type cropIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  item?: boolean | Prisma.crop$itemArgs<ExtArgs>
+}
+export type cropIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  item?: boolean | Prisma.crop$itemArgs<ExtArgs>
+}
 
 export type $cropPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "crop"
   objects: {
-    item: Prisma.$itemPayload<ExtArgs>[]
+    item: Prisma.$itemPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     created_at: Date
@@ -508,6 +576,7 @@ export type $cropPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     apiId: string | null
     name: string | null
     url: string | null
+    item_id: string | null
   }, ExtArgs["result"]["crop"]>
   composites: {}
 }
@@ -902,7 +971,7 @@ readonly fields: cropFieldRefs;
  */
 export interface Prisma__cropClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  item<T extends Prisma.crop$itemArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.crop$itemArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$itemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  item<T extends Prisma.crop$itemArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.crop$itemArgs<ExtArgs>>): Prisma.Prisma__itemClient<runtime.Types.Result.GetResult<Prisma.$itemPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -938,6 +1007,7 @@ export interface cropFieldRefs {
   readonly apiId: Prisma.FieldRef<"crop", 'String'>
   readonly name: Prisma.FieldRef<"crop", 'String'>
   readonly url: Prisma.FieldRef<"crop", 'String'>
+  readonly item_id: Prisma.FieldRef<"crop", 'String'>
 }
     
 
@@ -1187,6 +1257,10 @@ export type cropCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions
    */
   data: Prisma.cropCreateManyInput | Prisma.cropCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.cropIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1257,6 +1331,10 @@ export type cropUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions
    * Limit how many crops to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.cropIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1342,11 +1420,6 @@ export type crop$itemArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs 
    */
   include?: Prisma.itemInclude<ExtArgs> | null
   where?: Prisma.itemWhereInput
-  orderBy?: Prisma.itemOrderByWithRelationInput | Prisma.itemOrderByWithRelationInput[]
-  cursor?: Prisma.itemWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.ItemScalarFieldEnum | Prisma.ItemScalarFieldEnum[]
 }
 
 /**

@@ -14,7 +14,8 @@ model crop {
   apiId      String?   @db.VarChar @unique
   name       String?  @db.VarChar
   url        String?  @db.VarChar
-  item       item[]
+  item_id    String?  @db.Uuid
+  item       item?     @relation("item_crops", fields: [item_id], references: [id])
 }
 
 model event {
@@ -68,22 +69,15 @@ model gallery {
   id                                            String          @id @db.Uuid @default(uuid())
   apiId                                         String?        @db.VarChar @unique
   name                                          String?        @db.VarChar
-  gallery_item                                  gallery_item[]
-  items                                         item[]         @relation("item_gallery")
+  items                                         item[]
   media_gallery_productions                     production[]   @relation("production_media_gallery")
   poster_gallery_productions                    production[]   @relation("production_poster_gallery")
   review_gallery_productions                    production[]   @relation("production_review_gallery")
   tags                                          tag[]          @relation("tag_gallery")
 }
 
-model gallery_item {
-  gallery_id String  @db.Uuid
-  item_id    String  @db.Uuid
-  gallery    gallery @relation(fields: [gallery_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  item       item    @relation(fields: [item_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
-  @@id([gallery_id, item_id])
-}
+
 
 model genre {
   created_at       DateTime           @default(now()) @db.Timestamp(6)
@@ -140,11 +134,10 @@ model item {
   description                   Json?
   credits                       Json?
   link                          Json?
-  crops                         String?        @db.Uuid
-  gallery_item                  gallery_item[]
-  crop                          crop?          @relation(fields: [crops], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  gallery                       gallery?       @relation("item_gallery", fields: [gallery_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  crops                         crop[]         @relation("item_crops")
+  gallery                       gallery?       @relation(fields: [gallery_id], references: [id])
 }
+
 
 model location {
   created_at                     DateTime @default(now()) @db.Timestamp(6)
@@ -162,7 +155,7 @@ model location {
   own_location                   String?  @db.VarChar
   country                        String?  @db.VarChar
   uitdatabank_id                 String?  @db.VarChar
-  space                          space[]  @relation("space_location")
+  spaces                         space[]  @relation("space_location")
 }
 
 model organisations {
@@ -232,9 +225,9 @@ model production {
   media_gallery                              gallery?                   @relation("production_media_gallery", fields: [media_gallery_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   poster_gallery                             gallery?                   @relation("production_poster_gallery", fields: [poster_gallery_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   review_gallery                             gallery?                   @relation("production_review_gallery", fields: [review_gallery_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  uitdatabank_themes                         uitdatabank_themes?        @relation(fields: [uitdatabank_theme], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  uitdatabank_types                          uitdatabank_types?         @relation(fields: [uitdatabank_type], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  uit_keywords_productions                   uit_keywords_productions[]
+  uitdatabank_themes                         uitdatabank_theme?        @relation(fields: [uitdatabank_theme], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  uitdatabank_types                          uitdatabank_type?         @relation(fields: [uitdatabank_type], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  uit_keywords_productions                   uit_keywords_production[]
 }
 
 model rank {
@@ -281,25 +274,25 @@ model tag {
   gallery                      gallery?       @relation("tag_gallery", fields: [gallery_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
-model uit_keywords_productions {
+model uit_keywords_production {
   production_id        String               @db.Uuid
   uitkeywords_id       String               @db.Uuid
   production           production           @relation(fields: [production_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  uitdatabank_keywords uitdatabank_keywords @relation(fields: [uitkeywords_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  uitdatabank_keywords uitdatabank_keyword @relation(fields: [uitkeywords_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([production_id, uitkeywords_id])
 }
 
-model uitdatabank_keywords {
+model uitdatabank_keyword {
   created_at               DateTime                   @default(now()) @db.Timestamp(6)
   updated_at               DateTime                   @default(now()) @db.Timestamp(6)
   id                       String                      @id @db.Uuid @default(uuid())
   apiId                    String?                    @db.VarChar @unique
   name                     String?                    @db.VarChar
-  uit_keywords_productions uit_keywords_productions[]
+  uit_keywords_productions uit_keywords_production[]
 }
 
-model uitdatabank_themes {
+model uitdatabank_theme {
   created_at DateTime     @default(now()) @db.Timestamp(6)
   updated_at DateTime     @default(now()) @db.Timestamp(6)
   id         String        @id @db.Uuid @default(uuid())
@@ -309,7 +302,7 @@ model uitdatabank_themes {
   production production[]
 }
 
-model uitdatabank_types {
+model uitdatabank_type {
   created_at DateTime     @default(now()) @db.Timestamp(6)
   updated_at DateTime     @default(now()) @db.Timestamp(6)
   id         String       @id @default(uuid()) @db.Uuid

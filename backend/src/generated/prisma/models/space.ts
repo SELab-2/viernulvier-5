@@ -259,7 +259,7 @@ export type spaceCreateInput = {
   vendor_id?: string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   halls?: Prisma.hallCreateNestedManyWithoutSpaceInput
-  location?: Prisma.locationCreateNestedOneWithoutSpaceInput
+  location?: Prisma.locationCreateNestedOneWithoutSpacesInput
 }
 
 export type spaceUncheckedCreateInput = {
@@ -281,7 +281,7 @@ export type spaceUpdateInput = {
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   halls?: Prisma.hallUpdateManyWithoutSpaceNestedInput
-  location?: Prisma.locationUpdateOneWithoutSpaceNestedInput
+  location?: Prisma.locationUpdateOneWithoutSpacesNestedInput
 }
 
 export type spaceUncheckedUpdateInput = {
@@ -432,7 +432,7 @@ export type spaceCreateWithoutHallsInput = {
   apiId?: string | null
   vendor_id?: string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  location?: Prisma.locationCreateNestedOneWithoutSpaceInput
+  location?: Prisma.locationCreateNestedOneWithoutSpacesInput
 }
 
 export type spaceUncheckedCreateWithoutHallsInput = {
@@ -468,7 +468,7 @@ export type spaceUpdateWithoutHallsInput = {
   apiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  location?: Prisma.locationUpdateOneWithoutSpaceNestedInput
+  location?: Prisma.locationUpdateOneWithoutSpacesNestedInput
 }
 
 export type spaceUncheckedUpdateWithoutHallsInput = {

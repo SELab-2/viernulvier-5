@@ -62,11 +62,6 @@ export type event_price = Prisma.event_priceModel
  */
 export type gallery = Prisma.galleryModel
 /**
- * Model gallery_item
- * 
- */
-export type gallery_item = Prisma.gallery_itemModel
-/**
  * Model genre
  * 
  */
@@ -122,25 +117,25 @@ export type space = Prisma.spaceModel
  */
 export type tag = Prisma.tagModel
 /**
- * Model uit_keywords_productions
+ * Model uit_keywords_production
  * 
  */
-export type uit_keywords_productions = Prisma.uit_keywords_productionsModel
+export type uit_keywords_production = Prisma.uit_keywords_productionModel
 /**
- * Model uitdatabank_keywords
+ * Model uitdatabank_keyword
  * 
  */
-export type uitdatabank_keywords = Prisma.uitdatabank_keywordsModel
+export type uitdatabank_keyword = Prisma.uitdatabank_keywordModel
 /**
- * Model uitdatabank_themes
+ * Model uitdatabank_theme
  * 
  */
-export type uitdatabank_themes = Prisma.uitdatabank_themesModel
+export type uitdatabank_theme = Prisma.uitdatabank_themeModel
 /**
- * Model uitdatabank_types
+ * Model uitdatabank_type
  * 
  */
-export type uitdatabank_types = Prisma.uitdatabank_typesModel
+export type uitdatabank_type = Prisma.uitdatabank_typeModel
 /**
  * Model AdminUser
  * 

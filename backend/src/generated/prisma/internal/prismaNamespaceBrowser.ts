@@ -55,7 +55,6 @@ export const ModelName = {
   event: 'event',
   event_price: 'event_price',
   gallery: 'gallery',
-  gallery_item: 'gallery_item',
   genre: 'genre',
   genre_production: 'genre_production',
   hall: 'hall',
@@ -67,10 +66,10 @@ export const ModelName = {
   rank: 'rank',
   space: 'space',
   tag: 'tag',
-  uit_keywords_productions: 'uit_keywords_productions',
-  uitdatabank_keywords: 'uitdatabank_keywords',
-  uitdatabank_themes: 'uitdatabank_themes',
-  uitdatabank_types: 'uitdatabank_types',
+  uit_keywords_production: 'uit_keywords_production',
+  uitdatabank_keyword: 'uitdatabank_keyword',
+  uitdatabank_theme: 'uitdatabank_theme',
+  uitdatabank_type: 'uitdatabank_type',
   AdminUser: 'AdminUser'
 } as const
 
@@ -96,7 +95,8 @@ export const CropScalarFieldEnum = {
   id: 'id',
   apiId: 'apiId',
   name: 'name',
-  url: 'url'
+  url: 'url',
+  item_id: 'item_id'
 } as const
 
 export type CropScalarFieldEnum = (typeof CropScalarFieldEnum)[keyof typeof CropScalarFieldEnum]
@@ -158,14 +158,6 @@ export const GalleryScalarFieldEnum = {
 export type GalleryScalarFieldEnum = (typeof GalleryScalarFieldEnum)[keyof typeof GalleryScalarFieldEnum]
 
 
-export const Gallery_itemScalarFieldEnum = {
-  gallery_id: 'gallery_id',
-  item_id: 'item_id'
-} as const
-
-export type Gallery_itemScalarFieldEnum = (typeof Gallery_itemScalarFieldEnum)[keyof typeof Gallery_itemScalarFieldEnum]
-
-
 export const GenreScalarFieldEnum = {
   created_at: 'created_at',
   updated_at: 'updated_at',
@@ -222,8 +214,7 @@ export const ItemScalarFieldEnum = {
   title: 'title',
   description: 'description',
   credits: 'credits',
-  link: 'link',
-  crops: 'crops'
+  link: 'link'
 } as const
 
 export type ItemScalarFieldEnum = (typeof ItemScalarFieldEnum)[keyof typeof ItemScalarFieldEnum]
@@ -371,15 +362,15 @@ export const TagScalarFieldEnum = {
 export type TagScalarFieldEnum = (typeof TagScalarFieldEnum)[keyof typeof TagScalarFieldEnum]
 
 
-export const Uit_keywords_productionsScalarFieldEnum = {
+export const Uit_keywords_productionScalarFieldEnum = {
   production_id: 'production_id',
   uitkeywords_id: 'uitkeywords_id'
 } as const
 
-export type Uit_keywords_productionsScalarFieldEnum = (typeof Uit_keywords_productionsScalarFieldEnum)[keyof typeof Uit_keywords_productionsScalarFieldEnum]
+export type Uit_keywords_productionScalarFieldEnum = (typeof Uit_keywords_productionScalarFieldEnum)[keyof typeof Uit_keywords_productionScalarFieldEnum]
 
 
-export const Uitdatabank_keywordsScalarFieldEnum = {
+export const Uitdatabank_keywordScalarFieldEnum = {
   created_at: 'created_at',
   updated_at: 'updated_at',
   id: 'id',
@@ -387,10 +378,10 @@ export const Uitdatabank_keywordsScalarFieldEnum = {
   name: 'name'
 } as const
 
-export type Uitdatabank_keywordsScalarFieldEnum = (typeof Uitdatabank_keywordsScalarFieldEnum)[keyof typeof Uitdatabank_keywordsScalarFieldEnum]
+export type Uitdatabank_keywordScalarFieldEnum = (typeof Uitdatabank_keywordScalarFieldEnum)[keyof typeof Uitdatabank_keywordScalarFieldEnum]
 
 
-export const Uitdatabank_themesScalarFieldEnum = {
+export const Uitdatabank_themeScalarFieldEnum = {
   created_at: 'created_at',
   updated_at: 'updated_at',
   id: 'id',
@@ -399,10 +390,10 @@ export const Uitdatabank_themesScalarFieldEnum = {
   cdb_cat_id: 'cdb_cat_id'
 } as const
 
-export type Uitdatabank_themesScalarFieldEnum = (typeof Uitdatabank_themesScalarFieldEnum)[keyof typeof Uitdatabank_themesScalarFieldEnum]
+export type Uitdatabank_themeScalarFieldEnum = (typeof Uitdatabank_themeScalarFieldEnum)[keyof typeof Uitdatabank_themeScalarFieldEnum]
 
 
-export const Uitdatabank_typesScalarFieldEnum = {
+export const Uitdatabank_typeScalarFieldEnum = {
   created_at: 'created_at',
   updated_at: 'updated_at',
   id: 'id',
@@ -411,7 +402,7 @@ export const Uitdatabank_typesScalarFieldEnum = {
   cdb_cat_id: 'cdb_cat_id'
 } as const
 
-export type Uitdatabank_typesScalarFieldEnum = (typeof Uitdatabank_typesScalarFieldEnum)[keyof typeof Uitdatabank_typesScalarFieldEnum]
+export type Uitdatabank_typeScalarFieldEnum = (typeof Uitdatabank_typeScalarFieldEnum)[keyof typeof Uitdatabank_typeScalarFieldEnum]
 
 
 export const AdminUserScalarFieldEnum = {
