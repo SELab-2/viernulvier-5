@@ -54,4 +54,23 @@ export class HallsRepository {
             }
         })
     }
+
+    async create(data: any) {
+        return this.prisma.hall.create({
+            data
+        })
+    }
+
+    async update(id: string, data: any) {
+        return this.prisma.hall.update({
+            where: { id },
+            data
+        })
+    }
+
+    async delete(id: string) {
+        return this.prisma.hall.delete({
+            where: { id }
+        })
+    }
 }

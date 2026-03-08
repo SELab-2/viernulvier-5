@@ -46,4 +46,63 @@ describe('Halls Routes', () => {
             expect(response.statusCode).toBe(404)
         })
     })
+
+    describe('POST /api/archive/halls', () => {
+        it('should create a hall and clean up', async () => {
+            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+            const response = await app.inject({
+                method: 'POST',
+                url: '/api/archive/halls',
+                headers: { authorization: `Bearer ${token}` },
+                payload: { name: { nl: 'New Hall POST' } }
+            })
+
+            expect(response.statusCode).toBe(201)
+            const body = JSON.parse(response.payload)
+            expect(body.name.nl).toBe('New Hall POST')
+
+            await app.prisma.hall.delete({ where: { id: body.id } })
+        })
+    })
+
+    describe('PUT /api/archive/halls/:id', () => {
+        it('should update a hall and clean up', async () => {
+            const hall = await app.prisma.hall.create({
+                data: { name: { nl: 'Original Hall' } }
+            })
+
+            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+            const response = await app.inject({
+                method: 'PUT',
+                url: `/api/archive/halls/${hall.id}`,
+                headers: { authorization: `Bearer ${token}` },
+                payload: { name: { nl: 'Updated Hall' } }
+            })
+
+            expect(response.statusCode).toBe(200)
+            const body = JSON.parse(response.payload)
+            expect(body.name.nl).toBe('Updated Hall')
+
+            await app.prisma.hall.delete({ where: { id: hall.id } })
+        })
+    })
+
+    describe('DELETE /api/archive/halls/:id', () => {
+        it('should delete a hall', async () => {
+            const hall = await app.prisma.hall.create({
+                data: { name: { nl: 'To Delete' } }
+            })
+
+            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+            const response = await app.inject({
+                method: 'DELETE',
+                url: `/api/archive/halls/${hall.id}`,
+                headers: { authorization: `Bearer ${token}` }
+            })
+
+            expect(response.statusCode).toBe(204)
+            const dbRecord = await app.prisma.hall.findUnique({ where: { id: hall.id } })
+            expect(dbRecord).toBeNull()
+        })
+    })
 })

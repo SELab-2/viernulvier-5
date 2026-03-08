@@ -46,4 +46,63 @@ describe('Spaces Routes', () => {
             expect(response.statusCode).toBe(404)
         })
     })
+
+    describe('POST /api/archive/spaces', () => {
+        it('should create a space and clean up', async () => {
+            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+            const response = await app.inject({
+                method: 'POST',
+                url: '/api/archive/spaces',
+                headers: { authorization: `Bearer ${token}` },
+                payload: { name: { nl: 'New Space POST' } }
+            })
+
+            expect(response.statusCode).toBe(201)
+            const body = JSON.parse(response.payload)
+            expect(body.name.nl).toBe('New Space POST')
+
+            await app.prisma.space.delete({ where: { id: body.id } })
+        })
+    })
+
+    describe('PUT /api/archive/spaces/:id', () => {
+        it('should update a space and clean up', async () => {
+            const space = await app.prisma.space.create({
+                data: { name: { nl: 'Original Space' } }
+            })
+
+            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+            const response = await app.inject({
+                method: 'PUT',
+                url: `/api/archive/spaces/${space.id}`,
+                headers: { authorization: `Bearer ${token}` },
+                payload: { name: { nl: 'Updated Space' } }
+            })
+
+            expect(response.statusCode).toBe(200)
+            const body = JSON.parse(response.payload)
+            expect(body.name.nl).toBe('Updated Space')
+
+            await app.prisma.space.delete({ where: { id: space.id } })
+        })
+    })
+
+    describe('DELETE /api/archive/spaces/:id', () => {
+        it('should delete a space', async () => {
+            const space = await app.prisma.space.create({
+                data: { name: { nl: 'To Delete' } }
+            })
+
+            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+            const response = await app.inject({
+                method: 'DELETE',
+                url: `/api/archive/spaces/${space.id}`,
+                headers: { authorization: `Bearer ${token}` }
+            })
+
+            expect(response.statusCode).toBe(204)
+            const dbRecord = await app.prisma.space.findUnique({ where: { id: space.id } })
+            expect(dbRecord).toBeNull()
+        })
+    })
 })

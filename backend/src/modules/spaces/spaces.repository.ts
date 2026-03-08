@@ -51,4 +51,23 @@ export class SpacesRepository {
             }
         })
     }
+
+    async create(data: any) {
+        return this.prisma.space.create({
+            data
+        })
+    }
+
+    async update(id: string, data: any) {
+        return this.prisma.space.update({
+            where: { id },
+            data
+        })
+    }
+
+    async delete(id: string) {
+        return this.prisma.space.delete({
+            where: { id }
+        })
+    }
 }

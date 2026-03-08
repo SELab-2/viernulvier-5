@@ -1,6 +1,10 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { SpacesService } from './spaces.service.js'
-import type { PaginationQuery } from './spaces.schema.js'
+import type { 
+    PaginationQuery, 
+    CreateSpaceInput, 
+    UpdateSpaceInput 
+} from './spaces.schema.js'
 
 export class SpacesController {
     constructor(private readonly service: SpacesService) { }
@@ -19,5 +23,22 @@ export class SpacesController {
         }
 
         return reply.status(200).send(space)
+    }
+
+    async createSpace(request: FastifyRequest<{ Body: CreateSpaceInput }>, reply: FastifyReply) {
+        const space = await this.service.createSpace(request.body)
+        return reply.status(201).send(space)
+    }
+
+    async updateSpace(request: FastifyRequest<{ Params: { id: string }, Body: UpdateSpaceInput }>, reply: FastifyReply) {
+        const { id } = request.params
+        const space = await this.service.updateSpace(id, request.body)
+        return reply.status(200).send(space)
+    }
+
+    async deleteSpace(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
+        const { id } = request.params
+        await this.service.deleteSpace(id)
+        return reply.status(204).send()
     }
 }

@@ -7,8 +7,12 @@ import {
     hallListSchema,
     hallSchema,
     idParamSchema,
-    errorSchema
+    errorSchema,
+    createHallSchema,
+    updateHallSchema
 } from './halls.schema.js'
+import { requireAuth } from '../../hooks/require-auth.js'
+import { z } from 'zod'
 
 const hallsRoutes: FastifyPluginAsync = async (fastify) => {
     const repository = new HallsRepository(fastify.prisma)
@@ -38,6 +42,48 @@ const hallsRoutes: FastifyPluginAsync = async (fastify) => {
             },
         },
         handler: (request, reply) => controller.getHall(request as any, reply),
+    })
+
+    fastify.post('/', {
+        preHandler: [requireAuth],
+        schema: {
+            tags: ['locations'],
+            summary: 'Create a new hall',
+            body: createHallSchema,
+            response: {
+                201: hallSchema,
+            },
+        },
+        handler: (request, reply) => controller.createHall(request as any, reply),
+    })
+
+    fastify.put('/:id', {
+        preHandler: [requireAuth],
+        schema: {
+            tags: ['locations'],
+            summary: 'Update a hall',
+            params: idParamSchema,
+            body: updateHallSchema,
+            response: {
+                200: hallSchema,
+                404: errorSchema
+            },
+        },
+        handler: (request, reply) => controller.updateHall(request as any, reply),
+    })
+
+    fastify.delete('/:id', {
+        preHandler: [requireAuth],
+        schema: {
+            tags: ['locations'],
+            summary: 'Delete a hall',
+            params: idParamSchema,
+            response: {
+                204: z.null(),
+                404: errorSchema
+            },
+        },
+        handler: (request, reply) => controller.deleteHall(request as any, reply),
     })
 }
 

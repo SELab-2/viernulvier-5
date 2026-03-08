@@ -7,8 +7,12 @@ import {
     spaceListSchema,
     spaceSchema,
     idParamSchema,
-    errorSchema
+    errorSchema,
+    createSpaceSchema,
+    updateSpaceSchema
 } from './spaces.schema.js'
+import { requireAuth } from '../../hooks/require-auth.js'
+import { z } from 'zod'
 
 const spacesRoutes: FastifyPluginAsync = async (fastify) => {
     const repository = new SpacesRepository(fastify.prisma)
@@ -38,6 +42,48 @@ const spacesRoutes: FastifyPluginAsync = async (fastify) => {
             },
         },
         handler: (request, reply) => controller.getSpace(request as any, reply),
+    })
+
+    fastify.post('/', {
+        preHandler: [requireAuth],
+        schema: {
+            tags: ['locations'],
+            summary: 'Create a new space',
+            body: createSpaceSchema,
+            response: {
+                201: spaceSchema,
+            },
+        },
+        handler: (request, reply) => controller.createSpace(request as any, reply),
+    })
+
+    fastify.put('/:id', {
+        preHandler: [requireAuth],
+        schema: {
+            tags: ['locations'],
+            summary: 'Update a space',
+            params: idParamSchema,
+            body: updateSpaceSchema,
+            response: {
+                200: spaceSchema,
+                404: errorSchema
+            },
+        },
+        handler: (request, reply) => controller.updateSpace(request as any, reply),
+    })
+
+    fastify.delete('/:id', {
+        preHandler: [requireAuth],
+        schema: {
+            tags: ['locations'],
+            summary: 'Delete a space',
+            params: idParamSchema,
+            response: {
+                204: z.null(),
+                404: errorSchema
+            },
+        },
+        handler: (request, reply) => controller.deleteSpace(request as any, reply),
     })
 }
 

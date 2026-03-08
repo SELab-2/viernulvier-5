@@ -32,6 +32,18 @@ export const hallListSchema = z.object({
     }),
 })
 
+export const createHallSchema = z.object({
+    name: z.any().nullable().optional(),
+    space_id: z.string().uuid().nullable().optional(),
+})
+
+export const updateHallSchema = z.object({
+    name: z.any().nullable().optional(),
+    space_id: z.string().uuid().nullable().optional(),
+})
+
 export type PaginationQuery = z.infer<typeof paginationQuerySchema>
 export type HallResponse = z.infer<typeof hallSchema>
 export type HallListResponse = z.infer<typeof hallListSchema>
+export type CreateHallInput = z.infer<typeof createHallSchema>
+export type UpdateHallInput = z.infer<typeof updateHallSchema>

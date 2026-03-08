@@ -33,9 +33,31 @@ export const locationListSchema = z.object({
     }),
 })
 
+export const createLocationSchema = z.object({
+    name: z.any().nullable().optional(),
+    code: z.string().nullable().optional(),
+    street: z.string().nullable().optional(),
+    number: z.string().nullable().optional(),
+    postal_code: z.string().nullable().optional(),
+    city: z.string().nullable().optional(),
+    country: z.string().nullable().optional(),
+})
+
+export const updateLocationSchema = z.object({
+    name: z.any().nullable().optional(),
+    code: z.string().nullable().optional(),
+    street: z.string().nullable().optional(),
+    number: z.string().nullable().optional(),
+    postal_code: z.string().nullable().optional(),
+    city: z.string().nullable().optional(),
+    country: z.string().nullable().optional(),
+})
+
 export type PaginationQuery = z.infer<typeof paginationQuerySchema>
 export type LocationResponse = z.infer<typeof locationSchema>
 export type LocationListResponse = z.infer<typeof locationListSchema>
+export type CreateLocationInput = z.infer<typeof createLocationSchema>
+export type UpdateLocationInput = z.infer<typeof updateLocationSchema>
 
 // Schema for a single hall record
 export const hallSchema = z.object({

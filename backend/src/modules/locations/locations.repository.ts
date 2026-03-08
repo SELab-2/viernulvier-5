@@ -56,6 +56,25 @@ export class LocationsRepository {
         })
     }
 
+    async create(data: any) {
+        return this.prisma.location.create({
+            data
+        })
+    }
+
+    async update(id: string, data: any) {
+        return this.prisma.location.update({
+            where: { id },
+            data
+        })
+    }
+
+    async delete(id: string) {
+        return this.prisma.location.delete({
+            where: { id }
+        })
+    }
+
     async findAllHalls(options: { page: number; limit: number; search?: string }) {
         const { page, limit, search } = options
         const skip = (page - 1) * limit

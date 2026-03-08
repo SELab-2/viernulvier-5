@@ -1,6 +1,10 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { LocationsService } from './locations.service.js'
-import type { PaginationQuery } from './locations.schema.js'
+import type { 
+    PaginationQuery, 
+    CreateLocationInput, 
+    UpdateLocationInput 
+} from './locations.schema.js'
 
 export class LocationsController {
     constructor(private readonly service: LocationsService) { }
@@ -19,6 +23,23 @@ export class LocationsController {
         }
 
         return reply.status(200).send(location)
+    }
+
+    async createLocation(request: FastifyRequest<{ Body: CreateLocationInput }>, reply: FastifyReply) {
+        const location = await this.service.createLocation(request.body)
+        return reply.status(201).send(location)
+    }
+
+    async updateLocation(request: FastifyRequest<{ Params: { id: string }, Body: UpdateLocationInput }>, reply: FastifyReply) {
+        const { id } = request.params
+        const location = await this.service.updateLocation(id, request.body)
+        return reply.status(200).send(location)
+    }
+
+    async deleteLocation(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
+        const { id } = request.params
+        await this.service.deleteLocation(id)
+        return reply.status(204).send()
     }
 
     async getHalls(request: FastifyRequest<{ Querystring: PaginationQuery }>, reply: FastifyReply) {

@@ -37,6 +37,18 @@ export class LocationsService {
         return this.repository.findById(id) as any
     }
 
+    async createLocation(data: CreateLocationInput): Promise<LocationResponse> {
+        return this.repository.create(data) as any
+    }
+
+    async updateLocation(id: string, data: UpdateLocationInput): Promise<LocationResponse> {
+        return this.repository.update(id, data) as any
+    }
+
+    async deleteLocation(id: string): Promise<void> {
+        await this.repository.delete(id)
+    }
+
     async getHalls(options: PaginationQuery): Promise<HallListResponse> {
         const { page, limit, search } = options
 

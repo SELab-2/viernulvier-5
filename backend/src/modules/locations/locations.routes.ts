@@ -11,8 +11,12 @@ import {
     spaceListSchema,
     spaceSchema,
     idParamSchema,
-    errorSchema
+    errorSchema,
+    createLocationSchema,
+    updateLocationSchema
 } from './locations.schema.js'
+import { requireAuth } from '../../hooks/require-auth.js'
+import { z } from 'zod'
 
 const locationsRoutes: FastifyPluginAsync = async (fastify) => {
     const repository = new LocationsRepository(fastify.prisma)
@@ -45,8 +49,49 @@ const locationsRoutes: FastifyPluginAsync = async (fastify) => {
         handler: (request, reply) => controller.getLocation(request as any, reply),
     })
 
+    fastify.post('/', {
+        preHandler: [requireAuth],
+        schema: {
+            tags: ['locations'],
+            summary: 'Create a new location',
+            body: createLocationSchema,
+            response: {
+                201: locationSchema,
+            },
+        },
+        handler: (request, reply) => controller.createLocation(request as any, reply),
+    })
+
+    fastify.put('/:id', {
+        preHandler: [requireAuth],
+        schema: {
+            tags: ['locations'],
+            summary: 'Update a location',
+            params: idParamSchema,
+            body: updateLocationSchema,
+            response: {
+                200: locationSchema,
+                404: errorSchema
+            },
+        },
+        handler: (request, reply) => controller.updateLocation(request as any, reply),
+    })
+
+    fastify.delete('/:id', {
+        preHandler: [requireAuth],
+        schema: {
+            tags: ['locations'],
+            summary: 'Delete a location',
+            params: idParamSchema,
+            response: {
+                204: z.null(),
+                404: errorSchema
+            },
+        },
+        handler: (request, reply) => controller.deleteLocation(request as any, reply),
+    })
+
     // Halls (prefix will be /api/archive/halls when registered in app.ts)
-    // Wait, let's check app.ts registration
 }
 
 export default locationsRoutes

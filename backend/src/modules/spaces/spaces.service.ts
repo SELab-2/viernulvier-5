@@ -1,5 +1,10 @@
-import { SpacesRepository } from './spaces.repository.js'
-import type { PaginationQuery, SpaceListResponse, SpaceResponse } from './spaces.schema.js'
+import type { 
+    PaginationQuery, 
+    SpaceListResponse, 
+    SpaceResponse,
+    CreateSpaceInput,
+    UpdateSpaceInput
+} from './spaces.schema.js'
 
 export class SpacesService {
     constructor(private readonly repository: SpacesRepository) { }
@@ -27,5 +32,17 @@ export class SpacesService {
 
     async getSpace(id: string): Promise<SpaceResponse | null> {
         return this.repository.findById(id) as any
+    }
+
+    async createSpace(data: CreateSpaceInput): Promise<SpaceResponse> {
+        return this.repository.create(data) as any
+    }
+
+    async updateSpace(id: string, data: UpdateSpaceInput): Promise<SpaceResponse> {
+        return this.repository.update(id, data) as any
+    }
+
+    async deleteSpace(id: string): Promise<void> {
+        await this.repository.delete(id)
     }
 }

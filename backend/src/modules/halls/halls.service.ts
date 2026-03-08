@@ -1,5 +1,10 @@
-import { HallsRepository } from './halls.repository.js'
-import type { PaginationQuery, HallListResponse, HallResponse } from './halls.schema.js'
+import type { 
+    PaginationQuery, 
+    HallListResponse, 
+    HallResponse,
+    CreateHallInput,
+    UpdateHallInput
+} from './halls.schema.js'
 
 export class HallsService {
     constructor(private readonly repository: HallsRepository) { }
@@ -27,5 +32,17 @@ export class HallsService {
 
     async getHall(id: string): Promise<HallResponse | null> {
         return this.repository.findById(id) as any
+    }
+
+    async createHall(data: CreateHallInput): Promise<HallResponse> {
+        return this.repository.create(data) as any
+    }
+
+    async updateHall(id: string, data: UpdateHallInput): Promise<HallResponse> {
+        return this.repository.update(id, data) as any
+    }
+
+    async deleteHall(id: string): Promise<void> {
+        await this.repository.delete(id)
     }
 }

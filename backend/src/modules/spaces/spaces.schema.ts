@@ -32,6 +32,18 @@ export const spaceListSchema = z.object({
     }),
 })
 
+export const createSpaceSchema = z.object({
+    name: z.any().nullable().optional(),
+    location_id: z.string().uuid().nullable().optional(),
+})
+
+export const updateSpaceSchema = z.object({
+    name: z.any().nullable().optional(),
+    location_id: z.string().uuid().nullable().optional(),
+})
+
 export type PaginationQuery = z.infer<typeof paginationQuerySchema>
 export type SpaceResponse = z.infer<typeof spaceSchema>
 export type SpaceListResponse = z.infer<typeof spaceListSchema>
+export type CreateSpaceInput = z.infer<typeof createSpaceSchema>
+export type UpdateSpaceInput = z.infer<typeof updateSpaceSchema>
