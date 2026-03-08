@@ -18,6 +18,24 @@ describe('Locations Routes', () => {
         expect(response.statusCode).toBe(200)
     })
 
+    it('GET /api/archive/locations should work with a search query', async () => {
+        const location = await app.prisma.location.create({
+            data: { name: { nl: 'Searchable Location' }, city: 'Search City' }
+        })
+
+        const response = await app.inject({
+            method: 'GET',
+            url: '/api/archive/locations',
+            query: { search: 'Searchable' }
+        })
+
+        expect(response.statusCode).toBe(200)
+        const body = JSON.parse(response.payload)
+        expect(body.data.length).toBeGreaterThanOrEqual(1)
+
+        await app.prisma.location.delete({ where: { id: location.id } })
+    })
+
     describe('GET /api/archive/locations/:id', () => {
         it('should return a location by ID with 200 OK', async () => {
             const location = await app.prisma.location.create({

@@ -2,11 +2,9 @@ import { LocationsRepository } from './locations.repository.js'
 import type { 
     PaginationQuery, 
     LocationListResponse, 
-    HallListResponse, 
-    SpaceListResponse,
     LocationResponse,
-    HallResponse,
-    SpaceResponse
+    CreateLocationInput,
+    UpdateLocationInput
 } from './locations.schema.js'
 
 export class LocationsService {
@@ -47,55 +45,5 @@ export class LocationsService {
 
     async deleteLocation(id: string): Promise<void> {
         await this.repository.delete(id)
-    }
-
-    async getHalls(options: PaginationQuery): Promise<HallListResponse> {
-        const { page, limit, search } = options
-
-        const [data, total] = await Promise.all([
-            this.repository.findAllHalls({ page, limit, search }),
-            this.repository.countHalls(search),
-        ])
-
-        const totalPages = Math.ceil(total / limit)
-
-        return {
-            data: data as any,
-            meta: {
-                total,
-                page,
-                limit,
-                totalPages,
-            },
-        }
-    }
-
-    async getHall(id: string): Promise<HallResponse | null> {
-        return this.repository.findHallById(id) as any
-    }
-
-    async getSpaces(options: PaginationQuery): Promise<SpaceListResponse> {
-        const { page, limit, search } = options
-
-        const [data, total] = await Promise.all([
-            this.repository.findAllSpaces({ page, limit, search }),
-            this.repository.countSpaces(search),
-        ])
-
-        const totalPages = Math.ceil(total / limit)
-
-        return {
-            data: data as any,
-            meta: {
-                total,
-                page,
-                limit,
-                totalPages,
-            },
-        }
-    }
-
-    async getSpace(id: string): Promise<SpaceResponse | null> {
-        return this.repository.findSpaceById(id) as any
     }
 }
