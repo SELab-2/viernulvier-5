@@ -35,6 +35,25 @@ export class MediaRepository {
         })
     }
 
+    async createGallery(data: any) {
+        return this.prisma.gallery.create({
+            data
+        })
+    }
+
+    async updateGallery(id: string, data: any) {
+        return this.prisma.gallery.update({
+            where: { id },
+            data
+        })
+    }
+
+    async deleteGallery(id: string) {
+        return this.prisma.gallery.delete({
+            where: { id }
+        })
+    }
+
     // Items
     async findAllItems(options: { page: number; limit: number; search?: string }) {
         const { page, limit, search } = options
@@ -74,6 +93,25 @@ export class MediaRepository {
         })
     }
 
+    async createItem(data: any) {
+        return this.prisma.item.create({
+            data
+        })
+    }
+
+    async updateItem(id: string, data: any) {
+        return this.prisma.item.update({
+            where: { id },
+            data
+        })
+    }
+
+    async deleteItem(id: string) {
+        return this.prisma.item.delete({
+            where: { id }
+        })
+    }
+
     // Crops
     async findAllCrops(options: { page: number; limit: number; search?: string }) {
         const { page, limit, search } = options
@@ -99,6 +137,25 @@ export class MediaRepository {
             include: {
                 item: true
             }
+        })
+    }
+
+    async createCrop(data: any) {
+        return this.prisma.crop.create({
+            data
+        })
+    }
+
+    async updateCrop(id: string, data: any) {
+        return this.prisma.crop.update({
+            where: { id },
+            data
+        })
+    }
+
+    async deleteCrop(id: string) {
+        return this.prisma.crop.delete({
+            where: { id }
         })
     }
 }
