@@ -4,7 +4,11 @@ import type {
     GenreListResponse, 
     TagListResponse,
     GenreResponse,
-    TagResponse
+    TagResponse,
+    CreateGenreInput,
+    UpdateGenreInput,
+    CreateTagInput,
+    UpdateTagInput
 } from './taxonomies.schema.js'
 
 export class TaxonomiesService {
@@ -35,6 +39,18 @@ export class TaxonomiesService {
         return this.repository.findGenreById(id) as any
     }
 
+    async createGenre(data: CreateGenreInput): Promise<GenreResponse> {
+        return this.repository.createGenre(data) as any
+    }
+
+    async updateGenre(id: string, data: UpdateGenreInput): Promise<GenreResponse> {
+        return this.repository.updateGenre(id, data) as any
+    }
+
+    async deleteGenre(id: string): Promise<void> {
+        await this.repository.deleteGenre(id)
+    }
+
     async getTags(options: PaginationQuery): Promise<TagListResponse> {
         const { page, limit, search } = options
 
@@ -58,5 +74,17 @@ export class TaxonomiesService {
 
     async getTag(id: string): Promise<TagResponse | null> {
         return this.repository.findTagById(id) as any
+    }
+
+    async createTag(data: CreateTagInput): Promise<TagResponse> {
+        return this.repository.createTag(data) as any
+    }
+
+    async updateTag(id: string, data: UpdateTagInput): Promise<TagResponse> {
+        return this.repository.updateTag(id, data) as any
+    }
+
+    async deleteTag(id: string): Promise<void> {
+        await this.repository.deleteTag(id)
     }
 }

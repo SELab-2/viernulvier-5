@@ -56,6 +56,25 @@ export class TaxonomiesRepository {
         })
     }
 
+    async createGenre(data: any) {
+        return this.prisma.genre.create({
+            data
+        })
+    }
+
+    async updateGenre(id: string, data: any) {
+        return this.prisma.genre.update({
+            where: { id },
+            data
+        })
+    }
+
+    async deleteGenre(id: string) {
+        return this.prisma.genre.delete({
+            where: { id }
+        })
+    }
+
     /**
      * Get a paginated list of tags from the database.
      */
@@ -107,6 +126,25 @@ export class TaxonomiesRepository {
             include: {
                 gallery: true
             }
+        })
+    }
+
+    async createTag(data: any) {
+        return this.prisma.tag.create({
+            data
+        })
+    }
+
+    async updateTag(id: string, data: any) {
+        return this.prisma.tag.update({
+            where: { id },
+            data
+        })
+    }
+
+    async deleteTag(id: string) {
+        return this.prisma.tag.delete({
+            where: { id }
         })
     }
 }

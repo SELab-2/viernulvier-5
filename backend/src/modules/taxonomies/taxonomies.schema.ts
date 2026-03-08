@@ -33,9 +33,23 @@ export const genreListSchema = z.object({
     }),
 })
 
+export const createGenreSchema = z.object({
+    type: z.string().nullable().optional(),
+    name: z.any().nullable().optional(),
+    slug: z.any().nullable().optional(),
+})
+
+export const updateGenreSchema = z.object({
+    type: z.string().nullable().optional(),
+    name: z.any().nullable().optional(),
+    slug: z.any().nullable().optional(),
+})
+
 export type PaginationQuery = z.infer<typeof paginationQuerySchema>
 export type GenreResponse = z.infer<typeof genreSchema>
 export type GenreListResponse = z.infer<typeof genreListSchema>
+export type CreateGenreInput = z.infer<typeof createGenreSchema>
+export type UpdateGenreInput = z.infer<typeof updateGenreSchema>
 
 // Schema for a single tag record
 export const tagSchema = z.object({
@@ -57,5 +71,17 @@ export const tagListSchema = z.object({
     }),
 })
 
+export const createTagSchema = z.object({
+    code: z.string().nullable().optional(),
+    name: z.any().nullable().optional(),
+})
+
+export const updateTagSchema = z.object({
+    code: z.string().nullable().optional(),
+    name: z.any().nullable().optional(),
+})
+
 export type TagResponse = z.infer<typeof tagSchema>
 export type TagListResponse = z.infer<typeof tagListSchema>
+export type CreateTagInput = z.infer<typeof createTagSchema>
+export type UpdateTagInput = z.infer<typeof updateTagSchema>
