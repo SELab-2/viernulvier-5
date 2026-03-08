@@ -6,7 +6,6 @@ import {
     paginationQuerySchema, 
     eventListSchema,
     eventPriceListSchema,
-    eventStatusListSchema,
     eventSchema,
     updateEventSchema,
     updateEventParamsSchema,
@@ -41,18 +40,6 @@ const eventsRoutes: FastifyPluginAsync = async (fastify) => {
             },
         },
         handler: (request, reply) => controller.getPrices(request as any, reply),
-    })
-
-    fastify.get('/statuses', {
-        schema: {
-            tags: ['events'],
-            summary: 'Get a paginated list of event statuses',
-            querystring: paginationQuerySchema,
-            response: {
-                200: eventStatusListSchema,
-            },
-        },
-        handler: (request, reply) => controller.getStatuses(request as any, reply),
     })
 
     // POST /api/archive/events

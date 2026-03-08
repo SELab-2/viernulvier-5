@@ -20,7 +20,7 @@ import spacesRoutes from './modules/spaces/spaces.routes.js'
 import mediaRoutes from './modules/media/media.routes.js'
 import organisationsRoutes from './modules/organisations/organisations.routes.js'
 import authRoutes from './modules/auth/auth.routes.js'
-import pricesRoutes from './modules/prices/prices.routes.js'
+import uitdatabankRoutes from './modules/uitdatabank/uitdatabank.routes.js'
 
 /**
  * Build the Fastify application.
@@ -61,7 +61,7 @@ export async function buildApp(opts = {}): Promise<FastifyInstance> {
     await app.register(spacesRoutes, { prefix: '/api/archive/spaces' })
     await app.register(mediaRoutes, { prefix: '/api/archive/media' })
     await app.register(organisationsRoutes, { prefix: '/api/archive/organisations' })
-    await app.register(pricesRoutes, { prefix: '/api/archive/prices' })
+    await app.register(uitdatabankRoutes, { prefix: '/api/archive/uitdatabank' })
     await app.register(authRoutes, { prefix: '/api/auth' })
 
     return app

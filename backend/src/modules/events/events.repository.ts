@@ -67,48 +67,6 @@ export class EventsRepository {
         })
     }
 
-    async findAllStatuses(options: { page: number; limit: number; search?: string }) {
-        const { page, limit, search } = options
-        const skip = (page - 1) * limit
-
-        const where = search ? {
-            OR: [
-                { short_name: { contains: search, mode: 'insensitive' } },
-                {
-                    name: {
-                        path: ['nl'],
-                        string_contains: search,
-                    },
-                },
-            ],
-        } : {}
-
-        return this.prisma.status.findMany({
-            where: where as any,
-            skip,
-            take: limit,
-            orderBy: { created_at: 'desc' },
-        })
-    }
-
-    async countStatuses(search?: string) {
-        const where = search ? {
-            OR: [
-                { short_name: { contains: search, mode: 'insensitive' } },
-                {
-                    name: {
-                        path: ['nl'],
-                        string_contains: search,
-                    },
-                },
-            ],
-        } : {}
-
-        return this.prisma.status.count({
-            where: where as any,
-        })
-    }
-
     async create(data: any) {
         return this.prisma.event.create({
             data,

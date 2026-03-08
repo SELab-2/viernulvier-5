@@ -49,27 +49,6 @@ export const eventPriceListSchema = z.object({
     }),
 })
 
-export const eventStatusSchema = z.object({
-    id: z.string().uuid(),
-    name: z.any().nullable(),
-    short_name: z.string().nullable(),
-    fixed: z.boolean().nullable(),
-    visible: z.boolean().nullable(),
-    bookable: z.boolean().nullable(),
-    created_at: z.date(),
-    updated_at: z.date(),
-})
-
-export const eventStatusListSchema = z.object({
-    data: z.array(z.any()),
-    meta: z.object({
-        total: z.number(),
-        page: z.number(),
-        limit: z.number(),
-        totalPages: z.number(),
-    }),
-})
-
 export const updateEventSchema = z.object({
     starts_at: z.coerce.date().optional(),
     ends_at: z.coerce.date().optional(),
@@ -95,7 +74,5 @@ export type EventResponse = z.infer<typeof eventSchema>
 export type EventListResponse = z.infer<typeof eventListSchema>
 export type EventPriceResponse = z.infer<typeof eventPriceSchema>
 export type EventPriceListResponse = z.infer<typeof eventPriceListSchema>
-export type EventStatusResponse = z.infer<typeof eventStatusSchema>
-export type EventStatusListResponse = z.infer<typeof eventStatusListSchema>
 export type UpdateEventInput = z.infer<typeof updateEventSchema>
 export type CreateEventInput = z.infer<typeof createEventSchema>

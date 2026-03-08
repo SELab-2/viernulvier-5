@@ -15,11 +15,6 @@ export class EventsController {
         return reply.status(200).send(prices)
     }
 
-    async getStatuses(request: FastifyRequest<{ Querystring: PaginationQuery }>, reply: FastifyReply) {
-        const statuses = await this.service.getStatuses(request.query)
-        return reply.status(200).send(statuses)
-    }
-
     async createEvent(request: FastifyRequest<{ Body: CreateEventInput }>, reply: FastifyReply) {
         const event = await this.service.createEvent(request.body)
         return reply.status(201).send(event)

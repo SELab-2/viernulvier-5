@@ -142,21 +142,4 @@ describe('Events Routes', () => {
             expect(Array.isArray(body.data)).toBe(true)
         })
     })
-
-    describe('GET /api/archive/events/statuses', () => {
-        it('should return a paginated list of event statuses with 200 OK', async () => {
-            const response = await app.inject({
-                method: 'GET',
-                url: '/api/archive/events/statuses',
-                query: { page: '1', limit: '5' }
-            })
-
-            const body = JSON.parse(response.payload)
-
-            expect(response.statusCode).toBe(200)
-            expect(body).toHaveProperty('data')
-            expect(body).toHaveProperty('meta')
-            expect(Array.isArray(body.data)).toBe(true)
-        })
-    })
 })
