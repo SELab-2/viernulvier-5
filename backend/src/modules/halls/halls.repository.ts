@@ -41,4 +41,17 @@ export class HallsRepository {
             where: where as any,
         })
     }
+
+    async findById(id: string) {
+        return this.prisma.hall.findUnique({
+            where: { id },
+            include: {
+                space: {
+                    include: {
+                        location: true
+                    }
+                }
+            }
+        })
+    }
 }

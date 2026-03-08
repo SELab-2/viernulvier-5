@@ -1,5 +1,5 @@
 import { HallsRepository } from './halls.repository.js'
-import type { PaginationQuery, HallListResponse } from './halls.schema.js'
+import type { PaginationQuery, HallListResponse, HallResponse } from './halls.schema.js'
 
 export class HallsService {
     constructor(private readonly repository: HallsRepository) { }
@@ -23,5 +23,9 @@ export class HallsService {
                 totalPages,
             },
         }
+    }
+
+    async getHall(id: string): Promise<HallResponse | null> {
+        return this.repository.findById(id) as any
     }
 }

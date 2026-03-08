@@ -29,6 +29,19 @@ export class UitdatabankRepository {
         })
     }
 
+    async findKeywordById(id: string) {
+        return this.prisma.uitdatabank_keywords.findUnique({
+            where: { id },
+            include: {
+                uit_keywords_productions: {
+                    include: {
+                        production: true
+                    }
+                }
+            }
+        })
+    }
+
     async findAllThemes(options: { page: number; limit: number; search?: string }) {
         const { page, limit, search } = options
         const skip = (page - 1) * limit
@@ -55,6 +68,15 @@ export class UitdatabankRepository {
         })
     }
 
+    async findThemeById(id: string) {
+        return this.prisma.uitdatabank_themes.findUnique({
+            where: { id },
+            include: {
+                production: true
+            }
+        })
+    }
+
     async findAllTypes(options: { page: number; limit: number; search?: string }) {
         const { page, limit, search } = options
         const skip = (page - 1) * limit
@@ -78,6 +100,15 @@ export class UitdatabankRepository {
 
         return this.prisma.uitdatabank_types.count({
             where,
+        })
+    }
+
+    async findTypeById(id: string) {
+        return this.prisma.uitdatabank_types.findUnique({
+            where: { id },
+            include: {
+                production: true
+            }
         })
     }
 }

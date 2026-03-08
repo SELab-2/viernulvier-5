@@ -5,8 +5,13 @@ import { MediaController } from './media.controller.js'
 import { 
     paginationQuerySchema, 
     galleryListSchema, 
+    gallerySchema,
     itemListSchema, 
-    cropListSchema 
+    itemSchema,
+    cropListSchema,
+    cropSchema,
+    idParamSchema,
+    errorSchema
 } from './media.schema.js'
 
 const mediaRoutes: FastifyPluginAsync = async (fastify) => {
@@ -24,6 +29,19 @@ const mediaRoutes: FastifyPluginAsync = async (fastify) => {
         handler: (request, reply) => controller.getGalleries(request as any, reply),
     })
 
+    fastify.get('/galleries/:id', {
+        schema: {
+            tags: ['media'],
+            summary: 'Get a gallery by ID',
+            params: idParamSchema,
+            response: { 
+                200: gallerySchema,
+                404: errorSchema
+            },
+        },
+        handler: (request, reply) => controller.getGallery(request as any, reply),
+    })
+
     fastify.get('/items', {
         schema: {
             tags: ['media'],
@@ -34,6 +52,19 @@ const mediaRoutes: FastifyPluginAsync = async (fastify) => {
         handler: (request, reply) => controller.getItems(request as any, reply),
     })
 
+    fastify.get('/items/:id', {
+        schema: {
+            tags: ['media'],
+            summary: 'Get a media item by ID',
+            params: idParamSchema,
+            response: { 
+                200: itemSchema,
+                404: errorSchema
+            },
+        },
+        handler: (request, reply) => controller.getItem(request as any, reply),
+    })
+
     fastify.get('/items/crops', {
         schema: {
             tags: ['media'],
@@ -42,6 +73,19 @@ const mediaRoutes: FastifyPluginAsync = async (fastify) => {
             response: { 200: cropListSchema },
         },
         handler: (request, reply) => controller.getCrops(request as any, reply),
+    })
+
+    fastify.get('/items/crops/:id', {
+        schema: {
+            tags: ['media'],
+            summary: 'Get a crop by ID',
+            params: idParamSchema,
+            response: { 
+                200: cropSchema,
+                404: errorSchema
+            },
+        },
+        handler: (request, reply) => controller.getCrop(request as any, reply),
     })
 }
 

@@ -31,6 +31,10 @@ export class ProductionsService {
         }
     }
 
+    async getProduction(id: string): Promise<ProductionResponse | null> {
+        return this.repository.findById(id) as any
+    }
+
     async createProduction(data: CreateProductionInput): Promise<ProductionResponse> {
         return this.repository.create(data) as any
     }

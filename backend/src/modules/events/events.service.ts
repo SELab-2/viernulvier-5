@@ -5,7 +5,8 @@ import type {
     EventPriceListResponse,
     UpdateEventInput,
     EventResponse,
-    CreateEventInput
+    CreateEventInput,
+    EventPriceResponse
 } from './events.schema.js'
 
 export class EventsService {
@@ -51,6 +52,14 @@ export class EventsService {
                 totalPages,
             },
         }
+    }
+
+    async getEventPrice(id: string): Promise<EventPriceResponse | null> {
+        return this.repository.findPriceById(id) as any
+    }
+
+    async getEvent(id: string): Promise<EventResponse | null> {
+        return this.repository.findById(id) as any
     }
 
     async createEvent(data: CreateEventInput): Promise<EventResponse> {

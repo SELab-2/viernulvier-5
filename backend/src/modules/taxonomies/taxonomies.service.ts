@@ -1,5 +1,11 @@
 import { TaxonomiesRepository } from './taxonomies.repository.js'
-import type { PaginationQuery, GenreListResponse, TagListResponse } from './taxonomies.schema.js'
+import type { 
+    PaginationQuery, 
+    GenreListResponse, 
+    TagListResponse,
+    GenreResponse,
+    TagResponse
+} from './taxonomies.schema.js'
 
 export class TaxonomiesService {
     constructor(private readonly repository: TaxonomiesRepository) { }
@@ -25,6 +31,10 @@ export class TaxonomiesService {
         }
     }
 
+    async getGenre(id: string): Promise<GenreResponse | null> {
+        return this.repository.findGenreById(id) as any
+    }
+
     async getTags(options: PaginationQuery): Promise<TagListResponse> {
         const { page, limit, search } = options
 
@@ -44,5 +54,9 @@ export class TaxonomiesService {
                 totalPages,
             },
         }
+    }
+
+    async getTag(id: string): Promise<TagResponse | null> {
+        return this.repository.findTagById(id) as any
     }
 }

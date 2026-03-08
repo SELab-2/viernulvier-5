@@ -3,7 +3,10 @@ import type {
     PaginationQuery, 
     KeywordListResponse, 
     ThemeListResponse,
-    TypeListResponse
+    TypeListResponse,
+    KeywordResponse,
+    ThemeResponse,
+    TypeResponse
 } from './uitdatabank.schema.js'
 
 export class UitdatabankService {
@@ -30,6 +33,10 @@ export class UitdatabankService {
         }
     }
 
+    async getKeyword(id: string): Promise<KeywordResponse | null> {
+        return this.repository.findKeywordById(id) as any
+    }
+
     async getThemes(options: PaginationQuery): Promise<ThemeListResponse> {
         const { page, limit, search } = options
 
@@ -51,6 +58,10 @@ export class UitdatabankService {
         }
     }
 
+    async getTheme(id: string): Promise<ThemeResponse | null> {
+        return this.repository.findThemeById(id) as any
+    }
+
     async getTypes(options: PaginationQuery): Promise<TypeListResponse> {
         const { page, limit, search } = options
 
@@ -70,5 +81,9 @@ export class UitdatabankService {
                 totalPages,
             },
         }
+    }
+
+    async getType(id: string): Promise<TypeResponse | null> {
+        return this.repository.findTypeById(id) as any
     }
 }

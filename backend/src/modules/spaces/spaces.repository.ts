@@ -41,4 +41,14 @@ export class SpacesRepository {
             where: where as any,
         })
     }
+
+    async findById(id: string) {
+        return this.prisma.space.findUnique({
+            where: { id },
+            include: {
+                halls: true,
+                location: true
+            }
+        })
+    }
 }

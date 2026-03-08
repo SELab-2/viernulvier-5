@@ -43,6 +43,19 @@ export class TaxonomiesRepository {
         })
     }
 
+    async findGenreById(id: string) {
+        return this.prisma.genre.findUnique({
+            where: { id },
+            include: {
+                genre_production: {
+                    include: {
+                        production: true
+                    }
+                }
+            }
+        })
+    }
+
     /**
      * Get a paginated list of tags from the database.
      */
@@ -87,5 +100,14 @@ export class TaxonomiesRepository {
             where: where as any,
         })
     }
+
+    async findTagById(id: string) {
+        return this.prisma.tag.findUnique({
+            where: { id },
+            include: {
+                gallery: true
+            }
+        })
     }
+}
 

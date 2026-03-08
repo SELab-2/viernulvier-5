@@ -35,6 +35,17 @@ export class EventsRepository {
         })
     }
 
+    async findById(id: string) {
+        return this.prisma.event.findUnique({
+            where: { id },
+            include: {
+                event_prices: true,
+                hall: true,
+                production: true
+            }
+        })
+    }
+
     async findAllPrices(options: { page: number; limit: number; search?: string }) {
         const { page, limit, search } = options
         const skip = (page - 1) * limit
@@ -64,6 +75,17 @@ export class EventsRepository {
 
         return this.prisma.event_price.count({
             where: where as any,
+        })
+    }
+
+    async findPriceById(id: string) {
+        return this.prisma.event_price.findUnique({
+            where: { id },
+            include: {
+                event: true,
+                price: true,
+                rank: true
+            }
         })
     }
 

@@ -1,5 +1,5 @@
 import { SpacesRepository } from './spaces.repository.js'
-import type { PaginationQuery, SpaceListResponse } from './spaces.schema.js'
+import type { PaginationQuery, SpaceListResponse, SpaceResponse } from './spaces.schema.js'
 
 export class SpacesService {
     constructor(private readonly repository: SpacesRepository) { }
@@ -23,5 +23,9 @@ export class SpacesService {
                 totalPages,
             },
         }
+    }
+
+    async getSpace(id: string): Promise<SpaceResponse | null> {
+        return this.repository.findById(id) as any
     }
 }

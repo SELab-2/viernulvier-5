@@ -22,6 +22,19 @@ export class MediaRepository {
         return this.prisma.gallery.count({ where: where as any })
     }
 
+    async findGalleryById(id: string) {
+        return this.prisma.gallery.findUnique({
+            where: { id },
+            include: {
+                items: true,
+                tags: true,
+                media_gallery_productions: true,
+                poster_gallery_productions: true,
+                review_gallery_productions: true
+            }
+        })
+    }
+
     // Items
     async findAllItems(options: { page: number; limit: number; search?: string }) {
         const { page, limit, search } = options
@@ -51,6 +64,16 @@ export class MediaRepository {
         return this.prisma.item.count({ where: where as any })
     }
 
+    async findItemById(id: string) {
+        return this.prisma.item.findUnique({
+            where: { id },
+            include: {
+                gallery: true,
+                crop: true
+            }
+        })
+    }
+
     // Crops
     async findAllCrops(options: { page: number; limit: number; search?: string }) {
         const { page, limit, search } = options
@@ -68,5 +91,14 @@ export class MediaRepository {
     async countCrops(search?: string) {
         const where = search ? { name: { contains: search } } : {}
         return this.prisma.crop.count({ where: where as any })
+    }
+
+    async findCropById(id: string) {
+        return this.prisma.crop.findUnique({
+            where: { id },
+            include: {
+                item: true
+            }
+        })
     }
 }

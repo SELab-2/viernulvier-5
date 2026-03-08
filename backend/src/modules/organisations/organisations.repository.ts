@@ -34,4 +34,10 @@ export class OrganisationsRepository {
             where: where as any,
         })
     }
+
+    async findById(id: string) {
+        return this.prisma.organisations.findUnique({
+            where: { id }
+        })
+    }
 }

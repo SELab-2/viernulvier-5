@@ -6,10 +6,12 @@ import {
     paginationQuerySchema, 
     eventListSchema,
     eventPriceListSchema,
+    eventPriceSchema,
     eventSchema,
     updateEventSchema,
     updateEventParamsSchema,
-    createEventSchema
+    createEventSchema,
+    errorSchema
 } from './events.schema.js'
 import { requireAuth } from '../../hooks/require-auth.js'
 
@@ -30,6 +32,19 @@ const eventsRoutes: FastifyPluginAsync = async (fastify) => {
         handler: (request, reply) => controller.getEvents(request as any, reply),
     })
 
+    fastify.get('/:id', {
+        schema: {
+            tags: ['events'],
+            summary: 'Get an event by ID',
+            params: updateEventParamsSchema,
+            response: {
+                200: eventSchema,
+                404: errorSchema
+            },
+        },
+        handler: (request, reply) => controller.getEvent(request as any, reply),
+    })
+
     fastify.get('/prices', {
         schema: {
             tags: ['events'],
@@ -40,6 +55,19 @@ const eventsRoutes: FastifyPluginAsync = async (fastify) => {
             },
         },
         handler: (request, reply) => controller.getPrices(request as any, reply),
+    })
+
+    fastify.get('/prices/:id', {
+        schema: {
+            tags: ['events'],
+            summary: 'Get an event price by ID',
+            params: updateEventParamsSchema,
+            response: {
+                200: eventPriceSchema,
+                404: errorSchema
+            },
+        },
+        handler: (request, reply) => controller.getEventPrice(request as any, reply),
     })
 
     // POST /api/archive/events

@@ -41,6 +41,10 @@ export const createProductionSchema = z.object({
     description: z.any().nullable().optional(),
 })
 
+export const errorSchema = z.object({
+    message: z.string(),
+})
+
 export type PaginationQuery = z.infer<typeof paginationQuerySchema>
 export type ProductionResponse = z.infer<typeof productionSchema>
 export type ProductionListResponse = z.infer<typeof productionListSchema>

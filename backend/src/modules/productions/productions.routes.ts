@@ -8,7 +8,8 @@ import {
     productionSchema, 
     updateProductionSchema,
     updateProductionParamsSchema,
-    createProductionSchema
+    createProductionSchema,
+    errorSchema
 } from './productions.schema.js'
 import { requireAuth } from '../../hooks/require-auth.js'
 
@@ -28,6 +29,20 @@ const productionsRoutes: FastifyPluginAsync = async (fastify) => {
             },
         },
         handler: (request, reply) => controller.getProductions(request, reply),
+    })
+
+    // GET /api/archive/productions/:id
+    fastify.get('/:id', {
+        schema: {
+            tags: ['productions'],
+            summary: 'Get a production by ID',
+            params: updateProductionParamsSchema, // reuse the one that validates ID as UUID
+            response: {
+                200: productionSchema,
+                404: errorSchema
+            },
+        },
+        handler: (request, reply) => controller.getProduction(request as any, reply),
     })
 
     // POST /api/archive/productions

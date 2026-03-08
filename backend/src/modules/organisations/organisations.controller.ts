@@ -9,4 +9,15 @@ export class OrganisationsController {
         const result = await this.service.getOrganisations(request.query)
         return reply.status(200).send(result)
     }
+
+    async getOrganisation(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
+        const { id } = request.params
+        const organisation = await this.service.getOrganisation(id)
+
+        if (!organisation) {
+            return reply.status(404).send({ message: 'Organisation not found' })
+        }
+
+        return reply.status(200).send(organisation)
+    }
 }

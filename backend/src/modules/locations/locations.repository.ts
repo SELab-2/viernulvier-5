@@ -43,6 +43,19 @@ export class LocationsRepository {
         })
     }
 
+    async findById(id: string) {
+        return this.prisma.location.findUnique({
+            where: { id },
+            include: {
+                space: {
+                    include: {
+                        halls: true
+                    }
+                }
+            }
+        })
+    }
+
     async findAllHalls(options: { page: number; limit: number; search?: string }) {
         const { page, limit, search } = options
         const skip = (page - 1) * limit
@@ -82,6 +95,19 @@ export class LocationsRepository {
         })
     }
 
+    async findHallById(id: string) {
+        return this.prisma.hall.findUnique({
+            where: { id },
+            include: {
+                space: {
+                    include: {
+                        location: true
+                    }
+                }
+            }
+        })
+    }
+
     async findAllSpaces(options: { page: number; limit: number; search?: string }) {
         const { page, limit, search } = options
         const skip = (page - 1) * limit
@@ -118,6 +144,16 @@ export class LocationsRepository {
 
         return this.prisma.space.count({
             where: where as any,
+        })
+    }
+
+    async findSpaceById(id: string) {
+        return this.prisma.space.findUnique({
+            where: { id },
+            include: {
+                halls: true,
+                location: true
+            }
         })
     }
 }

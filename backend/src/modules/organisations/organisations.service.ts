@@ -1,5 +1,5 @@
 import { OrganisationsRepository } from './organisations.repository.js'
-import type { PaginationQuery, OrganisationListResponse } from './organisations.schema.js'
+import type { PaginationQuery, OrganisationListResponse, OrganisationResponse } from './organisations.schema.js'
 
 export class OrganisationsService {
     constructor(private readonly repository: OrganisationsRepository) { }
@@ -23,5 +23,9 @@ export class OrganisationsService {
                 totalPages,
             },
         }
+    }
+
+    async getOrganisation(id: string): Promise<OrganisationResponse | null> {
+        return this.repository.findById(id) as any
     }
 }

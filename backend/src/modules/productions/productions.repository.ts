@@ -43,6 +43,20 @@ export class ProductionsRepository {
         })
     }
 
+    async findById(id: string) {
+        return this.prisma.production.findUnique({
+            where: { id },
+            include: {
+                events: true,
+                genre_production: {
+                    include: {
+                        genre: true
+                    }
+                }
+            }
+        })
+    }
+
     async create(data: any) {
         return this.prisma.production.create({
             data,

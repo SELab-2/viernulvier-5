@@ -29,6 +29,46 @@ describe('Productions Routes', () => {
         })
     })
 
+    describe('GET /api/archive/productions/:id', () => {
+        it('should return a production by ID with 200 OK', async () => {
+            // 1. Pre-create a record directly in DB for testing
+            const production = await app.prisma.production.create({
+                data: {
+                    title: { nl: 'Test Production by ID' },
+                    artist: { nl: 'Test Artist' }
+                }
+            })
+
+            // 2. Fetch via API
+            const response = await app.inject({
+                method: 'GET',
+                url: `/api/archive/productions/${production.id}`,
+            })
+
+            expect(response.statusCode).toBe(200)
+            const body = JSON.parse(response.payload)
+            expect(body.id).toBe(production.id)
+            expect(body.title.nl).toBe('Test Production by ID')
+
+            // 3. CLEANUP
+            await app.prisma.production.delete({
+                where: { id: production.id }
+            })
+        })
+
+        it('should return 404 Not Found for non-existent ID', async () => {
+            const nonExistentId = '00000000-0000-0000-0000-000000000000'
+            const response = await app.inject({
+                method: 'GET',
+                url: `/api/archive/productions/${nonExistentId}`,
+            })
+
+            expect(response.statusCode).toBe(404)
+            const body = JSON.parse(response.payload)
+            expect(body.message).toBe('Production not found')
+        })
+    })
+
     describe('POST /api/archive/productions', () => {
         it('should return 401 Unauthorized when no token is provided', async () => {
             const response = await app.inject({

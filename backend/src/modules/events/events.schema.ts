@@ -69,6 +69,10 @@ export const createEventSchema = z.object({
     info: z.any().nullable().optional(),
 })
 
+export const errorSchema = z.object({
+    message: z.string(),
+})
+
 export type PaginationQuery = z.infer<typeof paginationQuerySchema>
 export type EventResponse = z.infer<typeof eventSchema>
 export type EventListResponse = z.infer<typeof eventListSchema>

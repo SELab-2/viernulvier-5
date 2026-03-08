@@ -3,7 +3,10 @@ import type {
     PaginationQuery, 
     LocationListResponse, 
     HallListResponse, 
-    SpaceListResponse 
+    SpaceListResponse,
+    LocationResponse,
+    HallResponse,
+    SpaceResponse
 } from './locations.schema.js'
 
 export class LocationsService {
@@ -30,6 +33,10 @@ export class LocationsService {
         }
     }
 
+    async getLocation(id: string): Promise<LocationResponse | null> {
+        return this.repository.findById(id) as any
+    }
+
     async getHalls(options: PaginationQuery): Promise<HallListResponse> {
         const { page, limit, search } = options
 
@@ -51,6 +58,10 @@ export class LocationsService {
         }
     }
 
+    async getHall(id: string): Promise<HallResponse | null> {
+        return this.repository.findHallById(id) as any
+    }
+
     async getSpaces(options: PaginationQuery): Promise<SpaceListResponse> {
         const { page, limit, search } = options
 
@@ -70,5 +81,9 @@ export class LocationsService {
                 totalPages,
             },
         }
+    }
+
+    async getSpace(id: string): Promise<SpaceResponse | null> {
+        return this.repository.findSpaceById(id) as any
     }
 }
