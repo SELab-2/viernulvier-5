@@ -9,6 +9,7 @@ import authPlugin from './plugins/auth.js'
 import corsPlugin from './plugins/cors.js'
 import securityPlugin from './plugins/security.js'
 import swaggerPlugin from './plugins/swagger.js'
+import errorHandlerPlugin from './plugins/error-handler.js'
 
 // Modules
 import productionsRoutes from './modules/productions/productions.routes.js'
@@ -48,6 +49,7 @@ export async function buildApp(opts = {}): Promise<FastifyInstance> {
     await app.register(swaggerPlugin)
     await app.register(prismaPlugin)
     await app.register(authPlugin)
+    await app.register(errorHandlerPlugin)
 
     // --- Feature modules ---
     // Register specific modules at their respective prefixes to preserve sub-routes

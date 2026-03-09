@@ -148,6 +148,17 @@ describe('Events Routes', () => {
 
             expect(response.statusCode).toBe(401)
         })
+
+        it('should return 404 for non-existent event', async () => {
+            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+            const response = await app.inject({
+                method: 'PUT',
+                url: '/api/archive/events/00000000-0000-0000-0000-000000000000',
+                headers: { authorization: `Bearer ${token}` },
+                payload: { info: { nl: 'Non-existent' } }
+            })
+            expect(response.statusCode).toBe(404)
+        })
     })
 
     describe('DELETE /api/archive/events/:id', () => {
@@ -177,6 +188,16 @@ describe('Events Routes', () => {
                 where: { id: event.id }
             })
             expect(dbRecord).toBeNull()
+        })
+
+        it('should return 404 for non-existent event', async () => {
+            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+            const response = await app.inject({
+                method: 'DELETE',
+                url: '/api/archive/events/00000000-0000-0000-0000-000000000000',
+                headers: { authorization: `Bearer ${token}` }
+            })
+            expect(response.statusCode).toBe(404)
         })
     })
 

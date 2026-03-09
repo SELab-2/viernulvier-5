@@ -89,6 +89,17 @@ describe('Halls Routes', () => {
                 await app.prisma.hall.delete({ where: { id: hall.id } })
             }
         })
+
+        it('should return 404 for non-existent hall', async () => {
+            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+            const response = await app.inject({
+                method: 'PUT',
+                url: '/api/archive/halls/00000000-0000-0000-0000-000000000000',
+                headers: { authorization: `Bearer ${token}` },
+                payload: { name: { nl: 'Non-existent' } }
+            })
+            expect(response.statusCode).toBe(404)
+        })
     })
 
     describe('DELETE /api/archive/halls/:id', () => {
@@ -107,6 +118,16 @@ describe('Halls Routes', () => {
             expect(response.statusCode).toBe(204)
             const dbRecord = await app.prisma.hall.findUnique({ where: { id: hall.id } })
             expect(dbRecord).toBeNull()
+        })
+
+        it('should return 404 for non-existent hall', async () => {
+            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+            const response = await app.inject({
+                method: 'DELETE',
+                url: '/api/archive/halls/00000000-0000-0000-0000-000000000000',
+                headers: { authorization: `Bearer ${token}` }
+            })
+            expect(response.statusCode).toBe(404)
         })
     })
 })

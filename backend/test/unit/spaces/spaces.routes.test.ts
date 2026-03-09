@@ -89,6 +89,17 @@ describe('Spaces Routes', () => {
                 await app.prisma.space.delete({ where: { id: space.id } })
             }
         })
+
+        it('should return 404 for non-existent space', async () => {
+            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+            const response = await app.inject({
+                method: 'PUT',
+                url: '/api/archive/spaces/00000000-0000-0000-0000-000000000000',
+                headers: { authorization: `Bearer ${token}` },
+                payload: { name: { nl: 'Non-existent' } }
+            })
+            expect(response.statusCode).toBe(404)
+        })
     })
 
     describe('DELETE /api/archive/spaces/:id', () => {
@@ -107,6 +118,16 @@ describe('Spaces Routes', () => {
             expect(response.statusCode).toBe(204)
             const dbRecord = await app.prisma.space.findUnique({ where: { id: space.id } })
             expect(dbRecord).toBeNull()
+        })
+
+        it('should return 404 for non-existent space', async () => {
+            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+            const response = await app.inject({
+                method: 'DELETE',
+                url: '/api/archive/spaces/00000000-0000-0000-0000-000000000000',
+                headers: { authorization: `Bearer ${token}` }
+            })
+            expect(response.statusCode).toBe(404)
         })
     })
 })

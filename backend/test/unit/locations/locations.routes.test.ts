@@ -110,6 +110,17 @@ describe('Locations Routes', () => {
                 await app.prisma.location.delete({ where: { id: location.id } })
             }
         })
+
+        it('should return 404 for non-existent location', async () => {
+            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+            const response = await app.inject({
+                method: 'PUT',
+                url: '/api/archive/locations/00000000-0000-0000-0000-000000000000',
+                headers: { authorization: `Bearer ${token}` },
+                payload: { city: 'Non-existent' }
+            })
+            expect(response.statusCode).toBe(404)
+        })
     })
 
     describe('DELETE /api/archive/locations/:id', () => {
@@ -128,6 +139,16 @@ describe('Locations Routes', () => {
             expect(response.statusCode).toBe(204)
             const dbRecord = await app.prisma.location.findUnique({ where: { id: location.id } })
             expect(dbRecord).toBeNull()
+        })
+
+        it('should return 404 for non-existent location', async () => {
+            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+            const response = await app.inject({
+                method: 'DELETE',
+                url: '/api/archive/locations/00000000-0000-0000-0000-000000000000',
+                headers: { authorization: `Bearer ${token}` }
+            })
+            expect(response.statusCode).toBe(404)
         })
     })
 })

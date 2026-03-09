@@ -100,6 +100,17 @@ describe('Taxonomies Routes', () => {
                 await app.prisma.genre.delete({ where: { id: genre.id } })
             }
         })
+
+        it('should return 404 for non-existent genre', async () => {
+            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+            const response = await app.inject({
+                method: 'PUT',
+                url: '/api/archive/genres/00000000-0000-0000-0000-000000000000',
+                headers: { authorization: `Bearer ${token}` },
+                payload: { name: { nl: 'Updated Name' } }
+            })
+            expect(response.statusCode).toBe(404)
+        })
     })
 
     describe('DELETE /api/archive/genres/:id', () => {
@@ -118,6 +129,16 @@ describe('Taxonomies Routes', () => {
             expect(response.statusCode).toBe(204)
             const dbRecord = await app.prisma.genre.findUnique({ where: { id: genre.id } })
             expect(dbRecord).toBeNull()
+        })
+
+        it('should return 404 for non-existent genre', async () => {
+            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+            const response = await app.inject({
+                method: 'DELETE',
+                url: '/api/archive/genres/00000000-0000-0000-0000-000000000000',
+                headers: { authorization: `Bearer ${token}` }
+            })
+            expect(response.statusCode).toBe(404)
         })
     })
 
@@ -207,6 +228,17 @@ describe('Taxonomies Routes', () => {
                 await app.prisma.tag.delete({ where: { id: tag.id } })
             }
         })
+
+        it('should return 404 for non-existent tag', async () => {
+            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+            const response = await app.inject({
+                method: 'PUT',
+                url: '/api/archive/tags/00000000-0000-0000-0000-000000000000',
+                headers: { authorization: `Bearer ${token}` },
+                payload: { name: { nl: 'Updated Name' } }
+            })
+            expect(response.statusCode).toBe(404)
+        })
     })
 
     describe('DELETE /api/archive/tags/:id', () => {
@@ -225,6 +257,16 @@ describe('Taxonomies Routes', () => {
             expect(response.statusCode).toBe(204)
             const dbRecord = await app.prisma.tag.findUnique({ where: { id: tag.id } })
             expect(dbRecord).toBeNull()
+        })
+
+        it('should return 404 for non-existent tag', async () => {
+            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+            const response = await app.inject({
+                method: 'DELETE',
+                url: '/api/archive/tags/00000000-0000-0000-0000-000000000000',
+                headers: { authorization: `Bearer ${token}` }
+            })
+            expect(response.statusCode).toBe(404)
         })
     })
 })

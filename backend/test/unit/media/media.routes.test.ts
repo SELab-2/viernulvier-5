@@ -125,6 +125,17 @@ describe('Media Routes', () => {
                 await app.prisma.gallery.delete({ where: { id: gallery.id } })
             }
         })
+
+        it('should return 404 for non-existent gallery', async () => {
+            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+            const response = await app.inject({
+                method: 'PUT',
+                url: '/api/archive/media/galleries/00000000-0000-0000-0000-000000000000',
+                headers: { authorization: `Bearer ${token}` },
+                payload: { name: 'Updated Name' }
+            })
+            expect(response.statusCode).toBe(404)
+        })
     })
 
     describe('DELETE /api/archive/media/galleries/:id', () => {
@@ -139,6 +150,16 @@ describe('Media Routes', () => {
             expect(response.statusCode).toBe(204)
             const dbRecord = await app.prisma.gallery.findUnique({ where: { id: gallery.id } })
             expect(dbRecord).toBeNull()
+        })
+
+        it('should return 404 for non-existent gallery', async () => {
+            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+            const response = await app.inject({
+                method: 'DELETE',
+                url: '/api/archive/media/galleries/00000000-0000-0000-0000-000000000000',
+                headers: { authorization: `Bearer ${token}` }
+            })
+            expect(response.statusCode).toBe(404)
         })
     })
 
@@ -176,6 +197,17 @@ describe('Media Routes', () => {
                 await app.prisma.item.delete({ where: { id: item.id } })
             }
         })
+
+        it('should return 404 for non-existent item', async () => {
+            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+            const response = await app.inject({
+                method: 'PUT',
+                url: '/api/archive/media/items/00000000-0000-0000-0000-000000000000',
+                headers: { authorization: `Bearer ${token}` },
+                payload: { original_filename: 'updated.jpg' }
+            })
+            expect(response.statusCode).toBe(404)
+        })
     })
 
     describe('DELETE /api/archive/media/items/:id', () => {
@@ -190,6 +222,16 @@ describe('Media Routes', () => {
             expect(response.statusCode).toBe(204)
             const dbRecord = await app.prisma.item.findUnique({ where: { id: item.id } })
             expect(dbRecord).toBeNull()
+        })
+
+        it('should return 404 for non-existent item', async () => {
+            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+            const response = await app.inject({
+                method: 'DELETE',
+                url: '/api/archive/media/items/00000000-0000-0000-0000-000000000000',
+                headers: { authorization: `Bearer ${token}` }
+            })
+            expect(response.statusCode).toBe(404)
         })
     })
 
@@ -227,6 +269,17 @@ describe('Media Routes', () => {
                 await app.prisma.crop.delete({ where: { id: crop.id } })
             }
         })
+
+        it('should return 404 for non-existent crop', async () => {
+            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+            const response = await app.inject({
+                method: 'PUT',
+                url: '/api/archive/media/items/crops/00000000-0000-0000-0000-000000000000',
+                headers: { authorization: `Bearer ${token}` },
+                payload: { name: 'Updated Crop' }
+            })
+            expect(response.statusCode).toBe(404)
+        })
     })
 
     describe('DELETE /api/archive/media/items/crops/:id', () => {
@@ -241,6 +294,16 @@ describe('Media Routes', () => {
             expect(response.statusCode).toBe(204)
             const dbRecord = await app.prisma.crop.findUnique({ where: { id: crop.id } })
             expect(dbRecord).toBeNull()
+        })
+
+        it('should return 404 for non-existent crop', async () => {
+            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+            const response = await app.inject({
+                method: 'DELETE',
+                url: '/api/archive/media/items/crops/00000000-0000-0000-0000-000000000000',
+                headers: { authorization: `Bearer ${token}` }
+            })
+            expect(response.statusCode).toBe(404)
         })
     })
 })

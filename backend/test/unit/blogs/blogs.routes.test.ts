@@ -121,6 +121,18 @@ describe('Blogs Routes', () => {
             expect(updated.title).toBe('New Title')
             expect(updated.content).toBe('Old Content')
         })
+
+        it('should return 404 for non-existent blog', async () => {
+            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+            const uuid = '00000000-0000-0000-0000-000000000000'
+            const response = await app.inject({
+                method: 'PUT',
+                url: `/api/archive/blogs/${uuid}`,
+                headers: { authorization: `Bearer ${token}` },
+                payload: { title: 'New Title' }
+            })
+            expect(response.statusCode).toBe(404)
+        })
     })
 
     describe('DELETE /api/archive/blogs/:id', () => {
@@ -151,6 +163,17 @@ describe('Blogs Routes', () => {
                 url: `/api/archive/blogs/${created.id}`,
             })
             expect(getResponse.statusCode).toBe(404)
+        })
+
+        it('should return 404 for non-existent blog', async () => {
+            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+            const uuid = '00000000-0000-0000-0000-000000000000'
+            const response = await app.inject({
+                method: 'DELETE',
+                url: `/api/archive/blogs/${uuid}`,
+                headers: { authorization: `Bearer ${token}` }
+            })
+            expect(response.statusCode).toBe(404)
         })
     })
 })

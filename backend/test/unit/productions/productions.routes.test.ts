@@ -150,6 +150,17 @@ describe('Productions Routes', () => {
 
             expect(response.statusCode).toBe(401)
         })
+
+        it('should return 404 for non-existent production', async () => {
+            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+            const response = await app.inject({
+                method: 'PUT',
+                url: '/api/archive/productions/00000000-0000-0000-0000-000000000000',
+                headers: { authorization: `Bearer ${token}` },
+                payload: { title: { nl: 'Non-existent' } }
+            })
+            expect(response.statusCode).toBe(404)
+        })
     })
 
     describe('DELETE /api/archive/productions/:id', () => {
@@ -179,6 +190,16 @@ describe('Productions Routes', () => {
                 where: { id: production.id }
             })
             expect(dbRecord).toBeNull()
+        })
+
+        it('should return 404 for non-existent production', async () => {
+            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+            const response = await app.inject({
+                method: 'DELETE',
+                url: '/api/archive/productions/00000000-0000-0000-0000-000000000000',
+                headers: { authorization: `Bearer ${token}` }
+            })
+            expect(response.statusCode).toBe(404)
         })
     })
 })
