@@ -1,5 +1,16 @@
 import "dotenv/config";
 import axios from "axios";
+import axiosRetry from "axios-retry";
+
+
+// if we request too fast, for rate limits
+axiosRetry(axios, {
+    retries: 3,
+    retryDelay: (retryCount) => retryCount * 1000,
+    retryCondition: (error) => {
+        return error.code === 'ECONNRESET' || axiosRetry.isNetworkError(error);
+    }
+});
 
 import type {
     APIProduction,
@@ -20,11 +31,13 @@ const api = `https://www.viernulvier.gent{url}`;
 
 
 
+
 async function* fetchPagesFromURL<T = any>(url: string, per_item: boolean=false): AsyncGenerator<T[]> {
     let currentUrl = url;
     while (true) {
         const link = api.replace("{url}", currentUrl);
         const response = await axios.get(link, { headers: headers });
+
         
         if (response.status !== 200) {
             console.error("Error:", response.status, response.statusText);

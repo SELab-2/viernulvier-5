@@ -87,11 +87,6 @@ export type item = Prisma.itemModel
  */
 export type location = Prisma.locationModel
 /**
- * Model organisations
- * 
- */
-export type organisations = Prisma.organisationsModel
-/**
  * Model production
  * 
  */

@@ -1,5 +1,6 @@
 import { prisma } from "./prisma";
 
+import {existsSync,readFileSync, writeFileSync } from 'fs';
 import * as Fetcher from "./fetcher"
 
 import type {
@@ -76,6 +77,7 @@ function sanitizeTimestamp(timestamp: string | undefined | null, fallbackDate: s
   }
 }
 
+let cutoff_timestamp = new Date(0);
 
 function mapEvent(event: APIEvent) {
   /*
@@ -334,37 +336,17 @@ function mapUitType(type: APIUitType){
   }
 }
 
-
-
-
-// function mapStatus(status: APIStatus) {
-//   /*
-//     Maps a status from the API to the status schema used by Prisma.
-//     Only scalar fields are included.
-//   */
-//   return {
-//     created_at: sanitizeTimestampRequired(status.created_at),
-//     updated_at: sanitizeTimestampRequired(status.updated_at),
-//     apiId: status["@id"],
-//     name: status.name,
-//     short_name: status.short_name,
-//     fixed: status.fixed,
-//     visible: status.visible,
-//     bookable: status.bookable,
-//   };
-// }
-
-
 async function sync_locations() {
 
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const page of Fetcher.fetchLocationsPages()) {
+  for await (let page of Fetcher.fetchLocationsPages()) {
     pageCount++;
     console.log(`Processing page ${pageCount} with ${page.length} locations`);
 
     if (page.length === 0) break;
+    page = page.filter(item => new Date(item.updated_at) > cutoff_timestamp);
 
     await prisma.$transaction(async (tx) => {
       for (const location of page) {
@@ -389,11 +371,12 @@ async function sync_hall() {
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const page of Fetcher.fetchHallsPages()) {
+  for await (let page of Fetcher.fetchHallsPages()) {
     pageCount++;
     console.log(`Processing page ${pageCount} with ${page.length} halls`);
 
     if (page.length === 0) break;
+    page = page.filter(item => new Date(item.updated_at) > cutoff_timestamp);
 
     await prisma.$transaction(async (tx) => {
       for (const hall of page) {
@@ -431,11 +414,12 @@ async function sync_spaces() {
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const page of Fetcher.fetchSpacesPages()) {
+  for await (let page of Fetcher.fetchSpacesPages()) {
     pageCount++;
     console.log(`Processing page ${pageCount} with ${page.length} spaces`);
 
     if (page.length === 0) break;
+    page = page.filter(item => new Date(item.updated_at) > cutoff_timestamp);
 
     await prisma.$transaction(async (tx) => {
       for (const space of page) {
@@ -465,44 +449,18 @@ async function sync_spaces() {
 
   console.log(`Completed syncing ${totalProcessed} spaces from ${pageCount} pages`);
 }
-//
-// async function sync_status() {
-//
-//   let totalProcessed = 0;
-//   let pageCount = 0;
-//
-//   for await (const page of Fetcher.fetchStatusesPages()) {
-//     pageCount++;
-//     console.log(`Processing page ${pageCount} with ${page.length} statuses`);
-//
-//     if (page.length === 0) break;
-//
-//     await prisma.$transaction(
-//       page.map(status =>
-//         prisma.status.upsert({
-//           where: { apiId: status["@id"] },
-//           update: mapStatus(status),
-//           create: mapStatus(status),
-//         })
-//       )
-//     );
-//
-//     totalProcessed += page.length;
-//   }
-//
-//   console.log(`Completed syncing ${totalProcessed} statuses from ${pageCount} pages`);
-// }
 
 async function sync_events() {
 
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const page of Fetcher.fetchEventsPages()) {
+  for await (let page of Fetcher.fetchEventsPages()) {
     pageCount++;
     console.log(`Processing page ${pageCount} with ${page.length} events`);
 
     if (page.length === 0) break;
+    page = page.filter(item => new Date(item.updated_at) > cutoff_timestamp);
 
     await prisma.$transaction(async (tx) => {
       for (const event of page) {
@@ -543,11 +501,12 @@ async function sync_productions() {
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const page of Fetcher.fetchProductionsPages()) {
+  for await (let page of Fetcher.fetchProductionsPages()) {
     pageCount++;
     console.log(`Processing page ${pageCount} with ${page.length} productions`);
 
     if (page.length === 0) break;
+    page = page.filter(item => new Date(item.updated_at) > cutoff_timestamp);
 
     await prisma.$transaction(async (tx) => {
       for (const production of page) {
@@ -633,9 +592,32 @@ async function sync_productions() {
             });
           }
         }
+
+        for (const genre of production.genres) {
+          let db_genre = undefined
+          if (production.genres) {
+            db_genre = await tx.genre.findUnique({
+              where: {apiId: genre}
+            });
+          }
+          if (db_genre !== undefined) {
+            await tx.genre_production.upsert({
+              where: {
+                genre_id_production_id: {
+                  genre_id: db_genre!.id,
+                  production_id: db_production.id,
+                }
+              },
+              update: {}, // if it already exists, you don't need to update it
+              create: {
+                production_id: db_production.id,
+                genre_id: db_genre!.id,
+              }
+            });
+          }
+        }
       }
     });
-
     totalProcessed += page.length;
     }
 
@@ -646,11 +628,12 @@ async function sync_genres(){
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const page of Fetcher.fetchGenrePages()) {
+  for await (let page of Fetcher.fetchGenrePages()) {
     pageCount++;
     console.log(`Processing page ${pageCount} with ${page.length} genres`);
 
     if (page.length === 0) break;
+    page = page.filter(item => new Date(item.updated_at) > cutoff_timestamp);
 
     await prisma.$transaction(
         page.map(genre =>
@@ -673,11 +656,12 @@ async function sync_galleries(){
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const page of Fetcher.fetchGalleryPages()) {
+  for await (let page of Fetcher.fetchGalleryPages()) {
     pageCount++;
     console.log(`Processing page ${pageCount} with ${page.length} galleries`);
 
     if (page.length === 0) break;
+    page = page.filter(item => new Date(item.updated_at) > cutoff_timestamp);
 
     await prisma.$transaction(async (tx) => {
       for (const gallery of page) {
@@ -726,11 +710,12 @@ async function sync_items(){
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const page of Fetcher.fetchItemPages()) {
+  for await (let page of Fetcher.fetchItemPages()) {
     pageCount++;
     console.log(`Processing page ${pageCount} with ${page.length} items`);
 
     if (page.length === 0) break;
+    page = page.filter(item => new Date(item.updated_at) > cutoff_timestamp);
 
 
     await prisma.$transaction(async (tx) => {
@@ -780,11 +765,12 @@ async function sync_event_prices(){
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const page of Fetcher.fetchEventPricePages()) {
+  for await (let page of Fetcher.fetchEventPricePages()) {
     pageCount++;
     console.log(`Processing page ${pageCount} with ${page.length} event_prices`);
 
     if (page.length === 0) break;
+    page = page.filter(item => new Date(item.updated_at) > cutoff_timestamp);
 
 
     await prisma.$transaction(async (tx) => {
@@ -822,11 +808,12 @@ async function sync_tags(){
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const page of Fetcher.fetchTagPages()) {
+  for await (let page of Fetcher.fetchTagPages()) {
     pageCount++;
     console.log(`Processing page ${pageCount} with ${page.length} tags`);
 
     if (page.length === 0) break;
+    page = page.filter(item => new Date(item.updated_at) > cutoff_timestamp);
 
     await prisma.$transaction(async (tx) => {
           for (const tag of page) {
@@ -863,11 +850,12 @@ async function sync_crops(){
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const page of Fetcher.fetchCropPages()) {
+  for await (let page of Fetcher.fetchCropPages()) {
     pageCount++;
     console.log(`Processing page ${pageCount} with ${page.length} crops`);
 
     if (page.length === 0) break;
+    page = page.filter(item => new Date(item.updated_at) > cutoff_timestamp);
 
     await prisma.$transaction(
         page.map(crop =>
@@ -890,11 +878,12 @@ async function sync_uit_keywords(){
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const page of Fetcher.fetchUitKeywordPages()) {
+  for await (let page of Fetcher.fetchUitKeywordPages()) {
     pageCount++;
     console.log(`Processing page ${pageCount} with ${page.length} keywords`);
 
     if (page.length === 0) break;
+    page = page.filter(item => new Date(item.updated_at) > cutoff_timestamp);
 
     await prisma.$transaction(
         page.map(keyword =>
@@ -918,11 +907,12 @@ async function sync_uit_themes(){
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const page of Fetcher.fetchUitThemePages()) {
+  for await (let page of Fetcher.fetchUitThemePages()) {
     pageCount++;
     console.log(`Processing page ${pageCount} with ${page.length} themes`);
 
     if (page.length === 0) break;
+    page = page.filter(item => new Date(item.updated_at) > cutoff_timestamp);
 
     await prisma.$transaction(
         page.map(theme =>
@@ -946,11 +936,12 @@ async function sync_uit_types(){
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const page of Fetcher.fetchUitTypePages()) {
+  for await (let page of Fetcher.fetchUitTypePages()) {
     pageCount++;
     console.log(`Processing page ${pageCount} with ${page.length} themes`);
 
     if (page.length === 0) break;
+    page = page.filter(item => new Date(item.updated_at) > cutoff_timestamp);
 
     await prisma.$transaction(
         page.map(type =>
@@ -974,6 +965,20 @@ async function sync_uit_types(){
 
 
 async function main() {
+  if (existsSync('scraper_timestamp.txt')) {
+    const read_timestamp = readFileSync('scraper_timestamp.txt', 'utf-8');
+    const ts = new Date(read_timestamp);
+    if ((ts.getTime())) {
+      cutoff_timestamp = ts;
+      console.log('Timestamp read from file:', cutoff_timestamp);
+    } else {
+      console.log('unable to read timestamp from file, reverted to standard:', cutoff_timestamp);
+    }
+  } else {
+    console.log('unable to read timestamp from file, reverted to standard:', cutoff_timestamp);
+  }
+  const timestamp = new Date().toISOString();
+
   // locations
   await sync_locations();
   await sync_spaces();
@@ -989,11 +994,15 @@ async function main() {
   await sync_crops();
   await sync_items();
   await sync_galleries()
+  await sync_genres();
   await sync_productions();
   await sync_events();
-  await sync_genres();
   await sync_event_prices();
   await sync_tags();
+
+  // overwrite the timestamp after everything is done in case it errors
+  writeFileSync('scraper_timestamp.txt', timestamp);
+  console.log('Timestamp written to scraper_timestamp.txt:', timestamp);
 
 }
 

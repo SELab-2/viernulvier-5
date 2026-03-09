@@ -60,7 +60,6 @@ export const ModelName = {
   hall: 'hall',
   item: 'item',
   location: 'location',
-  organisations: 'organisations',
   production: 'production',
   space: 'space',
   tag: 'tag',
@@ -235,17 +234,6 @@ export const LocationScalarFieldEnum = {
 } as const
 
 export type LocationScalarFieldEnum = (typeof LocationScalarFieldEnum)[keyof typeof LocationScalarFieldEnum]
-
-
-export const OrganisationsScalarFieldEnum = {
-  created_at: 'created_at',
-  updated_at: 'updated_at',
-  id: 'id',
-  apiId: 'apiId',
-  name: 'name'
-} as const
-
-export type OrganisationsScalarFieldEnum = (typeof OrganisationsScalarFieldEnum)[keyof typeof OrganisationsScalarFieldEnum]
 
 
 export const ProductionScalarFieldEnum = {

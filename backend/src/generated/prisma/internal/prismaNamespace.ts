@@ -393,7 +393,6 @@ export const ModelName = {
   hall: 'hall',
   item: 'item',
   location: 'location',
-  organisations: 'organisations',
   production: 'production',
   space: 'space',
   tag: 'tag',
@@ -417,7 +416,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "crop" | "event" | "event_price" | "gallery" | "genre" | "genre_production" | "hall" | "item" | "location" | "organisations" | "production" | "space" | "tag" | "uit_keywords_production" | "uitdatabank_keyword" | "uitdatabank_theme" | "uitdatabank_type" | "adminUser"
+    modelProps: "crop" | "event" | "event_price" | "gallery" | "genre" | "genre_production" | "hall" | "item" | "location" | "production" | "space" | "tag" | "uit_keywords_production" | "uitdatabank_keyword" | "uitdatabank_theme" | "uitdatabank_type" | "adminUser"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1084,80 +1083,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.locationCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.LocationCountAggregateOutputType> | number
-        }
-      }
-    }
-    organisations: {
-      payload: Prisma.$organisationsPayload<ExtArgs>
-      fields: Prisma.organisationsFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.organisationsFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$organisationsPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.organisationsFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$organisationsPayload>
-        }
-        findFirst: {
-          args: Prisma.organisationsFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$organisationsPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.organisationsFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$organisationsPayload>
-        }
-        findMany: {
-          args: Prisma.organisationsFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$organisationsPayload>[]
-        }
-        create: {
-          args: Prisma.organisationsCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$organisationsPayload>
-        }
-        createMany: {
-          args: Prisma.organisationsCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.organisationsCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$organisationsPayload>[]
-        }
-        delete: {
-          args: Prisma.organisationsDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$organisationsPayload>
-        }
-        update: {
-          args: Prisma.organisationsUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$organisationsPayload>
-        }
-        deleteMany: {
-          args: Prisma.organisationsDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.organisationsUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.organisationsUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$organisationsPayload>[]
-        }
-        upsert: {
-          args: Prisma.organisationsUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$organisationsPayload>
-        }
-        aggregate: {
-          args: Prisma.OrganisationsAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateOrganisations>
-        }
-        groupBy: {
-          args: Prisma.organisationsGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.OrganisationsGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.organisationsCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.OrganisationsCountAggregateOutputType> | number
         }
       }
     }
@@ -1942,17 +1867,6 @@ export const LocationScalarFieldEnum = {
 export type LocationScalarFieldEnum = (typeof LocationScalarFieldEnum)[keyof typeof LocationScalarFieldEnum]
 
 
-export const OrganisationsScalarFieldEnum = {
-  created_at: 'created_at',
-  updated_at: 'updated_at',
-  id: 'id',
-  apiId: 'apiId',
-  name: 'name'
-} as const
-
-export type OrganisationsScalarFieldEnum = (typeof OrganisationsScalarFieldEnum)[keyof typeof OrganisationsScalarFieldEnum]
-
-
 export const ProductionScalarFieldEnum = {
   created_at: 'created_at',
   updated_at: 'updated_at',
@@ -2323,7 +2237,6 @@ export type GlobalOmitConfig = {
   hall?: Prisma.hallOmit
   item?: Prisma.itemOmit
   location?: Prisma.locationOmit
-  organisations?: Prisma.organisationsOmit
   production?: Prisma.productionOmit
   space?: Prisma.spaceOmit
   tag?: Prisma.tagOmit
