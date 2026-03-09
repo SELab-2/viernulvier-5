@@ -12,6 +12,22 @@ services:
       - "3001:3001"
     networks:
         - vnv_net
+  
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    networks:
+      - vnv_net
+
+  nginx:
+    image: nginx:latest
+    container_name: vnv_nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf/:/etc/nginx/conf.d:ro
 
 networks:
   vnv_net:
