@@ -32,4 +32,4 @@ coverage/
 *.log
 npm-debug.log*
 
-backend/src/generated/prisma/models
+backend/src/generated/prisma
