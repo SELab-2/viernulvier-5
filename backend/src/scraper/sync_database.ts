@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 import Scraper from './scraper';
 
-// contains the data of the last sync
+// contains the data of the last sync with the API, the scraper will only add data updated or created after this timestamp
 const TIMESTAMP_FILE = join(dirname(fileURLToPath(import.meta.url)), 'scraper_timestamp.txt');
 
 function readCutoffTimestamp(): Date | undefined {

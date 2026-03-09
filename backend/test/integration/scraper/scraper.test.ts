@@ -6,6 +6,18 @@ import * as Fetcher from '../../../src/scraper/fetcher';
 import type { APIProduction, APIEvent, APISpace, APIHall, APILocation, APIGenre, APIGallery, APIItem, APICrop, APIEventPrice, APITag, APIUitKeyword, APIUitTheme, APIUitType } from "../../../src/scraper/APItypes";
 
 
+/*
+!!!!!! READ THIS IF THESE TESTS FAIL !!!!!!!!!
+
+- Make sure you have a dedicated test database (never production)
+- Make sure `.env.test` exists and contains `DATABASE_URL`
+- Make sure `DATABASE_URL` points to your test database
+- Make sure the test database is synced with the Prisma schema:
+  - `npx prisma migrate deploy`
+  - or `npx prisma db push`
+
+*/
+
 
 // ------------------------------------------------------------------
 // helper om Json fields te casten
@@ -309,6 +321,16 @@ vi.mock('../../../src/scraper/fetcher', () => {
 // 2. setup: clear DB & sync everything ONCE
 // ------------------------------------------------------------------
 beforeAll(async () => {
+  const testDatabaseUrl = process.env.DATABASE_URL;
+
+  if (!testDatabaseUrl) {
+    throw new Error('Missing DATABASE_URL. Create .env.test with a valid test database URL.');
+  }
+
+  if (!/test/i.test(testDatabaseUrl)) {
+    throw new Error('Unsafe DATABASE_URL detected. Use a dedicated test database (URL should clearly indicate test).');
+  }
+
   // clear DB
   await prisma.event_price.deleteMany();
   await prisma.event.deleteMany();
