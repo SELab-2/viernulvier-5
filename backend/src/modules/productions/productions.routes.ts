@@ -29,7 +29,7 @@ const productionsRoutes: FastifyPluginAsync = async (fastify) => {
                 200: productionListSchema,
             },
         },
-        handler: (request, reply) => controller.getProductions(request, reply),
+        handler: (request, reply) => controller.getProductions(request as any, reply),
     })
 
     // GET /api/archive/productions/:id

@@ -5,6 +5,7 @@ import type {
     CreateSpaceInput,
     UpdateSpaceInput
 } from './spaces.schema.js'
+import { SpacesRepository } from './spaces.repository.js'
 
 export class SpacesService {
     constructor(private readonly repository: SpacesRepository) { }

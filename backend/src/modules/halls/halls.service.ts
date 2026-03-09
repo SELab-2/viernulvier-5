@@ -5,6 +5,7 @@ import type {
     CreateHallInput,
     UpdateHallInput
 } from './halls.schema.js'
+import { HallsRepository } from './halls.repository.js'
 
 export class HallsService {
     constructor(private readonly repository: HallsRepository) { }
