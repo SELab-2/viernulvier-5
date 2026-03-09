@@ -13,6 +13,12 @@ services:
     networks:
         - vnv_net
 
+  frontend:
+    container_name: vnv_frontend
+    image: crccheck/hello-world
+    networks:
+      - vnv_net
+
   nginx:
     image: nginx:latest
     container_name: nginx
