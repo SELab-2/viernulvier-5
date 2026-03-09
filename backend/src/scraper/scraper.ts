@@ -27,7 +27,15 @@ export default {
     sync_hall,
     sync_productions,
     sync_spaces,
-    sync_status,
+  sync_genres,
+  sync_galleries,
+  sync_items,
+  sync_crops,
+  sync_event_prices,
+  sync_tags,
+  sync_uit_keywords,
+  sync_uit_themes,
+  sync_uit_types,
 };
 /*
 
@@ -282,7 +290,7 @@ function mapEventPrice(price: APIEventPrice){
     available: price.available,
     amount: price.amount,
     box_office_id: price.box_office_id,
-    contingent_id: price.contingent_id,
+    contigent_id: price.contingent_id,
     expires_at: sanitizeTimestampOptional(price.expires_at),
   }
 }
@@ -299,7 +307,7 @@ function mapTag(tag: APITag){
     name: tag.name,
     short_description: tag.short_description,
     url: tag.url,
-    tag: tag.url_title,
+    url_title: tag.url_title,
     expires_after: tag.expires_after,
     automatically_assigned: tag.automatically_assigned,
     external: tag.external,
@@ -793,7 +801,7 @@ async function sync_event_prices(){
               });
             }
 
-            prisma.event_price.upsert({
+            await tx.event_price.upsert({
               where: {apiId: price["@id"]},
               update: {
                 ...mapEventPrice(price),
@@ -835,15 +843,15 @@ async function sync_tags(){
               });
             }
 
-            prisma.event_price.upsert({
+            await tx.tag.upsert({
               where: {apiId: tag["@id"]},
               update: {
                 ...mapTag(tag),
-                event_id: gallery?.id || null,
+                gallery_id: gallery?.id || null,
               },
               create: {
                 ...mapTag(tag),
-                event_id: gallery?.id || null,
+                gallery_id: gallery?.id || null,
               },
             });
           }
