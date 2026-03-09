@@ -23,7 +23,7 @@ jobs:
         working-directory: backend
 
     env:
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/viernulvier_test
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/viernulvier
       JWT_SECRET: test-secret-for-ci
       ADMIN_USERNAME: admin
       ADMIN_PASSWORD: password123
@@ -39,10 +39,33 @@ jobs:
 
       - run: npm ci
       - run: npx prisma generate
+      - name: Start database
+        working-directory: ${{ github.workspace }}
+        run: |
+          docker compose down -v --remove-orphans || true
+          docker compose up -d db
+
+          for attempt in {1..30}; do
+            if docker compose exec -T db pg_isready -U postgres -d viernulvier; then
+              exit 0
+            fi
+
+            sleep 2
+          done
+
+          docker compose logs db
+          exit 1
+
+      - run: npx prisma migrate deploy
       # Fail CI on any lint warning. Placeholder exceptions are handled inline.
       - run: npm run lint -- --max-warnings=0
       - run: npm run build
       - run: npm test
+
+      - name: Stop database
+        if: always()
+        working-directory: ${{ github.workspace }}
+        run: docker compose down -v --remove-orphans
 
   frontend:
     name: Frontend (Lint + Test + Build)
