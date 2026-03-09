@@ -1,16 +1,42 @@
 services:
-  db:
-    image: postgres:16-alpine
-    container_name: viernulvier-db
+  backend:
+    build: ./backend
+    container_name: vnv_backend
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend/src:/usr/src/app/src
+      - ./backend/prisma:/usr/src/app/prisma
+    ports:
+      - 3001:3001
+    networks:
+        - vnv_net
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
     restart: unless-stopped
     ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: viernulvier
+      - 80:80
+      - 443:443
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    networks:
+      - vnv_net
 
-volumes:
-  postgres_data:
+  certbot:
+    image: certbot/certbot:latest
+    container_name: certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    networks:
+      - vnv_net
+    command: certonly --webroot -w /var/www/certbot --force-renewal --email ${CERTBOT_MAIL} -d ${DOMAIN} --agree-tos
+
+networks:
+  vnv_net:
+    external: true

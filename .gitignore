@@ -25,6 +25,10 @@ Thumbs.db
 # Prisma
 backend/prisma/migrations/**/migration_lock.toml
 
+# certbot
+certbot/conf
+certbot/www
+
 # Test coverage
 coverage/
 
