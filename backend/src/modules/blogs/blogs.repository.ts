@@ -1,56 +1,60 @@
-import type { PrismaClient } from '@prisma/client'
-import type { Blog, CreateBlog, UpdateBlog } from './blogs.schema.js'
+import type { PrismaClient } from '../../generated/prisma/client.js'
+import type { CreateBlogInput, UpdateBlogInput, Blog } from './blogs.schema.js'
 import { randomUUID } from 'crypto'
 
-/**
- * A repository for managing blogs.
- * Note: Currently using in-memory storage since blogs are not yet in the DB.
- */
+// Skeleton implementation that can be used with real Prisma later
+// For now, it uses an in-memory store to allow tests to pass since the DB model doesn't exist yet.
 export class BlogsRepository {
-    private blogs: Blog[] = []
+    private mockBlogs: Blog[] = []
 
-    constructor(private prisma: PrismaClient) {}
+    constructor(private readonly prisma: PrismaClient) {}
 
     async findAll(): Promise<Blog[]> {
-        return this.blogs
+        // Implementation for when DB is ready:
+        // return this.prisma.blog.findMany({ orderBy: { createdAt: 'desc' } })
+        return this.mockBlogs
     }
 
     async findById(id: string): Promise<Blog | null> {
-        return this.blogs.find(b => b.id === id) || null
+        // Implementation for when DB is ready:
+        // return this.prisma.blog.findUnique({ where: { id } })
+        return this.mockBlogs.find(b => b.id === id) || null
     }
 
-    async create(data: CreateBlog): Promise<Blog> {
-        const now = new Date().toISOString()
+    async create(data: CreateBlogInput): Promise<Blog> {
+        // Implementation for when DB is ready:
+        // return this.prisma.blog.create({ data })
         const newBlog: Blog = {
             id: randomUUID(),
-            title: data.title,
-            content: data.content,
-            publishedAt: data.publishedAt || null,
-            createdAt: now,
-            updatedAt: now,
+            ...data,
+            createdAt: new Date(),
+            updatedAt: new Date()
         }
-        this.blogs.push(newBlog)
+        this.mockBlogs.push(newBlog)
         return newBlog
     }
 
-    async update(id: string, data: UpdateBlog): Promise<Blog | null> {
-        const index = this.blogs.findIndex(b => b.id === id)
-        if (index === -1) return null
-
+    async update(id: string, data: UpdateBlogInput): Promise<Blog> {
+        // Implementation for when DB is ready:
+        // return this.prisma.blog.update({ where: { id }, data })
+        const index = this.mockBlogs.findIndex(b => b.id === id)
+        if (index === -1) throw new Error('Blog not found')
+        
         const updatedBlog = {
-            ...this.blogs[index],
+            ...this.mockBlogs[index],
             ...data,
-            updatedAt: new Date().toISOString(),
+            updatedAt: new Date()
         }
-        this.blogs[index] = updatedBlog
+        this.mockBlogs[index] = updatedBlog
         return updatedBlog
     }
 
-    async delete(id: string): Promise<boolean> {
-        const index = this.blogs.findIndex(b => b.id === id)
-        if (index === -1) return false
-
-        this.blogs.splice(index, 1)
-        return true
+    async delete(id: string): Promise<void> {
+        // Implementation for when DB is ready:
+        // await this.prisma.blog.delete({ where: { id } })
+        const index = this.mockBlogs.findIndex(b => b.id === id)
+        if (index !== -1) {
+            this.mockBlogs.splice(index, 1)
+        }
     }
 }

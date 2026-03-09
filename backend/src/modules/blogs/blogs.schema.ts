@@ -4,35 +4,17 @@ export const blogSchema = z.object({
     id: z.string().uuid(),
     title: z.string().min(1),
     content: z.string().min(1),
-    publishedAt: z.string().datetime().nullable(),
-    createdAt: z.string().datetime(),
-    updatedAt: z.string().datetime(),
+    createdAt: z.date().optional(),
+    updatedAt: z.date().optional(),
 })
 
-export const createBlogSchema = z.object({
-    title: z.string().min(1),
-    content: z.string().min(1),
-    publishedAt: z.string().datetime().optional(),
-})
+export const createBlogSchema = blogSchema.omit({ id: true, createdAt: true, updatedAt: true })
+export const updateBlogSchema = createBlogSchema.partial()
 
-export const updateBlogSchema = z.object({
-    title: z.string().min(1).optional(),
-    content: z.string().min(1).optional(),
-    publishedAt: z.string().datetime().optional().nullable(),
-})
-
-export const blogParamsSchema = z.object({
+export const blogIdSchema = z.object({
     id: z.string().uuid(),
 })
 
-export const blogListSchema = z.array(blogSchema)
-
-export const errorSchema = z.object({
-    message: z.string(),
-    error: z.string().optional(),
-    statusCode: z.number(),
-})
-
 export type Blog = z.infer<typeof blogSchema>
-export type CreateBlog = z.infer<typeof createBlogSchema>
-export type UpdateBlog = z.infer<typeof updateBlogSchema>
+export type CreateBlogInput = z.infer<typeof createBlogSchema>
+export type UpdateBlogInput = z.infer<typeof updateBlogSchema>
