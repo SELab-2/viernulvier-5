@@ -755,4 +755,61 @@ describe('scraper integration full coverage', () => {
     expect(after).toEqual(before);
   });
 
+  it('applies cutoff_timestamp and only syncs newer records', async () => {
+    const keywordSpy = vi.spyOn(Fetcher, 'fetchUitKeywordPages').mockImplementation(() => singlePage([
+      {
+        '@context': '/api/context/uit-keyword',
+        '@id': '/uit-keyword/cutoff-old',
+        '@type': 'UitKeyword',
+        created_at: '2021-01-01T00:00:00Z',
+        updated_at: '2021-01-10T00:00:00Z',
+        name: 'Old Keyword',
+      } as APIUitKeyword,
+      {
+        '@context': '/api/context/uit-keyword',
+        '@id': '/uit-keyword/cutoff-new-1',
+        '@type': 'UitKeyword',
+        created_at: '2021-01-01T00:00:00Z',
+        updated_at: '2021-02-10T00:00:00Z',
+        name: 'New Keyword 1',
+      } as APIUitKeyword,
+      {
+        '@context': '/api/context/uit-keyword',
+        '@id': '/uit-keyword/cutoff-new-2',
+        '@type': 'UitKeyword',
+        created_at: '2021-01-01T00:00:00Z',
+        updated_at: '2021-03-10T00:00:00Z',
+        name: 'New Keyword 2',
+      } as APIUitKeyword,
+    ]));
+
+    try {
+      await Scraper.sync_uit_keywords(new Date('2021-02-01T00:00:00Z'));
+    } finally {
+      keywordSpy.mockRestore();
+    }
+
+    const oldKeyword = await prisma.uitdatabank_keyword.findUnique({
+      where: { apiId: '/uit-keyword/cutoff-old' },
+    });
+    const newKeyword1 = await prisma.uitdatabank_keyword.findUnique({
+      where: { apiId: '/uit-keyword/cutoff-new-1' },
+    });
+    const newKeyword2 = await prisma.uitdatabank_keyword.findUnique({
+      where: { apiId: '/uit-keyword/cutoff-new-2' },
+    });
+
+    expect(oldKeyword).toBeNull();
+    expect(newKeyword1?.name).toBe('New Keyword 1');
+    expect(newKeyword2?.name).toBe('New Keyword 2');
+
+    await prisma.uitdatabank_keyword.deleteMany({
+      where: {
+        apiId: {
+          in: ['/uit-keyword/cutoff-old', '/uit-keyword/cutoff-new-1', '/uit-keyword/cutoff-new-2'],
+        },
+      },
+    });
+  });
+
 });
