@@ -13,10 +13,10 @@ services:
     networks:
         - vnv_net
 
-  # placeholder frontend
   frontend:
+    build: ./frontend
     container_name: vnv_frontend
-    image: crccheck/hello-world
+    restart: unless-stopped
     networks:
       - vnv_net
 

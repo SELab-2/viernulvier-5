@@ -11,7 +11,7 @@
 ### 1. Start the database
 
 ```bash
-# make sure you create a network for the container if not done yet
+# make sure you have a network for the containers
 docker network create vnv_net
 
 # start the database container
@@ -30,7 +30,7 @@ docker compose -f docker-compose-app.yml up -d --build
 docker exec vnv_backend npx prisma migrate dev
 
 # seed database
-docker exec vnv_backend npx prisma db seed      # optional
+docker exec vnv_backend npx prisma db seed      # (optional)
 
 # run backend
 docker exec vnv_backend npm run dev             # now Fastify should be running on port :3001
@@ -44,7 +44,13 @@ npm install
 npm run dev                # Start Vite on :5173
 ```
 
-### 4. Access the app
+
+### 4. Nginx
+```bash
+docker compose -f docker-compose.yml
+```
+
+### 5. Access the app
 
 - Frontend: http://localhost:5173
 - API: http://localhost:3001/api/health
