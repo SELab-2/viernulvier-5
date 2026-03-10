@@ -11,11 +11,11 @@ export class ProductionsService {
     constructor(private readonly repository: ProductionsRepository) { }
 
     async getProductions(options: PaginationQuery): Promise<ProductionListResponse> {
-        const { page, limit, search } = options
+        const { page, limit, search, lang } = options
 
         const [data, total] = await Promise.all([
-            this.repository.findAll({ page, limit, search }),
-            this.repository.count(search),
+            this.repository.findAll({ page, limit, search, lang }),
+            this.repository.count({ search, lang }),
         ])
 
         const totalPages = Math.ceil(total / limit)

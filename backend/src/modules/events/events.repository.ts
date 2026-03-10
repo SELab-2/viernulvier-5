@@ -3,14 +3,21 @@ import type { PrismaClient } from '../../generated/prisma/client.js'
 export class EventsRepository {
     constructor(private readonly prisma: PrismaClient) { }
 
-    async findAll(options: { page: number; limit: number; productionId?: string }) {
-        const { page, limit, productionId } = options
+    async findAll(options: { page: number; limit: number; productionId?: string; search?: string; lang?: string }) {
+        const { page, limit, productionId, search, lang = 'nl' } = options
         const skip = (page - 1) * limit
 
-        const where = productionId ? { production_id: productionId } : {}
+        let where: any = {}
+        if (productionId) where.production_id = productionId
+        if (search) {
+            where.info = {
+                path: [lang],
+                string_contains: search,
+            }
+        }
 
         return this.prisma.event.findMany({
-            where: where as any,
+            where: where,
             skip,
             take: limit,
             orderBy: { starts_at: 'desc' },
@@ -27,11 +34,19 @@ export class EventsRepository {
         })
     }
 
-    async count(productionId?: string) {
-        const where = productionId ? { production_id: productionId } : {}
+    async count(options: { productionId?: string; search?: string; lang?: string }) {
+        const { productionId, search, lang = 'nl' } = options
+        let where: any = {}
+        if (productionId) where.production_id = productionId
+        if (search) {
+            where.info = {
+                path: [lang],
+                string_contains: search,
+            }
+        }
 
         return this.prisma.event.count({
-            where: where as any,
+            where: where,
         })
     }
 

@@ -15,11 +15,11 @@ export class TaxonomiesService {
     constructor(private readonly repository: TaxonomiesRepository) { }
 
     async getGenres(options: PaginationQuery): Promise<GenreListResponse> {
-        const { page, limit, search } = options
+        const { page, limit, search, lang } = options
 
         const [data, total] = await Promise.all([
-            this.repository.findAllGenres({ page, limit, search }),
-            this.repository.countGenres(search),
+            this.repository.findAllGenres({ page, limit, search, lang }),
+            this.repository.countGenres({ search, lang }),
         ])
 
         const totalPages = Math.ceil(total / limit)
@@ -52,11 +52,11 @@ export class TaxonomiesService {
     }
 
     async getTags(options: PaginationQuery): Promise<TagListResponse> {
-        const { page, limit, search } = options
+        const { page, limit, search, lang } = options
 
         const [data, total] = await Promise.all([
-            this.repository.findAllTags({ page, limit, search }),
-            this.repository.countTags(search),
+            this.repository.findAllTags({ page, limit, search, lang }),
+            this.repository.countTags({ search, lang }),
         ])
 
         const totalPages = Math.ceil(total / limit)

@@ -3,13 +3,13 @@ import type { PrismaClient } from '../../generated/prisma/client.js'
 export class ProductionsRepository {
     constructor(private readonly prisma: PrismaClient) { }
 
-    async findAll(options: { page: number; limit: number; search?: string }) {
-        const { page, limit, search } = options
+    async findAll(options: { page: number; limit: number; search?: string; lang?: string }) {
+        const { page, limit, search, lang = 'nl' } = options
         const skip = (page - 1) * limit
 
         const where = search ? {
             title: {
-                path: ['nl'],
+                path: [lang],
                 string_contains: search,
             },
         } : {}
@@ -30,10 +30,11 @@ export class ProductionsRepository {
         })
     }
 
-    async count(search?: string) {
+    async count(options: { search?: string; lang?: string }) {
+        const { search, lang = 'nl' } = options
         const where = search ? {
             title: {
-                path: ['nl'],
+                path: [lang],
                 string_contains: search,
             },
         } : {}

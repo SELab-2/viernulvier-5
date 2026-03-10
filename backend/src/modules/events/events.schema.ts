@@ -18,6 +18,7 @@ export const paginationQuerySchema = z.object({
     limit: z.coerce.number().int().positive().max(100).default(20),
     productionId: z.string().uuid().optional(),
     search: z.string().optional(),
+    lang: z.string().optional().default('nl'),
 })
 
 export const eventSchema = z.object({

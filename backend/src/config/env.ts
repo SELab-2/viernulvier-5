@@ -11,7 +11,7 @@ const envSchema = z.object({
     HOST: z.string().default('0.0.0.0'),
     JWT_SECRET: z.string().min(8),
     ADMIN_USERNAME: z.string().min(3).default('admin'),
-    ADMIN_PASSWORD: z.string().min(8).default('password123'),
+    ADMIN_PASSWORD: z.string().min(8).default('admin123'),
     NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
 })
 

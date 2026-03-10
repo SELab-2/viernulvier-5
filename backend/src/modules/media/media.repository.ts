@@ -4,8 +4,8 @@ export class MediaRepository {
     constructor(private readonly prisma: PrismaClient) { }
 
     // Galleries
-    async findAllGalleries(options: { page: number; limit: number; search?: string }) {
-        const { page, limit, search } = options
+    async findAllGalleries(options: { page: number; limit: number; search?: string; lang?: string }) {
+        const { page, limit, search, lang = 'nl' } = options
         const skip = (page - 1) * limit
         const where = search ? { name: { contains: search } } : {}
 
@@ -17,7 +17,8 @@ export class MediaRepository {
         })
     }
 
-    async countGalleries(search?: string) {
+    async countGalleries(options: { search?: string; lang?: string }) {
+        const { search, lang = 'nl' } = options
         const where = search ? { name: { contains: search } } : {}
         return this.prisma.gallery.count({ where: where as any })
     }
@@ -55,12 +56,12 @@ export class MediaRepository {
     }
 
     // Items
-    async findAllItems(options: { page: number; limit: number; search?: string }) {
-        const { page, limit, search } = options
+    async findAllItems(options: { page: number; limit: number; search?: string; lang?: string }) {
+        const { page, limit, search, lang = 'nl' } = options
         const skip = (page - 1) * limit
         const where = search ? {
             title: {
-                path: ['nl'],
+                path: [lang],
                 string_contains: search,
             },
         } : {}
@@ -73,10 +74,11 @@ export class MediaRepository {
         })
     }
 
-    async countItems(search?: string) {
+    async countItems(options: { search?: string; lang?: string }) {
+        const { search, lang = 'nl' } = options
         const where = search ? {
             title: {
-                path: ['nl'],
+                path: [lang],
                 string_contains: search,
             },
         } : {}
@@ -113,8 +115,8 @@ export class MediaRepository {
     }
 
     // Crops
-    async findAllCrops(options: { page: number; limit: number; search?: string }) {
-        const { page, limit, search } = options
+    async findAllCrops(options: { page: number; limit: number; search?: string; lang?: string }) {
+        const { page, limit, search, lang = 'nl' } = options
         const skip = (page - 1) * limit
         const where = search ? { name: { contains: search } } : {}
 
@@ -126,7 +128,8 @@ export class MediaRepository {
         })
     }
 
-    async countCrops(search?: string) {
+    async countCrops(options: { search?: string; lang?: string }) {
+        const { search, lang = 'nl' } = options
         const where = search ? { name: { contains: search } } : {}
         return this.prisma.crop.count({ where: where as any })
     }

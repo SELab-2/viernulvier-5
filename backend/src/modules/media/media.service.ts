@@ -16,10 +16,10 @@ export class MediaService {
     constructor(private readonly repository: MediaRepository) { }
 
     async getGalleries(options: PaginationQuery) {
-        const { page, limit, search } = options
+        const { page, limit, search, lang } = options
         const [data, total] = await Promise.all([
-            this.repository.findAllGalleries({ page, limit, search }),
-            this.repository.countGalleries(search),
+            this.repository.findAllGalleries({ page, limit, search, lang }),
+            this.repository.countGalleries({ search, lang }),
         ])
         return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } }
     }
@@ -41,10 +41,10 @@ export class MediaService {
     }
 
     async getItems(options: PaginationQuery) {
-        const { page, limit, search } = options
+        const { page, limit, search, lang } = options
         const [data, total] = await Promise.all([
-            this.repository.findAllItems({ page, limit, search }),
-            this.repository.countItems(search),
+            this.repository.findAllItems({ page, limit, search, lang }),
+            this.repository.countItems({ search, lang }),
         ])
         return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } }
     }
@@ -66,10 +66,10 @@ export class MediaService {
     }
 
     async getCrops(options: PaginationQuery) {
-        const { page, limit, search } = options
+        const { page, limit, search, lang } = options
         const [data, total] = await Promise.all([
-            this.repository.findAllCrops({ page, limit, search }),
-            this.repository.countCrops(search),
+            this.repository.findAllCrops({ page, limit, search, lang }),
+            this.repository.countCrops({ search, lang }),
         ])
         return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } }
     }

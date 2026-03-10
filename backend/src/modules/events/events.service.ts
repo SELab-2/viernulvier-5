@@ -13,11 +13,11 @@ export class EventsService {
     constructor(private readonly repository: EventsRepository) { }
 
     async getEvents(options: PaginationQuery): Promise<EventListResponse> {
-        const { page, limit, productionId } = options
+        const { page, limit, productionId, search, lang } = options
 
         const [data, total] = await Promise.all([
-            this.repository.findAll({ page, limit, productionId }),
-            this.repository.count(productionId),
+            this.repository.findAll({ page, limit, productionId, search, lang }),
+            this.repository.count({ productionId, search, lang }),
         ])
 
         const totalPages = Math.ceil(total / limit)

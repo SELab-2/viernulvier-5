@@ -3,13 +3,13 @@ import type { PrismaClient } from '../../generated/prisma/client.js'
 export class TaxonomiesRepository {
     constructor(private readonly prisma: PrismaClient) { }
 
-    async findAllGenres(options: { page: number; limit: number; search?: string }) {
-        const { page, limit, search } = options
+    async findAllGenres(options: { page: number; limit: number; search?: string; lang?: string }) {
+        const { page, limit, search, lang = 'nl' } = options
         const skip = (page - 1) * limit
 
         const where = search ? {
             name: {
-                path: ['nl'],
+                path: [lang],
                 string_contains: search,
             },
         } : {}
@@ -30,10 +30,11 @@ export class TaxonomiesRepository {
         })
     }
 
-    async countGenres(search?: string) {
+    async countGenres(options: { search?: string; lang?: string }) {
+        const { search, lang = 'nl' } = options
         const where = search ? {
             name: {
-                path: ['nl'],
+                path: [lang],
                 string_contains: search,
             },
         } : {}
@@ -78,13 +79,13 @@ export class TaxonomiesRepository {
     /**
      * Get a paginated list of tags from the database.
      */
-    async findAllTags(options: { page: number; limit: number; search?: string }) {
-        const { page, limit, search } = options
+    async findAllTags(options: { page: number; limit: number; search?: string; lang?: string }) {
+        const { page, limit, search, lang = 'nl' } = options
         const skip = (page - 1) * limit
 
         const where = search ? {
             name: {
-                path: ['nl'],
+                path: [lang],
                 string_contains: search,
             },
         } : {}
@@ -107,10 +108,11 @@ export class TaxonomiesRepository {
     /**
      * Count total number of tags for pagination metadata.
      */
-    async countTags(search?: string) {
+    async countTags(options: { search?: string; lang?: string }) {
+        const { search, lang = 'nl' } = options
         const where = search ? {
             name: {
-                path: ['nl'],
+                path: [lang],
                 string_contains: search,
             },
         } : {}
