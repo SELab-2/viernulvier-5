@@ -7,7 +7,7 @@ export class EventsRepository {
         const { page, limit, productionId, search, lang = 'nl' } = options
         const skip = (page - 1) * limit
 
-        let where: any = {}
+        const where: any = {}
         if (productionId) where.production_id = productionId
         if (search) {
             where.info = {
@@ -36,7 +36,7 @@ export class EventsRepository {
 
     async count(options: { productionId?: string; search?: string; lang?: string }) {
         const { productionId, search, lang = 'nl' } = options
-        let where: any = {}
+        const where: any = {}
         if (productionId) where.production_id = productionId
         if (search) {
             where.info = {

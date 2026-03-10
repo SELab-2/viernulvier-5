@@ -5,7 +5,7 @@ export class MediaRepository {
 
     // Galleries
     async findAllGalleries(options: { page: number; limit: number; search?: string; lang?: string }) {
-        const { page, limit, search, lang = 'nl' } = options
+        const { page, limit, search } = options
         const skip = (page - 1) * limit
         const where = search ? { name: { contains: search } } : {}
 
@@ -18,7 +18,7 @@ export class MediaRepository {
     }
 
     async countGalleries(options: { search?: string; lang?: string }) {
-        const { search, lang = 'nl' } = options
+        const { search } = options
         const where = search ? { name: { contains: search } } : {}
         return this.prisma.gallery.count({ where: where as any })
     }
@@ -116,7 +116,7 @@ export class MediaRepository {
 
     // Crops
     async findAllCrops(options: { page: number; limit: number; search?: string; lang?: string }) {
-        const { page, limit, search, lang = 'nl' } = options
+        const { page, limit, search } = options
         const skip = (page - 1) * limit
         const where = search ? { name: { contains: search } } : {}
 
@@ -129,7 +129,7 @@ export class MediaRepository {
     }
 
     async countCrops(options: { search?: string; lang?: string }) {
-        const { search, lang = 'nl' } = options
+        const { search } = options
         const where = search ? { name: { contains: search } } : {}
         return this.prisma.crop.count({ where: where as any })
     }
