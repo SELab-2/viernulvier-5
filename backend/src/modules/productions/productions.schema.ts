@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+const localizedTextSchema = z.record(z.string())
+
 export const paginationQuerySchema = z.object({
     page: z.coerce.number().int().positive().default(1),
     limit: z.coerce.number().int().positive().max(100).default(20),
@@ -8,15 +10,15 @@ export const paginationQuerySchema = z.object({
 
 export const productionSchema = z.object({
     id: z.string().uuid(),
-    title: z.any().nullable(),
-    artist: z.any().nullable(),
-    description: z.any().nullable(),
+    title: localizedTextSchema.nullable(),
+    artist: localizedTextSchema.nullable(),
+    description: localizedTextSchema.nullable(),
     created_at: z.date(),
     updated_at: z.date(),
 })
 
 export const productionListSchema = z.object({
-    data: z.array(z.any()),
+    data: z.array(productionSchema),
     meta: z.object({
         total: z.number(),
         page: z.number(),
@@ -26,9 +28,9 @@ export const productionListSchema = z.object({
 })
 
 export const updateProductionSchema = z.object({
-    title: z.any().optional(),
-    artist: z.any().optional(),
-    description: z.any().optional(),
+    title: localizedTextSchema.nullable().optional(),
+    artist: localizedTextSchema.nullable().optional(),
+    description: localizedTextSchema.nullable().optional(),
 })
 
 export const updateProductionParamsSchema = z.object({
@@ -36,9 +38,9 @@ export const updateProductionParamsSchema = z.object({
 })
 
 export const createProductionSchema = z.object({
-    title: z.any().nullable().optional(),
-    artist: z.any().nullable().optional(),
-    description: z.any().nullable().optional(),
+    title: localizedTextSchema.nullable().optional(),
+    artist: localizedTextSchema.nullable().optional(),
+    description: localizedTextSchema.nullable().optional(),
 })
 
 export const errorSchema = z.object({

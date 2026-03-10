@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+const localizedTextSchema = z.record(z.string())
+
 export const paginationQuerySchema = z.object({
     page: z.coerce.number().int().positive().default(1),
     limit: z.coerce.number().int().positive().max(100).default(20),
@@ -31,7 +33,7 @@ export const updateGallerySchema = z.object({
 })
 
 export const galleryListSchema = z.object({
-    data: z.array(z.any()),
+    data: z.array(gallerySchema),
     meta: z.object({
         total: z.number(),
         page: z.number(),
@@ -45,7 +47,7 @@ export const itemSchema = z.object({
     id: z.string().uuid(),
     type: z.string().nullable(),
     original_filename: z.string().nullable(),
-    title: z.any().nullable(),
+    title: localizedTextSchema.nullable(),
     gallery_id: z.string().uuid().nullable(),
     created_at: z.date(),
     updated_at: z.date(),
@@ -54,19 +56,19 @@ export const itemSchema = z.object({
 export const createItemSchema = z.object({
     type: z.string().nullable().optional(),
     original_filename: z.string().nullable().optional(),
-    title: z.any().nullable().optional(),
+    title: localizedTextSchema.nullable().optional(),
     gallery_id: z.string().uuid().nullable().optional(),
 })
 
 export const updateItemSchema = z.object({
     type: z.string().nullable().optional(),
     original_filename: z.string().nullable().optional(),
-    title: z.any().nullable().optional(),
+    title: localizedTextSchema.nullable().optional(),
     gallery_id: z.string().uuid().nullable().optional(),
 })
 
 export const itemListSchema = z.object({
-    data: z.array(z.any()),
+    data: z.array(itemSchema),
     meta: z.object({
         total: z.number(),
         page: z.number(),
@@ -95,7 +97,7 @@ export const updateCropSchema = z.object({
 })
 
 export const cropListSchema = z.object({
-    data: z.array(z.any()),
+    data: z.array(cropSchema),
     meta: z.object({
         total: z.number(),
         page: z.number(),

@@ -1,5 +1,18 @@
 import { z } from 'zod'
 
+type JsonValue = string | number | boolean | null | { [key: string]: JsonValue } | JsonValue[]
+
+const jsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
+    z.union([
+        z.string(),
+        z.number(),
+        z.boolean(),
+        z.null(),
+        z.array(jsonValueSchema),
+        z.record(jsonValueSchema),
+    ])
+)
+
 export const paginationQuerySchema = z.object({
     page: z.coerce.number().int().positive().default(1),
     limit: z.coerce.number().int().positive().max(100).default(20),
@@ -13,13 +26,13 @@ export const eventSchema = z.object({
     ends_at: z.date().nullable(),
     doors_at: z.date().nullable(),
     production_id: z.string().uuid().nullable(),
-    info: z.any().nullable(),
+    info: jsonValueSchema.nullable(),
     created_at: z.date(),
     updated_at: z.date(),
 })
 
 export const eventListSchema = z.object({
-    data: z.array(z.any()),
+    data: z.array(eventSchema),
     meta: z.object({
         total: z.number(),
         page: z.number(),
@@ -40,7 +53,7 @@ export const eventPriceSchema = z.object({
 })
 
 export const eventPriceListSchema = z.object({
-    data: z.array(z.any()),
+    data: z.array(eventPriceSchema),
     meta: z.object({
         total: z.number(),
         page: z.number(),
@@ -54,7 +67,7 @@ export const updateEventSchema = z.object({
     ends_at: z.coerce.date().optional(),
     doors_at: z.coerce.date().optional(),
     production_id: z.string().uuid().optional(),
-    info: z.any().optional(),
+    info: jsonValueSchema.optional(),
 })
 
 export const updateEventParamsSchema = z.object({
@@ -66,7 +79,7 @@ export const createEventSchema = z.object({
     ends_at: z.coerce.date().nullable().optional(),
     doors_at: z.coerce.date().nullable().optional(),
     production_id: z.string().uuid().nullable().optional(),
-    info: z.any().nullable().optional(),
+    info: jsonValueSchema.nullable().optional(),
 })
 
 export const errorSchema = z.object({

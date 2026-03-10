@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+const localizedTextSchema = z.record(z.string())
+
 export const paginationQuerySchema = z.object({
     page: z.coerce.number().int().positive().default(1),
     limit: z.coerce.number().int().positive().max(100).default(20),
@@ -16,7 +18,7 @@ export const errorSchema = z.object({
 
 export const locationSchema = z.object({
     id: z.string().uuid(),
-    name: z.any().nullable(),
+    name: localizedTextSchema.nullable(),
     city: z.string().nullable(),
     street: z.string().nullable(),
     created_at: z.date(),
@@ -24,7 +26,7 @@ export const locationSchema = z.object({
 })
 
 export const locationListSchema = z.object({
-    data: z.array(z.any()),
+    data: z.array(locationSchema),
     meta: z.object({
         total: z.number(),
         page: z.number(),
@@ -34,7 +36,7 @@ export const locationListSchema = z.object({
 })
 
 export const createLocationSchema = z.object({
-    name: z.any().nullable().optional(),
+    name: localizedTextSchema.nullable().optional(),
     code: z.string().nullable().optional(),
     street: z.string().nullable().optional(),
     number: z.string().nullable().optional(),
@@ -44,7 +46,7 @@ export const createLocationSchema = z.object({
 })
 
 export const updateLocationSchema = z.object({
-    name: z.any().nullable().optional(),
+    name: localizedTextSchema.nullable().optional(),
     code: z.string().nullable().optional(),
     street: z.string().nullable().optional(),
     number: z.string().nullable().optional(),
@@ -62,7 +64,7 @@ export type UpdateLocationInput = z.infer<typeof updateLocationSchema>
 // Schema for a single hall record
 export const hallSchema = z.object({
     id: z.string().uuid(),
-    name: z.any().nullable(),
+    name: localizedTextSchema.nullable(),
     space_id: z.string().uuid().nullable(),
     created_at: z.date(),
     updated_at: z.date(),
@@ -70,7 +72,7 @@ export const hallSchema = z.object({
 
 // Schema for a paginated list of halls
 export const hallListSchema = z.object({
-    data: z.array(z.any()),
+    data: z.array(hallSchema),
     meta: z.object({
         total: z.number(),
         page: z.number(),
@@ -82,7 +84,7 @@ export const hallListSchema = z.object({
 // Schema for a single space record
 export const spaceSchema = z.object({
     id: z.string().uuid(),
-    name: z.any().nullable(),
+    name: localizedTextSchema.nullable(),
     location_id: z.string().uuid().nullable(),
     created_at: z.date(),
     updated_at: z.date(),
@@ -90,7 +92,7 @@ export const spaceSchema = z.object({
 
 // Schema for a paginated list of spaces
 export const spaceListSchema = z.object({
-    data: z.array(z.any()),
+    data: z.array(spaceSchema),
     meta: z.object({
         total: z.number(),
         page: z.number(),

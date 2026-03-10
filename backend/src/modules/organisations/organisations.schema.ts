@@ -22,7 +22,7 @@ export const organisationSchema = z.object({
 })
 
 export const organisationListSchema = z.object({
-    data: z.array(z.any()),
+    data: z.array(organisationSchema),
     meta: z.object({
         total: z.number(),
         page: z.number(),
