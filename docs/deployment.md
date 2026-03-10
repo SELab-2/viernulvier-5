@@ -44,8 +44,9 @@ npm install
 npm run dev                # Start Vite on :5173
 ```
 
-
 ### 4. Nginx
+<!-- This might not work, you should already have a server running on port 80 in nginx -->
+<!-- and only then you can modify the ./nginx/nginx.conf to also use certbot -->
 ```bash
 docker compose -f docker-compose.yml
 ```

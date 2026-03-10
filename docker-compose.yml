@@ -17,6 +17,8 @@ services:
     build: ./frontend
     container_name: vnv_frontend
     restart: unless-stopped
+    volumes:
+      - dist:/usr/src/app/dist
     networks:
       - vnv_net
 
@@ -31,6 +33,7 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
+      - dist:/var/www/html
     networks:
       - vnv_net
 
@@ -49,3 +52,6 @@ services:
 networks:
   vnv_net:
     external: true
+
+volumes:
+  dist: {}
