@@ -1,32 +1,30 @@
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { prisma } from "./prisma";
 
 import Scraper from './scraper';
 
 // contains the data of the last sync with the API, the scraper will only add data updated or created after this timestamp
-const TIMESTAMP_FILE = join(dirname(fileURLToPath(import.meta.url)), 'scraper_timestamp.txt');
 
-function readCutoffTimestamp(): Date | undefined {
-  if (!existsSync(TIMESTAMP_FILE)) {
-    console.log('unable to read timestamp from file, reverted to standard: enter everything');
+
+async function readCutoffTimestamp(): Promise<Date | undefined> {
+  const last_scraped = await prisma.last_scraped.findFirst()
+  if (!last_scraped) {
+    console.log('unable to read timestamp from database, reverted to standard: enter everything');
     return undefined;
   }
-
-  const read_timestamp = readFileSync(TIMESTAMP_FILE, 'utf-8').trim();
-  const ts = new Date(read_timestamp);
+  const ts = new Date(last_scraped.time)
 
   if (Number.isNaN(ts.getTime())) {
-    console.log('unable to read timestamp from file, reverted to standard: enter everything');
+    console.log('unable to read timestamp from database, reverted to standard: enter everything');
     return undefined;
   }
 
-  console.log('Timestamp read from file:', ts.toISOString());
+  console.log('Timestamp read from database:', ts.toISOString());
   return ts;
 }
 
 export async function main() {
-  const cutoff_timestamp = readCutoffTimestamp();
+  const cutoff_timestamp = await readCutoffTimestamp();
   const timestamp = new Date().toISOString();
 
   await Scraper.sync_locations(cutoff_timestamp);
@@ -46,8 +44,13 @@ export async function main() {
   await Scraper.sync_event_prices(cutoff_timestamp);
   await Scraper.sync_tags(cutoff_timestamp);
 
-  writeFileSync(TIMESTAMP_FILE, timestamp);
-  console.log('Timestamp written to scraper_timestamp.txt:', timestamp);
+  await prisma.last_scraped.deleteMany({});
+  await prisma.last_scraped.create({
+    data: {
+      time: timestamp
+    }
+  });
+  console.log("Timestamp written to database table 'last_scraped' :", timestamp);
 }
 
 const isMainModule = process.argv[1] === fileURLToPath(import.meta.url);

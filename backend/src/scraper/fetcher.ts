@@ -1,16 +1,16 @@
 import "dotenv/config";
 import axios from "axios";
-import axiosRetry from "axios-retry";
-
-
-// if we request too fast, for rate limits
-axiosRetry(axios, {
-    retries: 3,
-    retryDelay: (retryCount) => retryCount * 1000,
-    retryCondition: (error) => {
-        return error.code === 'ECONNRESET' || axiosRetry.isNetworkError(error);
-    }
-});
+// import axiosRetry from "axios-retry";
+//
+//
+// // if we request too fast, for rate limits
+// axiosRetry(axios, {
+//     retries: 3,
+//     retryDelay: (retryCount) => retryCount * 1000,
+//     retryCondition: (error) => {
+//         return error.code === 'ECONNRESET' || axiosRetry.isNetworkError(error);
+//     }
+// });
 
 import type {
     APIProduction,
