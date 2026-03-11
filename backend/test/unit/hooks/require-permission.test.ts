@@ -16,8 +16,13 @@ describe('requirePermission', () => {
         app = Fastify({ logger: false })
         await app.register(authPlugin)
 
-        app.get('/write', {
+        app.get('/archive-delete', {
             preHandler: [requirePermission(Permission.ARCHIVE_DELETE)],
+            handler: async () => ({ success: true }),
+        })
+
+        app.get('/editors-manage', {
+            preHandler: [requirePermission(Permission.EDITORS_MANAGE)],
             handler: async () => ({ success: true }),
         })
     })
@@ -29,16 +34,16 @@ describe('requirePermission', () => {
     it('returns 401 without a token', async () => {
         const response = await app.inject({
             method: 'GET',
-            url: '/write',
+            url: '/archive-delete',
         })
 
         expect(response.statusCode).toBe(401)
     })
 
-    it('allows an ADMIN token through', async () => {
+    it('allows an ADMIN token through for editor management', async () => {
         const response = await app.inject({
             method: 'GET',
-            url: '/write',
+            url: '/editors-manage',
             cookies: {
                 token: app.jwt.sign({ sub: 'admin-id', username: 'admin', role: 'ADMIN' }),
             },
@@ -48,10 +53,23 @@ describe('requirePermission', () => {
         expect(response.json()).toEqual({ success: true })
     })
 
-    it('rejects an EDITOR token without the needed permission', async () => {
+    it('allows an EDITOR token to delete archive items', async () => {
         const response = await app.inject({
             method: 'GET',
-            url: '/write',
+            url: '/archive-delete',
+            cookies: {
+                token: app.jwt.sign({ sub: 'editor-id', username: 'editor', role: 'EDITOR' }),
+            },
+        })
+
+        expect(response.statusCode).toBe(200)
+        expect(response.json()).toEqual({ success: true })
+    })
+
+    it('rejects an EDITOR token without the needed admin permission', async () => {
+        const response = await app.inject({
+            method: 'GET',
+            url: '/editors-manage',
             cookies: {
                 token: app.jwt.sign({ sub: 'editor-id', username: 'editor', role: 'EDITOR' }),
             },

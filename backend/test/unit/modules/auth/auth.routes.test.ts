@@ -22,12 +22,12 @@ describe('auth routes', () => {
         findUnique = vi.fn()
         const passwordHash = await hashPassword('admin12345')
 
-        findUnique.mockResolvedValue({
-            id: 'admin-id',
-            username: 'admin',
+        findUnique.mockImplementation(async ({ where: { username } }) => ({
+            id: `${username}-id`,
+            username,
             passwordHash,
-            role: 'ADMIN',
-        })
+            role: username === 'editor' ? 'EDITOR' : 'ADMIN',
+        }))
 
         app = Fastify({ logger: false })
         app.setValidatorCompiler(validatorCompiler)
@@ -120,5 +120,104 @@ describe('auth routes', () => {
         expect(second.statusCode).toBe(401)
         expect(third.statusCode).toBe(429)
         expect(third.json()).toEqual({ error: 'Too many login attempts' })
+    })
+
+    it('does not count successful logins toward the rate limit', async () => {
+        const first = await app.inject({
+            method: 'POST',
+            url: '/api/auth/login',
+            payload: { username: 'admin', password: 'admin12345' },
+        })
+
+        const second = await app.inject({
+            method: 'POST',
+            url: '/api/auth/login',
+            payload: { username: 'admin', password: 'admin12345' },
+        })
+
+        const third = await app.inject({
+            method: 'POST',
+            url: '/api/auth/login',
+            payload: { username: 'admin', password: 'admin12345' },
+        })
+
+        expect(first.statusCode).toBe(200)
+        expect(second.statusCode).toBe(200)
+        expect(third.statusCode).toBe(200)
+    })
+
+    it('clears failed login attempts after a successful login', async () => {
+        findUnique.mockResolvedValueOnce(null)
+
+        const failedBeforeSuccess = await app.inject({
+            method: 'POST',
+            url: '/api/auth/login',
+            payload: { username: 'admin', password: 'wrongpass' },
+        })
+
+        const successfulLogin = await app.inject({
+            method: 'POST',
+            url: '/api/auth/login',
+            payload: { username: 'admin', password: 'admin12345' },
+        })
+
+        findUnique.mockResolvedValueOnce(null)
+        findUnique.mockResolvedValueOnce(null)
+        findUnique.mockResolvedValueOnce(null)
+
+        const failedAfterReset = await app.inject({
+            method: 'POST',
+            url: '/api/auth/login',
+            payload: { username: 'admin', password: 'wrongpass' },
+        })
+
+        const secondFailedAfterReset = await app.inject({
+            method: 'POST',
+            url: '/api/auth/login',
+            payload: { username: 'admin', password: 'wrongpass' },
+        })
+
+        const blockedAttempt = await app.inject({
+            method: 'POST',
+            url: '/api/auth/login',
+            payload: { username: 'admin', password: 'wrongpass' },
+        })
+
+        expect(failedBeforeSuccess.statusCode).toBe(401)
+        expect(successfulLogin.statusCode).toBe(200)
+        expect(failedAfterReset.statusCode).toBe(401)
+        expect(secondFailedAfterReset.statusCode).toBe(401)
+        expect(blockedAttempt.statusCode).toBe(429)
+    })
+
+    it('does not clear another username throttle bucket after a successful login', async () => {
+        const firstAdminFailure = await app.inject({
+            method: 'POST',
+            url: '/api/auth/login',
+            payload: { username: 'admin', password: 'wrongpass' },
+        })
+
+        const secondAdminFailure = await app.inject({
+            method: 'POST',
+            url: '/api/auth/login',
+            payload: { username: 'admin', password: 'wrongpass' },
+        })
+
+        const otherUserSuccess = await app.inject({
+            method: 'POST',
+            url: '/api/auth/login',
+            payload: { username: 'editor', password: 'admin12345' },
+        })
+
+        const blockedAdminAttempt = await app.inject({
+            method: 'POST',
+            url: '/api/auth/login',
+            payload: { username: 'admin', password: 'wrongpass' },
+        })
+
+        expect(firstAdminFailure.statusCode).toBe(401)
+        expect(secondAdminFailure.statusCode).toBe(401)
+        expect(otherUserSuccess.statusCode).toBe(200)
+        expect(blockedAdminAttempt.statusCode).toBe(429)
     })
 })

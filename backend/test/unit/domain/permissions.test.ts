@@ -8,12 +8,14 @@ describe('Permissions', () => {
         expect(hasPermission(Role.ADMIN, Permission.ARCHIVE_CREATE)).toBe(true)
         expect(hasPermission(Role.ADMIN, Permission.ARCHIVE_UPDATE)).toBe(true)
         expect(hasPermission(Role.ADMIN, Permission.ARCHIVE_DELETE)).toBe(true)
+        expect(hasPermission(Role.ADMIN, Permission.EDITORS_MANAGE)).toBe(true)
     })
 
-    it('EDITOR should be able to read and write but not delete', () => {
+    it('EDITOR should be able to fully manage archive items but not editor accounts', () => {
         expect(hasPermission(Role.EDITOR, Permission.ARCHIVE_READ)).toBe(true)
         expect(hasPermission(Role.EDITOR, Permission.ARCHIVE_CREATE)).toBe(true)
         expect(hasPermission(Role.EDITOR, Permission.ARCHIVE_UPDATE)).toBe(true)
-        expect(hasPermission(Role.EDITOR, Permission.ARCHIVE_DELETE)).toBe(false)
+        expect(hasPermission(Role.EDITOR, Permission.ARCHIVE_DELETE)).toBe(true)
+        expect(hasPermission(Role.EDITOR, Permission.EDITORS_MANAGE)).toBe(false)
     })
 })

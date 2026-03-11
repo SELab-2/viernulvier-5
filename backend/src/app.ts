@@ -13,6 +13,7 @@ import swaggerPlugin from './plugins/swagger.js'
 // Modules
 import archiveRoutes from './modules/archive/archive.routes.js'
 import authRoutes from './modules/auth/auth.routes.js'
+import editorsRoutes from './modules/editors/editors.routes.js'
 
 /**
  * Build the Fastify application.
@@ -46,6 +47,7 @@ export async function buildApp(opts = {}): Promise<FastifyInstance> {
     // --- Feature modules ---
     await app.register(archiveRoutes, { prefix: '/api/archive' })
     await app.register(authRoutes, { prefix: '/api/auth' })
+    await app.register(editorsRoutes, { prefix: '/api/editors' })
 
     return app
 }
