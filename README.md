@@ -2,7 +2,7 @@
 
 ## Frameworks:
 frontend: React  
-backend: Next.js  
+backend: Fastify  
 database: PostgreSQL + Prisma  
 serverside: nginx  
 
