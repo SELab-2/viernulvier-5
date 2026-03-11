@@ -124,7 +124,7 @@ describe('Productions Routes', () => {
 
             try {
                 const response = await app.inject({
-                    method: 'PUT',
+                    method: 'PATCH',
                     url: `/api/archive/productions/${initialProd.id}`,
                     headers: { authorization: `Bearer ${token}` },
                     payload: updatePayload
@@ -143,7 +143,7 @@ describe('Productions Routes', () => {
         it('should return 401 Unauthorized when no token is provided', async () => {
             const id = '00000000-0000-0000-0000-000000000000'
             const response = await app.inject({
-                method: 'PUT',
+                method: 'PATCH',
                 url: `/api/archive/productions/${id}`,
                 payload: { title: { nl: 'Unauthorized' } }
             })
@@ -154,7 +154,7 @@ describe('Productions Routes', () => {
         it('should return 404 for non-existent production', async () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const response = await app.inject({
-                method: 'PUT',
+                method: 'PATCH',
                 url: '/api/archive/productions/00000000-0000-0000-0000-000000000000',
                 headers: { authorization: `Bearer ${token}` },
                 payload: { title: { nl: 'Non-existent' } }

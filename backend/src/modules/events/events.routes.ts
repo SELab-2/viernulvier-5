@@ -86,7 +86,7 @@ const eventsRoutes: FastifyPluginAsync = async (fastify) => {
     })
 
     // PUT /api/archive/events/:id
-    fastify.put('/:id', {
+    fastify.patch('/:id', {
         preHandler: [requireAuth],
         schema: {
             tags: ['events'],

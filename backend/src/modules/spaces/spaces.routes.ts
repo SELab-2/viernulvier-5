@@ -57,7 +57,7 @@ const spacesRoutes: FastifyPluginAsync = async (fastify) => {
         handler: (request, reply) => controller.createSpace(request as any, reply),
     })
 
-    fastify.put('/:id', {
+    fastify.patch('/:id', {
         preHandler: [requireAuth],
         schema: {
             tags: ['locations'],

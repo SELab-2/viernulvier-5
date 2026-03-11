@@ -57,7 +57,7 @@ const hallsRoutes: FastifyPluginAsync = async (fastify) => {
         handler: (request, reply) => controller.createHall(request as any, reply),
     })
 
-    fastify.put('/:id', {
+    fastify.patch('/:id', {
         preHandler: [requireAuth],
         schema: {
             tags: ['locations'],

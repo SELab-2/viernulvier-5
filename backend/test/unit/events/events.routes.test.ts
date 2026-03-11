@@ -122,7 +122,7 @@ describe('Events Routes', () => {
 
             try {
                 const response = await app.inject({
-                    method: 'PUT',
+                    method: 'PATCH',
                     url: `/api/archive/events/${initialEvent.id}`,
                     headers: { authorization: `Bearer ${token}` },
                     payload: updatePayload
@@ -141,7 +141,7 @@ describe('Events Routes', () => {
         it('should return 401 Unauthorized when no token is provided', async () => {
             const id = '00000000-0000-0000-0000-000000000000'
             const response = await app.inject({
-                method: 'PUT',
+                method: 'PATCH',
                 url: `/api/archive/events/${id}`,
                 payload: { starts_at: new Date() }
             })
@@ -152,7 +152,7 @@ describe('Events Routes', () => {
         it('should return 404 for non-existent event', async () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const response = await app.inject({
-                method: 'PUT',
+                method: 'PATCH',
                 url: '/api/archive/events/00000000-0000-0000-0000-000000000000',
                 headers: { authorization: `Bearer ${token}` },
                 payload: { info: { nl: 'Non-existent' } }

@@ -110,7 +110,7 @@ describe('Blogs Routes', () => {
 
             // Update
             const response = await app.inject({
-                method: 'PUT',
+                method: 'PATCH',
                 url: `/api/archive/blogs/${created.id}`,
                 headers: { authorization: `Bearer ${token}` },
                 payload: { title: 'New Title' }
@@ -126,7 +126,7 @@ describe('Blogs Routes', () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const uuid = '00000000-0000-0000-0000-000000000000'
             const response = await app.inject({
-                method: 'PUT',
+                method: 'PATCH',
                 url: `/api/archive/blogs/${uuid}`,
                 headers: { authorization: `Bearer ${token}` },
                 payload: { title: 'New Title' }

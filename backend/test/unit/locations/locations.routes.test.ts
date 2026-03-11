@@ -97,7 +97,7 @@ describe('Locations Routes', () => {
             try {
                 const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
                 const response = await app.inject({
-                    method: 'PUT',
+                    method: 'PATCH',
                     url: `/api/archive/locations/${location.id}`,
                     headers: { authorization: `Bearer ${token}` },
                     payload: { city: 'Updated City' }
@@ -114,7 +114,7 @@ describe('Locations Routes', () => {
         it('should return 404 for non-existent location', async () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const response = await app.inject({
-                method: 'PUT',
+                method: 'PATCH',
                 url: '/api/archive/locations/00000000-0000-0000-0000-000000000000',
                 headers: { authorization: `Bearer ${token}` },
                 payload: { city: 'Non-existent' }

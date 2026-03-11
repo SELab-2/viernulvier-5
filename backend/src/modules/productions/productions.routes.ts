@@ -61,7 +61,7 @@ const productionsRoutes: FastifyPluginAsync = async (fastify) => {
     })
 
     // PUT /api/archive/productions/:id
-    fastify.put('/:id', {
+    fastify.patch('/:id', {
         preHandler: [requireAuth],
         schema: {
             tags: ['productions'],

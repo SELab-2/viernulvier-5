@@ -57,7 +57,7 @@ const blogsRoutes: FastifyPluginAsync = async (fastify) => {
     })
 
     // PUT /api/archive/blogs/:id
-    fastify.put('/:id', {
+    fastify.patch('/:id', {
         preHandler: [requireAuth],
         schema: {
             tags: ['blogs'],

@@ -113,7 +113,7 @@ describe('Media Routes', () => {
             try {
                 const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
                 const response = await app.inject({
-                    method: 'PUT',
+                    method: 'PATCH',
                     url: `/api/archive/media/galleries/${gallery.id}`,
                     headers: { authorization: `Bearer ${token}` },
                     payload: { name: 'Updated Name' }
@@ -129,7 +129,7 @@ describe('Media Routes', () => {
         it('should return 404 for non-existent gallery', async () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const response = await app.inject({
-                method: 'PUT',
+                method: 'PATCH',
                 url: '/api/archive/media/galleries/00000000-0000-0000-0000-000000000000',
                 headers: { authorization: `Bearer ${token}` },
                 payload: { name: 'Updated Name' }
@@ -185,7 +185,7 @@ describe('Media Routes', () => {
             try {
                 const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
                 const response = await app.inject({
-                    method: 'PUT',
+                    method: 'PATCH',
                     url: `/api/archive/media/items/${item.id}`,
                     headers: { authorization: `Bearer ${token}` },
                     payload: { original_filename: 'updated.jpg' }
@@ -201,7 +201,7 @@ describe('Media Routes', () => {
         it('should return 404 for non-existent item', async () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const response = await app.inject({
-                method: 'PUT',
+                method: 'PATCH',
                 url: '/api/archive/media/items/00000000-0000-0000-0000-000000000000',
                 headers: { authorization: `Bearer ${token}` },
                 payload: { original_filename: 'updated.jpg' }
@@ -257,7 +257,7 @@ describe('Media Routes', () => {
             try {
                 const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
                 const response = await app.inject({
-                    method: 'PUT',
+                    method: 'PATCH',
                     url: `/api/archive/media/items/crops/${crop.id}`,
                     headers: { authorization: `Bearer ${token}` },
                     payload: { name: 'Updated Crop' }
@@ -273,7 +273,7 @@ describe('Media Routes', () => {
         it('should return 404 for non-existent crop', async () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const response = await app.inject({
-                method: 'PUT',
+                method: 'PATCH',
                 url: '/api/archive/media/items/crops/00000000-0000-0000-0000-000000000000',
                 headers: { authorization: `Bearer ${token}` },
                 payload: { name: 'Updated Crop' }

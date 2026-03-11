@@ -62,7 +62,7 @@ const mediaRoutes: FastifyPluginAsync = async (fastify) => {
         handler: (request, reply) => controller.createGallery(request as any, reply),
     })
 
-    fastify.put('/galleries/:id', {
+    fastify.patch('/galleries/:id', {
         preHandler: [requireAuth],
         schema: {
             tags: ['media'],
@@ -126,7 +126,7 @@ const mediaRoutes: FastifyPluginAsync = async (fastify) => {
         handler: (request, reply) => controller.createItem(request as any, reply),
     })
 
-    fastify.put('/items/:id', {
+    fastify.patch('/items/:id', {
         preHandler: [requireAuth],
         schema: {
             tags: ['media'],
@@ -190,7 +190,7 @@ const mediaRoutes: FastifyPluginAsync = async (fastify) => {
         handler: (request, reply) => controller.createCrop(request as any, reply),
     })
 
-    fastify.put('/items/crops/:id', {
+    fastify.patch('/items/crops/:id', {
         preHandler: [requireAuth],
         schema: {
             tags: ['media'],

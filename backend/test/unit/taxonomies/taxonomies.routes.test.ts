@@ -87,7 +87,7 @@ describe('Taxonomies Routes', () => {
             try {
                 const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
                 const response = await app.inject({
-                    method: 'PUT',
+                    method: 'PATCH',
                     url: `/api/archive/genres/${genre.id}`,
                     headers: { authorization: `Bearer ${token}` },
                     payload: { name: { nl: 'Updated Name' } }
@@ -104,7 +104,7 @@ describe('Taxonomies Routes', () => {
         it('should return 404 for non-existent genre', async () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const response = await app.inject({
-                method: 'PUT',
+                method: 'PATCH',
                 url: '/api/archive/genres/00000000-0000-0000-0000-000000000000',
                 headers: { authorization: `Bearer ${token}` },
                 payload: { name: { nl: 'Updated Name' } }
@@ -215,7 +215,7 @@ describe('Taxonomies Routes', () => {
             try {
                 const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
                 const response = await app.inject({
-                    method: 'PUT',
+                    method: 'PATCH',
                     url: `/api/archive/tags/${tag.id}`,
                     headers: { authorization: `Bearer ${token}` },
                     payload: { name: { nl: 'Updated Tag' } }
@@ -232,7 +232,7 @@ describe('Taxonomies Routes', () => {
         it('should return 404 for non-existent tag', async () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const response = await app.inject({
-                method: 'PUT',
+                method: 'PATCH',
                 url: '/api/archive/tags/00000000-0000-0000-0000-000000000000',
                 headers: { authorization: `Bearer ${token}` },
                 payload: { name: { nl: 'Updated Name' } }

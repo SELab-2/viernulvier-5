@@ -76,7 +76,7 @@ describe('Halls Routes', () => {
             try {
                 const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
                 const response = await app.inject({
-                    method: 'PUT',
+                    method: 'PATCH',
                     url: `/api/archive/halls/${hall.id}`,
                     headers: { authorization: `Bearer ${token}` },
                     payload: { name: { nl: 'Updated Hall' } }
@@ -93,7 +93,7 @@ describe('Halls Routes', () => {
         it('should return 404 for non-existent hall', async () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const response = await app.inject({
-                method: 'PUT',
+                method: 'PATCH',
                 url: '/api/archive/halls/00000000-0000-0000-0000-000000000000',
                 headers: { authorization: `Bearer ${token}` },
                 payload: { name: { nl: 'Non-existent' } }

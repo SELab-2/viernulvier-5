@@ -62,7 +62,7 @@ const taxonomiesRoutes: FastifyPluginAsync = async (fastify) => {
         handler: (request, reply) => controller.createGenre(request as any, reply),
     })
 
-    fastify.put('/genres/:id', {
+    fastify.patch('/genres/:id', {
         preHandler: [requireAuth],
         schema: {
             tags: ['taxonomies'],
@@ -130,7 +130,7 @@ const taxonomiesRoutes: FastifyPluginAsync = async (fastify) => {
         handler: (request, reply) => controller.createTag(request as any, reply),
     })
 
-    fastify.put('/tags/:id', {
+    fastify.patch('/tags/:id', {
         preHandler: [requireAuth],
         schema: {
             tags: ['taxonomies'],

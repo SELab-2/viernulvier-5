@@ -76,7 +76,7 @@ describe('Spaces Routes', () => {
             try {
                 const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
                 const response = await app.inject({
-                    method: 'PUT',
+                    method: 'PATCH',
                     url: `/api/archive/spaces/${space.id}`,
                     headers: { authorization: `Bearer ${token}` },
                     payload: { name: { nl: 'Updated Space' } }
@@ -93,7 +93,7 @@ describe('Spaces Routes', () => {
         it('should return 404 for non-existent space', async () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const response = await app.inject({
-                method: 'PUT',
+                method: 'PATCH',
                 url: '/api/archive/spaces/00000000-0000-0000-0000-000000000000',
                 headers: { authorization: `Bearer ${token}` },
                 payload: { name: { nl: 'Non-existent' } }
