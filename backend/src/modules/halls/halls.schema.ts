@@ -1,28 +1,30 @@
 import { z } from 'zod'
 
-const localizedTextSchema = z.record(z.string())
+const localizedTextSchema = z.object({
+    nl: z.string().optional(),
+    fr: z.string().optional(),
+    en: z.string().optional(),
+}).nullable()
 
 export const paginationQuerySchema = z.object({
     page: z.coerce.number().int().positive().default(1),
     limit: z.coerce.number().int().positive().max(100).default(20),
+    spaceId: z.string().uuid().optional(),
     search: z.string().optional(),
-    lang: z.string().optional().default('nl'),
-})
-
-export const idParamSchema = z.object({
-    id: z.string().uuid(),
-})
-
-export const errorSchema = z.object({
-    message: z.string(),
 })
 
 export const hallSchema = z.object({
     id: z.string().uuid(),
-    name: localizedTextSchema.nullable(),
+    apiId: z.string().nullable(),
+    vendor_id: z.string().nullable(),
+    box_office_id: z.string().nullable(),
+    seat_selection: z.string().nullable(),
+    open_seating: z.string().nullable(),
+    name: localizedTextSchema,
+    remark: localizedTextSchema,
     space_id: z.string().uuid().nullable(),
-    created_at: z.date(),
-    updated_at: z.date(),
+    created_at: z.coerce.date(),
+    updated_at: z.coerce.date(),
 })
 
 export const hallListSchema = z.object({
@@ -35,14 +37,25 @@ export const hallListSchema = z.object({
     }),
 })
 
+export const idParamSchema = z.object({
+    id: z.string().uuid(),
+})
+
 export const createHallSchema = z.object({
-    name: localizedTextSchema.nullable().optional(),
+    apiId: z.string().nullable().optional(),
+    vendor_id: z.string().nullable().optional(),
+    box_office_id: z.string().nullable().optional(),
+    seat_selection: z.string().nullable().optional(),
+    open_seating: z.string().nullable().optional(),
+    name: localizedTextSchema.optional(),
+    remark: localizedTextSchema.optional(),
     space_id: z.string().uuid().nullable().optional(),
 })
 
-export const updateHallSchema = z.object({
-    name: localizedTextSchema.nullable().optional(),
-    space_id: z.string().uuid().nullable().optional(),
+export const updateHallSchema = createHallSchema.partial()
+
+export const errorSchema = z.object({
+    message: z.string(),
 })
 
 export type PaginationQuery = z.infer<typeof paginationQuerySchema>

@@ -19,14 +19,6 @@ export class TaxonomiesRepository {
             skip,
             take: limit,
             orderBy: { created_at: 'desc' },
-            select: {
-                id: true,
-                type: true,
-                name: true,
-                slug: true,
-                created_at: true,
-                updated_at: true,
-            },
         })
     }
 
@@ -95,13 +87,6 @@ export class TaxonomiesRepository {
             skip,
             take: limit,
             orderBy: { created_at: 'desc' },
-            select: {
-                id: true,
-                code: true,
-                name: true,
-                created_at: true,
-                updated_at: true,
-            },
         })
     }
 

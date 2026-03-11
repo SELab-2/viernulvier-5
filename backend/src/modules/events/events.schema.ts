@@ -1,17 +1,10 @@
 import { z } from 'zod'
 
-type JsonValue = string | number | boolean | null | { [key: string]: JsonValue } | JsonValue[]
-
-const jsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
-    z.union([
-        z.string(),
-        z.number(),
-        z.boolean(),
-        z.null(),
-        z.array(jsonValueSchema),
-        z.record(jsonValueSchema),
-    ])
-)
+const localizedTextSchema = z.object({
+    nl: z.string().optional(),
+    fr: z.string().optional(),
+    en: z.string().optional(),
+}).nullable()
 
 export const paginationQuerySchema = z.object({
     page: z.coerce.number().int().positive().default(1),
@@ -23,13 +16,26 @@ export const paginationQuerySchema = z.object({
 
 export const eventSchema = z.object({
     id: z.string().uuid(),
-    starts_at: z.date().nullable(),
-    ends_at: z.date().nullable(),
-    doors_at: z.date().nullable(),
+    apiId: z.string().nullable(),
+    starts_at: z.coerce.date().nullable(),
+    ends_at: z.coerce.date().nullable(),
+    intermission_at: z.coerce.date().nullable(),
+    doors_at: z.coerce.date().nullable(),
+    box_office_id: z.string().nullable(),
+    vendor_id: z.string().nullable(),
+    max_tickets_per_order: z.number().int().nullable(),
+    uitdatabank_id: z.string().nullable(),
+    secure: z.boolean().nullable(),
+    sms_verification: z.boolean().nullable(),
+    info: localizedTextSchema,
+    eticket_info: localizedTextSchema,
+    external_order_url: localizedTextSchema,
+    order_url: z.string().nullable(),
     production_id: z.string().uuid().nullable(),
-    info: jsonValueSchema.nullable(),
-    created_at: z.date(),
-    updated_at: z.date(),
+    status_id: z.string().uuid().nullable(),
+    hall_id: z.string().uuid().nullable(),
+    created_at: z.coerce.date(),
+    updated_at: z.coerce.date(),
 })
 
 export const eventListSchema = z.object({
@@ -44,9 +50,13 @@ export const eventListSchema = z.object({
 
 export const eventPriceSchema = z.object({
     id: z.string().uuid(),
+    apiId: z.string().nullable(),
     event_id: z.string().uuid().nullable(),
-    amount: z.string().nullable(),
     available: z.number().int().nullable(),
+    amount: z.string().nullable(),
+    box_office_id: z.string().nullable(),
+    contigent_id: z.number().int().nullable(),
+    expires_at: z.coerce.date().nullable(),
     created_at: z.coerce.date(),
     updated_at: z.coerce.date(),
 })
@@ -62,24 +72,31 @@ export const eventPriceListSchema = z.object({
 })
 
 export const updateEventSchema = z.object({
-    starts_at: z.coerce.date().optional(),
-    ends_at: z.coerce.date().optional(),
-    doors_at: z.coerce.date().optional(),
-    production_id: z.string().uuid().optional(),
-    info: jsonValueSchema.optional(),
+    apiId: z.string().nullable().optional(),
+    starts_at: z.coerce.date().nullable().optional(),
+    ends_at: z.coerce.date().nullable().optional(),
+    intermission_at: z.coerce.date().nullable().optional(),
+    doors_at: z.coerce.date().nullable().optional(),
+    box_office_id: z.string().nullable().optional(),
+    vendor_id: z.string().nullable().optional(),
+    max_tickets_per_order: z.number().int().nullable().optional(),
+    uitdatabank_id: z.string().nullable().optional(),
+    secure: z.boolean().nullable().optional(),
+    sms_verification: z.boolean().nullable().optional(),
+    info: localizedTextSchema.optional(),
+    eticket_info: localizedTextSchema.optional(),
+    external_order_url: localizedTextSchema.optional(),
+    order_url: z.string().nullable().optional(),
+    production_id: z.string().uuid().nullable().optional(),
+    status_id: z.string().uuid().nullable().optional(),
+    hall_id: z.string().uuid().nullable().optional(),
 })
 
 export const updateEventParamsSchema = z.object({
     id: z.string().uuid(),
 })
 
-export const createEventSchema = z.object({
-    starts_at: z.coerce.date().nullable().optional(),
-    ends_at: z.coerce.date().nullable().optional(),
-    doors_at: z.coerce.date().nullable().optional(),
-    production_id: z.string().uuid().nullable().optional(),
-    info: jsonValueSchema.nullable().optional(),
-})
+export const createEventSchema = updateEventSchema
 
 export const errorSchema = z.object({
     message: z.string(),

@@ -1,28 +1,26 @@
 import { z } from 'zod'
 
-const localizedTextSchema = z.record(z.string())
+const localizedTextSchema = z.object({
+    nl: z.string().optional(),
+    fr: z.string().optional(),
+    en: z.string().optional(),
+}).nullable()
 
 export const paginationQuerySchema = z.object({
     page: z.coerce.number().int().positive().default(1),
     limit: z.coerce.number().int().positive().max(100).default(20),
+    locationId: z.string().uuid().optional(),
     search: z.string().optional(),
-    lang: z.string().optional().default('nl'),
-})
-
-export const idParamSchema = z.object({
-    id: z.string().uuid(),
-})
-
-export const errorSchema = z.object({
-    message: z.string(),
 })
 
 export const spaceSchema = z.object({
     id: z.string().uuid(),
-    name: localizedTextSchema.nullable(),
+    apiId: z.string().nullable(),
+    vendor_id: z.string().nullable(),
+    name: localizedTextSchema,
     location_id: z.string().uuid().nullable(),
-    created_at: z.date(),
-    updated_at: z.date(),
+    created_at: z.coerce.date(),
+    updated_at: z.coerce.date(),
 })
 
 export const spaceListSchema = z.object({
@@ -35,14 +33,21 @@ export const spaceListSchema = z.object({
     }),
 })
 
+export const idParamSchema = z.object({
+    id: z.string().uuid(),
+})
+
 export const createSpaceSchema = z.object({
-    name: localizedTextSchema.nullable().optional(),
+    apiId: z.string().nullable().optional(),
+    vendor_id: z.string().nullable().optional(),
+    name: localizedTextSchema.optional(),
     location_id: z.string().uuid().nullable().optional(),
 })
 
-export const updateSpaceSchema = z.object({
-    name: localizedTextSchema.nullable().optional(),
-    location_id: z.string().uuid().nullable().optional(),
+export const updateSpaceSchema = createSpaceSchema.partial()
+
+export const errorSchema = z.object({
+    message: z.string(),
 })
 
 export type PaginationQuery = z.infer<typeof paginationQuerySchema>

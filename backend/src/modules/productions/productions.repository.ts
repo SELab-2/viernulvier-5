@@ -19,14 +19,6 @@ export class ProductionsRepository {
             skip,
             take: limit,
             orderBy: { created_at: 'desc' },
-            select: {
-                id: true,
-                title: true,
-                artist: true,
-                description: true,
-                created_at: true,
-                updated_at: true,
-            },
         })
     }
 

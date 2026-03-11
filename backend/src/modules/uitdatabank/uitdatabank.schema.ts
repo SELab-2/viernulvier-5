@@ -6,19 +6,30 @@ export const paginationQuerySchema = z.object({
     search: z.string().optional(),
 })
 
-export const idParamSchema = z.object({
-    id: z.string().uuid(),
-})
-
-export const errorSchema = z.object({
-    message: z.string(),
-})
-
 export const keywordSchema = z.object({
     id: z.string().uuid(),
+    apiId: z.string().nullable(),
     name: z.string().nullable(),
-    created_at: z.date(),
-    updated_at: z.date(),
+    created_at: z.coerce.date(),
+    updated_at: z.coerce.date(),
+})
+
+export const themeSchema = z.object({
+    id: z.string().uuid(),
+    apiId: z.string().nullable(),
+    name: z.string().nullable(),
+    cdb_cat_id: z.string().nullable(),
+    created_at: z.coerce.date(),
+    updated_at: z.coerce.date(),
+})
+
+export const typeSchema = z.object({
+    id: z.string().uuid(),
+    apiId: z.string().nullable(),
+    name: z.string().nullable(),
+    cdb_cat_id: z.string().nullable(),
+    created_at: z.coerce.date(),
+    updated_at: z.coerce.date(),
 })
 
 export const keywordListSchema = z.object({
@@ -31,14 +42,6 @@ export const keywordListSchema = z.object({
     }),
 })
 
-export const themeSchema = z.object({
-    id: z.string().uuid(),
-    name: z.string().nullable(),
-    cdb_cat_id: z.string().nullable(),
-    created_at: z.date(),
-    updated_at: z.date(),
-})
-
 export const themeListSchema = z.object({
     data: z.array(themeSchema),
     meta: z.object({
@@ -47,14 +50,6 @@ export const themeListSchema = z.object({
         limit: z.number(),
         totalPages: z.number(),
     }),
-})
-
-export const typeSchema = z.object({
-    id: z.string().uuid(),
-    name: z.string().nullable(),
-    cdb_cat_id: z.string().nullable(),
-    created_at: z.date(),
-    updated_at: z.date(),
 })
 
 export const typeListSchema = z.object({
@@ -67,10 +62,18 @@ export const typeListSchema = z.object({
     }),
 })
 
+export const idParamSchema = z.object({
+    id: z.string().uuid(),
+})
+
+export const errorSchema = z.object({
+    message: z.string(),
+})
+
 export type PaginationQuery = z.infer<typeof paginationQuerySchema>
-export type KeywordResponse = z.infer<typeof keywordSchema>
-export type KeywordListResponse = z.infer<typeof keywordListSchema>
-export type ThemeResponse = z.infer<typeof themeSchema>
-export type ThemeListResponse = z.infer<typeof themeListSchema>
-export type TypeResponse = z.infer<typeof typeSchema>
-export type TypeListResponse = z.infer<typeof typeListSchema>
+export type UitdatabankKeywordResponse = z.infer<typeof keywordSchema>
+export type UitdatabankKeywordListResponse = z.infer<typeof keywordListSchema>
+export type UitdatabankThemeResponse = z.infer<typeof themeSchema>
+export type UitdatabankThemeListResponse = z.infer<typeof themeListSchema>
+export type UitdatabankTypeResponse = z.infer<typeof typeSchema>
+export type UitdatabankTypeListResponse = z.infer<typeof typeListSchema>

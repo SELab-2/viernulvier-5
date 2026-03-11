@@ -19,13 +19,6 @@ export class SpacesRepository {
             skip,
             take: limit,
             orderBy: { created_at: 'desc' },
-            select: {
-                id: true,
-                name: true,
-                location_id: true,
-                created_at: true,
-                updated_at: true,
-            },
         })
     }
 

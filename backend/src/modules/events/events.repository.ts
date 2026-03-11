@@ -21,16 +21,6 @@ export class EventsRepository {
             skip,
             take: limit,
             orderBy: { starts_at: 'desc' },
-            select: {
-                id: true,
-                starts_at: true,
-                ends_at: true,
-                doors_at: true,
-                production_id: true,
-                info: true,
-                created_at: true,
-                updated_at: true,
-            },
         })
     }
 
