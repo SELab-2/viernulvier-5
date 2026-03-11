@@ -23,11 +23,6 @@ export * from './enums';
  */
 export type crop = Prisma.cropModel
 /**
- * Model crosssells
- * 
- */
-export type crosssells = Prisma.crosssellsModel
-/**
  * Model event
  * 
  */
@@ -42,11 +37,6 @@ export type event_price = Prisma.event_priceModel
  * 
  */
 export type gallery = Prisma.galleryModel
-/**
- * Model gallery_item
- * 
- */
-export type gallery_item = Prisma.gallery_itemModel
 /**
  * Model genre
  * 
@@ -73,115 +63,45 @@ export type item = Prisma.itemModel
  */
 export type location = Prisma.locationModel
 /**
- * Model mailinglist
- * 
- */
-export type mailinglist = Prisma.mailinglistModel
-/**
- * Model optins
- * 
- */
-export type optins = Prisma.optinsModel
-/**
- * Model order
- * 
- */
-export type order = Prisma.orderModel
-/**
- * Model orderticket
- * 
- */
-export type orderticket = Prisma.orderticketModel
-/**
- * Model organisations
- * 
- */
-export type organisations = Prisma.organisationsModel
-/**
- * Model price
- * 
- */
-export type price = Prisma.priceModel
-/**
  * Model production
  * 
  */
 export type production = Prisma.productionModel
-/**
- * Model rank
- * 
- */
-export type rank = Prisma.rankModel
 /**
  * Model space
  * 
  */
 export type space = Prisma.spaceModel
 /**
- * Model status
- * 
- */
-export type status = Prisma.statusModel
-/**
- * Model subscriber
- * 
- */
-export type subscriber = Prisma.subscriberModel
-/**
- * Model subscriber_mailinglist
- * 
- */
-export type subscriber_mailinglist = Prisma.subscriber_mailinglistModel
-/**
- * Model subscriber_optins
- * 
- */
-export type subscriber_optins = Prisma.subscriber_optinsModel
-/**
  * Model tag
  * 
  */
 export type tag = Prisma.tagModel
 /**
- * Model ticket
+ * Model uit_keywords_production
  * 
  */
-export type ticket = Prisma.ticketModel
+export type uit_keywords_production = Prisma.uit_keywords_productionModel
 /**
- * Model uit_keywords_productions
+ * Model uitdatabank_keyword
  * 
  */
-export type uit_keywords_productions = Prisma.uit_keywords_productionsModel
+export type uitdatabank_keyword = Prisma.uitdatabank_keywordModel
 /**
- * Model uitdatabank_keywords
+ * Model uitdatabank_theme
  * 
  */
-export type uitdatabank_keywords = Prisma.uitdatabank_keywordsModel
+export type uitdatabank_theme = Prisma.uitdatabank_themeModel
 /**
- * Model uitdatabank_themes
+ * Model uitdatabank_type
  * 
  */
-export type uitdatabank_themes = Prisma.uitdatabank_themesModel
+export type uitdatabank_type = Prisma.uitdatabank_typeModel
 /**
- * Model uitdatabank_types
+ * Model last_scraped
  * 
  */
-export type uitdatabank_types = Prisma.uitdatabank_typesModel
-/**
- * Model user
- * 
- */
-export type user = Prisma.userModel
-/**
- * Model visitor
- * 
- */
-export type visitor = Prisma.visitorModel
-/**
- * Model visitor_tags
- * 
- */
-export type visitor_tags = Prisma.visitor_tagsModel
+export type last_scraped = Prisma.last_scrapedModel
 /**
  * Model AdminUser
  * 

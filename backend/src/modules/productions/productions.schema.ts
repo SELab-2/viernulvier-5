@@ -1,6 +1,10 @@
 import { z } from 'zod'
 
-const localizedTextSchema = z.record(z.string())
+const localizedTextSchema = z.object({
+    nl: z.string().optional(),
+    fr: z.string().optional(),
+    en: z.string().optional(),
+})
 
 export const paginationQuerySchema = z.object({
     page: z.coerce.number().int().positive().default(1),
@@ -14,8 +18,8 @@ export const productionSchema = z.object({
     title: localizedTextSchema.nullable(),
     artist: localizedTextSchema.nullable(),
     description: localizedTextSchema.nullable(),
-    created_at: z.date(),
-    updated_at: z.date(),
+    created_at: z.coerce.date(),
+    updated_at: z.coerce.date(),
 })
 
 export const productionListSchema = z.object({

@@ -48,7 +48,7 @@ export class LocationsRepository {
         return this.prisma.location.findUnique({
             where: { id },
             include: {
-                space: {
+                spaces: {
                     include: {
                         halls: true
                     }

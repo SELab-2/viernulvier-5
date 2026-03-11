@@ -90,7 +90,7 @@ export class MediaRepository {
             where: { id },
             include: {
                 gallery: true,
-                crop: true
+                crops: true
             }
         })
     }

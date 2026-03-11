@@ -30,7 +30,7 @@ describe('UIT Databank Routes', () => {
         })
 
         it('should filter keywords by search term', async () => {
-             const keyword = await app.prisma.uitdatabank_keywords.create({
+             const keyword = await app.prisma.uitdatabank_keyword.create({
                 data: {
                     name: 'TestKeywordUnique'
                 }
@@ -48,7 +48,7 @@ describe('UIT Databank Routes', () => {
                 expect(body.data.length).toBeGreaterThanOrEqual(1)
                 expect(body.data[0].name).toBe('TestKeywordUnique')
             } finally {
-                await app.prisma.uitdatabank_keywords.delete({
+                await app.prisma.uitdatabank_keyword.delete({
                     where: { id: keyword.id }
                 })
             }
@@ -57,7 +57,7 @@ describe('UIT Databank Routes', () => {
 
     describe('GET /api/archive/uitdatabank/keywords/:id', () => {
         it('should return a keyword by ID with 200 OK', async () => {
-            const keyword = await app.prisma.uitdatabank_keywords.create({
+            const keyword = await app.prisma.uitdatabank_keyword.create({
                 data: { name: 'Test Keyword' }
             })
             try {
@@ -66,7 +66,7 @@ describe('UIT Databank Routes', () => {
                 const body = JSON.parse(response.payload)
                 expect(body.id).toBe(keyword.id)
             } finally {
-                await app.prisma.uitdatabank_keywords.delete({ where: { id: keyword.id } })
+                await app.prisma.uitdatabank_keyword.delete({ where: { id: keyword.id } })
             }
         })
 
@@ -95,7 +95,7 @@ describe('UIT Databank Routes', () => {
 
     describe('GET /api/archive/uitdatabank/themes/:id', () => {
         it('should return a theme by ID with 200 OK', async () => {
-            const theme = await app.prisma.uitdatabank_themes.create({
+            const theme = await app.prisma.uitdatabank_theme.create({
                 data: { name: 'Test Theme' }
             })
             try {
@@ -104,7 +104,7 @@ describe('UIT Databank Routes', () => {
                 const body = JSON.parse(response.payload)
                 expect(body.id).toBe(theme.id)
             } finally {
-                await app.prisma.uitdatabank_themes.delete({ where: { id: theme.id } })
+                await app.prisma.uitdatabank_theme.delete({ where: { id: theme.id } })
             }
         })
 
@@ -133,7 +133,7 @@ describe('UIT Databank Routes', () => {
 
     describe('GET /api/archive/uitdatabank/types/:id', () => {
         it('should return a type by ID with 200 OK', async () => {
-            const type = await app.prisma.uitdatabank_types.create({
+            const type = await app.prisma.uitdatabank_type.create({
                 data: { name: 'Test Type' }
             })
             try {
@@ -142,7 +142,7 @@ describe('UIT Databank Routes', () => {
                 const body = JSON.parse(response.payload)
                 expect(body.id).toBe(type.id)
             } finally {
-                await app.prisma.uitdatabank_types.delete({ where: { id: type.id } })
+                await app.prisma.uitdatabank_type.delete({ where: { id: type.id } })
             }
         })
 

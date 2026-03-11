@@ -47,10 +47,8 @@ export const eventPriceSchema = z.object({
     event_id: z.string().uuid().nullable(),
     amount: z.string().nullable(),
     available: z.number().int().nullable(),
-    price_id: z.string().uuid().nullable(),
-    rank_id: z.string().uuid().nullable(),
-    created_at: z.date(),
-    updated_at: z.date(),
+    created_at: z.coerce.date(),
+    updated_at: z.coerce.date(),
 })
 
 export const eventPriceListSchema = z.object({

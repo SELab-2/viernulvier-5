@@ -11,7 +11,7 @@ export class UitdatabankRepository {
             name: { contains: search, mode: 'insensitive' as const },
         } : {}
 
-        return this.prisma.uitdatabank_keywords.findMany({
+        return this.prisma.uitdatabank_keyword.findMany({
             where,
             skip,
             take: limit,
@@ -24,13 +24,13 @@ export class UitdatabankRepository {
             name: { contains: search, mode: 'insensitive' as const },
         } : {}
 
-        return this.prisma.uitdatabank_keywords.count({
+        return this.prisma.uitdatabank_keyword.count({
             where,
         })
     }
 
     async findKeywordById(id: string) {
-        return this.prisma.uitdatabank_keywords.findUnique({
+        return this.prisma.uitdatabank_keyword.findUnique({
             where: { id },
             include: {
                 uit_keywords_productions: {
@@ -50,7 +50,7 @@ export class UitdatabankRepository {
             name: { contains: search, mode: 'insensitive' as const },
         } : {}
 
-        return this.prisma.uitdatabank_themes.findMany({
+        return this.prisma.uitdatabank_theme.findMany({
             where,
             skip,
             take: limit,
@@ -63,13 +63,13 @@ export class UitdatabankRepository {
             name: { contains: search, mode: 'insensitive' as const },
         } : {}
 
-        return this.prisma.uitdatabank_themes.count({
+        return this.prisma.uitdatabank_theme.count({
             where,
         })
     }
 
     async findThemeById(id: string) {
-        return this.prisma.uitdatabank_themes.findUnique({
+        return this.prisma.uitdatabank_theme.findUnique({
             where: { id },
             include: {
                 production: true
@@ -85,7 +85,7 @@ export class UitdatabankRepository {
             name: { contains: search, mode: 'insensitive' as const },
         } : {}
 
-        return this.prisma.uitdatabank_types.findMany({
+        return this.prisma.uitdatabank_type.findMany({
             where,
             skip,
             take: limit,
@@ -98,13 +98,13 @@ export class UitdatabankRepository {
             name: { contains: search, mode: 'insensitive' as const },
         } : {}
 
-        return this.prisma.uitdatabank_types.count({
+        return this.prisma.uitdatabank_type.count({
             where,
         })
     }
 
     async findTypeById(id: string) {
-        return this.prisma.uitdatabank_types.findUnique({
+        return this.prisma.uitdatabank_type.findUnique({
             where: { id },
             include: {
                 production: true
