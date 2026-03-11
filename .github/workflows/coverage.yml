@@ -15,6 +15,21 @@ jobs:
     name: Backend Coverage
     runs-on: self-hosted
 
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: viernulvier_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d viernulvier_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     permissions:
       contents: read
       pull-requests: write
@@ -24,7 +39,7 @@ jobs:
         working-directory: backend
 
     env:
-      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/viernulvier
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/viernulvier_test
       JWT_SECRET: test-secret-for-ci
       NODE_ENV: test
 
@@ -39,30 +54,8 @@ jobs:
 
       - run: npm ci
       - run: npx prisma generate
-      - name: Start database
-        working-directory: ${{ github.workspace }}
-        run: |
-          docker compose down -v --remove-orphans || true
-          docker compose up -d db
-
-          for attempt in {1..30}; do
-            if docker compose exec -T db pg_isready -U postgres -d viernulvier; then
-              exit 0
-            fi
-
-            sleep 2
-          done
-
-          docker compose logs db
-          exit 1
-
       - run: npx prisma migrate deploy
       - run: npm run test:coverage -- --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage
-
-      - name: Stop database
-        if: always()
-        working-directory: ${{ github.workspace }}
-        run: docker compose down -v --remove-orphans
 
       - name: Post backend coverage comment
         uses: MishaKav/jest-coverage-comment@v1
