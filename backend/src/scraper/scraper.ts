@@ -498,6 +498,12 @@ async function sync_events(cutoff_timestamp: Date | undefined = undefined) {
           where: { apiId: event.production["@id"] }
         });
 
+        // skip the event if there is no production connected to it.
+        if (!production){
+          totalProcessed -= 1;
+          continue;
+        }
+
         const hall = await tx.hall.findUnique({
           where: { apiId: event.hall}
         });
