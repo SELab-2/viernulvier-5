@@ -71,9 +71,9 @@ export const errorSchema = z.object({
 })
 
 export type PaginationQuery = z.infer<typeof paginationQuerySchema>
-export type UitdatabankKeywordResponse = z.infer<typeof keywordSchema>
-export type UitdatabankKeywordListResponse = z.infer<typeof keywordListSchema>
-export type UitdatabankThemeResponse = z.infer<typeof themeSchema>
-export type UitdatabankThemeListResponse = z.infer<typeof themeListSchema>
-export type UitdatabankTypeResponse = z.infer<typeof typeSchema>
-export type UitdatabankTypeListResponse = z.infer<typeof typeListSchema>
+export type KeywordResponse = z.infer<typeof keywordSchema>
+export type KeywordListResponse = z.infer<typeof keywordListSchema>
+export type ThemeResponse = z.infer<typeof themeSchema>
+export type ThemeListResponse = z.infer<typeof themeListSchema>
+export type TypeResponse = z.infer<typeof typeSchema>
+export type TypeListResponse = z.infer<typeof typeListSchema>

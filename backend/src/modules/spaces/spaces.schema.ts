@@ -7,10 +7,10 @@ const localizedTextSchema = z.object({
 }).nullable()
 
 export const paginationQuerySchema = z.object({
-    page: z.coerce.number().int().positive().default(1),
-    limit: z.coerce.number().int().positive().max(100).default(20),
+    page: z.coerce.number().int().positive().default(1),    limit: z.coerce.number().int().positive().max(100).default(20),
     locationId: z.string().uuid().optional(),
     search: z.string().optional(),
+    lang: z.string().optional().default('nl'),
 })
 
 export const spaceSchema = z.object({
