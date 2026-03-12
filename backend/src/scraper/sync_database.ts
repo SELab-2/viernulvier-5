@@ -1,5 +1,6 @@
 import { fileURLToPath } from 'node:url';
 import { prisma } from "./prisma";
+import { log } from "./logger";
 
 import Scraper from './scraper';
 
@@ -9,17 +10,17 @@ import Scraper from './scraper';
 async function readCutoffTimestamp(): Promise<Date | undefined> {
   const last_scraped = await prisma.last_scraped.findFirst()
   if (!last_scraped) {
-    console.log('unable to read timestamp from database, reverted to standard: enter everything');
+    log('unable to read timestamp from database, reverted to standard: enter everything');
     return undefined;
   }
   const ts = new Date(last_scraped.time)
 
   if (Number.isNaN(ts.getTime())) {
-    console.log('unable to read timestamp from database, reverted to standard: enter everything');
+    log('unable to read timestamp from database, reverted to standard: enter everything');
     return undefined;
   }
 
-  console.log('Timestamp read from database:', ts.toISOString());
+  log('Timestamp read from database:', ts.toISOString());
   return ts;
 }
 
@@ -50,7 +51,7 @@ export async function main() {
       time: timestamp
     }
   });
-  console.log("Timestamp written to database table 'last_scraped' :", timestamp);
+  log("Timestamp written to database table 'last_scraped' :", timestamp);
 }
 
 const isMainModule = process.argv[1] === fileURLToPath(import.meta.url);

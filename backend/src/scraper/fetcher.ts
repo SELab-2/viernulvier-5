@@ -1,6 +1,7 @@
 import "dotenv/config";
 import axios from "axios";
 import axiosRetry from "axios-retry";
+import { log } from "./logger";
 
 
 // if we request too fast, for rate limits
@@ -63,10 +64,10 @@ async function* fetchPagesFromURL<T = any>(url: string, per_item: boolean=false)
             }
 
 
-            console.log(`Fetched page with ${return_members.length} items: ${currentUrl}`);
+            log(`Fetched page with ${return_members.length} items: ${currentUrl}`);
             yield return_members;
         } else {
-            console.log(`Fetched page with ${members.length} items: ${currentUrl}`);
+            log(`Fetched page with ${members.length} items: ${currentUrl}`);
             yield members;
         }
         
