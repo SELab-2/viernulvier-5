@@ -254,9 +254,6 @@ function mapGenre(genre: APIGenre){
     name: genre.name,
     slug: genre.slug,
     description: genre.description,
-
-    // genre_production link moet nog gemaakt worden
-
   };
 }
 
