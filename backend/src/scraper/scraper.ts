@@ -267,8 +267,6 @@ function mapGallery(gallery: APIGallery){
     updated_at: sanitizeTimestampRequired(gallery.updated_at),
     apiId: gallery["@id"],
     name: gallery.name,
-    // gallery_item moet nog gemaakt worden
-
   };
 }
 
@@ -283,13 +281,12 @@ function mapItem(item: APIItem) {
     width: item.width,
     height: item.height,
     format: item.format,
-    //gallery: item.gallery, // is this something different than the APIs gallery?
+
     title: item.title,
     description: item.description,
     credits: item.credits,
     link: item.link,
-    // crops have to be separate
-    // gallery_items still have to be created
+
   }
 }
 
