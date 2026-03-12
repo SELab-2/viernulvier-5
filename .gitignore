@@ -9,6 +9,7 @@ build/
 
 # Environment variables
 .env
+.env.test
 .env.local
 .env.*.local
 
@@ -24,6 +25,7 @@ Thumbs.db
 
 # Prisma
 backend/prisma/migrations/**/migration_lock.toml
+backend/src/generated/prisma/
 
 # Test coverage
 coverage/
