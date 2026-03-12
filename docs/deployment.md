@@ -21,12 +21,12 @@ docker compose -f docker-compose-db.yml up -d
 ### 2. Backend setup
 
 ```bash
-cd backend                                                                    
-cp .env.example .env       # Edit values as needed                            
+cd backend
+cp .env.example .env       # Edit values as needed
 npm install
-npx prisma migrate dev     # Create tables                                    
-npx prisma db seed         # Seed sample data (optional)                      
-npm run dev                # Start Fastify on :3001     
+npx prisma migrate dev     # Create tables
+npx prisma db seed         # Seed sample data (optional)
+npm run dev                # Start Fastify on :3001
 ```
 
 ### 3. Frontend setup
@@ -47,7 +47,7 @@ npm run dev                # Start Vite on :5173
 ## Production Deployment
 
 See nginx/nginx.conf for the production reverse proxy configuration.
-Because this might not work, you should already have a nginx server running on port 80
+Because this might not work, you should already have a nginx server running on port 80 in a container
 and only then you can modify the ./nginx/nginx.conf to also use certbot
 
 ```bash
