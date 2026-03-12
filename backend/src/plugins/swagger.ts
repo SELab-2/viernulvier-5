@@ -16,6 +16,7 @@ export default fp(async (fastify) => {
                 version: '0.1.0',
             },
             servers: [
+                // TODO: this has to change to non-local url
                 { url: 'http://localhost:3001', description: 'Local development' },
             ],
             components: {
