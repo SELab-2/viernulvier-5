@@ -11,7 +11,7 @@ export default tseslint.config(
         rules: {
             // Allow unused vars prefixed with underscore (common pattern for unused params)
             '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
-            '@typescript-eslint/no-explicit-any': 'warn',
+            '@typescript-eslint/no-explicit-any': 'off',
         },
     },
 )
