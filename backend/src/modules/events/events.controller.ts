@@ -1,11 +1,11 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { EventsService } from './events.service.js'
-import type { PaginationQuery, UpdateEventInput, CreateEventInput } from './events.schema.js'
+import type { EventPaginationQuery, EventPricePaginationQuery, UpdateEventInput, CreateEventInput } from './events.schema.js'
 
 export class EventsController {
     constructor(private readonly service: EventsService) { }
 
-    async getEvents(request: FastifyRequest<{ Querystring: PaginationQuery }>, reply: FastifyReply) {
+    async getEvents(request: FastifyRequest<{ Querystring: EventPaginationQuery }>, reply: FastifyReply) {
         const events = await this.service.getEvents(request.query)
         return reply.status(200).send(events)
     }
@@ -21,7 +21,7 @@ export class EventsController {
         return reply.status(200).send(event)
     }
 
-    async getPrices(request: FastifyRequest<{ Querystring: PaginationQuery }>, reply: FastifyReply) {
+    async getPrices(request: FastifyRequest<{ Querystring: EventPricePaginationQuery }>, reply: FastifyReply) {
         const prices = await this.service.getPrices(request.query)
         return reply.status(200).send(prices)
     }

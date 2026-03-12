@@ -1,6 +1,7 @@
 import { EventsRepository } from './events.repository.js'
 import type { 
-    PaginationQuery, 
+    EventPaginationQuery,
+    EventPricePaginationQuery,
     EventListResponse, 
     EventPriceListResponse,
     UpdateEventInput,
@@ -12,7 +13,7 @@ import type {
 export class EventsService {
     constructor(private readonly repository: EventsRepository) { }
 
-    async getEvents(options: PaginationQuery): Promise<EventListResponse> {
+    async getEvents(options: EventPaginationQuery): Promise<EventListResponse> {
         const { page, limit, productionId, search, lang } = options
 
         const [data, total] = await Promise.all([
@@ -33,12 +34,12 @@ export class EventsService {
         }
     }
 
-    async getPrices(options: PaginationQuery): Promise<EventPriceListResponse> {
-        const { page, limit, search } = options
+    async getPrices(options: EventPricePaginationQuery): Promise<EventPriceListResponse> {
+        const { page, limit, eventId, search } = options
 
         const [data, total] = await Promise.all([
-            this.repository.findAllPrices({ page, limit, search }),
-            this.repository.countPrices(search),
+            this.repository.findAllPrices({ page, limit, eventId, search }),
+            this.repository.countPrices({ eventId, search }),
         ])
 
         const totalPages = Math.ceil(total / limit)

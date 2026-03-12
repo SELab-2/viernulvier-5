@@ -51,16 +51,18 @@ export class EventsRepository {
         })
     }
 
-    async findAllPrices(options: { page: number; limit: number; search?: string }) {
-        const { page, limit, search } = options
+    async findAllPrices(options: { page: number; limit: number; eventId?: string; search?: string }) {
+        const { page, limit, eventId, search } = options
         const skip = (page - 1) * limit
 
-        const where = search ? {
+        const where: any = search ? {
             OR: [
                 { amount: { contains: search, mode: 'insensitive' } },
                 { box_office_id: { contains: search, mode: 'insensitive' } },
             ],
         } : {}
+
+        if (eventId) where.event_id = eventId
 
         return this.prisma.event_price.findMany({
             where: where as any,
@@ -70,13 +72,16 @@ export class EventsRepository {
         })
     }
 
-    async countPrices(search?: string) {
-        const where = search ? {
+    async countPrices(options: { eventId?: string; search?: string }) {
+        const { eventId, search } = options
+        const where: any = search ? {
             OR: [
                 { amount: { contains: search, mode: 'insensitive' } },
                 { box_office_id: { contains: search, mode: 'insensitive' } },
             ],
         } : {}
+
+        if (eventId) where.event_id = eventId
 
         return this.prisma.event_price.count({
             where: where as any,

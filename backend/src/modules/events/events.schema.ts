@@ -6,12 +6,19 @@ const localizedTextSchema = z.object({
     en: z.string().optional(),
 }).nullable()
 
-export const paginationQuerySchema = z.object({
+export const eventPaginationQuerySchema = z.object({
     page: z.coerce.number().int().positive().default(1),
     limit: z.coerce.number().int().positive().max(100).default(20),
     productionId: z.string().uuid().optional(),
     search: z.string().optional(),
     lang: z.string().optional().default('nl'),
+})
+
+export const eventPricePaginationQuerySchema = z.object({
+    page: z.coerce.number().int().positive().default(1),
+    limit: z.coerce.number().int().positive().max(100).default(20),
+    eventId: z.string().uuid().optional(),
+    search: z.string().optional(),
 })
 
 export const eventSchema = z.object({
@@ -102,7 +109,8 @@ export const errorSchema = z.object({
     message: z.string(),
 })
 
-export type PaginationQuery = z.infer<typeof paginationQuerySchema>
+export type EventPaginationQuery = z.infer<typeof eventPaginationQuerySchema>
+export type EventPricePaginationQuery = z.infer<typeof eventPricePaginationQuerySchema>
 export type EventResponse = z.infer<typeof eventSchema>
 export type EventListResponse = z.infer<typeof eventListSchema>
 export type EventPriceResponse = z.infer<typeof eventPriceSchema>

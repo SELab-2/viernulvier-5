@@ -4,7 +4,8 @@ import { EventsService } from './events.service.js'
 import { EventsController } from './events.controller.js'
 import { z } from 'zod'
 import { 
-    paginationQuerySchema, 
+    eventPaginationQuerySchema,
+    eventPricePaginationQuerySchema,
     eventListSchema,
     eventPriceListSchema,
     eventPriceSchema,
@@ -25,7 +26,7 @@ const eventsRoutes: FastifyPluginAsync = async (fastify) => {
         schema: {
             tags: ['events'],
             summary: 'Get a paginated list of events',
-            querystring: paginationQuerySchema,
+            querystring: eventPaginationQuerySchema,
             response: {
                 200: eventListSchema,
             },
@@ -50,7 +51,7 @@ const eventsRoutes: FastifyPluginAsync = async (fastify) => {
         schema: {
             tags: ['events'],
             summary: 'Get a paginated list of event prices',
-            querystring: paginationQuerySchema,
+            querystring: eventPricePaginationQuerySchema,
             response: {
                 200: eventPriceListSchema,
             },
