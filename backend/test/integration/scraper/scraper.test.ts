@@ -122,12 +122,12 @@ vi.mock('../../../src/scraper/fetcher', () => {
       video_2: { nl: "Video2 NL", en: "Video2 EN", fr: "Video2 FR" },
       genres: ["/genre/1"],
       events: [],
-      media_gallery: "",
-      review_gallery: "",
-      poster_gallery: "",
-      uitdatabank_keywords: [],
-      uitdatabank_theme: "",
-      uitdatabank_type: "",
+      media_gallery: "/gallery/1",
+      review_gallery: "/gallery/1",
+      poster_gallery: "/gallery/1",
+      uitdatabank_keywords: ["/uit-keyword/1"],
+      uitdatabank_theme: "/uit-theme/1",
+      uitdatabank_type: "/uit-type/1",
     } as APIProduction,
   ];
 
@@ -433,7 +433,13 @@ describe('scraper integration full coverage', () => {
 
   it('checks all production fields', async () => {
     const prod = await prisma.production.findUnique({ where: { apiId: '/prod/1' } });
+    const gallery = await prisma.gallery.findUnique({ where: { apiId: '/gallery/1' } });
+    const theme = await prisma.uitdatabank_theme.findUnique({ where: { apiId: '/uit-theme/1' } });
+    const type = await prisma.uitdatabank_type.findUnique({ where: { apiId: '/uit-type/1' } });
     expect(prod).not.toBeNull();
+    expect(gallery).not.toBeNull();
+    expect(theme).not.toBeNull();
+    expect(type).not.toBeNull();
     const supertitle = getLocalized(prod?.super_title);
     const title = getLocalized(prod?.title);
     const artist = getLocalized(prod?.artist);
@@ -445,8 +451,30 @@ describe('scraper integration full coverage', () => {
     expect(supertitle.nl).toBe("Supertitle NL");
     expect(title.fr).toBe("Spectacle Incroyable");
     expect(artist.fr).toBe("Jean Dupont");
+    expect(prod?.media_gallery_id).toBe(gallery?.id);
+    expect(prod?.review_gallery_id).toBe(gallery?.id);
+    expect(prod?.poster_gallery_id).toBe(gallery?.id);
+    expect(prod?.uitdatabank_theme).toBe(theme?.id);
+    expect(prod?.uitdatabank_type).toBe(type?.id);
     expect(prod?.created_at.toISOString().startsWith("1970-01-01")).toBe(true);
     expect(prod?.updated_at.toISOString()).toBe("2021-01-02T18:00:00.000Z");
+  });
+
+  it('links production with uitdatabank keyword in uit_keywords_production', async () => {
+    const prod = await prisma.production.findUnique({ where: { apiId: '/prod/1' } });
+    const keyword = await prisma.uitdatabank_keyword.findUnique({ where: { apiId: '/uit-keyword/1' } });
+
+    expect(prod).not.toBeNull();
+    expect(keyword).not.toBeNull();
+
+    const relation = await prisma.uit_keywords_production.findFirst({
+      where: {
+        production_id: prod!.id,
+        uitkeywords_id: keyword!.id,
+      },
+    });
+
+    expect(relation).not.toBeNull();
   });
 
   it('checks all genre fields', async () => {
