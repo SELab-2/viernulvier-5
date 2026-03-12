@@ -3,36 +3,41 @@ import type { PrismaClient } from '../../generated/prisma/client.js'
 export class HallsRepository {
     constructor(private readonly prisma: PrismaClient) { }
 
-    async findAll(options: { page: number; limit: number; search?: string; lang?: string }) {
-        const { page, limit, search, lang = 'nl' } = options
+    async findAll(options: { page: number; limit: number; spaceId?: string; search?: string; lang?: string }) {
+        const { page, limit, spaceId, search, lang = 'nl' } = options
         const skip = (page - 1) * limit
 
-        const where = search ? {
-            name: {
+        const where: any = {}
+        if (spaceId) where.space_id = spaceId
+        if (search) {
+            where.name = {
                 path: [lang],
                 string_contains: search,
-            },
-        } : {}
+            }
+        }
 
         return this.prisma.hall.findMany({
-            where: where as any,
+            where: where,
             skip,
             take: limit,
             orderBy: { created_at: 'desc' },
         })
     }
 
-    async count(options: { search?: string; lang?: string }) {
-        const { search, lang = 'nl' } = options
-        const where = search ? {
-            name: {
+    async count(options: { spaceId?: string; search?: string; lang?: string }) {
+        const { spaceId, search, lang = 'nl' } = options
+        
+        const where: any = {}
+        if (spaceId) where.space_id = spaceId
+        if (search) {
+            where.name = {
                 path: [lang],
                 string_contains: search,
-            },
-        } : {}
+            }
+        }
 
         return this.prisma.hall.count({
-            where: where as any,
+            where: where,
         })
     }
 

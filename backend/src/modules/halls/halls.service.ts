@@ -11,11 +11,11 @@ export class HallsService {
     constructor(private readonly repository: HallsRepository) { }
 
     async getHalls(options: PaginationQuery): Promise<HallListResponse> {
-        const { page, limit, search, lang } = options
+        const { page, limit, spaceId, search, lang } = options
 
         const [data, total] = await Promise.all([
-            this.repository.findAll({ page, limit, search, lang }),
-            this.repository.count({ search, lang }),
+            this.repository.findAll({ page, limit, spaceId, search, lang }),
+            this.repository.count({ spaceId, search, lang }),
         ])
 
         const totalPages = Math.ceil(total / limit)
