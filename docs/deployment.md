@@ -11,7 +11,11 @@
 ### 1. Start the database
 
 ```bash
-docker compose up -d
+# make sure you have a network for the containers
+docker network create vnv_net
+
+# start the database container
+docker compose -f docker-compose-db.yml up -d
 ```
 
 ### 2. Backend setup
@@ -43,17 +47,16 @@ npm run dev                # Start Vite on :5173
 ## Production Deployment
 
 See nginx/nginx.conf for the production reverse proxy configuration.
+Because this might not work, you should already have a nginx server running on port 80 in a container
+and only then you can modify the ./nginx/nginx.conf to also use certbot
 
 ```bash
-# Build frontend
-cd frontend && npm run build
+# make sure you have a network for the containers
+docker network create vnv_net
 
-# Build backend
-cd backend && npm run build
+# start the database container
+docker compose -f docker-compose-db.yml up -d
 
-# Start backend
-cd backend && npm run start
-
-# Copy frontend/dist to /var/www/viernulvier/frontend/dist
-# Configure Nginx with nginx/nginx.conf
+# start certbot, nginx, frontend and backend
+docker compose up -d
 ```
