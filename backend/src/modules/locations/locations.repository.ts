@@ -38,14 +38,7 @@ export class LocationsRepository {
 
     async findById(id: string) {
         return this.prisma.location.findUnique({
-            where: { id },
-            include: {
-                spaces: {
-                    include: {
-                        halls: true
-                    }
-                }
-            }
+            where: { id }
         })
     }
 
