@@ -16,4 +16,4 @@ jobs:
           cd /srv/repos/viernulvier-5
           git pull origin main
           docker compose up -d --build
-          docker compose exec app npx prisma migrate deploy
+          docker compose exec vnv_backend npx prisma migrate deploy
