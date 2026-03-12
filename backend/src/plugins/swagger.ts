@@ -29,7 +29,7 @@ export default fp(async (fastify) => {
                 },
             },
         },
-        transform: jsonSchemaTransform, // This is the crucial part for Zod
+        transform: jsonSchemaTransform,
     })
 
     await fastify.register(swaggerUi, {

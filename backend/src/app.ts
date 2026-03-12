@@ -20,6 +20,7 @@ import hallsRoutes from './modules/halls/halls.routes.js'
 import spacesRoutes from './modules/spaces/spaces.routes.js'
 import mediaRoutes from './modules/media/media.routes.js'
 import authRoutes from './modules/auth/auth.routes.js'
+import editorsRoutes from './modules/editors/editors.routes.js'
 import uitdatabankRoutes from './modules/uitdatabank/uitdatabank.routes.js'
 import blogsRoutes from './modules/blogs/blogs.routes.js'
 
@@ -55,16 +56,17 @@ export async function buildApp(opts = {}): Promise<FastifyInstance> {
     await app.register(productionsRoutes, { prefix: '/api/archive/productions' })
     await app.register(eventsRoutes, { prefix: '/api/archive/events' })
     await app.register(locationsRoutes, { prefix: '/api/archive/locations' })
-    
+
     // Taxonomies handles both /genres and /tags under /api/archive
     await app.register(taxonomiesRoutes, { prefix: '/api/archive' })
-    
+
     await app.register(hallsRoutes, { prefix: '/api/archive/halls' })
     await app.register(spacesRoutes, { prefix: '/api/archive/spaces' })
     await app.register(mediaRoutes, { prefix: '/api/archive/media' })
     await app.register(uitdatabankRoutes, { prefix: '/api/archive/uitdatabank' })
     await app.register(blogsRoutes, { prefix: '/api/archive/blogs' })
     await app.register(authRoutes, { prefix: '/api/auth' })
+    await app.register(editorsRoutes, { prefix: '/api/editors' })
 
     return app
 }
