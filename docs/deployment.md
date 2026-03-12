@@ -21,19 +21,12 @@ docker compose -f docker-compose-db.yml up -d
 ### 2. Backend setup
 
 ```bash
-cp ./backend/.env.example ./backend/.env        # Edit values as needed
-
-# build and start the backend container
-docker compose -f docker-compose-app.yml up -d --build
-
-# migrate prisma in docker
-docker exec vnv_backend npx prisma migrate dev
-
-# seed database
-docker exec vnv_backend npx prisma db seed      # (optional)
-
-# run backend
-docker exec vnv_backend npm run dev             # now Fastify should be running on port :3001
+cd backend                                                                    
+cp .env.example .env       # Edit values as needed                            
+npm install
+npx prisma migrate dev     # Create tables                                    
+npx prisma db seed         # Seed sample data (optional)                      
+npm run dev                # Start Fastify on :3001     
 ```
 
 ### 3. Frontend setup
@@ -44,14 +37,7 @@ npm install
 npm run dev                # Start Vite on :5173
 ```
 
-### 4. Nginx
-<!-- This might not work, you should already have a server running on port 80 in nginx -->
-<!-- and only then you can modify the ./nginx/nginx.conf to also use certbot -->
-```bash
-docker compose -f docker-compose.yml
-```
-
-### 5. Access the app
+### 4. Access the app
 
 - Frontend: http://localhost:5173
 - API: http://localhost:3001/api/health
@@ -61,17 +47,16 @@ docker compose -f docker-compose.yml
 ## Production Deployment
 
 See nginx/nginx.conf for the production reverse proxy configuration.
+Because this might not work, you should already have a nginx server running on port 80
+and only then you can modify the ./nginx/nginx.conf to also use certbot
 
 ```bash
-# Build frontend
-cd frontend && npm run build
+# make sure you have a network for the containers
+docker network create vnv_net
 
-# Build backend
-cd backend && npm run build
+# start the database container
+docker compose -f docker-compose-db.yml up -d
 
-# Start backend
-cd backend && npm run start
-
-# Copy frontend/dist to /var/www/viernulvier/frontend/dist
-# Configure Nginx with nginx/nginx.conf
+# start certbot, nginx, frontend and backend
+docker compose up -d
 ```
