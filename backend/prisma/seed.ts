@@ -1,5 +1,6 @@
 import { Pool } from 'pg'
 import { PrismaPg } from '@prisma/adapter-pg'
+import { hashPassword } from '../src/utils/password.js'
 import { PrismaClient } from '@prisma/client'
 
 const pool = new Pool({
@@ -13,16 +14,32 @@ const prisma = new PrismaClient({ adapter })
  */
 async function main() {
     console.log('🌱 Seeding database...')
+    const adminPasswordHash = await hashPassword('admin123')
+    const editorPasswordHash = await hashPassword('editor123')
 
-    // Create admin user
-    // TODO: Hash this password before production!
     await prisma.adminUser.upsert({
         where: { username: 'admin' },
-        update: {},
+        update: {
+            passwordHash: adminPasswordHash,
+            role: 'ADMIN',
+        },
         create: {
             username: 'admin',
-            password: 'admin123',
+            passwordHash: adminPasswordHash,
             role: 'ADMIN',
+        },
+    })
+
+    await prisma.adminUser.upsert({
+        where: { username: 'editor' },
+        update: {
+            passwordHash: editorPasswordHash,
+            role: 'EDITOR',
+        },
+        create: {
+            username: 'editor',
+            passwordHash: editorPasswordHash,
+            role: 'EDITOR',
         },
     })
 

@@ -9,7 +9,8 @@ import {
     updateBlogSchema, 
     blogIdSchema 
 } from './blogs.schema.js'
-import { requireAuth } from '../../hooks/require-auth.js'
+import { requirePermission } from '../../hooks/require-permission.js'
+import { Permission } from '../../domain/permissions.js'
 
 const blogsRoutes: FastifyPluginAsync = async (fastify) => {
     const repository = new BlogsRepository(fastify.prisma)
@@ -44,7 +45,7 @@ const blogsRoutes: FastifyPluginAsync = async (fastify) => {
 
     // POST /api/archive/blogs
     fastify.post('/', {
-        preHandler: [requireAuth],
+        preHandler: [requirePermission(Permission.ARCHIVE_CREATE)],
         schema: {
             tags: ['blogs'],
             summary: 'Create a new blog',
@@ -58,7 +59,7 @@ const blogsRoutes: FastifyPluginAsync = async (fastify) => {
 
     // PUT /api/archive/blogs/:id
     fastify.patch('/:id', {
-        preHandler: [requireAuth],
+        preHandler: [requirePermission(Permission.ARCHIVE_UPDATE)],
         schema: {
             tags: ['blogs'],
             summary: 'Update a blog',
@@ -74,7 +75,7 @@ const blogsRoutes: FastifyPluginAsync = async (fastify) => {
 
     // DELETE /api/archive/blogs/:id
     fastify.delete('/:id', {
-        preHandler: [requireAuth],
+        preHandler: [requirePermission(Permission.ARCHIVE_DELETE)],
         schema: {
             tags: ['blogs'],
             summary: 'Delete a blog',

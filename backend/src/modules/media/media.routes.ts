@@ -19,7 +19,8 @@ import {
     createCropSchema,
     updateCropSchema
 } from './media.schema.js'
-import { requireAuth } from '../../hooks/require-auth.js'
+import { requirePermission } from '../../hooks/require-permission.js'
+import { Permission } from '../../domain/permissions.js'
 import { z } from 'zod'
 
 const mediaRoutes: FastifyPluginAsync = async (fastify) => {
@@ -52,7 +53,7 @@ const mediaRoutes: FastifyPluginAsync = async (fastify) => {
     })
 
     fastify.post('/galleries', {
-        preHandler: [requireAuth],
+        preHandler: [requirePermission(Permission.ARCHIVE_CREATE)],
         schema: {
             tags: ['media'],
             summary: 'Create a new gallery',
@@ -63,7 +64,7 @@ const mediaRoutes: FastifyPluginAsync = async (fastify) => {
     })
 
     fastify.patch('/galleries/:id', {
-        preHandler: [requireAuth],
+        preHandler: [requirePermission(Permission.ARCHIVE_UPDATE)],
         schema: {
             tags: ['media'],
             summary: 'Update a gallery',
@@ -78,7 +79,7 @@ const mediaRoutes: FastifyPluginAsync = async (fastify) => {
     })
 
     fastify.delete('/galleries/:id', {
-        preHandler: [requireAuth],
+        preHandler: [requirePermission(Permission.ARCHIVE_DELETE)],
         schema: {
             tags: ['media'],
             summary: 'Delete a gallery',
@@ -116,7 +117,7 @@ const mediaRoutes: FastifyPluginAsync = async (fastify) => {
     })
 
     fastify.post('/items', {
-        preHandler: [requireAuth],
+        preHandler: [requirePermission(Permission.ARCHIVE_CREATE)],
         schema: {
             tags: ['media'],
             summary: 'Create a new media item',
@@ -127,7 +128,7 @@ const mediaRoutes: FastifyPluginAsync = async (fastify) => {
     })
 
     fastify.patch('/items/:id', {
-        preHandler: [requireAuth],
+        preHandler: [requirePermission(Permission.ARCHIVE_UPDATE)],
         schema: {
             tags: ['media'],
             summary: 'Update a media item',
@@ -142,7 +143,7 @@ const mediaRoutes: FastifyPluginAsync = async (fastify) => {
     })
 
     fastify.delete('/items/:id', {
-        preHandler: [requireAuth],
+        preHandler: [requirePermission(Permission.ARCHIVE_DELETE)],
         schema: {
             tags: ['media'],
             summary: 'Delete a media item',
@@ -180,7 +181,7 @@ const mediaRoutes: FastifyPluginAsync = async (fastify) => {
     })
 
     fastify.post('/items/crops', {
-        preHandler: [requireAuth],
+        preHandler: [requirePermission(Permission.ARCHIVE_CREATE)],
         schema: {
             tags: ['media'],
             summary: 'Create a new crop',
@@ -191,7 +192,7 @@ const mediaRoutes: FastifyPluginAsync = async (fastify) => {
     })
 
     fastify.patch('/items/crops/:id', {
-        preHandler: [requireAuth],
+        preHandler: [requirePermission(Permission.ARCHIVE_UPDATE)],
         schema: {
             tags: ['media'],
             summary: 'Update a crop',
@@ -206,7 +207,7 @@ const mediaRoutes: FastifyPluginAsync = async (fastify) => {
     })
 
     fastify.delete('/items/crops/:id', {
-        preHandler: [requireAuth],
+        preHandler: [requirePermission(Permission.ARCHIVE_DELETE)],
         schema: {
             tags: ['media'],
             summary: 'Delete a crop',

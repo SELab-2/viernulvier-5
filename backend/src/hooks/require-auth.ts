@@ -13,10 +13,7 @@ export async function requireAuth(
 ) {
     try {
         await request.jwtVerify()
-    } catch (err: any) {
-        return reply.status(401).send({ 
-            error: 'Authentication required',
-            message: err.message 
-        })
+    } catch {
+        return reply.status(401).send({ error: 'Authentication required' })
     }
 }

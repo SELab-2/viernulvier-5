@@ -11,7 +11,8 @@ import {
     createHallSchema,
     updateHallSchema
 } from './halls.schema.js'
-import { requireAuth } from '../../hooks/require-auth.js'
+import { requirePermission } from '../../hooks/require-permission.js'
+import { Permission } from '../../domain/permissions.js'
 import { z } from 'zod'
 
 const hallsRoutes: FastifyPluginAsync = async (fastify) => {
@@ -45,7 +46,7 @@ const hallsRoutes: FastifyPluginAsync = async (fastify) => {
     })
 
     fastify.post('/', {
-        preHandler: [requireAuth],
+        preHandler: [requirePermission(Permission.ARCHIVE_CREATE)],
         schema: {
             tags: ['locations'],
             summary: 'Create a new hall',
@@ -58,7 +59,7 @@ const hallsRoutes: FastifyPluginAsync = async (fastify) => {
     })
 
     fastify.patch('/:id', {
-        preHandler: [requireAuth],
+        preHandler: [requirePermission(Permission.ARCHIVE_UPDATE)],
         schema: {
             tags: ['locations'],
             summary: 'Update a hall',
@@ -73,7 +74,7 @@ const hallsRoutes: FastifyPluginAsync = async (fastify) => {
     })
 
     fastify.delete('/:id', {
-        preHandler: [requireAuth],
+        preHandler: [requirePermission(Permission.ARCHIVE_DELETE)],
         schema: {
             tags: ['locations'],
             summary: 'Delete a hall',
