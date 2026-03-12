@@ -9,7 +9,6 @@ build/
 
 # Environment variables
 .env
-.env.test
 .env.local
 .env.*.local
 
@@ -31,17 +30,9 @@ backend/src/generated/*
 certbot/conf
 certbot/www
 
-backend/src/generated/*
-
-# certbot
-certbot/conf
-certbot/www
-
 # Test coverage
 coverage/
 
 # Logs
 *.log
 npm-debug.log*
-
-backend/src/generated/prisma
