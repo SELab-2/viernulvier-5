@@ -15,7 +15,8 @@ import {
     createTagSchema,
     updateTagSchema
 } from './taxonomies.schema.js'
-import { requireAuth } from '../../hooks/require-auth.js'
+import { requirePermission } from '../../hooks/require-permission.js'
+import { Permission } from '../../domain/permissions.js'
 import { z } from 'zod'
 
 const taxonomiesRoutes: FastifyPluginAsync = async (fastify) => {
@@ -50,7 +51,7 @@ const taxonomiesRoutes: FastifyPluginAsync = async (fastify) => {
     })
 
     fastify.post('/genres', {
-        preHandler: [requireAuth],
+        preHandler: [requirePermission(Permission.ARCHIVE_CREATE)],
         schema: {
             tags: ['taxonomies'],
             summary: 'Create a new genre',
@@ -63,7 +64,7 @@ const taxonomiesRoutes: FastifyPluginAsync = async (fastify) => {
     })
 
     fastify.patch('/genres/:id', {
-        preHandler: [requireAuth],
+        preHandler: [requirePermission(Permission.ARCHIVE_UPDATE)],
         schema: {
             tags: ['taxonomies'],
             summary: 'Update a genre',
@@ -78,7 +79,7 @@ const taxonomiesRoutes: FastifyPluginAsync = async (fastify) => {
     })
 
     fastify.delete('/genres/:id', {
-        preHandler: [requireAuth],
+        preHandler: [requirePermission(Permission.ARCHIVE_DELETE)],
         schema: {
             tags: ['taxonomies'],
             summary: 'Delete a genre',
@@ -118,7 +119,7 @@ const taxonomiesRoutes: FastifyPluginAsync = async (fastify) => {
     })
 
     fastify.post('/tags', {
-        preHandler: [requireAuth],
+        preHandler: [requirePermission(Permission.ARCHIVE_CREATE)],
         schema: {
             tags: ['taxonomies'],
             summary: 'Create a new tag',
@@ -131,7 +132,7 @@ const taxonomiesRoutes: FastifyPluginAsync = async (fastify) => {
     })
 
     fastify.patch('/tags/:id', {
-        preHandler: [requireAuth],
+        preHandler: [requirePermission(Permission.ARCHIVE_UPDATE)],
         schema: {
             tags: ['taxonomies'],
             summary: 'Update a tag',
@@ -146,7 +147,7 @@ const taxonomiesRoutes: FastifyPluginAsync = async (fastify) => {
     })
 
     fastify.delete('/tags/:id', {
-        preHandler: [requireAuth],
+        preHandler: [requirePermission(Permission.ARCHIVE_DELETE)],
         schema: {
             tags: ['taxonomies'],
             summary: 'Delete a tag',

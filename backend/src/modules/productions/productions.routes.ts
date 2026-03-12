@@ -12,7 +12,8 @@ import {
     createProductionSchema,
     errorSchema
 } from './productions.schema.js'
-import { requireAuth } from '../../hooks/require-auth.js'
+import { requirePermission } from '../../hooks/require-permission.js'
+import { Permission } from '../../domain/permissions.js'
 
 const productionsRoutes: FastifyPluginAsync = async (fastify) => {
     const repository = new ProductionsRepository(fastify.prisma)
@@ -48,7 +49,7 @@ const productionsRoutes: FastifyPluginAsync = async (fastify) => {
 
     // POST /api/archive/productions
     fastify.post('/', {
-        preHandler: [requireAuth],
+        preHandler: [requirePermission(Permission.ARCHIVE_CREATE)],
         schema: {
             tags: ['productions'],
             summary: 'Create a new production',
@@ -62,7 +63,7 @@ const productionsRoutes: FastifyPluginAsync = async (fastify) => {
 
     // PUT /api/archive/productions/:id
     fastify.patch('/:id', {
-        preHandler: [requireAuth],
+        preHandler: [requirePermission(Permission.ARCHIVE_UPDATE)],
         schema: {
             tags: ['productions'],
             summary: 'Update a production',
@@ -76,7 +77,7 @@ const productionsRoutes: FastifyPluginAsync = async (fastify) => {
     })
 
     fastify.delete('/:id', {
-        preHandler: [requireAuth],
+        preHandler: [requirePermission(Permission.ARCHIVE_DELETE)],
         schema: {
             tags: ['productions'],
             summary: 'Delete a production',

@@ -15,7 +15,8 @@ import {
     createEventSchema,
     errorSchema
 } from './events.schema.js'
-import { requireAuth } from '../../hooks/require-auth.js'
+import { requirePermission } from '../../hooks/require-permission.js'
+import { Permission } from '../../domain/permissions.js'
 
 const eventsRoutes: FastifyPluginAsync = async (fastify) => {
     const repository = new EventsRepository(fastify.prisma)
@@ -74,7 +75,7 @@ const eventsRoutes: FastifyPluginAsync = async (fastify) => {
 
     // POST /api/archive/events
     fastify.post('/', {
-        preHandler: [requireAuth],
+        preHandler: [requirePermission(Permission.ARCHIVE_CREATE)],
         schema: {
             tags: ['events'],
             summary: 'Create a new event',
@@ -88,7 +89,7 @@ const eventsRoutes: FastifyPluginAsync = async (fastify) => {
 
     // PUT /api/archive/events/:id
     fastify.patch('/:id', {
-        preHandler: [requireAuth],
+        preHandler: [requirePermission(Permission.ARCHIVE_UPDATE)],
         schema: {
             tags: ['events'],
             summary: 'Update an event',
@@ -102,7 +103,7 @@ const eventsRoutes: FastifyPluginAsync = async (fastify) => {
     })
 
     fastify.delete('/:id', {
-        preHandler: [requireAuth],
+        preHandler: [requirePermission(Permission.ARCHIVE_DELETE)],
         schema: {
             tags: ['events'],
             summary: 'Delete an event',
