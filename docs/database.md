@@ -35,6 +35,12 @@ met
 ```bash
 docker compose -f docker-compose-db.yml up
 ```
+
+Wil je daarna ook de volledige app stack starten, gebruik dan het standaard compose bestand:
+
+```bash
+docker compose up -d --build
+```
 ### prisma
 ```bash
 # Create and apply a new migration

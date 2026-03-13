@@ -56,11 +56,13 @@ and only then you can modify the ./nginx/nginx.conf to also use certbot
 # make sure you have a network for the containers
 docker network create vnv_net
 
-# start the database container
+# start the database container first
 docker compose -f docker-compose-db.yml up -d
 
-# start certbot, nginx, frontend, backend and the daily scraper cron
-docker compose up -d
+# then start the app stack
+docker compose up -d --build
 ```
 
-The `scraper` service joins the same external `vnv_net` network as the app stack and database, so `DATABASE_URL` should continue to use `database:5432` as the host. Its cron schedule defaults to `0 0 * * *`, and logs are written inside the container to `/usr/src/app/logs/scraper.log`.
+The Docker app services override `DATABASE_URL` to use the `database` container hostname by default: `postgresql://postgres:postgres@database:5432/viernulvier?schema=public`. If your Docker database uses different credentials or a different database name, set `DOCKER_DATABASE_URL` before running `docker compose up`.
+
+The `scraper` service joins the same external `vnv_net` network as the app stack and database. On container startup it runs one scraper sync immediately, then continues on its cron schedule, which defaults to `0 0 * * *`. Logs are written inside the container to `/usr/src/app/logs/scraper.log`. Set `SCRAPER_RUN_ON_STARTUP=false` if you want to disable the startup run.
