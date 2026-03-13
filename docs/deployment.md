@@ -29,6 +29,8 @@ npx prisma db seed         # Seed sample data (optional)
 npm run dev                # Start Fastify on :3001
 ```
 
+If you want the scraper to run in Docker, make sure `backend/.env` also contains a valid `API_KEY`.
+
 ### 3. Frontend setup
 
 ```bash
@@ -57,6 +59,8 @@ docker network create vnv_net
 # start the database container
 docker compose -f docker-compose-db.yml up -d
 
-# start certbot, nginx, frontend and backend
+# start certbot, nginx, frontend, backend and the daily scraper cron
 docker compose up -d
 ```
+
+The `scraper` service joins the same external `vnv_net` network as the app stack and database, so `DATABASE_URL` should continue to use `database:5432` as the host. Its cron schedule defaults to `0 0 * * *`, and logs are written inside the container to `/usr/src/app/logs/scraper.log`.
