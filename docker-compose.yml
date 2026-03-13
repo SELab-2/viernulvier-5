@@ -2,6 +2,8 @@ x-backend-service: &backend-service
   build: ./backend
   env_file:
     - ./backend/.env
+  environment:
+    DATABASE_URL: ${DOCKER_DATABASE_URL:-postgresql://postgres:postgres@database:5432/viernulvier?schema=public}
   networks:
     - vnv_net
 
@@ -19,6 +21,7 @@ services:
     restart: unless-stopped
     command: ["/usr/local/bin/scraper-cron-entrypoint.sh"]
     environment:
+      DATABASE_URL: ${DOCKER_DATABASE_URL:-postgresql://postgres:postgres@database:5432/viernulvier?schema=public}
       SCRAPER_CRON_SCHEDULE: "0 0 * * *"
     volumes:
       - scraper_logs:/usr/src/app/logs
