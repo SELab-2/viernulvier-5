@@ -7,6 +7,8 @@ COPY package*.json ./
 RUN npm install 
 
 COPY . .
+RUN chmod +x /usr/src/app/docker/scraper-cron-entrypoint.sh \
+    && cp /usr/src/app/docker/scraper-cron-entrypoint.sh /usr/local/bin/scraper-cron-entrypoint.sh
 RUN npx prisma generate
 RUN npm run build
 
