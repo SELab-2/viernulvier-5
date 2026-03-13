@@ -10,7 +10,7 @@
         "test": "npm run test:prepare && vitest run",
         "test:watch": "npm run test:prepare && vitest",
         "test:coverage": "npm run test:prepare && vitest run --coverage",
-        "test:prepare": "npm run test:db:up && PRISMA_ENV_FILE=.env.test NODE_ENV=test prisma db push",
+        "test:prepare": "npm run db:generate && npm run test:db:up && PRISMA_ENV_FILE=.env.test NODE_ENV=test prisma db push",
         "test:db:up": "node test/scripts/ensure-test-db.mjs",
         "test:db:down": "docker compose -f test/docker-compose.yml down",
         "lint": "eslint src/",
