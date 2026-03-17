@@ -1,0 +1,109 @@
+import { z } from 'zod'
+
+const localizedTextSchema = z.object({
+    nl: z.string().optional(),
+    fr: z.string().optional(),
+    en: z.string().optional(),
+}).nullable()
+
+export const paginationQuerySchema = z.object({
+    page: z.coerce.number().int().positive().default(1),
+    limit: z.coerce.number().int().positive().max(100).default(20),
+    search: z.string().optional(),
+    lang: z.string().optional().default('nl'),
+})
+
+export const productionSchema = z.object({
+    id: z.string().uuid(),
+    apiId: z.string().nullable(),
+    vendor_id: z.string().nullable(),
+    box_office_id: z.number().int().nullable(),
+    performer_field: z.string().nullable(),
+    performer_type: z.string().nullable(),
+    attendance_mode: z.string().nullable(),
+    super_title: localizedTextSchema,
+    title: localizedTextSchema,
+    artist: localizedTextSchema,
+    meta_title: localizedTextSchema,
+    meta_description: localizedTextSchema,
+    tagline: localizedTextSchema,
+    teaser: localizedTextSchema,
+    description: localizedTextSchema,
+    description_extra: localizedTextSchema,
+    description_2: localizedTextSchema,
+    video_1: localizedTextSchema,
+    video_2: localizedTextSchema,
+    quote: localizedTextSchema,
+    quote_source: localizedTextSchema,
+    programme: localizedTextSchema,
+    info: localizedTextSchema,
+    description_short: localizedTextSchema,
+    eticket_info: localizedTextSchema,
+    custom_data: localizedTextSchema,
+    media_gallery_id: z.string().uuid().nullable(),
+    review_gallery_id: z.string().uuid().nullable(),
+    poster_gallery_id: z.string().uuid().nullable(),
+    uitdatabank_theme: z.string().uuid().nullable(),
+    uitdatabank_type: z.string().uuid().nullable(),
+    created_at: z.coerce.date(),
+    updated_at: z.coerce.date(),
+})
+
+export const productionListSchema = z.object({
+    data: z.array(productionSchema),
+    meta: z.object({
+        total: z.number(),
+        page: z.number(),
+        limit: z.number(),
+        totalPages: z.number(),
+    }),
+})
+
+export const updateProductionSchema = z.object({
+    apiId: z.string().nullable().optional(),
+    vendor_id: z.string().nullable().optional(),
+    box_office_id: z.number().int().nullable().optional(),
+    performer_field: z.string().nullable().optional(),
+    performer_type: z.string().nullable().optional(),
+    attendance_mode: z.string().nullable().optional(),
+    super_title: localizedTextSchema.optional(),
+    title: localizedTextSchema.optional(),
+    artist: localizedTextSchema.optional(),
+    meta_title: localizedTextSchema.optional(),
+    meta_description: localizedTextSchema.optional(),
+    tagline: localizedTextSchema.optional(),
+    teaser: localizedTextSchema.optional(),
+    description: localizedTextSchema.optional(),
+    description_extra: localizedTextSchema.optional(),
+    description_2: localizedTextSchema.optional(),
+    video_1: localizedTextSchema.optional(),
+    video_2: localizedTextSchema.optional(),
+    quote: localizedTextSchema.optional(),
+    quote_source: localizedTextSchema.optional(),
+    programme: localizedTextSchema.optional(),
+    info: localizedTextSchema.optional(),
+    description_short: localizedTextSchema.optional(),
+    eticket_info: localizedTextSchema.optional(),
+    custom_data: localizedTextSchema.optional(),
+    media_gallery_id: z.string().uuid().nullable().optional(),
+    review_gallery_id: z.string().uuid().nullable().optional(),
+    poster_gallery_id: z.string().uuid().nullable().optional(),
+    uitdatabank_theme: z.string().uuid().nullable().optional(),
+    uitdatabank_type: z.string().uuid().nullable().optional(),
+})
+
+export const updateProductionParamsSchema = z.object({
+    id: z.string().uuid(),
+})
+
+export const createProductionSchema = updateProductionSchema
+
+export const errorSchema = z.object({
+    message: z.string(),
+})
+
+export type PaginationQuery = z.infer<typeof paginationQuerySchema>
+export type ProductionResponse = z.infer<typeof productionSchema>
+export type ProductionListResponse = z.infer<typeof productionListSchema>
+export type UpdateProductionInput = z.infer<typeof updateProductionSchema>
+export type CreateProductionInput = z.infer<typeof createProductionSchema>

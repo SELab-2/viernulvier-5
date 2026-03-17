@@ -2,6 +2,7 @@ import fp from 'fastify-plugin'
 import fastifyJwt from '@fastify/jwt'
 import fastifyCookie from '@fastify/cookie'
 import { env } from '../config/env.js'
+import type { Role } from '../domain/role.js'
 
 /**
  * Auth plugin — sets up JWT with HttpOnly cookie support.
@@ -18,3 +19,18 @@ export default fp(async (fastify) => {
         },
     })
 })
+
+declare module '@fastify/jwt' {
+    interface FastifyJWT {
+        payload: {
+            sub: string
+            username: string
+            role: Role
+        }
+        user: {
+            sub: string
+            username: string
+            role: Role
+        }
+    }
+}

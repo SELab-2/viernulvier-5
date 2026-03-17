@@ -9,10 +9,20 @@ import authPlugin from './plugins/auth.js'
 import corsPlugin from './plugins/cors.js'
 import securityPlugin from './plugins/security.js'
 import swaggerPlugin from './plugins/swagger.js'
+import errorHandlerPlugin from './plugins/error-handler.js'
 
 // Modules
-import archiveRoutes from './modules/archive/archive.routes.js'
+import productionsRoutes from './modules/productions/productions.routes.js'
+import eventsRoutes from './modules/events/events.routes.js'
+import taxonomiesRoutes from './modules/taxonomies/taxonomies.routes.js'
+import locationsRoutes from './modules/locations/locations.routes.js'
+import hallsRoutes from './modules/halls/halls.routes.js'
+import spacesRoutes from './modules/spaces/spaces.routes.js'
+import mediaRoutes from './modules/media/media.routes.js'
 import authRoutes from './modules/auth/auth.routes.js'
+import editorsRoutes from './modules/editors/editors.routes.js'
+import uitdatabankRoutes from './modules/uitdatabank/uitdatabank.routes.js'
+import blogsRoutes from './modules/blogs/blogs.routes.js'
 
 /**
  * Build the Fastify application.
@@ -39,13 +49,24 @@ export async function buildApp(opts = {}): Promise<FastifyInstance> {
     await app.register(swaggerPlugin)
     await app.register(prismaPlugin)
     await app.register(authPlugin)
-
-    // --- Health check ---
-    app.get('/api/health', async () => ({ status: 'ok' }))
+    await app.register(errorHandlerPlugin)
 
     // --- Feature modules ---
-    await app.register(archiveRoutes, { prefix: '/api/archive' })
+    // Register specific modules at their respective prefixes to preserve sub-routes
+    await app.register(productionsRoutes, { prefix: '/api/archive/productions' })
+    await app.register(eventsRoutes, { prefix: '/api/archive/events' })
+    await app.register(locationsRoutes, { prefix: '/api/archive/locations' })
+
+    // Taxonomies handles both /genres and /tags under /api/archive
+    await app.register(taxonomiesRoutes, { prefix: '/api/archive' })
+
+    await app.register(hallsRoutes, { prefix: '/api/archive/halls' })
+    await app.register(spacesRoutes, { prefix: '/api/archive/spaces' })
+    await app.register(mediaRoutes, { prefix: '/api/archive/media' })
+    await app.register(uitdatabankRoutes, { prefix: '/api/archive/uitdatabank' })
+    await app.register(blogsRoutes, { prefix: '/api/archive/blogs' })
     await app.register(authRoutes, { prefix: '/api/auth' })
+    await app.register(editorsRoutes, { prefix: '/api/editors' })
 
     return app
 }
