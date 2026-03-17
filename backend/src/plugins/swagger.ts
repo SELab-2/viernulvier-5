@@ -10,14 +10,16 @@ import { jsonSchemaTransform } from 'fastify-type-provider-zod'
 export default fp(async (fastify) => {
     await fastify.register(swagger, {
         openapi: {
+            openapi: '3.0.0',
             info: {
                 title: 'VIERNULVIER Archief API',
                 description: 'REST API voor het VIERNULVIER archiefwebsite',
                 version: '0.1.0',
             },
             servers: [
-                // TODO: this has to change to non-local url
-                { url: 'http://localhost:3001', description: 'Local development' },
+                // TODO: test if localhost is still required for dev
+                // { url: 'http://localhost:3001', description: 'Local development' },
+                { url: '/', description: 'Swagger API' },
             ],
             components: {
                 securitySchemes: {

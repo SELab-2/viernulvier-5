@@ -19,14 +19,16 @@ docker compose -f docker-compose-db.yml up -d
 ```
 
 ### 2. Backend setup
-
+Make sure the backend/.env exists by running the following code:
 ```bash
 cd backend
-cp .env.example .env       # Edit values as needed
-npm install
-npx prisma migrate dev     # Create tables
-npx prisma db seed         # Seed sample data (optional)
-npm run dev                # Start Fastify on :3001
+cp .env.example .env
+```
+Next startup the development container
+```bash
+cd ..                        # return from backend/ to project root
+docker compose -f docker-compose-dev.yml up -d
+# npx prisma db seed         # Seed sample data (optional) this has to be done explicitly in the container
 ```
 
 ### 3. Frontend setup
