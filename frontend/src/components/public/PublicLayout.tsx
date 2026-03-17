@@ -19,7 +19,7 @@ function PublicLayout({ title, archiveLabel, searchAriaLabel, searchPlaceholder,
                 searchAriaLabel={searchAriaLabel}
                 searchPlaceholder={searchPlaceholder}
             />
-            <main className="mx-auto w-full flex-1 py-8">{children}</main>
+            <main className="mx-auto w-full flex-1">{children}</main>
             <PublicFooter />
         </div>
     )

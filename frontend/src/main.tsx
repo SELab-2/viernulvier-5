@@ -5,7 +5,7 @@ import App from './App'
 import { getActiveLocale } from './i18n'
 import './styles/index.css'
 
-document.documentElement.lang = getActiveLocale()
+document.documentElement.lang = getActiveLocale(window.location.pathname)
 
 const savedTheme = localStorage.getItem('theme')
 if (savedTheme === 'light' || savedTheme === 'dark') {

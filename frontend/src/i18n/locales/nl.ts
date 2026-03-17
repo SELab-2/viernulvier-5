@@ -21,6 +21,48 @@ const nl: Messages = {
     searchGenre: 'Genre',
     searchLocation: 'Locatie',
     searchButton: 'Zoek',
+    popularTagsLabel: 'Verken op categorie:',
+    popularTagsMore: '+ meer',
+    popularTags: ['theater', 'dans', 'concert', 'nightlife', 'talks', 'comedy', 'literatuur'],
+    latestBlogHeading: 'recente blog post',
+    latestBlogSubheading: 'verhalen, achtergronden en nieuws uit ons kunstencentrum',
+      latestBlogTitle: 'Van speleologie naar cultuurtempel: de hergeboorte van 1982',
+      latestBlogParagraphOne:
+      'Wist je dat de vooruit in de jaren 70 bijna een ruïne was? In 1982 nam een bende enthousiaste jongeren het heft in eigen handen. Gewapend met zaklampen en speleologiehelmen leidden ze duizenden gentenaars door de vergeten gangen van ons gebouw.',
+    latestBlogParagraphTwoTitle: 'Eclectisch & complex gebouw',
+    latestBlogParagraphTwo:
+      'Het resultaat was een eclectisch en bijzonder complex gebouw met een cafe-restaurant, een winkel, een bibliotheek, vergader- en repetitielokalen en natuurlijk de twee grote zalen: de Concertzaal ...',
+    latestBlogReadMore: 'lees meer',
+    latestBlogViewAll: 'bekijk alle blog posts',
+    recentDigitizedHeading: 'recent gedigitaliseerd',
+    recentDigitizedViewItem: 'bekijk item',
+    recentDigitizedViewAll: 'doorzoek het volledige archief >',
+    recentDigitizedItems: [
+      {
+        dateLabel: '23 SEP 2019',
+        archiveLabel: 'Archief #A92',
+        title: 'UITGELEZEN',
+        description: 'met Ruth Joos, Raf Njotea, Melissa Giardina, Marijke Pinoy en Kaat Van Stralen',
+      },
+      {
+        dateLabel: '23 SEP 2019',
+        archiveLabel: 'Archief #A92',
+        title: 'Eefje De Visser',
+        description: 'Het volledige concert "Nachtlicht", exclusief opgenomen in de Theaterzaal.',
+      },
+      {
+        dateLabel: '23 SEP 2019',
+        archiveLabel: 'Archief #A92',
+        title: 'Afra Tafri Creations / Abhishek Thapar',
+        description: 'Lacuna Kitchen - Een culinaire performance over herinnering en smaak.',
+      },
+      {
+        dateLabel: '23 SEP 2019',
+        archiveLabel: 'Archief #A92',
+        title: 'The Tender Ears',
+        description: 'Dampende bouillon, gefermenteerd lekkers en poezie.',
+      },
+    ],
   },
   auth: {
     loginTitle: 'Admin Login',

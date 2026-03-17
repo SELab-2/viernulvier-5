@@ -21,6 +21,48 @@ const en: Messages = {
     searchGenre: 'Genre',
     searchLocation: 'Location',
     searchButton: 'Search',
+    popularTagsLabel: 'Explore by category:',
+    popularTagsMore: '+ more',
+    popularTags: ['theatre', 'dance', 'concert', 'nightlife', 'talks', 'comedy', 'literature'],
+    latestBlogHeading: 'latest blog post',
+    latestBlogSubheading: 'stories, context and updates from our arts centre',
+    latestBlogTitle: 'Did you know De Vooruit was almost a ruin in the 70s?',
+    latestBlogParagraphOne:
+      'In 1982, a group of enthusiastic young people took matters into their own hands. Armed with flashlights and caving helmets, they guided thousands of Ghent residents through the forgotten hallways of our building.',
+    latestBlogParagraphTwoTitle: 'Eclectic & complex building',
+    latestBlogParagraphTwo:
+      'The result was an eclectic and highly complex building with a cafe-restaurant, a shop, a library, meeting and rehearsal rooms, and of course the two major halls: the Concert Hall ...',
+    latestBlogReadMore: 'read more',
+    latestBlogViewAll: 'view all blog posts',
+    recentDigitizedHeading: 'recently digitized',
+    recentDigitizedViewItem: 'view item',
+    recentDigitizedViewAll: 'browse the full archive >',
+    recentDigitizedItems: [
+      {
+        dateLabel: '23 SEP 2019',
+        archiveLabel: 'Archive #A92',
+        title: 'UITGELEZEN',
+        description: 'with Ruth Joos, Raf Njotea, Melissa Giardina, Marijke Pinoy and Kaat Van Stralen',
+      },
+      {
+        dateLabel: '23 SEP 2019',
+        archiveLabel: 'Archive #A92',
+        title: 'Eefje De Visser',
+        description: 'The full "Nachtlicht" concert, recorded exclusively in the Theatre Hall.',
+      },
+      {
+        dateLabel: '23 SEP 2019',
+        archiveLabel: 'Archive #A92',
+        title: 'Afra Tafri Creations / Abhishek Thapar',
+        description: 'Lacuna Kitchen - A culinary performance about memory and taste.',
+      },
+      {
+        dateLabel: '23 SEP 2019',
+        archiveLabel: 'Archive #A92',
+        title: 'The Tender Ears',
+        description: 'Steaming broth, fermented delights and poetry.',
+      },
+    ],
   },
   auth: {
     loginTitle: 'Admin Login',

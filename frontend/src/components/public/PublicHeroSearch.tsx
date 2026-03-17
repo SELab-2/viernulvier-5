@@ -26,6 +26,7 @@ type PublicHeroSearchProps = {
     yearOptions?: FilterOption[]
     genreOptions?: FilterOption[]
     locationOptions?: FilterOption[]
+    initialFilters?: HeroSearchFilters
     onSearch?: (filters: HeroSearchFilters) => void
 }
 
@@ -52,15 +53,17 @@ function SelectPill({
     options,
     onChange,
     disabled,
+    className,
 }: {
     label: string
     value: string
     options: FilterOption[]
     onChange: (value: string) => void
     disabled?: boolean
+    className?: string
 }) {
     return (
-        <div className="relative min-w-24">
+        <div className={`relative ${className ?? 'min-w-24'}`}>
             <select
                 value={value}
                 onChange={(event) => onChange(event.target.value)}
@@ -93,12 +96,13 @@ function PublicHeroSearch({
     yearOptions,
     genreOptions = [],
     locationOptions = [],
+    initialFilters,
     onSearch,
 }: PublicHeroSearchProps) {
-    const [query, setQuery] = useState('')
-    const [year, setYear] = useState('')
-    const [genre, setGenre] = useState('')
-    const [location, setLocation] = useState('')
+    const [query, setQuery] = useState(initialFilters?.query ?? '')
+    const [year, setYear] = useState(initialFilters?.year ?? '')
+    const [genre, setGenre] = useState(initialFilters?.genre ?? '')
+    const [location, setLocation] = useState(initialFilters?.location ?? '')
 
     const defaultYearOptions = useMemo<FilterOption[]>(() => {
         const currentYear = new Date().getFullYear()
@@ -126,24 +130,24 @@ function PublicHeroSearch({
             <div className="pointer-events-none absolute -left-32 top-44 h-64 w-64 rounded-full bg-accent/30 blur-3xl" />
             <div className="pointer-events-none absolute -right-24 -top-8 h-72 w-72 rounded-full bg-accent/40 blur-3xl" />
 
-            <div className="relative mx-auto flex w-full max-w-3xl flex-col items-center px-3 text-center sm:px-4 md:px-0">
+            <div className="site-container relative flex max-w-3xl flex-col items-center text-center">
                 <p className="mb-8 text-sm font-regular tracking-wide text-accent bg-accent/10 py-2 px-4 rounded-full">
                     {heroTagline}
                 </p>
 
-                <h1 className="text-5xl font-regular leading-tight text-muted md:text-6xl">
+                <h1 className="text-5xl font-regular leading-tight text-text md:text-6xl">
                     <span>{titleTop}</span>
                     <br />
                     <span className="text-accent">{titleAccent}</span>
-                    <span className="text-muted"> {titleBottom}</span>
+                    <span className="text-text"> {titleBottom}</span>
                 </h1>
 
                 <form
                     onSubmit={handleSubmit}
                     className="mt-10 w-full max-w-xl rounded-xl border border-border bg-surface p-2 shadow-[0_10px_30px_rgba(0,0,0,0.35)] md:max-w-none"
                 >
-                    <div className="grid gap-2 md:grid-cols-[1.8fr_auto_auto_auto_auto]">
-                        <div className="flex h-12 items-center rounded-md bg-background px-4 text-muted">
+                    <div className="grid gap-2 md:grid-cols-[1.8fr_auto_auto_auto_auto] md:items-center">
+                        <div className="col-span-full flex h-12 items-center rounded-md bg-background px-4 text-muted md:col-span-1">
                             <SearchIcon className="mr-3 h-5 w-5" />
                             <input
                                 type="text"
@@ -153,32 +157,37 @@ function PublicHeroSearch({
                                 className="w-full bg-transparent text-sm text-foreground placeholder:text-muted outline-none"
                             />
                         </div>
-                        <SelectPill
-                            label={searchYearLabel}
-                            value={year}
-                            options={effectiveYearOptions}
-                            onChange={setYear}
-                        />
-                        <SelectPill
-                            label={searchGenreLabel}
-                            value={genre}
-                            options={genreOptions}
-                            onChange={setGenre}
-                            disabled={genreOptions.length === 0}
-                        />
-                        <SelectPill
-                            label={searchLocationLabel}
-                            value={location}
-                            options={locationOptions}
-                            onChange={setLocation}
-                            disabled={locationOptions.length === 0}
-                        />
-                        <button
-                            type="submit"
-                            className="h-12 w-full rounded-md bg-accent px-6 text-sm font-semibold text-white md:w-auto"
-                        >
-                            {searchButtonLabel}
-                        </button>
+                        <div className="col-span-full flex gap-2 pb-1 md:col-span-4 md:contents md:pb-0">
+                            <SelectPill
+                                className="min-w-0 flex-1 md:min-w-24 md:flex-none"
+                                label={searchYearLabel}
+                                value={year}
+                                options={effectiveYearOptions}
+                                onChange={setYear}
+                            />
+                            <SelectPill
+                                className="min-w-0 flex-1 md:min-w-24 md:flex-none"
+                                label={searchGenreLabel}
+                                value={genre}
+                                options={genreOptions}
+                                onChange={setGenre}
+                                disabled={genreOptions.length === 0}
+                            />
+                            <SelectPill
+                                className="min-w-0 flex-1 md:min-w-24 md:flex-none"
+                                label={searchLocationLabel}
+                                value={location}
+                                options={locationOptions}
+                                onChange={setLocation}
+                                disabled={locationOptions.length === 0}
+                            />
+                            <button
+                                type="submit"
+                                className="h-12 shrink-0 rounded-md bg-accent px-6 text-sm font-semibold text-white"
+                            >
+                                {searchButtonLabel}
+                            </button>
+                        </div>
                     </div>
                 </form>
 

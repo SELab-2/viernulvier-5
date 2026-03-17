@@ -1,7 +1,11 @@
-import { useNavigate } from 'react-router-dom'
-import { getMessages } from '../../i18n'
+import { useMemo } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { getActiveLocale, getMessages, withLocalePath } from '../../i18n'
 import PublicLayout from '../../components/public/PublicLayout'
 import PublicHeroSearch, { type HeroSearchFilters } from '../../components/public/PublicHeroSearch'
+import PublicPopularTags from '../../components/public/PublicPopularTags'
+import PublicLatestBlogPreview from '../../components/public/PublicLatestBlogPreview'
+import PublicRecentDigitized from '../../components/public/PublicRecentDigitized'
 
 /**
  * Public home page — displays the archive listing.
@@ -9,6 +13,23 @@ import PublicHeroSearch, { type HeroSearchFilters } from '../../components/publi
 function HomePage() {
     const messages = getMessages()
     const navigate = useNavigate()
+    const [searchParams] = useSearchParams()
+    const locale = getActiveLocale(window.location.pathname)
+
+    const initialFilters = useMemo<HeroSearchFilters>(
+        () => ({
+            query: searchParams.get('q') ?? '',
+            year: searchParams.get('year') ?? undefined,
+            genre: searchParams.get('genre') ?? undefined,
+            location: searchParams.get('location') ?? undefined,
+        }),
+        [searchParams]
+    )
+
+    const genreOptions = useMemo(
+        () => messages.home.popularTags.map((tag) => ({ value: tag, label: tag })),
+        [messages.home.popularTags]
+    )
 
     const handleSearch = (filters: HeroSearchFilters) => {
         const params = new URLSearchParams()
@@ -21,8 +42,31 @@ function HomePage() {
             params.set('year', filters.year)
         }
 
+        if (filters.genre) {
+            params.set('genre', filters.genre)
+        }
+
+        if (filters.location) {
+            params.set('location', filters.location)
+        }
+
         const queryString = params.toString()
-        navigate(queryString ? `/?${queryString}` : '/')
+        const searchPath = withLocalePath('/zoeken', locale)
+        navigate(queryString ? `${searchPath}?${queryString}` : searchPath)
+    }
+
+    const handlePopularTagClick = (tag: string) => {
+        const params = new URLSearchParams()
+        params.set('genre', tag)
+        navigate(`${withLocalePath('/zoeken', locale)}?${params.toString()}`)
+    }
+
+    const handleRecentDigitizedItemClick = (index: number) => {
+        navigate(withLocalePath(`/archive/${index + 1}`, locale))
+    }
+
+    const handleRecentDigitizedViewAll = () => {
+        navigate(withLocalePath('/zoeken', locale))
     }
 
     return (
@@ -33,6 +77,7 @@ function HomePage() {
             searchPlaceholder={messages.nav.searchPlaceholder}
         >
             <PublicHeroSearch
+                key={searchParams.toString()}
                 heroTagline={messages.home.heroTagline}
                 titleTop={messages.home.heroTitleTop}
                 titleAccent={messages.home.heroTitleAccent}
@@ -43,7 +88,33 @@ function HomePage() {
                 searchGenreLabel={messages.home.searchGenre}
                 searchLocationLabel={messages.home.searchLocation}
                 searchButtonLabel={messages.home.searchButton}
+                genreOptions={genreOptions}
+                initialFilters={initialFilters}
                 onSearch={handleSearch}
+            />
+            <PublicPopularTags
+                label={messages.home.popularTagsLabel}
+                tags={messages.home.popularTags}
+                moreLabel={messages.home.popularTagsMore}
+                onTagClick={handlePopularTagClick}
+            />
+            <PublicLatestBlogPreview
+                heading={messages.home.latestBlogHeading}
+                subheading={messages.home.latestBlogSubheading}
+                title={messages.home.latestBlogTitle}
+                paragraphOne={messages.home.latestBlogParagraphOne}
+                paragraphTwoTitle={messages.home.latestBlogParagraphTwoTitle}
+                paragraphTwo={messages.home.latestBlogParagraphTwo}
+                readMoreLabel={messages.home.latestBlogReadMore}
+                viewAllLabel={messages.home.latestBlogViewAll}
+            />
+            <PublicRecentDigitized
+                heading={messages.home.recentDigitizedHeading}
+                items={messages.home.recentDigitizedItems}
+                viewItemLabel={messages.home.recentDigitizedViewItem}
+                viewAllLabel={messages.home.recentDigitizedViewAll}
+                onViewItem={handleRecentDigitizedItemClick}
+                onViewAll={handleRecentDigitizedViewAll}
             />
         </PublicLayout>
     )
