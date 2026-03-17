@@ -10,6 +10,7 @@ const MESSAGES: Record<Locale, Messages> = {
 }
 
 const LOCALE_STORAGE_KEY = 'locale'
+const LOCALE_PATH_REGEX = /^\/(nl|en)(?=\/|$)/i
 
 export function resolveLocale(rawLocale?: string): Locale {
   if (!rawLocale) {
@@ -29,8 +30,33 @@ export function resolveLocale(rawLocale?: string): Locale {
   return DEFAULT_LOCALE
 }
 
-export function getActiveLocale(): Locale {
+export function getLocaleFromPath(pathname: string): Locale | undefined {
+  const match = pathname.match(LOCALE_PATH_REGEX)
+  if (!match?.[1]) {
+    return undefined
+  }
+
+  return resolveLocale(match[1])
+}
+
+export function withLocalePath(pathname: string, locale: Locale): string {
+  const normalizedPath = pathname.startsWith('/') ? pathname : `/${pathname}`
+  const stripped = normalizedPath.replace(LOCALE_PATH_REGEX, '') || '/'
+
+  if (stripped === '/') {
+    return `/${locale}`
+  }
+
+  return `/${locale}${stripped}`
+}
+
+export function getActiveLocale(pathname?: string): Locale {
   if (typeof window !== 'undefined') {
+    const localeFromPath = getLocaleFromPath(pathname ?? window.location.pathname)
+    if (localeFromPath) {
+      return localeFromPath
+    }
+
     const savedLocale = window.localStorage.getItem(LOCALE_STORAGE_KEY)
     if (savedLocale) {
       return resolveLocale(savedLocale)

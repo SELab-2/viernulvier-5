@@ -1,12 +1,14 @@
-import { Link } from 'react-router-dom'
-import { getMessages } from '../../i18n'
+import { Link, useLocation } from 'react-router-dom'
+import { getActiveLocale, getMessages, withLocalePath } from '../../i18n'
 
 function PublicFooter() {
+    const location = useLocation()
+    const locale = getActiveLocale(location.pathname)
     const messages = getMessages()
 
     return (
         <footer className="mt-16 bg-black text-white">
-            <div className="mx-auto max-w-7xl px-8 py-14">
+            <div className="site-container py-14">
                 <div className="grid gap-12 md:grid-cols-2 xl:grid-cols-4">
                     <section>
                         <img src="/logo-white.png" alt="VIERNULVIER" className="mb-5 h-10 w-auto" />
@@ -18,7 +20,7 @@ function PublicFooter() {
                     <section>
                         <h3 className="mb-5 text-xs font-semibold uppercase tracking-[0.12em]">{messages.footer.navigationTitle}</h3>
                         <ul className="space-y-2 text-base text-grey">
-                            <li><Link to="/" className="hover:text-white">{messages.footer.navHome}</Link></li>
+                            <li><Link to={withLocalePath('/', locale)} className="hover:text-white">{messages.footer.navHome}</Link></li>
                             <li><button type="button" className="text-left text-grey hover:text-white">{messages.footer.navAgenda}</button></li>
                             <li><button type="button" className="text-left text-grey hover:text-white">{messages.footer.navArchiveSearch}</button></li>
                             <li><button type="button" className="text-left text-grey hover:text-white">{messages.footer.navAbout}</button></li>

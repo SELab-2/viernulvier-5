@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { getActiveLocale, setActiveLocale } from '../../i18n'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { getActiveLocale, setActiveLocale, withLocalePath } from '../../i18n'
 
 type PublicNavbarProps = {
     title: string
@@ -46,15 +46,34 @@ function SearchIcon({ className }: { className: string }) {
     )
 }
 
+function HamburgerIcon({ className }: { className: string }) {
+    return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
+            <path d="M4 7h16M4 12h16M4 17h16" strokeLinecap="round" />
+        </svg>
+    )
+}
+
+function CloseIcon({ className }: { className: string }) {
+    return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
+            <path d="M6 6l12 12M18 6 6 18" strokeLinecap="round" />
+        </svg>
+    )
+}
+
 function PublicNavbar({
     title,
     archiveLabel,
     searchAriaLabel,
     searchPlaceholder,
 }: PublicNavbarProps) {
+    const location = useLocation()
+    const navigate = useNavigate()
+    const locale = getActiveLocale(location.pathname)
     const [theme, setTheme] = useState<Theme>(resolveTheme)
     const [isSearchOpen, setIsSearchOpen] = useState(false)
-    const [locale, setLocale] = useState(getActiveLocale)
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
     useEffect(() => {
         const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
@@ -69,6 +88,19 @@ function PublicNavbar({
         return () => mediaQuery.removeEventListener('change', updateFromSystem)
     }, [])
 
+    useEffect(() => {
+        const mobileQuery = window.matchMedia('(max-width: 480px)')
+        const updateMobileState = () => {
+            if (!mobileQuery.matches) {
+                setIsMobileMenuOpen(false)
+                setIsSearchOpen(false)
+            }
+        }
+
+        mobileQuery.addEventListener('change', updateMobileState)
+        return () => mobileQuery.removeEventListener('change', updateMobileState)
+    }, [])
+
     const applyTheme = (nextTheme: Theme) => {
         setTheme(nextTheme)
         document.documentElement.dataset.theme = nextTheme
@@ -77,22 +109,32 @@ function PublicNavbar({
 
     const toggleLocale = () => {
         const nextLocale = locale === 'nl' ? 'en' : 'nl'
-        setLocale(nextLocale)
         setActiveLocale(nextLocale)
-        window.location.reload()
+        const localizedPath = withLocalePath(location.pathname, nextLocale)
+        navigate(`${localizedPath}${location.search}${location.hash}`)
     }
 
     return (
         <header className="border-b border-border bg-black">
-            <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4">
+            <div className="site-container flex h-16 items-center justify-between max-[480px]:h-14">
                 <div className="flex items-end gap-1">
-                    <Link to="/" className="inline-flex items-center" aria-label={title}>
-                        <img src="/logo-white.png" alt="VIERNULVIER Logo" className="h-8 w-auto" />
+                    <Link to={withLocalePath('/', locale)} className="inline-flex items-center" aria-label={title}>
+                        <img src="/logo-white.png" alt="VIERNULVIER Logo" className="h-8 w-auto max-[480px]:h-7" />
                     </Link>
-                    <h3 className="text-lg leading-none font-light text-grey">| {archiveLabel}</h3>
+                    <h3 className="text-lg leading-none font-light text-grey max-[480px]:text-base">| {archiveLabel}</h3>
                 </div>
-                
-                <nav aria-label="Hoofdnavigatie">
+
+                <button
+                    type="button"
+                    className="hidden h-9 w-9 items-center justify-center text-white max-[480px]:inline-flex"
+                    aria-label={isMobileMenuOpen ? 'Sluit menu' : 'Open menu'}
+                    aria-expanded={isMobileMenuOpen}
+                    onClick={() => setIsMobileMenuOpen((open) => !open)}
+                >
+                    {isMobileMenuOpen ? <CloseIcon className="h-5 w-5" /> : <HamburgerIcon className="h-5 w-5" />}
+                </button>
+
+                <nav aria-label="Hoofdnavigatie" className="max-[480px]:hidden">
                     <ul className="flex items-center gap-6 text-sm font-medium text-white">
                         <li>
                             <div className="flex items-center gap-4">
@@ -120,7 +162,7 @@ function PublicNavbar({
                                 <button
                                     type="button"
                                     onClick={toggleLocale}
-                                    className="inline-flex h-8 items-center justify-center cursor-pointer text-md font-semibold text-white"
+                                    className="inline-flex h-8 items-center justify-center cursor-pointer text-md font-semibold text-white max-[480px]:text-sm"
                                     aria-label="Wissel taal"
                                 >
                                     {locale === 'nl' ? 'EN' : 'NL'}
@@ -149,6 +191,62 @@ function PublicNavbar({
                         </li>
                     </ul>
                 </nav>
+            </div>
+
+            <div
+                className={`hidden overflow-hidden border-t border-white/10 max-[480px]:block ${isMobileMenuOpen ? 'max-h-64 py-3' : 'max-h-0 py-0'}`}
+            >
+                <div className="site-container space-y-3 text-xs text-white">
+                    <div className="flex items-center justify-between">
+                        <div className="inline-flex h-8 w-16 items-center border border-border bg-grey">
+                            <button
+                                type="button"
+                                onClick={() => applyTheme('dark')}
+                                className={`inline-flex h-8 w-8 items-center justify-center cursor-pointer text-black transition-colors ${theme === 'dark' ? 'bg-white' : 'bg-grey'}`}
+                                aria-label="Donkere modus"
+                                aria-pressed={theme === 'dark'}
+                            >
+                                <MoonIcon className="h-4 w-4" />
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => applyTheme('light')}
+                                className={`inline-flex h-8 w-8 items-center justify-center cursor-pointer text-black transition-colors ${theme === 'light' ? 'bg-white' : 'bg-grey'}`}
+                                aria-label="Lichte modus"
+                                aria-pressed={theme === 'light'}
+                            >
+                                <SunIcon className="h-4 w-4" />
+                            </button>
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={toggleLocale}
+                            className="inline-flex h-8 items-center justify-center cursor-pointer text-sm font-semibold text-white"
+                            aria-label="Wissel taal"
+                        >
+                            {locale === 'nl' ? 'EN' : 'NL'}
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => setIsSearchOpen((open) => !open)}
+                            className="inline-flex h-8 w-8 items-center justify-center text-white"
+                            aria-label={searchAriaLabel}
+                            aria-expanded={isSearchOpen}
+                        >
+                            <SearchIcon className="h-4 w-4" />
+                        </button>
+                    </div>
+
+                    {isSearchOpen ? (
+                        <input
+                            type="text"
+                            placeholder={searchPlaceholder}
+                            className="h-9 w-full rounded-sm border bg-surface px-3 text-xs text-foreground placeholder:text-muted"
+                        />
+                    ) : null}
+                </div>
             </div>
         </header>
     )

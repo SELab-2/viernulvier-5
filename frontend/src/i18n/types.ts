@@ -21,6 +21,26 @@ export type Messages = {
     searchGenre: string
     searchLocation: string
     searchButton: string
+    popularTagsLabel: string
+    popularTagsMore: string
+    popularTags: string[]
+    latestBlogHeading: string
+    latestBlogSubheading: string
+    latestBlogTitle: string
+    latestBlogParagraphOne: string
+    latestBlogParagraphTwoTitle: string
+    latestBlogParagraphTwo: string
+    latestBlogReadMore: string
+    latestBlogViewAll: string
+    recentDigitizedHeading: string
+    recentDigitizedViewItem: string
+    recentDigitizedViewAll: string
+    recentDigitizedItems: Array<{
+      dateLabel: string
+      archiveLabel: string
+      title: string
+      description: string
+    }>
   }
   auth: {
     loginTitle: string
