@@ -26,6 +26,7 @@ describe('UIT Databank Routes', () => {
             expect(response.statusCode).toBe(200)
             expect(body).toHaveProperty('data')
             expect(body).toHaveProperty('meta')
+            expect(body).toHaveProperty('links')
             expect(Array.isArray(body.data)).toBe(true)
         })
 
@@ -56,7 +57,7 @@ describe('UIT Databank Routes', () => {
     })
 
     describe('GET /api/v1/archive/uitdatabank/keywords/:id', () => {
-        it('should return a keyword by ID with 200 OK', async () => {
+        it('should return a keyword by ID with 200 OK and links', async () => {
             const keyword = await app.prisma.uitdatabank_keyword.create({
                 data: { name: 'Test Keyword' }
             })
@@ -64,7 +65,9 @@ describe('UIT Databank Routes', () => {
                 const response = await app.inject({ method: 'GET', url: `/api/v1/archive/uitdatabank/keywords/${keyword.id}` })
                 expect(response.statusCode).toBe(200)
                 const body = JSON.parse(response.payload)
-                expect(body.id).toBe(keyword.id)
+                expect(body.data.id).toBe(keyword.id)
+                expect(body.data).toHaveProperty('links')
+                expect(body.data.links).toHaveProperty('self')
             } finally {
                 await app.prisma.uitdatabank_keyword.delete({ where: { id: keyword.id } })
             }
@@ -89,12 +92,13 @@ describe('UIT Databank Routes', () => {
             expect(response.statusCode).toBe(200)
             expect(body).toHaveProperty('data')
             expect(body).toHaveProperty('meta')
+            expect(body).toHaveProperty('links')
             expect(Array.isArray(body.data)).toBe(true)
         })
     })
 
     describe('GET /api/v1/archive/uitdatabank/themes/:id', () => {
-        it('should return a theme by ID with 200 OK', async () => {
+        it('should return a theme by ID with 200 OK and links', async () => {
             const theme = await app.prisma.uitdatabank_theme.create({
                 data: { name: 'Test Theme' }
             })
@@ -102,7 +106,9 @@ describe('UIT Databank Routes', () => {
                 const response = await app.inject({ method: 'GET', url: `/api/v1/archive/uitdatabank/themes/${theme.id}` })
                 expect(response.statusCode).toBe(200)
                 const body = JSON.parse(response.payload)
-                expect(body.id).toBe(theme.id)
+                expect(body.data.id).toBe(theme.id)
+                expect(body.data).toHaveProperty('links')
+                expect(body.data.links).toHaveProperty('self')
             } finally {
                 await app.prisma.uitdatabank_theme.delete({ where: { id: theme.id } })
             }
@@ -127,12 +133,13 @@ describe('UIT Databank Routes', () => {
             expect(response.statusCode).toBe(200)
             expect(body).toHaveProperty('data')
             expect(body).toHaveProperty('meta')
+            expect(body).toHaveProperty('links')
             expect(Array.isArray(body.data)).toBe(true)
         })
     })
 
     describe('GET /api/v1/archive/uitdatabank/types/:id', () => {
-        it('should return a type by ID with 200 OK', async () => {
+        it('should return a type by ID with 200 OK and links', async () => {
             const type = await app.prisma.uitdatabank_type.create({
                 data: { name: 'Test Type' }
             })
@@ -140,7 +147,9 @@ describe('UIT Databank Routes', () => {
                 const response = await app.inject({ method: 'GET', url: `/api/v1/archive/uitdatabank/types/${type.id}` })
                 expect(response.statusCode).toBe(200)
                 const body = JSON.parse(response.payload)
-                expect(body.id).toBe(type.id)
+                expect(body.data.id).toBe(type.id)
+                expect(body.data).toHaveProperty('links')
+                expect(body.data.links).toHaveProperty('self')
             } finally {
                 await app.prisma.uitdatabank_type.delete({ where: { id: type.id } })
             }
