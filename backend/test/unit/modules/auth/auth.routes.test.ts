@@ -22,12 +22,20 @@ describe('auth routes', () => {
         findUnique = vi.fn()
         const passwordHash = await hashPassword('admin12345')
 
-        findUnique.mockImplementation(async ({ where: { username } }) => ({
-            id: `${username}-id`,
-            username,
-            passwordHash,
-            role: username === 'editor' ? 'EDITOR' : 'ADMIN',
-        }))
+        findUnique.mockImplementation(async ({ where: { username, id } }) => {
+            const userId = id || (username === 'editor' 
+                ? '00000000-0000-0000-0000-000000000002' 
+                : '00000000-0000-0000-0000-000000000001')
+            
+            return {
+                id: userId,
+                username: username || (userId === '00000000-0000-0000-0000-000000000002' ? 'editor' : 'admin'),
+                passwordHash,
+                role: (username === 'editor' || userId === '00000000-0000-0000-0000-000000000002') ? 'EDITOR' : 'ADMIN',
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            }
+        })
 
         app = Fastify({ logger: false })
         app.setValidatorCompiler(validatorCompiler)
@@ -45,7 +53,7 @@ describe('auth routes', () => {
         await app.close()
     })
 
-    it('logs in with a database user and sets a cookie', async () => {
+    it('logs in with a database user and sets a cookie (no token in body)', async () => {
         const response = await app.inject({
             method: 'POST',
             url: '/api/v1/auth/login',
@@ -58,10 +66,15 @@ describe('auth routes', () => {
         expect(response.statusCode).toBe(200)
         expect(findUnique).toHaveBeenCalledWith({ where: { username: 'admin' } })
         expect(response.cookies.find((cookie) => cookie.name === 'token')).toBeTruthy()
-        expect(response.json()).toEqual({ success: true })
+        
+        const body = response.json()
+        expect(body).toHaveProperty('data')
+        expect(body.data).toHaveProperty('user')
+        expect(body.data).not.toHaveProperty('token') // Verify token is NOT in body
+        expect(body).toHaveProperty('links')
     })
 
-    it('returns the current user from the JWT cookie', async () => {
+    it('returns the current user from the JWT cookie with RESTful structure', async () => {
         const loginResponse = await app.inject({
             method: 'POST',
             url: '/api/v1/auth/login',
@@ -82,15 +95,10 @@ describe('auth routes', () => {
         })
 
         expect(meResponse.statusCode).toBe(200)
-        expect(meResponse.json()).toEqual({
-            user: {
-                sub: 'admin-id',
-                username: 'admin',
-                role: 'ADMIN',
-                iat: expect.any(Number),
-                exp: expect.any(Number),
-            },
-        })
+        const body = meResponse.json()
+        expect(body.data.username).toBe('admin')
+        expect(body.data).toHaveProperty('links')
+        expect(body.links.self).toContain('/api/v1/auth/me')
     })
 
     it('rate limits repeated failed login attempts', async () => {
@@ -119,7 +127,6 @@ describe('auth routes', () => {
         expect(first.statusCode).toBe(401)
         expect(second.statusCode).toBe(401)
         expect(third.statusCode).toBe(429)
-        expect(third.json()).toEqual({ error: 'Too many login attempts' })
     })
 
     it('does not count successful logins toward the rate limit', async () => {

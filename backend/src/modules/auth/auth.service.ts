@@ -52,6 +52,19 @@ export class AuthService {
             role: toDomainRole(user.role),
         })
 
-        return { token }
+        const { passwordHash, ...userWithoutPassword } = user
+
+        return { 
+            token, 
+            user: userWithoutPassword 
+        }
+    }
+
+    async getCurrentUser(id: string) {
+        const user = await this.repository.findById(id)
+        if (!user) return null
+        
+        const { passwordHash, ...userWithoutPassword } = user
+        return userWithoutPassword
     }
 }

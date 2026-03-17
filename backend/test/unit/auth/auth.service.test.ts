@@ -32,7 +32,14 @@ describe('AuthService', () => {
             password: 'correct-password',
         })
 
-        expect(result).toEqual({ token: 'mock-token' })
+        expect(result).toEqual({ 
+            token: 'mock-token',
+            user: {
+                id: 'user-1',
+                username: 'admin',
+                role: 'ADMIN',
+            }
+        })
         expect(repository.findByUsername).toHaveBeenCalledWith('admin')
         expect(signToken).toHaveBeenCalledWith({
             sub: 'user-1',
