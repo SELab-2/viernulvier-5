@@ -8,4 +8,10 @@ export class AuthRepository {
             where: { username },
         })
     }
+
+    async findById(id: string) {
+        return this.prisma.adminUser.findUnique({
+            where: { id },
+        })
+    }
 }
