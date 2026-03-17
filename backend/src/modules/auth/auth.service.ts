@@ -52,7 +52,8 @@ export class AuthService {
             role: toDomainRole(user.role),
         })
 
-        const { passwordHash, ...userWithoutPassword } = user
+        const userWithoutPassword: any = { ...user }
+        delete userWithoutPassword.passwordHash
 
         return { 
             token, 
@@ -64,7 +65,9 @@ export class AuthService {
         const user = await this.repository.findById(id)
         if (!user) return null
         
-        const { passwordHash, ...userWithoutPassword } = user
+        const userWithoutPassword: any = { ...user }
+        delete userWithoutPassword.passwordHash
+        
         return userWithoutPassword
     }
 }
