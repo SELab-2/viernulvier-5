@@ -38,7 +38,7 @@ describe('auth routes', () => {
                 findUnique,
             },
         })
-        await app.register(authRoutes, { prefix: '/api/auth' })
+        await app.register(authRoutes, { prefix: '/api/v1/auth' })
     })
 
     afterEach(async () => {
@@ -48,7 +48,7 @@ describe('auth routes', () => {
     it('logs in with a database user and sets a cookie', async () => {
         const response = await app.inject({
             method: 'POST',
-            url: '/api/auth/login',
+            url: '/api/v1/auth/login',
             payload: {
                 username: 'admin',
                 password: 'admin12345',
@@ -64,7 +64,7 @@ describe('auth routes', () => {
     it('returns the current user from the JWT cookie', async () => {
         const loginResponse = await app.inject({
             method: 'POST',
-            url: '/api/auth/login',
+            url: '/api/v1/auth/login',
             payload: {
                 username: 'admin',
                 password: 'admin12345',
@@ -75,7 +75,7 @@ describe('auth routes', () => {
 
         const meResponse = await app.inject({
             method: 'GET',
-            url: '/api/auth/me',
+            url: '/api/v1/auth/me',
             cookies: {
                 token: tokenCookie?.value ?? '',
             },
@@ -100,19 +100,19 @@ describe('auth routes', () => {
 
         const first = await app.inject({
             method: 'POST',
-            url: '/api/auth/login',
+            url: '/api/v1/auth/login',
             payload: { username: 'admin', password: 'wrongpass' },
         })
 
         const second = await app.inject({
             method: 'POST',
-            url: '/api/auth/login',
+            url: '/api/v1/auth/login',
             payload: { username: 'admin', password: 'wrongpass' },
         })
 
         const third = await app.inject({
             method: 'POST',
-            url: '/api/auth/login',
+            url: '/api/v1/auth/login',
             payload: { username: 'admin', password: 'wrongpass' },
         })
 
@@ -125,19 +125,19 @@ describe('auth routes', () => {
     it('does not count successful logins toward the rate limit', async () => {
         const first = await app.inject({
             method: 'POST',
-            url: '/api/auth/login',
+            url: '/api/v1/auth/login',
             payload: { username: 'admin', password: 'admin12345' },
         })
 
         const second = await app.inject({
             method: 'POST',
-            url: '/api/auth/login',
+            url: '/api/v1/auth/login',
             payload: { username: 'admin', password: 'admin12345' },
         })
 
         const third = await app.inject({
             method: 'POST',
-            url: '/api/auth/login',
+            url: '/api/v1/auth/login',
             payload: { username: 'admin', password: 'admin12345' },
         })
 
@@ -151,13 +151,13 @@ describe('auth routes', () => {
 
         const failedBeforeSuccess = await app.inject({
             method: 'POST',
-            url: '/api/auth/login',
+            url: '/api/v1/auth/login',
             payload: { username: 'admin', password: 'wrongpass' },
         })
 
         const successfulLogin = await app.inject({
             method: 'POST',
-            url: '/api/auth/login',
+            url: '/api/v1/auth/login',
             payload: { username: 'admin', password: 'admin12345' },
         })
 
@@ -167,19 +167,19 @@ describe('auth routes', () => {
 
         const failedAfterReset = await app.inject({
             method: 'POST',
-            url: '/api/auth/login',
+            url: '/api/v1/auth/login',
             payload: { username: 'admin', password: 'wrongpass' },
         })
 
         const secondFailedAfterReset = await app.inject({
             method: 'POST',
-            url: '/api/auth/login',
+            url: '/api/v1/auth/login',
             payload: { username: 'admin', password: 'wrongpass' },
         })
 
         const blockedAttempt = await app.inject({
             method: 'POST',
-            url: '/api/auth/login',
+            url: '/api/v1/auth/login',
             payload: { username: 'admin', password: 'wrongpass' },
         })
 
@@ -193,25 +193,25 @@ describe('auth routes', () => {
     it('does not clear another username throttle bucket after a successful login', async () => {
         const firstAdminFailure = await app.inject({
             method: 'POST',
-            url: '/api/auth/login',
+            url: '/api/v1/auth/login',
             payload: { username: 'admin', password: 'wrongpass' },
         })
 
         const secondAdminFailure = await app.inject({
             method: 'POST',
-            url: '/api/auth/login',
+            url: '/api/v1/auth/login',
             payload: { username: 'admin', password: 'wrongpass' },
         })
 
         const otherUserSuccess = await app.inject({
             method: 'POST',
-            url: '/api/auth/login',
+            url: '/api/v1/auth/login',
             payload: { username: 'editor', password: 'admin12345' },
         })
 
         const blockedAdminAttempt = await app.inject({
             method: 'POST',
-            url: '/api/auth/login',
+            url: '/api/v1/auth/login',
             payload: { username: 'admin', password: 'wrongpass' },
         })
 

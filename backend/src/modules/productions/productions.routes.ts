@@ -6,7 +6,7 @@ import { z } from 'zod'
 import { 
     paginationQuerySchema, 
     productionListSchema, 
-    productionSchema, 
+    singleProductionSchema, 
     updateProductionSchema,
     updateProductionParamsSchema,
     createProductionSchema,
@@ -40,7 +40,7 @@ const productionsRoutes: FastifyPluginAsync = async (fastify) => {
             summary: 'Get a production by ID',
             params: updateProductionParamsSchema, // reuse the one that validates ID as UUID
             response: {
-                200: productionSchema,
+                200: singleProductionSchema,
                 404: errorSchema
             },
         },
@@ -55,7 +55,7 @@ const productionsRoutes: FastifyPluginAsync = async (fastify) => {
             summary: 'Create a new production',
             body: createProductionSchema,
             response: {
-                201: productionSchema,
+                201: singleProductionSchema,
             },
         },
         handler: (request, reply) => controller.createProduction(request as any, reply),
@@ -70,7 +70,7 @@ const productionsRoutes: FastifyPluginAsync = async (fastify) => {
             params: updateProductionParamsSchema,
             body: updateProductionSchema,
             response: {
-                200: productionSchema,
+                200: singleProductionSchema,
             },
         },
         handler: (request, reply) => controller.updateProduction(request as any, reply),
