@@ -25,6 +25,7 @@ describe('Events Routes', () => {
             expect(response.statusCode).toBe(200)
             expect(body).toHaveProperty('data')
             expect(body).toHaveProperty('meta')
+            expect(body).toHaveProperty('links')
             expect(body.meta.page).toBe(1)
         })
     })
@@ -46,8 +47,10 @@ describe('Events Routes', () => {
 
                 expect(response.statusCode).toBe(200)
                 const body = JSON.parse(response.payload)
-                expect(body.id).toBe(event.id)
-                expect(body.info.nl).toBe('Event by ID Test')
+                expect(body.data.id).toBe(event.id)
+                expect(body.data.info.nl).toBe('Event by ID Test')
+                expect(body.data).toHaveProperty('links')
+                expect(body.data.links).toHaveProperty('self')
             } finally {
                 await app.prisma.event.delete({
                     where: { id: event.id }
@@ -84,12 +87,14 @@ describe('Events Routes', () => {
             })
 
             expect(response.statusCode).toBe(201)
-            const created = JSON.parse(response.payload)
+            const body = JSON.parse(response.payload)
+            const created = body.data
 
             const dbRecord = await app.prisma.event.findUnique({
                 where: { id: created.id }
             })
             expect(dbRecord).not.toBeNull()
+            expect(body.links).toHaveProperty('self')
 
             await app.prisma.event.delete({
                 where: { id: created.id }
@@ -129,8 +134,10 @@ describe('Events Routes', () => {
                 })
 
                 expect(response.statusCode).toBe(200)
-                const updated = JSON.parse(response.payload)
+                const body = JSON.parse(response.payload)
+                const updated = body.data
                 expect(updated.info.nl).toBe(updatePayload.info.nl)
+                expect(updated.links).toHaveProperty('self')
             } finally {
                 await app.prisma.event.delete({
                     where: { id: initialEvent.id }
@@ -214,6 +221,7 @@ describe('Events Routes', () => {
             expect(response.statusCode).toBe(200)
             expect(body).toHaveProperty('data')
             expect(body).toHaveProperty('meta')
+            expect(body).toHaveProperty('links')
             expect(Array.isArray(body.data)).toBe(true)
         })
     })
@@ -235,7 +243,9 @@ describe('Events Routes', () => {
 
                 expect(response.statusCode).toBe(200)
                 const body = JSON.parse(response.payload)
-                expect(body.id).toBe(price.id)
+                expect(body.data.id).toBe(price.id)
+                expect(body.data).toHaveProperty('links')
+                expect(body.data.links).toHaveProperty('self')
             } finally {
                 await app.prisma.event_price.delete({ where: { id: price.id } })
             }
