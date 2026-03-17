@@ -13,12 +13,12 @@ describe('Halls Routes', () => {
         await app.close()
     })
 
-    it('GET /api/archive/halls should return 200', async () => {
-        const response = await app.inject({ method: 'GET', url: '/api/archive/halls' })
+    it('GET /api/v1/archive/halls should return 200', async () => {
+        const response = await app.inject({ method: 'GET', url: '/api/v1/archive/halls' })
         expect(response.statusCode).toBe(200)
     })
 
-    describe('GET /api/archive/halls/:id', () => {
+    describe('GET /api/v1/archive/halls/:id', () => {
         it('should return a hall by ID with 200 OK', async () => {
             const hall = await app.prisma.hall.create({
                 data: {
@@ -29,7 +29,7 @@ describe('Halls Routes', () => {
             try {
                 const response = await app.inject({
                     method: 'GET',
-                    url: `/api/archive/halls/${hall.id}`
+                    url: `/api/v1/archive/halls/${hall.id}`
                 })
 
                 expect(response.statusCode).toBe(200)
@@ -43,18 +43,18 @@ describe('Halls Routes', () => {
         it('should return 404 for non-existent hall', async () => {
             const response = await app.inject({
                 method: 'GET',
-                url: '/api/archive/halls/00000000-0000-0000-0000-000000000000'
+                url: '/api/v1/archive/halls/00000000-0000-0000-0000-000000000000'
             })
             expect(response.statusCode).toBe(404)
         })
     })
 
-    describe('POST /api/archive/halls', () => {
+    describe('POST /api/v1/archive/halls', () => {
         it('should create a hall and clean up', async () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const response = await app.inject({
                 method: 'POST',
-                url: '/api/archive/halls',
+                url: '/api/v1/archive/halls',
                 headers: { authorization: `Bearer ${token}` },
                 payload: { name: { nl: 'New Hall POST' } }
             })
@@ -67,7 +67,7 @@ describe('Halls Routes', () => {
         })
     })
 
-    describe('PUT /api/archive/halls/:id', () => {
+    describe('PUT /api/v1/archive/halls/:id', () => {
         it('should update a hall and clean up', async () => {
             const hall = await app.prisma.hall.create({
                 data: { name: { nl: 'Original Hall' } }
@@ -77,7 +77,7 @@ describe('Halls Routes', () => {
                 const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
                 const response = await app.inject({
                     method: 'PATCH',
-                    url: `/api/archive/halls/${hall.id}`,
+                    url: `/api/v1/archive/halls/${hall.id}`,
                     headers: { authorization: `Bearer ${token}` },
                     payload: { name: { nl: 'Updated Hall' } }
                 })
@@ -94,7 +94,7 @@ describe('Halls Routes', () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const response = await app.inject({
                 method: 'PATCH',
-                url: '/api/archive/halls/00000000-0000-0000-0000-000000000000',
+                url: '/api/v1/archive/halls/00000000-0000-0000-0000-000000000000',
                 headers: { authorization: `Bearer ${token}` },
                 payload: { name: { nl: 'Non-existent' } }
             })
@@ -102,7 +102,7 @@ describe('Halls Routes', () => {
         })
     })
 
-    describe('DELETE /api/archive/halls/:id', () => {
+    describe('DELETE /api/v1/archive/halls/:id', () => {
         it('should delete a hall', async () => {
             const hall = await app.prisma.hall.create({
                 data: { name: { nl: 'To Delete' } }
@@ -111,7 +111,7 @@ describe('Halls Routes', () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const response = await app.inject({
                 method: 'DELETE',
-                url: `/api/archive/halls/${hall.id}`,
+                url: `/api/v1/archive/halls/${hall.id}`,
                 headers: { authorization: `Bearer ${token}` }
             })
 
@@ -124,7 +124,7 @@ describe('Halls Routes', () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const response = await app.inject({
                 method: 'DELETE',
-                url: '/api/archive/halls/00000000-0000-0000-0000-000000000000',
+                url: '/api/v1/archive/halls/00000000-0000-0000-0000-000000000000',
                 headers: { authorization: `Bearer ${token}` }
             })
             expect(response.statusCode).toBe(404)

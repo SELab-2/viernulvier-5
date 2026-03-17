@@ -41,7 +41,7 @@ describe('editors routes', () => {
                 delete: remove,
             },
         })
-        await app.register(editorsRoutes, { prefix: '/api/editors' })
+        await app.register(editorsRoutes, { prefix: '/api/v1/editors' })
     })
 
     afterEach(async () => {
@@ -51,7 +51,7 @@ describe('editors routes', () => {
     it('rejects editor tokens for editor management routes', async () => {
         const response = await app.inject({
             method: 'GET',
-            url: '/api/editors',
+            url: '/api/v1/editors',
             cookies: {
                 token: app.jwt.sign({ sub: 'editor-id', username: 'editor', role: 'EDITOR' }),
             },
@@ -74,7 +74,7 @@ describe('editors routes', () => {
 
         const response = await app.inject({
             method: 'GET',
-            url: '/api/editors',
+            url: '/api/v1/editors',
             cookies: {
                 token: app.jwt.sign({ sub: 'admin-id', username: 'admin', role: 'ADMIN' }),
             },
@@ -117,7 +117,7 @@ describe('editors routes', () => {
 
         const response = await app.inject({
             method: 'POST',
-            url: '/api/editors',
+            url: '/api/v1/editors',
             cookies: {
                 token: app.jwt.sign({ sub: 'admin-id', username: 'admin', role: 'ADMIN' }),
             },
@@ -163,7 +163,7 @@ describe('editors routes', () => {
 
         const response = await app.inject({
             method: 'PATCH',
-            url: `/api/editors/${editorId}`,
+            url: `/api/v1/editors/${editorId}`,
             cookies: {
                 token: app.jwt.sign({ sub: 'admin-id', username: 'admin', role: 'ADMIN' }),
             },
@@ -208,7 +208,7 @@ describe('editors routes', () => {
 
         const response = await app.inject({
             method: 'DELETE',
-            url: `/api/editors/${editorId}`,
+            url: `/api/v1/editors/${editorId}`,
             cookies: {
                 token: app.jwt.sign({ sub: 'admin-id', username: 'admin', role: 'ADMIN' }),
             },

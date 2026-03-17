@@ -13,11 +13,11 @@ describe('UIT Databank Routes', () => {
         await app.close()
     })
 
-    describe('GET /api/archive/uitdatabank/keywords', () => {
+    describe('GET /api/v1/archive/uitdatabank/keywords', () => {
         it('should return a paginated list of keywords with 200 OK', async () => {
             const response = await app.inject({
                 method: 'GET',
-                url: '/api/archive/uitdatabank/keywords',
+                url: '/api/v1/archive/uitdatabank/keywords',
                 query: { page: '1', limit: '10' }
             })
 
@@ -39,7 +39,7 @@ describe('UIT Databank Routes', () => {
             try {
                 const response = await app.inject({
                     method: 'GET',
-                    url: '/api/archive/uitdatabank/keywords',
+                    url: '/api/v1/archive/uitdatabank/keywords',
                     query: { search: 'TestKeywordUnique' }
                 })
 
@@ -55,13 +55,13 @@ describe('UIT Databank Routes', () => {
         })
     })
 
-    describe('GET /api/archive/uitdatabank/keywords/:id', () => {
+    describe('GET /api/v1/archive/uitdatabank/keywords/:id', () => {
         it('should return a keyword by ID with 200 OK', async () => {
             const keyword = await app.prisma.uitdatabank_keyword.create({
                 data: { name: 'Test Keyword' }
             })
             try {
-                const response = await app.inject({ method: 'GET', url: `/api/archive/uitdatabank/keywords/${keyword.id}` })
+                const response = await app.inject({ method: 'GET', url: `/api/v1/archive/uitdatabank/keywords/${keyword.id}` })
                 expect(response.statusCode).toBe(200)
                 const body = JSON.parse(response.payload)
                 expect(body.id).toBe(keyword.id)
@@ -71,16 +71,16 @@ describe('UIT Databank Routes', () => {
         })
 
         it('should return 404 for non-existent keyword', async () => {
-            const response = await app.inject({ method: 'GET', url: '/api/archive/uitdatabank/keywords/00000000-0000-0000-0000-000000000000' })
+            const response = await app.inject({ method: 'GET', url: '/api/v1/archive/uitdatabank/keywords/00000000-0000-0000-0000-000000000000' })
             expect(response.statusCode).toBe(404)
         })
     })
 
-    describe('GET /api/archive/uitdatabank/themes', () => {
+    describe('GET /api/v1/archive/uitdatabank/themes', () => {
         it('should return a paginated list of themes with 200 OK', async () => {
             const response = await app.inject({
                 method: 'GET',
-                url: '/api/archive/uitdatabank/themes',
+                url: '/api/v1/archive/uitdatabank/themes',
                 query: { page: '1', limit: '10' }
             })
 
@@ -93,13 +93,13 @@ describe('UIT Databank Routes', () => {
         })
     })
 
-    describe('GET /api/archive/uitdatabank/themes/:id', () => {
+    describe('GET /api/v1/archive/uitdatabank/themes/:id', () => {
         it('should return a theme by ID with 200 OK', async () => {
             const theme = await app.prisma.uitdatabank_theme.create({
                 data: { name: 'Test Theme' }
             })
             try {
-                const response = await app.inject({ method: 'GET', url: `/api/archive/uitdatabank/themes/${theme.id}` })
+                const response = await app.inject({ method: 'GET', url: `/api/v1/archive/uitdatabank/themes/${theme.id}` })
                 expect(response.statusCode).toBe(200)
                 const body = JSON.parse(response.payload)
                 expect(body.id).toBe(theme.id)
@@ -109,16 +109,16 @@ describe('UIT Databank Routes', () => {
         })
 
         it('should return 404 for non-existent theme', async () => {
-            const response = await app.inject({ method: 'GET', url: '/api/archive/uitdatabank/themes/00000000-0000-0000-0000-000000000000' })
+            const response = await app.inject({ method: 'GET', url: '/api/v1/archive/uitdatabank/themes/00000000-0000-0000-0000-000000000000' })
             expect(response.statusCode).toBe(404)
         })
     })
 
-    describe('GET /api/archive/uitdatabank/types', () => {
+    describe('GET /api/v1/archive/uitdatabank/types', () => {
         it('should return a paginated list of types with 200 OK', async () => {
             const response = await app.inject({
                 method: 'GET',
-                url: '/api/archive/uitdatabank/types',
+                url: '/api/v1/archive/uitdatabank/types',
                 query: { page: '1', limit: '10' }
             })
 
@@ -131,13 +131,13 @@ describe('UIT Databank Routes', () => {
         })
     })
 
-    describe('GET /api/archive/uitdatabank/types/:id', () => {
+    describe('GET /api/v1/archive/uitdatabank/types/:id', () => {
         it('should return a type by ID with 200 OK', async () => {
             const type = await app.prisma.uitdatabank_type.create({
                 data: { name: 'Test Type' }
             })
             try {
-                const response = await app.inject({ method: 'GET', url: `/api/archive/uitdatabank/types/${type.id}` })
+                const response = await app.inject({ method: 'GET', url: `/api/v1/archive/uitdatabank/types/${type.id}` })
                 expect(response.statusCode).toBe(200)
                 const body = JSON.parse(response.payload)
                 expect(body.id).toBe(type.id)
@@ -147,7 +147,7 @@ describe('UIT Databank Routes', () => {
         })
 
         it('should return 404 for non-existent type', async () => {
-            const response = await app.inject({ method: 'GET', url: '/api/archive/uitdatabank/types/00000000-0000-0000-0000-000000000000' })
+            const response = await app.inject({ method: 'GET', url: '/api/v1/archive/uitdatabank/types/00000000-0000-0000-0000-000000000000' })
             expect(response.statusCode).toBe(404)
         })
     })
