@@ -25,6 +25,9 @@ describe('Taxonomies Routes', () => {
 
             expect(response.statusCode).toBe(200)
             expect(body).toHaveProperty('data')
+            expect(body).toHaveProperty('meta')
+            expect(body).toHaveProperty('links')
+            expect(body.meta.page).toBe(1)
         })
     })
 
@@ -45,7 +48,9 @@ describe('Taxonomies Routes', () => {
 
                 expect(response.statusCode).toBe(200)
                 const body = JSON.parse(response.payload)
-                expect(body.id).toBe(genre.id)
+                expect(body.data.id).toBe(genre.id)
+                expect(body.data).toHaveProperty('links')
+                expect(body.data.links).toHaveProperty('self')
             } finally {
                 await app.prisma.genre.delete({ where: { id: genre.id } })
             }
@@ -72,13 +77,14 @@ describe('Taxonomies Routes', () => {
 
             expect(response.statusCode).toBe(201)
             const body = JSON.parse(response.payload)
-            expect(body.name.nl).toBe('New Genre')
+            expect(body.data.name.nl).toBe('New Genre')
+            expect(body.links).toHaveProperty('self')
 
-            await app.prisma.genre.delete({ where: { id: body.id } })
+            await app.prisma.genre.delete({ where: { id: body.data.id } })
         })
     })
 
-    describe('PUT /api/v1/archive/genres/:id', () => {
+    describe('PATCH /api/v1/archive/genres/:id', () => {
         it('should update a genre and clean up', async () => {
             const genre = await app.prisma.genre.create({
                 data: { name: { nl: 'Original Name' } }
@@ -95,7 +101,7 @@ describe('Taxonomies Routes', () => {
 
                 expect(response.statusCode).toBe(200)
                 const body = JSON.parse(response.payload)
-                expect(body.name.nl).toBe('Updated Name')
+                expect(body.data.name.nl).toBe('Updated Name')
             } finally {
                 await app.prisma.genre.delete({ where: { id: genre.id } })
             }
@@ -153,6 +159,8 @@ describe('Taxonomies Routes', () => {
 
             expect(response.statusCode).toBe(200)
             expect(body).toHaveProperty('data')
+            expect(body).toHaveProperty('meta')
+            expect(body).toHaveProperty('links')
         })
     })
 
@@ -173,7 +181,9 @@ describe('Taxonomies Routes', () => {
 
                 expect(response.statusCode).toBe(200)
                 const body = JSON.parse(response.payload)
-                expect(body.id).toBe(tag.id)
+                expect(body.data.id).toBe(tag.id)
+                expect(body.data).toHaveProperty('links')
+                expect(body.data.links).toHaveProperty('self')
             } finally {
                 await app.prisma.tag.delete({ where: { id: tag.id } })
             }
@@ -200,13 +210,14 @@ describe('Taxonomies Routes', () => {
 
             expect(response.statusCode).toBe(201)
             const body = JSON.parse(response.payload)
-            expect(body.name.nl).toBe('New Tag')
+            expect(body.data.name.nl).toBe('New Tag')
+            expect(body.links).toHaveProperty('self')
 
-            await app.prisma.tag.delete({ where: { id: body.id } })
+            await app.prisma.tag.delete({ where: { id: body.data.id } })
         })
     })
 
-    describe('PUT /api/v1/archive/tags/:id', () => {
+    describe('PATCH /api/v1/archive/tags/:id', () => {
         it('should update a tag and clean up', async () => {
             const tag = await app.prisma.tag.create({
                 data: { name: { nl: 'Original Tag' } }
@@ -223,7 +234,8 @@ describe('Taxonomies Routes', () => {
 
                 expect(response.statusCode).toBe(200)
                 const body = JSON.parse(response.payload)
-                expect(body.name.nl).toBe('Updated Tag')
+                expect(body.data.name.nl).toBe('Updated Tag')
+                expect(body.data).toHaveProperty('links')
             } finally {
                 await app.prisma.tag.delete({ where: { id: tag.id } })
             }
