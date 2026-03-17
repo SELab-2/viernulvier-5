@@ -1,12 +1,12 @@
 /**
  * User roles in the system.
  *
- * Currently only ADMIN is used for the simple login system.
- * This enum is designed to be extended when more roles are needed.
+ * ADMIN can manage editor accounts.
+ * EDITOR can manage archive content.
  */
 export enum Role {
     ADMIN = 'ADMIN',
+    EDITOR = 'EDITOR',
     // Future roles can be added here:
-    // EDITOR = 'EDITOR',
     // VIEWER = 'VIEWER',
 }
