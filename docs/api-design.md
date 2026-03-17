@@ -1,6 +1,6 @@
 # API Design Principles
 
-This document outlines the architectural decisions and design patterns applied to the RESTful API of the Archive project. The goal is to provide a consistent, predictable, and scalable interface for clients.
+This document outlines the architectural decisions and design patterns applied to the RESTful API of the Viernulvier Archive project. The goal is to provide a consistent, predictable, and scalable interface for clients.
 
 ## 1. Resource-Oriented Architecture
 
@@ -29,6 +29,10 @@ A single resource is returned within a `data` object, accompanied by relevant me
     "id": "uuid",
     "title": "Example Production",
     ...
+    "links": {
+      "self": "/api/v1/archive/productions/uuid",
+      "events": "/api/v1/archive/events?productionId=uuid"
+    }
   },
   "links": {
     "self": "/api/v1/archive/productions/uuid"
@@ -42,7 +46,10 @@ Collections use a consistent structure for data, pagination metadata, and naviga
 ```json
 {
   "data": [
-    { ... },
+    { 
+      "id": "...", 
+      "links": { "self": "..." } 
+    },
     { ... }
   ],
   "meta": {
@@ -63,43 +70,64 @@ Collections use a consistent structure for data, pagination metadata, and naviga
 
 ## 3. Hypermedia (HATEOAS)
 
-The API implements HATEOAS (Hypermedia as the Engine of Application State) by providing links within the response. This allows clients to discover related actions and resources dynamically without hardcoding URL patterns.
+The API implements HATEOAS (Hypermedia as the Engine of Application State). Links are provided in two places:
+1.  **Top-level `links`**: Metadata about the request itself (e.g., pagination).
+2.  **Resource-level `data.links`**: Links directly related to the resource (e.g., related entities).
 
-- Every resource contains a `self` link.
+- Every resource contains a `self` link in its `links` property.
 - Collections contain navigation links (`next`, `prev`, `first`, `last`).
-- Related resources are linked where appropriate.
+- Related resources are linked where appropriate (e.g., a `space` links to its `halls`).
 
-## 4. HTTP Methods and Status Codes
+## 4. Authentication & Security
+
+The API uses JWT (JSON Web Tokens) for authentication, but with a focus on security for web clients.
+
+- **Storage:** Tokens are stored in **HttpOnly, Secure, SameSite=Strict cookies**.
+- **Access:** JavaScript cannot access the token, preventing XSS-based token theft.
+- **Response:** Upon successful login, the API returns the user object in the JSON body, but **never the token itself**. The token is strictly transmitted via the `Set-Cookie` header.
+- **Logout:** The `/logout` endpoint clears the auth cookie and returns a `200 OK`.
+
+## 5. HTTP Methods and Status Codes
 
 We strictly adhere to the intended usage of HTTP methods:
 
 - **GET:** Retrieve resources. Should be idempotent and have no side effects.
 - **POST:** Create a new resource. Returns `201 Created` with a `Location` header.
 - **PATCH:** Partial update of an existing resource.
-- **PUT:** Replace an entire resource.
 - **DELETE:** Remove a resource. Returns `204 No Content`.
 
 ### Standard Status Codes
-- `200 OK`: Success for GET, PATCH, PUT.
+- `200 OK`: Success for GET, PATCH.
 - `201 Created`: Success for POST.
 - `204 No Content`: Success for DELETE.
 - `400 Bad Request`: Validation errors or malformed syntax.
-- `401 Unauthorized`: Authentication required.
+- `401 Unauthorized`: Authentication required or invalid credentials.
 - `403 Forbidden`: Authenticated but lacks required permissions.
 - `404 Not Found`: Resource does not exist.
-- `429 Too Many Requests`: Rate limit exceeded.
+- `429 Too Many Requests`: Rate limit exceeded (e.g., too many failed login attempts).
 - `500 Internal Server Error`: Unhandled server-side exceptions.
 
-## 5. Error Handling
+## 6. Error Handling
 
-Error responses follow the RFC 7807 (Problem Details for HTTP APIs) standard to provide machine-readable error information.
+Error responses follow a standard structure to provide clear feedback to developers.
 
 ```json
 {
-  "type": "https://api.archive.be/errors/not-found",
-  "title": "Resource Not Found",
-  "status": 404,
-  "detail": "Production with ID {id} could not be found.",
-  "instance": "/api/v1/archive/productions/{id}"
+  "statusCode": 404,
+  "error": "Not Found",
+  "message": "The requested resource was not found."
+}
+```
+
+For validation errors, a `details` field is provided:
+
+```json
+{
+  "statusCode": 400,
+  "error": "Bad Request",
+  "message": "Validation failed",
+  "details": [
+    { "path": ["email"], "message": "Invalid email format" }
+  ]
 }
 ```
