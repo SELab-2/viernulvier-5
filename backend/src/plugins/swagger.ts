@@ -10,7 +10,6 @@ import { jsonSchemaTransform } from 'fastify-type-provider-zod'
 export default fp(async (fastify) => {
     await fastify.register(swagger, {
         openapi: {
-            openapi: '3.0.0',
             info: {
                 title: 'VIERNULVIER Archief API',
                 description: 'REST API voor het VIERNULVIER archiefwebsite',
