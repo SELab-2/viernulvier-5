@@ -146,6 +146,13 @@ const nl: Messages = {
     archiveLabel: 'Archief',
     logoutLabel: 'Uitloggen',
   },
+  production: {
+      editTitle: 'Productie bewerken',
+      editSubTitle: 'Beheer archiefdetails en vertalingen voor deze voorstelling',
+      title: 'Titel',
+      slug: 'Slug',
+      content: 'Inhoud'
+  },
   footer: {
     brandLogoAlt: 'VIERNULVIER logo',
     organizationName: 'Kunstencentrum VIERNULVIER vzw.',

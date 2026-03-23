@@ -146,6 +146,13 @@ const en: Messages = {
     archiveLabel: 'Archive',
     logoutLabel: 'Log out',
   },
+  production: {
+      editTitle: 'Edit production',
+      editSubTitle: 'Manage archive details and translation for this event',
+      title: 'Title',
+      slug: 'Slug',
+      content: 'Content'
+  },
   footer: {
     brandLogoAlt: 'VIERNULVIER logo',
     organizationName: 'VIERNULVIER Arts Centre vzw.',

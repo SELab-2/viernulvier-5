@@ -120,6 +120,13 @@ export type Messages = {
     archiveLabel: string
     logoutLabel: string
   }
+  production: {
+      editTitle: string,
+      editSubTitle: string,
+      title: string,
+      slug: string,
+      content: string
+  }
   footer: {
     brandLogoAlt: string
     organizationName: string
