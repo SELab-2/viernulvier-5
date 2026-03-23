@@ -71,6 +71,13 @@ const nl: Messages = {
     submit: 'Inloggen',
     loginFailed: 'Login mislukt',
   },
+  production: {
+      editTitle: 'Productie bewerken',
+      editSubTitle: 'Beheer archiefdetails en vertalingen voor deze voorstelling',
+      title: 'Titel',
+      slug: 'Slug',
+      content: 'Inhoud'
+  },
   footer: {
     about: 'De Kunstencentrum VIERNULVIER archiefcollectie bewaart en ontsluit meer dan 40 jaar podiumkunsten geschiedenis in De Vooruit.',
     navigationTitle: 'Navigatie',
