@@ -49,6 +49,13 @@ export type Messages = {
     submit: string
     loginFailed: string
   }
+  production: {
+      editTitle: string,
+      editSubTitle: string,
+      title: string,
+      slug: string,
+      content: string
+  }
   footer: {
     about: string
     navigationTitle: string
