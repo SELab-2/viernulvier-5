@@ -408,10 +408,6 @@ function MobileSearchForm() {
     const { search: s } = getMessages(locale)
     const [searchInput, setSearchInput] = useState((searchParams.get('q') ?? '').trim())
 
-    useEffect(() => {
-        setSearchInput((searchParams.get('q') ?? '').trim())
-    }, [searchParams])
-
     const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault()
 
@@ -680,7 +676,7 @@ function SearchPage() {
                                 </>
                             ) : null}
 
-                            <MobileSearchForm />
+                            <MobileSearchForm key={searchParams.toString()} />
 
                             <div className="flex flex-wrap items-center justify-between gap-4">
                                 <div>
