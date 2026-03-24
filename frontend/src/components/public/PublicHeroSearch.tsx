@@ -1,4 +1,5 @@
 import { useMemo, useState, type FormEvent } from 'react'
+import { getMessages } from '../../i18n'
 
 export type HeroSearchFilters = {
     query: string
@@ -13,18 +14,7 @@ type FilterOption = {
 }
 
 type PublicHeroSearchProps = {
-    heroTagline: string
-    titleTop: string
-    titleAccent: string
-    titleBottom: string
-    intro: string
-    searchPlaceholder: string
-    searchYearLabel: string
-    searchGenreLabel: string
-    searchLocationLabel: string
-    searchButtonLabel: string
     yearOptions?: FilterOption[]
-    genreOptions?: FilterOption[]
     locationOptions?: FilterOption[]
     initialFilters?: HeroSearchFilters
     onSearch?: (filters: HeroSearchFilters) => void
@@ -83,22 +73,17 @@ function SelectPill({
 }
 
 function PublicHeroSearch({
-    heroTagline,
-    titleTop,
-    titleAccent,
-    titleBottom,
-    intro,
-    searchPlaceholder,
-    searchYearLabel,
-    searchGenreLabel,
-    searchLocationLabel,
-    searchButtonLabel,
     yearOptions,
-    genreOptions = [],
     locationOptions = [],
     initialFilters,
     onSearch,
 }: PublicHeroSearchProps) {
+    const messages = getMessages()
+    const genreOptions = useMemo(
+        () => messages.home.popularTags.map((tag) => ({ value: tag, label: tag })),
+        [messages.home.popularTags]
+    )
+
     const [query, setQuery] = useState(initialFilters?.query ?? '')
     const [year, setYear] = useState(initialFilters?.year ?? '')
     const [genre, setGenre] = useState(initialFilters?.genre ?? '')
@@ -132,14 +117,14 @@ function PublicHeroSearch({
 
             <div className="site-container relative flex max-w-3xl flex-col items-center text-center">
                 <p className="mb-8 text-sm font-regular tracking-wide text-accent bg-accent/10 py-2 px-4 rounded-full">
-                    {heroTagline}
+                    {messages.home.heroTagline}
                 </p>
 
                 <h1 className="text-5xl font-regular leading-tight text-text md:text-6xl">
-                    <span>{titleTop}</span>
+                    <span>{messages.home.heroTitleTop}</span>
                     <br />
-                    <span className="text-accent">{titleAccent}</span>
-                    <span className="text-text"> {titleBottom}</span>
+                    <span className="text-accent">{messages.home.heroTitleAccent}</span>
+                    <span className="text-text"> {messages.home.heroTitleBottom}</span>
                 </h1>
 
                 <form
@@ -153,21 +138,21 @@ function PublicHeroSearch({
                                 type="text"
                                 value={query}
                                 onChange={(event) => setQuery(event.target.value)}
-                                placeholder={searchPlaceholder}
+                                placeholder={messages.nav.searchPlaceholder}
                                 className="w-full bg-transparent text-sm text-foreground placeholder:text-muted outline-none"
                             />
                         </div>
                         <div className="col-span-full flex gap-2 pb-1 md:col-span-4 md:contents md:pb-0">
                             <SelectPill
                                 className="min-w-0 flex-1 md:min-w-24 md:flex-none"
-                                label={searchYearLabel}
+                                label={messages.home.searchYear}
                                 value={year}
                                 options={effectiveYearOptions}
                                 onChange={setYear}
                             />
                             <SelectPill
                                 className="min-w-0 flex-1 md:min-w-24 md:flex-none"
-                                label={searchGenreLabel}
+                                label={messages.home.searchGenre}
                                 value={genre}
                                 options={genreOptions}
                                 onChange={setGenre}
@@ -175,7 +160,7 @@ function PublicHeroSearch({
                             />
                             <SelectPill
                                 className="min-w-0 flex-1 md:min-w-24 md:flex-none"
-                                label={searchLocationLabel}
+                                label={messages.home.searchLocation}
                                 value={location}
                                 options={locationOptions}
                                 onChange={setLocation}
@@ -185,13 +170,13 @@ function PublicHeroSearch({
                                 type="submit"
                                 className="h-12 shrink-0 rounded-md bg-accent px-6 text-sm font-semibold text-white"
                             >
-                                {searchButtonLabel}
+                                {messages.home.searchButton}
                             </button>
                         </div>
                     </div>
                 </form>
 
-                <p className="mt-8 max-w-2xl text-sm leading-6 text-muted">{intro}</p>
+                <p className="mt-8 max-w-2xl text-sm leading-6 text-muted">{messages.home.intro}</p>
             </div>
         </section>
     )
