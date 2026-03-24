@@ -14,7 +14,7 @@ export const editorPaginationQuerySchema = z.object({
  * Explicit links for the Editor resource.
  */
 export const editorLinksSchema = z.object({
-    self: z.string().url(),
+    self: z.string().url().default('https://example.com/'),
 })
 
 export const editorSchema = z.object({

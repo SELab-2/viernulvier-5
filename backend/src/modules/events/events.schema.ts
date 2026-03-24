@@ -29,10 +29,10 @@ export const eventPricePaginationQuerySchema = z.object({
  * Explicit links for the Event resource.
  */
 export const eventLinksSchema = z.object({
-    self: z.string().url(),
-    production: z.string().url().optional(),
-    hall: z.string().url().optional(),
-    prices: z.string().url().optional(),
+    self: z.string().url().default('https://example.com/'),
+    production: z.string().url().optional().default('https://example.com/'),
+    hall: z.string().url().optional().default('https://example.com/'),
+    prices: z.string().url().optional().default('https://example.com/'),
 })
 
 export const eventSchema = z.object({
@@ -67,8 +67,8 @@ export const singleEventSchema = createSingleResponseSchema(eventSchema)
  * Explicit links for the EventPrice resource.
  */
 export const eventPriceLinksSchema = z.object({
-    self: z.string().url(),
-    event: z.string().url().optional(),
+    self: z.string().url().default('https://example.com/'),
+    event: z.string().url().optional().default('https://example.com/'),
 })
 
 export const eventPriceSchema = z.object({

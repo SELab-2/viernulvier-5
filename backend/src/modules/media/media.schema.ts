@@ -29,8 +29,8 @@ export const cropPaginationQuerySchema = galleryPaginationQuerySchema.extend({
  * Explicit links for the Gallery resource.
  */
 export const galleryLinksSchema = z.object({
-    self: z.string().url(),
-    items: z.string().url().optional(),
+    self: z.string().url().default('https://example.com/'),
+    items: z.string().url().optional().default('https://example.com/'),
 })
 
 export const gallerySchema = z.object({
@@ -46,9 +46,9 @@ export const gallerySchema = z.object({
  * Explicit links for the Item resource.
  */
 export const itemLinksSchema = z.object({
-    self: z.string().url(),
-    gallery: z.string().url().optional(),
-    crops: z.string().url().optional(),
+    self: z.string().url().default('https://example.com/'),
+    gallery: z.string().url().optional().default('https://example.com/'),
+    crops: z.string().url().optional().default('https://example.com/'),
 })
 
 export const itemSchema = z.object({
@@ -74,8 +74,8 @@ export const itemSchema = z.object({
  * Explicit links for the Crop resource.
  */
 export const cropLinksSchema = z.object({
-    self: z.string().url(),
-    item: z.string().url().optional(),
+    self: z.string().url().default('https://example.com/'),
+    item: z.string().url().optional().default('https://example.com/'),
 })
 
 export const cropSchema = z.object({
