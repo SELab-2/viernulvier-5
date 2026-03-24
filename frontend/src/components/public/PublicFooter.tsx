@@ -44,13 +44,13 @@ function PublicFooter() {
                         <p className="mb-5 max-w-xs text-base leading-7 text-grey">
                             {messages.footer.newsletterText}
                         </p>
-                        <form className="flex max-w-sm gap-2">
+                        <form className="grid max-w-sm grid-cols-1 gap-2 min-[1400px]:grid-cols-[1fr_auto]">
                             <input
                                 type="email"
                                 placeholder={messages.footer.newsletterPlaceholder}
-                                className="h-10 flex-1 rounded-md bg-zinc-900 px-4 text-sm text-white placeholder:text-zinc-400"
+                                className="h-10 min-w-0 rounded-md bg-zinc-900 px-4 text-sm text-white placeholder:text-zinc-400"
                             />
-                            <button type="submit" className="h-10 rounded-md bg-white px-5 text-sm font-semibold text-zinc-900">
+                            <button type="submit" className="h-10 w-full rounded-md bg-white px-5 text-sm font-semibold text-zinc-900 min-[1400px]:w-auto">
                                 {messages.footer.newsletterSubmit}
                             </button>
                         </form>

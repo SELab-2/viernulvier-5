@@ -1,13 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { getActiveLocale, setActiveLocale, withLocalePath } from '../../i18n'
-
-type PublicNavbarProps = {
-    title: string
-    archiveLabel: string
-    searchAriaLabel: string
-    searchPlaceholder: string
-}
+import { getActiveLocale, getMessages, setActiveLocale, withLocalePath } from '../../i18n'
 
 type Theme = 'light' | 'dark'
 
@@ -62,15 +55,81 @@ function CloseIcon({ className }: { className: string }) {
     )
 }
 
-function PublicNavbar({
-    title,
-    archiveLabel,
-    searchAriaLabel,
-    searchPlaceholder,
-}: PublicNavbarProps) {
+type ThemeToggleProps = {
+    theme: Theme
+    applyTheme: (nextTheme: Theme) => void
+}
+
+function ThemeToggle({ theme, applyTheme }: ThemeToggleProps) {
+    return (
+        <div className="inline-flex h-8 w-16 items-center border border-border bg-grey">
+            <button
+                type="button"
+                onClick={() => applyTheme('dark')}
+                className={`inline-flex h-8 w-8 items-center justify-center cursor-pointer text-black transition-colors ${theme === 'dark' ? 'bg-white' : 'bg-grey'}`}
+                aria-label="Donkere modus"
+                aria-pressed={theme === 'dark'}
+            >
+                <MoonIcon className="h-4 w-4" />
+            </button>
+            <button
+                type="button"
+                onClick={() => applyTheme('light')}
+                className={`inline-flex h-8 w-8 items-center justify-center cursor-pointer text-black transition-colors ${theme === 'light' ? 'bg-white' : 'bg-grey'}`}
+                aria-label="Lichte modus"
+                aria-pressed={theme === 'light'}
+            >
+                <SunIcon className="h-4 w-4" />
+            </button>
+        </div>
+    )
+}
+
+type LocaleToggleButtonProps = {
+    locale: 'nl' | 'en'
+    onToggle: () => void
+    className: string
+}
+
+function LocaleToggleButton({ locale, onToggle, className }: LocaleToggleButtonProps) {
+    return (
+        <button
+            type="button"
+            onClick={onToggle}
+            className={className}
+            aria-label="Wissel taal"
+        >
+            {locale === 'nl' ? 'EN' : 'NL'}
+        </button>
+    )
+}
+
+type SearchToggleButtonProps = {
+    onToggle: () => void
+    ariaLabel: string
+    isExpanded: boolean
+    className: string
+}
+
+function SearchToggleButton({ onToggle, ariaLabel, isExpanded, className }: SearchToggleButtonProps) {
+    return (
+        <button
+            type="button"
+            onClick={onToggle}
+            className={className}
+            aria-label={ariaLabel}
+            aria-expanded={isExpanded}
+        >
+            <SearchIcon className="h-4 w-4" />
+        </button>
+    )
+}
+
+function PublicNavbar() {
     const location = useLocation()
     const navigate = useNavigate()
     const locale = getActiveLocale(location.pathname)
+    const messages = getMessages(locale)
     const [theme, setTheme] = useState<Theme>(resolveTheme)
     const [isSearchOpen, setIsSearchOpen] = useState(false)
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -118,10 +177,10 @@ function PublicNavbar({
         <header className="border-b border-border bg-black">
             <div className="site-container flex h-16 items-center justify-between max-[480px]:h-14">
                 <div className="flex items-end gap-1">
-                    <Link to={withLocalePath('/', locale)} className="inline-flex items-center" aria-label={title}>
+                    <Link to={withLocalePath('/', locale)} className="inline-flex items-center" aria-label={messages.home.title}>
                         <img src="/logo-white.png" alt="VIERNULVIER Logo" className="h-8 w-auto max-[480px]:h-7" />
                     </Link>
-                    <h3 className="text-lg leading-none font-light text-grey max-[480px]:text-base">| {archiveLabel}</h3>
+                    <h3 className="text-lg leading-none font-light text-grey max-[480px]:text-base">| {messages.nav.archive}</h3>
                 </div>
 
                 <button
@@ -138,52 +197,27 @@ function PublicNavbar({
                     <ul className="flex items-center gap-6 text-sm font-medium text-white">
                         <li>
                             <div className="flex items-center gap-4">
-                                <div className="inline-flex h-8 w-16 items-center border border-border bg-grey">
-                                    <button
-                                        type="button"
-                                        onClick={() => applyTheme('dark')}
-                                        className={`inline-flex h-8 w-8 items-center justify-center cursor-pointer text-black transition-colors ${theme === 'dark' ? 'bg-white' : 'bg-grey'}`}
-                                        aria-label="Donkere modus"
-                                        aria-pressed={theme === 'dark'}
-                                    >
-                                        <MoonIcon className="h-4 w-4" />
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => applyTheme('light')}
-                                        className={`inline-flex h-8 w-8 items-center justify-center cursor-pointer text-black transition-colors ${theme === 'light' ? 'bg-white' : 'bg-grey'}`}
-                                        aria-label="Lichte modus"
-                                        aria-pressed={theme === 'light'}
-                                    >
-                                        <SunIcon className="h-4 w-4" />
-                                    </button>
-                                </div>
+                                <ThemeToggle theme={theme} applyTheme={applyTheme} />
 
-                                <button
-                                    type="button"
-                                    onClick={toggleLocale}
+                                <LocaleToggleButton
+                                    locale={locale}
+                                    onToggle={toggleLocale}
                                     className="inline-flex h-8 items-center justify-center cursor-pointer text-md font-semibold text-white max-[480px]:text-sm"
-                                    aria-label="Wissel taal"
-                                >
-                                    {locale === 'nl' ? 'EN' : 'NL'}
-                                </button>
+                                />
 
-                                <button
-                                    type="button"
-                                    onClick={() => setIsSearchOpen((open) => !open)}
-                                    className=" inline-flex h-8 items-center justify-center text-white"
-                                    aria-label={searchAriaLabel}
-                                    aria-expanded={isSearchOpen}
-                                >
-                                    <SearchIcon className="h-4 w-4" />
-                                </button>
+                                <SearchToggleButton
+                                    onToggle={() => setIsSearchOpen((open) => !open)}
+                                    ariaLabel={messages.nav.searchAriaLabel}
+                                    isExpanded={isSearchOpen}
+                                    className="inline-flex h-8 items-center justify-center text-white"
+                                />
 
                                 <div
                                     className={`overflow-hidden transition-all duration-300 ${isSearchOpen ? 'ml-2 w-72 opacity-100' : 'ml-0 w-0 opacity-0'}`}
                                 >
                                     <input
                                         type="text"
-                                        placeholder={searchPlaceholder}
+                                        placeholder={messages.nav.searchPlaceholder}
                                         className="h-8 w-72 border rounded-sm bg-surface px-3 text-sm text-foreground placeholder:text-muted"
                                     />
                                 </div>
@@ -198,51 +232,26 @@ function PublicNavbar({
             >
                 <div className="site-container space-y-3 text-xs text-white">
                     <div className="flex items-center justify-between">
-                        <div className="inline-flex h-8 w-16 items-center border border-border bg-grey">
-                            <button
-                                type="button"
-                                onClick={() => applyTheme('dark')}
-                                className={`inline-flex h-8 w-8 items-center justify-center cursor-pointer text-black transition-colors ${theme === 'dark' ? 'bg-white' : 'bg-grey'}`}
-                                aria-label="Donkere modus"
-                                aria-pressed={theme === 'dark'}
-                            >
-                                <MoonIcon className="h-4 w-4" />
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => applyTheme('light')}
-                                className={`inline-flex h-8 w-8 items-center justify-center cursor-pointer text-black transition-colors ${theme === 'light' ? 'bg-white' : 'bg-grey'}`}
-                                aria-label="Lichte modus"
-                                aria-pressed={theme === 'light'}
-                            >
-                                <SunIcon className="h-4 w-4" />
-                            </button>
-                        </div>
+                        <ThemeToggle theme={theme} applyTheme={applyTheme} />
 
-                        <button
-                            type="button"
-                            onClick={toggleLocale}
+                        <LocaleToggleButton
+                            locale={locale}
+                            onToggle={toggleLocale}
                             className="inline-flex h-8 items-center justify-center cursor-pointer text-sm font-semibold text-white"
-                            aria-label="Wissel taal"
-                        >
-                            {locale === 'nl' ? 'EN' : 'NL'}
-                        </button>
+                        />
 
-                        <button
-                            type="button"
-                            onClick={() => setIsSearchOpen((open) => !open)}
+                        <SearchToggleButton
+                            onToggle={() => setIsSearchOpen((open) => !open)}
+                            ariaLabel={messages.nav.searchAriaLabel}
+                            isExpanded={isSearchOpen}
                             className="inline-flex h-8 w-8 items-center justify-center text-white"
-                            aria-label={searchAriaLabel}
-                            aria-expanded={isSearchOpen}
-                        >
-                            <SearchIcon className="h-4 w-4" />
-                        </button>
+                        />
                     </div>
 
                     {isSearchOpen ? (
                         <input
                             type="text"
-                            placeholder={searchPlaceholder}
+                            placeholder={messages.nav.searchPlaceholder}
                             className="h-9 w-full rounded-sm border bg-surface px-3 text-xs text-foreground placeholder:text-muted"
                         />
                     ) : null}

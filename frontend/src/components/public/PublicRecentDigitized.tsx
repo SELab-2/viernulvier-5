@@ -1,5 +1,6 @@
 import SectionTitle from './SectionTitle'
 import PublicPillButton from './PublicPillButton'
+import { getMessages } from '../../i18n'
 
 function RightChevronIcon({ className }: { className: string }) {
     return (
@@ -9,36 +10,23 @@ function RightChevronIcon({ className }: { className: string }) {
     )
 }
 
-export type RecentDigitizedItem = {
-    dateLabel: string
-    archiveLabel: string
-    title: string
-    description: string
-}
-
 type PublicRecentDigitizedProps = {
-    heading: string
-    items: RecentDigitizedItem[]
-    viewItemLabel: string
-    viewAllLabel: string
     onViewItem: (index: number) => void
     onViewAll: () => void
 }
 
 function PublicRecentDigitized({
-    heading,
-    items,
-    viewItemLabel,
-    viewAllLabel,
     onViewItem,
     onViewAll,
 }: PublicRecentDigitizedProps) {
+    const messages = getMessages()
+
     return (
         <section className="site-container mt-20 pb-10">
-            <SectionTitle title={heading} />
+            <SectionTitle title={messages.home.recentDigitizedHeading} />
 
             <div className="mt-6">
-                {items.map((item, index) => (
+                {messages.home.recentDigitizedItems.map((item, index) => (
                     <article
                         key={`${item.title}-${index}`}
                         className="grid grid-cols-[1fr_auto] items-center gap-x-4 border-t border-foreground/25 py-7"
@@ -58,14 +46,18 @@ function PublicRecentDigitized({
                         <div className="self-center justify-self-end">
                             <button
                                 type="button"
-                                aria-label={`${viewItemLabel}: ${item.title}`}
+                                aria-label={`${messages.home.recentDigitizedViewItem}: ${item.title}`}
                                 onClick={() => onViewItem(index)}
                                 className="inline-flex h-10 w-10 items-center justify-center text-accent transition hover:text-foreground md:hidden"
                             >
                                 <RightChevronIcon className="h-8 w-8" />
                             </button>
                             <div className="hidden md:block">
-                                <PublicPillButton label={viewItemLabel} onClick={() => onViewItem(index)} className="min-w-28" />
+                                <PublicPillButton
+                                    label={messages.home.recentDigitizedViewItem}
+                                    onClick={() => onViewItem(index)}
+                                    className="min-w-28"
+                                />
                             </div>
                         </div>
                     </article>
@@ -73,7 +65,7 @@ function PublicRecentDigitized({
             </div>
 
             <div className="flex justify-center border-t border-foreground/25 pt-8">
-                <PublicPillButton label={viewAllLabel} onClick={onViewAll} />
+                <PublicPillButton label={messages.home.recentDigitizedViewAll} onClick={onViewAll} />
             </div>
         </section>
     )
