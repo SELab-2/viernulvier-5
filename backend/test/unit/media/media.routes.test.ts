@@ -13,31 +13,37 @@ describe('Media Routes', () => {
         await app.close()
     })
 
-    it('GET /api/v1/archive/media/galleries should return 200 with paginated structure', async () => {
-        const response = await app.inject({ method: 'GET', url: '/api/v1/archive/media/galleries' })
-        expect(response.statusCode).toBe(200)
-        const body = JSON.parse(response.payload)
-        expect(body).toHaveProperty('data')
-        expect(body).toHaveProperty('meta')
-        expect(body).toHaveProperty('links')
+    describe('GET /api/v1/archive/media/galleries', () => {
+        it('should return 200 with paginated structure', async () => {
+            const response = await app.inject({ method: 'GET', url: '/api/v1/archive/media/galleries' })
+            expect(response.statusCode).toBe(200)
+            const body = JSON.parse(response.payload)
+            expect(body).toHaveProperty('data')
+            expect(body).toHaveProperty('meta')
+            expect(body).toHaveProperty('links')
+        })
     })
 
-    it('GET /api/v1/archive/media/items should return 200 with paginated structure', async () => {
-        const response = await app.inject({ method: 'GET', url: '/api/v1/archive/media/items' })
-        expect(response.statusCode).toBe(200)
-        const body = JSON.parse(response.payload)
-        expect(body).toHaveProperty('data')
-        expect(body).toHaveProperty('meta')
-        expect(body).toHaveProperty('links')
+    describe('GET /api/v1/archive/media/items', () => {
+        it('should return 200 with paginated structure', async () => {
+            const response = await app.inject({ method: 'GET', url: '/api/v1/archive/media/items' })
+            expect(response.statusCode).toBe(200)
+            const body = JSON.parse(response.payload)
+            expect(body).toHaveProperty('data')
+            expect(body).toHaveProperty('meta')
+            expect(body).toHaveProperty('links')
+        })
     })
 
-    it('GET /api/v1/archive/media/items/crops should return 200 with paginated structure', async () => {
-        const response = await app.inject({ method: 'GET', url: '/api/v1/archive/media/items/crops' })
-        expect(response.statusCode).toBe(200)
-        const body = JSON.parse(response.payload)
-        expect(body).toHaveProperty('data')
-        expect(body).toHaveProperty('meta')
-        expect(body).toHaveProperty('links')
+    describe('GET /api/v1/archive/media/items/crops', () => {
+        it('should return 200 with paginated structure', async () => {
+            const response = await app.inject({ method: 'GET', url: '/api/v1/archive/media/items/crops' })
+            expect(response.statusCode).toBe(200)
+            const body = JSON.parse(response.payload)
+            expect(body).toHaveProperty('data')
+            expect(body).toHaveProperty('meta')
+            expect(body).toHaveProperty('links')
+        })
     })
 
     describe('GET /api/v1/archive/media/galleries/:id', () => {
