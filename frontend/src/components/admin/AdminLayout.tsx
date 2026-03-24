@@ -1,7 +1,8 @@
-import { createContext, useContext, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { getActiveLocale, getMessages, setActiveLocale } from '../../i18n'
-import type { Locale, Messages } from '../../i18n/types'
+import type { Locale } from '../../i18n/types'
 import AdminFooter from './AdminFooter'
+import { AdminMessagesContext } from './AdminMessagesContext'
 import AdminTopBar from './AdminTopBar'
 
 type Theme = 'light' | 'dark'
@@ -9,18 +10,6 @@ type Theme = 'light' | 'dark'
 type AdminLayoutProps = {
     children: React.ReactNode
     mainClassName?: string
-}
-
-const AdminMessagesContext = createContext<Messages | null>(null)
-
-export function useAdminMessages() {
-    const messages = useContext(AdminMessagesContext)
-
-    if (!messages) {
-        throw new Error('useAdminMessages must be used within AdminLayout')
-    }
-
-    return messages
 }
 
 function resolveTheme(): Theme {
