@@ -22,7 +22,7 @@ const editorsRoutes: FastifyPluginAsync = async (fastify) => {
 
     // GET /api/v1/editors
     fastify.get('/', {
-        preHandler: [requirePermission(Permission.ARCHIVE_UPDATE)], // Adjust permission as needed
+        preHandler: [requirePermission(Permission.EDITORS_MANAGE)], // Adjust permission as needed
         schema: {
             tags: ['editors'],
             summary: 'Get all editors',
@@ -36,7 +36,7 @@ const editorsRoutes: FastifyPluginAsync = async (fastify) => {
 
     // GET /api/v1/editors/:id
     fastify.get('/:id', {
-        preHandler: [requirePermission(Permission.ARCHIVE_UPDATE)],
+        preHandler: [requirePermission(Permission.EDITORS_MANAGE)],
         schema: {
             tags: ['editors'],
             summary: 'Get an editor by ID',
@@ -51,7 +51,7 @@ const editorsRoutes: FastifyPluginAsync = async (fastify) => {
 
     // POST /api/v1/editors
     fastify.post('/', {
-        preHandler: [requirePermission(Permission.ARCHIVE_UPDATE)],
+        preHandler: [requirePermission(Permission.EDITORS_MANAGE)],
         schema: {
             tags: ['editors'],
             summary: 'Create a new editor',
@@ -65,7 +65,7 @@ const editorsRoutes: FastifyPluginAsync = async (fastify) => {
 
     // PATCH /api/v1/editors/:id
     fastify.patch('/:id', {
-        preHandler: [requirePermission(Permission.ARCHIVE_UPDATE)],
+        preHandler: [requirePermission(Permission.EDITORS_MANAGE)],
         schema: {
             tags: ['editors'],
             summary: 'Update an editor',
@@ -81,7 +81,7 @@ const editorsRoutes: FastifyPluginAsync = async (fastify) => {
 
     // DELETE /api/v1/editors/:id
     fastify.delete('/:id', {
-        preHandler: [requirePermission(Permission.ARCHIVE_UPDATE)],
+        preHandler: [requirePermission(Permission.EDITORS_MANAGE)],
         schema: {
             tags: ['editors'],
             summary: 'Delete an editor',
