@@ -1,4 +1,8 @@
 import { z } from 'zod'
+import { 
+    createPaginatedResponseSchema, 
+    createSingleResponseSchema
+} from '../../utils/rest-schemas.js'
 
 const localizedTextSchema = z.object({
     nl: z.string().optional(),
@@ -11,6 +15,19 @@ export const paginationQuerySchema = z.object({
     limit: z.coerce.number().int().positive().max(100).default(20),
     search: z.string().optional(),
     lang: z.string().optional().default('nl'),
+})
+
+/**
+ * Explicit links for the Production resource.
+ */
+export const productionLinksSchema = z.object({
+    self: z.string().url().default('https://example.com/'),
+    events: z.string().url().optional().default('https://example.com/'),
+    media_gallery: z.string().url().optional().default('https://example.com/'),
+    review_gallery: z.string().url().optional().default('https://example.com/'),
+    poster_gallery: z.string().url().optional().default('https://example.com/'),
+    uitdatabank_theme: z.string().url().optional().default('https://example.com/'),
+    uitdatabank_type: z.string().url().optional().default('https://example.com/'),
 })
 
 export const productionSchema = z.object({
@@ -47,17 +64,12 @@ export const productionSchema = z.object({
     uitdatabank_type: z.string().uuid().nullable(),
     created_at: z.coerce.date(),
     updated_at: z.coerce.date(),
+    // RESTful links inside the resource
+    links: productionLinksSchema.optional(),
 })
 
-export const productionListSchema = z.object({
-    data: z.array(productionSchema),
-    meta: z.object({
-        total: z.number(),
-        page: z.number(),
-        limit: z.number(),
-        totalPages: z.number(),
-    }),
-})
+export const productionListSchema = createPaginatedResponseSchema(productionSchema)
+export const singleProductionSchema = createSingleResponseSchema(productionSchema)
 
 export const updateProductionSchema = z.object({
     apiId: z.string().nullable().optional(),
