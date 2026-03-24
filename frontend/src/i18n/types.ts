@@ -42,6 +42,45 @@ export type Messages = {
       description: string
     }>
   }
+  search: {
+    heading: string
+    subtitle: string
+    productionsTab: string
+    blogTab: string
+    resultsCount: string
+    resultsSuffix: string
+    sortLabel: string
+    sortDefault: string
+    shareLabel: string
+    shareCopiedLabel: string
+    filterOpenLabel: string
+    filterCloseLabel: string
+    noResults: string
+    activeFilterTags: string[]
+    searchPlaceholder: string
+    genreLabel: string
+    genres: string[]
+    periodLabel: string
+    periodMin: string
+    periodCurrent: string
+    periodMax: string
+    locationLabel: string
+    locations: string[]
+    resetFiltersLabel: string
+    paginationPrevious: string
+    paginationNext: string
+    paginationPages: string[]
+    paginationCurrent: string
+    items: Array<{
+      id: string
+      tag: string
+      date: string
+      title: string
+      excerpt: string
+      venue: string
+      imageClassName: string
+    }>
+  }
   auth: {
     loginTitle: string
     usernameLabel: string

@@ -5,6 +5,7 @@ import { getMessages } from './i18n'
 // Public pages
 import HomePage from './pages/public/HomePage'
 import ArchiveDetailPage from './pages/public/ArchiveDetailPage'
+import SearchPage from './pages/public/SearchPage'
 
 // Admin pages (lazy loaded — not included in public bundle)
 const LoginPage = lazy(() => import('./pages/admin/LoginPage'))
@@ -32,9 +33,9 @@ function App() {
                 <Route path="/" element={<HomePage />} />
                 <Route path="/nl" element={<HomePage />} />
                 <Route path="/en" element={<HomePage />} />
-                <Route path="/zoeken" element={<HomePage />} />
-                <Route path="/nl/zoeken" element={<HomePage />} />
-                <Route path="/en/zoeken" element={<HomePage />} />
+                <Route path="/zoeken" element={<SearchPage />} />
+                <Route path="/nl/zoeken" element={<SearchPage />} />
+                <Route path="/en/zoeken" element={<SearchPage />} />
                 <Route path="/archive/:id" element={<ArchiveDetailPage />} />
                 <Route path="/nl/archive/:id" element={<ArchiveDetailPage />} />
                 <Route path="/en/archive/:id" element={<ArchiveDetailPage />} />

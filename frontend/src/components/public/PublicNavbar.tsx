@@ -174,7 +174,7 @@ function PublicNavbar() {
     }
 
     return (
-        <header className="border-b border-border bg-black">
+        <header className="sticky top-0 z-50 bg-black">
             <div className="site-container flex h-16 items-center justify-between max-[480px]:h-14">
                 <div className="flex items-end gap-1">
                     <Link to={withLocalePath('/', locale)} className="inline-flex items-center" aria-label={messages.home.title}>
