@@ -30,7 +30,14 @@ function App() {
             <Routes>
                 {/* Public routes — always available */}
                 <Route path="/" element={<HomePage />} />
+                <Route path="/nl" element={<HomePage />} />
+                <Route path="/en" element={<HomePage />} />
+                <Route path="/zoeken" element={<HomePage />} />
+                <Route path="/nl/zoeken" element={<HomePage />} />
+                <Route path="/en/zoeken" element={<HomePage />} />
                 <Route path="/archive/:id" element={<ArchiveDetailPage />} />
+                <Route path="/nl/archive/:id" element={<ArchiveDetailPage />} />
+                <Route path="/en/archive/:id" element={<ArchiveDetailPage />} />
 
                 {/* Admin routes — via subdomain or /admin prefix in development */}
                 {(isAdmin || isLocalDevHost) && (
