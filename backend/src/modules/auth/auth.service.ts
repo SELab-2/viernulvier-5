@@ -52,9 +52,8 @@ export class AuthService {
             role: toDomainRole(user.role),
         })
 
-        // Re-map user to a clean object without passwordHash
-        // Using destructuring to exclude passwordHash
-        const { passwordHash, ...userWithoutPassword } = user
+        const userWithoutPassword: any = { ...user }
+        delete userWithoutPassword.passwordHash
 
         return { 
             token, 
