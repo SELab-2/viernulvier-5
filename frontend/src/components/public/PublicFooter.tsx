@@ -7,7 +7,7 @@ function PublicFooter() {
     const messages = getMessages()
 
     return (
-        <footer className="mt-16 bg-black text-white">
+        <footer className="bg-black text-white z-50">
             <div className="site-container py-14">
                 <div className="grid gap-12 md:grid-cols-2 xl:grid-cols-4">
                     <section>
@@ -22,7 +22,7 @@ function PublicFooter() {
                         <ul className="space-y-2 text-base text-grey">
                             <li><Link to={withLocalePath('/', locale)} className="hover:text-white">{messages.footer.navHome}</Link></li>
                             <li><button type="button" className="text-left text-grey hover:text-white">{messages.footer.navAgenda}</button></li>
-                            <li><button type="button" className="text-left text-grey hover:text-white">{messages.footer.navArchiveSearch}</button></li>
+                            <li><Link to={withLocalePath('/zoeken', locale)} className="text-left text-grey hover:text-white">{messages.footer.navArchiveSearch}</Link></li>
                             <li><button type="button" className="text-left text-grey hover:text-white">{messages.footer.navAbout}</button></li>
                         </ul>
                     </section>
