@@ -1,37 +1,35 @@
 import { TaxonomiesRepository } from './taxonomies.repository.js'
 import type { 
-    PaginationQuery, 
-    GenreListResponse, 
-    TagListResponse,
-    GenreResponse,
+    GenrePaginationQuery,
+    TagPaginationQuery,
+    GenreResponse, 
     TagResponse,
     CreateGenreInput,
     UpdateGenreInput,
     CreateTagInput,
     UpdateTagInput
 } from './taxonomies.schema.js'
+import { PaginatedResult, calculateTotalPages } from '../../utils/pagination.js'
 
 export class TaxonomiesService {
     constructor(private readonly repository: TaxonomiesRepository) { }
 
-    async getGenres(options: PaginationQuery): Promise<GenreListResponse> {
+    async getGenres(options: GenrePaginationQuery): Promise<PaginatedResult<GenreResponse>> {
         const { page, limit, search, lang } = options
 
-        const [data, total] = await Promise.all([
+        const [items, total] = await Promise.all([
             this.repository.findAllGenres({ page, limit, search, lang }),
             this.repository.countGenres({ search, lang }),
         ])
 
-        const totalPages = Math.ceil(total / limit)
+        const totalPages = calculateTotalPages(total, limit)
 
         return {
-            data: data as any,
-            meta: {
-                total,
-                page,
-                limit,
-                totalPages,
-            },
+            items: items as any,
+            total,
+            page,
+            limit,
+            totalPages,
         }
     }
 
@@ -51,24 +49,22 @@ export class TaxonomiesService {
         await this.repository.deleteGenre(id)
     }
 
-    async getTags(options: PaginationQuery): Promise<TagListResponse> {
+    async getTags(options: TagPaginationQuery): Promise<PaginatedResult<TagResponse>> {
         const { page, limit, search, lang } = options
 
-        const [data, total] = await Promise.all([
+        const [items, total] = await Promise.all([
             this.repository.findAllTags({ page, limit, search, lang }),
             this.repository.countTags({ search, lang }),
         ])
 
-        const totalPages = Math.ceil(total / limit)
+        const totalPages = calculateTotalPages(total, limit)
 
         return {
-            data: data as any,
-            meta: {
-                total,
-                page,
-                limit,
-                totalPages,
-            },
+            items: items as any,
+            total,
+            page,
+            limit,
+            totalPages,
         }
     }
 
