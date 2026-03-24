@@ -112,7 +112,7 @@ describe('Events Routes', () => {
         })
     })
 
-    describe('PUT /api/v1/archive/events/:id', () => {
+    describe('PATCH /api/v1/archive/events/:id', () => {
         it('should update an event in the DB and then clean up', async () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             

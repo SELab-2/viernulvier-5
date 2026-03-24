@@ -61,7 +61,7 @@ const productionsRoutes: FastifyPluginAsync = async (fastify) => {
         handler: (request, reply) => controller.createProduction(request as any, reply),
     })
 
-    // PUT /api/archive/productions/:id
+    // PATCH /api/archive/productions/:id
     fastify.patch('/:id', {
         preHandler: [requirePermission(Permission.ARCHIVE_UPDATE)],
         schema: {
