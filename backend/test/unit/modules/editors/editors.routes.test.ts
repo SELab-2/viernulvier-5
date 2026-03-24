@@ -14,7 +14,7 @@ describe('Editors Routes', () => {
     })
 
     describe('GET /api/v1/editors', () => {
-        it('should return a list of editors with 200 OK', async () => {
+        it('should return a list of editors with 200 OK for ADMIN', async () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const response = await app.inject({
                 method: 'GET',
@@ -27,6 +27,17 @@ describe('Editors Routes', () => {
             expect(body).toHaveProperty('data')
             expect(body).toHaveProperty('meta')
             expect(body).toHaveProperty('links')
+        })
+
+        it('should return 403 Forbidden for EDITOR role', async () => {
+            const token = app.jwt.sign({ sub: 'editor', role: 'EDITOR' })
+            const response = await app.inject({
+                method: 'GET',
+                url: '/api/v1/editors',
+                headers: { authorization: `Bearer ${token}` }
+            })
+
+            expect(response.statusCode).toBe(403)
         })
     })
 
