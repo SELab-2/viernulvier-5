@@ -34,7 +34,7 @@ export class AuthService {
     ) { }
 
     async login(input: LoginInput) {
-        const user = await this.repository.findByUsername(input.username)
+        const user = await this.repository.findByUsernameWithPassword(input.username)
 
         if (!user) {
             throw new AppError('Invalid credentials', 401)
@@ -52,8 +52,9 @@ export class AuthService {
             role: toDomainRole(user.role),
         })
 
-        const userWithoutPassword: any = { ...user }
-        delete userWithoutPassword.passwordHash
+        // Re-map user to a clean object without passwordHash
+        // Using destructuring to exclude passwordHash
+        const { passwordHash, ...userWithoutPassword } = user
 
         return { 
             token, 
@@ -65,9 +66,6 @@ export class AuthService {
         const user = await this.repository.findById(id)
         if (!user) return null
         
-        const userWithoutPassword: any = { ...user }
-        delete userWithoutPassword.passwordHash
-        
-        return userWithoutPassword
+        return user
     }
 }
