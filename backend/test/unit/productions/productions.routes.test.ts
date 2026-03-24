@@ -115,7 +115,7 @@ describe('Productions Routes', () => {
         })
     })
 
-    describe('PUT /api/v1/archive/productions/:id', () => {
+    describe('PATCH /api/v1/archive/productions/:id', () => {
         it('should update a production in the DB and then clean up', async () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             
