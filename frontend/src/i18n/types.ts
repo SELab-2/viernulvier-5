@@ -43,11 +43,26 @@ export type Messages = {
     }>
   }
   auth: {
+    adminLabel: string
+    localeToggleLabel: string
     loginTitle: string
+    loginSubtitle: string
     usernameLabel: string
+    usernamePlaceholder: string
     passwordLabel: string
+    passwordPlaceholder: string
+    rememberMeLabel: string
     submit: string
+    submitting: string
     loginFailed: string
+    invalidCredentials: string
+    rateLimitReached: string
+    navigationTitle: string
+    dashboardLabel: string
+    productionsLabel: string
+    statisticsLabel: string
+    archiveLabel: string
+    logoutLabel: string
   }
   footer: {
     about: string
