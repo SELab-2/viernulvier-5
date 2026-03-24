@@ -6,6 +6,8 @@ import { hashPassword } from '../../../src/utils/password.js'
 describe('AuthService', () => {
     const repository = {
         findByUsername: vi.fn(),
+        findByUsernameWithPassword: vi.fn(),
+        findById: vi.fn(),
     }
     const signToken = vi.fn()
 
@@ -19,7 +21,7 @@ describe('AuthService', () => {
     it('should return a token for valid credentials', async () => {
         const passwordHash = await hashPassword('correct-password')
 
-        repository.findByUsername.mockResolvedValue({
+        repository.findByUsernameWithPassword.mockResolvedValue({
             id: 'user-1',
             username: 'admin',
             passwordHash,
@@ -40,7 +42,7 @@ describe('AuthService', () => {
                 role: 'ADMIN',
             }
         })
-        expect(repository.findByUsername).toHaveBeenCalledWith('admin')
+        expect(repository.findByUsernameWithPassword).toHaveBeenCalledWith('admin')
         expect(signToken).toHaveBeenCalledWith({
             sub: 'user-1',
             username: 'admin',
@@ -49,7 +51,7 @@ describe('AuthService', () => {
     })
 
     it('should throw AppError for invalid credentials', async () => {
-        repository.findByUsername.mockResolvedValue(null)
+        repository.findByUsernameWithPassword.mockResolvedValue(null)
 
         await expect(service.login({
             username: 'wrong',
@@ -59,5 +61,31 @@ describe('AuthService', () => {
             message: 'Invalid credentials',
             statusCode: 401,
         } satisfies Partial<AppError>)
+    })
+
+    describe('getCurrentUser', () => {
+        it('should return a user without passwordHash', async () => {
+            const mockUser = {
+                id: 'user-1',
+                username: 'admin',
+                role: 'ADMIN',
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            }
+            repository.findById.mockResolvedValue(mockUser)
+
+            const result = await service.getCurrentUser('user-1')
+
+            expect(result).toEqual(mockUser)
+            expect(repository.findById).toHaveBeenCalledWith('user-1')
+        })
+
+        it('should return null if user not found', async () => {
+            repository.findById.mockResolvedValue(null)
+
+            const result = await service.getCurrentUser('non-existent')
+
+            expect(result).toBeNull()
+        })
     })
 })
