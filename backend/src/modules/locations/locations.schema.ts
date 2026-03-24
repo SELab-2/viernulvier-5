@@ -21,8 +21,8 @@ export const locationPaginationQuerySchema = z.object({
  * Explicit links for the Location resource.
  */
 export const locationLinksSchema = z.object({
-    self: z.string().url(),
-    spaces: z.string().url().optional(),
+    self: z.string().url().default('https://example.com/'),
+    spaces: z.string().url().optional().default('https://example.com/'),
 })
 
 export const locationSchema = z.object({

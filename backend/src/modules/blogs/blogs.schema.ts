@@ -14,7 +14,7 @@ export const blogPaginationQuerySchema = z.object({
  * Explicit links for the Blog resource.
  */
 export const blogLinksSchema = z.object({
-    self: z.string().url(),
+    self: z.string().url().default('https://example.com/'),
 })
 
 export const blogSchema = z.object({

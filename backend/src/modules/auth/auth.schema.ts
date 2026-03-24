@@ -10,8 +10,8 @@ export const loginSchema = z.object({
  * Explicit links for the Auth/User resource.
  */
 export const authLinksSchema = z.object({
-    self: z.string().url(),
-    logout: z.string().url().optional(),
+    self: z.string().url().default('https://example.com/'),
+    logout: z.string().url().optional().default('https://example.com/'),
 })
 
 export const userSchema = z.object({
@@ -28,7 +28,7 @@ export const authResponseSchema = z.object({
         user: userSchema,
     }),
     links: z.object({
-        self: z.string().url(),
+        self: z.string().url().default('https://example.com/'),
     })
 })
 

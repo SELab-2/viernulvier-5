@@ -23,8 +23,8 @@ export const tagPaginationQuerySchema = genrePaginationQuerySchema
  * Explicit links for the Genre resource.
  */
 export const genreLinksSchema = z.object({
-    self: z.string().url(),
-    productions: z.string().url().optional(),
+    self: z.string().url().default('https://example.com/'),
+    productions: z.string().url().optional().default('https://example.com/'),
 })
 
 export const genreSchema = z.object({
@@ -48,8 +48,8 @@ export const singleGenreSchema = createSingleResponseSchema(genreSchema)
  * Explicit links for the Tag resource.
  */
 export const tagLinksSchema = z.object({
-    self: z.string().url(),
-    gallery: z.string().url().optional(),
+    self: z.string().url().default('https://example.com/'),
+    gallery: z.string().url().optional().default('https://example.com/'),
 })
 
 export const tagSchema = z.object({

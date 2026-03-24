@@ -4,19 +4,19 @@ import { z } from 'zod'
  * Top-level links for the response envelope.
  */
 export const linkSchema = z.object({
-    self: z.string(),
-    next: z.string().nullable().optional(),
-    prev: z.string().nullable().optional(),
-    first: z.string().nullable().optional(),
-    last: z.string().nullable().optional(),
+    self: z.string().default('https://example.com/'),
+    next: z.string().nullable().optional().default('https://example.com/'),
+    prev: z.string().nullable().optional().default('https://example.com/'),
+    first: z.string().nullable().optional().default('https://example.com/'),
+    last: z.string().nullable().optional().default('https://example.com/'),
 })
 
 /**
  * Standard links for an individual resource (HATEOAS).
  */
 export const resourceLinksSchema = z.object({
-    self: z.string(),
-}).catchall(z.string().optional()) // Allows for dynamic links like 'events', 'media', etc.
+    self: z.string().default('https://example.com/'),
+}).catchall(z.string().optional().default('https://example.com/')) // Allows for dynamic links like 'events', 'media', etc.
 
 export const metaSchema = z.object({
     total: z.number(),

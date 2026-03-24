@@ -22,9 +22,9 @@ export const spacePaginationQuerySchema = z.object({
  * Explicit links for the Space resource.
  */
 export const spaceLinksSchema = z.object({
-    self: z.string().url(),
-    location: z.string().url().optional(),
-    halls: z.string().url().optional(),
+    self: z.string().url().default('https://example.com/'),
+    location: z.string().url().optional().default('https://example.com/'),
+    halls: z.string().url().optional().default('https://example.com/'),
 })
 
 export const spaceSchema = z.object({
