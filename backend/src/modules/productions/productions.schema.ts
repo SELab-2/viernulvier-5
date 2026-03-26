@@ -10,6 +10,18 @@ const localizedTextSchema = z.object({
     en: z.string().optional(),
 }).nullable()
 
+const customDataSchema = z.record(z.string(), z.unknown()).nullable()
+
+const galleryItemSchema = z.object({
+    id: z.string().uuid(),
+    link: z.unknown().nullable(),
+}).passthrough()
+
+const gallerySchema = z.object({
+    id: z.string().uuid(),
+    items: z.array(galleryItemSchema),
+}).passthrough().nullable()
+
 export const paginationQuerySchema = z.object({
     page: z.coerce.number().int().positive().default(1),
     limit: z.coerce.number().int().positive().max(100).default(20),
@@ -56,7 +68,9 @@ export const productionSchema = z.object({
     info: localizedTextSchema,
     description_short: localizedTextSchema,
     eticket_info: localizedTextSchema,
-    custom_data: localizedTextSchema,
+    custom_data: customDataSchema,
+    media_gallery: gallerySchema.optional(),
+    poster_gallery: gallerySchema.optional(),
     media_gallery_id: z.string().uuid().nullable(),
     review_gallery_id: z.string().uuid().nullable(),
     poster_gallery_id: z.string().uuid().nullable(),
@@ -96,7 +110,9 @@ export const updateProductionSchema = z.object({
     info: localizedTextSchema.optional(),
     description_short: localizedTextSchema.optional(),
     eticket_info: localizedTextSchema.optional(),
-    custom_data: localizedTextSchema.optional(),
+    custom_data: customDataSchema.optional(),
+    media_gallery: gallerySchema.optional(),
+    poster_gallery: gallerySchema.optional(),
     media_gallery_id: z.string().uuid().nullable().optional(),
     review_gallery_id: z.string().uuid().nullable().optional(),
     poster_gallery_id: z.string().uuid().nullable().optional(),

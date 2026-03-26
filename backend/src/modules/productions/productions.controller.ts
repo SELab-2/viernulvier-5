@@ -4,6 +4,48 @@ import type { PaginationQuery, UpdateProductionInput, CreateProductionInput, Pro
 import { buildPaginationLinks } from '../../utils/pagination.js'
 
 export class ProductionsController {
+        private extractImageUrl(production: any): string | undefined {
+            const posterItem = production.poster_gallery?.items?.[0]
+            const mediaItem = production.media_gallery?.items?.[0]
+
+            const posterLink = posterItem?.link as any
+            const mediaLink = mediaItem?.link as any
+
+            if (typeof posterLink === 'string' && posterLink.trim().length > 0) {
+                return posterLink
+            }
+
+            if (posterLink && typeof posterLink === 'object') {
+                const fromPosterObject = posterLink.url || posterLink.src || posterLink.original
+                if (typeof fromPosterObject === 'string' && fromPosterObject.trim().length > 0) {
+                    return fromPosterObject
+                }
+            }
+
+            if (typeof mediaLink === 'string' && mediaLink.trim().length > 0) {
+                return mediaLink
+            }
+
+            if (mediaLink && typeof mediaLink === 'object') {
+                const fromMediaObject = mediaLink.url || mediaLink.src || mediaLink.original
+                if (typeof fromMediaObject === 'string' && fromMediaObject.trim().length > 0) {
+                    return fromMediaObject
+                }
+            }
+
+            const existingCustomData = production.custom_data
+            if (
+                existingCustomData &&
+                typeof existingCustomData === 'object' &&
+                typeof existingCustomData.image_url === 'string' &&
+                existingCustomData.image_url.trim().length > 0
+            ) {
+                return existingCustomData.image_url
+            }
+
+            return undefined
+        }
+
     constructor(private readonly service: ProductionsService) { }
 
     private getBaseUrl(request: FastifyRequest) {
@@ -17,9 +59,15 @@ export class ProductionsController {
      */
     private mapProductionLinks(production: any, baseUrl: string): ProductionResponse {
         const prodId = production.id
+        const imageUrl = this.extractImageUrl(production)
+        const customData = {
+            ...(production.custom_data && typeof production.custom_data === 'object' ? production.custom_data : {}),
+            ...(imageUrl ? { image_url: imageUrl } : {}),
+        }
         
         return {
             ...production,
+            custom_data: customData,
             links: {
                 self: `${baseUrl}/productions/${prodId}`,
                 events: `${baseUrl}/events?production_id=${prodId}`,
