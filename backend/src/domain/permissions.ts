@@ -11,10 +11,18 @@ export enum Permission {
     ARCHIVE_CREATE = 'archive:create',
     ARCHIVE_UPDATE = 'archive:update',
     ARCHIVE_DELETE = 'archive:delete',
+    EDITORS_MANAGE = 'editors:manage',
 }
 
 export const rolePermissions: Record<Role, Permission[]> = {
     [Role.ADMIN]: [
+        Permission.ARCHIVE_READ,
+        Permission.ARCHIVE_CREATE,
+        Permission.ARCHIVE_UPDATE,
+        Permission.ARCHIVE_DELETE,
+        Permission.EDITORS_MANAGE,
+    ],
+    [Role.EDITOR]: [
         Permission.ARCHIVE_READ,
         Permission.ARCHIVE_CREATE,
         Permission.ARCHIVE_UPDATE,

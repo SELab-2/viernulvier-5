@@ -1,33 +1,56 @@
-import type { FastifyInstance } from 'fastify'
 import type { LoginInput } from './auth.schema.js'
+import { AuthRepository } from './auth.repository.js'
 import { AppError } from '../../errors/app-error.js'
 import { Role } from '../../domain/role.js'
+import { verifyPassword } from '../../utils/password.js'
+
+function toDomainRole(role: string): Role {
+    if (role === Role.ADMIN) {
+        return Role.ADMIN
+    }
+
+    if (role === Role.EDITOR) {
+        return Role.EDITOR
+    }
+
+    throw new AppError('Invalid user role', 500)
+}
+
+type AuthTokenPayload = {
+    sub: string
+    username: string
+    role: Role
+}
 
 /**
  * Auth Service — handles authentication logic.
  *
- * For now, uses a simple admin user check.
- * When the project grows, this can be expanded with database-backed users.
+ * Uses the users table for authentication and stores only password hashes.
  */
 export class AuthService {
-    constructor(private readonly app: FastifyInstance) { }
+    constructor(
+        private readonly repository: AuthRepository,
+        private readonly signToken: (payload: AuthTokenPayload) => string
+    ) { }
 
     async login(input: LoginInput) {
-        // TODO: Replace with database-backed user lookup
-        // This is a placeholder for the simple admin login
-        const isValid = input.username === 'admin' && input.password === 'admin123'
+        const user = await this.repository.findByUsername(input.username)
+
+        if (!user) {
+            throw new AppError('Invalid credentials', 401)
+        }
+
+        const isValid = await verifyPassword(input.password, user.passwordHash)
 
         if (!isValid) {
             throw new AppError('Invalid credentials', 401)
         }
 
-        const token = this.app.jwt.sign(
-            {
-                sub: 'admin',
-                role: Role.ADMIN,
-            },
-            { expiresIn: '8h' }
-        )
+        const token = this.signToken({
+            sub: user.id,
+            username: user.username,
+            role: toDomainRole(user.role),
+        })
 
         return { token }
     }
