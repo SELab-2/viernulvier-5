@@ -1,31 +1,57 @@
 import { AppError } from '../../errors/app-error.js'
 import { hashPassword } from '../../utils/password.js'
 import { EditorsRepository } from './editors.repository.js'
-import type { CreateEditorInput, UpdateEditorInput } from './editors.schema.js'
+import type { 
+    EditorPaginationQuery, 
+    EditorResponse,
+    CreateEditorInput, 
+    UpdateEditorInput 
+} from './editors.schema.js'
+import { PaginatedResult, calculateTotalPages } from '../../utils/pagination.js'
 
 export class EditorsService {
     constructor(private readonly repository: EditorsRepository) { }
 
-    async listEditors() {
-        return this.repository.listEditors()
+    async getEditors(options: EditorPaginationQuery): Promise<PaginatedResult<EditorResponse>> {
+        const { page, limit, search } = options
+
+        const [items, total] = await Promise.all([
+            this.repository.listEditors({ page, limit, search }),
+            this.repository.countEditors({ search }),
+        ])
+
+        const totalPages = calculateTotalPages(total, limit)
+
+        return {
+            items: items as any,
+            total,
+            page,
+            limit,
+            totalPages,
+        }
     }
 
-    async createEditor(input: CreateEditorInput) {
+    async getEditor(id: string): Promise<EditorResponse | null> {
+        return this.repository.findEditorById(id) as any
+    }
+
+    async createEditor(input: CreateEditorInput): Promise<EditorResponse> {
         const existingUser = await this.repository.findByUsername(input.username)
 
         if (existingUser) {
             throw new AppError('Username already exists', 409)
         }
 
+        // HASH THE PASSWORD BEFORE SAVING
         const passwordHash = await hashPassword(input.password)
 
         return this.repository.createEditor({
             username: input.username,
             passwordHash,
-        })
+        }) as any
     }
 
-    async updateEditor(id: string, input: UpdateEditorInput) {
+    async updateEditor(id: string, input: UpdateEditorInput): Promise<EditorResponse> {
         const existingEditor = await this.repository.findEditorById(id)
 
         if (!existingEditor) {
@@ -40,17 +66,19 @@ export class EditorsService {
             }
         }
 
-        const passwordHash = input.password
-            ? await hashPassword(input.password)
-            : undefined
+        // ONLY HASH IF A NEW PASSWORD IS PROVIDED
+        let passwordHash: string | undefined = undefined
+        if (input.password) {
+            passwordHash = await hashPassword(input.password)
+        }
 
         return this.repository.updateEditor(id, {
             username: input.username,
             passwordHash,
-        })
+        }) as any
     }
 
-    async deleteEditor(id: string) {
+    async deleteEditor(id: string): Promise<void> {
         const existingEditor = await this.repository.findEditorById(id)
 
         if (!existingEditor) {
