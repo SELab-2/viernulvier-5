@@ -19,6 +19,24 @@ export class ProductionsRepository {
             skip,
             take: limit,
             orderBy: { created_at: 'desc' },
+            include: {
+                poster_gallery: {
+                    include: {
+                        items: {
+                            take: 1,
+                            orderBy: { created_at: 'asc' },
+                        },
+                    },
+                },
+                media_gallery: {
+                    include: {
+                        items: {
+                            take: 1,
+                            orderBy: { created_at: 'asc' },
+                        },
+                    },
+                },
+            },
         })
     }
 
@@ -45,7 +63,17 @@ export class ProductionsRepository {
                     include: {
                         genre: true
                     }
-                }
+                },
+                poster_gallery: {
+                    include: {
+                        items: true,
+                    },
+                },
+                media_gallery: {
+                    include: {
+                        items: true,
+                    },
+                },
             }
         })
     }

@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { getActiveLocale, getMessages, withLocalePath } from '../../i18n'
+import type { Locale } from '../../i18n/types'
+import { apiFetch } from '../../api/client'
 import PublicLayout from '../../components/public/PublicLayout'
 import SearchPagination from '../../components/public/search/SearchPagination'
 import SearchResultCard, { type SearchResultItem } from '../../components/public/search/SearchResultCard'
@@ -9,124 +11,82 @@ type SearchEntry = SearchResultItem & {
     year: number
     genre: string
     location: string
+    createdTimestamp: number
 }
 
-const SEARCH_ENTRIES: SearchEntry[] = [
-    {
-        id: '1',
-        tag: 'koken',
-        date: '14.03.2024',
-        title: 'The Tender Ears',
-        excerpt: 'In het kader van FOOD x.019 strijkt een mobiele keuken neer op ...',
-        venue: 'balzaal',
-        year: 2024,
-        genre: 'dans',
-        location: 'balzaal',
-    },
-    {
-        id: '2',
-        tag: 'dans',
-        date: '14.03.2024',
-        title: "Fresh Juice: voorjaar '26",
-        excerpt: 'VIERNULVIER serveert Fresh Juice: een voorjaarsprogramma om bij weg ...',
-        venue: 'balzaal',
-        year: 2024,
-        genre: 'dans',
-        location: 'balzaal',
-    },
-    {
-        id: '3',
-        tag: 'voorstelling',
-        date: '14.03.2024',
-        title: 'SNOBS: Editie #11',
-        excerpt: 'SNOBS is terug, wilder, vuiler en vrijer dan ooit. Na heel wat jaren van ...',
-        venue: 'balzaal',
-        year: 2024,
-        genre: 'voorstelling',
-        location: 'balzaal',
-    },
-    {
-        id: '4',
-        tag: 'workshop',
-        date: '14.03.2024',
-        title: 'SNOBS: Editie #11',
-        excerpt: 'SNOBS is terug, wilder, vuiler en vrijer dan ooit. Na heel wat jaren van ...',
-        venue: 'theaterzaal',
-        year: 2024,
-        genre: 'workshop',
-        location: 'theaterzaal',
-    },
-    {
-        id: '5',
-        tag: 'dans',
-        date: '14.03.2024',
-        title: 'SNOBS: Editie #11',
-        excerpt: 'SNOBS is terug, wilder, vuiler en vrijer dan ooit. Na heel wat jaren van ...',
-        venue: 'balzaal',
-        year: 2024,
-        genre: 'dans',
-        location: 'balzaal',
-    },
-    {
-        id: '6',
-        tag: 'dans',
-        date: '14.03.2024',
-        title: 'PALMARIUM 2026',
-        excerpt: "Our annual concert series in Ghent's Botanical Garden is back! Featuring ...",
-        venue: 'theaterzaal',
-        year: 2024,
-        genre: 'dans',
-        location: 'theaterzaal',
-    },
-    {
-        id: '7',
-        tag: 'muziek',
-        date: '10.02.2023',
-        title: 'Eefje De Visser',
-        excerpt: 'Het volledige concert Nachtlicht, exclusief opgenomen in de Theaterzaal.',
-        venue: 'domzaal',
-        year: 2023,
-        genre: 'muziek',
-        location: 'domzaal',
-    },
-    {
-        id: '8',
-        tag: 'theater',
-        date: '17.11.2022',
-        title: 'UITGELEZEN',
-        excerpt: 'Met Ruth Joos, Raf Njotea, Melissa Giardina, Marijke Pinoy en Kaat Van Stralen.',
-        venue: 'theaterzaal',
-        year: 2022,
-        genre: 'theater',
-        location: 'theaterzaal',
-    },
-    {
-        id: '9',
-        tag: 'komedie',
-        date: '04.04.2021',
-        title: 'Late Night Sessions',
-        excerpt: 'Een avond vol korte sets met opkomende stemmen uit de comedy scene.',
-        venue: 'balzaal',
-        year: 2021,
-        genre: 'komedie',
-        location: 'balzaal',
-    },
-    {
-        id: '10',
-        tag: 'workshop',
-        date: '23.05.2020',
-        title: 'Lacuna Kitchen',
-        excerpt: 'Een culinaire performance over herinnering en smaak.',
-        venue: 'domzaal',
-        year: 2020,
-        genre: 'workshop',
-        location: 'domzaal',
-    },
-]
-
 const PAGE_SIZE = 6
+const API_FETCH_LIMIT = 100
 const MIN_PERIOD_YEAR = 1982
 const MAX_PERIOD_YEAR = 2026
+
+type LocalizedText = {
+    nl?: string
+    en?: string
+    fr?: string
+} | null
+
+type ProductionApiItem = {
+    id: string
+    title: LocalizedText
+    teaser: LocalizedText
+    description_short: LocalizedText
+    custom_data: {
+        image_url?: string
+    } | null
+    performer_type: string | null
+    attendance_mode: string | null
+    created_at: string
+}
+
+type PaginatedApiResponse<T> = {
+    data: T[]
+}
+
+function getLocalizedText(text: LocalizedText, locale: Locale): string {
+    if (!text) {
+        return ''
+    }
+
+    const values = locale === 'en' ? [text.en, text.nl, text.fr] : [text.nl, text.en, text.fr]
+    return values.find((value) => typeof value === 'string' && value.trim().length > 0)?.trim() ?? ''
+}
+
+function formatDate(value: string, locale: Locale): string {
+    const parsedDate = new Date(value)
+    if (Number.isNaN(parsedDate.getTime())) {
+        return '-'
+    }
+
+    return new Intl.DateTimeFormat(locale === 'nl' ? 'nl-BE' : 'en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+    }).format(parsedDate)
+}
+
+function mapProductionToSearchEntry(item: ProductionApiItem, locale: Locale): SearchEntry {
+    const title = getLocalizedText(item.title, locale) || (locale === 'nl' ? 'Zonder titel' : 'Untitled')
+    const excerpt = getLocalizedText(item.description_short, locale) || getLocalizedText(item.teaser, locale) || title
+    const createdDate = new Date(item.created_at)
+    const createdTimestamp = Number.isNaN(createdDate.getTime()) ? 0 : createdDate.getTime()
+    const year = Number.isNaN(createdDate.getTime()) ? MIN_PERIOD_YEAR : createdDate.getFullYear()
+    const normalizedGenre = (item.performer_type ?? '').trim().toLowerCase()
+    const normalizedLocation = (item.attendance_mode ?? '').trim().toLowerCase()
+
+    return {
+        id: item.id,
+        tag: normalizedGenre || (locale === 'nl' ? 'productie' : 'production'),
+        date: formatDate(item.created_at, locale),
+        title,
+        excerpt,
+        venue: normalizedLocation || 'VIERNULVIER',
+        imageUrl: item.custom_data?.image_url,
+        year,
+        genre: normalizedGenre,
+        location: normalizedLocation,
+        createdTimestamp,
+    }
+}
 
 async function copyCurrentUrl() {
     const currentUrl = window.location.href
@@ -452,6 +412,9 @@ function SearchPage() {
     const m = getMessages(locale)
     const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false)
     const [shareCopied, setShareCopied] = useState(false)
+    const [apiEntries, setApiEntries] = useState<SearchEntry[]>([])
+    const [isLoading, setIsLoading] = useState(true)
+    const [apiError, setApiError] = useState<string | null>(null)
 
     const query = (searchParams.get('q') ?? '').trim()
     const legacyYear = Number(searchParams.get('year') ?? String(MAX_PERIOD_YEAR))
@@ -467,8 +430,55 @@ function SearchPage() {
     const pageParam = Number(searchParams.get('page') ?? '1')
     const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1
 
+    useEffect(() => {
+        const abortController = new AbortController()
+
+        const loadSearchEntries = async () => {
+            setIsLoading(true)
+            setApiError(null)
+
+            try {
+                const params = new URLSearchParams({
+                    page: '1',
+                    limit: String(API_FETCH_LIMIT),
+                    lang: locale,
+                })
+
+                if (query) {
+                    params.set('search', query)
+                }
+
+                const response = await apiFetch<PaginatedApiResponse<ProductionApiItem>>(
+                    `/v1/archive/productions?${params.toString()}`,
+                    { signal: abortController.signal }
+                )
+
+                const mappedEntries = response.data.map((item) => mapProductionToSearchEntry(item, locale))
+                setApiEntries(mappedEntries)
+            } catch (error) {
+                if (abortController.signal.aborted) {
+                    return
+                }
+
+                const message = error instanceof Error ? error.message : 'Request failed'
+                setApiError(message)
+                setApiEntries([])
+            } finally {
+                if (!abortController.signal.aborted) {
+                    setIsLoading(false)
+                }
+            }
+        }
+
+        void loadSearchEntries()
+
+        return () => {
+            abortController.abort()
+        }
+    }, [query, locale])
+
     const filtered = useMemo(() => {
-        return SEARCH_ENTRIES.filter((item) => {
+        return apiEntries.filter((item) => {
             const queryMatches =
                 query === '' ||
                 item.title.toLowerCase().includes(query.toLowerCase()) ||
@@ -480,18 +490,18 @@ function SearchPage() {
 
             return queryMatches && yearMatches && genreMatches && locationMatches
         })
-    }, [query, safeFromYear, safeToYear, selectedGenres, selectedLocations])
+    }, [apiEntries, query, safeFromYear, safeToYear, selectedGenres, selectedLocations])
 
     const sorted = useMemo(() => {
         const items = [...filtered]
 
         if (sort === 'recent') {
-            items.sort((a, b) => b.year - a.year)
+            items.sort((a, b) => b.createdTimestamp - a.createdTimestamp)
             return items
         }
 
         if (sort === 'oldest') {
-            items.sort((a, b) => a.year - b.year)
+            items.sort((a, b) => a.createdTimestamp - b.createdTimestamp)
             return items
         }
 
@@ -536,6 +546,12 @@ function SearchPage() {
     const pageItems = sorted.slice(start, start + PAGE_SIZE)
 
     const pageLabels = Array.from({ length: totalPages }, (_, index) => String(index + 1))
+    const apiErrorHint =
+        apiError && /500|network error/i.test(apiError)
+            ? locale === 'nl'
+                ? 'Controleer of de backend draait op http://localhost:3001.'
+                : 'Check if the backend is running on http://localhost:3001.'
+            : null
 
     const handlePageChange = (nextPage: number) => {
         if (nextPage < 1 || nextPage > totalPages) {
@@ -732,7 +748,14 @@ function SearchPage() {
                             </div>
                         ) : null}
 
-                        {pageItems.length > 0 ? (
+                        {apiError ? (
+                            <div className="mt-6 space-y-2 text-base text-muted">
+                                <p>{locale === 'nl' ? `Kon resultaten niet laden: ${apiError}` : `Could not load results: ${apiError}`}</p>
+                                {apiErrorHint ? <p>{apiErrorHint}</p> : null}
+                            </div>
+                        ) : isLoading ? (
+                            <p className="mt-6 text-base text-muted">{m.common.loading}</p>
+                        ) : pageItems.length > 0 ? (
                             <div className="mt-5 grid gap-x-5 gap-y-8 md:grid-cols-2 xl:grid-cols-3">
                                 {pageItems.map((item) => (
                                     <SearchResultCard key={item.id} item={item} />

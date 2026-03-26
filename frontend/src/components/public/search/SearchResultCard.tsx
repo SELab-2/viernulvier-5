@@ -5,6 +5,7 @@ export type SearchResultItem = {
     title: string
     excerpt: string
     venue: string
+    imageUrl?: string
 }
 
 type SearchResultCardProps = {
@@ -15,6 +16,16 @@ function SearchResultCard({ item }: SearchResultCardProps) {
     return (
         <article className="border-b border-border pb-5">
             <div className="relative h-32 overflow-hidden rounded-md sm:h-36 bg-gradient-to-br from-accent to-accent/50">
+                {item.imageUrl ? (
+                    <img
+                        src={item.imageUrl}
+                        alt={item.title}
+                        className="absolute inset-0 h-full w-full object-cover"
+                        loading="lazy"
+                        referrerPolicy="no-referrer"
+                    />
+                ) : null}
+                <div className="absolute inset-0 bg-black/20" />
                 <span className="absolute left-3 top-3 rounded-full border border-white/50 bg-white/25 px-3 py-1 text-xs font-semibold lowercase text-white backdrop-blur-sm">
                     {item.tag}
                 </span>
