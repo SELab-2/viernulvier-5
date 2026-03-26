@@ -19,6 +19,24 @@ const API_FETCH_LIMIT = 100
 const MIN_PERIOD_YEAR = 1982
 const MAX_PERIOD_YEAR = 2026
 
+const CANONICAL_GENRE_VALUES = ['theater', 'dans', 'muziek', 'voorstelling', 'komedie', 'workshop'] as const
+const CANONICAL_LOCATION_VALUES = ['theaterzaal', 'balzaal', 'domzaal'] as const
+
+const GENRE_ALIASES: Record<string, string> = {
+    theatre: 'theater',
+    dance: 'dans',
+    music: 'muziek',
+    performance: 'voorstelling',
+    comedy: 'komedie',
+    workshop: 'workshop',
+}
+
+const LOCATION_ALIASES: Record<string, string> = {
+    'theatre hall': 'theaterzaal',
+    ballroom: 'balzaal',
+    'dom hall': 'domzaal',
+}
+
 type LocalizedText = {
     nl?: string
     en?: string
@@ -114,11 +132,11 @@ function parseSelectedGenres(searchParams: URLSearchParams): string[] {
     if (genresParam) {
         return genresParam
             .split(',')
-            .map((value) => value.trim())
+            .map((value) => GENRE_ALIASES[value.trim()] ?? value.trim())
             .filter(Boolean)
     }
 
-    return legacyGenre ? [legacyGenre] : []
+    return legacyGenre ? [GENRE_ALIASES[legacyGenre] ?? legacyGenre] : []
 }
 
 function parseSelectedLocations(searchParams: URLSearchParams): string[] {
@@ -128,11 +146,23 @@ function parseSelectedLocations(searchParams: URLSearchParams): string[] {
     if (locationsParam) {
         return locationsParam
             .split(',')
-            .map((value) => value.trim())
+            .map((value) => LOCATION_ALIASES[value.trim()] ?? value.trim())
             .filter(Boolean)
     }
 
-    return legacyLocation ? [legacyLocation] : []
+    return legacyLocation ? [LOCATION_ALIASES[legacyLocation] ?? legacyLocation] : []
+}
+
+function getGenreLabel(value: string, locale: Locale): string {
+    const labels = getMessages(locale).search.genres
+    const index = CANONICAL_GENRE_VALUES.indexOf(value as (typeof CANONICAL_GENRE_VALUES)[number])
+    return index >= 0 ? labels[index] ?? value : value
+}
+
+function getLocationLabel(value: string, locale: Locale): string {
+    const labels = getMessages(locale).search.locations
+    const index = CANONICAL_LOCATION_VALUES.indexOf(value as (typeof CANONICAL_LOCATION_VALUES)[number])
+    return index >= 0 ? labels[index] ?? value : value
 }
 
 function HamburgerIcon({ className }: { className: string }) {
@@ -234,9 +264,17 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
     const yearRange = MAX_PERIOD_YEAR - MIN_PERIOD_YEAR
     const fromPercent = ((safeFromYear - MIN_PERIOD_YEAR) / yearRange) * 100
     const toPercent = ((safeToYear - MIN_PERIOD_YEAR) / yearRange) * 100
+    const genreOptions = s.genres.map((label, index) => ({
+        label,
+        value: CANONICAL_GENRE_VALUES[index] ?? label.toLowerCase(),
+    }))
+    const locationOptions = s.locations.map((label, index) => ({
+        label,
+        value: CANONICAL_LOCATION_VALUES[index] ?? label.toLowerCase(),
+    }))
 
     return (
-        <aside className={`flex flex-col ${className}`}>
+        <aside className={`flex h-full flex-col ${className}`}>
             <h2 className="text-3xl text-foreground">{s.heading}</h2>
             <p className="mt-2 text-xs text-muted">{s.subtitle}</p>
 
@@ -268,8 +306,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
                     <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground">{s.genreLabel}</h3>
                 </div>
                 <div className="space-y-2 text-sm text-text-accent">
-                    {s.genres.map((label) => {
-                        const value = label.toLowerCase()
+                    {genreOptions.map(({ label, value }) => {
                         return (
                             <label key={value} className="flex items-center gap-2.5 text-foreground/90">
                                 <input
@@ -322,8 +359,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
             <div className="mt-6 border-t border-border pt-5 pb-5">
                 <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground">{s.locationLabel}</h3>
                 <div className="mt-4 space-y-2 text-sm text-text-accent">
-                    {s.locations.map((label) => {
-                        const value = label.toLowerCase()
+                    {locationOptions.map(({ label, value }) => {
                         return (
                             <label key={value} className="flex items-center gap-2.5 text-foreground/90">
                                 <input
@@ -624,12 +660,12 @@ function SearchPage() {
     const filterChips: Array<{ key: string; label: string; onRemove: () => void }> = [
         ...selectedGenres.map((value) => ({
             key: `genre-${value}`,
-            label: value,
+            label: getGenreLabel(value, locale),
             onRemove: () => handleRemoveGenreChip(value),
         })),
         ...selectedLocations.map((value) => ({
             key: `location-${value}`,
-            label: value,
+            label: getLocationLabel(value, locale),
             onRemove: () => handleRemoveLocationChip(value),
         })),
         {
@@ -642,11 +678,15 @@ function SearchPage() {
     return (
         <PublicLayout>
             <section className="relative bg-surface-sunken">
-                <div className="mx-auto w-full max-w-screen-2xl md:flex md:items-start">
-                    <FilterPanel className="hidden w-96 shrink-0 self-stretch border-r border-border bg-surface-inset px-6 py-8 md:flex" />
+                <div className="w-full md:flex md:items-stretch">
+                    <div
+                        aria-hidden="true"
+                        className="hidden w-[max(1.5rem,calc((100vw-var(--layout-content-max-width))/2))] shrink-0 md:block"
+                    />
+                    <FilterPanel className="hidden w-80 shrink-0 self-stretch rounded-2xl border border-border bg-surface-inset px-5 py-5 md:my-6 md:flex md:min-h-[calc(100vh-7rem)]" />
 
                     <div className="flex w-full items-start">
-                        <div className="z-30 flex w-12 shrink-0 self-stretch justify-center border-r border-border bg-grey md:hidden">
+                        <div className="z-30 flex w-12 shrink-0 self-stretch justify-center border-r border-border bg-surface-inset md:hidden">
                             <div className="fixed top-[65px] left-1.5 z-40 flex items-start justify-center md:hidden">
                                 <button
                                     type="button"
@@ -659,7 +699,8 @@ function SearchPage() {
                             </div>
                         </div>
 
-                        <div className="w-full px-4 py-6 md:px-8 md:py-8">
+                        <div className="w-full px-4 py-6 md:py-8 md:pr-0 md:pl-0">
+                            <div className="search-main-rail">
                             {isMobileFiltersOpen ? (
                                 <>
                                     <button
@@ -708,7 +749,7 @@ function SearchPage() {
                                 <div className="flex items-center gap-3">
                                     <label className="text-sm text-muted">{m.search.sortLabel}</label>
                                     <select
-                                        className="h-9 rounded-full border border-border bg-white px-4 text-sm"
+                                        className="h-9 rounded-full border border-border bg-surface px-4 text-sm text-foreground"
                                         value={sort}
                                         onChange={(event) => handleSortChange(event.target.value)}
                                     >
@@ -720,7 +761,7 @@ function SearchPage() {
                                     </select>
                                     <button
                                         type="button"
-                                        className="hidden h-9 items-center gap-2 rounded-full border border-border bg-white px-3 text-sm md:inline-flex"
+                                        className="hidden h-9 items-center gap-2 rounded-full border border-border bg-surface px-3 text-sm text-foreground md:inline-flex"
                                         onClick={() => {
                                             void handleShare()
                                         }}
@@ -778,6 +819,7 @@ function SearchPage() {
                                 canGoNext={currentPage < totalPages}
                             />
                         ) : null}
+                            </div>
                         </div>
                     </div>
                 </div>

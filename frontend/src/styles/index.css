@@ -38,6 +38,8 @@
 	color-scheme: dark;
 	--color-bg: #1C1917;
 	--color-surface: #121214;
+	--color-surface-sunken: #16161a;
+	--color-surface-inset: #1f1f24;
 	--color-border: #27272a;
 	--color-text: #ffffff;
 	--color-text-muted: #D9D9D9;
@@ -50,9 +52,12 @@
 		color-scheme: dark;
 		--color-bg: #1C1917;
 		--color-surface: #121214;
+		--color-surface-sunken: #16161a;
+		--color-surface-inset: #1f1f24;
 		--color-border: #27272a;
 		--color-text: #ffffff;
 		--color-text-muted: #D9D9D9;
+		--color-text-accent: #e2e2e2;
 		--color-accent: #8224e3;
 	}
 }
@@ -130,21 +135,21 @@ button:disabled {
 	width: 0.95rem;
 	height: 0.95rem;
 	border-radius: 9999px;
-	border: 1.5px solid #6b7280;
-	background: #f8f8f8;
+	border: 1.5px solid var(--color-border);
+	background: var(--color-surface);
 	display: inline-block;
 	transition: border-color 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
 }
 
 .filter-radio:checked {
-	border-color: #111111;
-	background: radial-gradient(circle at center, #111111 0 42%, #f8f8f8 44% 100%);
-	box-shadow: 0 0 0 1px #111111;
+	border-color: var(--color-text);
+	background: radial-gradient(circle at center, var(--color-text) 0 42%, var(--color-surface) 44% 100%);
+	box-shadow: 0 0 0 1px var(--color-text);
 }
 
 .filter-radio:focus-visible {
 	outline: none;
-	box-shadow: 0 0 0 2px #d1d5db, 0 0 0 4px #111111;
+	box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-text);
 }
 
 .filter-checkbox {
@@ -152,16 +157,16 @@ button:disabled {
 	width: 0.95rem;
 	height: 0.95rem;
 	border-radius: 9999px;
-	border: 1.5px solid #6b7280;
-	background: #f8f8f8;
+	border: 1.5px solid var(--color-border);
+	background: var(--color-surface);
 	display: inline-block;
 	position: relative;
 	transition: border-color 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
 }
 
 .filter-checkbox:checked {
-	border-color: #111111;
-	background: #111111;
+	border-color: var(--color-text);
+	background: var(--color-text);
 	box-shadow: none;
 }
 
@@ -172,14 +177,14 @@ button:disabled {
 	top: 45%;
 	width: 0.24rem;
 	height: 0.48rem;
-	border: solid #ffffff;
+	border: solid var(--color-surface);
 	border-width: 0 2px 2px 0;
 	transform: translate(-50%, -50%) rotate(45deg);
 }
 
 .filter-checkbox:focus-visible {
 	outline: none;
-	box-shadow: 0 0 0 2px #d1d5db, 0 0 0 4px #111111;
+	box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-text);
 }
 
 .range-slider {
@@ -195,7 +200,7 @@ button:disabled {
 	height: 0.28rem;
 	transform: translateY(-50%);
 	border-radius: 9999px;
-	background: #d1d5db;
+	background: var(--color-border);
 }
 
 .range-track-active {
@@ -204,7 +209,7 @@ button:disabled {
 	height: 0.28rem;
 	transform: translateY(-50%);
 	border-radius: 9999px;
-	background: #111111;
+	background: var(--color-text);
 }
 
 .range-input {
@@ -230,7 +235,7 @@ button:disabled {
 	width: 0.95rem;
 	margin-top: -0.46rem;
 	border-radius: 9999px;
-	background: #111111;
+	background: var(--color-text);
 	border: 0;
 	box-shadow: none;
 	cursor: pointer;
@@ -246,7 +251,7 @@ button:disabled {
 	height: 0.95rem;
 	width: 0.95rem;
 	border-radius: 9999px;
-	background: #111111;
+	background: var(--color-text);
 	border: 0;
 	box-shadow: none;
 	cursor: pointer;
