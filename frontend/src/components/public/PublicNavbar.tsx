@@ -61,12 +61,25 @@ type ThemeToggleProps = {
 }
 
 function ThemeToggle({ theme, applyTheme }: ThemeToggleProps) {
+    const handleThemeButtonClick = (targetTheme: Theme) => {
+        if (targetTheme === theme) {
+            applyTheme(theme === 'dark' ? 'light' : 'dark')
+            return
+        }
+
+        applyTheme(targetTheme)
+    }
+
     return (
-        <div className="inline-flex h-8 w-16 items-center border border-border bg-grey">
+        <div className="relative inline-flex h-8 w-16 items-center overflow-hidden border border-border bg-grey">
+            <span
+                aria-hidden="true"
+                className={`pointer-events-none absolute left-0 top-0 h-8 w-8 bg-white transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${theme === 'dark' ? 'translate-x-0' : 'translate-x-8'}`}
+            />
             <button
                 type="button"
-                onClick={() => applyTheme('dark')}
-                className={`inline-flex h-8 w-8 items-center justify-center cursor-pointer text-black transition-colors ${theme === 'dark' ? 'bg-white' : 'bg-grey'}`}
+                onClick={() => handleThemeButtonClick('dark')}
+                className={`relative z-10 inline-flex h-8 w-8 items-center justify-center cursor-pointer text-black transition-all duration-200 ${theme === 'dark' ? 'scale-100' : 'scale-95 opacity-75 hover:opacity-100'}`}
                 aria-label="Donkere modus"
                 aria-pressed={theme === 'dark'}
             >
@@ -74,8 +87,8 @@ function ThemeToggle({ theme, applyTheme }: ThemeToggleProps) {
             </button>
             <button
                 type="button"
-                onClick={() => applyTheme('light')}
-                className={`inline-flex h-8 w-8 items-center justify-center cursor-pointer text-black transition-colors ${theme === 'light' ? 'bg-white' : 'bg-grey'}`}
+                onClick={() => handleThemeButtonClick('light')}
+                className={`relative z-10 inline-flex h-8 w-8 items-center justify-center cursor-pointer text-black transition-all duration-200 ${theme === 'light' ? 'scale-100' : 'scale-95 opacity-75 hover:opacity-100'}`}
                 aria-label="Lichte modus"
                 aria-pressed={theme === 'light'}
             >
