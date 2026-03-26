@@ -1,6 +1,7 @@
 import fp from 'fastify-plugin'
 import swagger from '@fastify/swagger'
 import swaggerUi from '@fastify/swagger-ui'
+import { jsonSchemaTransform } from 'fastify-type-provider-zod'
 
 /**
  * Swagger/OpenAPI plugin — auto-generates API docs from route schemas.
@@ -15,6 +16,7 @@ export default fp(async (fastify) => {
                 version: '0.1.0',
             },
             servers: [
+                // TODO: this has to change to non-local url
                 { url: 'http://localhost:3001', description: 'Local development' },
             ],
             components: {
@@ -27,6 +29,7 @@ export default fp(async (fastify) => {
                 },
             },
         },
+        transform: jsonSchemaTransform,
     })
 
     await fastify.register(swaggerUi, {

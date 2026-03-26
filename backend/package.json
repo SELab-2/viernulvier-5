@@ -12,7 +12,7 @@
         "test:coverage": "vitest run --coverage",
         "lint": "eslint src/",
         "db:generate": "prisma generate",
-        "db:migrate": "prisma migrate dev",
+        "db:migrate": "prisma migrate dev && prisma generate",
         "db:push": "prisma db push",
         "db:seed": "tsx prisma/seed.ts",
         "db:studio": "prisma studio"
@@ -27,6 +27,8 @@
         "@fastify/swagger-ui": "^5.0.0",
         "@prisma/adapter-pg": "^7.4.2",
         "@prisma/client": "^7.4.1",
+        "axios": "^1.13.6",
+        "axios-retry": "^4.5.0",
         "dotenv": "^17.3.1",
         "fastify": "^5.8.1",
         "fastify-plugin": "^5.0.0",
