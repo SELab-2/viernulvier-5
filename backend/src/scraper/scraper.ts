@@ -504,34 +504,52 @@ async function sync_events(cutoff_timestamp: Date | undefined = undefined) {
     page = filterByCutoff(page, cutoff_timestamp);
 
     await prisma.$transaction(async (tx) => {
+      // Collect all production and hall apiIds for bulk lookup
+      const productionApiIds = new Set<string>();
+      const hallApiIds = new Set<string>();
       for (const event of page) {
+        if (event.production?.["@id"]) productionApiIds.add(event.production["@id"]);
+        if (event.hall) hallApiIds.add(event.hall);
+      }
 
-        // to link the production
-        const production = await tx.production.findUnique({
-          where: { apiId: event.production["@id"] }
-        });
+      // Fetch all required productions and halls in bulk
+      const [productions, halls] = await Promise.all([
+        tx.production.findMany({
+          where: { apiId: { in: Array.from(productionApiIds) } },
+          select: { id: true, apiId: true }
+        }),
+        tx.hall.findMany({
+          where: { apiId: { in: Array.from(hallApiIds) } },
+          select: { id: true, apiId: true }
+        })
+      ]);
 
-        // skip the event if there is no production connected to it.
-        if (!production){
+      // Create lookup maps
+      const productionMap = new Map(productions.map(p => [p.apiId, p.id]));
+      const hallMap = new Map(halls.map(h => [h.apiId, h.id]));
+
+      for (const event of page) {
+        const productionId = event.production?.["@id"] ? productionMap.get(event.production["@id"]) : null;
+        
+        // Original logic: skip the event if there is no production connected to it in the DB
+        if (!productionId){
           totalProcessed -= 1;
           continue;
         }
 
-        const hall = await tx.hall.findUnique({
-          where: { apiId: event.hall}
-        });
+        const hallId = event.hall ? hallMap.get(event.hall) : null;
 
         await tx.event.upsert({
           where: { apiId: event["@id"] },
           update: {
             ...mapEvent(event),
-            production_id: production?.id,
-            hall_id: hall?.id,
+            production_id: productionId,
+            hall_id: hallId || null,
           },
           create: {
             ...mapEvent(event),
-            production_id: production?.id,
-            hall_id: hall?.id,
+            production_id: productionId,
+            hall_id: hallId || null,
           }
         });
       }
