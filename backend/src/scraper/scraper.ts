@@ -1,6 +1,6 @@
 import { prisma } from "./prisma";
 import * as Fetcher from "./fetcher"
-import { log, updateStatus, finishStatus } from "./logger";
+import {updateStatus, finishStatus } from "./logger";
 
 import type {
   APIProduction,
