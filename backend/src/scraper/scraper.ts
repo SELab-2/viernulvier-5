@@ -538,111 +538,105 @@ async function sync_productions(cutoff_timestamp: Date | undefined = undefined) 
     page = filterByCutoff(page, cutoff_timestamp);
 
     await prisma.$transaction(async (tx) => {
+      // Collect all apiIds for lookups to avoid N+1 queries
+      const galleryIds = new Set<string>();
+      const themeIds = new Set<string>();
+      const typeIds = new Set<string>();
+      const keywordIds = new Set<string>();
+      const genreIds = new Set<string>();
+
+      for (const prod of page) {
+        if (prod.media_gallery) galleryIds.add(prod.media_gallery);
+        if (prod.poster_gallery) galleryIds.add(prod.poster_gallery);
+        if (prod.review_gallery) galleryIds.add(prod.review_gallery);
+        if (prod.uitdatabank_theme) themeIds.add(prod.uitdatabank_theme);
+        if (prod.uitdatabank_type) typeIds.add(prod.uitdatabank_type);
+        if (prod.uitdatabank_keywords) {
+          prod.uitdatabank_keywords.forEach(k => keywordIds.add(k));
+        }
+        if (prod.genres) {
+          prod.genres.forEach(g => genreIds.add(g));
+        }
+      }
+
+      // Fetch all required relations in bulk
+      const [galleries, themes, types, keywords, genres] = await Promise.all([
+        tx.gallery.findMany({ where: { apiId: { in: Array.from(galleryIds) } } }),
+        tx.uitdatabank_theme.findMany({ where: { apiId: { in: Array.from(themeIds) } } }),
+        tx.uitdatabank_type.findMany({ where: { apiId: { in: Array.from(typeIds) } } }),
+        tx.uitdatabank_keyword.findMany({ where: { apiId: { in: Array.from(keywordIds) } } }),
+        tx.genre.findMany({ where: { apiId: { in: Array.from(genreIds) } } }),
+      ]);
+
+      // Create lookup maps
+      const galleryMap = new Map(galleries.map(g => [g.apiId, g.id]));
+      const themeMap = new Map(themes.map(t => [t.apiId, t.id]));
+      const typeMap = new Map(types.map(t => [t.apiId, t.id]));
+      const keywordMap = new Map(keywords.map(k => [k.apiId, k.id]));
+      const genreMap = new Map(genres.map(g => [g.apiId, g.id]));
+
       for (const production of page) {
-
-        let media_gallery = null
-        if (production.media_gallery) {
-          media_gallery = await tx.gallery.findUnique({
-            where: {apiId: production.media_gallery}
-          });
-        }
-
-        let poster_gallery = null
-        if (production.poster_gallery) {
-          poster_gallery = await tx.gallery.findUnique({
-            where: {apiId: production.poster_gallery}
-          });
-        }
-
-        let review_gallery = null
-        if (production.review_gallery) {
-          review_gallery = await tx.gallery.findUnique({
-            where: {apiId: production.review_gallery}
-          });
-        }
-
-        let uitdatabank_theme = null
-        if (production.uitdatabank_theme) {
-          uitdatabank_theme = await tx.uitdatabank_theme.findUnique({
-            where: {apiId: production.uitdatabank_theme}
-          });
-        }
-
-        let uitdatabank_type = null
-        if (production.uitdatabank_type) {
-          uitdatabank_type = await tx.uitdatabank_type.findUnique({
-            where: {apiId: production.uitdatabank_type}
-          });
-        }
-
-
         const db_production = await tx.production.upsert({
           where: {apiId: production["@id"]},
           update: {
             ...mapProduction(production),
-            media_gallery_id: media_gallery?.id || null,
-            poster_gallery_id: poster_gallery?.id || null,
-            review_gallery_id: review_gallery?.id || null,
-            uitdatabank_theme: uitdatabank_theme?.id || null,
-            uitdatabank_type: uitdatabank_type?.id || null,
+            media_gallery_id: production.media_gallery ? galleryMap.get(production.media_gallery) : null,
+            poster_gallery_id: production.poster_gallery ? galleryMap.get(production.poster_gallery) : null,
+            review_gallery_id: production.review_gallery ? galleryMap.get(production.review_gallery) : null,
+            uitdatabank_theme: production.uitdatabank_theme ? themeMap.get(production.uitdatabank_theme) : null,
+            uitdatabank_type: production.uitdatabank_type ? typeMap.get(production.uitdatabank_type) : null,
           },
           create: {
             ...mapProduction(production),
-            media_gallery_id: media_gallery?.id || null,
-            poster_gallery_id: poster_gallery?.id || null,
-            review_gallery_id: review_gallery?.id || null,
-            uitdatabank_theme: uitdatabank_theme?.id || null,
-            uitdatabank_type: uitdatabank_type?.id || null,
+            media_gallery_id: production.media_gallery ? galleryMap.get(production.media_gallery) : null,
+            poster_gallery_id: production.poster_gallery ? galleryMap.get(production.poster_gallery) : null,
+            review_gallery_id: production.review_gallery ? galleryMap.get(production.review_gallery) : null,
+            uitdatabank_theme: production.uitdatabank_theme ? themeMap.get(production.uitdatabank_theme) : null,
+            uitdatabank_type: production.uitdatabank_type ? typeMap.get(production.uitdatabank_type) : null,
           },
         })
 
-        //uit_keywords_production table
-        for (const keyword of production.uitdatabank_keywords) {
-          let uitdatabank_keyword = undefined
-          if (production.uitdatabank_type) {
-            uitdatabank_keyword = await tx.uitdatabank_keyword.findUnique({
-              where: {apiId: keyword}
-            });
-          }
-
-          if (uitdatabank_keyword !== undefined) {
-            await tx.uit_keywords_production.upsert({
-              where: {
-                production_id_uitkeywords_id: {
+        // Link keywords
+        if (production.uitdatabank_keywords) {
+          for (const keyword of production.uitdatabank_keywords) {
+            const keywordId = keywordMap.get(keyword);
+            if (keywordId) {
+              await tx.uit_keywords_production.upsert({
+                where: {
+                  production_id_uitkeywords_id: {
+                    production_id: db_production.id,
+                    uitkeywords_id: keywordId
+                  }
+                },
+                update: {}, // exists, no update needed
+                create: {
                   production_id: db_production.id,
-                  uitkeywords_id: uitdatabank_keyword!.id
-                }
-              },
-              update: {}, // if it already exists, you don't need to update it
-              create: {
-                production_id: db_production.id,
-                uitkeywords_id: uitdatabank_keyword!.id
-              },
-            });
+                  uitkeywords_id: keywordId
+                },
+              });
+            }
           }
         }
 
-        for (const genre of production.genres) {
-          let db_genre = undefined
-          if (production.genres) {
-            db_genre = await tx.genre.findUnique({
-              where: {apiId: genre}
-            });
-          }
-          if (db_genre !== undefined) {
-            await tx.genre_production.upsert({
-              where: {
-                genre_id_production_id: {
-                  genre_id: db_genre!.id,
+        // Link genres
+        if (production.genres) {
+          for (const genre of production.genres) {
+            const genreId = genreMap.get(genre);
+            if (genreId) {
+              await tx.genre_production.upsert({
+                where: {
+                  genre_id_production_id: {
+                    genre_id: genreId,
+                    production_id: db_production.id,
+                  }
+                },
+                update: {}, // exists, no update needed
+                create: {
                   production_id: db_production.id,
+                  genre_id: genreId,
                 }
-              },
-              update: {}, // if it already exists, you don't need to update it
-              create: {
-                production_id: db_production.id,
-                genre_id: db_genre!.id,
-              }
-            });
+              });
+            }
           }
         }
       }
