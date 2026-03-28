@@ -453,23 +453,33 @@ async function sync_spaces(cutoff_timestamp: Date | undefined = undefined) {
     page = filterByCutoff(page, cutoff_timestamp);
 
     await prisma.$transaction(async (tx) => {
+      // Collect all location apiIds for bulk lookup
+      const locationApiIds = new Set<string>();
       for (const space of page) {
+        if (space.location) locationApiIds.add(space.location);
+      }
 
-        // to link the location
-        const location = await tx.location.findUnique({
-          where: { apiId: space.location}
-        });
+      // Fetch all required locations in bulk
+      const locations = await tx.location.findMany({
+        where: { apiId: { in: Array.from(locationApiIds) } },
+        select: { id: true, apiId: true }
+      });
 
+      // Create lookup map
+      const locationMap = new Map(locations.map(l => [l.apiId, l.id]));
+
+      for (const space of page) {
+        const locationId = space.location ? locationMap.get(space.location) : null;
 
         await tx.space.upsert({
           where: { apiId: space["@id"] },
           update: {
             ...mapSpace(space),
-            location_id: location?.id,
+            location_id: locationId || null,
           },
           create: {
             ...mapSpace(space),
-            location_id: location?.id,
+            location_id: locationId || null,
           }
         });
       }
