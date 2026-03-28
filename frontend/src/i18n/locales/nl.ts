@@ -76,7 +76,10 @@ const nl: Messages = {
       editSubTitle: 'Beheer archiefdetails en vertalingen voor deze voorstelling',
       title: 'Titel',
       slug: 'Slug',
-      content: 'Inhoud'
+      content: 'Inhoud',
+      back: '← Terug naar overzicht',
+      saveOnDraft: 'Opslaan als draft',
+      publish: 'Publiceren'
   },
   footer: {
     about: 'De Kunstencentrum VIERNULVIER archiefcollectie bewaart en ontsluit meer dan 40 jaar podiumkunsten geschiedenis in De Vooruit.',

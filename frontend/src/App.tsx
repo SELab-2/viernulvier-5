@@ -10,7 +10,7 @@ import ProductionEditPage from './pages/admin/ProductionEditPage'
 // Admin pages (lazy loaded — not included in public bundle)
 const LoginPage = lazy(() => import('./pages/admin/LoginPage'))
 const DashboardPage = lazy(() => import('./pages/admin/DashboardPage'))
-const ArchiveEditPage = lazy(() => import('./pages/admin/ArchiveEditPage'))
+const ArchiveEditPage = lazy(() => import('./pages/admin/ProductionEditPage'))
 
 /**
  * Root App component.

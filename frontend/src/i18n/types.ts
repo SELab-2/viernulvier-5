@@ -55,6 +55,9 @@ export type Messages = {
       title: string,
       slug: string,
       content: string
+      back: string
+      saveOnDraft: string
+      publish: string
   }
   footer: {
     about: string
