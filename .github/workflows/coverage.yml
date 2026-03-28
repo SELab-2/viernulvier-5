@@ -42,6 +42,7 @@ jobs:
       DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/viernulvier_test
       JWT_SECRET: test-secret-for-ci
       NODE_ENV: test
+      SKIP_TEST_DB_START: 1
 
     steps:
       - name: Checkout code
@@ -54,8 +55,6 @@ jobs:
           cache-dependency-path: backend/package-lock.json
 
       - run: npm ci
-      - run: npx prisma generate
-      - run: npx prisma migrate deploy
       - run: npm run test:coverage -- --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage
 
       - name: Post backend coverage comment
