@@ -8,8 +8,8 @@ import {
     eventPricePaginationQuerySchema,
     eventListSchema,
     eventPriceListSchema,
-    eventPriceSchema,
-    eventSchema,
+    singleEventPriceSchema,
+    singleEventSchema,
     updateEventSchema,
     updateEventParamsSchema,
     createEventSchema,
@@ -23,31 +23,7 @@ const eventsRoutes: FastifyPluginAsync = async (fastify) => {
     const service = new EventsService(repository)
     const controller = new EventsController(service)
 
-    fastify.get('/', {
-        schema: {
-            tags: ['events'],
-            summary: 'Get a paginated list of events',
-            querystring: eventPaginationQuerySchema,
-            response: {
-                200: eventListSchema,
-            },
-        },
-        handler: (request, reply) => controller.getEvents(request as any, reply),
-    })
-
-    fastify.get('/:id', {
-        schema: {
-            tags: ['events'],
-            summary: 'Get an event by ID',
-            params: updateEventParamsSchema,
-            response: {
-                200: eventSchema,
-                404: errorSchema
-            },
-        },
-        handler: (request, reply) => controller.getEvent(request as any, reply),
-    })
-
+    // Static routes first to avoid ID collision
     fastify.get('/prices', {
         schema: {
             tags: ['events'],
@@ -66,14 +42,40 @@ const eventsRoutes: FastifyPluginAsync = async (fastify) => {
             summary: 'Get an event price by ID',
             params: updateEventParamsSchema,
             response: {
-                200: eventPriceSchema,
+                200: singleEventPriceSchema,
                 404: errorSchema
             },
         },
         handler: (request, reply) => controller.getEventPrice(request as any, reply),
     })
 
-    // POST /api/archive/events
+    // Collection and parameterized routes last
+    fastify.get('/', {
+        schema: {
+            tags: ['events'],
+            summary: 'Get a paginated list of events',
+            querystring: eventPaginationQuerySchema,
+            response: {
+                200: eventListSchema,
+            },
+        },
+        handler: (request, reply) => controller.getEvents(request as any, reply),
+    })
+
+    fastify.get('/:id', {
+        schema: {
+            tags: ['events'],
+            summary: 'Get an event by ID',
+            params: updateEventParamsSchema,
+            response: {
+                200: singleEventSchema,
+                404: errorSchema
+            },
+        },
+        handler: (request, reply) => controller.getEvent(request as any, reply),
+    })
+
+    // POST /api/v1/archive/events
     fastify.post('/', {
         preHandler: [requirePermission(Permission.ARCHIVE_CREATE)],
         schema: {
@@ -81,13 +83,13 @@ const eventsRoutes: FastifyPluginAsync = async (fastify) => {
             summary: 'Create a new event',
             body: createEventSchema,
             response: {
-                201: eventSchema,
+                201: singleEventSchema,
             },
         },
         handler: (request, reply) => controller.createEvent(request as any, reply),
     })
 
-    // PUT /api/archive/events/:id
+    // PATCH /api/v1/archive/events/:id
     fastify.patch('/:id', {
         preHandler: [requirePermission(Permission.ARCHIVE_UPDATE)],
         schema: {
@@ -96,7 +98,7 @@ const eventsRoutes: FastifyPluginAsync = async (fastify) => {
             params: updateEventParamsSchema,
             body: updateEventSchema,
             response: {
-                200: eventSchema,
+                200: singleEventSchema,
             },
         },
         handler: (request, reply) => controller.updateEvent(request as any, reply),
