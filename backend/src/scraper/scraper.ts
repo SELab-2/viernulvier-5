@@ -1,6 +1,6 @@
 import { prisma } from "./prisma";
 import * as Fetcher from "./fetcher"
-import { log } from "./logger";
+import { log, updateStatus, finishStatus } from "./logger";
 
 import type {
   APIProduction,
@@ -366,7 +366,7 @@ async function sync_locations(cutoff_timestamp: Date | undefined = undefined) {
 
   for await (let page of Fetcher.fetchLocationsPages()) {
     pageCount++;
-    log(`Processing page ${pageCount} with ${page.length} locations`);
+    updateStatus("Locations", `Processing page ${pageCount} (${totalProcessed} total)`);
 
     if (page.length === 0) break;
     page = filterByCutoff(page, cutoff_timestamp);
@@ -386,7 +386,7 @@ async function sync_locations(cutoff_timestamp: Date | undefined = undefined) {
     totalProcessed += page.length;
   }
 
-  log(`Completed syncing ${totalProcessed} locations from ${pageCount} pages`);
+  finishStatus(`\u2705 Completed syncing ${totalProcessed} locations from ${pageCount} pages`);
 }
 
 async function sync_hall(cutoff_timestamp: Date | undefined = undefined) {
@@ -396,7 +396,7 @@ async function sync_hall(cutoff_timestamp: Date | undefined = undefined) {
 
   for await (let page of Fetcher.fetchHallsPages()) {
     pageCount++;
-    log(`Processing page ${pageCount} with ${page.length} halls`);
+    updateStatus("Halls", `Processing page ${pageCount} (${totalProcessed} total)`);
 
     if (page.length === 0) break;
     page = filterByCutoff(page, cutoff_timestamp);
@@ -437,7 +437,7 @@ async function sync_hall(cutoff_timestamp: Date | undefined = undefined) {
     totalProcessed += page.length;
   }
 
-  log(`Completed syncing ${totalProcessed} halls from ${pageCount} pages`);
+  finishStatus(`\u2705 Completed syncing ${totalProcessed} halls from ${pageCount} pages`);
 }
 
 async function sync_spaces(cutoff_timestamp: Date | undefined = undefined) {
@@ -447,7 +447,7 @@ async function sync_spaces(cutoff_timestamp: Date | undefined = undefined) {
 
   for await (let page of Fetcher.fetchSpacesPages()) {
     pageCount++;
-    log(`Processing page ${pageCount} with ${page.length} spaces`);
+    updateStatus("Spaces", `Processing page ${pageCount} (${totalProcessed} total)`);
 
     if (page.length === 0) break;
     page = filterByCutoff(page, cutoff_timestamp);
@@ -488,7 +488,7 @@ async function sync_spaces(cutoff_timestamp: Date | undefined = undefined) {
     totalProcessed += page.length;
   }
 
-  log(`Completed syncing ${totalProcessed} spaces from ${pageCount} pages`);
+  finishStatus(`\u2705 Completed syncing ${totalProcessed} spaces from ${pageCount} pages`);
 }
 
 async function sync_events(cutoff_timestamp: Date | undefined = undefined) {
@@ -498,7 +498,7 @@ async function sync_events(cutoff_timestamp: Date | undefined = undefined) {
 
   for await (let page of Fetcher.fetchEventsPages()) {
     pageCount++;
-    log(`Processing page ${pageCount} with ${page.length} events`);
+    updateStatus("Events", `Processing page ${pageCount} (${totalProcessed} total)`);
 
     if (page.length === 0) break;
     page = filterByCutoff(page, cutoff_timestamp);
@@ -558,7 +558,7 @@ async function sync_events(cutoff_timestamp: Date | undefined = undefined) {
     totalProcessed += page.length;
   }
 
-  log(`Completed syncing ${totalProcessed} events from ${pageCount} pages`);
+  finishStatus(`\u2705 Completed syncing ${totalProcessed} events from ${pageCount} pages`);
 }
 
 async function sync_productions(cutoff_timestamp: Date | undefined = undefined) {
@@ -568,7 +568,7 @@ async function sync_productions(cutoff_timestamp: Date | undefined = undefined) 
 
   for await (let page of Fetcher.fetchProductionsPages()) {
     pageCount++;
-    log(`Processing page ${pageCount} with ${page.length} productions`);
+    updateStatus("Productions", `Processing page ${pageCount} (${totalProcessed} total)`);
 
     if (page.length === 0) break;
     page = filterByCutoff(page, cutoff_timestamp);
@@ -680,8 +680,9 @@ async function sync_productions(cutoff_timestamp: Date | undefined = undefined) 
     totalProcessed += page.length;
     }
 
-  log(`Completed syncing ${totalProcessed} productions from ${pageCount} pages`);
+  finishStatus(`\u2705 Completed syncing ${totalProcessed} productions from ${pageCount} pages`);
 }
+
 
 async function sync_genres(cutoff_timestamp: Date | undefined = undefined){
   let totalProcessed = 0;
@@ -689,7 +690,7 @@ async function sync_genres(cutoff_timestamp: Date | undefined = undefined){
 
   for await (let page of Fetcher.fetchGenrePages()) {
     pageCount++;
-    log(`Processing page ${pageCount} with ${page.length} genres`);
+    updateStatus("Genres", `Processing page ${pageCount} (${totalProcessed} total)`);
 
     if (page.length === 0) break;
     page = filterByCutoff(page, cutoff_timestamp);
@@ -707,7 +708,7 @@ async function sync_genres(cutoff_timestamp: Date | undefined = undefined){
     totalProcessed += page.length;
   }
 
-  log(`Completed syncing ${totalProcessed} genres from ${pageCount} pages`);
+  finishStatus(`\u2705 Completed syncing ${totalProcessed} genres from ${pageCount} pages`);
 }
 
 
@@ -717,7 +718,7 @@ async function sync_galleries(cutoff_timestamp: Date | undefined = undefined){
 
   for await (let page of Fetcher.fetchGalleryPages()) {
     pageCount++;
-    log(`Processing page ${pageCount} with ${page.length} galleries`);
+    updateStatus("Galleries", `Processing page ${pageCount} (${totalProcessed} total)`);
 
     if (page.length === 0) break;
     page = filterByCutoff(page, cutoff_timestamp);
@@ -769,7 +770,7 @@ async function sync_galleries(cutoff_timestamp: Date | undefined = undefined){
     totalProcessed += page.length;
   }
 
-  log(`Completed syncing ${totalProcessed} galleries from ${pageCount} pages`);
+  finishStatus(`\u2705 Completed syncing ${totalProcessed} galleries from ${pageCount} pages`);
 }
 
 
@@ -779,7 +780,7 @@ async function sync_items(cutoff_timestamp: Date | undefined = undefined){
 
   for await (let page of Fetcher.fetchItemPages()) {
     pageCount++;
-    log(`Processing page ${pageCount} with ${page.length} items`);
+    updateStatus("Items", `Processing page ${pageCount} (${totalProcessed} total)`);
 
     if (page.length === 0) break;
     page = filterByCutoff(page, cutoff_timestamp);
@@ -833,7 +834,7 @@ async function sync_items(cutoff_timestamp: Date | undefined = undefined){
 
   }
 
-  log(`Completed syncing ${totalProcessed} items from ${pageCount} pages`);
+  finishStatus(`\u2705 Completed syncing ${totalProcessed} items from ${pageCount} pages`);
 }
 
 async function sync_event_prices(cutoff_timestamp: Date | undefined = undefined){
@@ -842,7 +843,7 @@ async function sync_event_prices(cutoff_timestamp: Date | undefined = undefined)
 
   for await (let page of Fetcher.fetchEventPricePages()) {
     pageCount++;
-    log(`Processing page ${pageCount} with ${page.length} event_prices`);
+    updateStatus("Prices", `Processing page ${pageCount} (${totalProcessed} total)`);
 
     if (page.length === 0) break;
     page = filterByCutoff(page, cutoff_timestamp);
@@ -884,7 +885,7 @@ async function sync_event_prices(cutoff_timestamp: Date | undefined = undefined)
     totalProcessed += page.length;
   }
 
-  log(`Completed syncing ${totalProcessed} event_prices from ${pageCount} pages`);
+  finishStatus(`\u2705 Completed syncing ${totalProcessed} event_prices from ${pageCount} pages`);
 }
 
 async function sync_tags(cutoff_timestamp: Date | undefined = undefined){
@@ -893,7 +894,7 @@ async function sync_tags(cutoff_timestamp: Date | undefined = undefined){
 
   for await (let page of Fetcher.fetchTagPages()) {
     pageCount++;
-    log(`Processing page ${pageCount} with ${page.length} tags`);
+    updateStatus("Tags", `Processing page ${pageCount} (${totalProcessed} total)`);
 
     if (page.length === 0) break;
     page = filterByCutoff(page, cutoff_timestamp);
@@ -935,7 +936,7 @@ async function sync_tags(cutoff_timestamp: Date | undefined = undefined){
     totalProcessed += page.length;
   }
 
-  log(`Completed syncing ${totalProcessed} tags from ${pageCount} pages`);
+  finishStatus(`\u2705 Completed syncing ${totalProcessed} tags from ${pageCount} pages`);
 }
 
 async function sync_crops(cutoff_timestamp: Date | undefined = undefined){
@@ -944,7 +945,7 @@ async function sync_crops(cutoff_timestamp: Date | undefined = undefined){
 
   for await (let page of Fetcher.fetchCropPages()) {
     pageCount++;
-    log(`Processing page ${pageCount} with ${page.length} crops`);
+    updateStatus("Crops", `Processing page ${pageCount} (${totalProcessed} total)`);
 
     if (page.length === 0) break;
     page = filterByCutoff(page, cutoff_timestamp);
@@ -963,7 +964,7 @@ async function sync_crops(cutoff_timestamp: Date | undefined = undefined){
     totalProcessed += page.length;
   }
 
-  log(`Completed syncing ${totalProcessed} crops from ${pageCount} pages`);
+  finishStatus(`\u2705 Completed syncing ${totalProcessed} crops from ${pageCount} pages`);
 }
 
 async function sync_uit_keywords(cutoff_timestamp: Date | undefined = undefined){
@@ -972,7 +973,7 @@ async function sync_uit_keywords(cutoff_timestamp: Date | undefined = undefined)
 
   for await (let page of Fetcher.fetchUitKeywordPages()) {
     pageCount++;
-    log(`Processing page ${pageCount} with ${page.length} keywords`);
+    updateStatus("Keywords", `Processing page ${pageCount} (${totalProcessed} total)`);
 
     if (page.length === 0) break;
     page = filterByCutoff(page, cutoff_timestamp);
@@ -991,7 +992,7 @@ async function sync_uit_keywords(cutoff_timestamp: Date | undefined = undefined)
     totalProcessed += page.length;
   }
 
-  log(`Completed syncing ${totalProcessed} keywords from ${pageCount} pages`);
+  finishStatus(`\u2705 Completed syncing ${totalProcessed} keywords from ${pageCount} pages`);
 }
 
 
@@ -1001,7 +1002,7 @@ async function sync_uit_themes(cutoff_timestamp: Date | undefined = undefined){
 
   for await (let page of Fetcher.fetchUitThemePages()) {
     pageCount++;
-    log(`Processing page ${pageCount} with ${page.length} themes`);
+    updateStatus("Themes", `Processing page ${pageCount} (${totalProcessed} total)`);
 
     if (page.length === 0) break;
     page = filterByCutoff(page, cutoff_timestamp);
@@ -1020,7 +1021,7 @@ async function sync_uit_themes(cutoff_timestamp: Date | undefined = undefined){
     totalProcessed += page.length;
   }
 
-  log(`Completed syncing ${totalProcessed} themes from ${pageCount} pages`);
+  finishStatus(`\u2705 Completed syncing ${totalProcessed} themes from ${pageCount} pages`);
 }
 
 
@@ -1030,7 +1031,7 @@ async function sync_uit_types(cutoff_timestamp: Date | undefined = undefined){
 
   for await (let page of Fetcher.fetchUitTypePages()) {
     pageCount++;
-    log(`Processing page ${pageCount} with ${page.length} themes`);
+    updateStatus("Types", `Processing page ${pageCount} (${totalProcessed} total)`);
 
     if (page.length === 0) break;
     page = filterByCutoff(page, cutoff_timestamp);
@@ -1049,7 +1050,7 @@ async function sync_uit_types(cutoff_timestamp: Date | undefined = undefined){
     totalProcessed += page.length;
   }
 
-  log(`Completed syncing ${totalProcessed} themes from ${pageCount} pages`);
+  finishStatus(`\u2705 Completed syncing ${totalProcessed} types from ${pageCount} pages`);
 }
 
 
