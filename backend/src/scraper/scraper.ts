@@ -784,40 +784,48 @@ async function sync_items(cutoff_timestamp: Date | undefined = undefined){
     if (page.length === 0) break;
     page = filterByCutoff(page, cutoff_timestamp);
 
-
     await prisma.$transaction(async (tx) => {
+      // Collect all crop apiIds from all items in the page
+      const cropApiIds = new Set<string>();
       for (const item of page) {
-
-
-        const apiIds = item.crops.map(crop => crop["@id"]);
-        let db_crops: any[] = [];
-        if (item.crops && item.crops.length !== 0) {
-           db_crops = await tx.crop.findMany({
-            where: {apiId: {in: apiIds}},
-            select: {id: true},
-          });
-
-
+        if (item.crops) {
+          item.crops.forEach(crop => cropApiIds.add(crop["@id"]));
         }
+      }
 
-        await prisma.item.upsert({
+      // Bulk fetch all required crops
+      const db_all_crops = await tx.crop.findMany({
+        where: { apiId: { in: Array.from(cropApiIds) } },
+        select: { id: true, apiId: true }
+      });
+
+      // Create lookup map
+      const cropMap = new Map(db_all_crops.map(c => [c.apiId, c.id]));
+
+      for (const item of page) {
+        // Map the apiIds of this specific item's crops to their internal database IDs
+        const itemCropIds = item.crops
+          ? item.crops
+              .map(crop => cropMap.get(crop["@id"]))
+              .filter((id): id is string => typeof id === 'string')
+          : [];
+
+        await tx.item.upsert({
           where: {apiId: item["@id"]},
           update: {
             ...mapItem(item),
-            crops: db_crops.length > 0
-                ? {connect: db_crops.map((crop) => ({ id: crop.id }))}
-                : undefined
+            crops: itemCropIds.length > 0
+                ? { set: itemCropIds.map(id => ({ id })) }
+                : { set: [] }
 
           },
           create: {
             ...mapItem(item),
-            crops: db_crops.length > 0
-                ? {connect: db_crops.map((crop) => ({ id: crop.id }))}
+            crops: itemCropIds.length > 0
+                ? { connect: itemCropIds.map(id => ({ id })) }
                 : undefined
           }
         });
-
-
       }
     });
 
