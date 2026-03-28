@@ -402,25 +402,33 @@ async function sync_hall(cutoff_timestamp: Date | undefined = undefined) {
     page = filterByCutoff(page, cutoff_timestamp);
 
     await prisma.$transaction(async (tx) => {
+      // Collect all space apiIds for bulk lookup
+      const spaceApiIds = new Set<string>();
       for (const hall of page) {
+        if (hall.space) spaceApiIds.add(hall.space);
+      }
 
-        // link the space
-        let space = null;
-        if (hall.space) {
-          space = await tx.space.findUnique({
-            where: { apiId: hall.space}
-          });
-        }
+      // Fetch all required spaces in bulk
+      const spaces = await tx.space.findMany({
+        where: { apiId: { in: Array.from(spaceApiIds) } },
+        select: { id: true, apiId: true }
+      });
+
+      // Create lookup map
+      const spaceMap = new Map(spaces.map(s => [s.apiId, s.id]));
+
+      for (const hall of page) {
+        const spaceId = hall.space ? spaceMap.get(hall.space) : null;
 
         await tx.hall.upsert({
           where: { apiId: hall["@id"] },
           update: {
             ...mapHall(hall),
-            space_id: space?.id || null
+            space_id: spaceId || null
           },
           create: {
             ...mapHall(hall),
-            space_id: space?.id || null
+            space_id: spaceId || null
           }
         });
       }
