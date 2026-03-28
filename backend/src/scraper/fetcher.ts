@@ -1,7 +1,7 @@
 import "dotenv/config";
 import axios from "axios";
 import axiosRetry from "axios-retry";
-import { log } from "./logger";
+import { log, updateStatus } from "./logger";
 
 
 // if we request too fast, for rate limits
@@ -30,11 +30,32 @@ const headers = {
 }
 const api = `https://www.viernulvier.gent{url}`;
 
-
+// Helper function to fetch items in parallel chunks to avoid overwhelming the API
+async function fetchInChunks<T>(urls: string[], chunkSize: number): Promise<T[]> {
+    const results: T[] = [];
+    for (let i = 0; i < urls.length; i += chunkSize) {
+        const chunk = urls.slice(i, i + chunkSize);
+        const promises = chunk.map(url => {
+            const link = api.replace("{url}", url);
+            return axios.get(link, { headers: headers }).then(res => res.data);
+        });
+        
+        updateStatus("Network", `Fetching sub-chunk ${i / chunkSize + 1}/${Math.ceil(urls.length / chunkSize)} (${urls.length} items)`);
+        const chunkResults = await Promise.all(promises);
+        results.push(...chunkResults);
+    }
+    return results;
+}
 
 
 async function* fetchPagesFromURL<T = any>(url: string, per_item: boolean=false): AsyncGenerator<T[]> {
     let currentUrl = url;
+    // Append itemsPerPage to the initial URL if not present
+    if (!currentUrl.includes("itemsPerPage=")) {
+        const separator = currentUrl.includes("?") ? "&" : "?";
+        currentUrl += `${separator}itemsPerPage=50`;
+    }
+
     while (true) {
         const link = api.replace("{url}", currentUrl);
         const response = await axios.get(link, { headers: headers });
@@ -55,23 +76,18 @@ async function* fetchPagesFromURL<T = any>(url: string, per_item: boolean=false)
         
         const view = data["view"];
         const members = data["member"];
-        if (per_item) {
-            const return_members = [];
-            for (const member of members) {
-                const member_link = api.replace("{url}", member["@id"]);
-                const response_member = await axios.get(member_link, {headers: headers});
-                return_members.push(response_member.data);
-            }
-
-
-            log(`Fetched page with ${return_members.length} items: ${currentUrl}`);
+        if (per_item && members && members.length > 0) {
+            log(`Fetching ${members.length} items in parallel for: ${currentUrl}`);
+            const itemUrls = members.map((m: any) => m["@id"]);
+            // Use a chunk size of 10 for parallel fetching
+            const return_members = await fetchInChunks<T>(itemUrls, 10);
             yield return_members;
         } else {
             log(`Fetched page with ${members.length} items: ${currentUrl}`);
             yield members;
         }
         
-        if (!("next" in view)) {
+        if (!view || !("next" in view)) {
             break;
         }
         
