@@ -1,6 +1,7 @@
 import { prisma } from "./prisma";
 import * as Fetcher from "./fetcher"
-import {updateStatus, finishStatus } from "./logger";
+import { updateStatus, finishStatus, createProgressBar } from "./logger";
+
 
 import type {
   APIProduction,
@@ -364,12 +365,13 @@ async function sync_locations(cutoff_timestamp: Date | undefined = undefined) {
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (let page of Fetcher.fetchLocationsPages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchLocationsPages()) {
     pageCount++;
-    updateStatus("Locations", `Processing page ${pageCount} (${totalProcessed} total)`);
+    totalProcessed += rawPage.length;
+    updateStatus("Locations", createProgressBar(totalProcessed, totalItems));
 
-    if (page.length === 0) break;
-    page = filterByCutoff(page, cutoff_timestamp);
+    if (rawPage.length === 0) break;
+    const page = filterByCutoff(rawPage, cutoff_timestamp);
 
     await prisma.$transaction(async (tx) => {
       for (const location of page) {
@@ -382,8 +384,6 @@ async function sync_locations(cutoff_timestamp: Date | undefined = undefined) {
         });
       }
     });
-
-    totalProcessed += page.length;
   }
 
   finishStatus(`\u2705 Completed syncing ${totalProcessed} locations from ${pageCount} pages`);
@@ -394,12 +394,13 @@ async function sync_hall(cutoff_timestamp: Date | undefined = undefined) {
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (let page of Fetcher.fetchHallsPages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchHallsPages()) {
     pageCount++;
-    updateStatus("Halls", `Processing page ${pageCount} (${totalProcessed} total)`);
+    totalProcessed += rawPage.length;
+    updateStatus("Halls", createProgressBar(totalProcessed, totalItems));
 
-    if (page.length === 0) break;
-    page = filterByCutoff(page, cutoff_timestamp);
+    if (rawPage.length === 0) break;
+    const page = filterByCutoff(rawPage, cutoff_timestamp);
 
     await prisma.$transaction(async (tx) => {
       // Collect all space apiIds for bulk lookup
@@ -433,8 +434,6 @@ async function sync_hall(cutoff_timestamp: Date | undefined = undefined) {
         });
       }
     });
-
-    totalProcessed += page.length;
   }
 
   finishStatus(`\u2705 Completed syncing ${totalProcessed} halls from ${pageCount} pages`);
@@ -445,12 +444,13 @@ async function sync_spaces(cutoff_timestamp: Date | undefined = undefined) {
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (let page of Fetcher.fetchSpacesPages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchSpacesPages()) {
     pageCount++;
-    updateStatus("Spaces", `Processing page ${pageCount} (${totalProcessed} total)`);
+    totalProcessed += rawPage.length;
+    updateStatus("Spaces", createProgressBar(totalProcessed, totalItems));
 
-    if (page.length === 0) break;
-    page = filterByCutoff(page, cutoff_timestamp);
+    if (rawPage.length === 0) break;
+    const page = filterByCutoff(rawPage, cutoff_timestamp);
 
     await prisma.$transaction(async (tx) => {
       // Collect all location apiIds for bulk lookup
@@ -484,8 +484,6 @@ async function sync_spaces(cutoff_timestamp: Date | undefined = undefined) {
         });
       }
     });
-
-    totalProcessed += page.length;
   }
 
   finishStatus(`\u2705 Completed syncing ${totalProcessed} spaces from ${pageCount} pages`);
@@ -496,12 +494,13 @@ async function sync_events(cutoff_timestamp: Date | undefined = undefined) {
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (let page of Fetcher.fetchEventsPages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchEventsPages()) {
     pageCount++;
-    updateStatus("Events", `Processing page ${pageCount} (${totalProcessed} total)`);
+    totalProcessed += rawPage.length;
+    updateStatus("Events", createProgressBar(totalProcessed, totalItems));
 
-    if (page.length === 0) break;
-    page = filterByCutoff(page, cutoff_timestamp);
+    if (rawPage.length === 0) break;
+    const page = filterByCutoff(rawPage, cutoff_timestamp);
 
     await prisma.$transaction(async (tx) => {
       // Collect all production and hall apiIds for bulk lookup
@@ -554,8 +553,6 @@ async function sync_events(cutoff_timestamp: Date | undefined = undefined) {
         });
       }
     });
-
-    totalProcessed += page.length;
   }
 
   finishStatus(`\u2705 Completed syncing ${totalProcessed} events from ${pageCount} pages`);
@@ -566,12 +563,13 @@ async function sync_productions(cutoff_timestamp: Date | undefined = undefined) 
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (let page of Fetcher.fetchProductionsPages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchProductionsPages()) {
     pageCount++;
-    updateStatus("Productions", `Processing page ${pageCount} (${totalProcessed} total)`);
+    totalProcessed += rawPage.length;
+    updateStatus("Productions", createProgressBar(totalProcessed, totalItems));
 
-    if (page.length === 0) break;
-    page = filterByCutoff(page, cutoff_timestamp);
+    if (rawPage.length === 0) break;
+    const page = filterByCutoff(rawPage, cutoff_timestamp);
 
     await prisma.$transaction(async (tx) => {
       // Collect all apiIds for lookups to avoid N+1 queries
@@ -677,23 +675,24 @@ async function sync_productions(cutoff_timestamp: Date | undefined = undefined) 
         }
       }
     });
-    totalProcessed += page.length;
     }
 
   finishStatus(`\u2705 Completed syncing ${totalProcessed} productions from ${pageCount} pages`);
 }
 
 
+
 async function sync_genres(cutoff_timestamp: Date | undefined = undefined){
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (let page of Fetcher.fetchGenrePages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchGenrePages()) {
     pageCount++;
-    updateStatus("Genres", `Processing page ${pageCount} (${totalProcessed} total)`);
+    totalProcessed += rawPage.length;
+    updateStatus("Genres", createProgressBar(totalProcessed, totalItems));
 
-    if (page.length === 0) break;
-    page = filterByCutoff(page, cutoff_timestamp);
+    if (rawPage.length === 0) break;
+    const page = filterByCutoff(rawPage, cutoff_timestamp);
 
     await prisma.$transaction(
         page.map(genre =>
@@ -704,8 +703,6 @@ async function sync_genres(cutoff_timestamp: Date | undefined = undefined){
             })
         )
     );
-
-    totalProcessed += page.length;
   }
 
   finishStatus(`\u2705 Completed syncing ${totalProcessed} genres from ${pageCount} pages`);
@@ -716,12 +713,13 @@ async function sync_galleries(cutoff_timestamp: Date | undefined = undefined){
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (let page of Fetcher.fetchGalleryPages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchGalleryPages()) {
     pageCount++;
-    updateStatus("Galleries", `Processing page ${pageCount} (${totalProcessed} total)`);
+    totalProcessed += rawPage.length;
+    updateStatus("Galleries", createProgressBar(totalProcessed, totalItems));
 
-    if (page.length === 0) break;
-    page = filterByCutoff(page, cutoff_timestamp);
+    if (rawPage.length === 0) break;
+    const page = filterByCutoff(rawPage, cutoff_timestamp);
 
     await prisma.$transaction(async (tx) => {
       // Collect all item apiIds from all galleries in the page
@@ -754,8 +752,8 @@ async function sync_galleries(cutoff_timestamp: Date | undefined = undefined){
           update: {
             ...mapGallery(gallery),
             items: galleryItemIds.length > 0
-                ? { set: galleryItemIds.map(id => ({ id })) }
-                : { set: [] },
+                ? { connect: galleryItemIds.map(id => ({ id })) }
+                : undefined,
           },
           create: {
             ...mapGallery(gallery),
@@ -766,8 +764,6 @@ async function sync_galleries(cutoff_timestamp: Date | undefined = undefined){
         });
       }
     });
-
-    totalProcessed += page.length;
   }
 
   finishStatus(`\u2705 Completed syncing ${totalProcessed} galleries from ${pageCount} pages`);
@@ -778,12 +774,13 @@ async function sync_items(cutoff_timestamp: Date | undefined = undefined){
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (let page of Fetcher.fetchItemPages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchItemPages()) {
     pageCount++;
-    updateStatus("Items", `Processing page ${pageCount} (${totalProcessed} total)`);
+    totalProcessed += rawPage.length;
+    updateStatus("Items", createProgressBar(totalProcessed, totalItems));
 
-    if (page.length === 0) break;
-    page = filterByCutoff(page, cutoff_timestamp);
+    if (rawPage.length === 0) break;
+    const page = filterByCutoff(rawPage, cutoff_timestamp);
 
     await prisma.$transaction(async (tx) => {
       // Collect all crop apiIds from all items in the page
@@ -816,9 +813,8 @@ async function sync_items(cutoff_timestamp: Date | undefined = undefined){
           update: {
             ...mapItem(item),
             crops: itemCropIds.length > 0
-                ? { set: itemCropIds.map(id => ({ id })) }
-                : { set: [] }
-
+                ? { connect: itemCropIds.map(id => ({ id })) }
+                : undefined
           },
           create: {
             ...mapItem(item),
@@ -829,9 +825,6 @@ async function sync_items(cutoff_timestamp: Date | undefined = undefined){
         });
       }
     });
-
-    totalProcessed += page.length;
-
   }
 
   finishStatus(`\u2705 Completed syncing ${totalProcessed} items from ${pageCount} pages`);
@@ -841,12 +834,13 @@ async function sync_event_prices(cutoff_timestamp: Date | undefined = undefined)
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (let page of Fetcher.fetchEventPricePages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchEventPricePages()) {
     pageCount++;
-    updateStatus("Prices", `Processing page ${pageCount} (${totalProcessed} total)`);
+    totalProcessed += rawPage.length;
+    updateStatus("Prices", createProgressBar(totalProcessed, totalItems));
 
-    if (page.length === 0) break;
-    page = filterByCutoff(page, cutoff_timestamp);
+    if (rawPage.length === 0) break;
+    const page = filterByCutoff(rawPage, cutoff_timestamp);
 
     await prisma.$transaction(async (tx) => {
           // Collect all event apiIds for bulk lookup
@@ -881,8 +875,6 @@ async function sync_event_prices(cutoff_timestamp: Date | undefined = undefined)
           }
         }
     );
-
-    totalProcessed += page.length;
   }
 
   finishStatus(`\u2705 Completed syncing ${totalProcessed} event_prices from ${pageCount} pages`);
@@ -892,12 +884,13 @@ async function sync_tags(cutoff_timestamp: Date | undefined = undefined){
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (let page of Fetcher.fetchTagPages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchTagPages()) {
     pageCount++;
-    updateStatus("Tags", `Processing page ${pageCount} (${totalProcessed} total)`);
+    totalProcessed += rawPage.length;
+    updateStatus("Tags", createProgressBar(totalProcessed, totalItems));
 
-    if (page.length === 0) break;
-    page = filterByCutoff(page, cutoff_timestamp);
+    if (rawPage.length === 0) break;
+    const page = filterByCutoff(rawPage, cutoff_timestamp);
 
     await prisma.$transaction(async (tx) => {
           // Collect all gallery apiIds for bulk lookup
@@ -932,8 +925,6 @@ async function sync_tags(cutoff_timestamp: Date | undefined = undefined){
           }
         }
     );
-
-    totalProcessed += page.length;
   }
 
   finishStatus(`\u2705 Completed syncing ${totalProcessed} tags from ${pageCount} pages`);
@@ -943,12 +934,13 @@ async function sync_crops(cutoff_timestamp: Date | undefined = undefined){
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (let page of Fetcher.fetchCropPages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchCropPages()) {
     pageCount++;
-    updateStatus("Crops", `Processing page ${pageCount} (${totalProcessed} total)`);
+    totalProcessed += rawPage.length;
+    updateStatus("Crops", createProgressBar(totalProcessed, totalItems));
 
-    if (page.length === 0) break;
-    page = filterByCutoff(page, cutoff_timestamp);
+    if (rawPage.length === 0) break;
+    const page = filterByCutoff(rawPage, cutoff_timestamp);
 
     await prisma.$transaction(
         page.map(crop =>
@@ -959,9 +951,6 @@ async function sync_crops(cutoff_timestamp: Date | undefined = undefined){
             })
         )
     );
-
-
-    totalProcessed += page.length;
   }
 
   finishStatus(`\u2705 Completed syncing ${totalProcessed} crops from ${pageCount} pages`);
@@ -971,12 +960,13 @@ async function sync_uit_keywords(cutoff_timestamp: Date | undefined = undefined)
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (let page of Fetcher.fetchUitKeywordPages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchUitKeywordPages()) {
     pageCount++;
-    updateStatus("Keywords", `Processing page ${pageCount} (${totalProcessed} total)`);
+    totalProcessed += rawPage.length;
+    updateStatus("Keywords", createProgressBar(totalProcessed, totalItems));
 
-    if (page.length === 0) break;
-    page = filterByCutoff(page, cutoff_timestamp);
+    if (rawPage.length === 0) break;
+    const page = filterByCutoff(rawPage, cutoff_timestamp);
 
     await prisma.$transaction(
         page.map(keyword =>
@@ -987,9 +977,6 @@ async function sync_uit_keywords(cutoff_timestamp: Date | undefined = undefined)
             })
         )
     );
-
-
-    totalProcessed += page.length;
   }
 
   finishStatus(`\u2705 Completed syncing ${totalProcessed} keywords from ${pageCount} pages`);
@@ -1000,12 +987,13 @@ async function sync_uit_themes(cutoff_timestamp: Date | undefined = undefined){
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (let page of Fetcher.fetchUitThemePages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchUitThemePages()) {
     pageCount++;
-    updateStatus("Themes", `Processing page ${pageCount} (${totalProcessed} total)`);
+    totalProcessed += rawPage.length;
+    updateStatus("Themes", createProgressBar(totalProcessed, totalItems));
 
-    if (page.length === 0) break;
-    page = filterByCutoff(page, cutoff_timestamp);
+    if (rawPage.length === 0) break;
+    const page = filterByCutoff(rawPage, cutoff_timestamp);
 
     await prisma.$transaction(
         page.map(theme =>
@@ -1016,9 +1004,6 @@ async function sync_uit_themes(cutoff_timestamp: Date | undefined = undefined){
             })
         )
     );
-
-
-    totalProcessed += page.length;
   }
 
   finishStatus(`\u2705 Completed syncing ${totalProcessed} themes from ${pageCount} pages`);
@@ -1029,12 +1014,13 @@ async function sync_uit_types(cutoff_timestamp: Date | undefined = undefined){
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (let page of Fetcher.fetchUitTypePages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchUitTypePages()) {
     pageCount++;
-    updateStatus("Types", `Processing page ${pageCount} (${totalProcessed} total)`);
+    totalProcessed += rawPage.length;
+    updateStatus("Types", createProgressBar(totalProcessed, totalItems));
 
-    if (page.length === 0) break;
-    page = filterByCutoff(page, cutoff_timestamp);
+    if (rawPage.length === 0) break;
+    const page = filterByCutoff(rawPage, cutoff_timestamp);
 
     await prisma.$transaction(
         page.map(type =>
@@ -1045,9 +1031,6 @@ async function sync_uit_types(cutoff_timestamp: Date | undefined = undefined){
             })
         )
     );
-
-
-    totalProcessed += page.length;
   }
 
   finishStatus(`\u2705 Completed syncing ${totalProcessed} types from ${pageCount} pages`);
