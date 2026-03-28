@@ -5,6 +5,7 @@ import { getMessages } from './i18n'
 // Public pages
 import HomePage from './pages/public/HomePage'
 import ArchiveDetailPage from './pages/public/ArchiveDetailPage'
+import ProductionEditPage from './pages/admin/ProductionEditPage'
 
 // Admin pages (lazy loaded — not included in public bundle)
 const LoginPage = lazy(() => import('./pages/admin/LoginPage'))
@@ -21,7 +22,9 @@ const ArchiveEditPage = lazy(() => import('./pages/admin/ArchiveEditPage'))
  */
 function App() {
     const hostname = window.location.hostname
-    const isAdmin = hostname.startsWith('admin.') || false
+    // TODO: for dev purposes isAdmin is true
+    // const isAdmin = hostname.startsWith('admin.') || false
+    const isAdmin = true
     const isLocalDevHost = hostname === 'localhost' || hostname === '127.0.0.1'
     const messages = getMessages()
 
@@ -45,6 +48,9 @@ function App() {
                         <Route path="/admin/login" element={<LoginPage />} />
                         <Route path="/admin" element={<DashboardPage />} />
                         <Route path="/admin/archive/:id/edit" element={<ArchiveEditPage />} />
+                        <Route path="/admin/production/:id/edit" element={<ProductionEditPage />} />
+                        <Route path="/en/admin/production/:id/edit" element={<ProductionEditPage />} />
+                        <Route path="/nl/admin/production/:id/edit" element={<ProductionEditPage />} />
                     </>
                 )}
             </Routes>
