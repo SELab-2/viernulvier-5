@@ -50,10 +50,10 @@ async function fetchInChunks<T>(urls: string[], chunkSize: number): Promise<T[]>
 
 async function* fetchPagesFromURL<T = any>(url: string, per_item: boolean=false): AsyncGenerator<T[]> {
     let currentUrl = url;
-    // Append itemsPerPage to the initial URL if not present
+    // Append itemsPerPage to the initial URL if not present, set to API limit of 30
     if (!currentUrl.includes("itemsPerPage=")) {
         const separator = currentUrl.includes("?") ? "&" : "?";
-        currentUrl += `${separator}itemsPerPage=50`;
+        currentUrl += `${separator}itemsPerPage=30`;
     }
 
     while (true) {
