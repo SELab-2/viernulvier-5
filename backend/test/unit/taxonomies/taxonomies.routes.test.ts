@@ -13,11 +13,11 @@ describe('Taxonomies Routes', () => {
         await app.close()
     })
 
-    describe('GET /api/archive/genres', () => {
+    describe('GET /api/v1/archive/genres', () => {
         it('should return a paginated list of genres with 200 OK', async () => {
             const response = await app.inject({
                 method: 'GET',
-                url: '/api/archive/genres',
+                url: '/api/v1/archive/genres',
                 query: { page: '1', limit: '10' }
             })
 
@@ -25,10 +25,13 @@ describe('Taxonomies Routes', () => {
 
             expect(response.statusCode).toBe(200)
             expect(body).toHaveProperty('data')
+            expect(body).toHaveProperty('meta')
+            expect(body).toHaveProperty('links')
+            expect(body.meta.page).toBe(1)
         })
     })
 
-    describe('GET /api/archive/genres/:id', () => {
+    describe('GET /api/v1/archive/genres/:id', () => {
         it('should return a genre by ID with 200 OK', async () => {
             const genre = await app.prisma.genre.create({
                 data: {
@@ -40,12 +43,14 @@ describe('Taxonomies Routes', () => {
             try {
                 const response = await app.inject({
                     method: 'GET',
-                    url: `/api/archive/genres/${genre.id}`
+                    url: `/api/v1/archive/genres/${genre.id}`
                 })
 
                 expect(response.statusCode).toBe(200)
                 const body = JSON.parse(response.payload)
-                expect(body.id).toBe(genre.id)
+                expect(body.data.id).toBe(genre.id)
+                expect(body.data).toHaveProperty('links')
+                expect(body.data.links).toHaveProperty('self')
             } finally {
                 await app.prisma.genre.delete({ where: { id: genre.id } })
             }
@@ -54,31 +59,32 @@ describe('Taxonomies Routes', () => {
         it('should return 404 for non-existent genre', async () => {
             const response = await app.inject({
                 method: 'GET',
-                url: '/api/archive/genres/00000000-0000-0000-0000-000000000000'
+                url: '/api/v1/archive/genres/00000000-0000-0000-0000-000000000000'
             })
             expect(response.statusCode).toBe(404)
         })
     })
 
-    describe('POST /api/archive/genres', () => {
+    describe('POST /api/v1/archive/genres', () => {
         it('should create a genre and clean up', async () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const response = await app.inject({
                 method: 'POST',
-                url: '/api/archive/genres',
+                url: '/api/v1/archive/genres',
                 headers: { authorization: `Bearer ${token}` },
                 payload: { type: 'test-create', name: { nl: 'New Genre' } }
             })
 
             expect(response.statusCode).toBe(201)
             const body = JSON.parse(response.payload)
-            expect(body.name.nl).toBe('New Genre')
+            expect(body.data.name.nl).toBe('New Genre')
+            expect(body.links).toHaveProperty('self')
 
-            await app.prisma.genre.delete({ where: { id: body.id } })
+            await app.prisma.genre.delete({ where: { id: body.data.id } })
         })
     })
 
-    describe('PUT /api/archive/genres/:id', () => {
+    describe('PATCH /api/v1/archive/genres/:id', () => {
         it('should update a genre and clean up', async () => {
             const genre = await app.prisma.genre.create({
                 data: { name: { nl: 'Original Name' } }
@@ -88,14 +94,14 @@ describe('Taxonomies Routes', () => {
                 const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
                 const response = await app.inject({
                     method: 'PATCH',
-                    url: `/api/archive/genres/${genre.id}`,
+                    url: `/api/v1/archive/genres/${genre.id}`,
                     headers: { authorization: `Bearer ${token}` },
                     payload: { name: { nl: 'Updated Name' } }
                 })
 
                 expect(response.statusCode).toBe(200)
                 const body = JSON.parse(response.payload)
-                expect(body.name.nl).toBe('Updated Name')
+                expect(body.data.name.nl).toBe('Updated Name')
             } finally {
                 await app.prisma.genre.delete({ where: { id: genre.id } })
             }
@@ -105,7 +111,7 @@ describe('Taxonomies Routes', () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const response = await app.inject({
                 method: 'PATCH',
-                url: '/api/archive/genres/00000000-0000-0000-0000-000000000000',
+                url: '/api/v1/archive/genres/00000000-0000-0000-0000-000000000000',
                 headers: { authorization: `Bearer ${token}` },
                 payload: { name: { nl: 'Updated Name' } }
             })
@@ -113,7 +119,7 @@ describe('Taxonomies Routes', () => {
         })
     })
 
-    describe('DELETE /api/archive/genres/:id', () => {
+    describe('DELETE /api/v1/archive/genres/:id', () => {
         it('should delete a genre', async () => {
             const genre = await app.prisma.genre.create({
                 data: { name: { nl: 'To Delete' } }
@@ -122,7 +128,7 @@ describe('Taxonomies Routes', () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const response = await app.inject({
                 method: 'DELETE',
-                url: `/api/archive/genres/${genre.id}`,
+                url: `/api/v1/archive/genres/${genre.id}`,
                 headers: { authorization: `Bearer ${token}` }
             })
 
@@ -135,28 +141,30 @@ describe('Taxonomies Routes', () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const response = await app.inject({
                 method: 'DELETE',
-                url: '/api/archive/genres/00000000-0000-0000-0000-000000000000',
+                url: '/api/v1/archive/genres/00000000-0000-0000-0000-000000000000',
                 headers: { authorization: `Bearer ${token}` }
             })
             expect(response.statusCode).toBe(404)
         })
     })
 
-    describe('GET /api/archive/tags', () => {
+    describe('GET /api/v1/archive/tags', () => {
         it('should return a paginated list of tags with 200 OK', async () => {
             const response = await app.inject({
                 method: 'GET',
-                url: '/api/archive/tags',
+                url: '/api/v1/archive/tags',
             })
 
             const body = JSON.parse(response.payload)
 
             expect(response.statusCode).toBe(200)
             expect(body).toHaveProperty('data')
+            expect(body).toHaveProperty('meta')
+            expect(body).toHaveProperty('links')
         })
     })
 
-    describe('GET /api/archive/tags/:id', () => {
+    describe('GET /api/v1/archive/tags/:id', () => {
         it('should return a tag by ID with 200 OK', async () => {
             const tag = await app.prisma.tag.create({
                 data: {
@@ -168,12 +176,14 @@ describe('Taxonomies Routes', () => {
             try {
                 const response = await app.inject({
                     method: 'GET',
-                    url: `/api/archive/tags/${tag.id}`
+                    url: `/api/v1/archive/tags/${tag.id}`
                 })
 
                 expect(response.statusCode).toBe(200)
                 const body = JSON.parse(response.payload)
-                expect(body.id).toBe(tag.id)
+                expect(body.data.id).toBe(tag.id)
+                expect(body.data).toHaveProperty('links')
+                expect(body.data.links).toHaveProperty('self')
             } finally {
                 await app.prisma.tag.delete({ where: { id: tag.id } })
             }
@@ -182,31 +192,32 @@ describe('Taxonomies Routes', () => {
         it('should return 404 for non-existent tag', async () => {
             const response = await app.inject({
                 method: 'GET',
-                url: '/api/archive/tags/00000000-0000-0000-0000-000000000000'
+                url: '/api/v1/archive/tags/00000000-0000-0000-0000-000000000000'
             })
             expect(response.statusCode).toBe(404)
         })
     })
 
-    describe('POST /api/archive/tags', () => {
+    describe('POST /api/v1/archive/tags', () => {
         it('should create a tag and clean up', async () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const response = await app.inject({
                 method: 'POST',
-                url: '/api/archive/tags',
+                url: '/api/v1/archive/tags',
                 headers: { authorization: `Bearer ${token}` },
                 payload: { code: 'new-tag', name: { nl: 'New Tag' } }
             })
 
             expect(response.statusCode).toBe(201)
             const body = JSON.parse(response.payload)
-            expect(body.name.nl).toBe('New Tag')
+            expect(body.data.name.nl).toBe('New Tag')
+            expect(body.links).toHaveProperty('self')
 
-            await app.prisma.tag.delete({ where: { id: body.id } })
+            await app.prisma.tag.delete({ where: { id: body.data.id } })
         })
     })
 
-    describe('PUT /api/archive/tags/:id', () => {
+    describe('PATCH /api/v1/archive/tags/:id', () => {
         it('should update a tag and clean up', async () => {
             const tag = await app.prisma.tag.create({
                 data: { name: { nl: 'Original Tag' } }
@@ -216,14 +227,15 @@ describe('Taxonomies Routes', () => {
                 const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
                 const response = await app.inject({
                     method: 'PATCH',
-                    url: `/api/archive/tags/${tag.id}`,
+                    url: `/api/v1/archive/tags/${tag.id}`,
                     headers: { authorization: `Bearer ${token}` },
                     payload: { name: { nl: 'Updated Tag' } }
                 })
 
                 expect(response.statusCode).toBe(200)
                 const body = JSON.parse(response.payload)
-                expect(body.name.nl).toBe('Updated Tag')
+                expect(body.data.name.nl).toBe('Updated Tag')
+                expect(body.data).toHaveProperty('links')
             } finally {
                 await app.prisma.tag.delete({ where: { id: tag.id } })
             }
@@ -233,7 +245,7 @@ describe('Taxonomies Routes', () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const response = await app.inject({
                 method: 'PATCH',
-                url: '/api/archive/tags/00000000-0000-0000-0000-000000000000',
+                url: '/api/v1/archive/tags/00000000-0000-0000-0000-000000000000',
                 headers: { authorization: `Bearer ${token}` },
                 payload: { name: { nl: 'Updated Name' } }
             })
@@ -241,7 +253,7 @@ describe('Taxonomies Routes', () => {
         })
     })
 
-    describe('DELETE /api/archive/tags/:id', () => {
+    describe('DELETE /api/v1/archive/tags/:id', () => {
         it('should delete a tag', async () => {
             const tag = await app.prisma.tag.create({
                 data: { name: { nl: 'To Delete Tag' } }
@@ -250,7 +262,7 @@ describe('Taxonomies Routes', () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const response = await app.inject({
                 method: 'DELETE',
-                url: `/api/archive/tags/${tag.id}`,
+                url: `/api/v1/archive/tags/${tag.id}`,
                 headers: { authorization: `Bearer ${token}` }
             })
 
@@ -263,7 +275,7 @@ describe('Taxonomies Routes', () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const response = await app.inject({
                 method: 'DELETE',
-                url: '/api/archive/tags/00000000-0000-0000-0000-000000000000',
+                url: '/api/v1/archive/tags/00000000-0000-0000-0000-000000000000',
                 headers: { authorization: `Bearer ${token}` }
             })
             expect(response.statusCode).toBe(404)

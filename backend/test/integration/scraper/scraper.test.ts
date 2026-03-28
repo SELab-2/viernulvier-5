@@ -9,12 +9,10 @@ import type { APIProduction, APIEvent, APISpace, APIHall, APILocation, APIGenre,
 /*
 !!!!!! READ THIS IF THESE TESTS FAIL !!!!!!!!!
 
-- Make sure you have a dedicated test database (never production)
-- Make sure `.env.test` exists and contains `DATABASE_URL`
+- `npm test` should start the dedicated test database and sync the schema automatically
+- Make sure Docker is running locally
+- Make sure `backend/.env.test` exists and contains `DATABASE_URL`
 - Make sure `DATABASE_URL` points to your test database
-- Make sure the test database is synced with the Prisma schema:
-  - `npx prisma migrate deploy`
-  - or `npx prisma db push`
 
 */
 
