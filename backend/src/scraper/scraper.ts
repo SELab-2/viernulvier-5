@@ -847,26 +847,34 @@ async function sync_event_prices(cutoff_timestamp: Date | undefined = undefined)
     if (page.length === 0) break;
     page = filterByCutoff(page, cutoff_timestamp);
 
-
     await prisma.$transaction(async (tx) => {
+          // Collect all event apiIds for bulk lookup
+          const eventApiIds = new Set<string>();
           for (const price of page) {
+            if (price.event) eventApiIds.add(price.event);
+          }
 
-            let event = null
-            if (price.event) {
-                event = await tx.event.findUnique({
-                where: {apiId: price.event}
-              });
-            }
+          // Fetch all required events in bulk
+          const db_events = await tx.event.findMany({
+            where: { apiId: { in: Array.from(eventApiIds) } },
+            select: { id: true, apiId: true }
+          });
+
+          // Create lookup map
+          const eventMap = new Map(db_events.map(e => [e.apiId, e.id]));
+
+          for (const price of page) {
+            const eventId = price.event ? eventMap.get(price.event) : null;
 
             await tx.event_price.upsert({
               where: {apiId: price["@id"]},
               update: {
                 ...mapEventPrice(price),
-                event_id: event?.id || null,
+                event_id: eventId || null,
               },
               create: {
                 ...mapEventPrice(price),
-                event_id: event?.id || null,
+                event_id: eventId || null,
               },
             });
           }
