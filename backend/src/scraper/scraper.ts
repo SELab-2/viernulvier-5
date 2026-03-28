@@ -723,40 +723,48 @@ async function sync_galleries(cutoff_timestamp: Date | undefined = undefined){
     page = filterByCutoff(page, cutoff_timestamp);
 
     await prisma.$transaction(async (tx) => {
+      // Collect all item apiIds from all galleries in the page
+      const itemApiIds = new Set<string>();
       for (const gallery of page) {
-
-
-        let db_items = null;
         if (gallery.items) {
-            db_items = await tx.item.findMany({
-            where: {apiId: {in: gallery.items}},
-          });
+          gallery.items.forEach(itemId => itemApiIds.add(itemId));
         }
+      }
 
+      // Bulk fetch all required items
+      const db_all_items = await tx.item.findMany({
+        where: { apiId: { in: Array.from(itemApiIds) } },
+        select: { id: true, apiId: true }
+      });
 
+      // Create lookup map
+      const itemMap = new Map(db_all_items.map(i => [i.apiId, i.id]));
 
-        await prisma.gallery.upsert({
+      for (const gallery of page) {
+        // Map the apiIds of this specific gallery to their internal database IDs
+        const galleryItemIds = gallery.items 
+          ? gallery.items
+              .map(apiId => itemMap.get(apiId))
+              .filter((id): id is string => typeof id === 'string')
+          : [];
+
+        await tx.gallery.upsert({
           where: {apiId: gallery["@id"]},
           update: {
             ...mapGallery(gallery),
-            items: db_items
-                ? {connect: db_items.map((item) => ({ id: item.id }))}
-                : undefined,
+            items: galleryItemIds.length > 0
+                ? { set: galleryItemIds.map(id => ({ id })) }
+                : { set: [] },
           },
           create: {
             ...mapGallery(gallery),
-            items: db_items
-                ? {connect: db_items.map((item) => ({ id: item.id }))}
+            items: galleryItemIds.length > 0
+                ? { connect: galleryItemIds.map(id => ({ id })) }
                 : undefined,
           }
-        })
-
-
+        });
       }
     });
-
-
-
 
     totalProcessed += page.length;
   }
