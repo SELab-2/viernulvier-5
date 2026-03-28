@@ -147,11 +147,14 @@ const en: Messages = {
     logoutLabel: 'Log out',
   },
   production: {
-      editTitle: 'Edit production',
-      editSubTitle: 'Manage archive details and translation for this event',
-      title: 'Title',
-      slug: 'Slug',
-      content: 'Content'
+    editTitle: 'Edit production',
+    editSubTitle: 'Manage archive details and translation for this event',
+    title: 'Title',
+    slug: 'Slug',
+    content: 'Content',
+    back: '← Back to overview',
+    saveOnDraft: 'Save as draft',
+    publish: 'Publish',
   },
   footer: {
     brandLogoAlt: 'VIERNULVIER logo',

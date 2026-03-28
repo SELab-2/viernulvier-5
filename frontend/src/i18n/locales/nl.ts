@@ -151,7 +151,10 @@ const nl: Messages = {
       editSubTitle: 'Beheer archiefdetails en vertalingen voor deze voorstelling',
       title: 'Titel',
       slug: 'Slug',
-      content: 'Inhoud'
+      content: 'Inhoud',
+      back: '← Terug naar overzicht',
+      saveOnDraft: 'Opslaan als draft',
+      publish: 'Publiceren'
   },
   footer: {
     brandLogoAlt: 'VIERNULVIER logo',
