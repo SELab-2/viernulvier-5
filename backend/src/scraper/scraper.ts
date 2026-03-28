@@ -899,24 +899,33 @@ async function sync_tags(cutoff_timestamp: Date | undefined = undefined){
     page = filterByCutoff(page, cutoff_timestamp);
 
     await prisma.$transaction(async (tx) => {
+          // Collect all gallery apiIds for bulk lookup
+          const galleryApiIds = new Set<string>();
           for (const tag of page) {
+            if (tag.gallery) galleryApiIds.add(tag.gallery);
+          }
 
-            let gallery = null;
-            if (tag.gallery) {
-                gallery = await tx.gallery.findUnique({
-                where: {apiId: tag.gallery}
-              });
-            }
+          // Fetch all required galleries in bulk
+          const db_galleries = await tx.gallery.findMany({
+            where: { apiId: { in: Array.from(galleryApiIds) } },
+            select: { id: true, apiId: true }
+          });
+
+          // Create lookup map
+          const galleryMap = new Map(db_galleries.map(g => [g.apiId, g.id]));
+
+          for (const tag of page) {
+            const galleryId = tag.gallery ? galleryMap.get(tag.gallery) : null;
 
             await tx.tag.upsert({
               where: {apiId: tag["@id"]},
               update: {
                 ...mapTag(tag),
-                gallery_id: gallery?.id || null,
+                gallery_id: galleryId || null,
               },
               create: {
                 ...mapTag(tag),
-                gallery_id: gallery?.id || null,
+                gallery_id: galleryId || null,
               },
             });
           }
