@@ -43,7 +43,6 @@ export type Messages = {
     }>
   }
   auth: {
-    adminLabel: string
     localeToggleLabel: string
     loginTitle: string
     loginSubtitle: string

@@ -65,7 +65,6 @@ const nl: Messages = {
     ],
   },
   auth: {
-    adminLabel: 'ADMIN',
     localeToggleLabel: 'Wissel taal',
     loginTitle: 'VIERNULVIER Admin',
     loginSubtitle: 'Admin toegang voor VIERNULVIER Archief',

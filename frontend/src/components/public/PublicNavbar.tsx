@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { getActiveLocale, setActiveLocale, withLocalePath } from '../../i18n'
+import { NextLocaleToggle, SegmentedThemeToggle } from '../shared/TopBarControls'
 
 type PublicNavbarProps = {
     title: string
@@ -18,23 +19,6 @@ function resolveTheme(): Theme {
     }
 
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-}
-
-function SunIcon({ className }: { className: string }) {
-    return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
-            <circle cx="12" cy="12" r="4" />
-            <path d="M12 2.5v2.5M12 19v2.5M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2.5 12H5M19 12h2.5M4.2 19.8L6 18M18 6l1.8-1.8" />
-        </svg>
-    )
-}
-
-function MoonIcon({ className }: { className: string }) {
-    return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
-            <path d="M20.6 14.6a8.5 8.5 0 1 1-11.2-11.2 7 7 0 1 0 11.2 11.2Z" />
-        </svg>
-    )
 }
 
 function SearchIcon({ className }: { className: string }) {
@@ -138,35 +122,19 @@ function PublicNavbar({
                     <ul className="flex items-center gap-6 text-sm font-medium text-white">
                         <li>
                             <div className="flex items-center gap-4">
-                                <div className="inline-flex h-8 w-16 items-center border border-border bg-grey">
-                                    <button
-                                        type="button"
-                                        onClick={() => applyTheme('dark')}
-                                        className={`inline-flex h-8 w-8 items-center justify-center cursor-pointer text-black transition-colors ${theme === 'dark' ? 'bg-white' : 'bg-grey'}`}
-                                        aria-label="Donkere modus"
-                                        aria-pressed={theme === 'dark'}
-                                    >
-                                        <MoonIcon className="h-4 w-4" />
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => applyTheme('light')}
-                                        className={`inline-flex h-8 w-8 items-center justify-center cursor-pointer text-black transition-colors ${theme === 'light' ? 'bg-white' : 'bg-grey'}`}
-                                        aria-label="Lichte modus"
-                                        aria-pressed={theme === 'light'}
-                                    >
-                                        <SunIcon className="h-4 w-4" />
-                                    </button>
-                                </div>
+                                <SegmentedThemeToggle
+                                    theme={theme}
+                                    darkLabel="Donkere modus"
+                                    lightLabel="Lichte modus"
+                                    onSelectTheme={applyTheme}
+                                />
 
-                                <button
-                                    type="button"
-                                    onClick={toggleLocale}
-                                    className="inline-flex h-8 items-center justify-center cursor-pointer text-md font-semibold text-white max-[480px]:text-sm"
-                                    aria-label="Wissel taal"
-                                >
-                                    {locale === 'nl' ? 'EN' : 'NL'}
-                                </button>
+                                <NextLocaleToggle
+                                    locale={locale}
+                                    ariaLabel="Wissel taal"
+                                    onToggleLocale={toggleLocale}
+                                    className="text-md text-white max-[480px]:text-sm"
+                                />
 
                                 <button
                                     type="button"
@@ -198,35 +166,19 @@ function PublicNavbar({
             >
                 <div className="site-container space-y-3 text-xs text-white">
                     <div className="flex items-center justify-between">
-                        <div className="inline-flex h-8 w-16 items-center border border-border bg-grey">
-                            <button
-                                type="button"
-                                onClick={() => applyTheme('dark')}
-                                className={`inline-flex h-8 w-8 items-center justify-center cursor-pointer text-black transition-colors ${theme === 'dark' ? 'bg-white' : 'bg-grey'}`}
-                                aria-label="Donkere modus"
-                                aria-pressed={theme === 'dark'}
-                            >
-                                <MoonIcon className="h-4 w-4" />
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => applyTheme('light')}
-                                className={`inline-flex h-8 w-8 items-center justify-center cursor-pointer text-black transition-colors ${theme === 'light' ? 'bg-white' : 'bg-grey'}`}
-                                aria-label="Lichte modus"
-                                aria-pressed={theme === 'light'}
-                            >
-                                <SunIcon className="h-4 w-4" />
-                            </button>
-                        </div>
+                        <SegmentedThemeToggle
+                            theme={theme}
+                            darkLabel="Donkere modus"
+                            lightLabel="Lichte modus"
+                            onSelectTheme={applyTheme}
+                        />
 
-                        <button
-                            type="button"
-                            onClick={toggleLocale}
-                            className="inline-flex h-8 items-center justify-center cursor-pointer text-sm font-semibold text-white"
-                            aria-label="Wissel taal"
-                        >
-                            {locale === 'nl' ? 'EN' : 'NL'}
-                        </button>
+                        <NextLocaleToggle
+                            locale={locale}
+                            ariaLabel="Wissel taal"
+                            onToggleLocale={toggleLocale}
+                            className="text-sm text-white"
+                        />
 
                         <button
                             type="button"

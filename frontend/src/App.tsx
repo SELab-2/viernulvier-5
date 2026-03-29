@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom'
 import { lazy, Suspense } from 'react'
 import { getMessages } from './i18n'
 import { getAdminRouteConfig } from './admin/paths'
+import ProtectedAdminRoute from './pages/admin/ProtectedAdminRoute'
 
 // Public pages
 import HomePage from './pages/public/HomePage'
@@ -44,8 +45,22 @@ function App() {
                 {adminRoutes.canRenderAdminRoutes ? (
                     <>
                         <Route path={adminRoutes.loginPath} element={<LoginPage />} />
-                        <Route path={adminRoutes.dashboardPath} element={<DashboardPage />} />
-                        <Route path={adminRoutes.archiveEditPath} element={<ArchiveEditPage />} />
+                        <Route
+                            path={adminRoutes.dashboardPath}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <DashboardPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+                        <Route
+                            path={adminRoutes.archiveEditPath}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <ArchiveEditPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
                     </>
                 ) : null}
             </Routes>

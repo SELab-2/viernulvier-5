@@ -1,11 +1,10 @@
 import { useMemo, useState } from 'react'
 import { getActiveLocale, getMessages, setActiveLocale } from '../../i18n'
 import type { Locale } from '../../i18n/types'
+import type { Theme } from '../shared/TopBarControls'
 import AdminFooter from './AdminFooter'
 import { AdminMessagesContext } from './AdminMessagesContext'
 import AdminTopBar from './AdminTopBar'
-
-type Theme = 'light' | 'dark'
 
 type AdminLayoutProps = {
     children: React.ReactNode
@@ -44,7 +43,6 @@ function AdminLayout({ children, mainClassName = '' }: AdminLayoutProps) {
             <div className="admin-shell min-h-screen bg-[var(--color-admin-bg)] text-foreground">
                 <AdminTopBar
                     locale={locale}
-                    adminLabel={messages.auth.adminLabel}
                     localeLabel={messages.auth.localeToggleLabel}
                     theme={theme}
                     onToggleLocale={toggleLocale}
@@ -64,7 +62,6 @@ function AdminLayout({ children, mainClassName = '' }: AdminLayoutProps) {
                     cookiesLabel={messages.footer.cookies}
                     disclaimerLabel={messages.footer.disclaimer}
                     rightsLabel={messages.footer.rights}
-                    adminLabel={messages.auth.adminLabel}
                 />
             </div>
         </AdminMessagesContext.Provider>

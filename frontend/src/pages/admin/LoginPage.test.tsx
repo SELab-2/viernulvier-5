@@ -50,7 +50,7 @@ describe('LoginPage', () => {
     vi.stubGlobal('fetch', vi.fn())
 
     render(
-      <MemoryRouter>
+      <MemoryRouter initialEntries={[{ pathname: '/admin/login', state: { from: '/admin/archive/42/edit?tab=metadata#notes' } }]}>
         <LoginPage />
       </MemoryRouter>,
     )
@@ -68,7 +68,7 @@ describe('LoginPage', () => {
     expect(submitButton).toBeEnabled()
   })
 
-  it('logs in, validates the session, and navigates to the admin dashboard', async () => {
+  it('logs in, validates the session, and navigates to the requested admin route when present', async () => {
     const fetchMock = vi.fn()
       .mockResolvedValueOnce(createJsonResponse(200, { success: true }))
       .mockResolvedValueOnce(createJsonResponse(200, {
@@ -78,7 +78,7 @@ describe('LoginPage', () => {
     vi.stubGlobal('fetch', fetchMock)
 
     render(
-      <MemoryRouter>
+      <MemoryRouter initialEntries={[{ pathname: '/admin/login', state: { from: '/admin/archive/42/edit?tab=metadata#notes' } }]}>
         <LoginPage />
       </MemoryRouter>,
     )
@@ -95,11 +95,11 @@ describe('LoginPage', () => {
       expect(fetchMock).toHaveBeenCalledTimes(2)
       expect(fetchMock.mock.calls[0]?.[0]).toBe('/api/auth/login')
       expect(fetchMock.mock.calls[1]?.[0]).toBe('/api/auth/me')
-      expect(navigate).toHaveBeenCalledWith('/admin')
+      expect(navigate).toHaveBeenCalledWith('/admin/archive/42/edit?tab=metadata#notes', { replace: true })
     })
   })
 
-  it('uses the admin-subdomain dashboard path when the host config requires it', async () => {
+  it('falls back to the host-specific dashboard path when no redirect state is present', async () => {
     getAdminRouteConfigMock.mockReturnValue({ dashboardPath: '/dashboard' })
 
     const fetchMock = vi.fn()
@@ -111,7 +111,7 @@ describe('LoginPage', () => {
     vi.stubGlobal('fetch', fetchMock)
 
     render(
-      <MemoryRouter>
+      <MemoryRouter initialEntries={['/admin/login']}>
         <LoginPage />
       </MemoryRouter>,
     )
@@ -125,7 +125,7 @@ describe('LoginPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Inloggen' }))
 
     await waitFor(() => {
-      expect(navigate).toHaveBeenCalledWith('/dashboard')
+      expect(navigate).toHaveBeenCalledWith('/dashboard', { replace: true })
     })
   })
 
@@ -186,14 +186,14 @@ describe('LoginPage', () => {
     )
 
     const localeToggle = screen.getByRole('button', { name: 'Wissel taal' })
-    expect(localeToggle).toHaveTextContent('en')
+    expect(localeToggle).toHaveTextContent('EN')
     expect(screen.getByRole('button', { name: 'Inloggen' })).toBeInTheDocument()
 
     fireEvent.click(localeToggle)
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: 'Sign in' })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: 'Switch language' })).toHaveTextContent('nl')
+      expect(screen.getByRole('button', { name: 'Wissel taal' })).toHaveTextContent('NL')
     })
   })
 

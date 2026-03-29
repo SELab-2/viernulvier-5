@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { api } from '../../api/client'
 import type { Messages } from '../../i18n/types'
 import AdminLayout from '../../components/admin/AdminLayout'
@@ -7,7 +7,7 @@ import { useAdminMessages } from '../../components/admin/AdminMessagesContext'
 import AdminLoginForm from '../../components/admin/AdminLoginForm'
 import { getAdminRouteConfig } from '../../admin/paths'
 
-const adminIconSrc = 'https://www.figma.com/api/mcp/asset/7d7b314a-5913-42fe-8b3f-649880903461'
+const adminIconSrc = '/admin-icon.svg'
 
 type SessionUser = {
     sub: string
@@ -33,6 +33,7 @@ function mapLoginError(message: string, messages: Messages) {
 
 function LoginPageContent() {
     const navigate = useNavigate()
+    const location = useLocation()
     const messages = useAdminMessages()
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
@@ -41,6 +42,7 @@ function LoginPageContent() {
     const [isSubmitting, setIsSubmitting] = useState(false)
 
     const { dashboardPath } = getAdminRouteConfig(window.location.hostname)
+    const from = (location.state as { from?: string } | null)?.from ?? dashboardPath
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
@@ -53,7 +55,7 @@ function LoginPageContent() {
                 password,
             })
             await api.get<SessionResponse>('/auth/me')
-            navigate(dashboardPath)
+            navigate(from, { replace: true })
         } catch (err) {
             const message = err instanceof Error ? err.message : ''
             setError(mapLoginError(message, messages))
@@ -64,10 +66,11 @@ function LoginPageContent() {
 
     return (
         <section className="w-full max-w-[27.5rem] text-center">
-            <div className="mx-auto mb-10 flex h-16 w-16 items-center justify-center rounded-xl bg-black shadow-[0_20px_25px_-5px_rgba(0,0,0,0.12),0_8px_10px_-6px_rgba(0,0,0,0.12)]">
-                <img src={adminIconSrc} alt="Admin icon" className="h-[1.7rem] w-[1.7rem] object-contain" />
+            <div
+                className="mx-auto flex h-24 w-24 items-center justify-center overflow-hidden rounded-xl">
+                <img src={adminIconSrc} alt="Admin icon" className="h-full w-full object-fill"/>
             </div>
-            <div className="mb-10 space-y-1.5">
+            <div className="mb-10">
                 <h1 className="text-[2rem] font-bold tracking-[-0.04em] text-foreground max-[640px]:text-[1.75rem]">
                     {messages.auth.loginTitle}
                 </h1>
@@ -102,7 +105,7 @@ function LoginPageContent() {
 function LoginPage() {
     return (
         <AdminLayout mainClassName="flex flex-1 items-center justify-center px-4 py-16 max-[640px]:py-12">
-            <LoginPageContent />
+            <LoginPageContent/>
         </AdminLayout>
     )
 }
