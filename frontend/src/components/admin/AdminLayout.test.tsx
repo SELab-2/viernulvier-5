@@ -55,7 +55,7 @@ describe('AdminLayout', () => {
     )
 
     expect(screen.getByText('Content')).toBeInTheDocument()
-    expect(screen.getByText('Beheerder')).toBeInTheDocument()
+    expect(screen.queryByText('Beheerder')).not.toBeInTheDocument()
     expect(screen.getByText('Navigatie')).toBeInTheDocument()
   })
 
