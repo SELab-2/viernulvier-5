@@ -68,7 +68,6 @@ model gallery {
   media_gallery_productions                     production[]   @relation("production_media_gallery")
   poster_gallery_productions                    production[]   @relation("production_poster_gallery")
   review_gallery_productions                    production[]   @relation("production_review_gallery")
-  // tags                                          tag[]          @relation("tag_gallery")
 }
 
 
@@ -230,26 +229,6 @@ model space {
   halls                             hall[]    @relation("hall_space")
   location                          location? @relation("space_location", fields: [location_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
-//
-// model tag {
-//   created_at                   DateTime       @default(now()) @db.Timestamp(6)
-//   updated_at                   DateTime       @default(now()) @db.Timestamp(6)
-//   id                           String          @id @db.Uuid @default(uuid())
-//   apiId                        String?        @db.VarChar @unique
-//   source                       String?        @db.VarChar
-//   sourcetype                   String?        @db.VarChar
-//   enable                       String?        @db.VarChar
-//   code                         String?        @db.VarChar
-//   name                         Json?
-//   short_description            Json?
-//   url                          String?        @db.VarChar
-//   url_title                    Json?
-//   expires_after                Int?
-//   automatically_assigned       Boolean?
-//   external                     Boolean?
-//   gallery_id                   String?        @db.Uuid
-//   gallery                      gallery?       @relation("tag_gallery", fields: [gallery_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-// }
 
 model uit_keywords_production {
   production_id        String               @db.Uuid
