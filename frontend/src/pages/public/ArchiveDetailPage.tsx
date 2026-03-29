@@ -1,14 +1,16 @@
 import { useNavigate, useParams } from 'react-router-dom'
-import { getActiveLocale, withLocalePath } from '../../i18n'
+import { getActiveLocale, getMessages, withLocalePath } from '../../i18n'
 import PublicLayout from '../../components/public/PublicLayout'
-import PublicBackButton from '../../components/public/PublicBackButton'
+import PublicPillButton from '../../components/public/PublicPillButton'
 
 /**
  * Public archive detail page — shows a single archive item.
  */
 function ArchiveDetailPage() {
-    //const navigate = useNavigate()
-    //const locale = getActiveLocale(window.location.pathname)
+    const navigate = useNavigate()
+    const locale = getActiveLocale(window.location.pathname)
+    const messages = getMessages()
+
     const { id } = useParams<{ id: string }>()
 
     /*
@@ -19,15 +21,16 @@ function ArchiveDetailPage() {
     }
     */
 
-    /*
     const handleGoBackToHome = () => {
-        navigate(withLocalePath('/', locale))
+        navigate(-1) || navigate(withLocalePath('/', locale))
     }
-    */
+    
     
     return (
         <PublicLayout>
-            <PublicBackButton />
+            <div className="site-container mt-8">
+                <PublicPillButton label={`${messages.detail.navBackToOverview}`} onClick={handleGoBackToHome} />
+            </div>
             <div className="max-w-4xl mx-auto px-4 py-8">
                 <h1 className="text-3xl font-bold text-gray-900 mb-4">
                     Archief Detail
