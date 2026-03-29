@@ -126,11 +126,6 @@ export async function* fetchEventPricePages(): AsyncGenerator<APIEventPrice[]>{
     // depending on per page or per item, the 'event', 'price', 'rank' fields will have a string or be filled in
 }
 
-export async function* fetchTagPages(): AsyncGenerator<APITag[]>{
-    yield* fetchPagesFromURL<APITag>("/api/v1/tags?page=1");
-    // depending on per page or per item, the 'gallery' field will have a string or be filled in
-}
-
 export async function* fetchCropPages(): AsyncGenerator<APICrop[]> {
     yield* fetchPagesFromURL<APICrop>("/api/v1/media/items/crops?page=1");
 }
