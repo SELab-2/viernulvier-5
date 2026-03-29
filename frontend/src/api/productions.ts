@@ -66,5 +66,5 @@ type ProductionResponse = {
 }
 
 export const getProductionById = (id: string) => {
-    return api.get<ProductionResponse>(`/productions/${id}`)
+    return api.get<ProductionResponse>(`/archive/productions/${id}`)
 }
