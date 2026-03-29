@@ -1,14 +1,30 @@
+x-backend-service: &backend-service
+  build: ./backend
+  env_file:
+    - ./backend/.env
+  environment:
+    DATABASE_URL: ${DOCKER_DATABASE_URL:-postgresql://postgres:postgres@database:5432/viernulvier?schema=public}
+  networks:
+    - vnv_net
+
 services:
   backend:
-    build: ./backend
+    <<: *backend-service
     container_name: vnv_backend
     restart: unless-stopped
-    env_file:
-      - ./backend/.env
     ports:
       - 3001:3001
-    networks:
-        - vnv_net
+
+  scraper:
+    <<: *backend-service
+    container_name: vnv_scraper
+    restart: unless-stopped
+    command: ["/usr/local/bin/scraper-cron-entrypoint.sh"]
+    environment:
+      DATABASE_URL: ${DOCKER_DATABASE_URL:-postgresql://postgres:postgres@database:5432/viernulvier?schema=public}
+      SCRAPER_CRON_SCHEDULE: "0 0 * * *"
+    volumes:
+      - scraper_logs:/usr/src/app/logs
 
   frontend:
     build: ./frontend
@@ -51,3 +67,4 @@ networks:
 
 volumes:
   dist: {}
+  scraper_logs: {}
