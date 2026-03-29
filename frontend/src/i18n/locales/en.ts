@@ -72,7 +72,7 @@ const en: Messages = {
     loginFailed: 'Login failed',
   },
   detail: {
-    navBackToOverview: 'Back to overview',
+    navBackToOverview: '🡠 Back to overview',
 
   },
   footer: {
