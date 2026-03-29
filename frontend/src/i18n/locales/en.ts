@@ -199,7 +199,7 @@ const en: Messages = {
     logoutLabel: 'Log out',
   },
   detail: {
-    navBackToOverview: 'Back to overview',
+    navBackToOverview: '🡠 Back to overview',
 
   },
   footer: {
