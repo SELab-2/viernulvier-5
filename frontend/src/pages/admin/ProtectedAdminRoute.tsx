@@ -1,7 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAdminSession } from '../../auth/useAdminSession'
 
-import type { Location } from 'react-router-dom'
 import type { ReactElement } from 'react'
 
 type ProtectedAdminRouteProps = {
