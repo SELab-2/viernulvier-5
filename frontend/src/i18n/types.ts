@@ -49,6 +49,9 @@ export type Messages = {
     submit: string
     loginFailed: string
   }
+  detail: {
+    navBackToOverview: string
+  }
   footer: {
     about: string
     navigationTitle: string

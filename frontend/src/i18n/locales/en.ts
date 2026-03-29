@@ -71,6 +71,10 @@ const en: Messages = {
     submit: 'Sign in',
     loginFailed: 'Login failed',
   },
+  detail: {
+    navBackToOverview: 'Back to overview',
+
+  },
   footer: {
     about: 'The VIERNULVIER Arts Centre archive collection preserves and provides access to over 40 years of performing arts history at De Vooruit.',
     navigationTitle: 'Navigation',
