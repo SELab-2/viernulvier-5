@@ -1,4 +1,4 @@
-import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { getActiveLocale, getMessages, withLocalePath } from '../../i18n'
 import PublicPillButton from './PublicPillButton'
 
