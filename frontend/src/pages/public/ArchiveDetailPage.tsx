@@ -25,6 +25,14 @@ function ArchiveDetailPage() {
         navigate(-1) || navigate(withLocalePath('/', locale))
     }
     
+    // QUESTION: Do we want to navigate back home, or just go back to previous page, this would preserve any search filters the user had applied.
+    // It would however also just go back if fe you changed the language, to the same page you're on (just back to the old language) 
+
+    // QUESTION: For the arrow, now i just used a unicode character, but would it be better to do something else. Fe instead of using PublicPillButton
+    // which doesn't have a children prop, maybe make a seperate PublicIconButton component. Or update PublicPillButton to also accept children?
+
+    // QUESTION: Would it be worth it to make a PublicBackButton component, which would just be a wrapper around PublicPillButton but with the arrow and the "back to overview" text already in place?
+    // This would make it easier to reuse this button in other places, and also make it more consistent across the site. But on the other hand, it might be overkill for just one button.
     
     return (
         <PublicLayout>
