@@ -43,10 +43,9 @@ function AdminLayout({ children, mainClassName = '' }: AdminLayoutProps) {
             <div className="admin-shell min-h-screen bg-[var(--color-admin-bg)] text-foreground">
                 <AdminTopBar
                     locale={locale}
-                    localeLabel={messages.auth.localeToggleLabel}
                     theme={theme}
                     onToggleLocale={toggleLocale}
-                    onToggleTheme={toggleTheme}
+                    onToggleTheme={() => toggleTheme()}
                 />
 
                 <main className={mainClassName}>{children}</main>
