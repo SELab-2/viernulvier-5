@@ -146,6 +146,9 @@ const nl: Messages = {
     archiveLabel: 'Archief',
     logoutLabel: 'Uitloggen',
   },
+  detail: {
+    navBackToOverview: 'Terug naar overzicht'
+  },
   footer: {
     brandLogoAlt: 'VIERNULVIER logo',
     organizationName: 'Kunstencentrum VIERNULVIER vzw.',
