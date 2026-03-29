@@ -65,7 +65,6 @@ const en: Messages = {
     ],
   },
   auth: {
-    adminLabel: 'ADMIN',
     localeToggleLabel: 'Switch language',
     loginTitle: 'VIERNULVIER Admin',
     loginSubtitle: 'Admin access for the VIERNULVIER Archive',
