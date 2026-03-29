@@ -1,0 +1,82 @@
+name: Notify on Discord when PR turns ready for review from draft
+
+# Triggers only when a pull request is converted from a draft to a ready-for-review state.
+
+on:
+  pull_request:
+    types: [ready_for_review, review_requested]
+
+jobs:
+  notify-on-discord:
+    name: Notify on Discord when PR turns ready for review from draft
+    runs-on: self-hosted
+
+    permissions:
+      pull-requests: read
+
+    steps:
+      - name: Notify on Discord
+        uses: actions/github-script@v8
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL}}
+        with:
+          # github-token is automatically provided; no extra secret needed
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            // ── TEAM CONFIGURATION ──────────────────────────────────────────────
+            // team discord ids:
+            const DISCORD_MAP = {
+             ,
+              LiamVDB1: "278968202434707457",
+              sarahvlan: "347024334172192778",
+              tuurdaneels: "290136304690266112",
+              Jorenve: "552082711721017344",
+              julesbauw: "471239256527077376",
+              jminjuk2: "860244412340895794",
+              ninavandezande: "535183800087347204"
+            };
+            // ───────────────────────────────────────────────────────────────────
+
+
+            const pr = context.payload.pull_request;
+
+            if (pr.draft) {
+              core.info("Still draft PR — skipping.");
+              return;
+            }
+
+            const { data: fullPr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number
+            });
+
+            const reviewers = fullPr.requested_reviewers.map(r => r.login);
+
+            if (reviewers.length === 0) {
+              core.info("No reviewers found — skipping notification.");
+              return;
+            }
+
+            // Map to Discord mentions
+            const mentions = reviewers
+              .map(user  => DISCORD_MAP[user])
+              .filter(Boolean)
+              .map(id => `<@${id}>`)
+              .join(' ');
+
+            const prTitle = context.payload.pull_request.title;
+            const prUrl = context.payload.pull_request.html_url;
+
+            const message = {
+              content: `🔔 **PR became ready for Review / Re-requested Review**\n${mentions}\n📦 **${prTitle}**\n🔗 ${prUrl}`
+            };
+
+            // Send to Discord
+            const webhook = process.env.DISCORD_WEBHOOK;
+
+            await fetch(webhook, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json'},
+              body: JSON.stringify(message)
+            });
