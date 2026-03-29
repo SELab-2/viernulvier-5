@@ -125,6 +125,9 @@ export type Messages = {
     archiveLabel: string
     logoutLabel: string
   }
+  detail: {
+    navBackToOverview: string
+  }
   footer: {
     brandLogoAlt: string
     organizationName: string

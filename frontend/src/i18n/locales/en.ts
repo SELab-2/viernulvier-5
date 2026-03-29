@@ -198,6 +198,10 @@ const en: Messages = {
     archiveLabel: 'Archive',
     logoutLabel: 'Log out',
   },
+  detail: {
+    navBackToOverview: 'Back to overview',
+
+  },
   footer: {
     brandLogoAlt: 'VIERNULVIER logo',
     organizationName: 'VIERNULVIER Arts Centre vzw.',
