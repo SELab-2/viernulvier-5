@@ -8,7 +8,7 @@ type AdminTopBarProps = {
     locale: Locale
     theme: Theme
     onToggleLocale: () => void
-    onToggleTheme: (theme: Theme) => void
+    onToggleTheme: () => void
 }
 
 function AdminTopBar({
@@ -29,7 +29,7 @@ function AdminTopBar({
                         theme={theme}
                         darkLabel="Donkere modus"
                         lightLabel="Lichte modus"
-                        onSelectTheme={onToggleTheme}
+                        onSelectTheme={() => onToggleTheme()}
                     />
 
                     <NextLocaleToggle
