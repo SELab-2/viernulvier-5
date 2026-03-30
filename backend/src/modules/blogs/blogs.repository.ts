@@ -50,7 +50,6 @@ export class BlogsRepository {
 
         return blogs.map((blog) => this.mapBlog(blog))
     }
-
     async count(options: { search?: string }): Promise<number> {
         const { search } = options
 
