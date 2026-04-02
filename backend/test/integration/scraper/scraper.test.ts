@@ -118,8 +118,7 @@ vi.mock('../../../src/scraper/fetcher', () => {
       custom_data: { nl: "Custom NL", en: "Custom EN", fr: "Custom FR" },
       video_1: { nl: "Video1 NL", en: "Video1 EN", fr: "Video1 FR" },
       video_2: { nl: "Video2 NL", en: "Video2 EN", fr: "Video2 FR" },
-      genres: ["/genre/1"],
-      tags: ["/tag/1"],
+      genres: ["/genre/1", "/tag/1"],
       events: [],
       media_gallery: "/gallery/1",
       review_gallery: "/gallery/1",
@@ -329,6 +328,7 @@ beforeAll(async () => {
   await prisma.event.deleteMany();
   await prisma.uit_keywords_production.deleteMany();
   await prisma.genre_production.deleteMany();
+  await prisma.tag_production.deleteMany();
   await prisma.tag.deleteMany();
   await prisma.production.deleteMany();
   await prisma.uitdatabank_theme.deleteMany();
