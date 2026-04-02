@@ -365,7 +365,7 @@ async function sync_locations(cutoff_timestamp: Date | undefined = undefined) {
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const { members: rawPage, totalItems } of Fetcher.fetchLocationsPages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchLocationsPages(cutoff_timestamp)) {
     pageCount++;
     totalProcessed += rawPage.length;
     updateStatus("Locations", createProgressBar(totalProcessed, totalItems));
@@ -394,7 +394,7 @@ async function sync_hall(cutoff_timestamp: Date | undefined = undefined) {
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const { members: rawPage, totalItems } of Fetcher.fetchHallsPages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchHallsPages(cutoff_timestamp)) {
     pageCount++;
     totalProcessed += rawPage.length;
     updateStatus("Halls", createProgressBar(totalProcessed, totalItems));
@@ -444,7 +444,7 @@ async function sync_spaces(cutoff_timestamp: Date | undefined = undefined) {
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const { members: rawPage, totalItems } of Fetcher.fetchSpacesPages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchSpacesPages(cutoff_timestamp)) {
     pageCount++;
     totalProcessed += rawPage.length;
     updateStatus("Spaces", createProgressBar(totalProcessed, totalItems));
@@ -494,7 +494,7 @@ async function sync_events(cutoff_timestamp: Date | undefined = undefined) {
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const { members: rawPage, totalItems } of Fetcher.fetchEventsPages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchEventsPages(cutoff_timestamp)) {
     pageCount++;
     totalProcessed += rawPage.length;
     updateStatus("Events", createProgressBar(totalProcessed, totalItems));
@@ -563,7 +563,7 @@ async function sync_productions(cutoff_timestamp: Date | undefined = undefined) 
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const { members: rawPage, totalItems } of Fetcher.fetchProductionsPages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchProductionsPages(cutoff_timestamp)) {
     pageCount++;
     totalProcessed += rawPage.length;
     updateStatus("Productions", createProgressBar(totalProcessed, totalItems));
@@ -686,7 +686,7 @@ async function sync_genres(cutoff_timestamp: Date | undefined = undefined){
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const { members: rawPage, totalItems } of Fetcher.fetchGenrePages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchGenrePages(cutoff_timestamp)) {
     pageCount++;
     totalProcessed += rawPage.length;
     updateStatus("Genres", createProgressBar(totalProcessed, totalItems));
@@ -713,7 +713,7 @@ async function sync_galleries(cutoff_timestamp: Date | undefined = undefined){
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const { members: rawPage, totalItems } of Fetcher.fetchGalleryPages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchGalleryPages(cutoff_timestamp)) {
     pageCount++;
     totalProcessed += rawPage.length;
     updateStatus("Galleries", createProgressBar(totalProcessed, totalItems));
@@ -774,7 +774,7 @@ async function sync_items(cutoff_timestamp: Date | undefined = undefined){
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const { members: rawPage, totalItems } of Fetcher.fetchItemPages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchItemPages(cutoff_timestamp)) {
     pageCount++;
     totalProcessed += rawPage.length;
     updateStatus("Items", createProgressBar(totalProcessed, totalItems));
@@ -834,7 +834,7 @@ async function sync_event_prices(cutoff_timestamp: Date | undefined = undefined)
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const { members: rawPage, totalItems } of Fetcher.fetchEventPricePages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchEventPricePages(cutoff_timestamp)) {
     pageCount++;
     totalProcessed += rawPage.length;
     updateStatus("Prices", createProgressBar(totalProcessed, totalItems));
@@ -884,7 +884,7 @@ async function sync_tags(cutoff_timestamp: Date | undefined = undefined){
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const { members: rawPage, totalItems } of Fetcher.fetchTagPages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchTagPages(cutoff_timestamp)) {
     pageCount++;
     totalProcessed += rawPage.length;
     updateStatus("Tags", createProgressBar(totalProcessed, totalItems));
@@ -934,7 +934,7 @@ async function sync_crops(cutoff_timestamp: Date | undefined = undefined){
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const { members: rawPage, totalItems } of Fetcher.fetchCropPages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchCropPages(cutoff_timestamp)) {
     pageCount++;
     totalProcessed += rawPage.length;
     updateStatus("Crops", createProgressBar(totalProcessed, totalItems));
@@ -960,7 +960,7 @@ async function sync_uit_keywords(cutoff_timestamp: Date | undefined = undefined)
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const { members: rawPage, totalItems } of Fetcher.fetchUitKeywordPages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchUitKeywordPages(cutoff_timestamp)) {
     pageCount++;
     totalProcessed += rawPage.length;
     updateStatus("Keywords", createProgressBar(totalProcessed, totalItems));
@@ -987,7 +987,7 @@ async function sync_uit_themes(cutoff_timestamp: Date | undefined = undefined){
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const { members: rawPage, totalItems } of Fetcher.fetchUitThemePages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchUitThemePages(cutoff_timestamp)) {
     pageCount++;
     totalProcessed += rawPage.length;
     updateStatus("Themes", createProgressBar(totalProcessed, totalItems));
@@ -1014,7 +1014,7 @@ async function sync_uit_types(cutoff_timestamp: Date | undefined = undefined){
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const { members: rawPage, totalItems } of Fetcher.fetchUitTypePages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchUitTypePages(cutoff_timestamp)) {
     pageCount++;
     totalProcessed += rawPage.length;
     updateStatus("Types", createProgressBar(totalProcessed, totalItems));
