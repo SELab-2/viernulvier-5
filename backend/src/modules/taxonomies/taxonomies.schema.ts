@@ -31,7 +31,6 @@ export const genreSchema = z.object({
     id: z.string().uuid(),
     apiId: z.string().nullable(),
     type: z.string().nullable(),
-    use_as: z.string().nullable(),
     vendor_id: z.string().nullable(),
     name: localizedTextSchema,
     slug: localizedTextSchema,
@@ -49,24 +48,18 @@ export const singleGenreSchema = createSingleResponseSchema(genreSchema)
  */
 export const tagLinksSchema = z.object({
     self: z.string().url().default('https://example.com/'),
-    gallery: z.string().url().optional().default('https://example.com/'),
+    productions: z.string().url().optional().default('https://example.com/'),
 })
 
+// basically the same as a genreSchema now, should it be changed it so it uses the same one?
 export const tagSchema = z.object({
     id: z.string().uuid(),
     apiId: z.string().nullable(),
-    source: z.string().nullable(),
-    sourcetype: z.string().nullable(),
-    enable: z.string().nullable(),
-    code: z.string().nullable(),
+    type: z.string().nullable(),
+    vendor_id: z.string().nullable(),
     name: localizedTextSchema,
-    short_description: localizedTextSchema,
-    url: z.string().nullable(),
-    url_title: localizedTextSchema,
-    expires_after: z.number().int().nullable(),
-    automatically_assigned: z.boolean().nullable(),
-    external: z.boolean().nullable(),
-    gallery_id: z.string().uuid().nullable(),
+    slug: localizedTextSchema,
+    description: localizedTextSchema,
     created_at: z.coerce.date(),
     updated_at: z.coerce.date(),
     links: tagLinksSchema.optional(),
@@ -82,7 +75,6 @@ export const idParamSchema = z.object({
 export const createGenreSchema = z.object({
     apiId: z.string().nullable().optional(),
     type: z.string().nullable().optional(),
-    use_as: z.string().nullable().optional(),
     vendor_id: z.string().nullable().optional(),
     name: localizedTextSchema.optional(),
     slug: localizedTextSchema.optional(),
@@ -93,18 +85,11 @@ export const updateGenreSchema = createGenreSchema.partial()
 
 export const createTagSchema = z.object({
     apiId: z.string().nullable().optional(),
-    source: z.string().nullable().optional(),
-    sourcetype: z.string().nullable().optional(),
-    enable: z.string().nullable().optional(),
-    code: z.string().nullable().optional(),
+    type: z.string().nullable().optional(),
+    vendor_id: z.string().nullable().optional(),
     name: localizedTextSchema.optional(),
-    short_description: localizedTextSchema.optional(),
-    url: z.string().nullable().optional(),
-    url_title: localizedTextSchema.optional(),
-    expires_after: z.number().int().nullable().optional(),
-    automatically_assigned: z.boolean().nullable().optional(),
-    external: z.boolean().nullable().optional(),
-    gallery_id: z.string().uuid().nullable().optional(),
+    slug: localizedTextSchema.optional(),
+    description: localizedTextSchema.optional(),
 })
 
 export const updateTagSchema = createTagSchema.partial()
