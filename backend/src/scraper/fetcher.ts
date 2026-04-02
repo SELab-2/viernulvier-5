@@ -19,7 +19,7 @@ import type {
     APISpace,
     APIHall,
     APILocation,
-    APIGenre, APIGallery, APIItem, APIEventPrice, APITag, APICrop, APIUitKeyword, APIUitTheme, APIUitType,
+    APIGenre, APIGallery, APIItem, APIEventPrice, APICrop, APIUitKeyword, APIUitTheme, APIUitType,
 
 } from "./APItypes";
 
