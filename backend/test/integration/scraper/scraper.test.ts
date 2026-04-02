@@ -3,7 +3,7 @@ import { prisma } from '../../../src/scraper/prisma';
 import Scraper from '../../../src/scraper/scraper';
 import * as Fetcher from '../../../src/scraper/fetcher';
 
-import type { APIProduction, APIEvent, APISpace, APIHall, APILocation, APIGenre, APIGallery, APIItem, APICrop, APIEventPrice, APITag, APIUitKeyword, APIUitTheme, APIUitType } from "../../../src/scraper/APItypes";
+import type { APIProduction, APIEvent, APISpace, APIHall, APILocation, APIGenre, APIGallery, APIItem, APICrop, APIEventPrice, APIUitKeyword, APIUitTheme, APIUitType } from "../../../src/scraper/APItypes";
 
 
 /*
@@ -119,6 +119,7 @@ vi.mock('../../../src/scraper/fetcher', () => {
       video_1: { nl: "Video1 NL", en: "Video1 EN", fr: "Video1 FR" },
       video_2: { nl: "Video2 NL", en: "Video2 EN", fr: "Video2 FR" },
       genres: ["/genre/1"],
+      tags: ["/tag/1"],
       events: [],
       media_gallery: "/gallery/1",
       review_gallery: "/gallery/1",
@@ -137,11 +138,27 @@ vi.mock('../../../src/scraper/fetcher', () => {
       created_at: "2021-01-03T10:00:00Z",
       updated_at: "2021-01-04T11:00:00Z",
       type: "category",
-      use_as: "filter",
+      use_as: "genre",
       vendor_id: "VEND001",
       name: { nl: "Theater", en: "Theatre", fr: "Théâtre" },
       slug: { nl: "theater", en: "theatre", fr: "theatre-fr" },
       description: { nl: "Genre NL", en: "Genre EN", fr: "Genre FR" },
+    } as APIGenre,
+  ];
+
+  const tags: APIGenre[] = [
+    {
+      "@context": "/api/context/tag",
+      "@id": "/tag/1",
+      "@type": "Genre",
+      created_at: "2021-01-03T10:00:00Z",
+      updated_at: "2021-01-04T11:00:00Z",
+      type: "category",
+      use_as: "tag",
+      vendor_id: "VEND001",
+      name: { nl: "Theater", en: "Theatre", fr: "Théâtre" },
+      slug: { nl: "theater", en: "theatre", fr: "theatre-fr" },
+      description: { nl: "Tag NL", en: "Tag EN", fr: "Tag FR" },
     } as APIGenre,
   ];
 
@@ -237,27 +254,6 @@ vi.mock('../../../src/scraper/fetcher', () => {
     } as APIEventPrice,
   ];
 
-  const tags: APITag[] = [
-    {
-      "@context": "/api/context/tag",
-      "@id": "/tag/1",
-      "@type": "Tag",
-      created_at: "2021-01-13T09:00:00Z",
-      updated_at: "2021-01-14T09:00:00Z",
-      source: "cms",
-      sourceType: "manual",
-      enable: "true",
-      code: "T001",
-      name: { nl: "Tag NL", en: "Tag EN", fr: "Tag FR" },
-      short_description: { nl: "Kort NL", en: "Short EN", fr: "Court FR" },
-      url: "https://example.com/tag",
-      url_title: { nl: "tag-nl", en: "tag-en", fr: "tag-fr" },
-      gallery: "/gallery/1",
-      expires_after: 30,
-      automatically_assigned: true,
-      external: false,
-    } as APITag,
-  ];
 
   const uitKeywords: APIUitKeyword[] = [
     {
@@ -301,13 +297,12 @@ vi.mock('../../../src/scraper/fetcher', () => {
     fetchLocationsPages: () => pages([locations]),
     fetchSpacesPages: () => pages([spaces]),
     fetchHallsPages: () => pages([halls]),
-    fetchGenrePages: () => pages([genres]),
+    fetchGenrePages: () => pages([genres, tags]),
     fetchGalleryPages: () => pages([galleries]),
     fetchItemPages: () => pages([items]),
     fetchCropPages: () => pages([crops]),
     fetchEventsPages: () => pages([events]),
     fetchEventPricePages: () => pages([eventPrices]),
-    fetchTagPages: () => pages([tags]),
     fetchUitKeywordPages: () => pages([uitKeywords]),
     fetchUitThemePages: () => pages([uitThemes]),
     fetchUitTypePages: () => pages([uitTypes]),
@@ -361,7 +356,6 @@ beforeAll(async () => {
   await Scraper.sync_productions();
   await Scraper.sync_events();
   await Scraper.sync_event_prices();
-  await Scraper.sync_tags();
 });
 
 afterAll(async () => {
@@ -483,7 +477,6 @@ describe('scraper integration full coverage', () => {
     const description = getLocalized(genre?.description);
 
     expect(genre?.type).toBe('category');
-    expect(genre?.use_as).toBe('filter');
     expect(genre?.vendor_id).toBe('VEND001');
     expect(name.nl).toBe('Theater');
     expect(name.en).toBe('Theatre');
@@ -494,6 +487,28 @@ describe('scraper integration full coverage', () => {
     expect(description.nl).toBe('Genre NL');
     expect(description.en).toBe('Genre EN');
     expect(description.fr).toBe('Genre FR');
+    expect(genre?.created_at.toISOString()).toBe('2021-01-03T10:00:00.000Z');
+    expect(genre?.updated_at.toISOString()).toBe('2021-01-04T11:00:00.000Z');
+  });
+
+  it('checks all tag fields', async () => {
+    const genre = await prisma.genre.findUnique({ where: { apiId: '/tag/1' } });
+    expect(genre).not.toBeNull();
+    const name = getLocalized(genre?.name);
+    const slug = getLocalized(genre?.slug);
+    const description = getLocalized(genre?.description);
+
+    expect(genre?.type).toBe('category');
+    expect(genre?.vendor_id).toBe('VEND001');
+    expect(name.nl).toBe('Theater');
+    expect(name.en).toBe('Theatre');
+    expect(name.fr).toBe('Théâtre');
+    expect(slug.nl).toBe('theater');
+    expect(slug.en).toBe('theatre');
+    expect(slug.fr).toBe('theatre-fr');
+    expect(description.nl).toBe('Tag NL');
+    expect(description.en).toBe('Tag EN');
+    expect(description.fr).toBe('Tag FR');
     expect(genre?.created_at.toISOString()).toBe('2021-01-03T10:00:00.000Z');
     expect(genre?.updated_at.toISOString()).toBe('2021-01-04T11:00:00.000Z');
   });
@@ -509,6 +524,23 @@ describe('scraper integration full coverage', () => {
       where: {
         production_id: prod!.id,
         genre_id: genre!.id,
+      },
+    });
+
+    expect(relation).not.toBeNull();
+  });
+
+  it('links production with tag in tag_production', async () => {
+    const prod = await prisma.production.findUnique({ where: { apiId: '/prod/1' } });
+    const tag = await prisma.genre.findUnique({ where: { apiId: '/tag/1' } });
+
+    expect(prod).not.toBeNull();
+    expect(tag).not.toBeNull();
+
+    const relation = await prisma.tag_production.findFirst({
+      where: {
+        production_id: prod!.id,
+        tag_id: tag!.id,
       },
     });
 
@@ -627,39 +659,6 @@ describe('scraper integration full coverage', () => {
     expect(eventPrice?.event?.apiId).toBe('/event/1');
   });
 
-  it('checks all tag fields and gallery relation', async () => {
-    const tag = await prisma.tag.findUnique({
-      where: { apiId: '/tag/1' },
-      include: { gallery: true },
-    });
-
-    expect(tag).not.toBeNull();
-    const name = getLocalized(tag?.name);
-    const shortDescription = getLocalized(tag?.short_description);
-    const urlTitle = getLocalized(tag?.url_title);
-
-    expect(tag?.source).toBe('cms');
-    expect(tag?.sourcetype).toBe('manual');
-    expect(tag?.enable).toBe('true');
-    expect(tag?.code).toBe('T001');
-    expect(name.nl).toBe('Tag NL');
-    expect(name.en).toBe('Tag EN');
-    expect(name.fr).toBe('Tag FR');
-    expect(shortDescription.nl).toBe('Kort NL');
-    expect(shortDescription.en).toBe('Short EN');
-    expect(shortDescription.fr).toBe('Court FR');
-    expect(tag?.url).toBe('https://example.com/tag');
-    expect(urlTitle.nl).toBe('tag-nl');
-    expect(urlTitle.en).toBe('tag-en');
-    expect(urlTitle.fr).toBe('tag-fr');
-    expect(tag?.expires_after).toBe(30);
-    expect(tag?.automatically_assigned).toBe(true);
-    expect(tag?.external).toBe(false);
-    expect(tag?.created_at.toISOString()).toBe('2021-01-13T09:00:00.000Z');
-    expect(tag?.updated_at.toISOString()).toBe('2021-01-14T09:00:00.000Z');
-    expect(tag?.gallery?.apiId).toBe('/gallery/1');
-  });
-
   it('checks uitdatabank keyword, theme and type fields', async () => {
     const keyword = await prisma.uitdatabank_keyword.findUnique({ where: { apiId: '/uit-keyword/1' } });
     const theme = await prisma.uitdatabank_theme.findUnique({ where: { apiId: '/uit-theme/1' } });
@@ -691,6 +690,7 @@ describe('scraper integration full coverage', () => {
       themes: await prisma.uitdatabank_theme.count({ where: { apiId: '/uit-theme/1' } }),
       types: await prisma.uitdatabank_type.count({ where: { apiId: '/uit-type/1' } }),
       genreLinks: await prisma.genre_production.count(),
+      tagLinks: await prisma.tag_production.count(),
     };
 
     await Scraper.sync_uit_keywords();
@@ -699,7 +699,6 @@ describe('scraper integration full coverage', () => {
     await Scraper.sync_genres();
     await Scraper.sync_productions();
     await Scraper.sync_event_prices();
-    await Scraper.sync_tags();
 
     const after = {
       eventPrices: await prisma.event_price.count({ where: { apiId: '/event-price/1' } }),
@@ -708,6 +707,7 @@ describe('scraper integration full coverage', () => {
       themes: await prisma.uitdatabank_theme.count({ where: { apiId: '/uit-theme/1' } }),
       types: await prisma.uitdatabank_type.count({ where: { apiId: '/uit-type/1' } }),
       genreLinks: await prisma.genre_production.count(),
+      tagLinks: await prisma.tag_production.count(),
     };
 
     expect(after).toEqual(before);
@@ -746,7 +746,6 @@ describe('scraper integration full coverage', () => {
     const itemSpy = vi.spyOn(Fetcher, 'fetchItemPages').mockImplementation(() => singlePage([]));
     const cropSpy = vi.spyOn(Fetcher, 'fetchCropPages').mockImplementation(() => singlePage([]));
     const eventPriceSpy = vi.spyOn(Fetcher, 'fetchEventPricePages').mockImplementation(() => singlePage([]));
-    const tagSpy = vi.spyOn(Fetcher, 'fetchTagPages').mockImplementation(() => singlePage([]));
     const keywordSpy = vi.spyOn(Fetcher, 'fetchUitKeywordPages').mockImplementation(() => singlePage([]));
     const themeSpy = vi.spyOn(Fetcher, 'fetchUitThemePages').mockImplementation(() => singlePage([]));
     const typeSpy = vi.spyOn(Fetcher, 'fetchUitTypePages').mockImplementation(() => singlePage([]));
@@ -762,7 +761,6 @@ describe('scraper integration full coverage', () => {
       await Scraper.sync_items();
       await Scraper.sync_crops();
       await Scraper.sync_event_prices();
-      await Scraper.sync_tags();
       await Scraper.sync_uit_keywords();
       await Scraper.sync_uit_themes();
       await Scraper.sync_uit_types();
@@ -777,7 +775,6 @@ describe('scraper integration full coverage', () => {
       itemSpy.mockRestore();
       cropSpy.mockRestore();
       eventPriceSpy.mockRestore();
-      tagSpy.mockRestore();
       keywordSpy.mockRestore();
       themeSpy.mockRestore();
       typeSpy.mockRestore();
