@@ -111,7 +111,11 @@ export class TaxonomiesRepository {
         return this.prisma.tag.findUnique({
             where: { id },
             include: {
-                gallery: true
+                tag_production: {
+                    include: {
+                        production: true
+                    }
+                }
             }
         })
     }

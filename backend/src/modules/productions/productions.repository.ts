@@ -45,6 +45,11 @@ export class ProductionsRepository {
                     include: {
                         genre: true
                     }
+                },
+                tag_production: {
+                    include: {
+                        tag: true
+                    }
                 }
             }
         })
