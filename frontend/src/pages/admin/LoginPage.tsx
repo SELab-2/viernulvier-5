@@ -7,7 +7,7 @@ import { useAdminMessages } from '../../components/admin/AdminMessagesContext'
 import AdminLoginForm from '../../components/admin/AdminLoginForm'
 import { getAdminRouteConfig } from '../../admin/paths'
 
-const adminIconSrc = '/admin-icon.svg'
+const adminIconSrc = '/admin/admin-login-icon.svg'
 
 type SessionUser = {
     sub: string
@@ -50,11 +50,11 @@ function LoginPageContent() {
         setIsSubmitting(true)
 
         try {
-            await api.post('/auth/login', {
+            await api.post('/v1/auth/login', {
                 username: username.trim(),
                 password,
             })
-            await api.get<SessionResponse>('/auth/me')
+            await api.get<SessionResponse>('/v1/auth/me')
             navigate(from, { replace: true })
         } catch (err) {
             const message = err instanceof Error ? err.message : ''

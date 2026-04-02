@@ -93,8 +93,8 @@ describe('LoginPage', () => {
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledTimes(2)
-      expect(fetchMock.mock.calls[0]?.[0]).toBe('/api/auth/login')
-      expect(fetchMock.mock.calls[1]?.[0]).toBe('/api/auth/me')
+      expect(fetchMock.mock.calls[0]?.[0]).toBe('/api/v1/auth/login')
+      expect(fetchMock.mock.calls[1]?.[0]).toBe('/api/v1/auth/me')
       expect(navigate).toHaveBeenCalledWith('/admin/archive/42/edit?tab=metadata#notes', { replace: true })
     })
   })

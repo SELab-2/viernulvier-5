@@ -24,7 +24,7 @@ export function useAdminSession(): AdminSessionState {
   useEffect(() => {
     let isActive = true
 
-    fetch('/api/auth/me')
+    fetch('/api/v1/auth/me')
       .then(async (response) => {
         if (!response.ok) {
           throw new Error('Unauthorized')

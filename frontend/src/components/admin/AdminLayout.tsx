@@ -4,11 +4,15 @@ import type { Locale } from '../../i18n/types'
 import type { Theme } from '../shared/TopBarControls'
 import AdminFooter from './AdminFooter'
 import { AdminMessagesContext } from './AdminMessagesContext'
+import AdminSidebar from './AdminSidebar'
 import AdminTopBar from './AdminTopBar'
 
 type AdminLayoutProps = {
     children: React.ReactNode
     mainClassName?: string
+    userName?: string
+    userRole?: string
+    showSidebar?: boolean
 }
 
 function resolveTheme(): Theme {
@@ -20,7 +24,13 @@ function resolveTheme(): Theme {
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
 
-function AdminLayout({ children, mainClassName = '' }: AdminLayoutProps) {
+function AdminLayout({
+    children,
+    mainClassName = '',
+    userName = 'Artevelde stagiair',
+    userRole = 'Administrator',
+    showSidebar = false,
+}: AdminLayoutProps) {
     const [locale, setLocale] = useState<Locale>(() => getActiveLocale(window.location.pathname))
     const [theme, setTheme] = useState<Theme>(resolveTheme)
     const messages = useMemo(() => getMessages(locale), [locale])
@@ -48,7 +58,10 @@ function AdminLayout({ children, mainClassName = '' }: AdminLayoutProps) {
                     onToggleTheme={() => toggleTheme()}
                 />
 
-                <main className={mainClassName}>{children}</main>
+                <div className="flex w-full items-stretch lg:min-h-[calc(100vh-4.5rem)]">
+                    {showSidebar ? <AdminSidebar userName={userName} userRole={userRole} /> : null}
+                    <main className={["min-w-0 flex-1", mainClassName].filter(Boolean).join(' ')}>{children}</main>
+                </div>
 
                 <AdminFooter
                     navigationTitle={messages.auth.navigationTitle}

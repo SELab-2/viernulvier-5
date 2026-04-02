@@ -2,7 +2,7 @@ import type { Locale } from '../../i18n/types'
 import { NextLocaleToggle, SegmentedThemeToggle } from '../shared/TopBarControls'
 import type { Theme } from '../shared/TopBarControls'
 
-const adminWordmarkSrc = '/admin-wordmark.png'
+const adminWordmarkSrc = '/admin/admin-wordmark.png'
 
 type AdminTopBarProps = {
     locale: Locale
