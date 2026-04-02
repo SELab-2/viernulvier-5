@@ -492,14 +492,14 @@ describe('scraper integration full coverage', () => {
   });
 
   it('checks all tag fields', async () => {
-    const genre = await prisma.genre.findUnique({ where: { apiId: '/tag/1' } });
-    expect(genre).not.toBeNull();
-    const name = getLocalized(genre?.name);
-    const slug = getLocalized(genre?.slug);
-    const description = getLocalized(genre?.description);
+    const tag = await prisma.tag.findUnique({ where: { apiId: '/tag/1' } });
+    expect(tag).not.toBeNull();
+    const name = getLocalized(tag?.name);
+    const slug = getLocalized(tag?.slug);
+    const description = getLocalized(tag?.description);
 
-    expect(genre?.type).toBe('category');
-    expect(genre?.vendor_id).toBe('VEND001');
+    expect(tag?.type).toBe('category');
+    expect(tag?.vendor_id).toBe('VEND001');
     expect(name.nl).toBe('Theater');
     expect(name.en).toBe('Theatre');
     expect(name.fr).toBe('Théâtre');
@@ -509,8 +509,8 @@ describe('scraper integration full coverage', () => {
     expect(description.nl).toBe('Tag NL');
     expect(description.en).toBe('Tag EN');
     expect(description.fr).toBe('Tag FR');
-    expect(genre?.created_at.toISOString()).toBe('2021-01-03T10:00:00.000Z');
-    expect(genre?.updated_at.toISOString()).toBe('2021-01-04T11:00:00.000Z');
+    expect(tag?.created_at.toISOString()).toBe('2021-01-03T10:00:00.000Z');
+    expect(tag?.updated_at.toISOString()).toBe('2021-01-04T11:00:00.000Z');
   });
 
   it('links production with genre in genre_production', async () => {
@@ -532,7 +532,7 @@ describe('scraper integration full coverage', () => {
 
   it('links production with tag in tag_production', async () => {
     const prod = await prisma.production.findUnique({ where: { apiId: '/prod/1' } });
-    const tag = await prisma.genre.findUnique({ where: { apiId: '/tag/1' } });
+    const tag = await prisma.tag.findUnique({ where: { apiId: '/tag/1' } });
 
     expect(prod).not.toBeNull();
     expect(tag).not.toBeNull();
