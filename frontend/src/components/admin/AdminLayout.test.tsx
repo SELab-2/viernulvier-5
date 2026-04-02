@@ -4,7 +4,7 @@ import { render, screen } from '@testing-library/react'
 import AdminLayout from './AdminLayout'
 
 vi.mock('./AdminTopBar', () => ({
-  default: ({ adminLabel }: { adminLabel: string }) => <div>{adminLabel}</div>,
+  default: () => <div>TopBar</div>,
 }))
 
 vi.mock('./AdminFooter', () => ({
@@ -15,7 +15,6 @@ vi.mock('../../i18n', () => ({
   getActiveLocale: () => 'nl',
   getMessages: () => ({
     auth: {
-      adminLabel: 'Beheerder',
       navigationTitle: 'Navigatie',
       dashboardLabel: 'Dashboard',
       productionsLabel: 'Producties',
@@ -45,7 +44,22 @@ describe('AdminLayout', () => {
     vi.unstubAllGlobals()
   })
 
-  it('renders admin copy through the shared shell', () => {
+  it('renders admin copy through the shared shell and sidebar defaults', () => {
+    render(
+      <MemoryRouter>
+        <AdminLayout showSidebar>
+          <span>Content</span>
+        </AdminLayout>
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByText('Content')).toBeInTheDocument()
+    expect(screen.getByText('Navigatie')).toBeInTheDocument()
+    expect(screen.getByText('Dashboard')).toBeInTheDocument()
+    expect(screen.getByText('Artevelde stagiair')).toBeInTheDocument()
+  })
+
+  it('does not render sidebar when showSidebar is false', () => {
     render(
       <MemoryRouter>
         <AdminLayout>
@@ -55,8 +69,19 @@ describe('AdminLayout', () => {
     )
 
     expect(screen.getByText('Content')).toBeInTheDocument()
-    expect(screen.queryByText('Beheerder')).not.toBeInTheDocument()
-    expect(screen.getByText('Navigatie')).toBeInTheDocument()
+    expect(screen.queryByText('Artevelde stagiair')).not.toBeInTheDocument()
   })
 
+  it('renders overridden sidebar identity when showSidebar is true', () => {
+    render(
+      <MemoryRouter>
+        <AdminLayout showSidebar userName="Liam" userRole="2 editors actief">
+          <span>Content</span>
+        </AdminLayout>
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByText('Liam')).toBeInTheDocument()
+    expect(screen.getByText('2 editors actief')).toBeInTheDocument()
+  })
 })

@@ -1,4 +1,4 @@
-const adminWordmarkSrc = '/admin-wordmark.png'
+const adminWordmarkSrc = '/admin/admin-wordmark.png'
 
 type AdminFooterProps = {
     navigationTitle: string
