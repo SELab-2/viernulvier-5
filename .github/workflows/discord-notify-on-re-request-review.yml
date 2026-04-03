@@ -1,8 +1,8 @@
-name: Notify on Discord when PR is ready for review
+name: Notify on Discord when a review is requested
 
 on:
   pull_request:
-    types: [ready_for_review]
+    types: [review_requested]
 
 jobs:
   notify:
@@ -31,33 +31,18 @@ jobs:
             };
 
             const pr = context.payload.pull_request;
+            const reviewer = context.payload.requested_reviewer;
 
-            if (pr.draft) {
-              core.info("Still draft — skipping.");
+            if (!reviewer) {
+              core.info("No reviewer in payload.");
               return;
             }
 
-            const { data: fullPr } = await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: pr.number
-            });
-
-            const reviewers = fullPr.requested_reviewers.map(r => r.login);
-
-            if (reviewers.length === 0) {
-              core.info("No reviewers.");
-              return;
-            }
-
-            const mentions = reviewers
-              .map(user => DISCORD_MAP[user])
-              .filter(Boolean)
-              .map(id => `<@&${id}>`)
-              .join(' ');
+            const roleId = DISCORD_MAP[reviewer.login];
+            const mention = roleId ? `<@&${roleId}>` : reviewer.login;
 
             const message = {
-              content: `🔔 **PR Ready for Review**\n${mentions}\n📦 **${pr.title}**\n🔗 ${pr.html_url}`
+              content: `📣 **Review Requested**\n${mention}\n📦 **${pr.title}**\n🔗 ${pr.html_url}`
             };
 
             await fetch(process.env.DISCORD_WEBHOOK, {
