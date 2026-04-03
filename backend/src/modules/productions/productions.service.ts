@@ -10,18 +10,179 @@ import { PaginatedResult, calculateTotalPages } from '../../utils/pagination.js'
 export class ProductionsService {
     constructor(private readonly repository: ProductionsRepository) { }
 
+    private getLocalizedName(value: unknown): string | null {
+        if (!value || typeof value !== 'object') {
+            return null
+        }
+
+        const name = value as Record<string, unknown>
+        const candidates = [name.nl, name.en, name.fr]
+
+        for (const candidate of candidates) {
+            if (typeof candidate === 'string' && candidate.trim().length > 0) {
+                return candidate.trim()
+            }
+        }
+
+        return null
+    }
+
+    private extractUrlCandidate(value: unknown): string | undefined {
+        if (typeof value === 'string') {
+            const trimmed = value.trim()
+            if (trimmed.length > 0 && /^https?:\/\//i.test(trimmed)) {
+                return trimmed
+            }
+
+            return undefined
+        }
+
+        if (!value || typeof value !== 'object') {
+            return undefined
+        }
+
+        const data = value as Record<string, unknown>
+        const preferredKeys = ['url', 'src', 'original', 'href', 'secure_url', 'nl', 'en', 'fr']
+
+        for (const key of preferredKeys) {
+            const fromPreferred = this.extractUrlCandidate(data[key])
+            if (fromPreferred) {
+                return fromPreferred
+            }
+        }
+
+        for (const nestedValue of Object.values(data)) {
+            const fromNested = this.extractUrlCandidate(nestedValue)
+            if (fromNested) {
+                return fromNested
+            }
+        }
+
+        return undefined
+    }
+
+    private extractImageUrl(production: any): string | null {
+        const posterItems = Array.isArray(production.poster_gallery?.items) ? production.poster_gallery.items : []
+        const mediaItems = Array.isArray(production.media_gallery?.items) ? production.media_gallery.items : []
+
+        for (const item of [...posterItems, ...mediaItems]) {
+            const crops = Array.isArray(item?.crops) ? item.crops : []
+
+            for (const crop of crops) {
+                const fromCrop = this.extractUrlCandidate(crop?.url)
+                if (fromCrop) {
+                    return fromCrop
+                }
+            }
+
+            const fromItem = this.extractUrlCandidate(item?.link)
+            if (fromItem) {
+                return fromItem
+            }
+        }
+
+        return null
+    }
+
+    private extractVenueName(production: any): string | null {
+        const venueNames = this.extractVenueNames(production)
+        return venueNames[0] ?? null
+    }
+
+    private extractVenueNames(production: any): string[] {
+        const events = Array.isArray(production.events) ? production.events : []
+        const uniqueNames = new Set<string>()
+
+        for (const event of events) {
+            const hallName = this.getLocalizedName(event?.hall?.name)
+            if (hallName) {
+                uniqueNames.add(hallName)
+            }
+        }
+
+        return Array.from(uniqueNames)
+    }
+
+    private extractProductionGenres(production: any): string[] {
+        const links = Array.isArray(production.genre_production) ? production.genre_production : []
+        const uniqueGenres = new Set<string>()
+
+        for (const link of links) {
+            const genreName = this.getLocalizedName(link?.genre?.name)
+            if (genreName) {
+                uniqueGenres.add(genreName)
+            }
+        }
+
+        return Array.from(uniqueGenres)
+    }
+
+    private mapProductionResponse(production: any): ProductionResponse {
+        return {
+            ...production,
+            image_url: this.extractImageUrl(production),
+            venue_name: this.extractVenueName(production),
+            venue_names: this.extractVenueNames(production),
+            production_genres: this.extractProductionGenres(production),
+        }
+    }
+
     async getProductions(options: PaginationQuery): Promise<PaginatedResult<ProductionResponse>> {
-        const { page, limit, search, lang } = options
+        const { page, limit, search, lang, genres, locations, yearFrom, yearTo, sort } = options
+
+        const normalizedGenres = genres
+            ? genres
+                .split(',')
+                .map((value) => value.trim().toLowerCase())
+                .filter(Boolean)
+            : undefined
+
+        const normalizedLocations = locations
+            ? locations
+                .split(',')
+                .map((value) => value.trim().toLowerCase())
+                .filter(Boolean)
+            : undefined
+
+        const normalizedYearFrom = typeof yearFrom === 'number' ? Math.max(1900, yearFrom) : undefined
+        const normalizedYearTo = typeof yearTo === 'number' ? Math.min(3000, yearTo) : undefined
+
+        const safeYearFrom =
+            typeof normalizedYearFrom === 'number' && typeof normalizedYearTo === 'number'
+                ? Math.min(normalizedYearFrom, normalizedYearTo)
+                : normalizedYearFrom
+
+        const safeYearTo =
+            typeof normalizedYearFrom === 'number' && typeof normalizedYearTo === 'number'
+                ? Math.max(normalizedYearFrom, normalizedYearTo)
+                : normalizedYearTo
 
         const [items, total] = await Promise.all([
-            this.repository.findAll({ page, limit, search, lang }),
-            this.repository.count({ search, lang }),
+            this.repository.findAll({
+                page,
+                limit,
+                search,
+                lang,
+                genres: normalizedGenres,
+                locations: normalizedLocations,
+                yearFrom: safeYearFrom,
+                yearTo: safeYearTo,
+                sort,
+            }),
+            this.repository.count({
+                search,
+                lang,
+                genres: normalizedGenres,
+                locations: normalizedLocations,
+                yearFrom: safeYearFrom,
+                yearTo: safeYearTo,
+            }),
         ])
 
         const totalPages = calculateTotalPages(total, limit)
 
         return {
-            items: items as any,
+            items: items.map((item) => this.mapProductionResponse(item)) as any,
             total,
             page,
             limit,
@@ -30,7 +191,12 @@ export class ProductionsService {
     }
 
     async getProduction(id: string): Promise<ProductionResponse | null> {
-        return this.repository.findById(id) as any
+        const production = await this.repository.findById(id)
+        if (!production) {
+            return null
+        }
+
+        return this.mapProductionResponse(production) as any
     }
 
     async createProduction(data: CreateProductionInput): Promise<ProductionResponse> {

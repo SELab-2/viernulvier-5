@@ -10,7 +10,7 @@ const localizedTextSchema = z.object({
     en: z.string().optional(),
 }).nullable()
 
-const customDataSchema = z.record(z.string(), z.unknown()).nullable()
+const customDataSchema = z.unknown().nullable()
 
 const galleryItemSchema = z.object({
     id: z.string().uuid(),
@@ -26,6 +26,11 @@ export const paginationQuerySchema = z.object({
     page: z.coerce.number().int().positive().default(1),
     limit: z.coerce.number().int().positive().max(100).default(20),
     search: z.string().optional(),
+    genres: z.string().optional(),
+    locations: z.string().optional(),
+    yearFrom: z.coerce.number().int().optional(),
+    yearTo: z.coerce.number().int().optional(),
+    sort: z.enum(['relevance', 'recent', 'oldest']).optional().default('relevance'),
     lang: z.string().optional().default('nl'),
 })
 
@@ -69,6 +74,10 @@ export const productionSchema = z.object({
     description_short: localizedTextSchema,
     eticket_info: localizedTextSchema,
     custom_data: customDataSchema,
+    image_url: z.string().nullable().optional(),
+    venue_name: z.string().nullable().optional(),
+    venue_names: z.array(z.string()).optional(),
+    production_genres: z.array(z.string()).optional(),
     media_gallery: gallerySchema.optional(),
     poster_gallery: gallerySchema.optional(),
     media_gallery_id: z.string().uuid().nullable(),
