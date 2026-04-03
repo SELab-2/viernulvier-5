@@ -24,16 +24,16 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             // ── TEAM CONFIGURATION ──────────────────────────────────────────────
-            // team discord ids:
+            // team discord role ids:
             const DISCORD_MAP = {
-              laveenae: "689468629729017886",
-              LiamVDB1: "278968202434707457",
-              sarahvlan: "347024334172192778",
-              tuurdaneels: "290136304690266112",
-              Jorenve: "552082711721017344",
-              julesbauw: "471239256527077376",
-              jminjuk2: "860244412340895794",
-              ninavandezande: "535183800087347204"
+              laveenae: "1489694586098946129",
+              LiamVDB1: "1489694455723462787",
+              sarahvlan: "1489694521603133521",
+              tuurdaneels: "1489694424530161816",
+              Jorenve: "1489694554721616162",
+              julesbauw: "1489694485490303206",
+              jminjuk2: "1489694397779017898",
+              ninavandezande: "1489694279088476273"
             };
             // ───────────────────────────────────────────────────────────────────
 
@@ -62,7 +62,7 @@ jobs:
             const mentions = reviewers
               .map(user  => DISCORD_MAP[user])
               .filter(Boolean)
-              .map(id => `<@${id}>`)
+              .map(id => `<@&${id}>`)
               .join(' ');
 
             const prTitle = context.payload.pull_request.title;
