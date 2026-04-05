@@ -24,6 +24,10 @@ import type {
 } from "./APItypes";
 
 const api_key = process.env.API_KEY;
+if (!api_key) {
+    throw new Error('API_KEY not configured');
+}
+
 const headers = {
     "Accept": "application/ld+json",
     "X-AUTH-TOKEN": api_key
