@@ -15,7 +15,7 @@ export const uitdatabankPaginationQuerySchema = z.object({
  */
 export const keywordLinksSchema = z.object({
     self: z.string().url().default('https://example.com/'),
-    productions: z.string().url().optional().default('https://example.com/'),
+    productions: z.string().url().optional().nullable().default('https://example.com/'),
 })
 
 export const keywordSchema = z.object({
@@ -32,7 +32,7 @@ export const keywordSchema = z.object({
  */
 export const themeLinksSchema = z.object({
     self: z.string().url().default('https://example.com/'),
-    productions: z.string().url().optional().default('https://example.com/'),
+    productions: z.string().url().optional().nullable().default('https://example.com/'),
 })
 
 export const themeSchema = z.object({
@@ -50,7 +50,7 @@ export const themeSchema = z.object({
  */
 export const typeLinksSchema = z.object({
     self: z.string().url().default('https://example.com/'),
-    productions: z.string().url().optional().default('https://example.com/'),
+    productions: z.string().url().optional().nullable().default('https://example.com/'),
 })
 
 export const typeSchema = z.object({
