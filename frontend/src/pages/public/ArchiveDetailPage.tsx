@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useLoaderData, useParams } from 'react-router-dom'
 import { getActiveLocale, getMessages, withLocalePath } from '../../i18n'
 import PublicLayout from '../../components/public/PublicLayout'
 import PublicPillButton from '../../components/public/PublicPillButton'
@@ -12,11 +11,8 @@ function ArchiveDetailPage() {
     const navigate = useNavigate()
     const locale = getActiveLocale(window.location.pathname)
     const messages = getMessages()
+    const production = useLoaderData() as Production
     const { id } = useParams<{ id: string }>()
-
-    const [production, setProduction] = useState<Production | null>(null)
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
 
     /*
     const handlePopularTagClick = (tag: string) => {
@@ -35,57 +31,6 @@ function ArchiveDetailPage() {
         } else {
             navigate(withLocalePath('/', locale))
         }
-    }
-
-
-    useEffect(() => {
-        if (!id) return
-
-        setLoading(true)
-
-        getProductionById(id)
-            .then((res) => {
-                setProduction(res.data)
-                setLoading(false)
-            })
-            .catch((err) => {
-                setError(err.message)
-                setLoading(false)
-            })
-    }, [id])
-
-    if (loading) {
-        return (
-            <PublicLayout>
-                <div className="site-container mt-8">
-                    <PublicPillButton
-                        label={messages.detail.navBackToOverview}
-                        onClick={handleGoBackToHome}
-                    />
-                </div>
-                <div className="max-w-4xl mx-auto px-4 py-8">
-                    <p>Loading...</p>
-                </div>
-            </PublicLayout>
-        )
-    }
-
-    if (error || !production) {
-        return (
-            <PublicLayout>
-                <div className="site-container mt-8">
-                    <PublicPillButton
-                        label={messages.detail.navBackToOverview}
-                        onClick={handleGoBackToHome}
-                    />
-                </div>
-                <div className="max-w-4xl mx-auto px-4 py-8">
-                    <p className="text-red-500">
-                        {error || 'Production not found'}
-                    </p>
-                </div>
-            </PublicLayout>
-        )
     }
 
     const title =
