@@ -17,8 +17,8 @@ export class BlogsRepository {
         id: string
         title: string | null
         content: unknown
-        created_at: Date
-        updated_at: Date
+        createdAt: Date
+        updatedAt: Date
         blog_production: Array<{ production_id: string }>
     }): BlogResponse {
         return {
@@ -26,8 +26,8 @@ export class BlogsRepository {
             title: blog.title,
             content: blog.content,
             productions: blog.blog_production.map((relation) => relation.production_id),
-            createdAt: blog.created_at,
-            updatedAt: blog.updated_at,
+            createdAt: blog.createdAt,
+            updatedAt: blog.updatedAt,
         }
     }
 
@@ -46,7 +46,7 @@ export class BlogsRepository {
             include: this.blogInclude,
             skip,
             take: limit,
-            orderBy: { created_at: 'desc' },
+            orderBy: { createdAt: 'desc' },
         })
 
         return blogs.map((blog) => this.mapBlog(blog))
