@@ -1,5 +1,6 @@
 import { Prisma, type PrismaClient } from '@prisma/client'
 import type { CreateBlogInput, UpdateBlogInput, BlogResponse, BlogPaginationQuery } from './blogs.schema.js'
+import { AppError } from '../../errors/app-error.js'
 
 export class BlogsRepository {
     constructor(private readonly prisma: PrismaClient) {}
@@ -92,7 +93,7 @@ export class BlogsRepository {
 
     async update(id: string, data: UpdateBlogInput): Promise<BlogResponse> {
         const existing = await this.prisma.blog.findUnique({ where: { id } })
-        if (!existing) throw new Error('Blog not found')
+        if (!existing) throw new AppError('Blog not found')
 
         const updatedBlog = await this.prisma.blog.update({
             where: { id },
@@ -120,14 +121,12 @@ export class BlogsRepository {
 
     async delete(id: string): Promise<void> {
         const existing = await this.prisma.blog.findUnique({ where: { id } })
-        if (!existing) throw new Error('Blog not found')
+        if (!existing) throw new AppError('Blog not found')
 
-        await this.prisma.blog_production.deleteMany({
-            where: { blog_id: id },
-        })
+        await this.prisma.$transaction([
+            this.prisma.blog_production.deleteMany({ where: { blog_id: id } }),
+            this.prisma.blog.delete({ where: { id } }),
+        ])
 
-        await this.prisma.blog.delete({
-            where: { id },
-        })
     }
 }
