@@ -158,7 +158,7 @@ model blog {
   title           String?           @db.Text
   content         Json?
   blog_production blog_production[]
-  
+
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt DateTime  @default(now()) @map("updated_at") @db.Timestamp(6)
 }
