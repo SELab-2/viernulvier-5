@@ -154,12 +154,13 @@ model location {
 }
 
 model blog {
-  created_at                        DateTime @default(now()) @db.Timestamp(6)
-  updated_at                        DateTime @default(now()) @db.Timestamp(6)
   id              String            @id @db.Uuid @default(uuid())
   title           String?           @db.Text
   content         Json?
   blog_production blog_production[]
+  
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt DateTime  @default(now()) @map("updated_at") @db.Timestamp(6)
 }
 
 model blog_production {
