@@ -40,6 +40,7 @@ export const updateBlogSchema = z.object({
     title: z.string().min(1).optional(),
     content: z.unknown().optional(),
     productionIds: z.array(z.string().uuid()).optional(),
+    productionIds: z.array(z.string().uuid()).optional(),
 })
 
 export const blogIdSchema = z.object({
