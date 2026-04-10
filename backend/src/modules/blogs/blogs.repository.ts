@@ -73,12 +73,14 @@ export class BlogsRepository {
     }
 
     async create(data: CreateBlogInput): Promise<BlogResponse> {
+        const productionIds = data.productionIds ?? []
+
         const blog = await this.prisma.blog.create({
             data: {
                 title: data.title,
                 content: (data.content ?? null) as Prisma.InputJsonValue,
                 blog_production: {
-                    create: data.productionIds.map((productionId) => ({
+                    create: productionIds.map((productionId) => ({
                         production: {
                             connect: { id: productionId },
                         },
@@ -104,7 +106,7 @@ export class BlogsRepository {
                     ? {
                         blog_production: {
                             deleteMany: {},
-                            create: data.productionIds.map((productionId) => ({
+                            create: (data.productionIds ?? []).map((productionId) => ({
                                 production: {
                                     connect: { id: productionId },
                                 },

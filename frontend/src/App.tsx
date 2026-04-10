@@ -10,6 +10,7 @@ import ArchiveDetailPage from './pages/public/ArchiveDetailPage'
 const LoginPage = lazy(() => import('./pages/admin/LoginPage'))
 const DashboardPage = lazy(() => import('./pages/admin/DashboardPage'))
 const ArchiveEditPage = lazy(() => import('./pages/admin/ArchiveEditPage'))
+const CreateBlogPage = lazy(() => import('./pages/admin/CreateBlogPage'))
 
 /**
  * Root App component.
@@ -45,6 +46,7 @@ function App() {
                         <Route path="/admin/login" element={<LoginPage />} />
                         <Route path="/admin" element={<DashboardPage />} />
                         <Route path="/admin/archive/:id/edit" element={<ArchiveEditPage />} />
+                        <Route path="/admin/blogs/create" element={<CreateBlogPage/>} />
                     </>
                 )}
             </Routes>
