@@ -62,10 +62,6 @@ export type APIProduction = {
     media_gallery:string;
     review_gallery:string;
     poster_gallery:string;
-
-    uitdatabank_keywords: string[];
-    uitdatabank_theme:string;
-    uitdatabank_type:string;
 };
 
 export type APILocation = {
@@ -84,7 +80,6 @@ export type APILocation = {
   phone_2: string;
   own_location: string;
   country: string;
-  uitdatabank_id: string;
   spaces: string[];
 };
 
@@ -128,7 +123,6 @@ export type APIEvent = {
   box_office_id: string;
   vendor_id: string;
   max_tickets_per_order: number;
-  uitdatabank_id: string;
   secure: boolean;
   sms_verification: boolean;
   production: foreignKey; // apiID that references Production
@@ -230,35 +224,6 @@ export type APICrop = {
     updated_at: string;
     name: string;
     url: string;
-}
-
-export type APIUitKeyword = {
-    "@context": string;
-    "@id": string;
-    "@type": string;
-    created_at: string;
-    updated_at: string;
-    name: string;
-}
-
-export type APIUitTheme = {
-    "@context": string;
-    "@id": string;
-    "@type": string;
-    created_at: string;
-    updated_at: string;
-    name: string;
-    cdb_cat_id: string;
-}
-
-export type APIUitType = {
-    "@context": string;
-    "@id": string;
-    "@type": string;
-    created_at: string;
-    updated_at: string;
-    name: string;
-    cdb_cat_id: string;
 }
 
 /*
