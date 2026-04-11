@@ -38,7 +38,6 @@ export const locationSchema = z.object({
     phone_2: z.string().nullable(),
     own_location: z.string().nullable(),
     country: z.string().nullable(),
-    uitdatabank_id: z.string().nullable(),
     created_at: z.coerce.date(),
     updated_at: z.coerce.date(),
     links: locationLinksSchema.optional(),
@@ -63,7 +62,6 @@ export const updateLocationSchema = z.object({
     phone_2: z.string().nullable().optional(),
     own_location: z.string().nullable().optional(),
     country: z.string().nullable().optional(),
-    uitdatabank_id: z.string().nullable().optional(),
 })
 
 export const createLocationSchema = updateLocationSchema

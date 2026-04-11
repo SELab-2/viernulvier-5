@@ -14,9 +14,6 @@ import type {
   APIEventPrice,
   APITag,
   APICrop,
-  APIUitKeyword,
-  APIUitTheme,
-  APIUitType,
 } from "./APItypes";
 
 
@@ -32,9 +29,6 @@ export default {
   sync_crops,
   sync_event_prices,
   sync_tags,
-  sync_uit_keywords,
-  sync_uit_themes,
-  sync_uit_types,
 };
 /*
 
@@ -125,18 +119,12 @@ function mapEvent(event: APIEvent) {
     box_office_id: event.box_office_id || undefined,
     vendor_id: event.vendor_id || undefined,
     max_tickets_per_order: event.max_tickets_per_order || undefined,
-    uitdatabank_id: event.uitdatabank_id || undefined,
     secure: event.secure || undefined,
     sms_verification: event.sms_verification || undefined,
     info: event.info || null,
     eticket_info: event.eticket_info || null,
     external_order_url: event.external_order_url || null,
     order_url: event.order_url || undefined,
-    
-    // Foreign keys are linked separately:
-    // production_id: looked up via event.production (apiId string)
-    // status_id: looked up via event.status["@id"] (apiId string)
-    // hall_id: looked up via event.hall["@id"] (apiId string)
   };
 }
 
@@ -181,8 +169,6 @@ function mapProduction(prod: APIProduction) {
       media_gallery_id: prod.media_gallery,
       review_gallery_id: prod.review_gallery,
       poster_gallery_id: prod.poster_gallery,
-
-    // uitdatabank_type/theme or keyword relations are handled separately.
   };
 }
 
@@ -205,7 +191,6 @@ function mapLocation(location:APILocation) {
     phone_2: location.phone_2,
     own_location: location.own_location,
     country: location.country,
-    uitdatabank_id: location.uitdatabank_id,
   };
 }
 
@@ -328,34 +313,6 @@ function mapCrop(crop: APICrop){
     name: crop.name,
     url: crop.url,
     // item: link items in function
-  }
-}
-
-function mapUitKeyword(keyword: APIUitKeyword){
-  return {
-    created_at: sanitizeTimestampRequired(keyword.created_at),
-    updated_at: sanitizeTimestampRequired(keyword.updated_at),
-    apiId: keyword["@id"],
-    name: keyword.name,
-  }
-}
-
-function mapUitTheme(theme: APIUitTheme){
-  return {
-    created_at: sanitizeTimestampRequired(theme.created_at),
-    updated_at: sanitizeTimestampRequired(theme.updated_at),
-    apiId: theme["@id"],
-    name: theme.name,
-    cdb_cat_id: theme.cdb_cat_id,
-  }
-}
-function mapUitType(type: APIUitType){
-  return {
-    created_at: sanitizeTimestampRequired(type.created_at),
-    updated_at: sanitizeTimestampRequired(type.updated_at),
-    apiId: type["@id"],
-    name: type.name,
-    cdb_cat_id: type.cdb_cat_id,
   }
 }
 
@@ -561,20 +518,6 @@ async function sync_productions(cutoff_timestamp: Date | undefined = undefined) 
           });
         }
 
-        let uitdatabank_theme = null
-        if (production.uitdatabank_theme) {
-          uitdatabank_theme = await tx.uitdatabank_theme.findUnique({
-            where: {apiId: production.uitdatabank_theme}
-          });
-        }
-
-        let uitdatabank_type = null
-        if (production.uitdatabank_type) {
-          uitdatabank_type = await tx.uitdatabank_type.findUnique({
-            where: {apiId: production.uitdatabank_type}
-          });
-        }
-
 
         const db_production = await tx.production.upsert({
           where: {apiId: production["@id"]},
@@ -583,44 +526,14 @@ async function sync_productions(cutoff_timestamp: Date | undefined = undefined) 
             media_gallery_id: media_gallery?.id || null,
             poster_gallery_id: poster_gallery?.id || null,
             review_gallery_id: review_gallery?.id || null,
-            uitdatabank_theme: uitdatabank_theme?.id || null,
-            uitdatabank_type: uitdatabank_type?.id || null,
           },
           create: {
             ...mapProduction(production),
             media_gallery_id: media_gallery?.id || null,
             poster_gallery_id: poster_gallery?.id || null,
             review_gallery_id: review_gallery?.id || null,
-            uitdatabank_theme: uitdatabank_theme?.id || null,
-            uitdatabank_type: uitdatabank_type?.id || null,
           },
         })
-
-        //uit_keywords_production table
-        for (const keyword of production.uitdatabank_keywords) {
-          let uitdatabank_keyword = undefined
-          if (production.uitdatabank_type) {
-            uitdatabank_keyword = await tx.uitdatabank_keyword.findUnique({
-              where: {apiId: keyword}
-            });
-          }
-
-          if (uitdatabank_keyword !== undefined) {
-            await tx.uit_keywords_production.upsert({
-              where: {
-                production_id_uitkeywords_id: {
-                  production_id: db_production.id,
-                  uitkeywords_id: uitdatabank_keyword!.id
-                }
-              },
-              update: {}, // if it already exists, you don't need to update it
-              create: {
-                production_id: db_production.id,
-                uitkeywords_id: uitdatabank_keyword!.id
-              },
-            });
-          }
-        }
 
         for (const genre of production.genres) {
           let db_genre = undefined
@@ -902,91 +815,3 @@ async function sync_crops(cutoff_timestamp: Date | undefined = undefined){
 
   log(`Completed syncing ${totalProcessed} crops from ${pageCount} pages`);
 }
-
-async function sync_uit_keywords(cutoff_timestamp: Date | undefined = undefined){
-  let totalProcessed = 0;
-  let pageCount = 0;
-
-  for await (let page of Fetcher.fetchUitKeywordPages()) {
-    pageCount++;
-    log(`Processing page ${pageCount} with ${page.length} keywords`);
-
-    if (page.length === 0) break;
-    page = filterByCutoff(page, cutoff_timestamp);
-
-    await prisma.$transaction(
-        page.map(keyword =>
-            prisma.uitdatabank_keyword.upsert({
-              where: {apiId: keyword["@id"]},
-              update: mapUitKeyword(keyword),
-              create: mapUitKeyword(keyword),
-            })
-        )
-    );
-
-
-    totalProcessed += page.length;
-  }
-
-  log(`Completed syncing ${totalProcessed} keywords from ${pageCount} pages`);
-}
-
-
-async function sync_uit_themes(cutoff_timestamp: Date | undefined = undefined){
-  let totalProcessed = 0;
-  let pageCount = 0;
-
-  for await (let page of Fetcher.fetchUitThemePages()) {
-    pageCount++;
-    log(`Processing page ${pageCount} with ${page.length} themes`);
-
-    if (page.length === 0) break;
-    page = filterByCutoff(page, cutoff_timestamp);
-
-    await prisma.$transaction(
-        page.map(theme =>
-            prisma.uitdatabank_theme.upsert({
-              where: {apiId: theme["@id"]},
-              update: mapUitTheme(theme),
-              create: mapUitTheme(theme),
-            })
-        )
-    );
-
-
-    totalProcessed += page.length;
-  }
-
-  log(`Completed syncing ${totalProcessed} themes from ${pageCount} pages`);
-}
-
-
-async function sync_uit_types(cutoff_timestamp: Date | undefined = undefined){
-  let totalProcessed = 0;
-  let pageCount = 0;
-
-  for await (let page of Fetcher.fetchUitTypePages()) {
-    pageCount++;
-    log(`Processing page ${pageCount} with ${page.length} themes`);
-
-    if (page.length === 0) break;
-    page = filterByCutoff(page, cutoff_timestamp);
-
-    await prisma.$transaction(
-        page.map(type =>
-            prisma.uitdatabank_type.upsert({
-              where: {apiId: type["@id"]},
-              update: mapUitType(type),
-              create: mapUitType(type),
-            })
-        )
-    );
-
-
-    totalProcessed += page.length;
-  }
-
-  log(`Completed syncing ${totalProcessed} themes from ${pageCount} pages`);
-}
-
-
