@@ -2,7 +2,7 @@ import { prisma } from "./prisma";
 import axios from "axios";
 import path from 'path';
 import * as fs from "node:fs";
-import { Crop } from "@prisma/client";
+import { crop } from "@prisma/client";
 
 
 
@@ -11,11 +11,8 @@ import { Crop } from "@prisma/client";
 
 // update: there is not a single gallery in tags.
 
-async function get_crops(): Crop[] {
-    let crops = await prisma.crop.findMany({});
-    console.log(crops.length);
-
-    crops = await prisma.crop.findMany({
+async function get_crops(): Promise<crop[]> {
+    const crops = await prisma.crop.findMany({
         where: {
             url: {
                 not: null
@@ -26,13 +23,12 @@ async function get_crops(): Crop[] {
             ]
         }
     });
-
-    console.log(crops.length);
+    console.log(crops);
     return crops;
 }
 
-async function download_crop(crop: Crop) {
-    const url = crop.url;
+async function download_crop(crop: crop) {
+    const url = crop.url!;
     try {
         const response = await axios({
             url,
@@ -69,8 +65,8 @@ export async function download_crops(){
     const crops = await get_crops();
     const chunkSize = 20;
 
-    for (let i = 0; i < crops.length/chunkSize; i += 1) {
-        console.log("chunk ", i, "of ", crops.length/chunkSize);
+    for (let i = 0; i < crops.length; i += chunkSize) {
+        console.log("chunk ", i/chunkSize, "of ", crops.length/chunkSize);
         const chunk = crops.slice(i, i + chunkSize);
 
         await Promise.all(
@@ -84,5 +80,3 @@ export async function download_crops(){
 export default {
     download_crops
 }
-
-download_crops();
