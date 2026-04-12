@@ -12,7 +12,7 @@ import { crop } from "@prisma/client";
 // update: there is not a single gallery in tags.
 
 async function get_crops(): Promise<crop[]> {
-    const crops = await prisma.crop.findMany({
+    return await prisma.crop.findMany({
         where: {
             url: {
                 not: null
@@ -23,8 +23,6 @@ async function get_crops(): Promise<crop[]> {
             ]
         }
     });
-    console.log(crops);
-    return crops;
 }
 
 async function download_crop(crop: crop) {
