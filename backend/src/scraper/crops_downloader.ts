@@ -63,6 +63,10 @@ async function download_crop(crop: crop) {
 export async function download_crops(){
 
     const crops = await get_crops();
+    if (crops === undefined){
+        console.log("No crops found.");
+        return;
+    }
     const chunkSize = 20;
 
     for (let i = 0; i < crops.length; i += chunkSize) {

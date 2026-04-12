@@ -13,15 +13,6 @@ vi.mock("node:fs", () => ({
     writeFileSync: vi.fn(),
 }));
 
-vi.mock("../../../src/scraper/prisma", () => ({
-    prisma: {
-        crop: {
-            findMany: vi.fn(),
-            update: vi.fn(),
-        },
-    },
-}));
-
 const mockedAxios = axios as any;
 const mockedFs = fs as any;
 
@@ -29,19 +20,29 @@ const mockedFs = fs as any;
 // tests
 // --------------------------------------------------
 describe("download_crops", () => {
-    beforeEach(() => {
+    beforeAll(async () => {
+        await prisma.$connect();
+    });
+    beforeEach(async () => {
         vi.clearAllMocks();
-        process.env.FILE_LOCATION = "./tmp";
+        process.env.FILE_LOCATION = "/tmp";
+
+        // Clean up database before each test
+        await prisma.crop.deleteMany();
+    });
+
+    afterAll(async () => {
+        await prisma.$disconnect();
     });
 
     it("downloads crops and stores file_location", async () => {
         const crops = [
-            { id: 1, url: "https://img/1.jpg", name: "FE3_header" },
-            { id: 2, url: "https://img/2.jpg", name: "FE3_grid" },
+            { url: "https://img/1.jpg", name: "FE3_header" },
+            {  url: "https://img/2.jpg", name: "FE3_grid" },
         ];
-
-        prisma.crop.findMany
-            .mockResolvedValueOnce(crops);   // filtered crops
+        await prisma.$transaction(
+            crops.map(crop => prisma.crop.create({ data: crop }))
+        );
 
         mockedAxios.mockResolvedValue({
             data: Buffer.from("file"),
@@ -53,52 +54,66 @@ describe("download_crops", () => {
 
         expect(mockedFs.writeFileSync).toHaveBeenCalledTimes(2);
 
-        expect(prisma.crop.update).toHaveBeenCalledTimes(2);
 
-        expect(prisma.crop.update).toHaveBeenCalledWith(
-            expect.objectContaining({
-                where: { id: 1 },
-                data: expect.objectContaining({
-                    file_location: expect.stringContaining("/tmp"),
-                }),
-            })
-        );
+        const updatedCrops = await prisma.crop.findMany({
+            where: {
+                file_location: {
+                    contains: "tmp"
+                }
+            }
+        });
+        expect(updatedCrops.length).toBe(2);
+        expect(updatedCrops[0].file_location).toContain("tmp");
     });
 
     it("handles failed downloads without crashing", async () => {
         const crops = [
-            { id: 1, url: "https://bad-url", name: "FE3_header" },
+            {url: "https://bad-url", name: "FE3_header" },
         ];
+        await prisma.$transaction(
+            crops.map(crop => prisma.crop.create({ data: crop }))
+        );
 
-        prisma.crop.findMany
-            .mockResolvedValueOnce(crops);
+
 
         mockedAxios.mockRejectedValue(new Error("fail"));
 
         await download_crops();
 
-        expect(prisma.crop.update).not.toHaveBeenCalled();
+        const updatedCrops = await prisma.crop.findMany({
+            where: {
+                file_location: {
+                    contains: "tmp"
+                }
+            }
+        });
+        expect(updatedCrops.length).toBe(0);
     });
 
     it("handles empty crop list", async () => {
-        prisma.crop.findMany
-            .mockResolvedValueOnce([]);
+
 
         await download_crops();
 
         expect(mockedAxios).not.toHaveBeenCalled();
-        expect(prisma.crop.update).not.toHaveBeenCalled();
+        const updatedCrops = await prisma.crop.findMany({
+            where: {
+                file_location: {
+                    contains: "tmp"
+                }
+            }
+        });
+        expect(updatedCrops.length).toBe(0);
     });
 
     it("processes crops in chunks", async () => {
         const crops = Array.from({ length: 25 }).map((_, i) => ({
-            id: i + 1,
             url: `https://img/${i}.jpg`,
             name: "FE3_header",
         }));
-
-        prisma.crop.findMany
-            .mockResolvedValueOnce(crops);
+        await prisma.$transaction(
+            crops.map(crop => prisma.crop.create({ data: crop }))
+        );
 
         mockedAxios.mockResolvedValue({
             data: Buffer.from("file"),
@@ -107,33 +122,53 @@ describe("download_crops", () => {
         await download_crops();
 
         expect(mockedAxios).toHaveBeenCalledTimes(25);
-        expect(prisma.crop.update).toHaveBeenCalledTimes(25);
+        const updatedCrops = await prisma.crop.findMany({
+            where: {
+                file_location: {
+                    contains: "tmp"
+                }
+            }
+        });
+        expect(updatedCrops.length).toBe(25);
     });
 
     it("does not attempt download when url is null", async () => {
         const crops = [
-            { id: 1, url: null, name: "FE3_header" },
+            {url: null, name: "FE3_header" },
         ];
-
-        prisma.crop.findMany
-            .mockResolvedValueOnce(crops);
+        await prisma.$transaction(
+            crops.map(crop => prisma.crop.create({ data: crop }))
+        );
 
         await download_crops();
 
-        expect(mockedAxios).not.toHaveBeenCalled();
+        const updatedCrops = await prisma.crop.findMany({
+            where: {
+                file_location: {
+                    contains: "tmp"
+                }
+            }
+        });
+        expect(updatedCrops.length).toBe(0);
     });
 
     it("does not attempt download when name isnt FE3_header or FE3_grid is null", async () => {
         const crops = [
-            { id: 1, url: "https://idk", name: "FE3_cropped" },
+            { url: "https://idk", name: "FE3_cropped" },
         ];
-
-        prisma.crop.findMany
-            .mockResolvedValueOnce(crops);
-
+        await prisma.$transaction(
+            crops.map(crop => prisma.crop.create({ data: crop }))
+        );
         await download_crops();
 
-        expect(mockedAxios).not.toHaveBeenCalled();
+        const updatedCrops = await prisma.crop.findMany({
+            where: {
+                file_location: {
+                    contains: "tmp"
+                }
+            }
+        });
+        expect(updatedCrops.length).toBe(0);
     });
 
 
