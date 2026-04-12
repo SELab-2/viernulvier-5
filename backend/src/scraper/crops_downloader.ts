@@ -1,4 +1,4 @@
-import { prisma } from "./prisma";
+import { prisma } from "../media/prisma";
 import axios from "axios";
 import path from 'path';
 import * as fs from "node:fs";
@@ -39,11 +39,23 @@ async function download_crop(crop: any) {
             responseType: 'arraybuffer',
         });
 
-        const filename = `${crop.id}.jpg`;
+        const filename = `${crop.id}.jpeg`;
         const filepath = path.join(process.env.FILE_LOCATION!, filename);
         fs.writeFileSync(filepath, response.data);
-        console.log(`Saved: ${filepath}`);
+        const fullPath = path.resolve(filepath);
+        console.log(`Saved: ${fullPath}`);
+        await prisma.crop.update({
+                where: {
+                    id: crop.id,
+                },
+                data: {
+                    file_location: fullPath
+                }
+            }
+        )
+
         return Number(response.headers['content-length']); // bytes
+
 
         // console.log("File size:", fileSize, "bytes");
         // console.log("done downloading");
@@ -57,7 +69,7 @@ async function download_crop(crop: any) {
 }
 
 
-export async function main(){
+export async function download_crops(){
 
 
     // const temp_crops = await get_media_items();
@@ -82,4 +94,6 @@ export async function main(){
 
 }
 
-main();
+export default {
+    download_crops
+}
