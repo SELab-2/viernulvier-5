@@ -53,8 +53,7 @@ describe("download_crops", () => {
         expect(mockedAxios).toHaveBeenCalledTimes(2);
 
         expect(mockedFs.writeFileSync).toHaveBeenCalledTimes(2);
-
-
+        
         const updatedCrops = await prisma.crop.findMany({
             where: {
                 file_location: {
