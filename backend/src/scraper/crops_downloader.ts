@@ -12,14 +12,14 @@ import { crop } from "@prisma/client";
 // update: there is not a single gallery in tags.
 
 async function get_crops(): Promise<crop[]> {
-    return await prisma.crop.findMany({
+    return prisma.crop.findMany({
         where: {
             url: {
                 not: null
             },
             OR: [
-                { name: "FE3_header" },
-                { name: "FE3_grid" }
+                {name: "FE3_header"},
+                {name: "FE3_grid"}
             ]
         }
     });
