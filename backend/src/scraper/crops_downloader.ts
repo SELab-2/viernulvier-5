@@ -1,7 +1,8 @@
-import { prisma } from "../media/prisma";
+import { prisma } from "./prisma";
 import axios from "axios";
 import path from 'path';
 import * as fs from "node:fs";
+import { Crop } from "@prisma/client";
 
 
 
@@ -10,7 +11,7 @@ import * as fs from "node:fs";
 
 // update: there is not a single gallery in tags.
 
-async function get_crops() {
+async function get_crops(): Crop[] {
     let crops = await prisma.crop.findMany({});
     console.log(crops.length);
 
@@ -30,7 +31,7 @@ async function get_crops() {
     return crops;
 }
 
-async function download_crop(crop: any) {
+async function download_crop(crop: Crop) {
     const url = crop.url;
     try {
         const response = await axios({
@@ -54,46 +55,34 @@ async function download_crop(crop: any) {
             }
         )
 
-        return Number(response.headers['content-length']); // bytes
 
-
-        // console.log("File size:", fileSize, "bytes");
-        // console.log("done downloading");
-        // return fileSize;
     } catch (error) {
         console.log(error);
         console.log(url);
         console.log(crop.id);
-        return 0;
     }
 }
 
 
 export async function download_crops(){
 
-
-    // const temp_crops = await get_media_items();
-    // console.log(temp_crops.size);
-
-
     const crops = await get_crops();
-    const crop_length = crops.length;
     const chunkSize = 20;
-    let size = 0
 
     for (let i = 0; i < crops.length/chunkSize; i += 1) {
         console.log("chunk ", i, "of ", crops.length/chunkSize);
         const chunk = crops.slice(i, i + chunkSize);
 
-        const results = await Promise.all(
-            chunk.map(crop => download_crop(crop))
+        await Promise.all(
+            chunk.map((crop) => download_crop(crop))
         );
-        size += results.reduce((partialSum, a) => partialSum + a, 0);
     }
-    console.log("total usage:", size, "bytes for ",crop_length, "crops" );
+    console.log("locally downloaded all crops");
 
 }
 
 export default {
     download_crops
 }
+
+download_crops();
