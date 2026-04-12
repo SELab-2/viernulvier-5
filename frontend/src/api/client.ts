@@ -1,4 +1,4 @@
-const API_BASE = '/api'
+const API_BASE = '/api/v1'
 
 /**
  * API client for communicating with the Fastify backend.
