@@ -178,6 +178,36 @@ describe('LoginPage', () => {
     expect(await screen.findByText('Te veel inlogpogingen. Probeer het straks opnieuw.')).toBeInTheDocument()
   })
 
+  it('retranslates the inline error when the locale changes after a failed login', async () => {
+    const fetchMock = vi.fn().mockResolvedValueOnce(
+      createJsonResponse(401, { message: 'Invalid credentials' }),
+    )
+
+    vi.stubGlobal('fetch', fetchMock)
+
+    render(
+      <MemoryRouter>
+        <LoginPage />
+      </MemoryRouter>,
+    )
+
+    fireEvent.change(screen.getByLabelText('Emailadres of gebruikersnaam'), {
+      target: { value: 'admin' },
+    })
+    fireEvent.change(screen.getByLabelText('Wachtwoord'), {
+      target: { value: 'foutwachtwoord' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Inloggen' }))
+
+    expect(await screen.findByText('Ongeldige inloggegevens.')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Wissel taal' }))
+
+    await waitFor(() => {
+      expect(screen.getByText('Your login details are incorrect.')).toBeInTheDocument()
+    })
+  })
+
   it('switches the admin copy immediately when the locale toggle is clicked', async () => {
     render(
       <MemoryRouter>
