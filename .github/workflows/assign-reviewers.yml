@@ -1,4 +1,4 @@
-name: Assign Reviewers
+name: Assign Reviewers + Notify on Discord
 
 # Triggers only when a new pull request is opened (not on updates).
 # Automatically picks 2 random reviewers from the team pool,
@@ -9,15 +9,17 @@ on:
 
 jobs:
   assign-reviewers:
-    name: Assign 2 random reviewers
+    name: Assign 2 random reviewers and notify on Discord
     runs-on: self-hosted
 
     permissions:
       pull-requests: write
 
     steps:
-      - name: Pick and assign reviewers
+      - name: Pick and assign reviewers, and notify on Discord
         uses: actions/github-script@v8
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL}}
         with:
           # github-token is automatically provided; no extra secret needed
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -35,7 +37,21 @@ jobs:
               'jminjuk2',
               'ninavandezande'
             ];
+
+            // team discord role ids:
+            const DISCORD_MAP = {
+              laveenae: "1489694586098946129",
+              LiamVDB1: "1489694455723462787",
+              sarahvlan: "1489694521603133521",
+              tuurdaneels: "1489694424530161816",
+              Jorenve: "1489694554721616162",
+              julesbauw: "1489694485490303206",
+              jminjuk2: "1489694397779017898",
+              ninavandezande: "1489694279088476273"
+            };
             // ───────────────────────────────────────────────────────────────────
+
+
 
             const author = context.payload.pull_request.user.login;
 
@@ -61,4 +77,35 @@ jobs:
               repo: context.repo.repo,
               pull_number: context.payload.pull_request.number,
               reviewers,
+            });
+
+            const pr = context.payload.pull_request;
+
+            // Prevent double assignment
+            if (pr.draft) {
+              core.info("Draft PR — skipping assignment.");
+              return;
+            }
+
+            // Map to Discord mentions
+            const mentions = reviewers
+              .map(user  => DISCORD_MAP[user])
+              .filter(Boolean)
+              .map(id => `<@&${id}>`)
+              .join(' ');
+
+            const prTitle = context.payload.pull_request.title;
+            const prUrl = context.payload.pull_request.html_url;
+
+            const message = {
+              content: `🔔 **New PR Review Assigned**\n${mentions}\n📦 **${prTitle}**\n🔗 ${prUrl}`
+            };
+
+            // Send to Discord
+            const webhook = process.env.DISCORD_WEBHOOK;
+
+            await fetch(webhook, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json'},
+              body: JSON.stringify(message)
             });
