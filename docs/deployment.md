@@ -19,15 +19,19 @@ docker compose -f docker-compose-db.yml up -d
 ```
 
 ### 2. Backend setup
-
+Make sure the backend/.env exists by running the following code:
 ```bash
 cd backend
-cp .env.example .env       # Edit values as needed
-npm install
-npx prisma migrate dev     # Create tables
-npx prisma db seed         # Seed sample data (optional)
-npm run dev                # Start Fastify on :3001
+cp .env.example .env
 ```
+Next startup the development container
+```bash
+cd ..                        # return from backend/ to project root
+docker compose -f docker-compose-dev.yml up -d
+# npx prisma db seed         # Seed sample data (optional) this has to be done explicitly in the container
+```
+
+If you want the scraper to run in Docker, make sure `backend/.env` also contains a valid `API_KEY`.
 
 ### 3. Frontend setup
 
@@ -54,9 +58,13 @@ and only then you can modify the ./nginx/nginx.conf to also use certbot
 # make sure you have a network for the containers
 docker network create vnv_net
 
-# start the database container
+# start the database container first
 docker compose -f docker-compose-db.yml up -d
 
-# start certbot, nginx, frontend and backend
-docker compose up -d
+# then start the app stack
+docker compose up -d --build
 ```
+
+The Docker app services override `DATABASE_URL` to use the `database` container hostname by default: `postgresql://postgres:postgres@database:5432/viernulvier?schema=public`. If your Docker database uses different credentials or a different database name, set `DOCKER_DATABASE_URL` before running `docker compose up`.
+
+The `scraper` service joins the same external `vnv_net` network as the app stack and database. On container startup it runs one scraper sync immediately, then continues on its cron schedule, which defaults to `0 0 * * *`. Logs are written inside the container to `/usr/src/app/logs/scraper.log`. Set `SCRAPER_RUN_ON_STARTUP=false` if you want to disable the startup run.

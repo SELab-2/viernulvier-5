@@ -1,23 +1,82 @@
-import { getMessages } from '../../i18n'
+import { useMemo } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { getActiveLocale, withLocalePath } from '../../i18n'
+import PublicLayout from '../../components/public/PublicLayout'
+import PublicHeroSearch, { type HeroSearchFilters } from '../../components/public/PublicHeroSearch'
+import PublicPopularTags from '../../components/public/PublicPopularTags'
+import PublicLatestBlogPreview from '../../components/public/PublicLatestBlogPreview'
+import PublicRecentDigitized from '../../components/public/PublicRecentDigitized'
 
 /**
  * Public home page — displays the archive listing.
  */
 function HomePage() {
-    const messages = getMessages()
+    const navigate = useNavigate()
+    const [searchParams] = useSearchParams()
+    const locale = getActiveLocale(window.location.pathname)
+
+    const initialFilters = useMemo<HeroSearchFilters>(
+        () => ({
+            query: searchParams.get('q') ?? '',
+            year: searchParams.get('year') ?? undefined,
+            genre: searchParams.get('genre') ?? undefined,
+            location: searchParams.get('location') ?? undefined,
+        }),
+        [searchParams]
+    )
+
+    const handleSearch = (filters: HeroSearchFilters) => {
+        const params = new URLSearchParams()
+
+        if (filters.query) {
+            params.set('q', filters.query)
+        }
+
+        if (filters.year) {
+            params.set('year', filters.year)
+        }
+
+        if (filters.genre) {
+            params.set('genre', filters.genre)
+        }
+
+        if (filters.location) {
+            params.set('location', filters.location)
+        }
+
+        const queryString = params.toString()
+        const searchPath = withLocalePath('/zoeken', locale)
+        navigate(queryString ? `${searchPath}?${queryString}` : searchPath)
+    }
+
+    const handlePopularTagClick = (tag: string) => {
+        const params = new URLSearchParams()
+        params.set('genre', tag)
+        navigate(`${withLocalePath('/zoeken', locale)}?${params.toString()}`)
+    }
+
+    const handleRecentDigitizedItemClick = (index: number) => {
+        navigate(withLocalePath(`/archive/${index + 1}`, locale))
+    }
+
+    const handleRecentDigitizedViewAll = () => {
+        navigate(withLocalePath('/zoeken', locale))
+    }
 
     return (
-        <main className="min-h-screen bg-gray-50">
-            <div className="max-w-7xl mx-auto px-4 py-8">
-                <h1 className="text-4xl font-bold text-gray-900 mb-8">
-                    {messages.home.title}
-                </h1>
-                <p className="text-lg text-gray-600">
-                    {messages.home.intro}
-                </p>
-                {/* TODO: Archive listing component */}
-            </div>
-        </main>
+        <PublicLayout>
+            <PublicHeroSearch
+                key={searchParams.toString()}
+                initialFilters={initialFilters}
+                onSearch={handleSearch}
+            />
+            <PublicPopularTags onTagClick={handlePopularTagClick} />
+            <PublicLatestBlogPreview />
+            <PublicRecentDigitized
+                onViewItem={handleRecentDigitizedItemClick}
+                onViewAll={handleRecentDigitizedViewAll}
+            />
+        </PublicLayout>
     )
 }
 

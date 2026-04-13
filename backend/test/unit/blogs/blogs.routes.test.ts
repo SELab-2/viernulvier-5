@@ -13,22 +13,25 @@ describe('Blogs Routes', () => {
         await app.close()
     })
 
-    describe('GET /api/archive/blogs', () => {
-        it('should return an empty list initially', async () => {
+    describe('GET /api/v1/archive/blogs', () => {
+        it('should return an empty list initially with paginated structure', async () => {
             const response = await app.inject({
                 method: 'GET',
-                url: '/api/archive/blogs',
+                url: '/api/v1/archive/blogs',
             })
 
             expect(response.statusCode).toBe(200)
             const body = JSON.parse(response.payload)
-            expect(Array.isArray(body)).toBe(true)
-            expect(body.length).toBe(0)
+            expect(body).toHaveProperty('data')
+            expect(body).toHaveProperty('meta')
+            expect(body).toHaveProperty('links')
+            expect(Array.isArray(body.data)).toBe(true)
+            expect(body.data.length).toBe(0)
         })
     })
 
-    describe('POST /api/archive/blogs', () => {
-        it('should create a blog with 201 Created', async () => {
+    describe('POST /api/v1/archive/blogs', () => {
+        it('should create a blog with 201 Created and links', async () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const payload = {
                 title: 'Test Blog',
@@ -37,22 +40,23 @@ describe('Blogs Routes', () => {
 
             const response = await app.inject({
                 method: 'POST',
-                url: '/api/archive/blogs',
+                url: '/api/v1/archive/blogs',
                 headers: { authorization: `Bearer ${token}` },
                 payload
             })
 
             expect(response.statusCode).toBe(201)
             const body = JSON.parse(response.payload)
-            expect(body.title).toBe(payload.title)
-            expect(body.content).toBe(payload.content)
-            expect(body).toHaveProperty('id')
+            expect(body.data.title).toBe(payload.title)
+            expect(body.data.content).toBe(payload.content)
+            expect(body.data).toHaveProperty('id')
+            expect(body.links).toHaveProperty('self')
         })
 
         it('should return 401 Unauthorized when no token is provided', async () => {
             const response = await app.inject({
                 method: 'POST',
-                url: '/api/archive/blogs',
+                url: '/api/v1/archive/blogs',
                 payload: { title: 'Test', content: 'Test' }
             })
 
@@ -60,14 +64,14 @@ describe('Blogs Routes', () => {
         })
     })
 
-    describe('GET /api/archive/blogs/:id', () => {
-        it('should return a blog by ID', async () => {
+    describe('GET /api/v1/archive/blogs/:id', () => {
+        it('should return a blog by ID with links', async () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             
             // Create a blog first
             const postResponse = await app.inject({
                 method: 'POST',
-                url: '/api/archive/blogs',
+                url: '/api/v1/archive/blogs',
                 headers: { authorization: `Bearer ${token}` },
                 payload: { title: 'Find Me', content: 'Content' }
             })
@@ -75,34 +79,36 @@ describe('Blogs Routes', () => {
 
             const response = await app.inject({
                 method: 'GET',
-                url: `/api/archive/blogs/${created.id}`,
+                url: `/api/v1/archive/blogs/${created.data.id}`,
             })
 
             expect(response.statusCode).toBe(200)
             const body = JSON.parse(response.payload)
-            expect(body.id).toBe(created.id)
-            expect(body.title).toBe('Find Me')
+            expect(body.data.id).toBe(created.data.id)
+            expect(body.data.title).toBe('Find Me')
+            expect(body.data).toHaveProperty('links')
+            expect(body.data.links).toHaveProperty('self')
         })
 
         it('should return 404 for non-existent ID', async () => {
             const uuid = '00000000-0000-0000-0000-000000000000'
             const response = await app.inject({
                 method: 'GET',
-                url: `/api/archive/blogs/${uuid}`,
+                url: `/api/v1/archive/blogs/${uuid}`,
             })
 
             expect(response.statusCode).toBe(404)
         })
     })
 
-    describe('PUT /api/archive/blogs/:id', () => {
-        it('should update a blog', async () => {
+    describe('PATCH /api/v1/archive/blogs/:id', () => {
+        it('should update a blog and return new structure', async () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             
             // Create
             const postResponse = await app.inject({
                 method: 'POST',
-                url: '/api/archive/blogs',
+                url: '/api/v1/archive/blogs',
                 headers: { authorization: `Bearer ${token}` },
                 payload: { title: 'Old Title', content: 'Old Content' }
             })
@@ -111,15 +117,16 @@ describe('Blogs Routes', () => {
             // Update
             const response = await app.inject({
                 method: 'PATCH',
-                url: `/api/archive/blogs/${created.id}`,
+                url: `/api/v1/archive/blogs/${created.data.id}`,
                 headers: { authorization: `Bearer ${token}` },
                 payload: { title: 'New Title' }
             })
 
             expect(response.statusCode).toBe(200)
-            const updated = JSON.parse(response.payload)
-            expect(updated.title).toBe('New Title')
-            expect(updated.content).toBe('Old Content')
+            const body = JSON.parse(response.payload)
+            expect(body.data.title).toBe('New Title')
+            expect(body.data.content).toBe('Old Content')
+            expect(body.data).toHaveProperty('links')
         })
 
         it('should return 404 for non-existent blog', async () => {
@@ -127,7 +134,7 @@ describe('Blogs Routes', () => {
             const uuid = '00000000-0000-0000-0000-000000000000'
             const response = await app.inject({
                 method: 'PATCH',
-                url: `/api/archive/blogs/${uuid}`,
+                url: `/api/v1/archive/blogs/${uuid}`,
                 headers: { authorization: `Bearer ${token}` },
                 payload: { title: 'New Title' }
             })
@@ -135,14 +142,14 @@ describe('Blogs Routes', () => {
         })
     })
 
-    describe('DELETE /api/archive/blogs/:id', () => {
+    describe('DELETE /api/v1/archive/blogs/:id', () => {
         it('should delete a blog', async () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             
             // Create
             const postResponse = await app.inject({
                 method: 'POST',
-                url: '/api/archive/blogs',
+                url: '/api/v1/archive/blogs',
                 headers: { authorization: `Bearer ${token}` },
                 payload: { title: 'To Delete', content: 'Content' }
             })
@@ -151,7 +158,7 @@ describe('Blogs Routes', () => {
             // Delete
             const response = await app.inject({
                 method: 'DELETE',
-                url: `/api/archive/blogs/${created.id}`,
+                url: `/api/v1/archive/blogs/${created.data.id}`,
                 headers: { authorization: `Bearer ${token}` }
             })
 
@@ -160,7 +167,7 @@ describe('Blogs Routes', () => {
             // Verify 404
             const getResponse = await app.inject({
                 method: 'GET',
-                url: `/api/archive/blogs/${created.id}`,
+                url: `/api/v1/archive/blogs/${created.data.id}`,
             })
             expect(getResponse.statusCode).toBe(404)
         })
@@ -170,7 +177,7 @@ describe('Blogs Routes', () => {
             const uuid = '00000000-0000-0000-0000-000000000000'
             const response = await app.inject({
                 method: 'DELETE',
-                url: `/api/archive/blogs/${uuid}`,
+                url: `/api/v1/archive/blogs/${uuid}`,
                 headers: { authorization: `Bearer ${token}` }
             })
             expect(response.statusCode).toBe(404)
