@@ -7,6 +7,14 @@ import { useAdminMessages } from '../../components/admin/AdminMessagesContext'
 import AdminLoginForm from '../../components/admin/AdminLoginForm'
 import { getAdminRouteConfig } from '../../admin/paths'
 
+const LOGIN_ERROR_KEYS = {
+    invalidCredentials: 'invalidCredentials',
+    rateLimitReached: 'rateLimitReached',
+    loginFailed: 'loginFailed',
+} as const
+
+type LoginErrorKey = keyof typeof LOGIN_ERROR_KEYS
+
 const adminIconSrc = '/admin-icon.svg'
 
 type SessionUser = {
@@ -19,16 +27,24 @@ type SessionResponse = {
     user: SessionUser
 }
 
-function mapLoginError(message: string, messages: Messages) {
+function mapLoginError(message: string): LoginErrorKey {
     if (message === 'Invalid credentials') {
-        return messages.auth.invalidCredentials
+        return LOGIN_ERROR_KEYS.invalidCredentials
     }
 
     if (message === 'Too many login attempts') {
-        return messages.auth.rateLimitReached
+        return LOGIN_ERROR_KEYS.rateLimitReached
     }
 
-    return messages.auth.loginFailed
+    return LOGIN_ERROR_KEYS.loginFailed
+}
+
+function getLoginErrorMessage(errorKey: LoginErrorKey | null, messages: Messages) {
+    if (!errorKey) {
+        return ''
+    }
+
+    return messages.auth[errorKey]
 }
 
 function LoginPageContent() {
@@ -38,7 +54,7 @@ function LoginPageContent() {
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
     const [rememberMe, setRememberMe] = useState(false)
-    const [error, setError] = useState('')
+    const [errorKey, setErrorKey] = useState<LoginErrorKey | null>(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
 
     const { dashboardPath } = getAdminRouteConfig(window.location.hostname)
@@ -46,7 +62,7 @@ function LoginPageContent() {
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
-        setError('')
+        setErrorKey(null)
         setIsSubmitting(true)
 
         try {
@@ -58,7 +74,7 @@ function LoginPageContent() {
             navigate(from, { replace: true })
         } catch (err) {
             const message = err instanceof Error ? err.message : ''
-            setError(mapLoginError(message, messages))
+            setErrorKey(mapLoginError(message))
         } finally {
             setIsSubmitting(false)
         }
@@ -81,7 +97,7 @@ function LoginPageContent() {
                 username={username}
                 password={password}
                 rememberMe={rememberMe}
-                error={error}
+                error={getLoginErrorMessage(errorKey, messages)}
                 isSubmitting={isSubmitting}
                 usernameLabel={messages.auth.usernameLabel}
                 usernamePlaceholder={messages.auth.usernamePlaceholder}
