@@ -19,6 +19,7 @@ updates:
   # ── 1. npm dependencies ─────────────────────────────────────────────
   - package-ecosystem: "npm"
     directory: "/"
+    target-branch: "development"
     schedule:
       interval: "weekly"
       day: "sunday"     # Run on Sunday nights so a fresh batch is ready Monday morning
@@ -47,6 +48,7 @@ updates:
   # Keeps your workflow action versions (e.g. actions/checkout) up to date.
   - package-ecosystem: "github-actions"
     directory: "/"   # GitHub Actions are always read from the root
+    target-branch: "development"
     schedule:
       interval: "weekly"
       day: "sunday"
