@@ -10,6 +10,6 @@ describe('HomePage', () => {
                 <HomePage />
             </MemoryRouter>
         )
-        expect(screen.getByText('VIERNULVIER Archief')).toBeInTheDocument()
+        expect(screen.getByLabelText('VIERNULVIER Archief')).toBeInTheDocument()
     })
 })
