@@ -4,10 +4,13 @@ import { BlogsService } from './blogs.service.js'
 import { BlogsController } from './blogs.controller.js'
 import { z } from 'zod'
 import { 
-    blogSchema, 
+    blogPaginationQuerySchema,
+    blogListSchema,
+    singleBlogSchema,
     createBlogSchema, 
     updateBlogSchema, 
-    blogIdSchema 
+    blogIdSchema,
+    errorSchema
 } from './blogs.schema.js'
 import { requirePermission } from '../../hooks/require-permission.js'
 import { Permission } from '../../domain/permissions.js'
@@ -17,33 +20,34 @@ const blogsRoutes: FastifyPluginAsync = async (fastify) => {
     const service = new BlogsService(repository)
     const controller = new BlogsController(service)
 
-    // GET /api/archive/blogs
+    // GET /api/v1/archive/blogs
     fastify.get('/', {
         schema: {
             tags: ['blogs'],
             summary: 'Get all blogs',
+            querystring: blogPaginationQuerySchema,
             response: {
-                200: z.array(blogSchema),
+                200: blogListSchema,
             },
         },
-        handler: (request, reply) => controller.getAll(request, reply),
+        handler: (request, reply) => controller.getBlogs(request as any, reply),
     })
 
-    // GET /api/archive/blogs/:id
+    // GET /api/v1/archive/blogs/:id
     fastify.get('/:id', {
         schema: {
             tags: ['blogs'],
             summary: 'Get a blog by ID',
             params: blogIdSchema,
             response: {
-                200: blogSchema,
-                404: z.object({ message: z.string() })
+                200: singleBlogSchema,
+                404: errorSchema
             },
         },
-        handler: (request, reply) => controller.getById(request as any, reply),
+        handler: (request, reply) => controller.getBlog(request as any, reply),
     })
 
-    // POST /api/archive/blogs
+    // POST /api/v1/archive/blogs
     fastify.post('/', {
         preHandler: [requirePermission(Permission.ARCHIVE_CREATE)],
         schema: {
@@ -51,13 +55,13 @@ const blogsRoutes: FastifyPluginAsync = async (fastify) => {
             summary: 'Create a new blog',
             body: createBlogSchema,
             response: {
-                201: blogSchema,
+                201: singleBlogSchema,
             },
         },
-        handler: (request, reply) => controller.create(request as any, reply),
+        handler: (request, reply) => controller.createBlog(request as any, reply),
     })
 
-    // PUT /api/archive/blogs/:id
+    // PATCH /api/v1/archive/blogs/:id
     fastify.patch('/:id', {
         preHandler: [requirePermission(Permission.ARCHIVE_UPDATE)],
         schema: {
@@ -66,14 +70,14 @@ const blogsRoutes: FastifyPluginAsync = async (fastify) => {
             params: blogIdSchema,
             body: updateBlogSchema,
             response: {
-                200: blogSchema,
-                404: z.object({ message: z.string() })
+                200: singleBlogSchema,
+                404: errorSchema
             },
         },
-        handler: (request, reply) => controller.update(request as any, reply),
+        handler: (request, reply) => controller.updateBlog(request as any, reply),
     })
 
-    // DELETE /api/archive/blogs/:id
+    // DELETE /api/v1/archive/blogs/:id
     fastify.delete('/:id', {
         preHandler: [requirePermission(Permission.ARCHIVE_DELETE)],
         schema: {
@@ -82,10 +86,10 @@ const blogsRoutes: FastifyPluginAsync = async (fastify) => {
             params: blogIdSchema,
             response: {
                 204: z.null(),
-                404: z.object({ message: z.string() })
+                404: errorSchema
             },
         },
-        handler: (request, reply) => controller.delete(request as any, reply),
+        handler: (request, reply) => controller.deleteBlog(request as any, reply),
     })
 }
 

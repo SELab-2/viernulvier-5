@@ -3,11 +3,12 @@ import { TaxonomiesRepository } from './taxonomies.repository.js'
 import { TaxonomiesService } from './taxonomies.service.js'
 import { TaxonomiesController } from './taxonomies.controller.js'
 import { 
-    paginationQuerySchema, 
+    genrePaginationQuerySchema,
+    tagPaginationQuerySchema,
     genreListSchema, 
-    genreSchema,
+    singleGenreSchema,
     tagListSchema,
-    tagSchema,
+    singleTagSchema,
     idParamSchema,
     errorSchema,
     createGenreSchema,
@@ -24,12 +25,12 @@ const taxonomiesRoutes: FastifyPluginAsync = async (fastify) => {
     const service = new TaxonomiesService(repository)
     const controller = new TaxonomiesController(service)
 
-    // GET /api/archive/genres
+    // --- Genres ---
     fastify.get('/genres', {
         schema: {
             tags: ['taxonomies'],
             summary: 'Get a paginated list of genres',
-            querystring: paginationQuerySchema,
+            querystring: genrePaginationQuerySchema,
             response: {
                 200: genreListSchema,
             },
@@ -43,7 +44,7 @@ const taxonomiesRoutes: FastifyPluginAsync = async (fastify) => {
             summary: 'Get a genre by ID',
             params: idParamSchema,
             response: {
-                200: genreSchema,
+                200: singleGenreSchema,
                 404: errorSchema
             },
         },
@@ -57,7 +58,7 @@ const taxonomiesRoutes: FastifyPluginAsync = async (fastify) => {
             summary: 'Create a new genre',
             body: createGenreSchema,
             response: {
-                201: genreSchema,
+                201: singleGenreSchema,
             },
         },
         handler: (request, reply) => controller.createGenre(request as any, reply),
@@ -71,7 +72,7 @@ const taxonomiesRoutes: FastifyPluginAsync = async (fastify) => {
             params: idParamSchema,
             body: updateGenreSchema,
             response: {
-                200: genreSchema,
+                200: singleGenreSchema,
                 404: errorSchema
             },
         },
@@ -92,12 +93,12 @@ const taxonomiesRoutes: FastifyPluginAsync = async (fastify) => {
         handler: (request, reply) => controller.deleteGenre(request as any, reply),
     })
 
-    // GET /api/archive/tags
+    // --- Tags ---
     fastify.get('/tags', {
         schema: {
             tags: ['taxonomies'],
             summary: 'Get a paginated list of tags',
-            querystring: paginationQuerySchema,
+            querystring: tagPaginationQuerySchema,
             response: {
                 200: tagListSchema,
             },
@@ -111,7 +112,7 @@ const taxonomiesRoutes: FastifyPluginAsync = async (fastify) => {
             summary: 'Get a tag by ID',
             params: idParamSchema,
             response: {
-                200: tagSchema,
+                200: singleTagSchema,
                 404: errorSchema
             },
         },
@@ -125,7 +126,7 @@ const taxonomiesRoutes: FastifyPluginAsync = async (fastify) => {
             summary: 'Create a new tag',
             body: createTagSchema,
             response: {
-                201: tagSchema,
+                201: singleTagSchema,
             },
         },
         handler: (request, reply) => controller.createTag(request as any, reply),
@@ -139,7 +140,7 @@ const taxonomiesRoutes: FastifyPluginAsync = async (fastify) => {
             params: idParamSchema,
             body: updateTagSchema,
             response: {
-                200: tagSchema,
+                200: singleTagSchema,
                 404: errorSchema
             },
         },
