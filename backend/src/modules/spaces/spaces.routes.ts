@@ -3,9 +3,9 @@ import { SpacesRepository } from './spaces.repository.js'
 import { SpacesService } from './spaces.service.js'
 import { SpacesController } from './spaces.controller.js'
 import { 
-    paginationQuerySchema, 
+    spacePaginationQuerySchema, 
     spaceListSchema,
-    spaceSchema,
+    singleSpaceSchema,
     idParamSchema,
     errorSchema,
     createSpaceSchema,
@@ -24,7 +24,7 @@ const spacesRoutes: FastifyPluginAsync = async (fastify) => {
         schema: {
             tags: ['locations'], // Same tag as locations to group them in Swagger
             summary: 'Get a paginated list of spaces',
-            querystring: paginationQuerySchema,
+            querystring: spacePaginationQuerySchema,
             response: {
                 200: spaceListSchema,
             },
@@ -38,7 +38,7 @@ const spacesRoutes: FastifyPluginAsync = async (fastify) => {
             summary: 'Get a space by ID',
             params: idParamSchema,
             response: {
-                200: spaceSchema,
+                200: singleSpaceSchema,
                 404: errorSchema
             },
         },
@@ -52,7 +52,7 @@ const spacesRoutes: FastifyPluginAsync = async (fastify) => {
             summary: 'Create a new space',
             body: createSpaceSchema,
             response: {
-                201: spaceSchema,
+                201: singleSpaceSchema,
             },
         },
         handler: (request, reply) => controller.createSpace(request as any, reply),
@@ -66,7 +66,7 @@ const spacesRoutes: FastifyPluginAsync = async (fastify) => {
             params: idParamSchema,
             body: updateSpaceSchema,
             response: {
-                200: spaceSchema,
+                200: singleSpaceSchema,
                 404: errorSchema
             },
         },
