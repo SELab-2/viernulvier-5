@@ -17,10 +17,6 @@ jobs:
   backend:
     name: Backend (Lint + Test)
     runs-on: self-hosted
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
 
     services:
       postgres:
