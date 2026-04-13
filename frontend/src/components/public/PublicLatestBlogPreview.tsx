@@ -1,9 +1,17 @@
+import { useNavigate } from 'react-router-dom'
+import { getActiveLocale, withLocalePath } from '../../i18n'
 import SectionTitle from './SectionTitle'
 import PublicPillButton from './PublicPillButton'
 import { getMessages } from '../../i18n'
 
 function PublicLatestBlogPreview() {
     const messages = getMessages()
+    const navigate = useNavigate()
+    const locale = getActiveLocale()
+
+    const handleViewAll = () => {
+        navigate(withLocalePath('/blogs', locale))
+    }
 
     return (
         <section className="py-16 bg-foreground/3">
@@ -29,7 +37,7 @@ function PublicLatestBlogPreview() {
                     </div>
                     <div className="mt-10 flex flex-wrap gap-3 justify-center lg:justify-start">
                         <PublicPillButton label={messages.home.latestBlogReadMore} variant="outline" />
-                        <PublicPillButton label={messages.home.latestBlogViewAll} />
+                        <PublicPillButton label={messages.home.latestBlogViewAll} onClick={handleViewAll} />
                     </div>
                 </div>
             </article>
