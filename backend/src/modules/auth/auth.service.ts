@@ -34,7 +34,7 @@ export class AuthService {
     ) { }
 
     async login(input: LoginInput) {
-        const user = await this.repository.findByUsername(input.username)
+        const user = await this.repository.findByUsernameWithPassword(input.username)
 
         if (!user) {
             throw new AppError('Invalid credentials', 401)
@@ -52,6 +52,19 @@ export class AuthService {
             role: toDomainRole(user.role),
         })
 
-        return { token }
+        const userWithoutPassword: any = { ...user }
+        delete userWithoutPassword.passwordHash
+
+        return { 
+            token, 
+            user: userWithoutPassword 
+        }
+    }
+
+    async getCurrentUser(id: string) {
+        const user = await this.repository.findById(id)
+        if (!user) return null
+        
+        return user
     }
 }
