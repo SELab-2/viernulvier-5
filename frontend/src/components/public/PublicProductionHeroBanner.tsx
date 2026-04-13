@@ -1,4 +1,4 @@
-import { Production } from '../../api/productions'
+import { type Production } from '../../api/productions'
 
 type Props = {
     production: Production
