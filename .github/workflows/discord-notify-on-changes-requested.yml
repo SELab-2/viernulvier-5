@@ -1,0 +1,70 @@
+name: Notify on Discord when changes are requested on PR
+
+on:
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  notify-changes-requested:
+    name: Notify when changes are requested
+    runs-on: self-hosted
+
+    permissions:
+      pull-requests: read
+
+    steps:
+      - name: Notify on Discord
+        uses: actions/github-script@v8
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            // ── TEAM CONFIGURATION ──────────────────────────────────────────────
+            const DISCORD_MAP = {
+              laveenae: "1489694586098946129",
+              LiamVDB1: "1489694455723462787",
+              sarahvlan: "1489694521603133521",
+              tuurdaneels: "1489694424530161816",
+              Jorenve: "1489694554721616162",
+              julesbauw: "1489694485490303206",
+              jminjuk2: "1489694397779017898",
+              ninavandezande: "1489694279088476273"
+            };
+            // ───────────────────────────────────────────────────────────────────
+
+            const review = context.payload.review;
+
+            // Only trigger on "changes requested"
+            if (review.state !== "changes_requested") {
+              core.info("Not a changes requested review — skipping.");
+              return;
+            }
+
+            const pr = context.payload.pull_request;
+
+            const prAuthor = pr.user.login;
+            const reviewer = review.user.login;
+
+            const prTitle = pr.title;
+            const prUrl = pr.html_url;
+
+            // Tag PR author
+            const authorRoleId = DISCORD_MAP[prAuthor];
+            const authorMention = authorRoleId ? `<@&${authorRoleId}>` : prAuthor;
+
+            // Optional: tag reviewer too
+            const reviewerRoleId = DISCORD_MAP[reviewer];
+            const reviewerMention = reviewerRoleId ? `<@&${reviewerRoleId}>` : reviewer;
+
+            const message = {
+              content: `❗ **Changes Requested on PR**\n${authorMention}\n🧑‍⚖️ Requested by: ${reviewerMention}\n📦 **${prTitle}**\n🔗 ${prUrl}`
+            };
+
+            const webhook = process.env.DISCORD_WEBHOOK;
+
+            await fetch(webhook, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(message)
+            });
