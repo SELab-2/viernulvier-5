@@ -120,7 +120,7 @@ function LoginPageContent() {
  */
 function LoginPage() {
     return (
-        <AdminLayout mainClassName="flex flex-1 items-center justify-center px-4 py-16 max-[640px]:py-12">
+        <AdminLayout showFooter={false} mainClassName="flex items-center justify-center px-4 py-16 max-[640px]:py-12">
             <LoginPageContent/>
         </AdminLayout>
     )
