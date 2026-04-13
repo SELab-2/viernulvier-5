@@ -4,11 +4,11 @@ import { render, screen } from '@testing-library/react'
 import AdminLayout from './AdminLayout'
 
 vi.mock('./AdminTopBar', () => ({
-  default: ({ adminLabel }: { adminLabel: string }) => <div>{adminLabel}</div>,
+  default: ({ logoutLabel }: { logoutLabel?: string }) => <div>{logoutLabel ?? 'topbar'}</div>,
 }))
 
 vi.mock('./AdminFooter', () => ({
-  default: ({ navigationTitle }: { navigationTitle: string }) => <div>{navigationTitle}</div>,
+  default: () => <div>footer</div>,
 }))
 
 vi.mock('../../i18n', () => ({
@@ -45,8 +45,8 @@ describe('AdminLayout', () => {
     vi.unstubAllGlobals()
   })
 
-  it('renders admin copy through the shared shell', () => {
-    render(
+  it('renders the footer by default and keeps the shell full height', () => {
+    const { container } = render(
       <MemoryRouter>
         <AdminLayout>
           <span>Content</span>
@@ -55,8 +55,23 @@ describe('AdminLayout', () => {
     )
 
     expect(screen.getByText('Content')).toBeInTheDocument()
-    expect(screen.queryByText('Beheerder')).not.toBeInTheDocument()
-    expect(screen.getByText('Navigatie')).toBeInTheDocument()
+    expect(screen.getByText('Afmelden')).toBeInTheDocument()
+    expect(screen.getByText('footer')).toBeInTheDocument()
+    expect(container.firstChild).toHaveClass('admin-shell', 'min-h-screen', 'flex', 'flex-col')
+  })
+
+  it('can hide the footer for the login page shell', () => {
+    render(
+      <MemoryRouter>
+        <AdminLayout showFooter={false}>
+          <span>Content</span>
+        </AdminLayout>
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByText('Content')).toBeInTheDocument()
+    expect(screen.queryByText('footer')).not.toBeInTheDocument()
+    expect(screen.getByText('Afmelden')).toBeInTheDocument()
   })
 
 })

@@ -9,6 +9,16 @@ import AdminTopBar from './AdminTopBar'
 type AdminLayoutProps = {
     children: React.ReactNode
     mainClassName?: string
+    showFooter?: boolean
+}
+
+function handleLogout() {
+    document.cookie = 'token=; Max-Age=0; path=/'
+    window.location.href = getActiveLocale(window.location.pathname) === 'en' ? '/' : '/nl'
+}
+
+function getMainClassName(mainClassName: string) {
+    return mainClassName ? `${mainClassName} flex-1` : 'flex-1'
 }
 
 function resolveTheme(): Theme {
@@ -20,7 +30,7 @@ function resolveTheme(): Theme {
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
 
-function AdminLayout({ children, mainClassName = '' }: AdminLayoutProps) {
+function AdminLayout({ children, mainClassName = '', showFooter = true }: AdminLayoutProps) {
     const [locale, setLocale] = useState<Locale>(() => getActiveLocale(window.location.pathname))
     const [theme, setTheme] = useState<Theme>(resolveTheme)
     const messages = useMemo(() => getMessages(locale), [locale])
@@ -40,28 +50,19 @@ function AdminLayout({ children, mainClassName = '' }: AdminLayoutProps) {
 
     return (
         <AdminMessagesContext.Provider value={messages}>
-            <div className="admin-shell min-h-screen bg-[var(--color-admin-bg)] text-foreground">
+            <div className="admin-shell min-h-screen flex flex-col bg-[var(--color-admin-bg)] text-foreground">
                 <AdminTopBar
                     locale={locale}
                     theme={theme}
+                    logoutLabel={messages.auth.logoutLabel}
+                    onLogout={handleLogout}
                     onToggleLocale={toggleLocale}
                     onToggleTheme={() => toggleTheme()}
                 />
 
-                <main className={mainClassName}>{children}</main>
+                <main className={getMainClassName(mainClassName)}>{children}</main>
 
-                <AdminFooter
-                    navigationTitle={messages.auth.navigationTitle}
-                    dashboardLabel={messages.auth.dashboardLabel}
-                    productionsLabel={messages.auth.productionsLabel}
-                    statisticsLabel={messages.auth.statisticsLabel}
-                    archiveLabel={messages.auth.archiveLabel}
-                    logoutLabel={messages.auth.logoutLabel}
-                    privacyLabel={messages.footer.privacy}
-                    cookiesLabel={messages.footer.cookies}
-                    disclaimerLabel={messages.footer.disclaimer}
-                    rightsLabel={messages.footer.rights}
-                />
+                {showFooter ? <AdminFooter /> : null}
             </div>
         </AdminMessagesContext.Provider>
     )
