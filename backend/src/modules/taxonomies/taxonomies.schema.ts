@@ -1,4 +1,8 @@
 import { z } from 'zod'
+import { 
+    createPaginatedResponseSchema, 
+    createSingleResponseSchema 
+} from '../../utils/rest-schemas.js'
 
 const localizedTextSchema = z.object({
     nl: z.string().optional(),
@@ -6,11 +10,21 @@ const localizedTextSchema = z.object({
     en: z.string().optional(),
 }).nullable()
 
-export const paginationQuerySchema = z.object({
+export const genrePaginationQuerySchema = z.object({
     page: z.coerce.number().int().positive().default(1),
     limit: z.coerce.number().int().positive().max(100).default(20),
     search: z.string().optional(),
     lang: z.string().optional().default('nl'),
+})
+
+export const tagPaginationQuerySchema = genrePaginationQuerySchema
+
+/**
+ * Explicit links for the Genre resource.
+ */
+export const genreLinksSchema = z.object({
+    self: z.string().url().default('https://example.com/'),
+    productions: z.string().url().optional().default('https://example.com/'),
 })
 
 export const genreSchema = z.object({
@@ -24,16 +38,18 @@ export const genreSchema = z.object({
     description: localizedTextSchema,
     created_at: z.coerce.date(),
     updated_at: z.coerce.date(),
+    links: genreLinksSchema.optional(),
 })
 
-export const genreListSchema = z.object({
-    data: z.array(genreSchema),
-    meta: z.object({
-        total: z.number(),
-        page: z.number(),
-        limit: z.number(),
-        totalPages: z.number(),
-    }),
+export const genreListSchema = createPaginatedResponseSchema(genreSchema)
+export const singleGenreSchema = createSingleResponseSchema(genreSchema)
+
+/**
+ * Explicit links for the Tag resource.
+ */
+export const tagLinksSchema = z.object({
+    self: z.string().url().default('https://example.com/'),
+    gallery: z.string().url().optional().default('https://example.com/'),
 })
 
 export const tagSchema = z.object({
@@ -53,17 +69,11 @@ export const tagSchema = z.object({
     gallery_id: z.string().uuid().nullable(),
     created_at: z.coerce.date(),
     updated_at: z.coerce.date(),
+    links: tagLinksSchema.optional(),
 })
 
-export const tagListSchema = z.object({
-    data: z.array(tagSchema),
-    meta: z.object({
-        total: z.number(),
-        page: z.number(),
-        limit: z.number(),
-        totalPages: z.number(),
-    }),
-})
+export const tagListSchema = createPaginatedResponseSchema(tagSchema)
+export const singleTagSchema = createSingleResponseSchema(tagSchema)
 
 export const idParamSchema = z.object({
     id: z.string().uuid(),
@@ -103,7 +113,8 @@ export const errorSchema = z.object({
     message: z.string(),
 })
 
-export type PaginationQuery = z.infer<typeof paginationQuerySchema>
+export type GenrePaginationQuery = z.infer<typeof genrePaginationQuerySchema>
+export type TagPaginationQuery = z.infer<typeof tagPaginationQuerySchema>
 export type GenreResponse = z.infer<typeof genreSchema>
 export type GenreListResponse = z.infer<typeof genreListSchema>
 export type TagResponse = z.infer<typeof tagSchema>
