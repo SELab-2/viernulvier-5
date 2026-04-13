@@ -5,6 +5,7 @@ import PublicLayout from '../../components/public/PublicLayout'
 import PublicPillButton from '../../components/public/PublicPillButton'
 import { getProductionById, type Production } from '../../api/productions'
 import { getGalleryItems, getItemCrops, getPreferredCropUrl } from '../../api/media'
+import { getEventsByProductionId, type Event } from '../../api/events'
 
 function ArchiveDetailPage() {
     const navigate = useNavigate()
@@ -14,6 +15,7 @@ function ArchiveDetailPage() {
 
     const [production, setProduction] = useState<Production | null>(null)
     const [imageUrl, setImageUrl] = useState<string | null>(null)
+    const [events, setEvents] = useState<Event[]>([])
 
     const handleGoBackToHome = () => {
         if (window.history.length > 1) {
@@ -37,6 +39,10 @@ function ArchiveDetailPage() {
                     setImageUrl(getPreferredCropUrl(cropsRes.data))
                 })
             })
+        })
+
+        getEventsByProductionId(id).then((res) => {
+            setEvents(res.data)
         })
     }, [id])
 
@@ -94,6 +100,32 @@ function ArchiveDetailPage() {
                     ) : (
                         <p>No description available.</p>
                     )}
+                </div>
+
+                <div className="site-container py-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h2 className="text-xl font-bold mb-4">messages.detail.dates</h2>
+                        {events.length === 0 ? (
+                            <p>No upcoming events.</p>
+                        ) : (
+                            <ul className="space-y-2">
+                                {events.map((event) => (
+                                    <li key={event.id}>
+                                        {event.starts_at
+                                            ? new Intl.DateTimeFormat(locale, {
+                                                dateStyle: 'long',
+                                                timeStyle: 'short',
+                                            }).format(new Date(event.starts_at))
+                                            : '—'}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
+
+                    <div>
+                        {/* credits / related — coming soon */}
+                    </div>
                 </div>
 
                 {/* Debug / inspection */}
