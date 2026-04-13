@@ -16,8 +16,9 @@ export default fp(async (fastify) => {
                 version: '0.1.0',
             },
             servers: [
-                // TODO: this has to change to non-local url
-                { url: 'http://localhost:3001', description: 'Local development' },
+                // TODO: test if localhost is still required for dev
+                // { url: 'http://localhost:3001', description: 'Local development' },
+                { url: '/', description: 'Swagger API' },
             ],
             components: {
                 securitySchemes: {
