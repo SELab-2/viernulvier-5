@@ -13,114 +13,139 @@ describe('Media Routes', () => {
         await app.close()
     })
 
-    it('GET /api/archive/media/galleries should return 200', async () => {
-        const response = await app.inject({ method: 'GET', url: '/api/archive/media/galleries' })
-        expect(response.statusCode).toBe(200)
+    describe('GET /api/v1/archive/media/galleries', () => {
+        it('should return 200 with paginated structure', async () => {
+            const response = await app.inject({ method: 'GET', url: '/api/v1/archive/media/galleries' })
+            expect(response.statusCode).toBe(200)
+            const body = JSON.parse(response.payload)
+            expect(body).toHaveProperty('data')
+            expect(body).toHaveProperty('meta')
+            expect(body).toHaveProperty('links')
+        })
     })
 
-    it('GET /api/archive/media/items should return 200', async () => {
-        const response = await app.inject({ method: 'GET', url: '/api/archive/media/items' })
-        expect(response.statusCode).toBe(200)
+    describe('GET /api/v1/archive/media/items', () => {
+        it('should return 200 with paginated structure', async () => {
+            const response = await app.inject({ method: 'GET', url: '/api/v1/archive/media/items' })
+            expect(response.statusCode).toBe(200)
+            const body = JSON.parse(response.payload)
+            expect(body).toHaveProperty('data')
+            expect(body).toHaveProperty('meta')
+            expect(body).toHaveProperty('links')
+        })
     })
 
-    it('GET /api/archive/media/items/crops should return 200', async () => {
-        const response = await app.inject({ method: 'GET', url: '/api/archive/media/items/crops' })
-        expect(response.statusCode).toBe(200)
+    describe('GET /api/v1/archive/media/items/crops', () => {
+        it('should return 200 with paginated structure', async () => {
+            const response = await app.inject({ method: 'GET', url: '/api/v1/archive/media/items/crops' })
+            expect(response.statusCode).toBe(200)
+            const body = JSON.parse(response.payload)
+            expect(body).toHaveProperty('data')
+            expect(body).toHaveProperty('meta')
+            expect(body).toHaveProperty('links')
+        })
     })
 
-    describe('GET /api/archive/media/galleries/:id', () => {
-        it('should return a gallery by ID with 200 OK', async () => {
+    describe('GET /api/v1/archive/media/galleries/:id', () => {
+        it('should return a gallery by ID with 200 OK and links', async () => {
             const gallery = await app.prisma.gallery.create({
                 data: { name: 'Test Gallery' }
             })
             try {
-                const response = await app.inject({ method: 'GET', url: `/api/archive/media/galleries/${gallery.id}` })
+                const response = await app.inject({ method: 'GET', url: `/api/v1/archive/media/galleries/${gallery.id}` })
                 expect(response.statusCode).toBe(200)
                 const body = JSON.parse(response.payload)
-                expect(body.id).toBe(gallery.id)
+                expect(body.data.id).toBe(gallery.id)
+                expect(body.data).toHaveProperty('links')
+                expect(body.data.links).toHaveProperty('self')
             } finally {
                 await app.prisma.gallery.delete({ where: { id: gallery.id } })
             }
         })
 
         it('should return 404 for non-existent gallery', async () => {
-            const response = await app.inject({ method: 'GET', url: '/api/archive/media/galleries/00000000-0000-0000-0000-000000000000' })
+            const response = await app.inject({ method: 'GET', url: '/api/v1/archive/media/galleries/00000000-0000-0000-0000-000000000000' })
             expect(response.statusCode).toBe(404)
         })
     })
 
-    describe('GET /api/archive/media/items/:id', () => {
-        it('should return a media item by ID with 200 OK', async () => {
+    describe('GET /api/v1/archive/media/items/:id', () => {
+        it('should return a media item by ID with 200 OK and links', async () => {
             const item = await app.prisma.item.create({
                 data: { type: 'image', original_filename: 'test.jpg' }
             })
             try {
-                const response = await app.inject({ method: 'GET', url: `/api/archive/media/items/${item.id}` })
+                const response = await app.inject({ method: 'GET', url: `/api/v1/archive/media/items/${item.id}` })
                 expect(response.statusCode).toBe(200)
                 const body = JSON.parse(response.payload)
-                expect(body.id).toBe(item.id)
+                expect(body.data.id).toBe(item.id)
+                expect(body.data).toHaveProperty('links')
+                expect(body.data.links).toHaveProperty('self')
             } finally {
                 await app.prisma.item.delete({ where: { id: item.id } })
             }
         })
 
         it('should return 404 for non-existent item', async () => {
-            const response = await app.inject({ method: 'GET', url: '/api/archive/media/items/00000000-0000-0000-0000-000000000000' })
+            const response = await app.inject({ method: 'GET', url: '/api/v1/archive/media/items/00000000-0000-0000-0000-000000000000' })
             expect(response.statusCode).toBe(404)
         })
     })
 
-    describe('GET /api/archive/media/items/crops/:id', () => {
-        it('should return a crop by ID with 200 OK', async () => {
+    describe('GET /api/v1/archive/media/items/crops/:id', () => {
+        it('should return a crop by ID with 200 OK and links', async () => {
             const crop = await app.prisma.crop.create({
                 data: { name: 'test-crop', url: 'http://test.com/crop.jpg' }
             })
             try {
-                const response = await app.inject({ method: 'GET', url: `/api/archive/media/items/crops/${crop.id}` })
+                const response = await app.inject({ method: 'GET', url: `/api/v1/archive/media/items/crops/${crop.id}` })
                 expect(response.statusCode).toBe(200)
                 const body = JSON.parse(response.payload)
-                expect(body.id).toBe(crop.id)
+                expect(body.data.id).toBe(crop.id)
+                expect(body.data).toHaveProperty('links')
+                expect(body.data.links).toHaveProperty('self')
             } finally {
                 await app.prisma.crop.delete({ where: { id: crop.id } })
             }
         })
 
         it('should return 404 for non-existent crop', async () => {
-            const response = await app.inject({ method: 'GET', url: '/api/archive/media/items/crops/00000000-0000-0000-0000-000000000000' })
+            const response = await app.inject({ method: 'GET', url: '/api/v1/archive/media/items/crops/00000000-0000-0000-0000-000000000000' })
             expect(response.statusCode).toBe(404)
         })
     })
 
-    describe('POST /api/archive/media/galleries', () => {
+    describe('POST /api/v1/archive/media/galleries', () => {
         it('should create a gallery and clean up', async () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const response = await app.inject({
                 method: 'POST',
-                url: '/api/archive/media/galleries',
+                url: '/api/v1/archive/media/galleries',
                 headers: { authorization: `Bearer ${token}` },
                 payload: { name: 'New Gallery POST' }
             })
             expect(response.statusCode).toBe(201)
             const body = JSON.parse(response.payload)
-            expect(body.name).toBe('New Gallery POST')
-            await app.prisma.gallery.delete({ where: { id: body.id } })
+            expect(body.data.name).toBe('New Gallery POST')
+            expect(body.links).toHaveProperty('self')
+            await app.prisma.gallery.delete({ where: { id: body.data.id } })
         })
     })
 
-    describe('PUT /api/archive/media/galleries/:id', () => {
+    describe('PATCH /api/v1/archive/media/galleries/:id', () => {
         it('should update a gallery and clean up', async () => {
             const gallery = await app.prisma.gallery.create({ data: { name: 'Old Name' } })
             try {
                 const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
                 const response = await app.inject({
                     method: 'PATCH',
-                    url: `/api/archive/media/galleries/${gallery.id}`,
+                    url: `/api/v1/archive/media/galleries/${gallery.id}`,
                     headers: { authorization: `Bearer ${token}` },
                     payload: { name: 'Updated Name' }
                 })
                 expect(response.statusCode).toBe(200)
                 const body = JSON.parse(response.payload)
-                expect(body.name).toBe('Updated Name')
+                expect(body.data.name).toBe('Updated Name')
             } finally {
                 await app.prisma.gallery.delete({ where: { id: gallery.id } })
             }
@@ -130,7 +155,7 @@ describe('Media Routes', () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const response = await app.inject({
                 method: 'PATCH',
-                url: '/api/archive/media/galleries/00000000-0000-0000-0000-000000000000',
+                url: '/api/v1/archive/media/galleries/00000000-0000-0000-0000-000000000000',
                 headers: { authorization: `Bearer ${token}` },
                 payload: { name: 'Updated Name' }
             })
@@ -138,13 +163,13 @@ describe('Media Routes', () => {
         })
     })
 
-    describe('DELETE /api/archive/media/galleries/:id', () => {
+    describe('DELETE /api/v1/archive/media/galleries/:id', () => {
         it('should delete a gallery', async () => {
             const gallery = await app.prisma.gallery.create({ data: { name: 'To Delete' } })
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const response = await app.inject({
                 method: 'DELETE',
-                url: `/api/archive/media/galleries/${gallery.id}`,
+                url: `/api/v1/archive/media/galleries/${gallery.id}`,
                 headers: { authorization: `Bearer ${token}` }
             })
             expect(response.statusCode).toBe(204)
@@ -156,43 +181,44 @@ describe('Media Routes', () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const response = await app.inject({
                 method: 'DELETE',
-                url: '/api/archive/media/galleries/00000000-0000-0000-0000-000000000000',
+                url: '/api/v1/archive/media/galleries/00000000-0000-0000-0000-000000000000',
                 headers: { authorization: `Bearer ${token}` }
             })
             expect(response.statusCode).toBe(404)
         })
     })
 
-    describe('POST /api/archive/media/items', () => {
+    describe('POST /api/v1/archive/media/items', () => {
         it('should create an item and clean up', async () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const response = await app.inject({
                 method: 'POST',
-                url: '/api/archive/media/items',
+                url: '/api/v1/archive/media/items',
                 headers: { authorization: `Bearer ${token}` },
                 payload: { type: 'image', original_filename: 'new.jpg' }
             })
             expect(response.statusCode).toBe(201)
             const body = JSON.parse(response.payload)
-            expect(body.original_filename).toBe('new.jpg')
-            await app.prisma.item.delete({ where: { id: body.id } })
+            expect(body.data.original_filename).toBe('new.jpg')
+            expect(body.links).toHaveProperty('self')
+            await app.prisma.item.delete({ where: { id: body.data.id } })
         })
     })
 
-    describe('PUT /api/archive/media/items/:id', () => {
+    describe('PATCH /api/v1/archive/media/items/:id', () => {
         it('should update an item and clean up', async () => {
             const item = await app.prisma.item.create({ data: { type: 'image', original_filename: 'old.jpg' } })
             try {
                 const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
                 const response = await app.inject({
                     method: 'PATCH',
-                    url: `/api/archive/media/items/${item.id}`,
+                    url: `/api/v1/archive/media/items/${item.id}`,
                     headers: { authorization: `Bearer ${token}` },
                     payload: { original_filename: 'updated.jpg' }
                 })
                 expect(response.statusCode).toBe(200)
                 const body = JSON.parse(response.payload)
-                expect(body.original_filename).toBe('updated.jpg')
+                expect(body.data.original_filename).toBe('updated.jpg')
             } finally {
                 await app.prisma.item.delete({ where: { id: item.id } })
             }
@@ -202,7 +228,7 @@ describe('Media Routes', () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const response = await app.inject({
                 method: 'PATCH',
-                url: '/api/archive/media/items/00000000-0000-0000-0000-000000000000',
+                url: '/api/v1/archive/media/items/00000000-0000-0000-0000-000000000000',
                 headers: { authorization: `Bearer ${token}` },
                 payload: { original_filename: 'updated.jpg' }
             })
@@ -210,13 +236,13 @@ describe('Media Routes', () => {
         })
     })
 
-    describe('DELETE /api/archive/media/items/:id', () => {
+    describe('DELETE /api/v1/archive/media/items/:id', () => {
         it('should delete an item', async () => {
             const item = await app.prisma.item.create({ data: { type: 'image', original_filename: 'to-delete.jpg' } })
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const response = await app.inject({
                 method: 'DELETE',
-                url: `/api/archive/media/items/${item.id}`,
+                url: `/api/v1/archive/media/items/${item.id}`,
                 headers: { authorization: `Bearer ${token}` }
             })
             expect(response.statusCode).toBe(204)
@@ -228,43 +254,44 @@ describe('Media Routes', () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const response = await app.inject({
                 method: 'DELETE',
-                url: '/api/archive/media/items/00000000-0000-0000-0000-000000000000',
+                url: '/api/v1/archive/media/items/00000000-0000-0000-0000-000000000000',
                 headers: { authorization: `Bearer ${token}` }
             })
             expect(response.statusCode).toBe(404)
         })
     })
 
-    describe('POST /api/archive/media/items/crops', () => {
+    describe('POST /api/v1/archive/media/items/crops', () => {
         it('should create a crop and clean up', async () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const response = await app.inject({
                 method: 'POST',
-                url: '/api/archive/media/items/crops',
+                url: '/api/v1/archive/media/items/crops',
                 headers: { authorization: `Bearer ${token}` },
                 payload: { name: 'New Crop', url: 'http://test.com/new.jpg' }
             })
             expect(response.statusCode).toBe(201)
             const body = JSON.parse(response.payload)
-            expect(body.name).toBe('New Crop')
-            await app.prisma.crop.delete({ where: { id: body.id } })
+            expect(body.data.name).toBe('New Crop')
+            expect(body.links).toHaveProperty('self')
+            await app.prisma.crop.delete({ where: { id: body.data.id } })
         })
     })
 
-    describe('PUT /api/archive/media/items/crops/:id', () => {
+    describe('PATCH /api/v1/archive/media/items/crops/:id', () => {
         it('should update a crop and clean up', async () => {
             const crop = await app.prisma.crop.create({ data: { name: 'Old Crop', url: 'http://test.com/old.jpg' } })
             try {
                 const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
                 const response = await app.inject({
                     method: 'PATCH',
-                    url: `/api/archive/media/items/crops/${crop.id}`,
+                    url: `/api/v1/archive/media/items/crops/${crop.id}`,
                     headers: { authorization: `Bearer ${token}` },
                     payload: { name: 'Updated Crop' }
                 })
                 expect(response.statusCode).toBe(200)
                 const body = JSON.parse(response.payload)
-                expect(body.name).toBe('Updated Crop')
+                expect(body.data.name).toBe('Updated Crop')
             } finally {
                 await app.prisma.crop.delete({ where: { id: crop.id } })
             }
@@ -274,7 +301,7 @@ describe('Media Routes', () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const response = await app.inject({
                 method: 'PATCH',
-                url: '/api/archive/media/items/crops/00000000-0000-0000-0000-000000000000',
+                url: '/api/v1/archive/media/items/crops/00000000-0000-0000-0000-000000000000',
                 headers: { authorization: `Bearer ${token}` },
                 payload: { name: 'Updated Crop' }
             })
@@ -282,13 +309,13 @@ describe('Media Routes', () => {
         })
     })
 
-    describe('DELETE /api/archive/media/items/crops/:id', () => {
+    describe('DELETE /api/v1/archive/media/items/crops/:id', () => {
         it('should delete a crop', async () => {
             const crop = await app.prisma.crop.create({ data: { name: 'To Delete', url: 'http://test.com/delete.jpg' } })
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const response = await app.inject({
                 method: 'DELETE',
-                url: `/api/archive/media/items/crops/${crop.id}`,
+                url: `/api/v1/archive/media/items/crops/${crop.id}`,
                 headers: { authorization: `Bearer ${token}` }
             })
             expect(response.statusCode).toBe(204)
@@ -300,7 +327,7 @@ describe('Media Routes', () => {
             const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const response = await app.inject({
                 method: 'DELETE',
-                url: '/api/archive/media/items/crops/00000000-0000-0000-0000-000000000000',
+                url: '/api/v1/archive/media/items/crops/00000000-0000-0000-0000-000000000000',
                 headers: { authorization: `Bearer ${token}` }
             })
             expect(response.statusCode).toBe(404)
