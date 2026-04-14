@@ -23,8 +23,8 @@ export const spacePaginationQuerySchema = z.object({
  */
 export const spaceLinksSchema = z.object({
     self: z.string().url().default('https://example.com/'),
-    location: z.string().url().optional().default('https://example.com/'),
-    halls: z.string().url().optional().default('https://example.com/'),
+    location: z.string().url().optional().nullable().default('https://example.com/'),
+    halls: z.string().url().optional().nullable().default('https://example.com/'),
 })
 
 export const spaceSchema = z.object({
