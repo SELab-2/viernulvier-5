@@ -185,15 +185,17 @@ describe('LoginPage', () => {
       </MemoryRouter>,
     )
 
+    // Initially nl locale: toggle shows 'EN' and submit reads 'Inloggen'
     const localeToggle = screen.getByRole('button', { name: 'Wissel taal' })
     expect(localeToggle).toHaveTextContent('EN')
     expect(screen.getByRole('button', { name: 'Inloggen' })).toBeInTheDocument()
 
     fireEvent.click(localeToggle)
 
+    // After switching to en: submit reads 'Sign in' and locale toggle shows 'NL'
     await waitFor(() => {
       expect(screen.getByRole('button', { name: 'Sign in' })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: 'Wissel taal' })).toHaveTextContent('NL')
+      expect(screen.getByRole('button', { name: 'Switch language' })).toHaveTextContent('NL')
     })
   })
 
