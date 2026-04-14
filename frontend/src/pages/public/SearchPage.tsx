@@ -17,18 +17,43 @@ const DEFAULT_PAGE_SIZE = 12
 const PAGE_SIZE_OPTIONS = [12, 24, 48] as const
 const MIN_PERIOD_YEAR = 1982
 const MAX_PERIOD_YEAR = 2026
+const SEARCH_INPUT_DEBOUNCE_MS = 250
 
-const CANONICAL_GENRE_VALUES = ['theater', 'dans', 'muziek', 'voorstelling', 'komedie', 'workshop'] as const
-const CANONICAL_LOCATION_VALUES = ['theaterzaal', 'balzaal', 'domzaal'] as const
+const CANONICAL_GENRE_VALUES = [
+    'theater',
+    'dans',
+    'concert',
+    'nightlife',
+    'talks',
+    'comedy',
+    'monument',
+    'circus',
+    'performance',
+    'spoken word',
+    'listening session',
+] as const
 
 const GENRE_ALIASES: Record<string, string> = {
+    theater: 'theater',
     theatre: 'theater',
+    dans: 'dans',
     dance: 'dans',
-    music: 'muziek',
-    performance: 'voorstelling',
-    comedy: 'komedie',
-    workshop: 'workshop',
+    music: 'concert',
+    komedie: 'comedy',
+    voorstelling: 'performance',
+    'spoken-word': 'spoken word',
 }
+
+const NON_GENRE_TAG_VALUES = new Set([
+    'group',
+    'in de vooruit',
+    'by viernulvier',
+    'te gast',
+    'nederlands gesproken',
+    'engels gesproken',
+    'frans gesproken',
+    'cadeaubon geldig',
+])
 
 const LOCATION_ALIASES: Record<string, string> = {
     'theatre hall': 'theaterzaal',
@@ -67,6 +92,30 @@ type PaginatedApiResponse<T> = {
     }
 }
 
+type SearchSort = 'relevance' | 'recent' | 'oldest'
+
+type SearchFilterState = {
+    query: string
+    yearFrom: number
+    yearTo: number
+    genres: string[]
+    locations: string[]
+    sort: SearchSort
+    page: number
+    limit: number
+}
+
+type SearchFilterOverrides = {
+    query?: string
+    yearFrom?: number
+    yearTo?: number
+    genres?: string[]
+    locations?: string[]
+    sort?: SearchSort
+    page?: number
+    limit?: number
+}
+
 function getLocalizedText(text: LocalizedText, locale: Locale): string {
     if (!text) {
         return ''
@@ -74,6 +123,59 @@ function getLocalizedText(text: LocalizedText, locale: Locale): string {
 
     const values = locale === 'en' ? [text.en, text.nl, text.fr] : [text.nl, text.en, text.fr]
     return values.find((value) => typeof value === 'string' && value.trim().length > 0)?.trim() ?? ''
+}
+
+function normalizeSort(value: string): SearchSort {
+    const normalized = value.trim().toLowerCase()
+    return normalized === 'recent' || normalized === 'oldest' || normalized === 'relevance' ? normalized : 'relevance'
+}
+
+function normalizePageSize(value: number): number {
+    return PAGE_SIZE_OPTIONS.includes(value as (typeof PAGE_SIZE_OPTIONS)[number]) ? value : DEFAULT_PAGE_SIZE
+}
+
+function parseSearchFilterState(searchParams: URLSearchParams): SearchFilterState {
+    const query = (searchParams.get('q') ?? '').trim()
+    const legacyYear = Number(searchParams.get('year') ?? String(MAX_PERIOD_YEAR))
+    const yearFromParam = Number(searchParams.get('yearFrom') ?? String(MIN_PERIOD_YEAR))
+    const yearToParam = Number(searchParams.get('yearTo') ?? String(Number.isFinite(legacyYear) ? legacyYear : MAX_PERIOD_YEAR))
+    const periodFromYear = Number.isFinite(yearFromParam) ? Math.min(MAX_PERIOD_YEAR, Math.max(MIN_PERIOD_YEAR, yearFromParam)) : MIN_PERIOD_YEAR
+    const periodToYear = Number.isFinite(yearToParam) ? Math.min(MAX_PERIOD_YEAR, Math.max(MIN_PERIOD_YEAR, yearToParam)) : MAX_PERIOD_YEAR
+    const yearFrom = Math.min(periodFromYear, periodToYear)
+    const yearTo = Math.max(periodFromYear, periodToYear)
+
+    const sort = normalizeSort(searchParams.get('sort') ?? 'relevance')
+    const pageParam = Number(searchParams.get('page') ?? '1')
+    const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1
+    const limitParam = Number(searchParams.get('limit') ?? String(DEFAULT_PAGE_SIZE))
+    const limit = normalizePageSize(limitParam)
+
+    return {
+        query,
+        yearFrom,
+        yearTo,
+        genres: parseSelectedGenres(searchParams),
+        locations: parseSelectedLocations(searchParams),
+        sort,
+        page,
+        limit,
+    }
+}
+
+function buildSearchParams(filters: SearchFilterOverrides): URLSearchParams {
+    const params = new URLSearchParams()
+    const trimmedQuery = filters.query?.trim() ?? ''
+
+    if (trimmedQuery) params.set('q', trimmedQuery)
+    if (filters.yearFrom && filters.yearFrom > MIN_PERIOD_YEAR) params.set('yearFrom', String(filters.yearFrom))
+    if (filters.yearTo && filters.yearTo < MAX_PERIOD_YEAR) params.set('yearTo', String(filters.yearTo))
+    if (filters.genres && filters.genres.length > 0) params.set('genres', filters.genres.join(','))
+    if (filters.locations && filters.locations.length > 0) params.set('locations', filters.locations.join(','))
+    if (filters.sort && filters.sort !== 'relevance') params.set('sort', filters.sort)
+    if (filters.page && filters.page > 1) params.set('page', String(filters.page))
+    if (filters.limit && filters.limit !== DEFAULT_PAGE_SIZE) params.set('limit', String(filters.limit))
+
+    return params
 }
 
 function formatDate(value: string, locale: Locale): string {
@@ -95,6 +197,10 @@ function toPlainText(value: string): string {
         return ''
     }
 
+    if (!/[<&]/.test(trimmed)) {
+        return trimmed.replace(/\s+/g, ' ').trim()
+    }
+
     if (typeof window !== 'undefined' && typeof DOMParser !== 'undefined') {
         const parsed = new DOMParser().parseFromString(trimmed, 'text/html')
         return (parsed.body.textContent ?? '').replace(/\s+/g, ' ').trim()
@@ -112,8 +218,18 @@ function toPlainText(value: string): string {
         .trim()
 }
 
-function mapProductionToSearchEntry(item: ProductionApiItem, locale: Locale): SearchEntry {
-    const title = getLocalizedText(item.title, locale) || (locale === 'nl' ? 'Zonder titel' : 'Untitled')
+function normalizeGenreValue(value: string): string {
+    const normalized = value.trim().toLowerCase()
+    if (!normalized) {
+        return ''
+    }
+
+    return GENRE_ALIASES[normalized] ?? normalized
+}
+
+function mapProductionToSearchEntry(item: ProductionApiItem, locale: Locale, preferredGenre?: string): SearchEntry {
+    const searchMessages = getMessages(locale).search
+    const title = getLocalizedText(item.title, locale) || searchMessages.fallbackUntitled
     const excerptRaw =
         getLocalizedText(item.description_short, locale) ||
         getLocalizedText(item.description, locale) ||
@@ -122,20 +238,45 @@ function mapProductionToSearchEntry(item: ProductionApiItem, locale: Locale): Se
     const excerpt = toPlainText(excerptRaw) || title
     const createdDate = new Date(item.created_at)
     const year = Number.isNaN(createdDate.getTime()) ? MIN_PERIOD_YEAR : createdDate.getFullYear()
-    const primaryProductionGenre = (item.production_genres ?? []).find(
-        (value) => typeof value === 'string' && value.trim().length > 0,
-    )
-    const normalizedGenre = (primaryProductionGenre ?? item.performer_type ?? '').trim().toLowerCase()
+    const normalizedProductionGenres = (item.production_genres ?? [])
+        .map((value) => normalizeGenreValue(value))
+        .filter((value) => value.length > 0 && !NON_GENRE_TAG_VALUES.has(value))
+
+    const normalizedPerformerType = normalizeGenreValue(item.performer_type ?? '')
+    const fallbackPerformerTag = normalizedPerformerType.length > 0 && normalizedPerformerType !== 'group'
+        ? normalizedPerformerType
+        : ''
+
+    const normalizedPreferredGenre = preferredGenre?.trim().toLowerCase() ?? ''
+    const matchedPreferredGenre = normalizedPreferredGenre
+        ? normalizedProductionGenres.find((genre) => {
+              if (genre === normalizedPreferredGenre) {
+                  return true
+              }
+
+              if (normalizedPreferredGenre === 'dans' && genre === 'dance') {
+                  return true
+              }
+
+              if (normalizedPreferredGenre === 'theater' && genre === 'theatre') {
+                  return true
+              }
+
+              return false
+          })
+        : undefined
+
+    const normalizedGenre = matchedPreferredGenre ?? normalizedProductionGenres[0] ?? fallbackPerformerTag
     const normalizedLocation = (item.attendance_mode ?? '').trim().toLowerCase()
     const hasConcreteAttendanceMode = normalizedLocation.length > 0 && normalizedLocation !== 'offline' && normalizedLocation !== 'online'
     const eventVenues = (item.venue_names ?? []).map((value) => value.trim()).filter((value) => value.length > 0)
     const venueFromEvents = eventVenues.length > 0 ? eventVenues.join(' • ') : ''
-    const fallbackVenue = locale === 'nl' ? 'Locatie nog niet bekend' : 'Venue to be announced'
+    const fallbackVenue = searchMessages.fallbackVenue
     const venue = venueFromEvents || (item.venue_name ?? '').trim() || (hasConcreteAttendanceMode ? normalizedLocation : fallbackVenue)
 
     return {
         id: item.id,
-        tag: normalizedGenre || (locale === 'nl' ? 'productie' : 'production'),
+        tag: normalizedGenre ? getGenreLabel(normalizedGenre, locale) : searchMessages.fallbackTag,
         date: formatDate(item.created_at, locale),
         title,
         excerpt,
@@ -200,10 +341,8 @@ function getGenreLabel(value: string, locale: Locale): string {
     return index >= 0 ? labels[index] ?? value : value
 }
 
-function getLocationLabel(value: string, locale: Locale): string {
-    const labels = getMessages(locale).search.locations
-    const index = CANONICAL_LOCATION_VALUES.indexOf(value as (typeof CANONICAL_LOCATION_VALUES)[number])
-    return index >= 0 ? labels[index] ?? value : value
+function getLocationLabel(value: string): string {
+    return value
 }
 
 function HamburgerIcon({ className }: { className: string }) {
@@ -228,58 +367,70 @@ type FilterPanelProps = {
     showSearch?: boolean
     shareLabel?: string
     onShare?: () => void
+    locationSuggestions?: string[]
 }
 
-function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, onShare }: FilterPanelProps) {
+function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, onShare, locationSuggestions = [] }: FilterPanelProps) {
     const [searchParams] = useSearchParams()
     const navigate = useNavigate()
     const locale = getActiveLocale(window.location.pathname)
     const { search: s } = getMessages(locale)
 
-    const query = (searchParams.get('q') ?? '').trim()
-    const legacyYear = Number(searchParams.get('year') ?? String(MAX_PERIOD_YEAR))
-    const yearFromParam = Number(searchParams.get('yearFrom') ?? String(MIN_PERIOD_YEAR))
-    const yearToParam = Number(searchParams.get('yearTo') ?? String(Number.isFinite(legacyYear) ? legacyYear : MAX_PERIOD_YEAR))
-    const periodFromYear = Number.isFinite(yearFromParam) ? Math.min(MAX_PERIOD_YEAR, Math.max(MIN_PERIOD_YEAR, yearFromParam)) : MIN_PERIOD_YEAR
-    const periodToYear = Number.isFinite(yearToParam) ? Math.min(MAX_PERIOD_YEAR, Math.max(MIN_PERIOD_YEAR, yearToParam)) : MAX_PERIOD_YEAR
-    const safeFromYear = Math.min(periodFromYear, periodToYear)
-    const safeToYear = Math.max(periodFromYear, periodToYear)
-    const selectedGenres = parseSelectedGenres(searchParams)
-    const selectedLocations = parseSelectedLocations(searchParams)
-    const sort = (searchParams.get('sort') ?? 'relevance').trim().toLowerCase()
-    const limitParam = Number(searchParams.get('limit') ?? String(DEFAULT_PAGE_SIZE))
-    const safeLimit = PAGE_SIZE_OPTIONS.includes(limitParam as (typeof PAGE_SIZE_OPTIONS)[number]) ? limitParam : DEFAULT_PAGE_SIZE
+    const filterState = useMemo(() => parseSearchFilterState(searchParams), [searchParams])
+    const query = filterState.query
+    const safeFromYear = filterState.yearFrom
+    const safeToYear = filterState.yearTo
+    const selectedGenres = filterState.genres
+    const selectedLocations = filterState.locations
+    const sort = filterState.sort
+    const safeLimit = filterState.limit
     const sliderRef = useRef<HTMLDivElement | null>(null)
 
     const [searchInput, setSearchInput] = useState(query)
+    const [locationInput, setLocationInput] = useState('')
+    const [isLocationSuggestionsOpen, setIsLocationSuggestionsOpen] = useState(false)
 
     useEffect(() => {
         setSearchInput(query)
     }, [query])
 
-    const pushFilters = (filters: { query?: string; yearFrom?: number; yearTo?: number; genres?: string[]; locations?: string[]; sort?: string; limit?: number }) => {
-        const params = new URLSearchParams()
-        if (filters.query) params.set('q', filters.query)
-        if (filters.yearFrom && filters.yearFrom > MIN_PERIOD_YEAR) params.set('yearFrom', String(filters.yearFrom))
-        if (filters.yearTo && filters.yearTo < MAX_PERIOD_YEAR) params.set('yearTo', String(filters.yearTo))
-        if (filters.genres && filters.genres.length > 0) params.set('genres', filters.genres.join(','))
-        if (filters.locations && filters.locations.length > 0) params.set('locations', filters.locations.join(','))
-        if (filters.sort && filters.sort !== 'relevance') params.set('sort', filters.sort)
-        if (filters.limit && filters.limit !== DEFAULT_PAGE_SIZE) params.set('limit', String(filters.limit))
+    const pushFilters = (filters: SearchFilterOverrides) => {
+        const params = buildSearchParams(filters)
         const path = withLocalePath('/zoeken', locale)
         const qs = params.toString()
         navigate(qs ? `${path}?${qs}` : path)
         onAfterChange?.()
     }
 
+    useEffect(() => {
+        const nextQuery = searchInput.trim()
+        if (nextQuery === query) {
+            return
+        }
+
+        const timerId = window.setTimeout(() => {
+            pushFilters({
+                query: nextQuery || undefined,
+                yearFrom: safeFromYear,
+                yearTo: safeToYear,
+                genres: selectedGenres,
+                locations: selectedLocations,
+                sort,
+                limit: safeLimit,
+            })
+        }, SEARCH_INPUT_DEBOUNCE_MS)
+
+        return () => {
+            window.clearTimeout(timerId)
+        }
+    }, [searchInput, query, safeFromYear, safeToYear, selectedGenres, selectedLocations, sort, safeLimit])
+
     const handleSearchSubmit = () => {
         pushFilters({ query: searchInput.trim() || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: safeLimit })
     }
 
     const handleGenreChange = (next: string) => {
-        const nextGenres = selectedGenres.includes(next)
-            ? selectedGenres.filter((value) => value !== next)
-            : [...selectedGenres, next]
+        const nextGenres = selectedGenres.includes(next) ? [] : [next]
 
         pushFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: nextGenres, locations: selectedLocations, sort, limit: safeLimit })
     }
@@ -290,6 +441,65 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
             : [...selectedLocations, next]
 
         pushFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: selectedGenres, locations: nextLocations, sort, limit: safeLimit })
+    }
+
+    const handleAddLocation = () => {
+        const nextLocation = locationInput.trim().toLowerCase()
+        if (!nextLocation || selectedLocations.includes(nextLocation)) {
+            setLocationInput('')
+            return
+        }
+
+        pushFilters({
+            query: query || undefined,
+            yearFrom: safeFromYear,
+            yearTo: safeToYear,
+            genres: selectedGenres,
+            locations: [...selectedLocations, nextLocation],
+            sort,
+            limit: safeLimit,
+        })
+        setLocationInput('')
+        setIsLocationSuggestionsOpen(false)
+    }
+
+    const normalizedLocationInput = locationInput.trim().toLowerCase()
+    const locationSuggestionItems = useMemo(() => {
+        if (!normalizedLocationInput) {
+            return []
+        }
+
+        return locationSuggestions
+            .filter((value) => {
+                const normalized = value.trim().toLowerCase()
+                return (
+                    normalized.length > 0 &&
+                    normalized.includes(normalizedLocationInput) &&
+                    !selectedLocations.includes(normalized)
+                )
+            })
+            .slice(0, 8)
+    }, [locationSuggestions, normalizedLocationInput, selectedLocations])
+
+    const handleSelectLocationSuggestion = (value: string) => {
+        const nextLocation = value.trim().toLowerCase()
+        if (!nextLocation || selectedLocations.includes(nextLocation)) {
+            setLocationInput('')
+            setIsLocationSuggestionsOpen(false)
+            return
+        }
+
+        pushFilters({
+            query: query || undefined,
+            yearFrom: safeFromYear,
+            yearTo: safeToYear,
+            genres: selectedGenres,
+            locations: [...selectedLocations, nextLocation],
+            sort,
+            limit: safeLimit,
+        })
+        setLocationInput('')
+        setIsLocationSuggestionsOpen(false)
     }
 
     const handleFromYearChange = (next: number) => {
@@ -335,11 +545,6 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
         label,
         value: CANONICAL_GENRE_VALUES[index] ?? label.toLowerCase(),
     }))
-    const locationOptions = s.locations.map((label, index) => ({
-        label,
-        value: CANONICAL_LOCATION_VALUES[index] ?? label.toLowerCase(),
-    }))
-
     return (
         <aside className={`flex h-full flex-col ${className}`}>
             <h2 className="text-3xl text-foreground">{s.heading}</h2>
@@ -425,20 +630,66 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
 
             <div className="mt-6 border-t border-border pt-5 pb-5">
                 <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground">{s.locationLabel}</h3>
-                <div className="mt-4 space-y-2 text-sm text-text-accent">
-                    {locationOptions.map(({ label, value }) => {
-                        return (
-                            <label key={value} className="flex items-center gap-2.5 text-foreground/90 transition-all duration-200 hover:translate-x-0.5 hover:text-foreground cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    checked={selectedLocations.includes(value)}
-                                    onChange={() => handleLocationChange(value)}
-                                    className="filter-checkbox cursor-pointer"
-                                />
-                                <span>{label}</span>
-                            </label>
-                        )
-                    })}
+                <div className="mt-4 space-y-3 text-sm text-text-accent">
+                    <div className="flex items-center gap-2">
+                        <input
+                            type="text"
+                            value={locationInput}
+                            onChange={(event) => setLocationInput(event.target.value)}
+                            onFocus={() => setIsLocationSuggestionsOpen(true)}
+                            onBlur={() => {
+                                window.setTimeout(() => {
+                                    setIsLocationSuggestionsOpen(false)
+                                }, 120)
+                            }}
+                            onKeyDown={(event) => {
+                                if (event.key === 'Enter') {
+                                    event.preventDefault()
+                                    handleAddLocation()
+                                }
+                            }}
+                            placeholder={s.locationSearchPlaceholder}
+                            className="h-10 w-full rounded-full border border-border bg-surface px-4 text-sm text-foreground"
+                        />
+                        <button
+                            type="button"
+                            className="h-10 rounded-full border border-border bg-surface px-3 text-xs font-semibold text-foreground"
+                            onClick={handleAddLocation}
+                        >
+                            {s.addLocationLabel}
+                        </button>
+                    </div>
+
+                    {isLocationSuggestionsOpen && locationSuggestionItems.length > 0 ? (
+                        <div className="max-h-52 overflow-auto rounded-2xl border border-border bg-surface p-1">
+                            {locationSuggestionItems.map((value) => (
+                                <button
+                                    key={value}
+                                    type="button"
+                                    className="flex w-full items-center rounded-xl px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-accent/10"
+                                    onClick={() => handleSelectLocationSuggestion(value)}
+                                >
+                                    {value}
+                                </button>
+                            ))}
+                        </div>
+                    ) : null}
+
+                    {selectedLocations.length > 0 ? (
+                        <div className="flex flex-wrap items-center gap-2">
+                            {selectedLocations.map((value) => (
+                                <button
+                                    key={value}
+                                    type="button"
+                                    onClick={() => handleLocationChange(value)}
+                                    className="inline-flex items-center gap-1.5 rounded-full bg-accent/15 px-3 py-1 text-xs text-accent"
+                                >
+                                    <span>{getLocationLabel(value)}</span>
+                                    <span className="text-sm leading-none">×</span>
+                                </button>
+                            ))}
+                        </div>
+                    ) : null}
                 </div>
             </div>
 
@@ -469,25 +720,47 @@ function MobileSearchForm() {
     const navigate = useNavigate()
     const locale = getActiveLocale(window.location.pathname)
     const { search: s } = getMessages(locale)
-    const [searchInput, setSearchInput] = useState((searchParams.get('q') ?? '').trim())
+    const query = useMemo(() => parseSearchFilterState(searchParams).query, [searchParams])
+    const [searchInput, setSearchInput] = useState(query)
 
-    const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault()
+    useEffect(() => {
+        setSearchInput(query)
+    }, [query])
 
-        const params = new URLSearchParams(searchParams)
-        const nextQuery = searchInput.trim()
-
-        if (nextQuery) {
-            params.set('q', nextQuery)
-        } else {
-            params.delete('q')
-        }
-
-        params.delete('page')
-
+    const pushQuery = (nextQuery: string) => {
+        const filterState = parseSearchFilterState(searchParams)
+        const params = buildSearchParams({
+            query: nextQuery,
+            yearFrom: filterState.yearFrom,
+            yearTo: filterState.yearTo,
+            genres: filterState.genres,
+            locations: filterState.locations,
+            sort: filterState.sort,
+            limit: filterState.limit,
+        })
         const path = withLocalePath('/zoeken', locale)
         const qs = params.toString()
         navigate(qs ? `${path}?${qs}` : path)
+    }
+
+    useEffect(() => {
+        const nextQuery = searchInput.trim()
+        if (nextQuery === query) {
+            return
+        }
+
+        const timerId = window.setTimeout(() => {
+            pushQuery(nextQuery)
+        }, SEARCH_INPUT_DEBOUNCE_MS)
+
+        return () => {
+            window.clearTimeout(timerId)
+        }
+    }, [searchInput, query])
+
+    const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault()
+        pushQuery(searchInput.trim())
     }
 
     return (
@@ -521,45 +794,15 @@ function SearchPage() {
     const [isLoading, setIsLoading] = useState(true)
     const [apiError, setApiError] = useState<string | null>(null)
 
-    const query = (searchParams.get('q') ?? '').trim()
-    const genresParamValue = (searchParams.get('genres') ?? '').trim().toLowerCase()
-    const legacyGenreValue = (searchParams.get('genre') ?? '').trim().toLowerCase()
-    const locationsParamValue = (searchParams.get('locations') ?? '').trim().toLowerCase()
-    const legacyLocationValue = (searchParams.get('location') ?? '').trim().toLowerCase()
-    const legacyYear = Number(searchParams.get('year') ?? String(MAX_PERIOD_YEAR))
-    const yearFromParam = Number(searchParams.get('yearFrom') ?? String(MIN_PERIOD_YEAR))
-    const yearToParam = Number(searchParams.get('yearTo') ?? String(Number.isFinite(legacyYear) ? legacyYear : MAX_PERIOD_YEAR))
-    const periodFromYear = Number.isFinite(yearFromParam) ? Math.min(MAX_PERIOD_YEAR, Math.max(MIN_PERIOD_YEAR, yearFromParam)) : MIN_PERIOD_YEAR
-    const periodToYear = Number.isFinite(yearToParam) ? Math.min(MAX_PERIOD_YEAR, Math.max(MIN_PERIOD_YEAR, yearToParam)) : MAX_PERIOD_YEAR
-    const safeFromYear = Math.min(periodFromYear, periodToYear)
-    const safeToYear = Math.max(periodFromYear, periodToYear)
-    const selectedGenres = useMemo(() => {
-        if (genresParamValue) {
-            return genresParamValue
-                .split(',')
-                .map((value) => GENRE_ALIASES[value.trim()] ?? value.trim())
-                .filter(Boolean)
-        }
-
-        return legacyGenreValue ? [GENRE_ALIASES[legacyGenreValue] ?? legacyGenreValue] : []
-    }, [genresParamValue, legacyGenreValue])
-
-    const selectedLocations = useMemo(() => {
-        if (locationsParamValue) {
-            return locationsParamValue
-                .split(',')
-                .map((value) => LOCATION_ALIASES[value.trim()] ?? value.trim())
-                .filter(Boolean)
-        }
-
-        return legacyLocationValue ? [LOCATION_ALIASES[legacyLocationValue] ?? legacyLocationValue] : []
-    }, [locationsParamValue, legacyLocationValue])
-    const sortParam = (searchParams.get('sort') ?? 'relevance').trim().toLowerCase()
-    const sort = sortParam === 'recent' || sortParam === 'oldest' || sortParam === 'relevance' ? sortParam : 'relevance'
-    const pageParam = Number(searchParams.get('page') ?? '1')
-    const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1
-    const limitParam = Number(searchParams.get('limit') ?? String(DEFAULT_PAGE_SIZE))
-    const pageSize = PAGE_SIZE_OPTIONS.includes(limitParam as (typeof PAGE_SIZE_OPTIONS)[number]) ? limitParam : DEFAULT_PAGE_SIZE
+    const filterState = useMemo(() => parseSearchFilterState(searchParams), [searchParams])
+    const query = filterState.query
+    const safeFromYear = filterState.yearFrom
+    const safeToYear = filterState.yearTo
+    const selectedGenres = filterState.genres
+    const selectedLocations = filterState.locations
+    const sort = filterState.sort
+    const page = filterState.page
+    const pageSize = filterState.limit
 
     useEffect(() => {
         const abortController = new AbortController()
@@ -600,11 +843,12 @@ function SearchPage() {
                 }
 
                 const response = await apiFetch<PaginatedApiResponse<ProductionApiItem>>(
-                    `/v1/archive/productions?${params.toString()}`,
+                    `/archive/productions?${params.toString()}`,
                     { signal: abortController.signal }
                 )
 
-                const mappedEntries = response.data.map((item) => mapProductionToSearchEntry(item, locale))
+                const preferredGenre = selectedGenres.length === 1 ? selectedGenres[0] : undefined
+                const mappedEntries = response.data.map((item) => mapProductionToSearchEntry(item, locale, preferredGenre))
                 setApiEntries(mappedEntries)
                 setTotalResults(response.meta?.total ?? mappedEntries.length)
                 setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
@@ -632,25 +876,8 @@ function SearchPage() {
         }
     }, [query, locale, selectedGenres, selectedLocations, safeFromYear, safeToYear, sort, page, pageSize])
 
-    const navigateWithFilters = (filters: {
-        query?: string
-        yearFrom?: number
-        yearTo?: number
-        genres?: string[]
-        locations?: string[]
-        sort?: string
-        page?: number
-        limit?: number
-    }) => {
-        const params = new URLSearchParams()
-        if (filters.query) params.set('q', filters.query)
-        if (filters.yearFrom && filters.yearFrom > MIN_PERIOD_YEAR) params.set('yearFrom', String(filters.yearFrom))
-        if (filters.yearTo && filters.yearTo < MAX_PERIOD_YEAR) params.set('yearTo', String(filters.yearTo))
-        if (filters.genres && filters.genres.length > 0) params.set('genres', filters.genres.join(','))
-        if (filters.locations && filters.locations.length > 0) params.set('locations', filters.locations.join(','))
-        if (filters.sort && filters.sort !== 'relevance') params.set('sort', filters.sort)
-        if (filters.page && filters.page > 1) params.set('page', String(filters.page))
-        if (filters.limit && filters.limit !== DEFAULT_PAGE_SIZE) params.set('limit', String(filters.limit))
+    const navigateWithFilters = (filters: SearchFilterOverrides) => {
+        const params = buildSearchParams(filters)
         const path = withLocalePath('/zoeken', locale)
         const qs = params.toString()
         navigate(qs ? `${path}?${qs}` : path)
@@ -676,6 +903,16 @@ function SearchPage() {
     }
 
     const pageLabels = getCompactPageLabels(currentPage, totalPages)
+    const loadingQuote = useMemo(() => {
+        const quotes = m.search.loadingQuotes
+        if (quotes.length === 0) {
+            return m.common.loading
+        }
+        const seed = `${query}|${safeFromYear}|${safeToYear}|${selectedGenres.join(',')}|${selectedLocations.join(',')}`
+        const hash = Array.from(seed).reduce((acc, char) => acc + char.charCodeAt(0), 0)
+        return quotes[hash % quotes.length]
+    }, [m.search.loadingQuotes, m.common.loading, query, safeFromYear, safeToYear, selectedGenres, selectedLocations])
+
     const apiErrorHint =
         apiError && /500|network error/i.test(apiError) && import.meta.env.DEV
             ? locale === 'nl'
@@ -701,13 +938,14 @@ function SearchPage() {
     }
 
     const handleSortChange = (nextSort: string) => {
+        const safeSort = normalizeSort(nextSort)
         navigateWithFilters({
             query: query || undefined,
             yearFrom: safeFromYear,
             yearTo: safeToYear,
             genres: selectedGenres,
             locations: selectedLocations,
-            sort: nextSort,
+            sort: safeSort,
             limit: pageSize,
         })
     }
@@ -764,7 +1002,7 @@ function SearchPage() {
         })),
         ...selectedLocations.map((value) => ({
             key: `location-${value}`,
-            label: getLocationLabel(value, locale),
+            label: getLocationLabel(value),
             onRemove: () => handleRemoveLocationChip(value),
         })),
         ...(safeFromYear > MIN_PERIOD_YEAR || safeToYear < MAX_PERIOD_YEAR
@@ -778,6 +1016,26 @@ function SearchPage() {
             : []),
     ]
 
+    const locationSuggestions = useMemo(() => {
+        const normalizedLocale = locale === 'en' ? 'en' : 'nl'
+        const values = new Set<string>(Object.values(LOCATION_ALIASES))
+
+        apiEntries.forEach((entry) => {
+            entry.venue
+                .split('•')
+                .map((part) => part.trim())
+                .filter((part) => part.length > 0)
+                .forEach((part) => {
+                    values.add(part)
+                    values.add(part.toLowerCase())
+                })
+        })
+
+        return Array.from(values).sort((a, b) =>
+            a.localeCompare(b, normalizedLocale === 'nl' ? 'nl-BE' : 'en-GB', { sensitivity: 'base' }),
+        )
+    }, [apiEntries, locale])
+
     return (
         <PublicLayout>
             <section className="relative bg-surface-sunken">
@@ -786,7 +1044,10 @@ function SearchPage() {
                         aria-hidden="true"
                         className="hidden w-[max(1.5rem,calc((100vw-var(--layout-content-max-width))/2))] shrink-0 md:block"
                     />
-                    <FilterPanel className="hidden w-80 shrink-0 self-stretch rounded-2xl border border-border bg-surface-inset px-5 py-5 md:my-6 md:flex md:min-h-[calc(100vh-7rem)]" />
+                    <FilterPanel
+                        className="hidden w-80 shrink-0 self-stretch rounded-2xl border border-border bg-surface-inset px-5 py-5 md:my-6 md:flex md:min-h-[calc(100vh-7rem)]"
+                        locationSuggestions={locationSuggestions}
+                    />
 
                     <div className="flex w-full items-start">
                         <div className="z-30 flex w-12 shrink-0 self-stretch justify-center border-r border-border bg-surface-inset md:hidden">
@@ -809,7 +1070,7 @@ function SearchPage() {
                                     <button
                                         type="button"
                                         className="fixed inset-0 z-40 bg-black/35 md:hidden"
-                                        aria-label="close-filters-overlay"
+                                        aria-label={m.search.filterCloseOverlayLabel}
                                         onClick={() => setIsMobileFiltersOpen(false)}
                                     />
                                     <div className="fixed left-0 top-0 z-50 h-full w-[min(84vw,21rem)] overflow-y-auto border-r border-border bg-surface-inset px-4 py-5 md:hidden">
@@ -818,7 +1079,7 @@ function SearchPage() {
                                                 type="button"
                                                 className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border"
                                                 onClick={() => setIsMobileFiltersOpen(false)}
-                                                aria-label="close-filters"
+                                                aria-label={m.search.filterCloseLabel}
                                             >
                                                 <CloseIcon className="h-4 w-4" />
                                             </button>
@@ -828,6 +1089,7 @@ function SearchPage() {
                                             className="pb-2"
                                             showSearch={false}
                                             shareLabel={shareCopied ? m.search.shareCopiedLabel : m.search.shareLabel}
+                                            locationSuggestions={locationSuggestions}
                                             onShare={() => {
                                                 void handleShare()
                                             }}
@@ -857,8 +1119,8 @@ function SearchPage() {
                                         onChange={(event) => handleSortChange(event.target.value)}
                                     >
                                         <option value="relevance">{m.search.sortDefault}</option>
-                                        <option value="recent">{locale === 'nl' ? 'Recentste eerst' : 'Newest first'}</option>
-                                        <option value="oldest">{locale === 'nl' ? 'Oudste eerst' : 'Oldest first'}</option>
+                                        <option value="recent">{m.search.sortRecent}</option>
+                                        <option value="oldest">{m.search.sortOldest}</option>
                                     </select>
                                     <select
                                         className="h-9 rounded-full border border-border bg-surface px-4 text-sm text-foreground transition-all cursor-pointer duration-200 hover:border-accent/45 hover:text-accent"
@@ -876,11 +1138,11 @@ function SearchPage() {
                                                 limit: nextLimit,
                                             })
                                         }}
-                                        aria-label={locale === 'nl' ? 'Resultaten per pagina' : 'Results per page'}
+                                        aria-label={m.search.resultsPerPageAriaLabel}
                                     >
                                         {PAGE_SIZE_OPTIONS.map((option) => (
                                             <option key={option} value={option}>
-                                                {locale === 'nl' ? `${option} per pagina` : `${option} per page`}
+                                                {`${option} ${m.search.resultsPerPageSuffix}`}
                                             </option>
                                         ))}
                                     </select>
@@ -921,11 +1183,29 @@ function SearchPage() {
 
                         {apiError ? (
                             <div className="mt-6 space-y-2 text-base text-muted">
-                                <p>{locale === 'nl' ? `Kon resultaten niet laden: ${apiError}` : `Could not load results: ${apiError}`}</p>
+                                <p>{`${m.search.loadErrorPrefix} ${apiError}`}</p>
                                 {apiErrorHint ? <p>{apiErrorHint}</p> : null}
                             </div>
                         ) : isLoading ? (
-                            <p className="mt-6 text-base text-muted">{m.common.loading}</p>
+                            <div className="mt-5 min-h-[260px] grid place-items-center">
+                                <div className="w-full max-w-xl text-center">
+                                    <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-full bg-accent/20 text-accent">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4" aria-hidden="true">
+                                            <path d="M12 3v2M12 19v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M3 12h2M19 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" strokeLinecap="round" />
+                                        </svg>
+                                    </div>
+                                    <p className="mt-3 text-xs font-semibold uppercase tracking-widest text-text-accent">{m.common.loading}</p>
+                                    <p className="mt-2 text-base italic text-foreground">"{loadingQuote}"</p>
+                                    <div className="mt-3 flex items-center justify-center gap-2 text-xs text-muted">
+                                        <span className="inline-flex items-center gap-1.5" aria-hidden="true">
+                                            <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
+                                            <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse [animation-delay:150ms]" />
+                                            <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse [animation-delay:300ms]" />
+                                        </span>
+                                        <span>{m.search.loadingStatusLabel}</span>
+                                    </div>
+                                </div>
+                            </div>
                         ) : pageItems.length > 0 ? (
                             <div className="mt-5 grid gap-x-5 gap-y-8 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                                 {pageItems.map((item) => (

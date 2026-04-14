@@ -13,8 +13,11 @@ type SearchResultCardProps = {
 }
 
 function SearchResultCard({ item }: SearchResultCardProps) {
+    const normalizedTitle = item.title.trim()
+    const displayTitle = normalizedTitle.length > 110 ? `${normalizedTitle.slice(0, 107)}...` : normalizedTitle
+
     return (
-        <article className="border-b border-border pb-5">
+        <article className="flex w-full flex-col border-b border-border pb-5">
             <div className="relative h-32 overflow-hidden rounded-md sm:h-36 bg-gradient-to-br from-accent to-accent/50">
                 {item.imageUrl ? (
                     <img
@@ -30,10 +33,12 @@ function SearchResultCard({ item }: SearchResultCardProps) {
                     {item.tag}
                 </span>
             </div>
-            <p className="mt-3 text-xs text-text-accent">{item.date}</p>
-            <h3 className="mt-1 text-2xl leading-none text-foreground">{item.title}</h3>
-            <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-text-accent">{item.excerpt}</p>
-            <p className="mt-4 text-xs font-semibold lowercase tracking-wide text-text-accent">{item.venue}</p>
+            <div className="flex flex-1 flex-col">
+                <p className="mt-3 text-xs text-text-accent">{item.date}</p>
+                <h3 className="mt-1 line-clamp-3 text-2xl leading-none text-foreground [overflow-wrap:anywhere]">{displayTitle}</h3>
+                <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-text-accent">{item.excerpt}</p>
+                <p className="mt-auto pt-4 text-xs font-semibold lowercase tracking-wide text-text-accent">{item.venue}</p>
+            </div>
         </article>
     )
 }

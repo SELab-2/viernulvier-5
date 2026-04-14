@@ -30,6 +30,14 @@ export const paginationQuerySchema = z.object({
     locations: z.string().optional(),
     yearFrom: z.coerce.number().int().optional(),
     yearTo: z.coerce.number().int().optional(),
+    onThisDay: z.coerce.boolean().optional().default(false),
+    referenceDate: z
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/)
+        .refine((value) => !Number.isNaN(new Date(`${value}T00:00:00.000Z`).getTime()), {
+            message: 'referenceDate must be a valid YYYY-MM-DD date',
+        })
+        .optional(),
     sort: z.enum(['relevance', 'recent', 'oldest']).optional().default('relevance'),
     lang: z.string().optional().default('nl'),
 })
@@ -78,6 +86,7 @@ export const productionSchema = z.object({
     venue_name: z.string().nullable().optional(),
     venue_names: z.array(z.string()).optional(),
     production_genres: z.array(z.string()).optional(),
+    on_this_day_event_date: z.coerce.date().nullable().optional(),
     media_gallery: gallerySchema.optional(),
     poster_gallery: gallerySchema.optional(),
     media_gallery_id: z.string().uuid().nullable(),

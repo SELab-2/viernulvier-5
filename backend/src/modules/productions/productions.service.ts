@@ -117,18 +117,38 @@ export class ProductionsService {
         return Array.from(uniqueGenres)
     }
 
-    private mapProductionResponse(production: any): ProductionResponse {
+    private getOnThisDayEventDate(production: any, onThisDayDate?: Date): Date | null {
+        if (!onThisDayDate) {
+            return null
+        }
+
+        const targetMonth = onThisDayDate.getUTCMonth()
+        const targetDay = onThisDayDate.getUTCDate()
+        const events = Array.isArray(production.events) ? production.events : []
+
+        const matchingDates = events
+            .map((event: any) => (event?.starts_at ? new Date(event.starts_at) : null))
+            .filter((value: Date | null): value is Date => value instanceof Date && !Number.isNaN(value.getTime()))
+            .filter((value: Date) => value.getUTCMonth() === targetMonth && value.getUTCDate() === targetDay)
+            .sort((a: Date, b: Date) => a.getTime() - b.getTime())
+
+        return matchingDates[0] ?? null
+    }
+
+    private mapProductionResponse(production: any, onThisDayDate?: Date): ProductionResponse {
         return {
             ...production,
             image_url: this.extractImageUrl(production),
             venue_name: this.extractVenueName(production),
             venue_names: this.extractVenueNames(production),
             production_genres: this.extractProductionGenres(production),
+            on_this_day_event_date: this.getOnThisDayEventDate(production, onThisDayDate),
         }
     }
 
     async getProductions(options: PaginationQuery): Promise<PaginatedResult<ProductionResponse>> {
-        const { page, limit, search, lang, genres, locations, yearFrom, yearTo, sort } = options
+        const { page, limit, search, lang, genres, locations, yearFrom, yearTo, sort, onThisDay, referenceDate } = options
+        const normalizedSearch = search?.trim() || undefined
 
         const normalizedGenres = genres
             ? genres
@@ -157,32 +177,46 @@ export class ProductionsService {
                 ? Math.max(normalizedYearFrom, normalizedYearTo)
                 : normalizedYearTo
 
+        const onThisDayDate = onThisDay
+            ? referenceDate
+                ? new Date(`${referenceDate}T00:00:00.000Z`)
+                : new Date()
+            : undefined
+
+        const searchIds = normalizedSearch
+            ? await this.repository.findSearchIds(normalizedSearch, lang ?? 'nl')
+            : undefined
+
         const [items, total] = await Promise.all([
             this.repository.findAll({
                 page,
                 limit,
-                search,
+                search: normalizedSearch,
+                searchIds,
                 lang,
                 genres: normalizedGenres,
                 locations: normalizedLocations,
                 yearFrom: safeYearFrom,
                 yearTo: safeYearTo,
+                onThisDayDate,
                 sort,
             }),
             this.repository.count({
-                search,
+                search: normalizedSearch,
+                searchIds,
                 lang,
                 genres: normalizedGenres,
                 locations: normalizedLocations,
                 yearFrom: safeYearFrom,
                 yearTo: safeYearTo,
+                onThisDayDate,
             }),
         ])
 
         const totalPages = calculateTotalPages(total, limit)
 
         return {
-            items: items.map((item) => this.mapProductionResponse(item)) as any,
+            items: items.map((item) => this.mapProductionResponse(item, onThisDayDate)) as any,
             total,
             page,
             limit,

@@ -51,13 +51,24 @@ export type Messages = {
     resultsSuffix: string
     sortLabel: string
     sortDefault: string
+    sortRecent: string
+    sortOldest: string
     shareLabel: string
     shareCopiedLabel: string
     filterOpenLabel: string
     filterCloseLabel: string
+    filterCloseOverlayLabel: string
     noResults: string
+    loadErrorPrefix: string
     activeFilterTags: string[]
     searchPlaceholder: string
+    fallbackUntitled: string
+    fallbackTag: string
+    fallbackVenue: string
+    resultsPerPageAriaLabel: string
+    resultsPerPageSuffix: string
+    loadingStatusLabel: string
+    loadingQuotes: string[]
     genreLabel: string
     genres: string[]
     periodLabel: string
@@ -65,6 +76,8 @@ export type Messages = {
     periodCurrent: string
     periodMax: string
     locationLabel: string
+    locationSearchPlaceholder: string
+    addLocationLabel: string
     locations: string[]
     resetFiltersLabel: string
     paginationPrevious: string
