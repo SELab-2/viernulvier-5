@@ -20,7 +20,7 @@ function AdminFooter() {
       <div className="site-container py-8 max-[640px]:py-6">
         <div className="flex flex-col gap-10 md:flex-row md:items-start md:justify-between">
           <div className="flex items-center gap-1">
-            <img src={adminWordmarkSrc} alt="VIERNULVIER" className="h-[1.6rem] w-auto shrink-0 object-contain" />
+            <img src={adminWordmarkSrc} alt={messages.common.brandLogoAlt} className="h-[1.6rem] w-auto shrink-0 object-contain" />
           </div>
 
           <section className="w-full max-w-xl md:max-w-2xl">

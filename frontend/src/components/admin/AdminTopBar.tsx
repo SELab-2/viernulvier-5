@@ -2,6 +2,7 @@ import type { RefObject } from 'react'
 import type { Locale } from '../../i18n/types'
 import { NextLocaleToggle, SegmentedThemeToggle } from '../shared/TopBarControls'
 import type { Theme } from '../shared/TopBarControls'
+import { useAdminMessages } from './AdminMessagesContext'
 
 const adminWordmarkSrc = '/admin/admin-wordmark.png'
 
@@ -36,6 +37,8 @@ function AdminTopBar({
     openerRef,
     showSidebar = false,
 }: AdminTopBarProps) {
+    const messages = useAdminMessages()
+
     return (
         <header className="bg-black text-white">
             <div className="site-container flex min-h-16 items-center justify-between gap-4 py-4 max-[640px]:min-h-14 max-[640px]:py-3">
@@ -53,7 +56,7 @@ function AdminTopBar({
                             </svg>
                         </button>
                     ) : null}
-                    <img src={adminWordmarkSrc} alt="VIERNULVIER" className="h-[1.55rem] w-auto shrink-0 object-contain max-[640px]:h-[1.35rem]" />
+                    <img src={adminWordmarkSrc} alt={messages.common.brandLogoAlt} className="h-[1.55rem] w-auto shrink-0 object-contain max-[640px]:h-[1.35rem]" />
                 </div>
 
                 <div className="flex items-center gap-4">
