@@ -21,7 +21,7 @@ export class SpacesController {
             ...space,
             links: {
                 self: `${baseUrl}/spaces/${space.id}`,
-                location: space.location_id ? `${baseUrl}/locations/${space.location_id}` : undefined,
+                location: space.location_id ? `${baseUrl}/locations/${space.location_id}` : null,
                 halls: `${baseUrl}/halls?spaceId=${space.id}`,
             }
         }
