@@ -6,8 +6,6 @@ on:
   push:
     branches-ignore:
       - main
-  pull_request:
-    types: [opened, synchronize, reopened]
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -44,8 +42,11 @@ jobs:
       SKIP_TEST_DB_START: 1
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js (latest LTS)
+        uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: npm
