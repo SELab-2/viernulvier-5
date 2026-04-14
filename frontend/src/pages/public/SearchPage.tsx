@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent, type PointerEvent as ReactPointerEvent } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type PointerEvent as ReactPointerEvent } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { getActiveLocale, getMessages, withLocalePath } from '../../i18n'
 import type { Locale } from '../../i18n/types'
@@ -394,13 +394,13 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
         setSearchInput(query)
     }, [query])
 
-    const pushFilters = (filters: SearchFilterOverrides) => {
+    const pushFilters = useCallback((filters: SearchFilterOverrides) => {
         const params = buildSearchParams(filters)
         const path = withLocalePath('/zoeken', locale)
         const qs = params.toString()
         navigate(qs ? `${path}?${qs}` : path)
         onAfterChange?.()
-    }
+    }, [locale, navigate, onAfterChange])
 
     useEffect(() => {
         const nextQuery = searchInput.trim()
@@ -423,7 +423,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
         return () => {
             window.clearTimeout(timerId)
         }
-    }, [searchInput, query, safeFromYear, safeToYear, selectedGenres, selectedLocations, sort, safeLimit])
+    }, [searchInput, query, safeFromYear, safeToYear, selectedGenres, selectedLocations, sort, safeLimit, pushFilters])
 
     const handleSearchSubmit = () => {
         pushFilters({ query: searchInput.trim() || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: safeLimit })
@@ -727,7 +727,7 @@ function MobileSearchForm() {
         setSearchInput(query)
     }, [query])
 
-    const pushQuery = (nextQuery: string) => {
+    const pushQuery = useCallback((nextQuery: string) => {
         const filterState = parseSearchFilterState(searchParams)
         const params = buildSearchParams({
             query: nextQuery,
@@ -741,7 +741,7 @@ function MobileSearchForm() {
         const path = withLocalePath('/zoeken', locale)
         const qs = params.toString()
         navigate(qs ? `${path}?${qs}` : path)
-    }
+    }, [searchParams, locale, navigate])
 
     useEffect(() => {
         const nextQuery = searchInput.trim()
@@ -756,7 +756,7 @@ function MobileSearchForm() {
         return () => {
             window.clearTimeout(timerId)
         }
-    }, [searchInput, query])
+    }, [searchInput, query, pushQuery])
 
     const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault()
