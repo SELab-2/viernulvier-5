@@ -3,22 +3,48 @@ import type { PrismaClient } from '@prisma/client'
 export class ProductionsRepository {
     constructor(private readonly prisma: PrismaClient) { }
 
-    async findAll(options: { page: number; limit: number; search?: string; lang?: string }) {
-        const { page, limit, search, lang = 'nl' } = options
+    async findAll(options: { page: number; limit: number; search?: string; lang?: string, genreId?: string, tagId?: string }) {
+        const { page, limit, search, lang = 'nl',  genreId, tagId } = options
         const skip = (page - 1) * limit
 
-        const where = search ? {
-            title: {
-                path: [lang],
-                string_contains: search,
-            },
-        } : {}
+        const where = {
+            ...(search && {
+                title: {
+                    path: [lang],
+                    string_contains: search,
+                },
+            }),
+
+            ...(genreId && {
+                genre_production: {
+                    some: {
+                        genreId: genreId,
+                    },
+                },
+            }),
+
+            ...(tagId && {
+                tag_production: {
+                    some: {
+                        tagId: tagId,
+                    },
+                },
+            }),
+        };
 
         return this.prisma.production.findMany({
             where: where as any,
             skip,
             take: limit,
             orderBy: { created_at: 'desc' },
+            include: {
+                genre_production: {
+                    include: { genre: true }
+                },
+                tag_production: {
+                    include: { tag: true }
+                }
+            }
         })
     }
 

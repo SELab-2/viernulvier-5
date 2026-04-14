@@ -656,7 +656,7 @@ async function sync_genres(cutoff_timestamp: Date | undefined = undefined){
 
     await prisma.$transaction(async (tx) => {
           for (const genre of page) {
-            if (genre.use_as.toLowerCase() == "tag") {
+            if (genre.use_as !== null && genre.use_as.toLowerCase() == "tag") {
               await tx.tag.upsert({
                 where: {apiId: genre["@id"]},
                 update: mapGenre(genre),
