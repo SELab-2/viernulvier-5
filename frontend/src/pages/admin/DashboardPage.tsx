@@ -1,11 +1,11 @@
 import AdminLayout from '../../components/admin/AdminLayout'
-import { useAdminMessages } from '../../components/admin/AdminMessagesContext'
+import { getMessages } from '../../i18n'
 
 /**
  * Admin dashboard — overview of archive management.
  */
 function DashboardPage() {
-    const messages = useAdminMessages()
+    const messages = getMessages()
 
     return (
         <AdminLayout mainClassName="px-4 py-14">
