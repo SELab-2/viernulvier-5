@@ -6,10 +6,20 @@ vi.mock('../../components/admin/AdminLayout', () => ({
   default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }))
 
+vi.mock('../../components/admin/AdminMessagesContext', () => ({
+  useAdminMessages: () => ({
+    auth: {
+      dashboardTitle: 'Admin dashboard',
+      dashboardDescription: 'Manage the VIERNULVIER archive from one central workspace.',
+    },
+  }),
+}))
+
 describe('DashboardPage', () => {
-  it('renders the dashboard title', () => {
+  it('renders the localized dashboard copy', () => {
     render(<DashboardPage />)
 
-    expect(screen.getByText('Admin Dashboard')).toBeInTheDocument()
+    expect(screen.getByText('Admin dashboard')).toBeInTheDocument()
+    expect(screen.getByText('Manage the VIERNULVIER archive from one central workspace.')).toBeInTheDocument()
   })
 })

@@ -3,6 +3,8 @@ export type Locale = 'nl' | 'en'
 export type Messages = {
   common: {
     loading: string
+    brandName: string
+    brandLogoAlt: string
   }
   nav: {
     home: string
@@ -64,12 +66,16 @@ export type Messages = {
     rateLimitReached: string
     navigationTitle: string
     dashboardLabel: string
+    dashboardTitle: string
+    dashboardDescription: string
     productionsLabel: string
     statisticsLabel: string
     archiveLabel: string
     logoutLabel: string
   }
   footer: {
+    brandLogoAlt: string
+    organizationName: string
     about: string
     navigationTitle: string
     navHome: string
