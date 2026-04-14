@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { getAdminSession, loginAdmin } from './adminAuth'
+import { getAdminSession, loginAdmin, logoutAdmin } from './adminAuth'
 
 const fetchMock = vi.fn()
 
@@ -42,6 +42,25 @@ describe('adminAuth', () => {
       '/api/v1/auth/me',
       expect.objectContaining({
         credentials: 'include',
+      }),
+    )
+  })
+
+  it('posts logout requests to the versioned auth endpoint', async () => {
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: vi.fn().mockResolvedValueOnce({ data: { success: true } }),
+    } as Response)
+
+    await logoutAdmin()
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/v1/auth/logout',
+      expect.objectContaining({
+        method: 'POST',
+        credentials: 'include',
+        body: JSON.stringify({}),
       }),
     )
   })

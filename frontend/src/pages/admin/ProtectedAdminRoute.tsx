@@ -8,6 +8,21 @@ type ProtectedAdminRouteProps = {
   loginPath: string
 }
 
+type AdminEntryRouteProps = {
+  loginPath: string
+  dashboardPath: string
+}
+
+export function AdminEntryRoute({ loginPath, dashboardPath }: AdminEntryRouteProps) {
+  const { isLoading, isAuthenticated } = useAdminSession()
+
+  if (isLoading) {
+    return null
+  }
+
+  return <Navigate to={isAuthenticated ? dashboardPath : loginPath} replace />
+}
+
 function ProtectedAdminRoute({ children, loginPath }: ProtectedAdminRouteProps) {
   const location = useLocation()
   const { isLoading, isAuthenticated } = useAdminSession()

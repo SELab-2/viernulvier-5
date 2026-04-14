@@ -1,4 +1,7 @@
 import { useMemo, useState } from 'react'
+import { logoutAdmin } from '../../api/adminAuth'
+import { getAdminRouteConfig } from '../../admin/paths'
+import { clearPrimedAdminSession } from '../../auth/primedAdminSession'
 import { getActiveLocale, getMessages, setActiveLocale } from '../../i18n'
 import type { Locale } from '../../i18n/types'
 import type { Theme } from '../shared/TopBarControls'
@@ -6,66 +9,81 @@ import AdminFooter from './AdminFooter'
 import { AdminMessagesContext } from './AdminMessagesContext'
 import AdminTopBar from './AdminTopBar'
 
-type AdminLayoutProps = {
-    children: React.ReactNode
-    mainClassName?: string
-    showFooter?: boolean
+interface AdminLayoutProps {
+  children: React.ReactNode
+  showFooter?: boolean
+  mainClassName?: string
+  showLogout?: boolean
 }
 
-function handleLogout() {
-    document.cookie = 'token=; Max-Age=0; path=/'
-    window.location.href = getActiveLocale(window.location.pathname) === 'en' ? '/' : '/nl'
-}
-
-function getMainClassName(mainClassName: string) {
-    return mainClassName ? `${mainClassName} flex-1` : 'flex-1'
+function getMainClassName(mainClassName = ''): string {
+  return mainClassName ? `${mainClassName} flex-1` : 'flex-1'
 }
 
 function resolveTheme(): Theme {
-    const explicitTheme = document.documentElement.dataset.theme
-    if (explicitTheme === 'light' || explicitTheme === 'dark') {
-        return explicitTheme
-    }
+  const explicitTheme = document.documentElement.dataset.theme
+  if (explicitTheme === 'light' || explicitTheme === 'dark') {
+    return explicitTheme
+  }
 
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
 
-function AdminLayout({ children, mainClassName = '', showFooter = true }: AdminLayoutProps) {
-    const [locale, setLocale] = useState<Locale>(() => getActiveLocale(window.location.pathname))
-    const [theme, setTheme] = useState<Theme>(resolveTheme)
-    const messages = useMemo(() => getMessages(locale), [locale])
+function getInitialLocale(): Locale {
+  return getActiveLocale(window.location.pathname)
+}
 
-    const toggleLocale = () => {
-        const nextLocale: Locale = locale === 'nl' ? 'en' : 'nl'
-        setActiveLocale(nextLocale)
-        setLocale(nextLocale)
-    }
+function applyTheme(theme: Theme) {
+  document.documentElement.dataset.theme = theme
+  localStorage.setItem('theme', theme)
+}
 
-    const toggleTheme = () => {
-        const nextTheme: Theme = theme === 'light' ? 'dark' : 'light'
-        document.documentElement.dataset.theme = nextTheme
-        localStorage.setItem('theme', nextTheme)
-        setTheme(nextTheme)
-    }
+async function logoutAndRedirect(hostname: string | undefined): Promise<void> {
+  try {
+    await logoutAdmin()
+  } catch {
+    // Keep logout UX consistent even if the API call fails.
+  } finally {
+    clearPrimedAdminSession()
+    window.location.assign(getAdminRouteConfig(hostname ?? window.location.hostname).loginPath)
+  }
+}
 
-    return (
-        <AdminMessagesContext.Provider value={messages}>
-            <div className="admin-shell min-h-screen flex flex-col bg-[var(--color-admin-bg)] text-foreground">
-                <AdminTopBar
-                    locale={locale}
-                    theme={theme}
-                    logoutLabel={messages.auth.logoutLabel}
-                    onLogout={handleLogout}
-                    onToggleLocale={toggleLocale}
-                    onToggleTheme={() => toggleTheme()}
-                />
+function AdminLayout({ children, showFooter = true, mainClassName, showLogout = true }: AdminLayoutProps) {
+  const [theme, setTheme] = useState<Theme>(resolveTheme)
+  const [locale, setLocale] = useState<Locale>(getInitialLocale)
 
-                <main className={getMainClassName(mainClassName)}>{children}</main>
+  const messages = useMemo(() => getMessages(locale), [locale])
+  const { logoutLabel } = messages.auth
 
-                {showFooter ? <AdminFooter /> : null}
-            </div>
-        </AdminMessagesContext.Provider>
-    )
+  const handleLocaleChange = (nextLocale: Locale) => {
+    setLocale(nextLocale)
+    setActiveLocale(nextLocale)
+  }
+
+  const handleThemeChange = (nextTheme: Theme) => {
+    setTheme(nextTheme)
+    applyTheme(nextTheme)
+  }
+
+  const handleLogoutClick = () => logoutAndRedirect(window.location.hostname)
+
+  return (
+    <AdminMessagesContext.Provider value={messages}>
+      <div className="admin-shell min-h-screen flex flex-col bg-[var(--color-admin-bg)] text-foreground">
+        <AdminTopBar
+          locale={locale}
+          theme={theme}
+          logoutLabel={showLogout ? logoutLabel : undefined}
+          onLogout={showLogout ? handleLogoutClick : undefined}
+          onToggleLocale={() => handleLocaleChange(locale === 'nl' ? 'en' : 'nl')}
+          onToggleTheme={() => handleThemeChange(theme === 'light' ? 'dark' : 'light')}
+        />
+        <main className={getMainClassName(mainClassName)}>{children}</main>
+        {showFooter ? <AdminFooter /> : null}
+      </div>
+    </AdminMessagesContext.Provider>
+  )
 }
 
 export default AdminLayout

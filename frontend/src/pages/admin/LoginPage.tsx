@@ -1,28 +1,12 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { getAdminSession, loginAdmin } from '../../api/adminAuth'
-import type { SessionResponse } from '../../api/adminAuth'
 import type { Messages } from '../../i18n/types'
 import AdminLayout from '../../components/admin/AdminLayout'
 import { useAdminMessages } from '../../components/admin/AdminMessagesContext'
 import AdminLoginForm from '../../components/admin/AdminLoginForm'
 import { getAdminRouteConfig } from '../../admin/paths'
-
-let primedAdminSession: SessionResponse | null = null
-
-export function primeAdminSession(session: SessionResponse) {
-  primedAdminSession = session
-}
-
-export function consumePrimedAdminSession(): SessionResponse | null {
-  const session = primedAdminSession
-  primedAdminSession = null
-  return session
-}
-
-export function clearPrimedAdminSession() {
-  primedAdminSession = null
-}
+import { primeAdminSession } from '../../auth/primedAdminSession'
 
 function loginAndFetchSession(username: string, password: string) {
   return loginAdmin(username, password).then(() => getAdminSession())
@@ -124,7 +108,7 @@ function LoginPageContent() {
 
 function LoginPage() {
   return (
-    <AdminLayout showFooter={false} mainClassName="flex items-center justify-center px-4 py-16 max-[640px]:py-12">
+    <AdminLayout showFooter={false} showLogout={false} mainClassName="flex items-center justify-center px-4 py-16 max-[640px]:py-12">
       <LoginPageContent />
     </AdminLayout>
   )

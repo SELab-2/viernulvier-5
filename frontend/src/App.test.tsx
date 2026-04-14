@@ -15,6 +15,7 @@ vi.mock('./admin/paths', async () => {
 
 vi.mock('./pages/admin/LoginPage', () => ({
   default: () => <div>Admin login</div>,
+  consumePrimedAdminSession: () => null,
 }))
 
 vi.mock('./pages/admin/DashboardPage', () => ({
@@ -31,8 +32,9 @@ describe('App', () => {
       isAdminHost: true,
       isLocalDevHost: false,
       canRenderAdminRoutes: true,
-      loginPath: '/',
+      loginPath: '/login',
       dashboardPath: '/dashboard',
+      legacyDashboardPaths: ['/'],
       archiveEditPath: '/archive/:id/edit',
     })
 

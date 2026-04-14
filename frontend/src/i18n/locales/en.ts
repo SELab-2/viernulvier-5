@@ -9,6 +9,9 @@ const en: Messages = {
     archive: 'ARCHIVE',
     searchAriaLabel: 'Search',
     searchPlaceholder: 'Search by title, artist, or keyword...',
+    navAriaLabel: 'Main navigation',
+    openMenuLabel: 'Open menu',
+    closeMenuLabel: 'Close menu',
   },
   home: {
     title: 'VIERNULVIER Archive',
@@ -66,6 +69,9 @@ const en: Messages = {
   },
   auth: {
     localeToggleLabel: 'Switch language',
+    darkModeLabel: 'Dark mode',
+    lightModeLabel: 'Light mode',
+    adminLabel: 'Admin',
     loginTitle: 'VIERNULVIER Admin',
     loginSubtitle: 'Admin access for the VIERNULVIER Archive',
     usernameLabel: 'Email address or username',
