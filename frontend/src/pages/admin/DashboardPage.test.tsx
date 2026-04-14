@@ -67,6 +67,7 @@ describe('DashboardPage', () => {
     render(<DashboardPage />)
 
     expect(screen.getByText('Dashboard')).toBeInTheDocument()
+    expect(screen.getByText('Overview of archive activity.')).toBeInTheDocument()
     expect(screen.getByText('Loading dashboard...')).toBeInTheDocument()
     expect(screen.getByText('Visitors')).toBeInTheDocument()
   })

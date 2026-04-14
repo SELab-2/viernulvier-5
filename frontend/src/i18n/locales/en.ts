@@ -3,6 +3,8 @@ import type { Messages } from '../types'
 const en: Messages = {
   common: {
     loading: 'Loading...',
+    brandName: 'VIERNULVIER',
+    brandLogoAlt: 'VIERNULVIER logo',
   },
   nav: {
     home: 'Home',
@@ -86,12 +88,16 @@ const en: Messages = {
     rateLimitReached: 'Too many login attempts. Please try again later.',
     navigationTitle: 'Navigation',
     dashboardLabel: 'Dashboard',
+    dashboardTitle: 'Admin dashboard',
+    dashboardDescription: 'Manage the VIERNULVIER archive from one central workspace.',
     productionsLabel: 'Productions',
     statisticsLabel: 'Statistics',
     archiveLabel: 'Archive',
     logoutLabel: 'Log out',
   },
   footer: {
+    brandLogoAlt: 'VIERNULVIER logo',
+    organizationName: 'VIERNULVIER Arts Centre vzw.',
     about: 'The VIERNULVIER Arts Centre archive collection preserves and provides access to over 40 years of performing arts history at De Vooruit.',
     navigationTitle: 'Navigation',
     navHome: 'Home',

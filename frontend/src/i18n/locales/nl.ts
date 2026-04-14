@@ -3,6 +3,8 @@ import type { Messages } from '../types'
 const nl: Messages = {
   common: {
     loading: 'Laden...',
+    brandName: 'VIERNULVIER',
+    brandLogoAlt: 'VIERNULVIER logo',
   },
   nav: {
     home: 'Home',
@@ -86,12 +88,16 @@ const nl: Messages = {
     rateLimitReached: 'Te veel inlogpogingen. Probeer het straks opnieuw.',
     navigationTitle: 'Navigatie',
     dashboardLabel: 'Dashboard',
+    dashboardTitle: 'Admin dashboard',
+    dashboardDescription: 'Beheer het VIERNULVIER-archief vanuit een centrale werkruimte.',
     productionsLabel: 'Producties',
     statisticsLabel: 'Statistieken',
     archiveLabel: 'Archief',
     logoutLabel: 'Uitloggen',
   },
   footer: {
+    brandLogoAlt: 'VIERNULVIER logo',
+    organizationName: 'Kunstencentrum VIERNULVIER vzw.',
     about: 'De Kunstencentrum VIERNULVIER archiefcollectie bewaart en ontsluit meer dan 40 jaar podiumkunsten geschiedenis in De Vooruit.',
     navigationTitle: 'Navigatie',
     navHome: 'Home',

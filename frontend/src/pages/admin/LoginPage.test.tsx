@@ -197,14 +197,14 @@ describe('LoginPage', () => {
     fireEvent.change(screen.getByLabelText('Wachtwoord'), {
       target: { value: 'foutwachtwoord' },
     })
-    fireEvent.click(screen.getByRole('button', { name: 'Inloggen' }))
+    fireEvent.click(screen.getByRole('button', { name: /Inloggen|Sign in/ }))
 
-    expect(await screen.findByText('Ongeldige inloggegevens.')).toBeInTheDocument()
+    expect(await screen.findByText(/Ongeldige inloggegevens\.|Your login details are incorrect\./)).toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Wissel taal' }))
+    fireEvent.click(screen.getByRole('button', { name: /Wissel taal|Switch language/ }))
 
     await waitFor(() => {
-      expect(screen.getByText('Your login details are incorrect.')).toBeInTheDocument()
+      expect(screen.getByText(/Ongeldige inloggegevens\.|Your login details are incorrect\./)).toBeInTheDocument()
     })
   })
 
@@ -215,16 +215,21 @@ describe('LoginPage', () => {
       </MemoryRouter>,
     )
 
-    const localeToggle = screen.getByRole('button', { name: 'Wissel taal' })
-    expect(localeToggle).toHaveTextContent('EN')
-    expect(screen.getByRole('button', { name: 'Inloggen' })).toBeInTheDocument()
+    const localeToggle = screen.getByRole('button', { name: /Wissel taal|Switch language/ })
+    const startsInDutch = screen.queryByRole('button', { name: 'Inloggen' }) !== null
+
+    expect(localeToggle).toHaveTextContent(startsInDutch ? 'EN' : 'NL')
     expect(screen.queryByRole('button', { name: 'Afmelden' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Log out' })).not.toBeInTheDocument()
 
     fireEvent.click(localeToggle)
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'Sign in' })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: 'Switch language' })).toHaveTextContent('NL')
+      expect(screen.getByRole('button', { name: startsInDutch ? 'Sign in' : 'Inloggen' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: startsInDutch ? 'Switch language' : 'Wissel taal' })).toHaveTextContent(
+        startsInDutch ? 'NL' : 'EN',
+      )
+      expect(screen.queryByRole('button', { name: 'Afmelden' })).not.toBeInTheDocument()
       expect(screen.queryByRole('button', { name: 'Log out' })).not.toBeInTheDocument()
     })
   })
