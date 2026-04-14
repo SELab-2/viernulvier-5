@@ -22,12 +22,12 @@ export const paginationQuerySchema = z.object({
  */
 export const productionLinksSchema = z.object({
     self: z.string().url().default('https://example.com/'),
-    events: z.string().url().optional().default('https://example.com/'),
-    media_gallery: z.string().url().optional().default('https://example.com/'),
-    review_gallery: z.string().url().optional().default('https://example.com/'),
-    poster_gallery: z.string().url().optional().default('https://example.com/'),
-    uitdatabank_theme: z.string().url().optional().default('https://example.com/'),
-    uitdatabank_type: z.string().url().optional().default('https://example.com/'),
+    events: z.string().url().optional().nullable().default('https://example.com/'),
+    media_gallery: z.string().url().optional().nullable().default('https://example.com/'),
+    review_gallery: z.string().url().optional().nullable().default('https://example.com/'),
+    poster_gallery: z.string().url().optional().nullable().default('https://example.com/'),
+    uitdatabank_theme: z.string().url().optional().nullable().default('https://example.com/'),
+    uitdatabank_type: z.string().url().optional().nullable().default('https://example.com/'),
 })
 
 export const productionSchema = z.object({
