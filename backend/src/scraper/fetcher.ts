@@ -67,8 +67,8 @@ async function* fetchPagesFromURL<T = any>(url: string, per_item: boolean=false,
         }
 
         // Force the date filter if it's missing (helps if view.next doesn't include it)
-        if (cutoff_timestamp && !urlObj.searchParams.has("updatedAt[after]")) {
-            urlObj.searchParams.set("updatedAt[after]", cutoff_timestamp.toISOString());
+        if (cutoff_timestamp && !urlObj.searchParams.has("updated_at[after]")) {
+            urlObj.searchParams.set("updated_at[after]", cutoff_timestamp.toISOString());
         }
 
         const finalUrl = urlObj.toString();
