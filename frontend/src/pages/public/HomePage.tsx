@@ -6,7 +6,7 @@ import PublicHeroSearch, { type HeroSearchFilters } from '../../components/publi
 import PublicPopularTags from '../../components/public/PublicPopularTags'
 import PublicLatestBlogPreview from '../../components/public/PublicLatestBlogPreview'
 import PublicRecentDigitized from '../../components/public/PublicRecentDigitized'
-
+import PublicCarousel from '../../components/public/PublicCarousel'
 /**
  * Public home page — displays the archive listing.
  */
@@ -71,6 +71,7 @@ function HomePage() {
                 onSearch={handleSearch}
             />
             <PublicPopularTags onTagClick={handlePopularTagClick} />
+            <PublicCarousel/>
             <PublicLatestBlogPreview />
             <PublicRecentDigitized
                 onViewItem={handleRecentDigitizedItemClick}
