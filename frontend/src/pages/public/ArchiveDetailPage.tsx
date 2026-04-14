@@ -75,23 +75,35 @@ function ArchiveDetailPage() {
 
             {imageUrl && (
                 <div className="site-container mt-6">
-                    <img
-                        src={imageUrl}
-                        alt={title || 'Production image'}
-                        className="w-full h-[400px] object-cover rounded-xl"
-                    />
+                    <div className="relative w-full h-[400px] rounded-xl overflow-hidden">
+                        
+                        {/* Background image */}
+                        <img
+                            src={imageUrl}
+                            alt={title || 'Production image'}
+                            className="w-full h-full object-cover"
+                        />
+
+                        {/* Overlay (20% dark) */}
+                        <div className="absolute inset-0 bg-black/20" />
+
+                        {/* Text on top */}
+                        <div className="absolute inset-0 flex flex-col justify-end p-6">
+                            <h1 className="text-3xl md:text-4xl font-bold text-white">
+                                {title || 'Untitled'}
+                            </h1>
+
+                            {artist && (
+                                <p className="text-lg text-white/90 mt-1">
+                                    {artist}
+                                </p>
+                            )}
+                        </div>
+                    </div>
                 </div>
             )}
 
             <div className="site-container py-8">
-                <h1 className="text-3xl font-bold mb-1">
-                    {title || 'Untitled'}
-                </h1>
-
-                <h1 className="textarea mb-4">
-                    {artist || 'Untitled'}
-                </h1>
-
                 <div className="prose max-w-none">
                     {description ? (
                         <div
