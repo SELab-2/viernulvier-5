@@ -13,6 +13,49 @@ vi.mock('../../components/admin/useDashboardSummary', () => ({
   useDashboardSummary: () => useDashboardSummaryMock(),
 }))
 
+vi.mock('../../components/admin/AdminMessagesContext', () => ({
+  useAdminMessages: () => ({
+    admin: {
+      dashboard: {
+        pageTitle: 'Dashboard',
+        pageSubtitle: 'Overview of archive activity.',
+        pageNote: 'Visitor insights are a placeholder.',
+        loadingMessage: 'Loading dashboard...',
+        recentlyEdited: 'Recently edited',
+        tableColTitle: 'Title',
+        tableColType: 'Type',
+        tableColStatus: 'Status',
+        tableColLanguage: 'Language Status',
+        tableColDate: 'Date',
+        tableColActions: 'Actions',
+        statusAvailable: 'Available in archive',
+        actionView: 'View',
+        actionEdit: 'Edit',
+        emptyRecent: 'No recent archive items found.',
+        paginationShowing: (from: number, to: number, total: number) => `Showing ${from}-${to} of ${total} results`,
+        paginationDefault: 'Showing recent results',
+        notSyncedYet: 'Not yet synced',
+        lastSync: 'last sync',
+        syncStatusPending: 'sync status pending',
+        visitorsPlaceholder: 'Coming soon',
+        visitorsNote: 'analytics coming later',
+        visitorsChange: 'placeholder',
+        editorsActive: (count: number) => `${count} editors active`,
+        statProductions: 'Productions',
+        statEvents: 'Events',
+        statVisitors: 'Visitors',
+        statMediaItems: 'Media Items',
+        statImportedArchive: 'imported archive',
+        statLinkedEvents: 'linked play dates',
+        statLastSync: 'last sync',
+        statSyncPending: 'sync status pending',
+        statLiveData: '+ live data',
+        statLinked: '+ linked',
+      },
+    },
+  }),
+}))
+
 describe('DashboardPage', () => {
   it('renders loading state and heading', () => {
     useDashboardSummaryMock.mockReturnValue({
@@ -24,8 +67,8 @@ describe('DashboardPage', () => {
     render(<DashboardPage />)
 
     expect(screen.getByText('Dashboard')).toBeInTheDocument()
-    expect(screen.getByText('Dashboard wordt geladen...')).toBeInTheDocument()
-    expect(screen.getByText('Bezoekers')).toBeInTheDocument()
+    expect(screen.getByText('Loading dashboard...')).toBeInTheDocument()
+    expect(screen.getByText('Visitors')).toBeInTheDocument()
   })
 
   it('renders live summary data', () => {
@@ -60,10 +103,10 @@ describe('DashboardPage', () => {
 
     expect(screen.getByText('1.284')).toBeInTheDocument()
     expect(screen.getByText('SNOBS: Editie #11')).toBeInTheDocument()
-    expect(screen.getByText('Beschikbaar in archief')).toBeInTheDocument()
+    expect(screen.getByText('Available in archive')).toBeInTheDocument()
     expect(adminLayoutMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        userRole: '3 editors actief',
+        userRole: '3 editors active',
       }),
     )
   })
@@ -86,7 +129,7 @@ describe('DashboardPage', () => {
 
     render(<DashboardPage />)
 
-    expect(screen.getByText('Nog geen recente archiefitems gevonden.')).toBeInTheDocument()
+    expect(screen.getByText('No recent archive items found.')).toBeInTheDocument()
   })
 
   it('renders error state when dashboard fetch fails', () => {
