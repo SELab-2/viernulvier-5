@@ -6,8 +6,8 @@ vi.mock('../../components/admin/AdminLayout', () => ({
   default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }))
 
-vi.mock('../../components/admin/AdminMessagesContext', () => ({
-  useAdminMessages: () => ({
+vi.mock('../../i18n', () => ({
+  getMessages: () => ({
     auth: {
       dashboardTitle: 'Admin dashboard',
       dashboardDescription: 'Manage the VIERNULVIER archive from one central workspace.',
