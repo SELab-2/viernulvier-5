@@ -1,4 +1,8 @@
 import { z } from 'zod'
+import { 
+    createPaginatedResponseSchema, 
+    createSingleResponseSchema 
+} from '../../utils/rest-schemas.js'
 
 const localizedTextSchema = z.object({
     nl: z.string().optional(),
@@ -19,6 +23,16 @@ export const eventPricePaginationQuerySchema = z.object({
     limit: z.coerce.number().int().positive().max(100).default(20),
     eventId: z.string().uuid().optional(),
     search: z.string().optional(),
+})
+
+/**
+ * Explicit links for the Event resource.
+ */
+export const eventLinksSchema = z.object({
+    self: z.string().url().default('https://example.com/'),
+    production: z.string().url().optional().nullable().default('https://example.com/'),
+    hall: z.string().url().optional().nullable().default('https://example.com/'),
+    prices: z.string().url().optional().nullable().default('https://example.com/'),
 })
 
 export const eventSchema = z.object({
@@ -43,16 +57,18 @@ export const eventSchema = z.object({
     hall_id: z.string().uuid().nullable(),
     created_at: z.coerce.date(),
     updated_at: z.coerce.date(),
+    links: eventLinksSchema.optional(),
 })
 
-export const eventListSchema = z.object({
-    data: z.array(eventSchema),
-    meta: z.object({
-        total: z.number(),
-        page: z.number(),
-        limit: z.number(),
-        totalPages: z.number(),
-    }),
+export const eventListSchema = createPaginatedResponseSchema(eventSchema)
+export const singleEventSchema = createSingleResponseSchema(eventSchema)
+
+/**
+ * Explicit links for the EventPrice resource.
+ */
+export const eventPriceLinksSchema = z.object({
+    self: z.string().url().default('https://example.com/'),
+    event: z.string().url().optional().nullable().default('https://example.com/'),
 })
 
 export const eventPriceSchema = z.object({
@@ -66,17 +82,11 @@ export const eventPriceSchema = z.object({
     expires_at: z.coerce.date().nullable(),
     created_at: z.coerce.date(),
     updated_at: z.coerce.date(),
+    links: eventPriceLinksSchema.optional(),
 })
 
-export const eventPriceListSchema = z.object({
-    data: z.array(eventPriceSchema),
-    meta: z.object({
-        total: z.number(),
-        page: z.number(),
-        limit: z.number(),
-        totalPages: z.number(),
-    }),
-})
+export const eventPriceListSchema = createPaginatedResponseSchema(eventPriceSchema)
+export const singleEventPriceSchema = createSingleResponseSchema(eventPriceSchema)
 
 export const updateEventSchema = z.object({
     apiId: z.string().nullable().optional(),
