@@ -1,59 +1,106 @@
 import type { RefObject } from 'react'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import type { Theme } from '../shared/TopBarControls'
 import AdminLayout from './AdminLayout'
 
+const adminTopBarProps = vi.hoisted(() => ({
+  current: null as null | {
+    locale: string
+    theme: string
+    logoutLabel?: string
+    onLogout?: () => void
+    onToggleLocale: () => void
+    onSelectTheme: (theme: Theme) => void
+    onOpenSidebar?: () => void
+    openSidebarLabel?: string
+    openerRef?: RefObject<HTMLButtonElement | null>
+  },
+}))
+const clearPrimedAdminSessionMock = vi.hoisted(() => vi.fn())
+const getActiveLocaleMock = vi.hoisted(() => vi.fn())
+const setActiveLocaleMock = vi.hoisted(() => vi.fn())
+
 vi.mock('./AdminTopBar', () => ({
   default: ({
-    onOpenSidebar,
+    locale,
+    theme,
+    logoutLabel,
+    onLogout,
+    onToggleLocale,
     onSelectTheme,
+    onOpenSidebar,
+    openSidebarLabel,
     openerRef,
   }: {
+    locale: string
+    theme: string
+    logoutLabel?: string
+    onLogout?: () => void
+    onToggleLocale: () => void
+    onSelectTheme: (theme: Theme) => void
     onOpenSidebar?: () => void
-    onSelectTheme?: (theme: Theme) => void
-    openerRef?: RefObject<HTMLButtonElement>
-  }) => (
-    <div>
-      TopBar
-      {onOpenSidebar ? (
-        <button ref={openerRef} onClick={onOpenSidebar}>Open navigation</button>
-      ) : null}
-      {onSelectTheme ? (
-        <>
-          <button onClick={() => onSelectTheme('dark')}>Select dark</button>
-          <button onClick={() => onSelectTheme('light')}>Select light</button>
-        </>
-      ) : null}
-    </div>
-  ),
+    openSidebarLabel?: string
+    openerRef?: RefObject<HTMLButtonElement | null>
+  }) => {
+    adminTopBarProps.current = {
+      locale,
+      theme,
+      logoutLabel,
+      onLogout,
+      onToggleLocale,
+      onSelectTheme,
+      onOpenSidebar,
+      openSidebarLabel,
+      openerRef,
+    }
+
+    return (
+      <div>
+        <span>{`topbar-${locale}-${theme}`}</span>
+        {logoutLabel && onLogout ? (
+          <button type="button" onClick={onLogout}>{logoutLabel}</button>
+        ) : null}
+        {onOpenSidebar ? (
+          <button ref={openerRef} type="button" onClick={onOpenSidebar}>{openSidebarLabel ?? 'Open navigation'}</button>
+        ) : null}
+        <button type="button" onClick={() => onSelectTheme('dark')}>Select dark</button>
+        <button type="button" onClick={() => onSelectTheme('light')}>Select light</button>
+      </div>
+    )
+  },
 }))
 
 vi.mock('./AdminFooter', () => ({
-  default: ({ navigationTitle }: { navigationTitle: string }) => <div>{navigationTitle}</div>,
+  default: () => <div>footer</div>,
+}))
+
+vi.mock('../../auth/primedAdminSession', () => ({
+  clearPrimedAdminSession: clearPrimedAdminSessionMock,
 }))
 
 vi.mock('./AdminSidebar', () => ({
   default: ({ onClose }: { onClose?: () => void }) => (
     <div>
       AdminSidebar
-      {onClose ? <button onClick={onClose}>Close navigation</button> : null}
+      {onClose ? <button type="button" onClick={onClose}>Close navigation</button> : null}
     </div>
   ),
 }))
 
 vi.mock('../../i18n', () => ({
-  getActiveLocale: () => 'nl',
-  getMessages: () => ({
+  getActiveLocale: getActiveLocaleMock,
+  getMessages: (locale: string) => ({
     auth: {
-      navigationTitle: 'Navigatie',
-      dashboardLabel: 'Dashboard',
-      productionsLabel: 'Producties',
-      statisticsLabel: 'Statistieken',
-      archiveLabel: 'Archief',
-      logoutLabel: 'Afmelden',
-      localeToggleLabel: 'Wijzig taal',
+      adminLabel: locale === 'en' ? 'Admin' : 'Beheerder',
+      navigationTitle: locale === 'en' ? 'Navigation' : 'Navigatie',
+      dashboardLabel: locale === 'en' ? 'Dashboard' : 'Dashboard',
+      productionsLabel: locale === 'en' ? 'Productions' : 'Producties',
+      statisticsLabel: locale === 'en' ? 'Statistics' : 'Statistieken',
+      archiveLabel: locale === 'en' ? 'Archive' : 'Archief',
+      logoutLabel: locale === 'en' ? 'Log out' : 'Afmelden',
+      localeToggleLabel: locale === 'en' ? 'Switch language' : 'Wijzig taal',
     },
     footer: {
       privacy: 'Privacy',
@@ -68,72 +115,147 @@ vi.mock('../../i18n', () => ({
       openSidebarLabel: 'Open navigatie',
       closeSidebarLabel: 'Sluit navigatie',
       navigationDrawerLabel: 'Navigatiemenu',
-      nav: {
-        dashboard: 'Dashboard',
-        productions: 'Producties',
-        gallery: 'Galerij',
-        organisation: 'Organisatie',
-        settings: 'Instellingen',
-        dashboardIconAlt: 'Dashboard icoon',
-        productionsIconAlt: 'Producties icoon',
-        galleryIconAlt: 'Galerij icoon',
-        organisationIconAlt: 'Organisatie icoon',
-        settingsIconAlt: 'Instellingen icoon',
-      },
-      dashboard: {
-        pageTitle: 'Dashboard',
-        pageSubtitle: 'Overzicht',
-        pageNote: 'Noot',
-        loadingMessage: 'Laden...',
-        recentlyEdited: 'Recentelijk bewerkt',
-        tableColTitle: 'Titel',
-        tableColType: 'Type',
-        tableColStatus: 'Status',
-        tableColLanguage: 'Taal Status',
-        tableColDate: 'Datum',
-        tableColActions: 'Acties',
-        statusAvailable: 'Beschikbaar in archief',
-        actionView: 'Bekijk',
-        actionEdit: 'Bewerk',
-        emptyRecent: 'Nog geen recente archiefitems gevonden.',
-        paginationShowing: (from: number, to: number, total: number) => `Toont ${from}-${to} van ${total} resultaten`,
-        paginationDefault: 'Toont recente resultaten',
-        notSyncedYet: 'Nog niet gesynchroniseerd',
-        lastSync: 'laatste sync',
-        syncStatusPending: 'syncstatus volgt',
-        visitorsPlaceholder: 'Binnenkort',
-        visitorsNote: 'analytics volgt later',
-        visitorsChange: 'placeholder',
-        editorsActive: (count: number) => `${count} editors actief`,
-        statProductions: 'Producties',
-        statEvents: 'Events',
-        statVisitors: 'Bezoekers',
-        statMediaItems: 'Media Items',
-        statImportedArchive: 'geïmporteerd archief',
-        statLinkedEvents: 'gekoppelde speeldata',
-        statLastSync: 'laatste sync',
-        statSyncPending: 'syncstatus volgt',
-        statLiveData: '+ live data',
-        statLinked: '+ gekoppeld',
-      },
-      archiveEdit: {
-        pageTitle: 'Archief item bewerken',
-        itemIdLabel: 'Item ID:',
-      },
     },
   }),
-  setActiveLocale: vi.fn(),
+  setActiveLocale: setActiveLocaleMock,
 }))
 
 describe('AdminLayout', () => {
   beforeEach(() => {
+    adminTopBarProps.current = null
+    clearPrimedAdminSessionMock.mockReset()
+    getActiveLocaleMock.mockReset()
+    getActiveLocaleMock.mockReturnValue('nl')
+    setActiveLocaleMock.mockReset()
     window.history.replaceState(window.history.state, '', '/admin')
+    document.documentElement.lang = 'nl'
     document.documentElement.dataset.theme = 'light'
     localStorage.setItem('locale', 'nl')
+    localStorage.setItem('theme', 'light')
   })
 
   afterEach(() => {
     vi.unstubAllGlobals()
+  })
+
+  it('renders the footer by default and keeps the shell full height', () => {
+    const { container } = render(
+      <MemoryRouter>
+        <AdminLayout>
+          <span>Content</span>
+        </AdminLayout>
+      </MemoryRouter>,
+    )
+
+    const main = container.querySelector('main')
+
+    expect(screen.getByText('Content')).toBeInTheDocument()
+    expect(screen.getByText('Afmelden')).toBeInTheDocument()
+    expect(screen.getByText('footer')).toBeInTheDocument()
+    expect(container.firstChild).toHaveClass('admin-shell', 'min-h-screen', 'flex', 'flex-col')
+    expect(main).toHaveClass('flex-1')
+  })
+
+  it('can hide the footer and logout action for the login page shell', () => {
+    render(
+      <MemoryRouter>
+        <AdminLayout showFooter={false} showLogout={false}>
+          <span>Content</span>
+        </AdminLayout>
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByText('Content')).toBeInTheDocument()
+    expect(screen.queryByText('footer')).not.toBeInTheDocument()
+    expect(screen.queryByText('Afmelden')).not.toBeInTheDocument()
+  })
+
+  it('initializes locale and theme from the active locale helper and document theme', () => {
+    getActiveLocaleMock.mockReturnValue('en')
+    document.documentElement.dataset.theme = 'dark'
+
+    render(
+      <MemoryRouter>
+        <AdminLayout>
+          <span>Content</span>
+        </AdminLayout>
+      </MemoryRouter>,
+    )
+
+    expect(getActiveLocaleMock).toHaveBeenCalledWith('/admin')
+    expect(adminTopBarProps.current).toMatchObject({
+      locale: 'en',
+      theme: 'dark',
+      logoutLabel: 'Log out',
+    })
+  })
+
+  it('logs out through the auth api and returns to the admin login route', async () => {
+    const fetchMock = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: vi.fn().mockResolvedValueOnce({ data: { success: true } }),
+    } as unknown as Response)
+    const assignMock = vi.fn()
+
+    vi.stubGlobal('fetch', fetchMock)
+    vi.stubGlobal('location', {
+      ...window.location,
+      hostname: 'localhost',
+      pathname: '/admin/dashboard',
+      search: '',
+      hash: '',
+      assign: assignMock,
+    } as Location)
+
+    render(
+      <MemoryRouter>
+        <AdminLayout>
+          <span>Content</span>
+        </AdminLayout>
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Afmelden' }))
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/v1/auth/logout',
+        expect.objectContaining({ method: 'POST', credentials: 'include' }),
+      )
+      expect(clearPrimedAdminSessionMock).toHaveBeenCalledTimes(1)
+      expect(assignMock).toHaveBeenCalledWith('/admin/login')
+    })
+  })
+
+  it('redirects to the login route even when the logout request fails', async () => {
+    const fetchMock = vi.fn().mockRejectedValueOnce(new Error('network error'))
+    const assignMock = vi.fn()
+
+    vi.stubGlobal('fetch', fetchMock)
+    vi.stubGlobal('location', {
+      ...window.location,
+      hostname: 'localhost',
+      pathname: '/admin/dashboard',
+      search: '',
+      hash: '',
+      assign: assignMock,
+    } as Location)
+
+    render(
+      <MemoryRouter>
+        <AdminLayout>
+          <span>Content</span>
+        </AdminLayout>
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Afmelden' }))
+
+    await waitFor(() => {
+      expect(clearPrimedAdminSessionMock).toHaveBeenCalledTimes(1)
+      expect(assignMock).toHaveBeenCalledWith('/admin/login')
+    })
   })
 
   it('renders admin copy through the shared shell and sidebar defaults', () => {
@@ -146,8 +268,8 @@ describe('AdminLayout', () => {
     )
 
     expect(screen.getByText('Content')).toBeInTheDocument()
-    expect(screen.getByText('Navigatie')).toBeInTheDocument()
     expect(screen.getByText('AdminSidebar')).toBeInTheDocument()
+    expect(screen.getByText('footer')).toBeInTheDocument()
   })
 
   it('does not render sidebar when showSidebar is false', () => {
@@ -161,19 +283,6 @@ describe('AdminLayout', () => {
 
     expect(screen.getByText('Content')).toBeInTheDocument()
     expect(screen.queryByText('AdminSidebar')).not.toBeInTheDocument()
-    expect(screen.queryByText('Artevelde stagiair')).not.toBeInTheDocument()
-  })
-
-  it('renders overridden sidebar identity when showSidebar is true', () => {
-    render(
-      <MemoryRouter>
-        <AdminLayout showSidebar userName="Liam" userRole="2 editors actief">
-          <span>Content</span>
-        </AdminLayout>
-      </MemoryRouter>,
-    )
-
-    expect(screen.getByText('AdminSidebar')).toBeInTheDocument()
   })
 
   it('opens the mobile sidebar overlay when the open button is clicked', () => {
@@ -185,12 +294,10 @@ describe('AdminLayout', () => {
       </MemoryRouter>,
     )
 
-    // Before opening: only one AdminSidebar (the desktop one)
     expect(screen.getAllByText('AdminSidebar')).toHaveLength(1)
 
-    fireEvent.click(screen.getByText('Open navigation'))
+    fireEvent.click(screen.getByText('Open navigatie'))
 
-    // After opening: still one AdminSidebar but the close button is visible
     expect(screen.getByText('Close navigation')).toBeInTheDocument()
   })
 
@@ -203,7 +310,7 @@ describe('AdminLayout', () => {
       </MemoryRouter>,
     )
 
-    fireEvent.click(screen.getByText('Open navigation'))
+    fireEvent.click(screen.getByText('Open navigatie'))
     expect(screen.getByText('Close navigation')).toBeInTheDocument()
 
     fireEvent.click(screen.getByText('Close navigation'))
@@ -219,7 +326,7 @@ describe('AdminLayout', () => {
       </MemoryRouter>,
     )
 
-    fireEvent.click(screen.getByText('Open navigation'))
+    fireEvent.click(screen.getByText('Open navigatie'))
 
     const dialog = screen.getByRole('dialog')
     expect(dialog).toBeInTheDocument()
@@ -235,10 +342,9 @@ describe('AdminLayout', () => {
       </MemoryRouter>,
     )
 
-    fireEvent.click(screen.getByText('Open navigation'))
+    fireEvent.click(screen.getByText('Open navigatie'))
 
     const dialog = screen.getByRole('dialog')
-    // Must use the dedicated drawer label, not the opener button label
     expect(dialog).toHaveAttribute('aria-label', 'Navigatiemenu')
     expect(dialog).not.toHaveAttribute('aria-label', 'Open navigatie')
   })
@@ -252,7 +358,7 @@ describe('AdminLayout', () => {
       </MemoryRouter>,
     )
 
-    const opener = screen.getByText('Open navigation')
+    const opener = screen.getByText('Open navigatie')
     fireEvent.click(opener)
     expect(screen.getByRole('dialog')).toBeInTheDocument()
 
@@ -270,7 +376,7 @@ describe('AdminLayout', () => {
       </MemoryRouter>,
     )
 
-    const opener = screen.getByText('Open navigation')
+    const opener = screen.getByText('Open navigatie')
     fireEvent.click(opener)
     expect(screen.getByRole('dialog')).toBeInTheDocument()
 
@@ -288,16 +394,13 @@ describe('AdminLayout', () => {
       </MemoryRouter>,
     )
 
-    fireEvent.click(screen.getByText('Open navigation'))
+    fireEvent.click(screen.getByText('Open navigatie'))
 
     const closeBtn = screen.getByText('Close navigation')
-    // Simulate focus on the last (and only) focusable element in the mocked drawer
     closeBtn.focus()
     expect(document.activeElement).toBe(closeBtn)
 
-    // Tab forward from the last element: should wrap to first
     fireEvent.keyDown(document, { key: 'Tab', shiftKey: false })
-    // The drawer has one button (Close navigation); wrapping first===last means focus stays on it
     expect(document.activeElement).toBe(closeBtn)
   })
 
@@ -310,13 +413,12 @@ describe('AdminLayout', () => {
       </MemoryRouter>,
     )
 
-    fireEvent.click(screen.getByText('Open navigation'))
+    fireEvent.click(screen.getByText('Open navigatie'))
 
     const closeBtn = screen.getByText('Close navigation')
     closeBtn.focus()
     expect(document.activeElement).toBe(closeBtn)
 
-    // Shift+Tab from first element: should wrap to last
     fireEvent.keyDown(document, { key: 'Tab', shiftKey: true })
     expect(document.activeElement).toBe(closeBtn)
   })
@@ -330,7 +432,7 @@ describe('AdminLayout', () => {
       </MemoryRouter>,
     )
 
-    fireEvent.click(screen.getByText('Open navigation'))
+    fireEvent.click(screen.getByText('Open navigatie'))
     expect(screen.getByRole('dialog')).toBeInTheDocument()
 
     fireEvent.keyDown(document, { key: 'Escape' })
@@ -346,7 +448,7 @@ describe('AdminLayout', () => {
       </MemoryRouter>,
     )
 
-    fireEvent.click(screen.getByText('Open navigation'))
+    fireEvent.click(screen.getByText('Open navigatie'))
 
     const closeBtn = screen.getByText('Close navigation')
     expect(closeBtn).toBeVisible()

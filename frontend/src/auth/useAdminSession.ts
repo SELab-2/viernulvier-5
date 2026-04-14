@@ -1,16 +1,8 @@
 import { useEffect, useState } from 'react'
+import { getAdminSession } from '../api/adminAuth'
+import { consumePrimedAdminSession } from './primedAdminSession'
 
-type SessionUser = {
-  sub: string
-  username: string
-  role: string
-}
-
-type SessionResponse = {
-  user: SessionUser
-}
-
-type AdminSessionState = {
+export type AdminSessionState = {
   isLoading: boolean
   isAuthenticated: boolean
 }
@@ -22,16 +14,15 @@ export function useAdminSession(): AdminSessionState {
   })
 
   useEffect(() => {
+    const primedSession = consumePrimedAdminSession()
+    if (primedSession) {
+      setState({ isLoading: false, isAuthenticated: true })
+      return
+    }
+
     let isActive = true
 
-    fetch('/api/v1/auth/me')
-      .then(async (response) => {
-        if (!response.ok) {
-          throw new Error('Unauthorized')
-        }
-
-        return response.json() as Promise<SessionResponse>
-      })
+    getAdminSession()
       .then(() => {
         if (isActive) {
           setState({ isLoading: false, isAuthenticated: true })

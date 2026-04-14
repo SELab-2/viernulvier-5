@@ -2,23 +2,25 @@ import { describe, expect, it } from 'vitest'
 import { getAdminRouteConfig } from './paths'
 
 describe('getAdminRouteConfig', () => {
-  it('uses root-based admin paths on admin subdomains', () => {
+  it('uses explicit login and dashboard paths on admin subdomains', () => {
     expect(getAdminRouteConfig('admin.archief.viernulvier.be')).toMatchObject({
       canRenderAdminRoutes: true,
       isAdminHost: true,
       isLocalDevHost: false,
-      loginPath: '/',
+      loginPath: '/login',
       dashboardPath: '/dashboard',
+      legacyDashboardPaths: ['/'],
     })
   })
 
-  it('keeps /admin-prefixed paths on localhost', () => {
+  it('keeps /admin-prefixed paths on localhost with /admin as the dashboard entry alias', () => {
     expect(getAdminRouteConfig('localhost')).toMatchObject({
       canRenderAdminRoutes: true,
       isAdminHost: false,
       isLocalDevHost: true,
       loginPath: '/admin/login',
-      dashboardPath: '/admin',
+      dashboardPath: '/admin/dashboard',
+      legacyDashboardPaths: ['/admin'],
     })
   })
 
