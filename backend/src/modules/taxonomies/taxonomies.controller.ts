@@ -35,7 +35,7 @@ export class TaxonomiesController {
             ...tag,
             links: {
                 self: `${baseUrl}/tags/${tag.id}`,
-                gallery: tag.gallery_id ? `${baseUrl}/media/galleries/${tag.gallery_id}` : undefined,
+                gallery: tag.gallery_id ? `${baseUrl}/media/galleries/${tag.gallery_id}` : null,
             }
         }
     }
