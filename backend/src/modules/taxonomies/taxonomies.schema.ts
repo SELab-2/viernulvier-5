@@ -24,7 +24,7 @@ export const tagPaginationQuerySchema = genrePaginationQuerySchema
  */
 export const genreLinksSchema = z.object({
     self: z.string().url().default('https://example.com/'),
-    productions: z.string().url().optional().default('https://example.com/'),
+    productions: z.string().url().optional().nullable().default('https://example.com/'),
 })
 
 export const genreSchema = z.object({
@@ -48,7 +48,7 @@ export const singleGenreSchema = createSingleResponseSchema(genreSchema)
  */
 export const tagLinksSchema = z.object({
     self: z.string().url().default('https://example.com/'),
-    productions: z.string().url().optional().default('https://example.com/'),
+    productions: z.string().url().optional().nullable().default('https://example.com/'),
 })
 
 // basically the same as a genreSchema now, should it be changed it so it uses the same one?
