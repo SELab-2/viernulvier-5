@@ -113,7 +113,7 @@ function PublicNavbar() {
             <div className="site-container flex h-16 items-center justify-between max-[480px]:h-14">
                 <div className="flex items-end gap-1">
                     <Link to={withLocalePath('/', locale)} className="inline-flex items-center" aria-label={messages.home.title}>
-                        <img src="/logo-white.png" alt="VIERNULVIER Logo" className="h-8 w-auto max-[480px]:h-7" />
+                        <img src="/logo-white.png" alt={messages.common.brandLogoAlt} className="h-8 w-auto max-[480px]:h-7" />
                     </Link>
                     <h3 className="text-lg leading-none font-light text-grey max-[480px]:text-base">| {messages.nav.archive}</h3>
                 </div>
