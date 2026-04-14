@@ -9,6 +9,9 @@ export type Messages = {
     archive: string
     searchAriaLabel: string
     searchPlaceholder: string
+    navAriaLabel: string
+    openMenuLabel: string
+    closeMenuLabel: string
   }
   home: {
     title: string
@@ -44,6 +47,9 @@ export type Messages = {
   }
   auth: {
     localeToggleLabel: string
+    darkModeLabel: string
+    lightModeLabel: string
+    adminLabel: string
     loginTitle: string
     loginSubtitle: string
     usernameLabel: string

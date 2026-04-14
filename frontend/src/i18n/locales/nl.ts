@@ -9,6 +9,9 @@ const nl: Messages = {
     archive: 'ARCHIEF',
     searchAriaLabel: 'Zoeken',
     searchPlaceholder: 'Zoek op titel, artiest of trefwoord...',
+    navAriaLabel: 'Hoofdnavigatie',
+    openMenuLabel: 'Open menu',
+    closeMenuLabel: 'Sluit menu',
   },
   home: {
     title: 'VIERNULVIER Archief',
@@ -66,6 +69,9 @@ const nl: Messages = {
   },
   auth: {
     localeToggleLabel: 'Wissel taal',
+    darkModeLabel: 'Donkere modus',
+    lightModeLabel: 'Lichte modus',
+    adminLabel: 'Beheerder',
     loginTitle: 'VIERNULVIER Admin',
     loginSubtitle: 'Admin toegang voor VIERNULVIER Archief',
     usernameLabel: 'Emailadres of gebruikersnaam',

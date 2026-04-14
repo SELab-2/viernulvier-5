@@ -35,7 +35,7 @@ describe('LoginPage', () => {
   beforeEach(() => {
     navigate.mockReset()
     getAdminRouteConfigMock.mockReset()
-    getAdminRouteConfigMock.mockReturnValue({ dashboardPath: '/admin' })
+    getAdminRouteConfigMock.mockReturnValue({ dashboardPath: '/admin/dashboard', legacyDashboardPaths: ['/admin'] })
     window.history.replaceState(window.history.state, '', '/')
     localStorage.setItem('locale', 'nl')
     document.documentElement.lang = 'nl'
@@ -100,7 +100,7 @@ describe('LoginPage', () => {
   })
 
   it('falls back to the host-specific dashboard path when no redirect state is present', async () => {
-    getAdminRouteConfigMock.mockReturnValue({ dashboardPath: '/dashboard' })
+    getAdminRouteConfigMock.mockReturnValue({ dashboardPath: '/dashboard', legacyDashboardPaths: ['/'] })
 
     const fetchMock = vi.fn()
       .mockResolvedValueOnce(createJsonResponse(200, { success: true }))
@@ -178,6 +178,36 @@ describe('LoginPage', () => {
     expect(await screen.findByText('Te veel inlogpogingen. Probeer het straks opnieuw.')).toBeInTheDocument()
   })
 
+  it('retranslates the inline error when the locale changes after a failed login', async () => {
+    const fetchMock = vi.fn().mockResolvedValueOnce(
+      createJsonResponse(401, { message: 'Invalid credentials' }),
+    )
+
+    vi.stubGlobal('fetch', fetchMock)
+
+    render(
+      <MemoryRouter>
+        <LoginPage />
+      </MemoryRouter>,
+    )
+
+    fireEvent.change(screen.getByLabelText('Emailadres of gebruikersnaam'), {
+      target: { value: 'admin' },
+    })
+    fireEvent.change(screen.getByLabelText('Wachtwoord'), {
+      target: { value: 'foutwachtwoord' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Inloggen' }))
+
+    expect(await screen.findByText('Ongeldige inloggegevens.')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Wissel taal' }))
+
+    await waitFor(() => {
+      expect(screen.getByText('Your login details are incorrect.')).toBeInTheDocument()
+    })
+  })
+
   it('switches the admin copy immediately when the locale toggle is clicked', async () => {
     render(
       <MemoryRouter>
@@ -185,18 +215,29 @@ describe('LoginPage', () => {
       </MemoryRouter>,
     )
 
-    // Initially nl locale: toggle shows 'EN' and submit reads 'Inloggen'
     const localeToggle = screen.getByRole('button', { name: 'Wissel taal' })
     expect(localeToggle).toHaveTextContent('EN')
     expect(screen.getByRole('button', { name: 'Inloggen' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Afmelden' })).not.toBeInTheDocument()
 
     fireEvent.click(localeToggle)
 
-    // After switching to en: submit reads 'Sign in' and locale toggle shows 'NL'
     await waitFor(() => {
       expect(screen.getByRole('button', { name: 'Sign in' })).toBeInTheDocument()
       expect(screen.getByRole('button', { name: 'Switch language' })).toHaveTextContent('NL')
+      expect(screen.queryByRole('button', { name: 'Log out' })).not.toBeInTheDocument()
     })
+  })
+
+  it('does not render a logout control on the login shell', () => {
+    render(
+      <MemoryRouter>
+        <LoginPage />
+      </MemoryRouter>,
+    )
+
+    expect(screen.queryByRole('button', { name: 'Afmelden' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Log out' })).not.toBeInTheDocument()
   })
 
   it('does not render a password reset control', () => {
@@ -210,15 +251,15 @@ describe('LoginPage', () => {
     expect(screen.queryByText('Forgot password?')).not.toBeInTheDocument()
   })
 
-  it('renders footer navigation as static placeholder copy', () => {
+  it('does not render the admin footer on the login shell', () => {
     render(
       <MemoryRouter>
         <LoginPage />
       </MemoryRouter>,
     )
 
-    expect(screen.getByText('Dashboard')).toBeInTheDocument()
-    expect(screen.getByText('Archief')).toBeInTheDocument()
+    expect(screen.queryByText('Dashboard')).not.toBeInTheDocument()
+    expect(screen.queryByText('Archief')).not.toBeInTheDocument()
     expect(screen.queryByText(/Binnenkort beschikbaar/i)).not.toBeInTheDocument()
   })
 
