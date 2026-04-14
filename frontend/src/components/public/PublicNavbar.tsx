@@ -121,27 +121,27 @@ function PublicNavbar() {
                 <button
                     type="button"
                     className="hidden h-9 w-9 items-center justify-center text-white max-[480px]:inline-flex"
-                    aria-label={isMobileMenuOpen ? 'Sluit menu' : 'Open menu'}
+                    aria-label={isMobileMenuOpen ? messages.nav.closeMenuLabel : messages.nav.openMenuLabel}
                     aria-expanded={isMobileMenuOpen}
                     onClick={() => setIsMobileMenuOpen((open) => !open)}
                 >
                     {isMobileMenuOpen ? <CloseIcon className="h-5 w-5" /> : <HamburgerIcon className="h-5 w-5" />}
                 </button>
 
-                <nav aria-label="Hoofdnavigatie" className="max-[480px]:hidden">
+                <nav aria-label={messages.nav.navAriaLabel} className="max-[480px]:hidden">
                     <ul className="flex items-center gap-6 text-sm font-medium text-white">
                         <li>
                             <div className="flex items-center gap-4">
                                 <SegmentedThemeToggle
                                     theme={theme}
-                                    darkLabel="Donkere modus"
-                                    lightLabel="Lichte modus"
+                                    darkLabel={messages.auth.darkModeLabel}
+                                    lightLabel={messages.auth.lightModeLabel}
                                     onSelectTheme={applyTheme}
                                 />
 
                                 <NextLocaleToggle
                                     locale={locale}
-                                    ariaLabel="Wissel taal"
+                                    ariaLabel={messages.auth.localeToggleLabel}
                                     onToggleLocale={toggleLocale}
                                     className="text-md text-white max-[480px]:text-sm"
                                 />
@@ -175,14 +175,14 @@ function PublicNavbar() {
                     <div className="flex items-center justify-between">
                         <SegmentedThemeToggle
                             theme={theme}
-                            darkLabel="Donkere modus"
-                            lightLabel="Lichte modus"
+                            darkLabel={messages.auth.darkModeLabel}
+                            lightLabel={messages.auth.lightModeLabel}
                             onSelectTheme={applyTheme}
                         />
 
                         <NextLocaleToggle
                             locale={locale}
-                            ariaLabel="Wissel taal"
+                            ariaLabel={messages.auth.localeToggleLabel}
                             onToggleLocale={toggleLocale}
                             className="text-sm text-white"
                         />

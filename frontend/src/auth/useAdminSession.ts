@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { getAdminSession } from '../api/adminAuth'
-import { consumePrimedAdminSession } from '../pages/admin/LoginPage'
+import { consumePrimedAdminSession } from './primedAdminSession'
 
 export type AdminSessionState = {
   isLoading: boolean

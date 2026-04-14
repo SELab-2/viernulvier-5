@@ -35,7 +35,7 @@ describe('LoginPage', () => {
   beforeEach(() => {
     navigate.mockReset()
     getAdminRouteConfigMock.mockReset()
-    getAdminRouteConfigMock.mockReturnValue({ dashboardPath: '/admin' })
+    getAdminRouteConfigMock.mockReturnValue({ dashboardPath: '/admin/dashboard', legacyDashboardPaths: ['/admin'] })
     window.history.replaceState(window.history.state, '', '/')
     localStorage.setItem('locale', 'nl')
     document.documentElement.lang = 'nl'
@@ -93,14 +93,14 @@ describe('LoginPage', () => {
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledTimes(2)
-      expect(fetchMock.mock.calls[0]?.[0]).toBe('/api/auth/login')
-      expect(fetchMock.mock.calls[1]?.[0]).toBe('/api/auth/me')
+      expect(fetchMock.mock.calls[0]?.[0]).toBe('/api/v1/auth/login')
+      expect(fetchMock.mock.calls[1]?.[0]).toBe('/api/v1/auth/me')
       expect(navigate).toHaveBeenCalledWith('/admin/archive/42/edit?tab=metadata#notes', { replace: true })
     })
   })
 
   it('falls back to the host-specific dashboard path when no redirect state is present', async () => {
-    getAdminRouteConfigMock.mockReturnValue({ dashboardPath: '/dashboard' })
+    getAdminRouteConfigMock.mockReturnValue({ dashboardPath: '/dashboard', legacyDashboardPaths: ['/'] })
 
     const fetchMock = vi.fn()
       .mockResolvedValueOnce(createJsonResponse(200, { success: true }))
@@ -218,14 +218,28 @@ describe('LoginPage', () => {
     const localeToggle = screen.getByRole('button', { name: 'Wissel taal' })
     expect(localeToggle).toHaveTextContent('EN')
     expect(screen.getByRole('button', { name: 'Inloggen' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Afmelden' })).not.toBeInTheDocument()
 
     fireEvent.click(localeToggle)
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: 'Sign in' })).toBeInTheDocument()
       expect(screen.getByRole('button', { name: 'Wissel taal' })).toHaveTextContent('NL')
+      expect(screen.queryByRole('button', { name: 'Log out' })).not.toBeInTheDocument()
     })
   })
+
+  it('does not render a logout control on the login shell', () => {
+    render(
+      <MemoryRouter>
+        <LoginPage />
+      </MemoryRouter>,
+    )
+
+    expect(screen.queryByRole('button', { name: 'Afmelden' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Log out' })).not.toBeInTheDocument()
+  })
+
 
   it('does not render a password reset control', () => {
     render(
@@ -238,15 +252,15 @@ describe('LoginPage', () => {
     expect(screen.queryByText('Forgot password?')).not.toBeInTheDocument()
   })
 
-  it('renders footer navigation as static placeholder copy', () => {
+  it('does not render the admin footer on the login shell', () => {
     render(
       <MemoryRouter>
         <LoginPage />
       </MemoryRouter>,
     )
 
-    expect(screen.getByText('Dashboard')).toBeInTheDocument()
-    expect(screen.getByText('Archief')).toBeInTheDocument()
+    expect(screen.queryByText('Dashboard')).not.toBeInTheDocument()
+    expect(screen.queryByText('Archief')).not.toBeInTheDocument()
     expect(screen.queryByText(/Binnenkort beschikbaar/i)).not.toBeInTheDocument()
   })
 

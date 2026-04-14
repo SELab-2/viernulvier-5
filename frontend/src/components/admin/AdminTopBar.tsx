@@ -7,8 +7,8 @@ const adminWordmarkSrc = '/admin-wordmark.png'
 type AdminTopBarProps = {
     locale: Locale
     theme: Theme
-    logoutLabel: string
-    onLogout: () => void
+    logoutLabel?: string
+    onLogout?: () => void
     onToggleLocale: () => void
     onToggleTheme: () => void
 }
@@ -29,13 +29,15 @@ function AdminTopBar({
                 </div>
 
                 <div className="flex items-center gap-4">
-                    <button
-                        type="button"
-                        onClick={onLogout}
-                        className="text-sm font-medium text-white/80 transition-colors hover:text-white"
-                    >
-                        {logoutLabel}
-                    </button>
+                    {logoutLabel && onLogout ? (
+                        <button
+                            type="button"
+                            onClick={onLogout}
+                            className="text-sm font-medium text-white/80 transition-colors hover:text-white"
+                        >
+                            {logoutLabel}
+                        </button>
+                    ) : null}
 
                     <SegmentedThemeToggle
                         theme={theme}

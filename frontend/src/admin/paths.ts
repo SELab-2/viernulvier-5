@@ -4,6 +4,7 @@ export type AdminRouteConfig = {
   canRenderAdminRoutes: boolean
   loginPath: string
   dashboardPath: string
+  legacyDashboardPaths: string[]
   archiveEditPath: string
 }
 
@@ -17,8 +18,9 @@ export function getAdminRouteConfig(hostname: string): AdminRouteConfig {
       isAdminHost,
       isLocalDevHost,
       canRenderAdminRoutes: true,
-      loginPath: '/',
+      loginPath: '/login',
       dashboardPath: '/dashboard',
+      legacyDashboardPaths: ['/'],
       archiveEditPath: '/archive/:id/edit',
     }
   }
@@ -29,7 +31,8 @@ export function getAdminRouteConfig(hostname: string): AdminRouteConfig {
       isLocalDevHost,
       canRenderAdminRoutes: true,
       loginPath: '/admin/login',
-      dashboardPath: '/admin',
+      dashboardPath: '/admin/dashboard',
+      legacyDashboardPaths: ['/admin'],
       archiveEditPath: '/admin/archive/:id/edit',
     }
   }
@@ -40,6 +43,7 @@ export function getAdminRouteConfig(hostname: string): AdminRouteConfig {
     canRenderAdminRoutes: false,
     loginPath: '/admin/login',
     dashboardPath: '/admin',
+    legacyDashboardPaths: [],
     archiveEditPath: '/admin/archive/:id/edit',
   }
 }

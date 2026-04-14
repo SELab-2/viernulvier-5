@@ -2,7 +2,7 @@ import { Routes, Route } from 'react-router-dom'
 import { lazy, Suspense } from 'react'
 import { getMessages } from './i18n'
 import { getAdminRouteConfig } from './admin/paths'
-import ProtectedAdminRoute from './pages/admin/ProtectedAdminRoute'
+import ProtectedAdminRoute, { AdminEntryRoute } from './pages/admin/ProtectedAdminRoute'
 
 // Public pages
 import HomePage from './pages/public/HomePage'
@@ -45,6 +45,18 @@ function App() {
                 {adminRoutes.canRenderAdminRoutes ? (
                     <>
                         <Route path={adminRoutes.loginPath} element={<LoginPage />} />
+                        {adminRoutes.legacyDashboardPaths.map((path) => (
+                            <Route
+                                key={path}
+                                path={path}
+                                element={
+                                    <AdminEntryRoute
+                                        loginPath={adminRoutes.loginPath}
+                                        dashboardPath={adminRoutes.dashboardPath}
+                                    />
+                                }
+                            />
+                        ))}
                         <Route
                             path={adminRoutes.dashboardPath}
                             element={

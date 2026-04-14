@@ -20,3 +20,7 @@ export function loginAdmin(username: string, password: string): Promise<unknown>
 export function getAdminSession(): Promise<SessionResponse> {
   return api.get<SessionResponse>('/auth/me')
 }
+
+export function logoutAdmin(): Promise<{ data: { success: boolean } }> {
+  return api.post<{ data: { success: boolean } }>('/auth/logout', {})
+}
