@@ -24,6 +24,10 @@ export type Messages = {
     popularTagsLabel: string
     popularTagsMore: string
     popularTags: string[]
+    onThisDayHeading: string
+    onThisDaySubheading: string
+    onThisDayViewAll: string
+    onThisDayEmpty: string
     latestBlogHeading: string
     latestBlogSubheading: string
     latestBlogTitle: string
