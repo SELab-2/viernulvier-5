@@ -23,13 +23,13 @@ export class ProductionsController {
             links: {
                 self: `${baseUrl}/productions/${prodId}`,
                 events: `${baseUrl}/events?production_id=${prodId}`,
-                tags: production.tags?.map((t: any) => `${baseUrl}/tag/${t.id}`) || undefined,
-                genres: production.genres?.map((g: any) => `${baseUrl}/genre/${g.id}`) || undefined,
-                media_gallery: production.media_gallery_id ? `${baseUrl}/media/galleries/${production.media_gallery_id}` : undefined,
-                review_gallery: production.review_gallery_id ? `${baseUrl}/media/galleries/${production.review_gallery_id}` : undefined,
-                poster_gallery: production.poster_gallery_id ? `${baseUrl}/media/galleries/${production.poster_gallery_id}` : undefined,
-                uitdatabank_theme: production.uitdatabank_theme ? `${baseUrl}/uitdatabank/themes/${production.uitdatabank_theme}` : undefined,
-                uitdatabank_type: production.uitdatabank_type ? `${baseUrl}/uitdatabank/types/${production.uitdatabank_type}` : undefined,
+                tags: production.tags?.map((t: any) => `${baseUrl}/tag/${t.id}`) || null,
+                genres: production.genres?.map((g: any) => `${baseUrl}/genre/${g.id}`) || null,
+                media_gallery: production.media_gallery_id ? `${baseUrl}/media/galleries/${production.media_gallery_id}` : null,
+                review_gallery: production.review_gallery_id ? `${baseUrl}/media/galleries/${production.review_gallery_id}` : null,
+                poster_gallery: production.poster_gallery_id ? `${baseUrl}/media/galleries/${production.poster_gallery_id}` : null,
+                uitdatabank_theme: production.uitdatabank_theme ? `${baseUrl}/uitdatabank/themes/${production.uitdatabank_theme}` : null,
+                uitdatabank_type: production.uitdatabank_type ? `${baseUrl}/uitdatabank/types/${production.uitdatabank_type}` : null,
             }
         }
     }
