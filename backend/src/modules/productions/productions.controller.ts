@@ -23,6 +23,8 @@ export class ProductionsController {
             links: {
                 self: `${baseUrl}/productions/${prodId}`,
                 events: `${baseUrl}/events?production_id=${prodId}`,
+                tags: production.tags?.map((t: any) => `${baseUrl}/tag/${t.id}`) || undefined,
+                genres: production.genres?.map((g: any) => `${baseUrl}/genre/${g.id}`) || undefined,
                 media_gallery: production.media_gallery_id ? `${baseUrl}/media/galleries/${production.media_gallery_id}` : undefined,
                 review_gallery: production.review_gallery_id ? `${baseUrl}/media/galleries/${production.review_gallery_id}` : undefined,
                 poster_gallery: production.poster_gallery_id ? `${baseUrl}/media/galleries/${production.poster_gallery_id}` : undefined,
@@ -31,7 +33,6 @@ export class ProductionsController {
             }
         }
     }
-
     async getProductions(request: FastifyRequest<{ Querystring: PaginationQuery }>, reply: FastifyReply) {
         const productions = await this.service.getProductions(request.query)
         const baseUrl = this.getBaseUrl(request)
