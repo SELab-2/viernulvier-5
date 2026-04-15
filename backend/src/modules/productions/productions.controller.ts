@@ -23,8 +23,8 @@ export class ProductionsController {
             links: {
                 self: `${baseUrl}/productions/${prodId}`,
                 events: `${baseUrl}/events?production_id=${prodId}`,
-                tags: production.tags?.map((t: any) => `${baseUrl}/tag/${t.id}`) || null,
-                genres: production.genres?.map((g: any) => `${baseUrl}/genre/${g.id}`) || null,
+                genres: `${baseUrl}/genres?productionId=${prodId}`,
+                tags: `${baseUrl}/tags?productionId=${prodId}`,
                 media_gallery: production.media_gallery_id ? `${baseUrl}/media/galleries/${production.media_gallery_id}` : null,
                 review_gallery: production.review_gallery_id ? `${baseUrl}/media/galleries/${production.review_gallery_id}` : null,
                 poster_gallery: production.poster_gallery_id ? `${baseUrl}/media/galleries/${production.poster_gallery_id}` : null,
