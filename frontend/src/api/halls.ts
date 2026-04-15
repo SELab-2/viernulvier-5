@@ -16,4 +16,4 @@ export const hallSchema = z.object({
 export type Hall = z.infer<typeof hallSchema>
 
 export const getHallById = (hallId: string) =>
-    api.get<{ data: Hall }>(`archive/halls/${hallId}`)
+    api.get<{ data: Hall }>(`/archive/halls/${hallId}`)
