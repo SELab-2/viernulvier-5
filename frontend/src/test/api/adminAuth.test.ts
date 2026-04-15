@@ -15,7 +15,7 @@ describe('adminAuth', () => {
       ok: true,
       status: 200,
       json: vi.fn().mockResolvedValueOnce({ success: true }),
-    } as Response)
+    } as unknown as Response)
 
     await loginAdmin(' admin ', 'secret')
 
@@ -34,7 +34,7 @@ describe('adminAuth', () => {
       ok: true,
       status: 200,
       json: vi.fn().mockResolvedValueOnce({ user: { sub: '1', username: 'admin', role: 'admin' } }),
-    } as Response)
+    } as unknown as Response)
 
     await getAdminSession()
 
@@ -51,7 +51,7 @@ describe('adminAuth', () => {
       ok: true,
       status: 200,
       json: vi.fn().mockResolvedValueOnce({ data: { success: true } }),
-    } as Response)
+    } as unknown as Response)
 
     await logoutAdmin()
 
