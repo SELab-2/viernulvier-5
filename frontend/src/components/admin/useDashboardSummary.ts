@@ -42,7 +42,7 @@ export function useDashboardSummary(): DashboardSummaryState {
     useEffect(() => {
         let isActive = true
 
-        api.get<DashboardSummaryResponse>('/v1/dashboard/summary')
+        api.get<DashboardSummaryResponse>('/dashboard/summary')
             .then((response) => {
                 if (!isActive) {
                     return
