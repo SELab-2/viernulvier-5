@@ -1,10 +1,23 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { useAdminSession } from '../../auth/useAdminSession'
+import * as primedAdminSession from '../../auth/primedAdminSession'
 
 describe('useAdminSession', () => {
   afterEach(() => {
     vi.restoreAllMocks()
+  })
+
+  it('starts in an authenticated state when a primed session exists', () => {
+    vi.spyOn(primedAdminSession, 'consumePrimedAdminSession').mockReturnValue({
+      user: { sub: '1', username: 'admin', role: 'admin' },
+    })
+    const fetchSpy = vi.spyOn(globalThis, 'fetch')
+
+    const { result } = renderHook(() => useAdminSession())
+
+    expect(result.current).toEqual({ isLoading: false, isAuthenticated: true })
+    expect(fetchSpy).not.toHaveBeenCalled()
   })
 
   it('starts in a loading state before the session request resolves', () => {
