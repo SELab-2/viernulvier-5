@@ -28,17 +28,17 @@ export async function main() {
   const cutoff_timestamp = await readCutoffTimestamp();
   const timestamp = new Date().toISOString();
 
-  // await Scraper.sync_locations(cutoff_timestamp);
-  // await Scraper.sync_spaces(cutoff_timestamp);
-  // await Scraper.sync_hall(cutoff_timestamp);
-  //
-  // await Scraper.sync_uit_keywords(cutoff_timestamp);
-  // await Scraper.sync_uit_themes(cutoff_timestamp);
-  // await Scraper.sync_uit_types(cutoff_timestamp);
-  //
-  // await Scraper.sync_crops(cutoff_timestamp);
-  // await Scraper.sync_items(cutoff_timestamp);
-  // await Scraper.sync_galleries(cutoff_timestamp);
+  await Scraper.sync_locations(cutoff_timestamp);
+  await Scraper.sync_spaces(cutoff_timestamp);
+  await Scraper.sync_hall(cutoff_timestamp);
+
+  await Scraper.sync_uit_keywords(cutoff_timestamp);
+  await Scraper.sync_uit_themes(cutoff_timestamp);
+  await Scraper.sync_uit_types(cutoff_timestamp);
+
+  await Scraper.sync_crops(cutoff_timestamp);
+  await Scraper.sync_items(cutoff_timestamp);
+  await Scraper.sync_galleries(cutoff_timestamp);
   await Scraper.sync_genres(cutoff_timestamp);
   await Scraper.sync_productions(cutoff_timestamp);
   await Scraper.sync_events(cutoff_timestamp);
