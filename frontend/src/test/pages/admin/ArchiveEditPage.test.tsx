@@ -1,9 +1,9 @@
 import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import ArchiveEditPage from './ArchiveEditPage'
+import ArchiveEditPage from '../../../pages/admin/ArchiveEditPage'
 
-vi.mock('../../components/admin/AdminLayout', () => ({
+vi.mock('../../../components/admin/AdminLayout', () => ({
   default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }))
 

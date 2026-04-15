@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import LoginPage from './LoginPage'
+import LoginPage from '../../../pages/admin/LoginPage'
 
 const navigate = vi.fn()
 const getAdminRouteConfigMock = vi.hoisted(() => vi.fn())
@@ -14,8 +14,8 @@ vi.mock('react-router-dom', async () => {
   }
 })
 
-vi.mock('../../admin/paths', async () => {
-  const actual = await vi.importActual<typeof import('../../admin/paths')>('../../admin/paths')
+vi.mock('../../../admin/paths', async () => {
+  const actual = await vi.importActual<typeof import('../../../admin/paths')>('../../../admin/paths')
   return {
     ...actual,
     getAdminRouteConfig: getAdminRouteConfigMock,

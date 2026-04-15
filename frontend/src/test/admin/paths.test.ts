@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getAdminRouteConfig } from './paths'
+import { getAdminRouteConfig } from '../../admin/paths'
 
 describe('getAdminRouteConfig', () => {
   it('uses explicit login and dashboard paths on admin subdomains', () => {
