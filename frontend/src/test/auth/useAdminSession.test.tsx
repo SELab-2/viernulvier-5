@@ -1,9 +1,11 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { primeAdminSession, clearPrimedAdminSession } from '../../auth/primedAdminSession'
 import { useAdminSession } from '../../auth/useAdminSession'
 
 describe('useAdminSession', () => {
   afterEach(() => {
+    clearPrimedAdminSession()
     vi.restoreAllMocks()
   })
 
@@ -15,6 +17,21 @@ describe('useAdminSession', () => {
     const { result } = renderHook(() => useAdminSession())
 
     expect(result.current).toEqual({ isLoading: true, isAuthenticated: false })
+  })
+
+  it('marks the session as authenticated immediately when a session is primed', () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(() => {
+      throw new Error('fetch should not run when the session is primed')
+    })
+
+    primeAdminSession({
+      user: { sub: '1', username: 'admin', role: 'admin' },
+    })
+
+    const { result } = renderHook(() => useAdminSession())
+
+    expect(result.current).toEqual({ isLoading: false, isAuthenticated: true })
+    expect(fetchSpy).not.toHaveBeenCalled()
   })
 
   it('marks the session as authenticated after a successful response', async () => {
