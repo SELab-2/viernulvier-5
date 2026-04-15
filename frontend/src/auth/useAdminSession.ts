@@ -8,15 +8,21 @@ export type AdminSessionState = {
 }
 
 export function useAdminSession(): AdminSessionState {
-  const [state, setState] = useState<AdminSessionState>({
-    isLoading: true,
-    isAuthenticated: false,
+  const [state, setState] = useState<AdminSessionState>(() => {
+    const primedSession = consumePrimedAdminSession()
+
+    if (primedSession) {
+      return { isLoading: false, isAuthenticated: true }
+    }
+
+    return {
+      isLoading: true,
+      isAuthenticated: false,
+    }
   })
 
   useEffect(() => {
-    const primedSession = consumePrimedAdminSession()
-    if (primedSession) {
-      setState({ isLoading: false, isAuthenticated: true })
+    if (!state.isLoading) {
       return
     }
 
@@ -37,7 +43,7 @@ export function useAdminSession(): AdminSessionState {
     return () => {
       isActive = false
     }
-  }, [])
+  }, [state.isLoading])
 
   return state
 }
