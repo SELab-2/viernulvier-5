@@ -6,6 +6,9 @@ import PublicPillButton from '../../components/public/PublicPillButton'
 import { getProductionById, type Production } from '../../api/productions'
 import { getGalleryItems, getItemCrops, getPreferredCropUrl } from '../../api/media'
 import { getEventsByProductionId, type Event } from '../../api/events'
+import { getHallById } from '../../api/halls'
+import { getSpaceById } from '../../api/spaces'
+import { getLocationById, type Location } from '../../api/locations'
 
 function ArchiveDetailPage() {
     const navigate = useNavigate()
@@ -16,6 +19,10 @@ function ArchiveDetailPage() {
     const [production, setProduction] = useState<Production | null>(null)
     const [imageUrl, setImageUrl] = useState<string | null>(null)
     const [events, setEvents] = useState<Event[]>([])
+    const [locationsByEvent, setLocationsByEvent] = useState<Record<string, Location>>({})
+    const [showAllEvents, setShowAllEvents] = useState(false)
+
+    const visibleEvents = showAllEvents ? events : events.slice(0, 5)
 
     const handleGoBackToHome = () => {
         if (window.history.length > 1) {
@@ -27,22 +34,60 @@ function ArchiveDetailPage() {
 
     useEffect(() => {
         if (!id) return
+
         getProductionById(id).then((res) => {
             const prod = res.data
             setProduction(prod)
 
-            if (!prod.media_gallery_id) return
-            getGalleryItems(prod.media_gallery_id).then((galleryRes) => {
-                const firstItem = galleryRes.data[0]
-                if (!firstItem) return
-                getItemCrops(firstItem.id).then((cropsRes) => {
-                    setImageUrl(getPreferredCropUrl(cropsRes.data))
+            if (prod.media_gallery_id) {
+                getGalleryItems(prod.media_gallery_id).then((galleryRes) => {
+                    const firstItem = galleryRes.data[0]
+                    if (!firstItem) return
+                    getItemCrops(firstItem.id).then((cropsRes) => {
+                        setImageUrl(getPreferredCropUrl(cropsRes.data))
+                    })
                 })
-            })
+            }
         })
 
         getEventsByProductionId(id).then((res) => {
-            setEvents(res.data)
+            const evts = res.data
+            console.log('Events:', evts)
+            setEvents(evts)
+
+            evts.forEach((event) => {
+                console.log('Processing event:', event)
+                if (!event.hall_id) {
+                    console.log('Event has no hall_id')
+                    return
+                }
+
+                getHallById(event.hall_id).then((hallRes) => {
+                    const hall = hallRes.data
+                    console.log('Hall for event', event.id, ':', hall)
+                    if (!hall.space_id) {
+                        console.log('Hall has no space_id')
+                        return
+                    }
+
+                    getSpaceById(hall.space_id).then((spaceRes) => {
+                        const space = spaceRes.data
+                        console.log('Space for hall', hall.id, ':', space)
+                        if (!space.location_id) {
+                            console.log('Space has no location_id')
+                            return
+                        }
+                    
+                        getLocationById(space.location_id).then((locationRes) => {
+                            console.log('Location for space', space.id, ':', locationRes.data)
+                            setLocationsByEvent((prev) => ({
+                                ...prev,
+                                [event.id]: locationRes.data,
+                            }))
+                        })
+                    })
+                })
+            })
         })
     }, [id])
 
@@ -113,25 +158,84 @@ function ArchiveDetailPage() {
                         <p>No description available.</p>
                     )}
                 </div>
-
-                <div className="site-container py-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                <div className="py-8 grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div>
-                        <h2 className="text-xl font-bold mb-4">messages.detail.dates</h2>
+                        <h2 className="text-xl font-bold mb-4">
+                            messages.detail.dates
+                        </h2>
+
                         {events.length === 0 ? (
                             <p>No upcoming events.</p>
                         ) : (
-                            <ul className="space-y-2">
-                                {events.map((event) => (
-                                    <li key={event.id}>
-                                        {event.starts_at
-                                            ? new Intl.DateTimeFormat(locale, {
-                                                dateStyle: 'long',
-                                                timeStyle: 'short',
-                                            }).format(new Date(event.starts_at))
-                                            : '—'}
-                                    </li>
-                                ))}
-                            </ul>
+                            <div>
+                                {/* Header row */}
+                                <div className="grid grid-cols-3 gap-4 p-4 border-b border-[var(--color-border)] font-semibold text-sm">
+                                    <div>Date</div>
+                                    <div>Time</div>
+                                    <div>Location</div>
+                                </div>
+
+                                {/* Event rows */}
+                                <div className="divide-y divide-[var(--color-border)]">
+                                    {visibleEvents.map((event) => {
+                                        const start = event.starts_at ? new Date(event.starts_at) : null
+                                        const end = event.ends_at ? new Date(event.ends_at) : null
+                                        const location = locationsByEvent[event.id]
+
+                                        return (
+                                            <div key={event.id} className="grid grid-cols-3 gap-4 p-4 text-sm">
+                                                {/* Date */}
+                                                <div className="font-medium">
+                                                    {start
+                                                        ? new Intl.DateTimeFormat(locale, {
+                                                            dateStyle: 'long',
+                                                        }).format(start)
+                                                        : '—'}
+                                                </div>
+
+                                                {/* Time */}
+                                                <div className="text-[var(--color-text-muted)]">
+                                                    {start
+                                                        ? new Intl.DateTimeFormat(locale, {
+                                                            timeStyle: 'short',
+                                                        }).format(start)
+                                                        : '—'}
+                                                    {end &&
+                                                        ` - ${new Intl.DateTimeFormat(locale, {
+                                                            timeStyle: 'short',
+                                                        }).format(end)}`}
+                                                </div>
+
+                                                {/* Location */}
+                                                <div className="text-[var(--color-text-accent)]">
+                                                    {location
+                                                        ? location.name ||
+                                                            [
+                                                                location.street && location.number && `${location.street} ${location.number}`,
+                                                                location.postal_code && location.city && `${location.postal_code} ${location.city}`
+                                                            ]
+                                                            .filter(Boolean)
+                                                            .join(', ') || '—'
+                                                        : '—'}
+                                                </div>
+                                            </div>
+                                        )
+                                    })}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Show more button */}
+                        {events.length > 3 && (
+                            <button
+                                onClick={() => setShowAllEvents(!showAllEvents)}
+                                className="mt-4 text-sm font-medium text-[var(--color-accent)] hover:underline"
+                            >
+                                showAllEvents
+                                    ? messages.detail.showLess || 'Show less'
+                                    : messages.detail.showMore || 'Show more'
+                            </button>
                         )}
                     </div>
 
