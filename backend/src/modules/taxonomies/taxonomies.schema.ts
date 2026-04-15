@@ -15,6 +15,7 @@ export const genrePaginationQuerySchema = z.object({
     limit: z.coerce.number().int().positive().max(100).default(20),
     search: z.string().optional(),
     lang: z.string().optional().default('nl'),
+    productionId: z.string().optional(),
 })
 export const tagPaginationQuerySchema = genrePaginationQuerySchema
 
