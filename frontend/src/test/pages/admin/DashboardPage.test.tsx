@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
-import type { Messages } from '../../i18n/types'
-import { AdminMessagesContext } from '../../components/admin/AdminMessagesContext'
-import DashboardPage from './DashboardPage'
+import type { Messages } from '../../../i18n/types'
+import { AdminMessagesContext } from '../../../components/admin/AdminMessagesContext'
+import DashboardPage from '../../../pages/admin/DashboardPage'
 
 const useDashboardSummaryMock = vi.hoisted(() => vi.fn())
 const adminLayoutMock = vi.hoisted(() => vi.fn(({ children }: { children: React.ReactNode }) => <div>{children}</div>))
@@ -47,17 +47,16 @@ const mockMessages = vi.hoisted(() => ({
   },
 }))
 
-vi.mock('../../components/admin/AdminLayout', () => ({
+vi.mock('../../../components/admin/AdminLayout', () => ({
   default: (props: { children: React.ReactNode }) => {
     adminLayoutMock(props)
     return <AdminMessagesContext.Provider value={mockMessages as unknown as Messages}>{props.children}</AdminMessagesContext.Provider>
   },
 }))
 
-vi.mock('../../components/admin/useDashboardSummary', () => ({
+vi.mock('../../../components/admin/useDashboardSummary', () => ({
   useDashboardSummary: () => useDashboardSummaryMock(),
 }))
-
 
 describe('DashboardPage', () => {
   it('renders loading state and heading', () => {

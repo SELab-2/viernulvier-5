@@ -1,9 +1,9 @@
 import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import { AdminMessagesContext } from '../../components/admin/AdminMessagesContext'
-import ArchiveEditPage from './ArchiveEditPage'
-import type { Messages } from '../../i18n/types'
+import { AdminMessagesContext } from '../../../components/admin/AdminMessagesContext'
+import ArchiveEditPage from '../../../pages/admin/ArchiveEditPage'
+import type { Messages } from '../../../i18n/types'
 
 const mockMessages: Pick<Messages, 'admin'> = {
   admin: {
@@ -68,7 +68,7 @@ const mockMessages: Pick<Messages, 'admin'> = {
   },
 }
 
-vi.mock('../../components/admin/AdminLayout', () => ({
+vi.mock('../../../components/admin/AdminLayout', () => ({
   default: ({ children }: { children: React.ReactNode }) => (
     <AdminMessagesContext.Provider value={mockMessages as unknown as Messages}>
       <div>{children}</div>
