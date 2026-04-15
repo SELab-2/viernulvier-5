@@ -40,7 +40,7 @@ describe('useAdminSession', () => {
       json: async () => ({
         user: { sub: '1', username: 'admin', role: 'admin' },
       }),
-    } as Response)
+    } as unknown as Response)
 
     const { result } = renderHook(() => useAdminSession())
 
@@ -53,7 +53,7 @@ describe('useAdminSession', () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       ok: false,
       json: async () => ({}),
-    } as Response)
+    } as unknown as Response)
 
     const { result } = renderHook(() => useAdminSession())
 
@@ -83,7 +83,7 @@ describe('useAdminSession', () => {
         json: async () => ({
           user: { sub: '1', username: 'admin', role: 'admin' },
         }),
-      } as Response)
+      } as unknown as Response)
       await Promise.resolve()
     })
 

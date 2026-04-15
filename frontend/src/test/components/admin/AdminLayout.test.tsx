@@ -152,7 +152,7 @@ describe('AdminLayout', () => {
       ok: true,
       status: 200,
       json: vi.fn().mockResolvedValueOnce({ data: { success: true } }),
-    } as Response)
+    } as unknown as Response)
     const assignMock = vi.fn()
 
     vi.stubGlobal('fetch', fetchMock)
