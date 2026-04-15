@@ -23,8 +23,8 @@ export class EventsController {
             ...event,
             links: {
                 self: `${baseUrl}/events/${event.id}`,
-                production: event.production_id ? `${baseUrl}/productions/${event.production_id}` : undefined,
-                hall: event.hall_id ? `${baseUrl}/halls/${event.hall_id}` : undefined,
+                production: event.production_id ? `${baseUrl}/productions/${event.production_id}` : null,
+                hall: event.hall_id ? `${baseUrl}/halls/${event.hall_id}` : null,
                 prices: `${baseUrl}/events/prices?eventId=${event.id}`,
             }
         }
@@ -35,7 +35,7 @@ export class EventsController {
             ...price,
             links: {
                 self: `${baseUrl}/events/prices/${price.id}`,
-                event: price.event_id ? `${baseUrl}/events/${price.event_id}` : undefined,
+                event: price.event_id ? `${baseUrl}/events/${price.event_id}` : null,
             }
         }
     }
