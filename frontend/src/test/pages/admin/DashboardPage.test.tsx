@@ -1,12 +1,12 @@
 import { describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import DashboardPage from './DashboardPage'
+import DashboardPage from '../../../pages/admin/DashboardPage'
 
-vi.mock('../../components/admin/AdminLayout', () => ({
+vi.mock('../../../components/admin/AdminLayout', () => ({
   default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }))
 
-vi.mock('../../i18n', () => ({
+vi.mock('../../../i18n', () => ({
   getMessages: () => ({
     auth: {
       dashboardTitle: 'Admin dashboard',

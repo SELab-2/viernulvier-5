@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
-import { NextLocaleToggle, SegmentedThemeToggle } from './TopBarControls'
+import { NextLocaleToggle, SegmentedThemeToggle } from '../../../components/shared/TopBarControls'
 
 describe('TopBarControls', () => {
   it('renders the next locale label and toggles when clicked', () => {

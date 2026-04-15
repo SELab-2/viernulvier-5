@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { getAdminSession, loginAdmin, logoutAdmin } from './adminAuth'
+import { getAdminSession, loginAdmin, logoutAdmin } from '../../api/adminAuth'
 
 const fetchMock = vi.fn()
 

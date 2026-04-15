@@ -1,7 +1,7 @@
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
-import AdminLayout from './AdminLayout'
+import AdminLayout from '../../../components/admin/AdminLayout'
 
 const adminTopBarProps = vi.hoisted(() => ({
   current: null as null | {
@@ -17,7 +17,7 @@ const clearPrimedAdminSessionMock = vi.hoisted(() => vi.fn())
 const getActiveLocaleMock = vi.hoisted(() => vi.fn())
 const setActiveLocaleMock = vi.hoisted(() => vi.fn())
 
-vi.mock('./AdminTopBar', () => ({
+vi.mock('../../../components/admin/AdminTopBar', () => ({
   default: ({ locale, theme, logoutLabel, onLogout, onToggleLocale, onToggleTheme }: {
     locale: string
     theme: string
@@ -46,15 +46,15 @@ vi.mock('./AdminTopBar', () => ({
   },
 }))
 
-vi.mock('./AdminFooter', () => ({
+vi.mock('../../../components/admin/AdminFooter', () => ({
   default: () => <div>footer</div>,
 }))
 
-vi.mock('../../auth/primedAdminSession', () => ({
+vi.mock('../../../auth/primedAdminSession', () => ({
   clearPrimedAdminSession: clearPrimedAdminSessionMock,
 }))
 
-vi.mock('../../i18n', () => ({
+vi.mock('../../../i18n', () => ({
   getActiveLocale: getActiveLocaleMock,
   getMessages: (locale: string) => ({
     auth: {

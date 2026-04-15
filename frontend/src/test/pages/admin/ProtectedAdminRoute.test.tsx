@@ -1,38 +1,38 @@
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
-import App from '../../App'
-import ProtectedAdminRoute from './ProtectedAdminRoute'
+import App from '../../../App'
+import ProtectedAdminRoute from '../../../pages/admin/ProtectedAdminRoute'
 
 const useAdminSessionMock = vi.hoisted(() => vi.fn())
 const getAdminRouteConfigMock = vi.hoisted(() => vi.fn())
 
-vi.mock('../../auth/useAdminSession', () => ({
+vi.mock('../../../auth/useAdminSession', () => ({
   useAdminSession: useAdminSessionMock,
 }))
 
-vi.mock('../../admin/paths', async () => {
-  const actual = await vi.importActual<typeof import('../../admin/paths')>('../../admin/paths')
+vi.mock('../../../admin/paths', async () => {
+  const actual = await vi.importActual<typeof import('../../../admin/paths')>('../../../admin/paths')
   return {
     ...actual,
     getAdminRouteConfig: getAdminRouteConfigMock,
   }
 })
 
-vi.mock('./LoginPage', () => ({
+vi.mock('../../../pages/admin/LoginPage', () => ({
   default: LoginPageProbe,
 }))
 
-vi.mock('./DashboardPage', () => ({
+vi.mock('../../../pages/admin/DashboardPage', () => ({
   default: () => <div>Dashboard page</div>,
 }))
 
-vi.mock('./ArchiveEditPage', () => ({
+vi.mock('../../../pages/admin/ArchiveEditPage', () => ({
   default: () => <div>Archive edit page</div>,
 }))
 
-vi.mock('../../i18n', async () => {
-  const actual = await vi.importActual<typeof import('../../i18n')>('../../i18n')
+vi.mock('../../../i18n', async () => {
+  const actual = await vi.importActual<typeof import('../../../i18n')>('../../../i18n')
   return {
     ...actual,
     getMessages: () => ({
