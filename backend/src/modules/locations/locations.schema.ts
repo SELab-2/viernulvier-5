@@ -22,7 +22,7 @@ export const locationPaginationQuerySchema = z.object({
  */
 export const locationLinksSchema = z.object({
     self: z.string().url().default('https://example.com/'),
-    spaces: z.string().url().optional().default('https://example.com/'),
+    spaces: z.string().url().optional().nullable().default('https://example.com/'),
 })
 
 export const locationSchema = z.object({
