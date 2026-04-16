@@ -121,14 +121,35 @@ export type Messages = {
     logoutLabel: string
   }
   production: {
-      editTitle: string,
-      editSubTitle: string,
-      title: string,
-      slug: string,
+      // sidbar
+      productionSettingsLabel: string
+      statusLabel: string
+      genreLabel: string
+      bannerLabel: string
+      extraPicturesLabel: string
+      artistLabel: string
+      // production edit
+      productionEditTitle: string
+      productionEditSubTitle: string
+      // tab tabs
+      dutchOption: string
+      englishOption: string
+      // tab content
+      title: string
+      slug: string
       content: string
       back: string
       saveOnDraft: string
       publish: string
+      // events edit
+      eventsEditTitle: string
+      eventsEditSubTitle: string
+      makeEventsLabel: string
+      eventsDateLabel: string
+      eventsTimeLabel: string
+      eventsLocationLabel: string
+      eventsCommentLabel: string
+      eventsActionsLabel: string
   }
   footer: {
     brandLogoAlt: string
