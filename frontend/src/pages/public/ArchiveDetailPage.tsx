@@ -152,17 +152,17 @@ function ArchiveDetailPage() {
         production?.description_2?.nl ||
         production?.description_2?.fr
 
-    const video_1 =
-        production?.video_1?.[locale as 'en' | 'nl' | 'fr'] ||
-        production?.video_1?.en ||
-        production?.video_1?.nl ||
-        production?.video_1?.fr
+    // const video_1 =
+    //     production?.video_1?.[locale as 'en' | 'nl' | 'fr'] ||
+    //     production?.video_1?.en ||
+    //     production?.video_1?.nl ||
+    //     production?.video_1?.fr
 
-    const video_2 =
-        production?.video_2?.[locale as 'en' | 'nl' | 'fr'] ||
-        production?.video_2?.en ||
-        production?.video_2?.nl ||
-        production?.video_2?.fr
+    // const video_2 =
+    //     production?.video_2?.[locale as 'en' | 'nl' | 'fr'] ||
+    //     production?.video_2?.en ||
+    //     production?.video_2?.nl ||
+    //     production?.video_2?.fr
 
     const quote =
         production?.quote?.[locale as 'en' | 'nl' | 'fr'] ||
@@ -307,7 +307,22 @@ function ArchiveDetailPage() {
                                 </button>
                             )}
                         </div>
+                        
+                        {description_extra && (
+                            <details className="mt-6">
+                                <summary className="cursor-pointer text-sm font-medium text-[var(--color-accent)]">
+                                    messages.detail.moreInfo || 'More info'
+                                </summary>
 
+                                <div className="prose max-w-none mt-4">
+                                    <div
+                                        dangerouslySetInnerHTML={{
+                                            __html: description_extra,
+                                        }}
+                                    />
+                                </div>
+                            </details>
+                        )}
                         <div>
                             {/* credits / related — coming soon */}
                         </div>
