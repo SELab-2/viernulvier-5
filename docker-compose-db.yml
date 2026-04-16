@@ -1,0 +1,28 @@
+services:
+  database:
+    image: postgres:16-alpine
+    container_name: vnv_container
+    restart: unless-stopped
+    # No need to use ports, we don't want to expose the database to the server
+    # ports:
+    #   - "5432:5432"
+    env_file:
+        - ./backend/.env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-viernulvier}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    volumes:
+      - vnv_data:/var/lib/postgresql/data
+    networks:
+      - vnv_net
+
+volumes:
+  vnv_data:
+
+# You must create your network separatly, see ./docs/deployment.md
+networks:
+  vnv_net:
+    external: true
