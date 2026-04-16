@@ -7,7 +7,7 @@ function PublicFooter() {
     const messages = getMessages()
 
     return (
-        <footer className="mt-16 bg-black text-white">
+        <footer className="bg-black text-white">
             <div className="site-container py-14">
                 <div className="grid gap-12 md:grid-cols-2 xl:grid-cols-4">
                     <section>
