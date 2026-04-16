@@ -208,13 +208,17 @@ function ArchiveDetailPage() {
                         {/* Text on top */}
                         <div className="absolute inset-0 flex flex-col justify-end p-6">
                             
-                            <h1 className="text-1xl md:text-1xl text-white">
-                                {super_title || 'Untitled'}
-                            </h1>
+                            { super_title && (
+                                <h1 className="text-1xl md:text-1xl text-white">
+                                    {super_title || 'Untitled'}
+                                </h1>
+                            )}
                             
-                            <h1 className="text-3xl md:text-4xl font-bold text-white">
-                                {title || 'Untitled'}
-                            </h1>
+                            { title && (
+                                <h1 className="text-3xl md:text-4xl font-bold text-white">
+                                    {title || 'Untitled'}
+                                </h1>
+                            )}
 
                             {artist && (
                                 <p className="text-2xl md:text-2xl text-white mt-1">
@@ -292,7 +296,7 @@ function ArchiveDetailPage() {
                             )}
 
                             {/* Show more button */}
-                            {events.length > 3 && (
+                            {events.length > 5 && (
                                 <button
                                     onClick={() => setShowAllEvents(!showAllEvents)}
                                     className="mt-4 text-sm font-medium text-[var(--color-accent)] hover:underline"
@@ -314,55 +318,46 @@ function ArchiveDetailPage() {
 
             <div className="site-container py-8 space-y-12">
 
-                <div className="prose max-w-none">
-                    {teaser ? (
+                { teaser && (
+                    <div className="prose max-w-none">
                         <div
                             dangerouslySetInnerHTML={{ __html: teaser.replace(/\r?\n/g, '<br />') }}
                         />
-                    ) : (
-                        <p>No teaser available.</p>
-                    )}
-                </div>
+                    </div>
+                )}
 
-                <div className="prose max-w-none">
-                    {description ? (
+                { description && (
+                    <div className="prose max-w-none">
                         <div
                             dangerouslySetInnerHTML={{ __html: description.replace(/\r?\n/g, '<br />') }}
                         />
-                    ) : (
-                        <p>No description available.</p>
-                    )}
-                </div>
+                    </div>
+                )}
 
                 <div>
                     {/* video_1/video_2 */}
                 </div>
 
-                <div className="prose max-w-none">
-                    {quote ? (
+                {quote && (
+                    <div className="prose max-w-none">
                         <div
                             dangerouslySetInnerHTML={{ __html: quote.replace(/\r?\n/g, '<br />') }}
                         />
-                        
-                    ) : (
-                        <p>No quote available.</p>
-                    )}
-                    {quote_source && (
-                        <p className="text-sm text-right mt-2">
-                            — {quote_source}
-                        </p>
-                    )}
-                </div>
+                        {quote_source && (
+                            <p className="text-sm text-right mt-2">
+                                — {quote_source}
+                            </p>
+                        )}
+                    </div>
+                )}
 
-                <div className="prose max-w-none">
-                    {description_2 ? (
+                {description_2 && (
+                    <div className="prose max-w-none">
                         <div
                             dangerouslySetInnerHTML={{ __html: description_2.replace(/\r?\n/g, '<br />') }}
                         />
-                    ) : (
-                        <p>No description_2 available.</p>
-                    )}
-                </div>
+                    </div>
+                )}
                 
 
                 {/* Debug / inspection */}
