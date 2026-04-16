@@ -1,0 +1,33 @@
+/**
+ * Pagination helper utilities.
+ */
+
+export interface PaginatedResult<T> {
+    items: T[]
+    total: number
+    page: number
+    limit: number
+    totalPages: number
+}
+
+/**
+ * Calculate total pages from item count and page limit.
+ */
+export function calculateTotalPages(total: number, limit: number): number {
+    return Math.ceil(total / limit)
+}
+
+/**
+ * Builds links for a paginated resource.
+ */
+export function buildPaginationLinks(baseUrl: string, page: number, limit: number, totalPages: number) {
+    const buildUrl = (p: number) => `${baseUrl}?page=${p}&limit=${limit}`
+    
+    return {
+        self: buildUrl(page),
+        next: (totalPages > 0 && page < totalPages) ? buildUrl(page + 1) : null,
+        prev: (totalPages > 0 && page > 1) ? buildUrl(page - 1) : null,
+        first: totalPages > 0 ? buildUrl(1) : buildUrl(page),
+        last: totalPages > 0 ? buildUrl(totalPages) : buildUrl(page),
+    }
+}

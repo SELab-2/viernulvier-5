@@ -1,0 +1,70 @@
+x-backend-service: &backend-service
+  build: ./backend
+  env_file:
+    - ./backend/.env
+  environment:
+    DATABASE_URL: ${DOCKER_DATABASE_URL:-postgresql://postgres:postgres@database:5432/viernulvier?schema=public}
+  networks:
+    - vnv_net
+
+services:
+  backend:
+    <<: *backend-service
+    container_name: vnv_backend
+    restart: unless-stopped
+    ports:
+      - 3001:3001
+
+  scraper:
+    <<: *backend-service
+    container_name: vnv_scraper
+    restart: unless-stopped
+    command: ["/usr/local/bin/scraper-cron-entrypoint.sh"]
+    environment:
+      DATABASE_URL: ${DOCKER_DATABASE_URL:-postgresql://postgres:postgres@database:5432/viernulvier?schema=public}
+      SCRAPER_CRON_SCHEDULE: "0 0 * * *"
+    volumes:
+      - scraper_logs:/usr/src/app/logs
+
+  frontend:
+    build: ./frontend
+    container_name: vnv_frontend
+    volumes:
+      - dist:/usr/src/app/dist
+    networks:
+      - vnv_net
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+      - dist:/var/www/html
+    networks:
+      - vnv_net
+
+  certbot:
+    image: certbot/certbot:latest
+    container_name: certbot
+    env_file:
+      - ./.env
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    networks:
+      - vnv_net
+    command: certonly --webroot -w /var/www/certbot -n --email ${CERTBOT_MAIL} -d ${DOMAIN} --agree-tos
+
+networks:
+  vnv_net:
+    external: true
+
+volumes:
+  dist: {}
+  scraper_logs: {}
