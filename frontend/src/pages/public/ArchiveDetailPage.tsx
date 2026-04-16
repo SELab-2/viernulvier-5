@@ -96,6 +96,12 @@ function ArchiveDetailPage() {
         production?.title?.en ||
         production?.title?.nl ||
         production?.title?.fr
+
+    const super_title =
+        production?.super_title?.[locale as 'en' | 'nl' | 'fr'] ||
+        production?.super_title?.en ||
+        production?.super_title?.nl ||
+        production?.super_title?.fr
     
     const artist = 
         production?.artist?.[locale as 'en' | 'nl' | 'fr'] ||
@@ -103,11 +109,59 @@ function ArchiveDetailPage() {
         production?.artist?.nl ||
         production?.artist?.fr
 
+    const teaser =
+        production?.teaser?.[locale as 'en' | 'nl' | 'fr'] ||
+        production?.teaser?.en ||
+        production?.teaser?.nl ||
+        production?.teaser?.fr
+    
     const description =
         production?.description?.[locale as 'en' | 'nl' | 'fr'] ||
         production?.description?.en ||
         production?.description?.nl ||
         production?.description?.fr
+
+    const description_extra =
+        production?.description_extra?.[locale as 'en' | 'nl' | 'fr'] ||
+        production?.description_extra?.en ||
+        production?.description_extra?.nl ||
+        production?.description_extra?.fr
+        
+    const description_2 =
+        production?.description_2?.[locale as 'en' | 'nl' | 'fr'] ||
+        production?.description_2?.en ||
+        production?.description_2?.nl ||
+        production?.description_2?.fr
+
+    const video_1 =
+        production?.video_1?.[locale as 'en' | 'nl' | 'fr'] ||
+        production?.video_1?.en ||
+        production?.video_1?.nl ||
+        production?.video_1?.fr
+
+    const video_2 =
+        production?.video_2?.[locale as 'en' | 'nl' | 'fr'] ||
+        production?.video_2?.en ||
+        production?.video_2?.nl ||
+        production?.video_2?.fr
+
+    const quote =
+        production?.quote?.[locale as 'en' | 'nl' | 'fr'] ||
+        production?.quote?.en ||
+        production?.quote?.nl ||
+        production?.quote?.fr
+
+    const quote_source =
+        production?.quote_source?.[locale as 'en' | 'nl' | 'fr'] ||
+        production?.quote_source?.en ||
+        production?.quote_source?.nl ||
+        production?.quote_source?.fr
+
+    const info =
+        production?.info?.[locale as 'en' | 'nl' | 'fr'] ||
+        production?.info?.en ||
+        production?.info?.nl ||
+        production?.info?.fr
 
     return (
         <PublicLayout>
@@ -134,115 +188,163 @@ function ArchiveDetailPage() {
 
                         {/* Text on top */}
                         <div className="absolute inset-0 flex flex-col justify-end p-6">
+                            
+                            <h1 className="text-1xl md:text-1xl text-white">
+                                {super_title || 'Untitled'}
+                            </h1>
+                            
                             <h1 className="text-3xl md:text-4xl font-bold text-white">
                                 {title || 'Untitled'}
                             </h1>
 
                             {artist && (
-                                <p className="text-lg text-white/90 mt-1">
+                                <p className="text-2xl md:text-2xl text-white mt-1">
                                     {artist}
                                 </p>
                             )}
                         </div>
                     </div>
+
+                    <div className="py-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <h2 className="text-xl font-bold mb-4">
+                                messages.detail.dates
+                            </h2>
+
+                            {events.length === 0 ? (
+                                <p>No upcoming events.</p>
+                            ) : (
+                                <div>
+                                    {/* Header row */}
+                                    <div className="grid grid-cols-3 gap-4 p-4 border-b border-[var(--color-border)] font-semibold text-sm">
+                                        <div>Date</div>
+                                        <div>Time</div>
+                                        <div>Location</div>
+                                    </div>
+
+                                    {/* Event rows */}
+                                    <div className="divide-y divide-[var(--color-border)]">
+                                        {visibleEvents.map((event) => {
+                                            const start = event.starts_at ? new Date(event.starts_at) : null
+                                            const end = event.ends_at ? new Date(event.ends_at) : null
+                                            const location = locationsByEvent[event.id]
+
+                                            return (
+                                                <div key={event.id} className="grid grid-cols-3 gap-4 p-4 text-sm">
+                                                    {/* Date */}
+                                                    <div className="font-medium">
+                                                        {start
+                                                            ? new Intl.DateTimeFormat(locale, {
+                                                                dateStyle: 'long',
+                                                            }).format(start)
+                                                            : '—'}
+                                                    </div>
+
+                                                    {/* Time */}
+                                                    <div className="text-[var(--color-text-muted)]">
+                                                        {start
+                                                            ? new Intl.DateTimeFormat(locale, {
+                                                                timeStyle: 'short',
+                                                            }).format(start)
+                                                            : '—'}
+                                                        {end &&
+                                                            ` - ${new Intl.DateTimeFormat(locale, {
+                                                                timeStyle: 'short',
+                                                            }).format(end)}`}
+                                                    </div>
+
+                                                    {/* Location */}
+                                                    <div className="text-[var(--color-text-accent)]">
+                                                        {location
+                                                            ? location.name ||
+                                                                [
+                                                                    location.street && location.number && `${location.street} ${location.number}`,
+                                                                    location.postal_code && location.city && `${location.postal_code} ${location.city}`
+                                                                ]
+                                                                .filter(Boolean)
+                                                                .join(', ') || '—'
+                                                            : '—'}
+                                                    </div>
+                                                </div>
+                                            )
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Show more button */}
+                            {events.length > 3 && (
+                                <button
+                                    onClick={() => setShowAllEvents(!showAllEvents)}
+                                    className="mt-4 text-sm font-medium text-[var(--color-accent)] hover:underline"
+                                >
+                                    showAllEvents
+                                        ? messages.detail.showLess || 'Show less'
+                                        : messages.detail.showMore || 'Show more'
+                                </button>
+                            )}
+                        </div>
+
+                        <div>
+                            {/* credits / related — coming soon */}
+                        </div>
+                    </div>
                 </div>
+            
             )}
 
-            <div className="site-container py-8">
+            <div className="site-container py-8 space-y-12">
+
+                <div className="prose max-w-none">
+                    {teaser ? (
+                        <div
+                            dangerouslySetInnerHTML={{ __html: teaser.replace(/\r?\n/g, '<br />') }}
+                        />
+                    ) : (
+                        <p>No teaser available.</p>
+                    )}
+                </div>
+
                 <div className="prose max-w-none">
                     {description ? (
                         <div
-                            dangerouslySetInnerHTML={{ __html: description }}
+                            dangerouslySetInnerHTML={{ __html: description.replace(/\r?\n/g, '<br />') }}
                         />
                     ) : (
                         <p>No description available.</p>
                     )}
                 </div>
-                
-                <div className="py-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div>
-                        <h2 className="text-xl font-bold mb-4">
-                            messages.detail.dates
-                        </h2>
 
-                        {events.length === 0 ? (
-                            <p>No upcoming events.</p>
-                        ) : (
-                            <div>
-                                {/* Header row */}
-                                <div className="grid grid-cols-3 gap-4 p-4 border-b border-[var(--color-border)] font-semibold text-sm">
-                                    <div>Date</div>
-                                    <div>Time</div>
-                                    <div>Location</div>
-                                </div>
-
-                                {/* Event rows */}
-                                <div className="divide-y divide-[var(--color-border)]">
-                                    {visibleEvents.map((event) => {
-                                        const start = event.starts_at ? new Date(event.starts_at) : null
-                                        const end = event.ends_at ? new Date(event.ends_at) : null
-                                        const location = locationsByEvent[event.id]
-
-                                        return (
-                                            <div key={event.id} className="grid grid-cols-3 gap-4 p-4 text-sm">
-                                                {/* Date */}
-                                                <div className="font-medium">
-                                                    {start
-                                                        ? new Intl.DateTimeFormat(locale, {
-                                                            dateStyle: 'long',
-                                                        }).format(start)
-                                                        : '—'}
-                                                </div>
-
-                                                {/* Time */}
-                                                <div className="text-[var(--color-text-muted)]">
-                                                    {start
-                                                        ? new Intl.DateTimeFormat(locale, {
-                                                            timeStyle: 'short',
-                                                        }).format(start)
-                                                        : '—'}
-                                                    {end &&
-                                                        ` - ${new Intl.DateTimeFormat(locale, {
-                                                            timeStyle: 'short',
-                                                        }).format(end)}`}
-                                                </div>
-
-                                                {/* Location */}
-                                                <div className="text-[var(--color-text-accent)]">
-                                                    {location
-                                                        ? location.name ||
-                                                            [
-                                                                location.street && location.number && `${location.street} ${location.number}`,
-                                                                location.postal_code && location.city && `${location.postal_code} ${location.city}`
-                                                            ]
-                                                            .filter(Boolean)
-                                                            .join(', ') || '—'
-                                                        : '—'}
-                                                </div>
-                                            </div>
-                                        )
-                                    })}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Show more button */}
-                        {events.length > 3 && (
-                            <button
-                                onClick={() => setShowAllEvents(!showAllEvents)}
-                                className="mt-4 text-sm font-medium text-[var(--color-accent)] hover:underline"
-                            >
-                                showAllEvents
-                                    ? messages.detail.showLess || 'Show less'
-                                    : messages.detail.showMore || 'Show more'
-                            </button>
-                        )}
-                    </div>
-
-                    <div>
-                        {/* credits / related — coming soon */}
-                    </div>
+                <div>
+                    {/* video_1/video_2 */}
                 </div>
+
+                <div className="prose max-w-none">
+                    {quote ? (
+                        <div
+                            dangerouslySetInnerHTML={{ __html: quote.replace(/\r?\n/g, '<br />') }}
+                        />
+                        
+                    ) : (
+                        <p>No quote available.</p>
+                    )}
+                    {quote_source && (
+                        <p className="text-sm text-right mt-2">
+                            — {quote_source}
+                        </p>
+                    )}
+                </div>
+
+                <div className="prose max-w-none">
+                    {description_2 ? (
+                        <div
+                            dangerouslySetInnerHTML={{ __html: description_2.replace(/\r?\n/g, '<br />') }}
+                        />
+                    ) : (
+                        <p>No description_2 available.</p>
+                    )}
+                </div>
+                
 
                 {/* Debug / inspection */}
                 <div className="mt-8">
