@@ -21,6 +21,7 @@ function ArchiveDetailPage() {
     const [events, setEvents] = useState<Event[]>([])
     const [locationsByEvent, setLocationsByEvent] = useState<Record<string, Location>>({})
     const [showAllEvents, setShowAllEvents] = useState(false)
+    const [galleryImages, setGalleryImages] = useState<(string | null)[]>([])
 
     const visibleEvents = showAllEvents ? events : events.slice(0, 5)
 
@@ -35,60 +36,78 @@ function ArchiveDetailPage() {
     useEffect(() => {
         if (!id) return
 
-        getProductionById(id).then((res) => {
-            const prod = res.data
-            setProduction(prod)
+        const fetchData = async () => {
+            try {
+                // 🔹 1. Fetch production + events in parallel
+                const [prodRes, eventsRes] = await Promise.all([
+                    getProductionById(id),
+                    getEventsByProductionId(id),
+                ])
 
-            if (prod.media_gallery_id) {
-                getGalleryItems(prod.media_gallery_id).then((galleryRes) => {
-                    const firstItem = galleryRes.data[0]
-                    if (!firstItem) return
-                    getItemCrops(firstItem.id).then((cropsRes) => {
-                        setImageUrl(getPreferredCropUrl(cropsRes.data))
-                    })
-                })
-            }
-        })
+                const prod = prodRes.data
+                const evts = eventsRes.data
 
-        getEventsByProductionId(id).then((res) => {
-            const evts = res.data
-            console.log('Events:', evts)
-            setEvents(evts)
+                setProduction(prod)
+                setEvents(evts)
 
-            evts.forEach((event) => {
-                console.log('Processing event:', event)
-                if (!event.hall_id) {
-                    console.log('Event has no hall_id')
-                    return
+                // 🔹 2. Handle gallery
+                if (prod.media_gallery_id) {
+                    const galleryRes = await getGalleryItems(prod.media_gallery_id)
+                    const items = galleryRes.data
+
+                    if (items.length > 0) {
+                        // 👉 Hero image (first item)
+                        const firstCrops = await getItemCrops(items[0].id)
+                        setImageUrl(getPreferredCropUrl(firstCrops.data))
+
+                        // 👉 (Optional) all gallery images
+                        const allCrops = await Promise.all(
+                            items.map((item) => getItemCrops(item.id))
+                        )
+                        const galleryImages = allCrops.map((res) =>
+                            getPreferredCropUrl(res.data)
+                        )
+                        setGalleryImages(galleryImages)
+                    }
                 }
 
-                getHallById(event.hall_id).then((hallRes) => {
-                    const hall = hallRes.data
-                    console.log('Hall for event', event.id, ':', hall)
-                    if (!hall.space_id) {
-                        console.log('Hall has no space_id')
-                        return
-                    }
+                // 🔹 3. Fetch locations for events (parallel per event)
+                const locationPromises = evts.map(async (event) => {
+                    if (!event.hall_id) return null
 
-                    getSpaceById(hall.space_id).then((spaceRes) => {
-                        const space = spaceRes.data
-                        console.log('Space for hall', hall.id, ':', space)
-                        if (!space.location_id) {
-                            console.log('Space has no location_id')
-                            return
-                        }
-                    
-                        getLocationById(space.location_id).then((locationRes) => {
-                            console.log('Location for space', space.id, ':', locationRes.data)
-                            setLocationsByEvent((prev) => ({
-                                ...prev,
-                                [event.id]: locationRes.data,
-                            }))
-                        })
-                    })
+                    try {
+                        const hall = (await getHallById(event.hall_id)).data
+                        if (!hall.space_id) return null
+
+                        const space = (await getSpaceById(hall.space_id)).data
+                        if (!space.location_id) return null
+
+                        const location = (await getLocationById(space.location_id)).data
+
+                        return { eventId: event.id, location }
+                    } catch {
+                        return null
+                    }
                 })
-            })
-        })
+
+                const locationResults = await Promise.all(locationPromises)
+
+                const locationMap: Record<string, Location> = {}
+
+                locationResults.forEach((res) => {
+                    if (res) {
+                        locationMap[res.eventId] = res.location
+                    }
+                })
+
+                setLocationsByEvent(locationMap)
+
+            } catch (error) {
+                console.error('Error loading data:', error)
+            }
+        }
+
+        fetchData()
     }, [id])
 
     const title =
