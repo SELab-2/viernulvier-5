@@ -323,9 +323,6 @@ function ArchiveDetailPage() {
                                 </div>
                             </details>
                         )}
-                        <div>
-                            {/* credits / related — coming soon */}
-                        </div>
                     </div>
                 </div>
             
