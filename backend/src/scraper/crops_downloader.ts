@@ -33,8 +33,17 @@ async function download_crop(crop: crop) {
             method: 'GET',
             responseType: 'arraybuffer',
         });
+        const contentType = response.headers['content-type'];
 
-        const filename = `${crop.id}.jpeg`;
+        let extension = 'webp'
+        if (contentType) {
+            const match = contentType.match(/\/([a-zA-Z0-9]+)/);
+            if (match) {
+                extension = match[1];
+            }
+        }
+
+        const filename = `${crop.id}.${extension}`;
         const filepath = path.join(process.env.FILE_LOCATION!, filename);
         fs.writeFileSync(filepath, response.data);
         const fullPath = path.resolve(filepath);
