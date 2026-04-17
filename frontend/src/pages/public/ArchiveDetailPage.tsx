@@ -348,6 +348,17 @@ function ArchiveDetailPage() {
                         />
                     </div>
                 )}
+
+                {info && (
+                    <div className="prose max-w-none">
+                        <h2 className="text-xl font-bold mb-4">
+                            messages.detail.credits
+                        </h2>
+                        <div
+                            dangerouslySetInnerHTML={{ __html: info.replace(/\r?\n/g, '<br />') }}
+                        />
+                    </div>
+                )}
                 
 
                 {/* Debug / inspection */}
