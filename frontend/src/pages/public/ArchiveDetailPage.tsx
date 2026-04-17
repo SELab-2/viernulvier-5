@@ -22,7 +22,8 @@ function ArchiveDetailPage() {
     const [locationsByEvent, setLocationsByEvent] = useState<Record<string, Location>>({})
     const [showAllEvents, setShowAllEvents] = useState(false)
     const [galleryImages, setGalleryImages] = useState<(string | null)[]>([])
-
+    const [currentImage, setCurrentImage] = useState(0)
+    
     const visibleEvents = showAllEvents ? events : events.slice(0, 5)
 
     const handleGoBackToHome = () => {
@@ -31,6 +32,18 @@ function ArchiveDetailPage() {
         } else {
             navigate(withLocalePath('/', locale))
         }
+    }
+
+    const nextImage = () => {
+        setCurrentImage((prev) =>
+            prev === galleryImages.length - 1 ? 0 : prev + 1
+        )
+    }
+
+    const prevImage = () => {
+        setCurrentImage((prev) =>
+            prev === 0 ? galleryImages.length - 1 : prev - 1
+        )
     }
 
     useEffect(() => {
@@ -341,6 +354,45 @@ function ArchiveDetailPage() {
                     </div>
                 )}
 
+                { galleryImages && galleryImages.length > 0 && (
+                    <div className="relative w-full">
+                        {/* Image */}
+                        <div className="w-full h-[300px] md:h-[400px] rounded-xl overflow-hidden">
+                            <img
+                                src={galleryImages[currentImage] || ''}
+                                alt={`Gallery image ${currentImage + 1}`}
+                                className="w-full h-full object-cover"
+                            />
+                        </div>
+
+                        {/* Controls (only if more than 1 image) */}
+                        {galleryImages.length > 1 && (
+                            <>
+                                {/* Left button */}
+                                <button
+                                    onClick={prevImage}
+                                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/40 text-white px-3 py-2 rounded-full hover:bg-black/60"
+                                >
+                                    ‹
+                                </button>
+
+                                {/* Right button */}
+                                <button
+                                    onClick={nextImage}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/40 text-white px-3 py-2 rounded-full hover:bg-black/60"
+                                >
+                                    ›
+                                </button>
+
+                                {/* Counter */}
+                                <div className="absolute bottom-4 right-4 bg-black/50 text-white text-sm px-3 py-1 rounded-full">
+                                    {currentImage + 1} / {galleryImages.length}
+                                </div>
+                            </>
+                        )}
+                    </div>
+                )}
+
                 {description_2 && (
                     <div className="prose max-w-none">
                         <div
@@ -361,12 +413,12 @@ function ArchiveDetailPage() {
                 )}
                 
 
-                {/* Debug / inspection */}
+                {/* Debug / inspection
                 <div className="mt-8">
                     <pre className="bg-gray-100 p-4 text-xs overflow-auto">
                         {JSON.stringify(production, null, 2)}
                     </pre>
-                </div>
+                </div> */}
             </div>
         </PublicLayout>
     )
