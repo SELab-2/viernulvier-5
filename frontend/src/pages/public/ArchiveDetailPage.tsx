@@ -139,12 +139,6 @@ function ArchiveDetailPage() {
         production?.description?.en ||
         production?.description?.nl ||
         production?.description?.fr
-
-    const description_extra =
-        production?.description_extra?.[locale as 'en' | 'nl' | 'fr'] ||
-        production?.description_extra?.en ||
-        production?.description_extra?.nl ||
-        production?.description_extra?.fr
         
     const description_2 =
         production?.description_2?.[locale as 'en' | 'nl' | 'fr'] ||
@@ -307,22 +301,6 @@ function ArchiveDetailPage() {
                                 </button>
                             )}
                         </div>
-                        
-                        {description_extra && (
-                            <details className="mt-6">
-                                <summary className="cursor-pointer text-sm font-medium text-[var(--color-accent)]">
-                                    messages.detail.moreInfo || 'More info'
-                                </summary>
-
-                                <div className="prose max-w-none mt-4">
-                                    <div
-                                        dangerouslySetInnerHTML={{
-                                            __html: description_extra,
-                                        }}
-                                    />
-                                </div>
-                            </details>
-                        )}
                     </div>
                 </div>
             
