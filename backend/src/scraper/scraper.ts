@@ -746,6 +746,7 @@ async function sync_items(cutoff_timestamp: Date | undefined = undefined){
     if (page.length === 0) break;
     page = filterByCutoff(page, cutoff_timestamp);
 
+
     await prisma.$transaction(async (tx) => {
       for (const item of page) {
 
