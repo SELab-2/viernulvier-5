@@ -165,7 +165,15 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
 
         <div className="overflow-hidden rounded-[12px] border border-[var(--color-admin-card-border)] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.05)] dark:bg-[#111318]">
           <div className="overflow-x-auto">
-            <table className="min-w-full border-collapse table-fixed">
+            <table className="w-full min-w-[960px] table-fixed border-collapse">
+              <colgroup>
+                <col />
+                <col className="w-[140px]" />
+                <col className="w-[200px]" />
+                <col className="w-[120px]" />
+                <col className="w-[140px]" />
+                <col className="w-[120px]" />
+              </colgroup>
               <thead className="bg-[rgba(248,250,252,0.7)] dark:bg-slate-900/60">
                 <tr>
                   {[
