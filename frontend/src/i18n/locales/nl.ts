@@ -200,7 +200,7 @@ const nl: Messages = {
   },
   detail: {
     navBackToOverview: '🡠 Terug naar overzicht',
-    dates: 'Data',
+    dates: 'Speelreeks Geschiedenis',
     noEvents: 'Geen verleden events.',
     date: 'Datum',
     time: "Tijd",
