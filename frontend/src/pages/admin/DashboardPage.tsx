@@ -116,7 +116,7 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
         <p className="text-base leading-6 text-[#475569] dark:text-slate-300">
           {d.pageSubtitle}
         </p>
-        <p className="text-sm leading-5 text-[#94a3b8] dark:text-slate-500">
+        <p className="text-sm leading-5 text-[#94a3b8] dark:text-slate-400">
           {d.pageNote}
         </p>
       </header>
@@ -151,7 +151,7 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
             <div className="mt-4 flex items-center gap-2">
               <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${card.pill}`}>{card.change}</span>
               {card.note ? (
-                <span className="text-xs text-[#94a3b8] dark:text-slate-500">{card.note}</span>
+                <span className="text-xs text-[#94a3b8] dark:text-slate-400">{card.note}</span>
               ) : null}
             </div>
           </article>
@@ -186,7 +186,7 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
                   ].map((heading) => (
                     <th
                       key={heading}
-                      className="border-b border-[var(--color-admin-card-border)] px-6 py-4 text-left text-[11px] font-medium uppercase tracking-[0.1em] text-[#475569]"
+                      className="border-b border-[var(--color-admin-card-border)] px-6 py-4 text-left text-[11px] font-medium uppercase tracking-[0.1em] text-[#475569] dark:text-slate-400"
                     >
                       {heading}
                     </th>
@@ -210,18 +210,18 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
                       </div>
                     </td>
                     <td className="whitespace-nowrap px-6 py-4">
-                      <span className="inline-block whitespace-nowrap rounded-full bg-slate-100 px-3 py-1 text-xs text-[#475569] dark:bg-slate-800 dark:text-slate-300">
+                      <span className="inline-block whitespace-nowrap rounded-full bg-slate-100 px-3 py-1 text-xs text-[#475569] dark:bg-slate-800 dark:text-[color:var(--color-text-muted)]">
                         {item.type}
                       </span>
                     </td>
                     <td className="whitespace-nowrap px-6 py-4">
-                      <span className="inline-flex items-center gap-2 whitespace-nowrap text-xs text-[#059669]">
+                      <span className="inline-flex items-center gap-2 whitespace-nowrap text-xs text-[#059669] dark:text-emerald-300">
                         <span className="h-2 w-2 shrink-0 rounded-full bg-[#10b981]" />
                         {d.statusAvailable}
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex gap-3 text-[9px] uppercase tracking-[0.08em] text-slate-500">
+                      <div className="flex gap-3 text-[9px] uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
                         {(['nl', 'en'] as const).map((loc) => {
                           const state = item.languageStatus[loc]
                           const dotClass = state === 'complete'
@@ -256,10 +256,10 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
                     <td className="px-6 py-4 text-sm text-[#475569] dark:text-slate-300">{formatDate(item.updatedAt)}</td>
                     <td className="px-6 py-4">
                       <div className="flex gap-1">
-                        <button className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white">
+                        <button className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white">
                           {d.actionView}
                         </button>
-                        <button className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white">
+                        <button className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white">
                           {d.actionEdit}
                         </button>
                       </div>
@@ -268,7 +268,8 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
                 ))}
                 {!isLoading && recentItems.length === 0 ? (
                   <tr className="h-[72px]">
-                    <td colSpan={6} className="px-6 py-10 text-center text-sm text-slate-500">
+                    <td colSpan={6} className="px-6 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+
                       {d.emptyRecent}
                     </td>
                   </tr>
@@ -288,10 +289,10 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-4">
             {!isLoading && total > 0 ? (
-              <p className="text-xs text-slate-500">{d.paginationShowing(from, to, total)}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">{d.paginationShowing(from, to, total)}</p>
             ) : null}
 
-            <label className="flex items-center gap-2 text-xs text-slate-500">
+            <label className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
               <span>{d.pageSizeLabel}</span>
               <select
                 value={pageSizeSetting}

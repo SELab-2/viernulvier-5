@@ -197,7 +197,7 @@ function AccountTab({
         <div className="space-y-6">
             {/* Profile section */}
             <section>
-                <h3 className="mb-4 text-sm font-semibold uppercase tracking-[0.08em] text-slate-400 dark:text-slate-500">
+                <h3 className="mb-4 text-sm font-semibold uppercase tracking-[0.08em] text-slate-400 dark:text-slate-400">
                     {s.accountSectionTitle}
                 </h3>
 
@@ -244,7 +244,7 @@ function AccountTab({
 
             {/* Security section */}
             <section>
-                <h3 className="mb-4 text-sm font-semibold uppercase tracking-[0.08em] text-slate-400 dark:text-slate-500">
+                <h3 className="mb-4 text-sm font-semibold uppercase tracking-[0.08em] text-slate-400 dark:text-slate-400">
                     {s.securitySectionTitle}
                 </h3>
 
@@ -543,7 +543,7 @@ function EditorsTab({ isVisible }: EditorsTabProps) {
         <div className="grid gap-6 lg:grid-cols-[minmax(16rem,0.95fr)_minmax(0,1.9fr)]">
             <section className="space-y-4">
                 <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-slate-400 dark:text-slate-500">
+                    <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-slate-400 dark:text-slate-400">
                         {s.editorsSectionTitle}
                     </h3>
                     <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-slate-600 dark:bg-slate-800 dark:text-slate-300">
@@ -560,7 +560,7 @@ function EditorsTab({ isVisible }: EditorsTabProps) {
                 ) : state.editors.length === 0 ? (
                     <div className="rounded-xl border border-dashed border-[var(--color-admin-card-border)] py-10 text-center">
                         <p className="text-sm text-slate-500 dark:text-slate-400">{s.noEditorsTitle}</p>
-                        <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+                        <p className="mt-1 text-xs text-slate-400 dark:text-slate-400">
                             {s.noEditorsHint}
                         </p>
                     </div>
@@ -610,7 +610,7 @@ function EditorsTab({ isVisible }: EditorsTabProps) {
                                 </svg>
                             </div>
                         ) : null}
-                        <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-slate-400 dark:text-slate-500">
+                        <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-slate-400 dark:text-slate-400">
                             {selectedEditor ? s.editEditorTitle : s.newEditorTitle}
                         </h3>
                     </div>
@@ -693,7 +693,7 @@ function EditorsTab({ isVisible }: EditorsTabProps) {
 
                         {/* Username rename subsection */}
                         <div className="space-y-2">
-                            <label className="block text-xs font-semibold uppercase tracking-[0.08em] text-slate-400 dark:text-slate-500">
+                            <label className="block text-xs font-semibold uppercase tracking-[0.08em] text-slate-400 dark:text-slate-400">
                                 {s.editorUsernameLabel}
                             </label>
                             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -719,7 +719,7 @@ function EditorsTab({ isVisible }: EditorsTabProps) {
                         {/* Password reset subsection */}
                         <div className="space-y-2">
                             <div>
-                                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-slate-400 dark:text-slate-500">{s.resetPasswordTitle}</p>
+                                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-slate-400 dark:text-slate-400">{s.resetPasswordTitle}</p>
                                 <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{s.resetPasswordHint}</p>
                             </div>
                             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
