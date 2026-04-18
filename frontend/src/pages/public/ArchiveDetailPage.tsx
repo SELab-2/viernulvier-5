@@ -34,6 +34,16 @@ function ArchiveDetailPage() {
         }
     }
 
+    const getYouTubeEmbedUrl = (url: string) => {
+        if (!url) return null
+
+        const match =
+            url.match(/youtube\.com\/watch\?v=([^&]+)/) ||
+            url.match(/youtu\.be\/([^?]+)/)
+
+        return match ? `https://www.youtube.com/embed/${match[1]}` : null
+    }
+
     const nextImage = () => {
         setCurrentImage((prev) =>
             prev === galleryImages.length - 1 ? 0 : prev + 1
@@ -159,17 +169,22 @@ function ArchiveDetailPage() {
         production?.description_2?.nl ||
         production?.description_2?.fr
 
-    // const video_1 =
-    //     production?.video_1?.[locale as 'en' | 'nl' | 'fr'] ||
-    //     production?.video_1?.en ||
-    //     production?.video_1?.nl ||
-    //     production?.video_1?.fr
+    const video_1 =
+        production?.video_1?.[locale as 'en' | 'nl' | 'fr'] ||
+        production?.video_1?.en ||
+        production?.video_1?.nl ||
+        production?.video_1?.fr
 
-    // const video_2 =
-    //     production?.video_2?.[locale as 'en' | 'nl' | 'fr'] ||
-    //     production?.video_2?.en ||
-    //     production?.video_2?.nl ||
-    //     production?.video_2?.fr
+    const video_2 =
+        production?.video_2?.[locale as 'en' | 'nl' | 'fr'] ||
+        production?.video_2?.en ||
+        production?.video_2?.nl ||
+        production?.video_2?.fr
+
+    const videos = [video_1, video_2]
+    .filter(Boolean)
+    .map((url) => getYouTubeEmbedUrl(url as string))
+    .filter(Boolean)
 
     const quote =
         production?.quote?.[locale as 'en' | 'nl' | 'fr'] ||
@@ -337,9 +352,25 @@ function ArchiveDetailPage() {
                     </div>
                 )}
 
-                <div>
-                    {/* video_1/video_2 */}
-                </div>
+                { (video_1 || video_2) && videos.length > 0 && (
+                    <div className="max-w-3xl mx-auto space-y-6">
+                        {videos.map((videoUrl, index) => (
+                            <div
+                                key={index}
+                                className="w-full aspect-video rounded-xl overflow-hidden"
+                            >
+                                <iframe
+                                    src={videoUrl!}
+                                    title={`Video ${index + 1}`}
+                                    className="w-full h-full"
+                                    loading="lazy"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                />
+                            </div>
+                        ))}
+                    </div>
+                )}
 
                 {quote && (
                     <div className="prose max-w-none">
