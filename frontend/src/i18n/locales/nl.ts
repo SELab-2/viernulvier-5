@@ -3,12 +3,17 @@ import type { Messages } from '../types'
 const nl: Messages = {
   common: {
     loading: 'Laden...',
+    brandName: 'VIERNULVIER',
+    brandLogoAlt: 'VIERNULVIER logo',
   },
   nav: {
     home: 'Home',
     archive: 'ARCHIEF',
     searchAriaLabel: 'Zoeken',
     searchPlaceholder: 'Zoek op titel, artiest of trefwoord...',
+    navAriaLabel: 'Hoofdnavigatie',
+    openMenuLabel: 'Open menu',
+    closeMenuLabel: 'Sluit menu',
   },
   home: {
     title: 'VIERNULVIER Archief',
@@ -26,8 +31,8 @@ const nl: Messages = {
     popularTags: ['theater', 'dans', 'concert', 'nightlife', 'talks', 'comedy', 'literatuur'],
     latestBlogHeading: 'recente blog post',
     latestBlogSubheading: 'verhalen, achtergronden en nieuws uit ons kunstencentrum',
-      latestBlogTitle: 'Van speleologie naar cultuurtempel: de hergeboorte van 1982',
-      latestBlogParagraphOne:
+    latestBlogTitle: 'Van speleologie naar cultuurtempel: de hergeboorte van 1982',
+    latestBlogParagraphOne:
       'Wist je dat de vooruit in de jaren 70 bijna een ruïne was? In 1982 nam een bende enthousiaste jongeren het heft in eigen handen. Gewapend met zaklampen en speleologiehelmen leidden ze duizenden gentenaars door de vergeten gangen van ons gebouw.',
     latestBlogParagraphTwoTitle: 'Eclectisch & complex gebouw',
     latestBlogParagraphTwo:
@@ -65,11 +70,30 @@ const nl: Messages = {
     ],
   },
   auth: {
-    loginTitle: 'Admin Login',
-    usernameLabel: 'Gebruikersnaam',
+    localeToggleLabel: 'Wissel taal',
+    darkModeLabel: 'Donkere modus',
+    lightModeLabel: 'Lichte modus',
+    adminLabel: 'Beheerder',
+    loginTitle: 'VIERNULVIER Admin',
+    loginSubtitle: 'Admin toegang voor VIERNULVIER Archief',
+    usernameLabel: 'Emailadres of gebruikersnaam',
+    usernamePlaceholder: 'naam@voorbeeld.be',
     passwordLabel: 'Wachtwoord',
+    passwordPlaceholder: '••••••••',
+    rememberMeLabel: 'Onthoud mij op dit apparaat',
     submit: 'Inloggen',
-    loginFailed: 'Login mislukt',
+    submitting: 'Bezig met inloggen...',
+    loginFailed: 'Inloggen lukt momenteel niet.',
+    invalidCredentials: 'Ongeldige inloggegevens.',
+    rateLimitReached: 'Te veel inlogpogingen. Probeer het straks opnieuw.',
+    navigationTitle: 'Navigatie',
+    dashboardLabel: 'Dashboard',
+    dashboardTitle: 'Admin dashboard',
+    dashboardDescription: 'Beheer het VIERNULVIER-archief vanuit een centrale werkruimte.',
+    productionsLabel: 'Producties',
+    statisticsLabel: 'Statistieken',
+    archiveLabel: 'Archief',
+    logoutLabel: 'Uitloggen',
   },
   detail: {
     navBackToOverview: '🡠 Terug naar overzicht',
@@ -83,6 +107,8 @@ const nl: Messages = {
     credits: 'Credits',
   },
   footer: {
+    brandLogoAlt: 'VIERNULVIER logo',
+    organizationName: 'Kunstencentrum VIERNULVIER vzw.',
     about: 'De Kunstencentrum VIERNULVIER archiefcollectie bewaart en ontsluit meer dan 40 jaar podiumkunsten geschiedenis in De Vooruit.',
     navigationTitle: 'Navigatie',
     navHome: 'Home',
