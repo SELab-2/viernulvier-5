@@ -199,7 +199,7 @@ const nl: Messages = {
     logoutLabel: 'Uitloggen',
   },
   detail: {
-    navBackToOverview: '🡠 Terug naar overzicht',
+    navBack: '🡠 Terug',
     events: 'Speelreeks Geschiedenis',
     noEvents: 'Geen verleden events.',
     date: 'Datum',

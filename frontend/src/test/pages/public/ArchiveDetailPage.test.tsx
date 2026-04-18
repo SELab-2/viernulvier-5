@@ -21,7 +21,7 @@ vi.mock('../../../i18n', () => ({
         nav: { archive: 'Archief', searchAriaLabel: 'Zoeken', searchPlaceholder: 'Zoek...' },
         home: { title: 'Home' },
         detail: {
-            navBackToOverview: 'Terug naar overzicht',
+            navBack: 'Terug',
             dates: 'Speeldata',
             events: 'Speeldata',
             date: 'Datum',
@@ -142,7 +142,7 @@ describe('ArchiveDetailPage', () => {
     it('renders the back button', async () => {
         renderPage()
 
-        expect(await screen.findByText('Terug naar overzicht')).toBeInTheDocument()
+        expect(await screen.findByText('Terug')).toBeInTheDocument()
     })
 
     it('renders the teaser content after loading', async () => {
@@ -211,7 +211,7 @@ describe('ArchiveDetailPage', () => {
 
         renderPage()
 
-        const backButton = await screen.findByText('Terug naar overzicht')
+        const backButton = await screen.findByText('Terug')
         fireEvent.click(backButton)
 
         expect(navigate).toHaveBeenCalledWith(-1)
@@ -222,7 +222,7 @@ describe('ArchiveDetailPage', () => {
 
         renderPage()
 
-        const backButton = await screen.findByText('Terug naar overzicht')
+        const backButton = await screen.findByText('Terug')
         fireEvent.click(backButton)
 
         expect(navigate).toHaveBeenCalledWith('/')
