@@ -12,13 +12,21 @@ export async function apiFetch<T>(
 ): Promise<T> {
     const url = `${API_BASE}${endpoint}`
 
+    // Only send Content-Type when there is a body to avoid servers
+    // rejecting bodyless DELETE requests with 'Body cannot be empty
+    // when content-type is set to application/json'.
+    const hasBody = options.body !== undefined && options.body !== null
+    const defaultHeaders: Record<string, string> = hasBody
+        ? { 'Content-Type': 'application/json' }
+        : {}
+
     const response = await fetch(url, {
         credentials: 'include', // Include cookies for auth
+        ...options,
         headers: {
-            'Content-Type': 'application/json',
+            ...defaultHeaders,
             ...options.headers,
         },
-        ...options,
     })
 
     if (!response.ok) {
@@ -43,6 +51,9 @@ export const api = {
 
     put: <T>(endpoint: string, body: unknown) =>
         apiFetch<T>(endpoint, { method: 'PUT', body: JSON.stringify(body) }),
+
+    patch: <T>(endpoint: string, body: unknown) =>
+        apiFetch<T>(endpoint, { method: 'PATCH', body: JSON.stringify(body) }),
 
     delete: <T>(endpoint: string) =>
         apiFetch<T>(endpoint, { method: 'DELETE' }),

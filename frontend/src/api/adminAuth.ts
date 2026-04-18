@@ -1,13 +1,13 @@
 import { api } from './client'
 
 export type SessionUser = {
-  sub: string
+  id: string
   username: string
   role: string
 }
 
 export type SessionResponse = {
-  user: SessionUser
+  data: SessionUser
 }
 
 export function loginAdmin(username: string, password: string): Promise<unknown> {
