@@ -1,7 +1,7 @@
 import type { FastifyRequest, FastifyReply } from 'fastify'
 import '@fastify/cookie'
 import { AuthService } from './auth.service.js'
-import type { LoginInput, UserResponse } from './auth.schema.js'
+import type { LoginInput, UpdateMeInput, UserResponse } from './auth.schema.js'
 
 /**
  * Auth Controller — handles login/logout HTTP requests.
@@ -9,17 +9,17 @@ import type { LoginInput, UserResponse } from './auth.schema.js'
 export class AuthController {
     constructor(private readonly service: AuthService) { }
 
-    private getBaseUrl(request: FastifyRequest) {
-        const host = request.headers.host || request.hostname
-        return `${request.protocol}://${host}/api/v1/auth`
+    private getBasePath() {
+        return '/api/v1/auth'
     }
 
-    private mapUserLinks(user: any, baseUrl: string): UserResponse {
+    private mapUserLinks(user: any): UserResponse {
+        const basePath = this.getBasePath()
         return {
             ...user,
             links: {
-                self: `${baseUrl}/me`,
-                logout: `${baseUrl}/logout`,
+                self: `${basePath}/me`,
+                logout: `${basePath}/logout`,
             }
         }
     }
@@ -39,24 +39,24 @@ export class AuthController {
             maxAge: 8 * 60 * 60, // 8 hours
         })
 
-        const baseUrl = this.getBaseUrl(request)
-        
-        return reply.status(200).send({ 
-            data: { 
-                user: this.mapUserLinks(user, baseUrl)
+        const basePath = this.getBasePath()
+
+        return reply.status(200).send({
+            data: {
+                user: this.mapUserLinks(user)
             },
             links: {
-                self: `${baseUrl}/login`
+                self: `${basePath}/login`
             }
         })
     }
 
-    async logout(request: FastifyRequest, reply: FastifyReply) {
+    async logout(_request: FastifyRequest, reply: FastifyReply) {
         reply.clearCookie('token', { path: '/' })
         return reply.status(200).send({
             data: { success: true },
             links: {
-                self: `${this.getBaseUrl(request)}/logout`
+                self: `${this.getBasePath()}/logout`
             }
         })
     }
@@ -69,13 +69,29 @@ export class AuthController {
             return reply.status(404).send({ message: 'User not found' })
         }
 
-        const baseUrl = this.getBaseUrl(request)
-        const dataWithLinks = this.mapUserLinks(user, baseUrl)
+        const basePath = this.getBasePath()
+        const dataWithLinks = this.mapUserLinks(user)
 
         return reply.status(200).send({
             data: dataWithLinks,
             links: {
-                self: `${baseUrl}/me`
+                self: `${basePath}/me`
+            }
+        })
+    }
+
+    async updateMe(
+        request: FastifyRequest<{ Body: UpdateMeInput }>,
+        reply: FastifyReply
+    ) {
+        const userId = (request.user as any).sub
+        const user = await this.service.updateCurrentUser(userId, request.body)
+        const basePath = this.getBasePath()
+
+        return reply.status(200).send({
+            data: this.mapUserLinks(user),
+            links: {
+                self: `${basePath}/me`
             }
         })
     }

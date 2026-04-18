@@ -9,9 +9,11 @@ export const loginSchema = z.object({
 /**
  * Explicit links for the Auth/User resource.
  */
+const authLinkSchema = z.string().regex(/^\/[^\s]*$/).default('/api/v1/auth/me')
+
 export const authLinksSchema = z.object({
-    self: z.string().url().default('https://example.com/'),
-    logout: z.string().url().optional().nullable().default('https://example.com/'),
+    self: authLinkSchema,
+    logout: authLinkSchema.optional().default('/api/v1/auth/logout'),
 })
 
 export const userSchema = z.object({
@@ -28,9 +30,27 @@ export const authResponseSchema = z.object({
         user: userSchema,
     }),
     links: z.object({
-        self: z.string().url().default('https://example.com/'),
+        self: authLinkSchema.default('/api/v1/auth/login'),
     })
 })
+
+export const updateMeSchema = z.object({
+    username: z.string().min(1).optional(),
+    currentPassword: z.string().min(6).optional(),
+    newPassword: z.string().min(6).optional(),
+}).refine(
+    (value) => value.username !== undefined || value.newPassword !== undefined,
+    {
+        message: 'At least one field must be updated',
+    }
+).refine(
+    (value) => (value.newPassword === undefined && value.currentPassword === undefined)
+        || (value.newPassword !== undefined && value.currentPassword !== undefined),
+    {
+        message: 'Current password is required to set a new password',
+        path: ['currentPassword'],
+    }
+)
 
 export const meResponseSchema = createSingleResponseSchema(userSchema)
 
@@ -39,4 +59,5 @@ export const errorSchema = z.object({
 })
 
 export type LoginInput = z.infer<typeof loginSchema>
+export type UpdateMeInput = z.infer<typeof updateMeSchema>
 export type UserResponse = z.infer<typeof userSchema>
