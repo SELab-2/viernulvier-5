@@ -21,18 +21,20 @@ describe('useDashboardSummary', () => {
         counts: {
           productions: 1,
           events: 2,
+          blogs: 0,
           mediaItems: 3,
           editors: 4,
         },
         recentItems: [],
+        totalRecentItems: 2,
         lastScrapedAt: null,
       },
     })
 
-    renderHook(() => useDashboardSummary())
+    renderHook(() => useDashboardSummary({ page: 1, limit: 3 }))
 
     await waitFor(() => {
-      expect(apiGetMock).toHaveBeenCalledWith('/dashboard/summary')
+      expect(apiGetMock).toHaveBeenCalledWith('/dashboard/summary?page=1&limit=3')
     })
   })
 })

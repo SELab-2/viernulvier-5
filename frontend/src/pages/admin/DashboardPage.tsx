@@ -4,8 +4,41 @@ import AdminLayout from '../../components/admin/AdminLayout'
 import { useDashboardSummary } from '../../components/admin/useDashboardSummary'
 import type { Locale } from '../../i18n/types'
 
+const PAGE_SIZE = 3
+
+type DeltaInfo = { changePct: number | null; direction: 'up' | 'down' | 'flat' }
+
 function makeCountFormatter(locale: Locale): Intl.NumberFormat {
   return new Intl.NumberFormat(locale === 'nl' ? 'nl-BE' : 'en-GB')
+}
+
+function makeSignFormatter(locale: Locale): Intl.NumberFormat {
+  return new Intl.NumberFormat(locale === 'nl' ? 'nl-BE' : 'en-GB', {
+    signDisplay: 'exceptZero',
+    maximumFractionDigits: 0,
+  })
+}
+
+function formatDeltaPill(delta: DeltaInfo | undefined, signFormatter: Intl.NumberFormat): string {
+  if (!delta || delta.changePct === null) {
+    return '—'
+  }
+
+  return signFormatter.format(delta.changePct) + '%'
+}
+
+function pillClasses(delta: DeltaInfo | undefined): string {
+  const direction = delta?.direction ?? 'flat'
+
+  if (direction === 'up') {
+    return 'bg-[#ecfdf5] text-[#10b981]'
+  }
+
+  if (direction === 'down') {
+    return 'bg-[#fef2f2] text-[#ef4444]'
+  }
+
+  return 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
 }
 
 function makeDateFormatter(locale: Locale): Intl.DateTimeFormat {
@@ -22,20 +55,20 @@ type DashboardPageContentProps = {
 
 function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
   const messages = useAdminMessages()
-  const { summary, isLoading, error } = useDashboardSummary()
   const d = messages.admin.dashboard
+  const [page, setPage] = useState(1)
+
+  const { summary, isLoading, error } = useDashboardSummary({ page, limit: PAGE_SIZE })
 
   useEffect(() => {
     onUserRoleChange(summary ? d.editorsActive(summary.counts.editors) : undefined)
   }, [d, onUserRoleChange, summary])
 
-  // Locale is derived from messages — use the locale stored in the html element
-  // as a lightweight proxy. The admin namespace keys themselves are locale-matched,
-  // but count/date formatting needs an explicit locale tag.
   const htmlLang = document.documentElement.lang as Locale | undefined
   const activeLocale: Locale = htmlLang === 'en' ? 'en' : 'nl'
   const countFormatter = makeCountFormatter(activeLocale)
   const dateFormatter = makeDateFormatter(activeLocale)
+  const signFormatter = makeSignFormatter(activeLocale)
 
   function formatCount(value: number): string {
     return countFormatter.format(value)
@@ -49,26 +82,29 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
     return dateFormatter.format(new Date(value))
   }
 
+  const productionsDelta = summary?.deltas?.productions
+  const blogsDelta = summary?.deltas?.blogs
+
   const stats = [
     {
       label: d.statProductions,
       value: summary ? formatCount(summary.counts.productions) : '—',
-      change: d.statLiveData,
-      note: d.statImportedArchive,
+      change: formatDeltaPill(productionsDelta, signFormatter),
+      note: productionsDelta?.changePct !== null && productionsDelta !== undefined ? d.deltaVsLastMonth : null,
       accent: 'bg-[rgba(236,19,55,0.1)] text-[#ec1337]',
-      pill: 'bg-[#ecfdf5] text-[#10b981]',
+      pill: pillClasses(productionsDelta),
       iconSrc: '/admin/dashboard/productions-icon.svg',
       iconAlt: d.statProductions,
     },
     {
-      label: d.statEvents,
-      value: summary ? formatCount(summary.counts.events) : '—',
-      change: d.statLinked,
-      note: d.statLinkedEvents,
+      label: d.statBlogConcepts,
+      value: summary ? formatCount(summary.counts.blogs) : '—',
+      change: formatDeltaPill(blogsDelta, signFormatter),
+      note: blogsDelta?.changePct !== null && blogsDelta !== undefined ? d.deltaVsLastMonth : null,
       accent: 'bg-[rgba(245,158,11,0.1)] text-[#f59e0b]',
-      pill: 'bg-[#fffbeb] text-[#d97706]',
+      pill: pillClasses(blogsDelta),
       iconSrc: '/admin/dashboard/concepts-icon.svg',
-      iconAlt: d.statEvents,
+      iconAlt: d.statBlogConcepts,
     },
     {
       label: d.statVisitors,
@@ -93,6 +129,17 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
   ]
 
   const recentItems = summary?.recentItems ?? []
+  const total = summary?.totalRecentItems ?? 0
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
+  const from = (page - 1) * PAGE_SIZE + 1
+  const to = Math.min(page * PAGE_SIZE, total)
+
+  const windowSize = Math.min(totalPages, 3)
+  const windowStart = Math.min(
+    Math.max(1, page - Math.floor(windowSize / 2)),
+    Math.max(1, totalPages - windowSize + 1),
+  )
+  const visiblePages = Array.from({ length: windowSize }, (_, i) => windowStart + i)
 
   return (
     <section className="mx-auto flex w-full max-w-[960px] flex-col gap-6">
@@ -137,7 +184,9 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
             </div>
             <div className="mt-4 flex items-center gap-2">
               <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${card.pill}`}>{card.change}</span>
-              <span className="text-xs text-[#94a3b8] dark:text-slate-500">{card.note}</span>
+              {card.note ? (
+                <span className="text-xs text-[#94a3b8] dark:text-slate-500">{card.note}</span>
+              ) : null}
             </div>
           </article>
         ))}
@@ -150,7 +199,7 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
 
         <div className="overflow-hidden rounded-[12px] border border-[var(--color-admin-card-border)] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.05)] dark:bg-[#111318]">
           <div className="overflow-x-auto">
-            <table className="min-w-full border-collapse">
+            <table className="min-w-full border-collapse table-fixed">
               <thead className="bg-[rgba(248,250,252,0.7)] dark:bg-slate-900/60">
                 <tr>
                   {[
@@ -172,13 +221,18 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
               </thead>
               <tbody>
                 {recentItems.map((item) => (
-                  <tr key={item.id} className="border-t border-slate-100 dark:border-slate-800">
-                    <td className="px-4 py-4">
+                  <tr key={item.id} className="h-[72px] border-t border-slate-100 dark:border-slate-800">
+                    <td className="w-[40%] max-w-0 px-4 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded bg-slate-100 text-xs font-semibold text-slate-500 dark:bg-slate-800 dark:text-slate-300">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-slate-100 text-xs font-semibold text-slate-500 dark:bg-slate-800 dark:text-slate-300">
                           {item.title.slice(0, 2).toUpperCase()}
                         </div>
-                        <span className="text-base text-[#0f172a] dark:text-white">{item.title}</span>
+                        <span
+                          className="block min-w-0 flex-1 truncate text-base text-[#0f172a] dark:text-white"
+                          title={item.title}
+                        >
+                          {item.title}
+                        </span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -225,37 +279,64 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
                   </tr>
                 ))}
                 {!isLoading && recentItems.length === 0 ? (
-                  <tr>
+                  <tr className="h-[72px]">
                     <td colSpan={6} className="px-6 py-10 text-center text-sm text-slate-500">
                       {d.emptyRecent}
                     </td>
                   </tr>
                 ) : null}
+                {!isLoading && recentItems.length > 0 && recentItems.length < PAGE_SIZE
+                  ? Array.from({ length: PAGE_SIZE - recentItems.length }).map((_, i) => (
+                      <tr key={`placeholder-${i}`} className="h-[72px] border-t border-slate-100 dark:border-slate-800" aria-hidden>
+                        <td colSpan={6} />
+                      </tr>
+                    ))
+                  : null}
               </tbody>
             </table>
           </div>
         </div>
 
-        <div className="flex flex-col gap-4 text-xs text-[#475569] sm:flex-row sm:items-center sm:justify-between">
-          <p>
-            {summary
-              ? d.paginationShowing(1, recentItems.length, summary.counts.productions + summary.counts.events)
-              : d.paginationDefault}
-          </p>
-          <div className="flex gap-1">
-            {['‹', '1', '2', '3', '›'].map((token, index) => (
+        <div className="flex items-center justify-between">
+          {!isLoading && total > 0 ? (
+            <p className="text-xs text-slate-500">{d.paginationShowing(from, to, total)}</p>
+          ) : (
+            <span />
+          )}
+
+          <div className="flex items-center gap-2">
+            <button
+              aria-label={d.paginationPrev}
+              disabled={page === 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              className="flex h-8 w-8 items-center justify-center rounded-md border border-[var(--color-admin-card-border)] bg-white text-sm text-[#475569] transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-[#111318] dark:text-slate-300 dark:hover:bg-slate-800"
+            >
+              ‹
+            </button>
+
+            {visiblePages.map((p) => (
               <button
-                key={token + index}
-                className={[
-                  'flex h-8 w-8 items-center justify-center rounded border text-xs',
-                  token === '1'
-                    ? 'border-accent bg-accent text-white'
-                    : 'border-[var(--color-admin-card-border)] bg-white text-[#0f172a] dark:bg-[#111318] dark:text-white',
-                ].join(' ')}
+                key={p}
+                aria-label={String(p)}
+                onClick={() => setPage(p)}
+                className={`flex h-8 w-8 items-center justify-center rounded-md border text-sm transition ${
+                  p === page
+                    ? 'border-accent bg-accent font-semibold text-white'
+                    : 'border-[var(--color-admin-card-border)] bg-white text-[#0f172a] hover:bg-slate-50 dark:bg-[#111318] dark:text-white dark:hover:bg-slate-800'
+                }`}
               >
-                {token}
+                {p}
               </button>
             ))}
+
+            <button
+              aria-label={d.paginationNext}
+              disabled={page >= totalPages}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              className="flex h-8 w-8 items-center justify-center rounded-md border border-[var(--color-admin-card-border)] bg-white text-sm text-[#475569] transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-[#111318] dark:text-slate-300 dark:hover:bg-slate-800"
+            >
+              ›
+            </button>
           </div>
         </div>
       </section>

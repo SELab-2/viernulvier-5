@@ -1,10 +1,16 @@
 import { useEffect, useState } from 'react'
 import { api } from '../../api/client'
 
+type Delta = {
+    changePct: number | null
+    direction: 'up' | 'down' | 'flat'
+}
+
 export type DashboardSummary = {
     counts: {
         productions: number
         events: number
+        blogs: number
         mediaItems: number
         editors: number
     }
@@ -19,7 +25,12 @@ export type DashboardSummary = {
         }
         updatedAt: string
     }>
+    totalRecentItems: number
     lastScrapedAt: string | null
+    deltas: {
+        productions: Delta
+        blogs: Delta
+    }
 }
 
 type DashboardSummaryResponse = {
@@ -32,7 +43,12 @@ type DashboardSummaryState = {
     error: string | null
 }
 
-export function useDashboardSummary(): DashboardSummaryState {
+type DashboardSummaryArgs = {
+    page: number
+    limit: number
+}
+
+export function useDashboardSummary({ page, limit }: DashboardSummaryArgs): DashboardSummaryState {
     const [state, setState] = useState<DashboardSummaryState>({
         summary: null,
         isLoading: true,
@@ -42,7 +58,7 @@ export function useDashboardSummary(): DashboardSummaryState {
     useEffect(() => {
         let isActive = true
 
-        api.get<DashboardSummaryResponse>('/dashboard/summary')
+        api.get<DashboardSummaryResponse>(`/dashboard/summary?page=${page}&limit=${limit}`)
             .then((response) => {
                 if (!isActive) {
                     return
@@ -70,7 +86,7 @@ export function useDashboardSummary(): DashboardSummaryState {
         return () => {
             isActive = false
         }
-    }, [])
+    }, [page, limit])
 
     return state
 }

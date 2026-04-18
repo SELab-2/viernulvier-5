@@ -128,7 +128,8 @@ export type Messages = {
       actionEdit: string
       emptyRecent: string
       paginationShowing: (from: number, to: number, total: number) => string
-      paginationDefault: string
+      paginationPrev: string
+      paginationNext: string
       notSyncedYet: string
       lastSync: string
       syncStatusPending: string
@@ -137,15 +138,12 @@ export type Messages = {
       visitorsChange: string
       editorsActive: (count: number) => string
       statProductions: string
-      statEvents: string
+      statBlogConcepts: string
       statVisitors: string
       statMediaItems: string
-      statImportedArchive: string
-      statLinkedEvents: string
+      deltaVsLastMonth: string
       statLastSync: string
       statSyncPending: string
-      statLiveData: string
-      statLinked: string
     }
     archiveEdit: {
       pageTitle: string
