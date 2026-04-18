@@ -1,0 +1,67 @@
+name: Notify on Discord when PR is ready for review
+
+on:
+  pull_request:
+    types: [ready_for_review]
+
+jobs:
+  notify:
+    runs-on: self-hosted
+
+    permissions:
+      pull-requests: read
+
+    steps:
+      - name: Notify Discord
+        uses: actions/github-script@v8
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const DISCORD_MAP = {
+              laveenae: "1489694586098946129",
+              LiamVDB1: "1489694455723462787",
+              sarahvlan: "1489694521603133521",
+              tuurdaneels: "1489694424530161816",
+              Jorenve: "1489694554721616162",
+              julesbauw: "1489694485490303206",
+              jminjuk2: "1489694397779017898",
+              ninavandezande: "1489694279088476273"
+            };
+
+            const pr = context.payload.pull_request;
+
+            if (pr.draft) {
+              core.info("Still draft — skipping.");
+              return;
+            }
+
+            const { data: fullPr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number
+            });
+
+            const reviewers = fullPr.requested_reviewers.map(r => r.login);
+
+            if (reviewers.length === 0) {
+              core.info("No reviewers.");
+              return;
+            }
+
+            const mentions = reviewers
+              .map(user => DISCORD_MAP[user])
+              .filter(Boolean)
+              .map(id => `<@&${id}>`)
+              .join(' ');
+
+            const message = {
+              content: `🔔 **PR Ready for Review**\n${mentions}\n📦 **${pr.title}**\n🔗 ${pr.html_url}`
+            };
+
+            await fetch(process.env.DISCORD_WEBHOOK, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(message)
+            });
