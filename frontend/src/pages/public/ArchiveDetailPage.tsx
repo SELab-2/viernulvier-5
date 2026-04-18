@@ -42,6 +42,23 @@ function ArchiveDetailPageContent() {
         }
     }
 
+    const formatHtml = (html: string) => {
+        const hptm = html
+            // 1. remove empty <p> first (before adding <br /> chaos)
+            .replace(/<p>(\s|&nbsp;|<br\s*\/?>)*<\/p>/g, '')
+
+            // 2. normalize newlines
+            .replace(/\r?\n/g, '<br />')
+
+            // 3. remove trailing <br />
+            .replace(/(<br\s*\/?>\s*)+$/g, '')
+
+            .trim()
+
+        console.log(hptm)
+        return hptm
+    }
+
     useEffect(() => {
         if (!id) return
 
@@ -130,40 +147,45 @@ function ArchiveDetailPageContent() {
                 />
             </div>
 
-            {imageUrl && (
-                <div className="site-container mt-6">
+            <div className="site-container mt-6">
+                {imageUrl && (
                     <ArchiveDetailHero
                         imageUrl={imageUrl}
                         title={title}
                         superTitle={superTitle}
                         artist={artist}
                     />
-
-                    <div className="py-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div>
-                            <h2 className="text-xl font-bold mb-4">{messages.detail.events}</h2>
-                            <ArchiveDetailEventsList
-                                events={events}
-                                locationsByEvent={locationsByEvent}
-                                locale={locale}
-                            />
-                        </div>
-                    </div>
-                </div>
-            )}
+                )}
+            </div>
 
             <div className="site-container py-8 space-y-12">
                 {teaser && (
                     <div className="prose max-w-none">
-                        <div dangerouslySetInnerHTML={{ __html: teaser.replace(/\r?\n/g, '<br />') }} />
+                        <div dangerouslySetInnerHTML={
+                                { __html: formatHtml(teaser) }
+                            } />
                     </div>
                 )}
 
                 {description && (
                     <div className="prose max-w-none">
-                        <div dangerouslySetInnerHTML={{ __html: description.replace(/\r?\n/g, '<br />') }} />
+                        <div dangerouslySetInnerHTML={{ __html: formatHtml(description) }} />
                     </div>
                 )}
+
+                <div className="grid grid-cols-1 gap-8">
+                    <div>
+                        <h2 className="text-xl font-bold mb-4">
+                            {messages.detail.events}
+                        </h2>
+
+                        <ArchiveDetailEventsList
+                            events={events}
+                            locationsByEvent={locationsByEvent}
+                            locale={locale}
+                        />
+                    </div>
+                </div>
 
                 {videos.length > 0 && (
                     <div
