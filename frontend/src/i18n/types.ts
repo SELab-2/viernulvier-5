@@ -127,7 +127,7 @@ export type Messages = {
   }
   detail: {
     navBackToOverview: string
-    dates: string
+    events: string
     noEvents: string
     date: string
     time: string

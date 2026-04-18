@@ -141,7 +141,7 @@ function ArchiveDetailPageContent() {
 
                     <div className="py-8 grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div>
-                            <h2 className="text-xl font-bold mb-4">{messages.detail.dates}</h2>
+                            <h2 className="text-xl font-bold mb-4">{messages.detail.events}</h2>
                             <ArchiveDetailEventsList
                                 events={events}
                                 locationsByEvent={locationsByEvent}
