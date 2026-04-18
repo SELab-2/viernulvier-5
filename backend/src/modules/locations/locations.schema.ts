@@ -1,4 +1,8 @@
 import { z } from 'zod'
+import { 
+    createPaginatedResponseSchema, 
+    createSingleResponseSchema 
+} from '../../utils/rest-schemas.js'
 
 const localizedTextSchema = z.object({
     nl: z.string().optional(),
@@ -6,11 +10,19 @@ const localizedTextSchema = z.object({
     en: z.string().optional(),
 }).nullable()
 
-export const paginationQuerySchema = z.object({
+export const locationPaginationQuerySchema = z.object({
     page: z.coerce.number().int().positive().default(1),
     limit: z.coerce.number().int().positive().max(100).default(20),
     search: z.string().optional(),
     lang: z.string().optional().default('nl'),
+})
+
+/**
+ * Explicit links for the Location resource.
+ */
+export const locationLinksSchema = z.object({
+    self: z.string().url().default('https://example.com/'),
+    spaces: z.string().url().optional().nullable().default('https://example.com/'),
 })
 
 export const locationSchema = z.object({
@@ -29,17 +41,11 @@ export const locationSchema = z.object({
     uitdatabank_id: z.string().nullable(),
     created_at: z.coerce.date(),
     updated_at: z.coerce.date(),
+    links: locationLinksSchema.optional(),
 })
 
-export const locationListSchema = z.object({
-    data: z.array(locationSchema),
-    meta: z.object({
-        total: z.number(),
-        page: z.number(),
-        limit: z.number(),
-        totalPages: z.number(),
-    }),
-})
+export const locationListSchema = createPaginatedResponseSchema(locationSchema)
+export const singleLocationSchema = createSingleResponseSchema(locationSchema)
 
 export const idParamSchema = z.object({
     id: z.string().uuid(),
@@ -66,7 +72,7 @@ export const errorSchema = z.object({
     message: z.string(),
 })
 
-export type PaginationQuery = z.infer<typeof paginationQuerySchema>
+export type LocationPaginationQuery = z.infer<typeof locationPaginationQuerySchema>
 export type LocationResponse = z.infer<typeof locationSchema>
 export type LocationListResponse = z.infer<typeof locationListSchema>
 export type UpdateLocationInput = z.infer<typeof updateLocationSchema>
