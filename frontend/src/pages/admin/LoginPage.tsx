@@ -1,82 +1,117 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { api } from '../../api/client'
-import { getMessages } from '../../i18n'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { getAdminSession, loginAdmin } from '../../api/adminAuth'
+import type { Messages } from '../../i18n/types'
+import AdminLayout from '../../components/admin/AdminLayout'
+import { useAdminMessages } from '../../components/admin/AdminMessagesContext'
+import AdminLoginForm from '../../components/admin/AdminLoginForm'
+import { getAdminRouteConfig } from '../../admin/paths'
+import { primeAdminSession } from '../../auth/primedAdminSession'
 
-/**
- * Admin login page.
- */
-function LoginPage() {
-    const navigate = useNavigate()
-    const messages = getMessages()
-    const [username, setUsername] = useState('')
-    const [password, setPassword] = useState('')
-    const [error, setError] = useState('')
+function loginAndFetchSession(username: string, password: string) {
+  return loginAdmin(username, password).then(() => getAdminSession())
+}
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        setError('')
+const LOGIN_ERROR_KEYS = {
+  invalidCredentials: 'invalidCredentials',
+  rateLimitReached: 'rateLimitReached',
+  loginFailed: 'loginFailed',
+} as const
 
-        try {
-            await api.post('/auth/login', { username, password })
-            navigate('/admin')
-        } catch (err) {
-            setError(err instanceof Error ? err.message : messages.auth.loginFailed)
-        }
+type LoginErrorKey = keyof typeof LOGIN_ERROR_KEYS
+
+const adminIconSrc = '/admin-icon.svg'
+
+function mapLoginError(message: string): LoginErrorKey {
+  if (message === 'Invalid credentials') {
+    return LOGIN_ERROR_KEYS.invalidCredentials
+  }
+
+  if (message === 'Too many login attempts') {
+    return LOGIN_ERROR_KEYS.rateLimitReached
+  }
+
+  return LOGIN_ERROR_KEYS.loginFailed
+}
+
+function getLoginErrorMessage(errorKey: LoginErrorKey | null, messages: Messages) {
+  if (!errorKey) {
+    return ''
+  }
+
+  return messages.auth[errorKey]
+}
+
+function LoginPageContent() {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const messages = useAdminMessages()
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [rememberMe, setRememberMe] = useState(false)
+  const [errorKey, setErrorKey] = useState<LoginErrorKey | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const { dashboardPath } = getAdminRouteConfig(window.location.hostname)
+  const from = (location.state as { from?: string } | null)?.from ?? dashboardPath
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setErrorKey(null)
+    setIsSubmitting(true)
+
+    try {
+      const session = await loginAndFetchSession(username, password)
+      primeAdminSession(session)
+      navigate(from, { replace: true })
+    } catch (err) {
+      const message = err instanceof Error ? err.message : ''
+      setErrorKey(mapLoginError(message))
+    } finally {
+      setIsSubmitting(false)
     }
+  }
 
-    return (
-        <main className="min-h-screen bg-gray-100 flex items-center justify-center">
-            <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-                <h1 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-                    {messages.auth.loginTitle}
-                </h1>
+  return (
+    <section className="w-full max-w-[27.5rem] text-center">
+      <div className="mx-auto flex h-24 w-24 items-center justify-center overflow-hidden rounded-xl">
+        <img src={adminIconSrc} alt="Admin icon" className="h-full w-full object-fill" />
+      </div>
+      <div className="mb-10">
+        <h1 className="text-[2rem] font-bold tracking-[-0.04em] text-foreground max-[640px]:text-[1.75rem]">
+          {messages.auth.loginTitle}
+        </h1>
+        <p className="text-sm text-slate-500">{messages.auth.loginSubtitle}</p>
+      </div>
 
-                {error && (
-                    <div className="bg-red-50 text-red-700 p-3 rounded mb-4 text-sm">
-                        {error}
-                    </div>
-                )}
+      <AdminLoginForm
+        username={username}
+        password={password}
+        rememberMe={rememberMe}
+        error={getLoginErrorMessage(errorKey, messages)}
+        isSubmitting={isSubmitting}
+        usernameLabel={messages.auth.usernameLabel}
+        usernamePlaceholder={messages.auth.usernamePlaceholder}
+        passwordLabel={messages.auth.passwordLabel}
+        passwordPlaceholder={messages.auth.passwordPlaceholder}
+        rememberMeLabel={messages.auth.rememberMeLabel}
+        submitLabel={messages.auth.submit}
+        submittingLabel={messages.auth.submitting}
+        onUsernameChange={setUsername}
+        onPasswordChange={setPassword}
+        onRememberMeChange={setRememberMe}
+        onSubmit={handleSubmit}
+      />
+    </section>
+  )
+}
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
-                            {messages.auth.usernameLabel}
-                        </label>
-                        <input
-                            id="username"
-                            type="text"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            required
-                        />
-                    </div>
-
-                    <div>
-                        <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                            {messages.auth.passwordLabel}
-                        </label>
-                        <input
-                            id="password"
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            required
-                        />
-                    </div>
-
-                    <button
-                        type="submit"
-                        className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
-                    >
-                        {messages.auth.submit}
-                    </button>
-                </form>
-            </div>
-        </main>
-    )
+function LoginPage() {
+  return (
+    <AdminLayout showFooter={false} showLogout={false} mainClassName="flex items-center justify-center px-4 py-16 max-[640px]:py-12">
+      <LoginPageContent />
+    </AdminLayout>
+  )
 }
 
 export default LoginPage

@@ -1,7 +1,14 @@
 import { Pool } from 'pg'
 import { PrismaPg } from '@prisma/adapter-pg'
+import { config } from 'dotenv'
+import { fileURLToPath } from 'node:url'
+import { dirname, resolve } from 'node:path'
 import { hashPassword } from '../src/utils/password.js'
 import { PrismaClient } from '@prisma/client'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+
+config({ path: resolve(__dirname, '../.env') })
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
