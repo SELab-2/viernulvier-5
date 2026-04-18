@@ -25,24 +25,27 @@ function getLoadingSessionState(): AdminSessionState {
   }
 }
 
+function getEnabledInitialSessionState(): AdminSessionState {
+  const primedSession = consumePrimedAdminSession()
+  if (primedSession) {
+    return { isLoading: false, isAuthenticated: true, user: primedSession.data }
+  }
+  return getLoadingSessionState()
+}
+
 export function useAdminSession(enabled = true): AdminSessionState {
   const [state, setState] = useState<AdminSessionState>(() => (
-    enabled ? getLoadingSessionState() : getIdleSessionState()
+    enabled ? getEnabledInitialSessionState() : getIdleSessionState()
   ))
+  const [prevEnabled, setPrevEnabled] = useState(enabled)
+
+  if (prevEnabled !== enabled) {
+    setPrevEnabled(enabled)
+    setState(enabled ? getEnabledInitialSessionState() : getIdleSessionState())
+  }
 
   useEffect(() => {
-    if (!enabled) {
-      setState((current) => (
-        current.isLoading || current.isAuthenticated || current.user
-          ? getIdleSessionState()
-          : current
-      ))
-      return
-    }
-
-    const primedSession = consumePrimedAdminSession()
-    if (primedSession) {
-      setState({ isLoading: false, isAuthenticated: true, user: primedSession.data })
+    if (!enabled || !state.isLoading) {
       return
     }
 
@@ -63,7 +66,7 @@ export function useAdminSession(enabled = true): AdminSessionState {
     return () => {
       isActive = false
     }
-  }, [enabled])
+  }, [enabled, state.isLoading])
 
   return state
 }

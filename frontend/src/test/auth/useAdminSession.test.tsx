@@ -12,13 +12,17 @@ describe('useAdminSession', () => {
 
   it('starts in an authenticated state when a primed session exists', () => {
     vi.spyOn(primedAdminSession, 'consumePrimedAdminSession').mockReturnValue({
-      user: { sub: '1', username: 'admin', role: 'admin' },
+      data: { id: '1', username: 'admin', role: 'ADMIN' },
     })
     const fetchSpy = vi.spyOn(globalThis, 'fetch')
 
     const { result } = renderHook(() => useAdminSession())
 
-    expect(result.current).toEqual({ isLoading: false, isAuthenticated: true })
+    expect(result.current).toEqual({
+      isLoading: false,
+      isAuthenticated: true,
+      user: { id: '1', username: 'admin', role: 'ADMIN' },
+    })
     expect(fetchSpy).not.toHaveBeenCalled()
   })
 
@@ -38,12 +42,16 @@ describe('useAdminSession', () => {
     })
 
     primeAdminSession({
-      user: { sub: '1', username: 'admin', role: 'admin' },
+      data: { id: '1', username: 'admin', role: 'ADMIN' },
     })
 
     const { result } = renderHook(() => useAdminSession())
 
-    expect(result.current).toEqual({ isLoading: false, isAuthenticated: true })
+    expect(result.current).toEqual({
+      isLoading: false,
+      isAuthenticated: true,
+      user: { id: '1', username: 'admin', role: 'ADMIN' },
+    })
     expect(fetchSpy).not.toHaveBeenCalled()
   })
 

@@ -75,12 +75,14 @@ function AdminLayout({
   const drawerRef = useRef<HTMLDivElement>(null)
   const openerRef = useRef<HTMLButtonElement>(null)
   const { user } = useAdminSession(showSidebar)
-  const [sessionUser, setSessionUser] = useState<SessionUser | null>(null)
+  const [sessionUser, setSessionUser] = useState<SessionUser | null>(user ?? null)
+  const [prevUser, setPrevUser] = useState<SessionUser | null>(user ?? null)
   const messages = useMemo(() => getMessages(locale), [locale])
 
-  useEffect(() => {
+  if (prevUser !== (user ?? null)) {
+    setPrevUser(user ?? null)
     setSessionUser(user ?? null)
-  }, [user])
+  }
 
   const getFocusableElements = useCallback((): HTMLElement[] => {
     if (!drawerRef.current) {
