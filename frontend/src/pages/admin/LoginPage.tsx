@@ -81,7 +81,7 @@ function LoginPageContent() {
         <h1 className="text-[2rem] font-bold tracking-[-0.04em] text-foreground max-[640px]:text-[1.75rem]">
           {messages.auth.loginTitle}
         </h1>
-        <p className="text-sm text-slate-500">{messages.auth.loginSubtitle}</p>
+        <p className="text-sm text-slate-500 dark:text-slate-400">{messages.auth.loginSubtitle}</p>
       </div>
 
       <AdminLoginForm

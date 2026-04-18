@@ -68,7 +68,7 @@ function AdminSidebar({ userName, userRole, onOpenSettings, onClose }: AdminSide
               return (
                 <div
                   key={item.id}
-                  className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-500 opacity-70"
+                  className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-500 opacity-70 dark:text-slate-400"
                 >
                   <img src={item.iconSrc} alt={iconAlt} className="h-4 w-4 shrink-0 opacity-70" />
                   <span>{label}</span>
