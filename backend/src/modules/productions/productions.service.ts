@@ -10,6 +10,40 @@ import { PaginatedResult, calculateTotalPages } from '../../utils/pagination.js'
 export class ProductionsService {
     constructor(private readonly repository: ProductionsRepository) { }
 
+    private getItemPosition(item: any): number {
+        return typeof item?.position === 'number' && Number.isFinite(item.position)
+            ? item.position
+            : Number.POSITIVE_INFINITY
+    }
+
+    private sortImageItems(items: any[]): any[] {
+        return [...items].sort((a, b) => this.getItemPosition(a) - this.getItemPosition(b))
+    }
+
+    private extractPreferredCropUrl(crops: any[]): string | undefined {
+        const preferredCropNames = ['fe3_header', 'fe3_grid']
+
+        for (const cropName of preferredCropNames) {
+            const preferredCrop = crops.find(
+                (crop) => typeof crop?.name === 'string' && crop.name.trim().toLowerCase() === cropName,
+            )
+
+            const preferredUrl = this.extractUrlCandidate(preferredCrop?.url)
+            if (preferredUrl) {
+                return preferredUrl
+            }
+        }
+
+        for (const crop of crops) {
+            const fromCrop = this.extractUrlCandidate(crop?.url)
+            if (fromCrop) {
+                return fromCrop
+            }
+        }
+
+        return undefined
+    }
+
     private getLocalizedName(value: unknown): string | null {
         if (!value || typeof value !== 'object') {
             return null
@@ -64,15 +98,14 @@ export class ProductionsService {
     private extractImageUrl(production: any): string | null {
         const posterItems = Array.isArray(production.poster_gallery?.items) ? production.poster_gallery.items : []
         const mediaItems = Array.isArray(production.media_gallery?.items) ? production.media_gallery.items : []
+        const sortedItems = this.sortImageItems([...posterItems, ...mediaItems])
 
-        for (const item of [...posterItems, ...mediaItems]) {
+        for (const item of sortedItems) {
             const crops = Array.isArray(item?.crops) ? item.crops : []
 
-            for (const crop of crops) {
-                const fromCrop = this.extractUrlCandidate(crop?.url)
-                if (fromCrop) {
-                    return fromCrop
-                }
+            const fromPreferredCrop = this.extractPreferredCropUrl(crops)
+            if (fromPreferredCrop) {
+                return fromPreferredCrop
             }
 
             const fromItem = this.extractUrlCandidate(item?.link)
