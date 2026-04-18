@@ -68,7 +68,12 @@ function ArchiveDetailPage() {
                 ])
 
                 const prod = prodRes.data
-                const evts = eventsRes.data
+                
+                const now = new Date()
+                const evts = eventsRes.data.filter((event) => {
+                    if (!event.starts_at) return false
+                    return new Date(event.starts_at) < now
+                })
 
                 setProduction(prod)
                 setEvents(evts)
