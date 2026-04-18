@@ -381,13 +381,23 @@ function EditorsTab({ isVisible }: EditorsTabProps) {
     const createUsernameId = useId()
     const createPasswordId = useId()
 
+    const [loadToken, setLoadToken] = useState(0)
+    const [prevVisible, setPrevVisible] = useState(isVisible)
+
+    if (prevVisible !== isVisible) {
+        setPrevVisible(isVisible)
+        if (isVisible) {
+            setState((current) => ({ ...current, isLoading: true, error: null }))
+            setLoadToken((token) => token + 1)
+        }
+    }
+
     useEffect(() => {
         if (!isVisible) {
             return
         }
 
         let isActive = true
-        setState((current) => ({ ...current, isLoading: true, error: null }))
 
         api.get<EditorsResponse>('/editors')
             .then((response) => {
@@ -406,7 +416,7 @@ function EditorsTab({ isVisible }: EditorsTabProps) {
         return () => {
             isActive = false
         }
-    }, [isVisible, s.editorsLoadError])
+    }, [isVisible, loadToken, s.editorsLoadError])
 
     const selectedEditor = useMemo(
         () => state.editors.find((editor) => editor.id === editingId) ?? null,
@@ -770,16 +780,18 @@ function SettingsModal({ isOpen, onClose, user, onUserUpdated }: SettingsModalPr
 
     const isAdmin = user?.role === 'ADMIN'
 
-    useEffect(() => {
-        if (user) {
-            setAccountState((current) => ({
-                ...current,
-                username: user.username,
-            }))
-        }
-    }, [user])
+    const [prevUserUsername, setPrevUserUsername] = useState(user?.username)
+    if (user && prevUserUsername !== user.username) {
+        setPrevUserUsername(user.username)
+        setAccountState((current) => ({
+            ...current,
+            username: user.username,
+        }))
+    }
 
-    useEffect(() => {
+    const [prevIsOpen, setPrevIsOpen] = useState(isOpen)
+    if (prevIsOpen !== isOpen) {
+        setPrevIsOpen(isOpen)
         if (!isOpen) {
             setActiveTab('account')
             setPasswordState(INITIAL_PASSWORD_STATE)
@@ -790,7 +802,7 @@ function SettingsModal({ isOpen, onClose, user, onUserUpdated }: SettingsModalPr
                 isSaving: false,
             })
         }
-    }, [isOpen, user])
+    }
 
     function handleUserUpdated(nextUser: SessionUser) {
         onUserUpdated?.(nextUser)
