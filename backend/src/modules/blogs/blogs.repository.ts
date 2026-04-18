@@ -33,13 +33,19 @@ export class BlogsRepository {
 
         if (search) {
             const searchLower = search.toLowerCase()
-            results = results.filter(b => 
-                b.title.toLowerCase().includes(searchLower) || 
+            results = results.filter(b =>
+                b.title.toLowerCase().includes(searchLower) ||
                 b.content.toLowerCase().includes(searchLower)
             )
         }
 
         return results.length
+    }
+
+    async countInRange({ from, to }: { from: Date; to: Date }): Promise<number> {
+        return this.mockBlogs.filter(
+            (b) => b.createdAt >= from && b.createdAt < to,
+        ).length
     }
 
     async findById(id: string): Promise<BlogResponse | null> {
