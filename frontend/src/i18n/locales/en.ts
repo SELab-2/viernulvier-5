@@ -96,7 +96,7 @@ const en: Messages = {
     logoutLabel: 'Log out',
   },
   detail: {
-    navBackToOverview: '🡠 Back to overview',
+    navBack: '🡠 Go Back',
     events: 'Event History',
     noEvents: 'No past events.',
     date: 'Date',
