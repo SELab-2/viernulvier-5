@@ -23,8 +23,8 @@ export const hallPaginationQuerySchema = z.object({
  */
 export const hallLinksSchema = z.object({
     self: z.string().url().default('https://example.com/'),
-    space: z.string().url().optional().default('https://example.com/'),
-    events: z.string().url().optional().default('https://example.com/'),
+    space: z.string().url().optional().nullable().default('https://example.com/'),
+    events: z.string().url().optional().nullable().default('https://example.com/'),
 })
 
 export const hallSchema = z.object({

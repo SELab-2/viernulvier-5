@@ -21,7 +21,7 @@ export class HallsController {
             ...hall,
             links: {
                 self: `${baseUrl}/halls/${hall.id}`,
-                space: hall.space_id ? `${baseUrl}/spaces/${hall.space_id}` : undefined,
+                space: hall.space_id ? `${baseUrl}/spaces/${hall.space_id}` : null,
                 events: `${baseUrl}/events?hallId=${hall.id}`,
             }
         }
