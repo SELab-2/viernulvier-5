@@ -353,7 +353,13 @@ function ArchiveDetailPage() {
                 )}
 
                 { (video_1 || video_2) && videos.length > 0 && (
-                    <div className="max-w-3xl mx-auto space-y-6">
+                    <div
+                        className={`mx-auto gap-6 ${
+                            videos.length === 1
+                                ? 'max-w-3xl'
+                                : 'max-w-5xl grid grid-cols-1 md:grid-cols-2'
+                        }`}
+                    >
                         {videos.map((videoUrl, index) => (
                             <div
                                 key={index}
