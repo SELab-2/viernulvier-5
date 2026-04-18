@@ -3,13 +3,13 @@ import { UitdatabankRepository } from './uitdatabank.repository.js'
 import { UitdatabankService } from './uitdatabank.service.js'
 import { UitdatabankController } from './uitdatabank.controller.js'
 import { 
-    paginationQuerySchema, 
+    uitdatabankPaginationQuerySchema, 
     keywordListSchema,
-    keywordSchema,
+    singleKeywordSchema,
     themeListSchema,
-    themeSchema,
+    singleThemeSchema,
     typeListSchema,
-    typeSchema,
+    singleTypeSchema,
     idParamSchema,
     errorSchema
 } from './uitdatabank.schema.js'
@@ -23,7 +23,7 @@ const uitdatabankRoutes: FastifyPluginAsync = async (fastify) => {
         schema: {
             tags: ['UIT databank'],
             summary: 'Get a paginated list of UIT databank keywords',
-            querystring: paginationQuerySchema,
+            querystring: uitdatabankPaginationQuerySchema,
             response: {
                 200: keywordListSchema,
             },
@@ -37,7 +37,7 @@ const uitdatabankRoutes: FastifyPluginAsync = async (fastify) => {
             summary: 'Get a keyword by ID',
             params: idParamSchema,
             response: {
-                200: keywordSchema,
+                200: singleKeywordSchema,
                 404: errorSchema
             },
         },
@@ -48,7 +48,7 @@ const uitdatabankRoutes: FastifyPluginAsync = async (fastify) => {
         schema: {
             tags: ['UIT databank'],
             summary: 'Get a paginated list of UIT databank themes',
-            querystring: paginationQuerySchema,
+            querystring: uitdatabankPaginationQuerySchema,
             response: {
                 200: themeListSchema,
             },
@@ -62,7 +62,7 @@ const uitdatabankRoutes: FastifyPluginAsync = async (fastify) => {
             summary: 'Get a theme by ID',
             params: idParamSchema,
             response: {
-                200: themeSchema,
+                200: singleThemeSchema,
                 404: errorSchema
             },
         },
@@ -73,7 +73,7 @@ const uitdatabankRoutes: FastifyPluginAsync = async (fastify) => {
         schema: {
             tags: ['UIT databank'],
             summary: 'Get a paginated list of UIT databank types',
-            querystring: paginationQuerySchema,
+            querystring: uitdatabankPaginationQuerySchema,
             response: {
                 200: typeListSchema,
             },
@@ -87,7 +87,7 @@ const uitdatabankRoutes: FastifyPluginAsync = async (fastify) => {
             summary: 'Get a type by ID',
             params: idParamSchema,
             response: {
-                200: typeSchema,
+                200: singleTypeSchema,
                 404: errorSchema
             },
         },
