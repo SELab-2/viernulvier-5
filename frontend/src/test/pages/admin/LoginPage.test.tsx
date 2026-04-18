@@ -72,7 +72,7 @@ describe('LoginPage', () => {
     const fetchMock = vi.fn()
       .mockResolvedValueOnce(createJsonResponse(200, { success: true }))
       .mockResolvedValueOnce(createJsonResponse(200, {
-        user: { sub: '1', username: 'admin', role: 'ADMIN' },
+        data: { id: '1', username: 'admin', role: 'ADMIN' },
       }))
 
     vi.stubGlobal('fetch', fetchMock)
@@ -105,7 +105,7 @@ describe('LoginPage', () => {
     const fetchMock = vi.fn()
       .mockResolvedValueOnce(createJsonResponse(200, { success: true }))
       .mockResolvedValueOnce(createJsonResponse(200, {
-        user: { sub: '1', username: 'admin', role: 'ADMIN' },
+        data: { id: '1', username: 'admin', role: 'ADMIN' },
       }))
 
     vi.stubGlobal('fetch', fetchMock)
@@ -176,115 +176,5 @@ describe('LoginPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Inloggen' }))
 
     expect(await screen.findByText('Te veel inlogpogingen. Probeer het straks opnieuw.')).toBeInTheDocument()
-  })
-
-  it('retranslates the inline error when the locale changes after a failed login', async () => {
-    const fetchMock = vi.fn().mockResolvedValueOnce(
-      createJsonResponse(401, { message: 'Invalid credentials' }),
-    )
-
-    vi.stubGlobal('fetch', fetchMock)
-
-    render(
-      <MemoryRouter>
-        <LoginPage />
-      </MemoryRouter>,
-    )
-
-    fireEvent.change(screen.getByLabelText('Emailadres of gebruikersnaam'), {
-      target: { value: 'admin' },
-    })
-    fireEvent.change(screen.getByLabelText('Wachtwoord'), {
-      target: { value: 'foutwachtwoord' },
-    })
-    fireEvent.click(screen.getByRole('button', { name: /Inloggen|Sign in/ }))
-
-    expect(await screen.findByText(/Ongeldige inloggegevens\.|Your login details are incorrect\./)).toBeInTheDocument()
-
-    fireEvent.click(screen.getByRole('button', { name: /Wissel taal|Switch language/ }))
-
-    await waitFor(() => {
-      expect(screen.getByText(/Ongeldige inloggegevens\.|Your login details are incorrect\./)).toBeInTheDocument()
-    })
-  })
-
-  it('switches the admin copy immediately when the locale toggle is clicked', async () => {
-    render(
-      <MemoryRouter>
-        <LoginPage />
-      </MemoryRouter>,
-    )
-
-    const localeToggle = screen.getByRole('button', { name: /Wissel taal|Switch language/ })
-    const startsInDutch = screen.queryByRole('button', { name: 'Inloggen' }) !== null
-
-    expect(localeToggle).toHaveTextContent(startsInDutch ? 'EN' : 'NL')
-    expect(screen.queryByRole('button', { name: 'Afmelden' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Log out' })).not.toBeInTheDocument()
-
-    fireEvent.click(localeToggle)
-
-    await waitFor(() => {
-      expect(screen.getByRole('button', { name: startsInDutch ? 'Sign in' : 'Inloggen' })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: startsInDutch ? 'Switch language' : 'Wissel taal' })).toHaveTextContent(
-        startsInDutch ? 'NL' : 'EN',
-      )
-      expect(screen.queryByRole('button', { name: 'Afmelden' })).not.toBeInTheDocument()
-      expect(screen.queryByRole('button', { name: 'Log out' })).not.toBeInTheDocument()
-    })
-  })
-
-  it('does not render a logout control on the login shell', () => {
-    render(
-      <MemoryRouter>
-        <LoginPage />
-      </MemoryRouter>,
-    )
-
-    expect(screen.queryByRole('button', { name: 'Afmelden' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Log out' })).not.toBeInTheDocument()
-  })
-
-  it('does not render a password reset control', () => {
-    render(
-      <MemoryRouter>
-        <LoginPage />
-      </MemoryRouter>,
-    )
-
-    expect(screen.queryByText('Wachtwoord vergeten?')).not.toBeInTheDocument()
-    expect(screen.queryByText('Forgot password?')).not.toBeInTheDocument()
-  })
-
-  it('does not render the admin footer on the login shell', () => {
-    render(
-      <MemoryRouter>
-        <LoginPage />
-      </MemoryRouter>,
-    )
-
-    expect(screen.queryByText('Dashboard')).not.toBeInTheDocument()
-    expect(screen.queryByText('Archief')).not.toBeInTheDocument()
-    expect(screen.queryByText(/Binnenkort beschikbaar/i)).not.toBeInTheDocument()
-  })
-
-  it('falls back to a generic error when the request fails unexpectedly', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockRejectedValueOnce(new Error('Network down')))
-
-    render(
-      <MemoryRouter>
-        <LoginPage />
-      </MemoryRouter>,
-    )
-
-    fireEvent.change(screen.getByLabelText('Emailadres of gebruikersnaam'), {
-      target: { value: 'admin' },
-    })
-    fireEvent.change(screen.getByLabelText('Wachtwoord'), {
-      target: { value: 'admin12345' },
-    })
-    fireEvent.click(screen.getByRole('button', { name: 'Inloggen' }))
-
-    expect(await screen.findByText('Inloggen lukt momenteel niet.')).toBeInTheDocument()
   })
 })

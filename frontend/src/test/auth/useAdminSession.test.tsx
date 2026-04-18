@@ -14,21 +14,25 @@ describe('useAdminSession', () => {
 
     const { result } = renderHook(() => useAdminSession())
 
-    expect(result.current).toEqual({ isLoading: true, isAuthenticated: false })
+    expect(result.current).toEqual({ isLoading: true, isAuthenticated: false, user: null })
   })
 
   it('marks the session as authenticated after a successful response', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       ok: true,
       json: async () => ({
-        user: { sub: '1', username: 'admin', role: 'admin' },
+        data: { id: '1', username: 'admin', role: 'ADMIN' },
       }),
     } as Response)
 
     const { result } = renderHook(() => useAdminSession())
 
     await waitFor(() => {
-      expect(result.current).toEqual({ isLoading: false, isAuthenticated: true })
+      expect(result.current).toEqual({
+        isLoading: false,
+        isAuthenticated: true,
+        user: { id: '1', username: 'admin', role: 'ADMIN' },
+      })
     })
   })
 
@@ -41,7 +45,7 @@ describe('useAdminSession', () => {
     const { result } = renderHook(() => useAdminSession())
 
     await waitFor(() => {
-      expect(result.current).toEqual({ isLoading: false, isAuthenticated: false })
+      expect(result.current).toEqual({ isLoading: false, isAuthenticated: false, user: null })
     })
   })
 
@@ -64,12 +68,48 @@ describe('useAdminSession', () => {
       resolveFetch?.({
         ok: true,
         json: async () => ({
-          user: { sub: '1', username: 'admin', role: 'admin' },
+          data: { id: '1', username: 'admin', role: 'ADMIN' },
         }),
       } as Response)
       await Promise.resolve()
     })
 
     expect(consoleErrorSpy).not.toHaveBeenCalled()
+  })
+
+  it('stays idle and skips the session request when disabled', () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch')
+
+    const { result } = renderHook(() => useAdminSession(false))
+
+    expect(result.current).toEqual({ isLoading: false, isAuthenticated: false, user: null })
+    expect(fetchSpy).not.toHaveBeenCalled()
+  })
+
+  it('resets to the idle state when disabled after authentication', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        data: { id: '1', username: 'admin', role: 'ADMIN' },
+      }),
+    } as Response)
+
+    const { result, rerender } = renderHook(({ enabled }) => useAdminSession(enabled), {
+      initialProps: { enabled: true },
+    })
+
+    await waitFor(() => {
+      expect(result.current).toEqual({
+        isLoading: false,
+        isAuthenticated: true,
+        user: { id: '1', username: 'admin', role: 'ADMIN' },
+      })
+    })
+
+    rerender({ enabled: false })
+
+    await waitFor(() => {
+      expect(result.current).toEqual({ isLoading: false, isAuthenticated: false, user: null })
+    })
   })
 })

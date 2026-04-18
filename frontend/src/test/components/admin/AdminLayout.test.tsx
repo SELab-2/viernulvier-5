@@ -19,6 +19,7 @@ const adminTopBarProps = vi.hoisted(() => ({
   },
 }))
 const clearPrimedAdminSessionMock = vi.hoisted(() => vi.fn())
+const consumePrimedAdminSessionMock = vi.hoisted(() => vi.fn(() => null))
 const getActiveLocaleMock = vi.hoisted(() => vi.fn())
 const setActiveLocaleMock = vi.hoisted(() => vi.fn())
 
@@ -78,6 +79,15 @@ vi.mock('../../../components/admin/AdminFooter', () => ({
 
 vi.mock('../../../auth/primedAdminSession', () => ({
   clearPrimedAdminSession: clearPrimedAdminSessionMock,
+  consumePrimedAdminSession: consumePrimedAdminSessionMock,
+}))
+
+vi.mock('../../../auth/useAdminSession', () => ({
+  useAdminSession: () => ({
+    isLoading: false,
+    isAuthenticated: false,
+    user: null,
+  }),
 }))
 
 vi.mock('../../../components/admin/AdminSidebar', () => ({
