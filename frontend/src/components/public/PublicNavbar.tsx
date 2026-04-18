@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { getActiveLocale, getMessages, setActiveLocale, withLocalePath } from '../../i18n'
+import { withLocalePath } from '../../i18n'
+import { usePublicMessages } from './PublicMessagesContext'
 
 type Theme = 'light' | 'dark'
 
@@ -125,11 +126,15 @@ function SearchToggleButton({ onToggle, ariaLabel, isExpanded, className }: Sear
     )
 }
 
-function PublicNavbar() {
+type PublicNavbarProps = {
+    locale: 'nl' | 'en'
+    onToggleLocale: () => void
+}
+
+function PublicNavbar({ locale, onToggleLocale }: PublicNavbarProps) {
     const location = useLocation()
     const navigate = useNavigate()
-    const locale = getActiveLocale(location.pathname)
-    const messages = getMessages(locale)
+    const messages = usePublicMessages()
     const [theme, setTheme] = useState<Theme>(resolveTheme)
     const [isSearchOpen, setIsSearchOpen] = useState(false)
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -167,8 +172,8 @@ function PublicNavbar() {
     }
 
     const toggleLocale = () => {
+        onToggleLocale()
         const nextLocale = locale === 'nl' ? 'en' : 'nl'
-        setActiveLocale(nextLocale)
         const localizedPath = withLocalePath(location.pathname, nextLocale)
         navigate(`${localizedPath}${location.search}${location.hash}`)
     }
