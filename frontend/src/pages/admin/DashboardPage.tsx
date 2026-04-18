@@ -201,14 +201,14 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className="rounded-full bg-slate-100 px-3 py-1 text-xs text-[#475569] dark:bg-slate-800 dark:text-slate-300">
+                    <td className="whitespace-nowrap px-6 py-4">
+                      <span className="inline-block whitespace-nowrap rounded-full bg-slate-100 px-3 py-1 text-xs text-[#475569] dark:bg-slate-800 dark:text-slate-300">
                         {item.type}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className="inline-flex items-center gap-2 text-xs text-[#059669]">
-                        <span className="h-2 w-2 rounded-full bg-[#10b981]" />
+                    <td className="whitespace-nowrap px-6 py-4">
+                      <span className="inline-flex items-center gap-2 whitespace-nowrap text-xs text-[#059669]">
+                        <span className="h-2 w-2 shrink-0 rounded-full bg-[#10b981]" />
                         {d.statusAvailable}
                       </span>
                     </td>
