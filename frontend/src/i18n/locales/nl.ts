@@ -148,7 +148,7 @@ const nl: Messages = {
   },
   detail: {
     navBackToOverview: '🡠 Terug naar overzicht',
-    dates: 'Speelreeks Geschiedenis',
+    events: 'Speelreeks Geschiedenis',
     noEvents: 'Geen verleden events.',
     date: 'Datum',
     time: "Tijd",
