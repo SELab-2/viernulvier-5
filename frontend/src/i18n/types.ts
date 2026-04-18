@@ -121,7 +121,7 @@ export type Messages = {
     logoutLabel: string
   }
   detail: {
-    navBackToOverview: string
+    navBack: string
     events: string
     noEvents: string
     date: string

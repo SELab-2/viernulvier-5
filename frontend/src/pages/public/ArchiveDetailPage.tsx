@@ -136,7 +136,7 @@ function ArchiveDetailPageContent() {
         <>
             <div className="site-container mt-8">
                 <PublicPillButton
-                    label={messages.detail.navBackToOverview}
+                    label={messages.detail.navBack}
                     onClick={handleGoBack}
                 />
             </div>
