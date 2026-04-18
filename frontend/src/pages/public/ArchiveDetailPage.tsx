@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { getActiveLocale, withLocalePath } from '../../i18n'
 import { localize } from '../../utils/localize'
+import { getYouTubeEmbedUrl } from '../../utils/youtube'
 import PublicLayout from '../../components/public/PublicLayout'
 import PublicPillButton from '../../components/public/PublicPillButton'
 import { usePublicMessages } from '../../components/public/PublicMessagesContext'
@@ -14,13 +15,6 @@ import { getEventsByProductionId, type Event } from '../../api/events'
 import { getHallById } from '../../api/halls'
 import { getSpaceById } from '../../api/spaces'
 import { getLocationById, type Location } from '../../api/locations'
-
-function getYouTubeEmbedUrl(url: string): string | null {
-    const match =
-        url.match(/youtube\.com\/watch\?v=([^&]+)/) ||
-        url.match(/youtu\.be\/([^?]+)/)
-    return match ? `https://www.youtube.com/embed/${match[1]}` : null
-}
 
 function ArchiveDetailPageContent() {
     const navigate = useNavigate()
