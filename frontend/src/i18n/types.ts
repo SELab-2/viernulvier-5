@@ -51,6 +51,14 @@ export type Messages = {
   }
   detail: {
     navBackToOverview: string
+    dates: string
+    noEvents: string
+    date: string
+    time: string
+    location: string
+    showLess: string
+    showMore: string
+    credits: string
   }
   footer: {
     about: string

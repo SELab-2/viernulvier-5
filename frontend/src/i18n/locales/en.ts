@@ -73,7 +73,14 @@ const en: Messages = {
   },
   detail: {
     navBackToOverview: '🡠 Back to overview',
-
+    dates: 'Dates',
+    noEvents: 'No past events.',
+    date: 'Date',
+    time: "Time",
+    location: "Location",
+    showLess: 'Show less',
+    showMore: 'Show more',
+    credits: 'Credits',
   },
   footer: {
     about: 'The VIERNULVIER Arts Centre archive collection preserves and provides access to over 40 years of performing arts history at De Vooruit.',
