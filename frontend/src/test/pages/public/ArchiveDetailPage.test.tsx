@@ -51,6 +51,12 @@ vi.mock('../../../components/public/PublicFooter', () => ({
     default: () => <footer>footer</footer>,
 }))
 
+vi.mock('../../../components/public/PublicPillButton', () => ({
+    default: ({ label, onClick }: { label: string; onClick: () => void }) => (
+        <button type="button" onClick={onClick}>{label}</button>
+    ),
+}))
+
 const getProductionByIdMock = vi.hoisted(() => vi.fn())
 const getEventsByProductionIdMock = vi.hoisted(() => vi.fn())
 const getGalleryItemsMock = vi.hoisted(() => vi.fn())
@@ -275,5 +281,221 @@ describe('ArchiveDetailPage', () => {
         })
 
         consoleSpy.mockRestore()
+    })
+
+    // ---- location chain catch ----
+    it('renders remaining events when one location chain fetch fails', async () => {
+        const event1 = {
+            id: 'evt-0000-0000-0000-000000000001',
+            starts_at: new Date('2020-01-01T13:00:00.000Z'),
+            ends_at: null,
+            doors_at: null,
+            info: null,
+            production_id: baseProduction.id,
+            hall_id: 'hall-000-0000-0000-000000000001',
+        }
+
+        getEventsByProductionIdMock.mockResolvedValue({ data: [event1] })
+        getHallByIdMock.mockRejectedValue(new Error('Network error'))
+
+        renderPage()
+
+        // Page should not crash, events section should still render
+        expect(await screen.findByText('Speeldata')).toBeInTheDocument()
+    })
+
+    it('resolves location when hall has no space_id', async () => {
+        const event = {
+            id: 'evt-0000-0000-0000-000000000001',
+            starts_at: new Date('2020-01-01T13:00:00.000Z'),
+            ends_at: null,
+            doors_at: null,
+            info: null,
+            production_id: baseProduction.id,
+            hall_id: 'hall-000-0000-0000-000000000001',
+        }
+
+        getEventsByProductionIdMock.mockResolvedValue({ data: [event] })
+        getHallByIdMock.mockResolvedValue({ data: { id: 'hall-000-0000-0000-000000000001', name: null, space_id: null } })
+
+        renderPage()
+
+        // Should not crash, and location chain stops at hall — dash shown
+        await waitFor(() => {
+            expect(screen.getByText('—')).toBeInTheDocument()
+        })
+    })
+
+    it('resolves location when space has no location_id', async () => {
+        const event = {
+            id: 'evt-0000-0000-0000-000000000001',
+            starts_at: new Date('2020-01-01T13:00:00.000Z'),
+            ends_at: null,
+            doors_at: null,
+            info: null,
+            production_id: baseProduction.id,
+            hall_id: 'hall-000-0000-0000-000000000001',
+        }
+
+        getEventsByProductionIdMock.mockResolvedValue({ data: [event] })
+        getHallByIdMock.mockResolvedValue({ data: { id: 'hall-000-0000-0000-000000000001', name: null, space_id: 'space-00-0000-0000-000000000001' } })
+        getSpaceByIdMock.mockResolvedValue({ data: { id: 'space-00-0000-0000-000000000001', location_id: null } })
+
+        renderPage()
+
+        await waitFor(() => {
+            expect(screen.getByText('—')).toBeInTheDocument()
+        })
+    })
+
+    it('renders the location city when the full chain resolves', async () => {
+        const event = {
+            id: 'evt-0000-0000-0000-000000000001',
+            starts_at: new Date('2020-01-01T13:00:00.000Z'),
+            ends_at: null,
+            doors_at: null,
+            info: null,
+            production_id: baseProduction.id,
+            hall_id: 'hall-000-0000-0000-000000000001',
+        }
+
+        getEventsByProductionIdMock.mockResolvedValue({ data: [event] })
+        getHallByIdMock.mockResolvedValue({ data: { id: 'hall-000-0000-0000-000000000001', name: null, space_id: 'space-00-0000-0000-000000000001' } })
+        getSpaceByIdMock.mockResolvedValue({ data: { id: 'space-00-0000-0000-000000000001', location_id: 'loc-0000-0000-0000-000000000001' } })
+        getLocationByIdMock.mockResolvedValue({ data: { id: 'loc-0000-0000-0000-000000000001', name: null, street: 'Kerkstraat', number: '1', postal_code: '9000', city: 'Gent', country: 'BE' } })
+
+        renderPage()
+
+        expect(await screen.findByText('Kerkstraat 1, 9000 Gent')).toBeInTheDocument()
+    })
+
+    // ---- videos ----
+    it('renders a single video in a wide container', async () => {
+        getProductionByIdMock.mockResolvedValue({
+            data: { ...baseProduction, video_1: { nl: 'https://www.youtube.com/watch?v=abc123' }, video_2: null },
+        })
+
+        renderPage()
+
+        await waitFor(() => {
+            const iframe = document.querySelector('iframe')
+            expect(iframe).toHaveAttribute('src', 'https://www.youtube.com/embed/abc123')
+            expect(iframe).toHaveAttribute('title', 'Video 1')
+            // single video gets the wide container
+            const container = iframe?.closest('.max-w-3xl')
+            expect(container).toBeInTheDocument()
+        })
+    })
+
+    it('renders two videos in a two-column grid', async () => {
+        getProductionByIdMock.mockResolvedValue({
+            data: {
+                ...baseProduction,
+                video_1: { nl: 'https://www.youtube.com/watch?v=abc123' },
+                video_2: { nl: 'https://youtu.be/def456' },
+            },
+        })
+
+        renderPage()
+
+        await waitFor(() => {
+            const iframes = document.querySelectorAll('iframe')
+            expect(iframes).toHaveLength(2)
+            expect(iframes[0]).toHaveAttribute('src', 'https://www.youtube.com/embed/abc123')
+            expect(iframes[1]).toHaveAttribute('src', 'https://www.youtube.com/embed/def456')
+            const container = iframes[0]?.closest('.max-w-5xl')
+            expect(container).toBeInTheDocument()
+        })
+    })
+
+    it('does not render any iframes when there are no valid video urls', async () => {
+        getProductionByIdMock.mockResolvedValue({
+            data: { ...baseProduction, video_1: null, video_2: null },
+        })
+
+        renderPage()
+
+        await waitFor(() => {
+            expect(document.querySelector('iframe')).not.toBeInTheDocument()
+        })
+    })
+
+    it('does not render an iframe for an unrecognised video url', async () => {
+        getProductionByIdMock.mockResolvedValue({
+            data: { ...baseProduction, video_1: { nl: 'https://vimeo.com/123456' }, video_2: null },
+        })
+
+        renderPage()
+
+        await waitFor(() => {
+            expect(document.querySelector('iframe')).not.toBeInTheDocument()
+        })
+    })
+
+    // ---- quote ----
+    it('renders the quote and its source', async () => {
+        getProductionByIdMock.mockResolvedValue({
+            data: {
+                ...baseProduction,
+                quote: { nl: 'Een prachtige voorstelling.' },
+                quote_source: { nl: 'De Standaard' },
+            },
+        })
+
+        renderPage()
+
+        expect(await screen.findByText('Een prachtige voorstelling.')).toBeInTheDocument()
+        expect(await screen.findByText('— De Standaard')).toBeInTheDocument()
+    })
+
+    it('renders a quote without a source', async () => {
+        getProductionByIdMock.mockResolvedValue({
+            data: {
+                ...baseProduction,
+                quote: { nl: 'Een prachtige voorstelling.' },
+                quote_source: null,
+            },
+        })
+
+        renderPage()
+
+        expect(await screen.findByText('Een prachtige voorstelling.')).toBeInTheDocument()
+        expect(screen.queryByText(/^—/)).not.toBeInTheDocument()
+    })
+
+    // ---- description2 ----
+    it('renders description_2 when present', async () => {
+        getProductionByIdMock.mockResolvedValue({
+            data: { ...baseProduction, description_2: { nl: 'Extra beschrijving.' } },
+        })
+
+        renderPage()
+
+        expect(await screen.findByText('Extra beschrijving.')).toBeInTheDocument()
+    })
+
+    // ---- info / credits ----
+    it('renders the credits section with the info content', async () => {
+        getProductionByIdMock.mockResolvedValue({
+            data: { ...baseProduction, info: { nl: 'Regie: Jan Janssen' } },
+        })
+
+        renderPage()
+
+        expect(await screen.findByText('Speeldata')).toBeInTheDocument() // wait for load
+        expect(screen.getByText('Credits')).toBeInTheDocument()
+        expect(screen.getByText('Regie: Jan Janssen')).toBeInTheDocument()
+    })
+
+    it('does not render the credits section when info is null', async () => {
+        getProductionByIdMock.mockResolvedValue({
+            data: { ...baseProduction, info: null },
+        })
+
+        renderPage()
+
+        await waitFor(() => {
+            expect(screen.queryByText('Credits')).not.toBeInTheDocument()
+        })
     })
 })
