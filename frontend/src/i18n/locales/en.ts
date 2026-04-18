@@ -148,7 +148,7 @@ const en: Messages = {
   },
   detail: {
     navBackToOverview: '🡠 Back to overview',
-    dates: 'Dates',
+    dates: 'Event History',
     noEvents: 'No past events.',
     date: 'Date',
     time: "Time",
