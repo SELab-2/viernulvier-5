@@ -199,7 +199,15 @@ const nl: Messages = {
     logoutLabel: 'Uitloggen',
   },
   detail: {
-    navBackToOverview: '🡠 Terug naar overzicht'
+    navBackToOverview: '🡠 Terug naar overzicht',
+    dates: 'Data',
+    noEvents: 'Geen verleden events.',
+    date: 'Datum',
+    time: "Tijd",
+    location: "Locatie",
+    showLess: 'Toon minder',
+    showMore: 'Toon meer',
+    credits: 'Credits',
   },
   footer: {
     brandLogoAlt: 'VIERNULVIER logo',

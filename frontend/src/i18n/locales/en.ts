@@ -200,7 +200,14 @@ const en: Messages = {
   },
   detail: {
     navBackToOverview: '🡠 Back to overview',
-
+    dates: 'Dates',
+    noEvents: 'No past events.',
+    date: 'Date',
+    time: "Time",
+    location: "Location",
+    showLess: 'Show less',
+    showMore: 'Show more',
+    credits: 'Credits',
   },
   footer: {
     brandLogoAlt: 'VIERNULVIER logo',

@@ -253,18 +253,18 @@ function ArchiveDetailPage() {
                     <div className="py-8 grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div>
                             <h2 className="text-xl font-bold mb-4">
-                                messages.detail.dates
+                                {messages.detail.dates}
                             </h2>
 
                             {events.length === 0 ? (
-                                <p>No upcoming events.</p>
+                                <p>{messages.detail.noEvents}</p>
                             ) : (
                                 <div>
                                     {/* Header row */}
                                     <div className="grid grid-cols-3 gap-4 p-4 border-b border-[var(--color-border)] font-semibold text-sm">
-                                        <div>Date</div>
-                                        <div>Time</div>
-                                        <div>Location</div>
+                                        <div>{messages.detail.date}</div>
+                                        <div>{messages.detail.time}</div>
+                                        <div>{messages.detail.location}</div>
                                     </div>
 
                                     {/* Event rows */}
@@ -321,11 +321,11 @@ function ArchiveDetailPage() {
                             {events.length > 5 && (
                                 <button
                                     onClick={() => setShowAllEvents(!showAllEvents)}
-                                    className="mt-4 text-sm font-medium text-[var(--color-accent)] hover:underline"
+                                    className="mt-4 text-sm font-medium text-[var(--color-text)] hover:underline"
                                 >
-                                    showAllEvents
-                                        ? messages.detail.showLess || 'Show less'
-                                        : messages.detail.showMore || 'Show more'
+                                    {showAllEvents
+                                        ? messages.detail.showLess
+                                        : messages.detail.showMore}
                                 </button>
                             )}
                         </div>
@@ -441,7 +441,7 @@ function ArchiveDetailPage() {
                 {info && (
                     <div className="prose max-w-none">
                         <h2 className="text-xl font-bold mb-4">
-                            messages.detail.credits
+                            {messages.detail.credits}
                         </h2>
                         <div
                             dangerouslySetInnerHTML={{ __html: info.replace(/\r?\n/g, '<br />') }}
