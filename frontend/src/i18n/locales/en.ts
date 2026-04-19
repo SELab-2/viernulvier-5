@@ -166,6 +166,9 @@ const en: Messages = {
       deltaVsLastMonth: 'vs last month',
       statLastSync: 'last sync',
       statSyncPending: 'sync status pending',
+      languageStatusComplete: 'Translation complete',
+      languageStatusAttention: 'Translation needs attention',
+      languageStatusMissing: 'Translation missing',
     },
     archiveEdit: {
       pageTitle: 'Edit archive item',

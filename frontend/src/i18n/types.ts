@@ -144,6 +144,9 @@ export type Messages = {
       deltaVsLastMonth: string
       statLastSync: string
       statSyncPending: string
+      languageStatusComplete: string
+      languageStatusAttention: string
+      languageStatusMissing: string
     }
     archiveEdit: {
       pageTitle: string
