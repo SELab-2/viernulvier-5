@@ -154,7 +154,7 @@ function ArchiveDetailPageContent() {
 
             <div className="site-container py-8 space-y-12">
                 {teaser && (
-                    <div className="prose max-w-none">
+                    <div className="prose max-w-none text-lg font-medium text-text-accent">
                         <div dangerouslySetInnerHTML={
                                 { __html: formatHtml(teaser) }
                             } />
@@ -162,14 +162,14 @@ function ArchiveDetailPageContent() {
                 )}
 
                 {description && (
-                    <div className="prose max-w-none">
+                    <div className="prose max-w-none prose-neutral">
                         <div dangerouslySetInnerHTML={{ __html: formatHtml(description) }} />
                     </div>
                 )}
 
                 <div className="grid grid-cols-1 gap-8">
                     <div>
-                        <h2 className="text-xl font-bold mb-4">
+                        <h2 className="text-2xl md:text-3xl font-semibold tracking-tight mb-6">
                             {messages.detail.events}
                         </h2>
 
@@ -205,10 +205,10 @@ function ArchiveDetailPageContent() {
                 )}
 
                 {quote && (
-                    <div className="prose max-w-none">
+                    <div className="border-l-4 border-accent pl-4 italic text-text-accent">
                         <div dangerouslySetInnerHTML={{ __html: quote.replace(/\r?\n/g, '<br />') }} />
                         {quoteSource && (
-                            <p className="text-sm text-right mt-2">— {quoteSource}</p>
+                            <p className="text-sm text-left mt-2">— {quoteSource}</p>
                         )}
                     </div>
                 )}
@@ -224,8 +224,8 @@ function ArchiveDetailPageContent() {
                 )}
 
                 {info && (
-                    <div className="prose max-w-none">
-                        <h2 className="text-xl font-bold mb-4">{messages.detail.credits}</h2>
+                    <div className="prose max-w-none text-sm text-muted">
+                        <h2 className="text-2xl md:text-3xl font-semibold tracking-tight mb-6">{messages.detail.credits}</h2>
                         <div dangerouslySetInnerHTML={{ __html: info.replace(/\r?\n/g, '<br />') }} />
                     </div>
                 )}
