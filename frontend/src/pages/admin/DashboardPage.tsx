@@ -255,11 +255,20 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
                             : state === 'attention'
                               ? 'bg-[#f59e0b]'
                               : 'bg-[#cbd5e1]'
+                          const tooltip = state === 'complete'
+                            ? d.languageStatusComplete
+                            : state === 'attention'
+                              ? d.languageStatusAttention
+                              : d.languageStatusMissing
 
                           return (
-                            <div key={loc} className={state === 'missing' ? 'opacity-40' : ''}>
+                            <div key={loc} className={state === 'missing' ? 'opacity-40' : ''} title={tooltip}>
                               <div>{loc}</div>
-                              <div className={`mt-1 h-2 w-2 rounded-full ${dotClass}`} />
+                              <div
+                                className={`mt-1 h-2 w-2 rounded-full ${dotClass}`}
+                                role="img"
+                                aria-label={tooltip}
+                              />
                             </div>
                           )
                         })}
