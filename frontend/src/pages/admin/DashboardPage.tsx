@@ -4,21 +4,45 @@ import AdminLayout from '../../components/admin/AdminLayout'
 import { useDashboardSummary } from '../../components/admin/useDashboardSummary'
 import type { Locale } from '../../i18n/types'
 
-const PAGE_SIZE_OPTIONS = [3, 6, 9, 12] as const
-type PageSize = (typeof PAGE_SIZE_OPTIONS)[number]
-const DEFAULT_PAGE_SIZE: PageSize = 3
+const PAGE_SIZE_OPTIONS = [3, 6, 9, 12, 15, 18] as const
+type FixedPageSize = (typeof PAGE_SIZE_OPTIONS)[number]
+type PageSizeSetting = 'auto' | FixedPageSize
+const DEFAULT_PAGE_SIZE_SETTING: PageSizeSetting = 'auto'
 const PAGE_SIZE_STORAGE_KEY = 'admin:dashboard:pageSize'
 
-function readStoredPageSize(): PageSize {
+const ROW_HEIGHT_PX = 72
+const CHROME_HEIGHT_PX = 520
+const MIN_AUTO_ROWS: FixedPageSize = 3
+const MAX_AUTO_ROWS: FixedPageSize = 18
+
+function readStoredPageSize(): PageSizeSetting {
   if (typeof window === 'undefined') {
-    return DEFAULT_PAGE_SIZE
+    return DEFAULT_PAGE_SIZE_SETTING
   }
 
   const raw = window.localStorage.getItem(PAGE_SIZE_STORAGE_KEY)
+  if (raw === 'auto') {
+    return 'auto'
+  }
+
   const parsed = raw === null ? NaN : Number(raw)
   return (PAGE_SIZE_OPTIONS as readonly number[]).includes(parsed)
-    ? (parsed as PageSize)
-    : DEFAULT_PAGE_SIZE
+    ? (parsed as FixedPageSize)
+    : DEFAULT_PAGE_SIZE_SETTING
+}
+
+function computeAutoPageSize(viewportHeightPx: number): FixedPageSize {
+  const available = Math.max(0, viewportHeightPx - CHROME_HEIGHT_PX)
+  const rawRows = Math.floor(available / ROW_HEIGHT_PX)
+  const clamped = Math.min(MAX_AUTO_ROWS, Math.max(MIN_AUTO_ROWS, rawRows))
+
+  let best: FixedPageSize = MIN_AUTO_ROWS
+  for (const option of PAGE_SIZE_OPTIONS) {
+    if (option <= clamped) {
+      best = option
+    }
+  }
+  return best
 }
 
 type DeltaInfo = { changePct: number | null; direction: 'up' | 'down' | 'flat' }
@@ -111,14 +135,30 @@ type DashboardPageContentProps = {
 function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
   const messages = useAdminMessages()
   const d = messages.admin.dashboard
-  const [pageSize, setPageSize] = useState<PageSize>(readStoredPageSize)
+  const [pageSizeSetting, setPageSizeSetting] = useState<PageSizeSetting>(readStoredPageSize)
+  const [autoSize, setAutoSize] = useState<FixedPageSize>(() =>
+    typeof window === 'undefined' ? MIN_AUTO_ROWS : computeAutoPageSize(window.innerHeight),
+  )
   const [page, setPage] = useState(1)
 
-  const handlePageSizeChange = (nextSize: PageSize) => {
-    setPageSize(nextSize)
+  useEffect(() => {
+    if (pageSizeSetting !== 'auto' || typeof window === 'undefined') {
+      return
+    }
+
+    const onResize = () => setAutoSize(computeAutoPageSize(window.innerHeight))
+    onResize()
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [pageSizeSetting])
+
+  const pageSize: FixedPageSize = pageSizeSetting === 'auto' ? autoSize : pageSizeSetting
+
+  const handlePageSizeChange = (nextSetting: PageSizeSetting) => {
+    setPageSizeSetting(nextSetting)
     setPage(1)
     if (typeof window !== 'undefined') {
-      window.localStorage.setItem(PAGE_SIZE_STORAGE_KEY, String(nextSize))
+      window.localStorage.setItem(PAGE_SIZE_STORAGE_KEY, String(nextSetting))
     }
   }
 
@@ -374,10 +414,16 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
             <label className="flex items-center gap-2 text-xs text-slate-500">
               <span>{d.pageSizeLabel}</span>
               <select
-                value={pageSize}
-                onChange={(event) => handlePageSizeChange(Number(event.target.value) as PageSize)}
+                value={pageSizeSetting}
+                onChange={(event) => {
+                  const raw = event.target.value
+                  handlePageSizeChange(raw === 'auto' ? 'auto' : (Number(raw) as FixedPageSize))
+                }}
                 className="rounded-md border border-[var(--color-admin-card-border)] bg-white px-2 py-1 text-xs text-[#0f172a] transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-accent/40 dark:bg-[#111318] dark:text-white dark:hover:bg-slate-800"
               >
+                <option value="auto">
+                  {pageSizeSetting === 'auto' ? `${d.pageSizeAuto} (${autoSize})` : d.pageSizeAuto}
+                </option>
                 {PAGE_SIZE_OPTIONS.map((size) => (
                   <option key={size} value={size}>
                     {size}
