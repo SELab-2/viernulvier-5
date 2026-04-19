@@ -3,13 +3,15 @@ import { MediaRepository } from './media.repository.js'
 import { MediaService } from './media.service.js'
 import { MediaController } from './media.controller.js'
 import { 
-    paginationQuerySchema, 
+    galleryPaginationQuerySchema,
+    itemPaginationQuerySchema,
+    cropPaginationQuerySchema,
     galleryListSchema, 
-    gallerySchema,
+    singleGallerySchema,
     itemListSchema, 
-    itemSchema,
+    singleItemSchema,
     cropListSchema,
-    cropSchema,
+    singleCropSchema,
     idParamSchema,
     errorSchema,
     createGallerySchema,
@@ -33,7 +35,7 @@ const mediaRoutes: FastifyPluginAsync = async (fastify) => {
         schema: {
             tags: ['media'],
             summary: 'Get a paginated list of galleries',
-            querystring: paginationQuerySchema,
+            querystring: galleryPaginationQuerySchema,
             response: { 200: galleryListSchema },
         },
         handler: (request, reply) => controller.getGalleries(request as any, reply),
@@ -45,7 +47,7 @@ const mediaRoutes: FastifyPluginAsync = async (fastify) => {
             summary: 'Get a gallery by ID',
             params: idParamSchema,
             response: { 
-                200: gallerySchema,
+                200: singleGallerySchema,
                 404: errorSchema
             },
         },
@@ -58,7 +60,7 @@ const mediaRoutes: FastifyPluginAsync = async (fastify) => {
             tags: ['media'],
             summary: 'Create a new gallery',
             body: createGallerySchema,
-            response: { 201: gallerySchema },
+            response: { 201: singleGallerySchema },
         },
         handler: (request, reply) => controller.createGallery(request as any, reply),
     })
@@ -71,7 +73,7 @@ const mediaRoutes: FastifyPluginAsync = async (fastify) => {
             params: idParamSchema,
             body: updateGallerySchema,
             response: { 
-                200: gallerySchema,
+                200: singleGallerySchema,
                 404: errorSchema
             },
         },
@@ -97,7 +99,7 @@ const mediaRoutes: FastifyPluginAsync = async (fastify) => {
         schema: {
             tags: ['media'],
             summary: 'Get a paginated list of media items',
-            querystring: paginationQuerySchema,
+            querystring: itemPaginationQuerySchema,
             response: { 200: itemListSchema },
         },
         handler: (request, reply) => controller.getItems(request as any, reply),
@@ -109,7 +111,7 @@ const mediaRoutes: FastifyPluginAsync = async (fastify) => {
             summary: 'Get a media item by ID',
             params: idParamSchema,
             response: { 
-                200: itemSchema,
+                200: singleItemSchema,
                 404: errorSchema
             },
         },
@@ -122,7 +124,7 @@ const mediaRoutes: FastifyPluginAsync = async (fastify) => {
             tags: ['media'],
             summary: 'Create a new media item',
             body: createItemSchema,
-            response: { 201: itemSchema },
+            response: { 201: singleItemSchema },
         },
         handler: (request, reply) => controller.createItem(request as any, reply),
     })
@@ -135,7 +137,7 @@ const mediaRoutes: FastifyPluginAsync = async (fastify) => {
             params: idParamSchema,
             body: updateItemSchema,
             response: { 
-                200: itemSchema,
+                200: singleItemSchema,
                 404: errorSchema
             },
         },
@@ -161,7 +163,7 @@ const mediaRoutes: FastifyPluginAsync = async (fastify) => {
         schema: {
             tags: ['media'],
             summary: 'Get a paginated list of image crops',
-            querystring: paginationQuerySchema,
+            querystring: cropPaginationQuerySchema,
             response: { 200: cropListSchema },
         },
         handler: (request, reply) => controller.getCrops(request as any, reply),
@@ -173,7 +175,7 @@ const mediaRoutes: FastifyPluginAsync = async (fastify) => {
             summary: 'Get a crop by ID',
             params: idParamSchema,
             response: { 
-                200: cropSchema,
+                200: singleCropSchema,
                 404: errorSchema
             },
         },
@@ -186,7 +188,7 @@ const mediaRoutes: FastifyPluginAsync = async (fastify) => {
             tags: ['media'],
             summary: 'Create a new crop',
             body: createCropSchema,
-            response: { 201: cropSchema },
+            response: { 201: singleCropSchema },
         },
         handler: (request, reply) => controller.createCrop(request as any, reply),
     })
@@ -199,7 +201,7 @@ const mediaRoutes: FastifyPluginAsync = async (fastify) => {
             params: idParamSchema,
             body: updateCropSchema,
             response: { 
-                200: cropSchema,
+                200: singleCropSchema,
                 404: errorSchema
             },
         },
