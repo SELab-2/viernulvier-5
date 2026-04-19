@@ -3,9 +3,9 @@ import { HallsRepository } from './halls.repository.js'
 import { HallsService } from './halls.service.js'
 import { HallsController } from './halls.controller.js'
 import { 
-    paginationQuerySchema, 
+    hallPaginationQuerySchema, 
     hallListSchema,
-    hallSchema,
+    singleHallSchema,
     idParamSchema,
     errorSchema,
     createHallSchema,
@@ -24,7 +24,7 @@ const hallsRoutes: FastifyPluginAsync = async (fastify) => {
         schema: {
             tags: ['locations'], // Same tag as locations to group them in Swagger
             summary: 'Get a paginated list of halls',
-            querystring: paginationQuerySchema,
+            querystring: hallPaginationQuerySchema,
             response: {
                 200: hallListSchema,
             },
@@ -38,7 +38,7 @@ const hallsRoutes: FastifyPluginAsync = async (fastify) => {
             summary: 'Get a hall by ID',
             params: idParamSchema,
             response: {
-                200: hallSchema,
+                200: singleHallSchema,
                 404: errorSchema
             },
         },
@@ -52,7 +52,7 @@ const hallsRoutes: FastifyPluginAsync = async (fastify) => {
             summary: 'Create a new hall',
             body: createHallSchema,
             response: {
-                201: hallSchema,
+                201: singleHallSchema,
             },
         },
         handler: (request, reply) => controller.createHall(request as any, reply),
@@ -66,7 +66,7 @@ const hallsRoutes: FastifyPluginAsync = async (fastify) => {
             params: idParamSchema,
             body: updateHallSchema,
             response: {
-                200: hallSchema,
+                200: singleHallSchema,
                 404: errorSchema
             },
         },
