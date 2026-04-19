@@ -1,33 +1,31 @@
 import { LocationsRepository } from './locations.repository.js'
 import type { 
-    PaginationQuery, 
-    LocationListResponse, 
+    LocationPaginationQuery, 
     LocationResponse,
     CreateLocationInput,
     UpdateLocationInput
 } from './locations.schema.js'
+import { PaginatedResult, calculateTotalPages } from '../../utils/pagination.js'
 
 export class LocationsService {
     constructor(private readonly repository: LocationsRepository) { }
 
-    async getLocations(options: PaginationQuery): Promise<LocationListResponse> {
+    async getLocations(options: LocationPaginationQuery): Promise<PaginatedResult<LocationResponse>> {
         const { page, limit, search, lang } = options
 
-        const [data, total] = await Promise.all([
+        const [items, total] = await Promise.all([
             this.repository.findAll({ page, limit, search, lang }),
             this.repository.count({ search, lang }),
         ])
 
-        const totalPages = Math.ceil(total / limit)
+        const totalPages = calculateTotalPages(total, limit)
 
         return {
-            data: data as any,
-            meta: {
-                total,
-                page,
-                limit,
-                totalPages,
-            },
+            items: items as any,
+            total,
+            page,
+            limit,
+            totalPages,
         }
     }
 

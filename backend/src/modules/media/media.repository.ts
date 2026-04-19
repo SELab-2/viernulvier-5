@@ -28,7 +28,6 @@ export class MediaRepository {
             where: { id },
             include: {
                 items: true,
-                tags: true,
                 media_gallery_productions: true,
                 poster_gallery_productions: true,
                 review_gallery_productions: true
@@ -56,33 +55,38 @@ export class MediaRepository {
     }
 
     // Items
-    async findAllItems(options: { page: number; limit: number; search?: string; lang?: string }) {
-        const { page, limit, search, lang = 'nl' } = options
+    async findAllItems(options: { page: number; limit: number; galleryId?: string; search?: string; lang?: string }) {
+        const { page, limit, galleryId, search, lang = 'nl' } = options
         const skip = (page - 1) * limit
-        const where = search ? {
-            title: {
+        
+        const where: any = {}
+        if (galleryId) where.gallery_id = galleryId
+        if (search) {
+            where.title = {
                 path: [lang],
                 string_contains: search,
-            },
-        } : {}
+            }
+        }
 
         return this.prisma.item.findMany({
-            where: where as any,
+            where,
             skip,
             take: limit,
             orderBy: { created_at: 'desc' },
         })
     }
 
-    async countItems(options: { search?: string; lang?: string }) {
-        const { search, lang = 'nl' } = options
-        const where = search ? {
-            title: {
+    async countItems(options: { galleryId?: string; search?: string; lang?: string }) {
+        const { galleryId, search, lang = 'nl' } = options
+        const where: any = {}
+        if (galleryId) where.gallery_id = galleryId
+        if (search) {
+            where.title = {
                 path: [lang],
                 string_contains: search,
-            },
-        } : {}
-        return this.prisma.item.count({ where: where as any })
+            }
+        }
+        return this.prisma.item.count({ where })
     }
 
     async findItemById(id: string) {
@@ -115,23 +119,27 @@ export class MediaRepository {
     }
 
     // Crops
-    async findAllCrops(options: { page: number; limit: number; search?: string; lang?: string }) {
-        const { page, limit, search } = options
+    async findAllCrops(options: { page: number; limit: number; itemId?: string; search?: string; lang?: string }) {
+        const { page, limit, itemId, search } = options
         const skip = (page - 1) * limit
-        const where = search ? { name: { contains: search } } : {}
+        const where: any = {}
+        if (itemId) where.item_id = itemId
+        if (search) where.name = { contains: search }
 
         return this.prisma.crop.findMany({
-            where: where as any,
+            where,
             skip,
             take: limit,
             orderBy: { created_at: 'desc' },
         })
     }
 
-    async countCrops(options: { search?: string; lang?: string }) {
-        const { search } = options
-        const where = search ? { name: { contains: search } } : {}
-        return this.prisma.crop.count({ where: where as any })
+    async countCrops(options: { itemId?: string; search?: string; lang?: string }) {
+        const { itemId, search } = options
+        const where: any = {}
+        if (itemId) where.item_id = itemId
+        if (search) where.name = { contains: search }
+        return this.prisma.crop.count({ where })
     }
 
     async findCropById(id: string) {

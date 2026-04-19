@@ -1,9 +1,21 @@
 import { z } from 'zod'
+import { 
+    createPaginatedResponseSchema, 
+    createSingleResponseSchema 
+} from '../../utils/rest-schemas.js'
 
-export const paginationQuerySchema = z.object({
+export const uitdatabankPaginationQuerySchema = z.object({
     page: z.coerce.number().int().positive().default(1),
     limit: z.coerce.number().int().positive().max(100).default(20),
     search: z.string().optional(),
+})
+
+/**
+ * Explicit links for the Keyword resource.
+ */
+export const keywordLinksSchema = z.object({
+    self: z.string().url().default('https://example.com/'),
+    productions: z.string().url().optional().nullable().default('https://example.com/'),
 })
 
 export const keywordSchema = z.object({
@@ -12,6 +24,15 @@ export const keywordSchema = z.object({
     name: z.string().nullable(),
     created_at: z.coerce.date(),
     updated_at: z.coerce.date(),
+    links: keywordLinksSchema.optional(),
+})
+
+/**
+ * Explicit links for the Theme resource.
+ */
+export const themeLinksSchema = z.object({
+    self: z.string().url().default('https://example.com/'),
+    productions: z.string().url().optional().nullable().default('https://example.com/'),
 })
 
 export const themeSchema = z.object({
@@ -21,6 +42,15 @@ export const themeSchema = z.object({
     cdb_cat_id: z.string().nullable(),
     created_at: z.coerce.date(),
     updated_at: z.coerce.date(),
+    links: themeLinksSchema.optional(),
+})
+
+/**
+ * Explicit links for the Type resource.
+ */
+export const typeLinksSchema = z.object({
+    self: z.string().url().default('https://example.com/'),
+    productions: z.string().url().optional().nullable().default('https://example.com/'),
 })
 
 export const typeSchema = z.object({
@@ -30,37 +60,17 @@ export const typeSchema = z.object({
     cdb_cat_id: z.string().nullable(),
     created_at: z.coerce.date(),
     updated_at: z.coerce.date(),
+    links: typeLinksSchema.optional(),
 })
 
-export const keywordListSchema = z.object({
-    data: z.array(keywordSchema),
-    meta: z.object({
-        total: z.number(),
-        page: z.number(),
-        limit: z.number(),
-        totalPages: z.number(),
-    }),
-})
+export const keywordListSchema = createPaginatedResponseSchema(keywordSchema)
+export const singleKeywordSchema = createSingleResponseSchema(keywordSchema)
 
-export const themeListSchema = z.object({
-    data: z.array(themeSchema),
-    meta: z.object({
-        total: z.number(),
-        page: z.number(),
-        limit: z.number(),
-        totalPages: z.number(),
-    }),
-})
+export const themeListSchema = createPaginatedResponseSchema(themeSchema)
+export const singleThemeSchema = createSingleResponseSchema(themeSchema)
 
-export const typeListSchema = z.object({
-    data: z.array(typeSchema),
-    meta: z.object({
-        total: z.number(),
-        page: z.number(),
-        limit: z.number(),
-        totalPages: z.number(),
-    }),
-})
+export const typeListSchema = createPaginatedResponseSchema(typeSchema)
+export const singleTypeSchema = createSingleResponseSchema(typeSchema)
 
 export const idParamSchema = z.object({
     id: z.string().uuid(),
@@ -70,10 +80,7 @@ export const errorSchema = z.object({
     message: z.string(),
 })
 
-export type PaginationQuery = z.infer<typeof paginationQuerySchema>
+export type UitdatabankPaginationQuery = z.infer<typeof uitdatabankPaginationQuerySchema>
 export type KeywordResponse = z.infer<typeof keywordSchema>
-export type KeywordListResponse = z.infer<typeof keywordListSchema>
 export type ThemeResponse = z.infer<typeof themeSchema>
-export type ThemeListResponse = z.infer<typeof themeListSchema>
 export type TypeResponse = z.infer<typeof typeSchema>
-export type TypeListResponse = z.infer<typeof typeListSchema>
