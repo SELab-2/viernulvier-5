@@ -62,6 +62,7 @@ const mockMessages: Pick<Messages, 'admin'> = {
       languageStatusAttention: 'Translation needs attention',
       languageStatusMissing: 'Translation missing',
       pageSizeLabel: 'Per page',
+      pageSizeAuto: 'Auto',
     },
     archiveEdit: {
       pageTitle: 'Edit archive item',
