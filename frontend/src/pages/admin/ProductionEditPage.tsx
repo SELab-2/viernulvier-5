@@ -7,26 +7,44 @@ import EventsEdit from '../../components/admin/ManageEvents'
 import type { Language, ProductionContent, ProductionFields } from '../../types/production'
 import type { Locale } from '../../i18n/types'
 import type { Event } from '../../types/event'
+import type { ProductionResponse } from '../../../../backend/src/modules/productions/productions.schema'
 
-import { useLocation, useNavigate } from 'react-router-dom'
+import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { getMessages } from '../../i18n'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { api } from '../../api/client'
 import EventPopup from '../../components/admin/EventPopup'
-
 
 const defaultForm : ProductionContent = {
     nl: {title: '', slug: '', content: ''},
     en: {title: '', slug: '', content: ''}
 }
 
+type ProductionEditPageProps = {
+    /**
+     * If true this will create a new production else it will try
+     * to open an existing production
+     */
+    create?: boolean
+}
+
 /**
- * Amin page for editing or creating a production
+ * Admin page for editing/creating a production
+ * 
+ * This page should provide a easy way to edit the contents of detail
+ * pages in English and Dutch, edit or add events linked to this production,
+ * change status, genre, banner or extra pictures and artist.
+ * 
+ * After a user is done with the edit they should be able to save it as
+ * draft or publish it.
  */
-function ProductionEditPage() {
+function ProductionEditPage({ create } : ProductionEditPageProps) {
     const messages = getMessages()
     const navigate = useNavigate()
+    const { id } = useParams()          // current production id
 
     // TODO: for now this is fine but later we want maybe variable length language tabs...
+    const [prod, setProd] = useState<ProductionResponse>()
     const [languageTab, setLanguageTab] = useState<Locale>('nl')
     const [form, setForm] = useState<ProductionContent>(defaultForm)
     const [slug, setSlug] = useState("")
@@ -37,6 +55,21 @@ function ProductionEditPage() {
         { key: 'nl', label: messages.production.dutchOption},
         { key: 'en', label: messages.production.englishOption},
     ]
+
+
+    useEffect(() => {
+        if (create) return 
+
+        api.get<ProductionResponse>(`/archive/productions/${id}`)
+            .then( data => {
+                console.log(data)
+                setProd(data)
+            })
+            .catch( err => {
+                console.error(err)
+            })
+    }, [prod])
+
 
     const back = () => {
         navigate("/admin")
