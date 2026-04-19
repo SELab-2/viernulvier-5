@@ -169,6 +169,7 @@ const en: Messages = {
       languageStatusComplete: 'Translation complete',
       languageStatusAttention: 'Translation needs attention',
       languageStatusMissing: 'Translation missing',
+      pageSizeLabel: 'Per page',
     },
     archiveEdit: {
       pageTitle: 'Edit archive item',

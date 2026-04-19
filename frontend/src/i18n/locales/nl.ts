@@ -169,6 +169,7 @@ const nl: Messages = {
       languageStatusComplete: 'Vertaling volledig',
       languageStatusAttention: 'Vertaling heeft aandacht nodig',
       languageStatusMissing: 'Vertaling ontbreekt',
+      pageSizeLabel: 'Per pagina',
     },
     archiveEdit: {
       pageTitle: 'Archief item bewerken',
