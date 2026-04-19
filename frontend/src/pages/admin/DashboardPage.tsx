@@ -201,7 +201,7 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
   const paginationItems = getPaginationItems(page, totalPages, 1)
 
   return (
-    <section className="mx-auto flex w-full max-w-[960px] flex-col gap-6">
+    <section className="mx-auto flex w-full max-w-[960px] flex-col gap-6 xl:max-w-[1280px] 2xl:max-w-[1536px]">
       <header className="space-y-1">
         <h1 className="text-[2rem] leading-9 font-normal tracking-[-0.05em] text-[#0f172a] dark:text-white">
           {d.pageTitle}
