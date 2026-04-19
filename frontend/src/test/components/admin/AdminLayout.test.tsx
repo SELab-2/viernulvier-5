@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import type { Theme } from '../../../components/shared/TopBarControls'
 import AdminLayout from '../../../components/admin/AdminLayout'
+import { useAdminMessages } from '../../../components/admin/AdminMessagesContext'
 
 const adminTopBarProps = vi.hoisted(() => ({
   current: null as null | {
@@ -14,7 +15,6 @@ const adminTopBarProps = vi.hoisted(() => ({
     onToggleLocale: () => void
     onSelectTheme: (theme: Theme) => void
     onOpenSidebar?: () => void
-    openSidebarLabel?: string
     openerRef?: RefObject<HTMLButtonElement | null>
   },
 }))
@@ -31,7 +31,6 @@ vi.mock('../../../components/admin/AdminTopBar', () => ({
     onToggleLocale,
     onSelectTheme,
     onOpenSidebar,
-    openSidebarLabel,
     openerRef,
   }: {
     locale: string
@@ -41,9 +40,10 @@ vi.mock('../../../components/admin/AdminTopBar', () => ({
     onToggleLocale: () => void
     onSelectTheme: (theme: Theme) => void
     onOpenSidebar?: () => void
-    openSidebarLabel?: string
     openerRef?: RefObject<HTMLButtonElement | null>
   }) => {
+    const messages = useAdminMessages()
+
     adminTopBarProps.current = {
       locale,
       theme,
@@ -52,7 +52,6 @@ vi.mock('../../../components/admin/AdminTopBar', () => ({
       onToggleLocale,
       onSelectTheme,
       onOpenSidebar,
-      openSidebarLabel,
       openerRef,
     }
 
@@ -63,7 +62,7 @@ vi.mock('../../../components/admin/AdminTopBar', () => ({
           <button type="button" onClick={onLogout}>{logoutLabel}</button>
         ) : null}
         {onOpenSidebar ? (
-          <button ref={openerRef} type="button" onClick={onOpenSidebar}>{openSidebarLabel ?? 'Open navigation'}</button>
+          <button ref={openerRef} type="button" onClick={onOpenSidebar}>{messages.admin.openSidebarLabel}</button>
         ) : null}
         <button type="button" onClick={() => onSelectTheme('dark')}>Select dark</button>
         <button type="button" onClick={() => onSelectTheme('light')}>Select light</button>

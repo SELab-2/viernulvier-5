@@ -64,12 +64,8 @@ function AdminLayout({
           onLogout={showLogout ? handleLogoutClick : undefined}
           onToggleLocale={() => handleLocaleChange(locale === 'nl' ? 'en' : 'nl')}
           onSelectTheme={handleThemeChange}
-          themeToggleDark={messages.admin.themeToggleDark}
-          themeToggleLight={messages.admin.themeToggleLight}
-          localeToggleAriaLabel={messages.admin.localeToggleAriaLabel}
           showSidebar={showSidebar}
           onOpenSidebar={showSidebar ? openMobileSidebar : undefined}
-          openSidebarLabel={messages.admin.openSidebarLabel}
           openerRef={openerRef}
         />
 
