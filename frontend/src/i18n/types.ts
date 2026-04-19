@@ -147,6 +147,7 @@ export type Messages = {
       languageStatusComplete: string
       languageStatusAttention: string
       languageStatusMissing: string
+      pageSizeLabel: string
     }
     archiveEdit: {
       pageTitle: string

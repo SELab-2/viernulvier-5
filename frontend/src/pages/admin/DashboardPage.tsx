@@ -4,7 +4,22 @@ import AdminLayout from '../../components/admin/AdminLayout'
 import { useDashboardSummary } from '../../components/admin/useDashboardSummary'
 import type { Locale } from '../../i18n/types'
 
-const PAGE_SIZE = 3
+const PAGE_SIZE_OPTIONS = [3, 6, 9, 12] as const
+type PageSize = (typeof PAGE_SIZE_OPTIONS)[number]
+const DEFAULT_PAGE_SIZE: PageSize = 3
+const PAGE_SIZE_STORAGE_KEY = 'admin:dashboard:pageSize'
+
+function readStoredPageSize(): PageSize {
+  if (typeof window === 'undefined') {
+    return DEFAULT_PAGE_SIZE
+  }
+
+  const raw = window.localStorage.getItem(PAGE_SIZE_STORAGE_KEY)
+  const parsed = raw === null ? NaN : Number(raw)
+  return (PAGE_SIZE_OPTIONS as readonly number[]).includes(parsed)
+    ? (parsed as PageSize)
+    : DEFAULT_PAGE_SIZE
+}
 
 type DeltaInfo = { changePct: number | null; direction: 'up' | 'down' | 'flat' }
 
@@ -96,9 +111,18 @@ type DashboardPageContentProps = {
 function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
   const messages = useAdminMessages()
   const d = messages.admin.dashboard
+  const [pageSize, setPageSize] = useState<PageSize>(readStoredPageSize)
   const [page, setPage] = useState(1)
 
-  const { summary, isLoading, error } = useDashboardSummary({ page, limit: PAGE_SIZE })
+  const handlePageSizeChange = (nextSize: PageSize) => {
+    setPageSize(nextSize)
+    setPage(1)
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(PAGE_SIZE_STORAGE_KEY, String(nextSize))
+    }
+  }
+
+  const { summary, isLoading, error } = useDashboardSummary({ page, limit: pageSize })
 
   useEffect(() => {
     onUserRoleChange(summary ? d.editorsActive(summary.counts.editors) : undefined)
@@ -170,9 +194,9 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
 
   const recentItems = summary?.recentItems ?? []
   const total = summary?.totalRecentItems ?? 0
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
-  const from = (page - 1) * PAGE_SIZE + 1
-  const to = Math.min(page * PAGE_SIZE, total)
+  const totalPages = Math.max(1, Math.ceil(total / pageSize))
+  const from = (page - 1) * pageSize + 1
+  const to = Math.min(page * pageSize, total)
 
   const paginationItems = getPaginationItems(page, totalPages, 1)
 
@@ -329,8 +353,8 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
                     </td>
                   </tr>
                 ) : null}
-                {!isLoading && recentItems.length > 0 && recentItems.length < PAGE_SIZE
-                  ? Array.from({ length: PAGE_SIZE - recentItems.length }).map((_, i) => (
+                {!isLoading && recentItems.length > 0 && recentItems.length < pageSize
+                  ? Array.from({ length: pageSize - recentItems.length }).map((_, i) => (
                       <tr key={`placeholder-${i}`} className="h-[72px] border-t border-slate-100 dark:border-slate-800" aria-hidden>
                         <td colSpan={6} />
                       </tr>
@@ -341,12 +365,27 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
           </div>
         </div>
 
-        <div className="flex items-center justify-between">
-          {!isLoading && total > 0 ? (
-            <p className="text-xs text-slate-500">{d.paginationShowing(from, to, total)}</p>
-          ) : (
-            <span />
-          )}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-4">
+            {!isLoading && total > 0 ? (
+              <p className="text-xs text-slate-500">{d.paginationShowing(from, to, total)}</p>
+            ) : null}
+
+            <label className="flex items-center gap-2 text-xs text-slate-500">
+              <span>{d.pageSizeLabel}</span>
+              <select
+                value={pageSize}
+                onChange={(event) => handlePageSizeChange(Number(event.target.value) as PageSize)}
+                className="rounded-md border border-[var(--color-admin-card-border)] bg-white px-2 py-1 text-xs text-[#0f172a] transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-accent/40 dark:bg-[#111318] dark:text-white dark:hover:bg-slate-800"
+              >
+                {PAGE_SIZE_OPTIONS.map((size) => (
+                  <option key={size} value={size}>
+                    {size}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
 
           <div className="flex items-center gap-2">
             <button
