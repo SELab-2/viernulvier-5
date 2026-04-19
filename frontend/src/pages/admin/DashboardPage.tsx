@@ -178,7 +178,7 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
                 <p className="text-sm font-medium text-[#475569] dark:text-slate-400">{card.label}</p>
                 <p className="text-2xl leading-8 font-bold text-[#0f172a] dark:text-white">{isLoading ? '...' : card.value}</p>
               </div>
-              <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${card.accent}`}>
+              <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${card.accent}`}>
                 <img src={card.iconSrc} alt={card.iconAlt} className="h-5 w-5 shrink-0" />
               </div>
             </div>
