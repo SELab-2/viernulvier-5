@@ -37,17 +37,23 @@ export class ProductionsRepository {
     }
 
     async findById(id: string) {
-        return this.prisma.production.findUnique({
+        const production = await this.prisma.production.findUnique({
             where: { id },
             include: {
-                events: true,
-                genre_production: {
-                    include: {
-                        genre: true
-                    }
-                }
+                genre_production: { include: { genre: true } },
+                tag_production: { include: { tag: true } }
             }
-        })
+        });
+
+        if (!production) return null;
+
+        const { genre_production, tag_production, ...rest } = production;
+
+        return {
+            ...rest,
+            genres: genre_production.map((gp) => gp.genre),
+            tags: tag_production.map((tp) => tp.tag),
+        };
     }
 
     async create(data: any) {
