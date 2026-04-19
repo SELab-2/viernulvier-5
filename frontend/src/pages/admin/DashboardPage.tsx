@@ -361,14 +361,19 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
                               : d.languageStatusMissing
 
                           return (
-                            <div key={loc} className={state === 'missing' ? 'opacity-40' : ''} title={tooltip}>
-                              <div>{loc}</div>
-                              <div
-                                className={`mt-1 h-2 w-2 rounded-full ${dotClass}`}
-                                role="img"
-                                aria-label={tooltip}
+                            <span
+                              key={loc}
+                              className={`inline-block cursor-help rounded-sm focus:outline-none focus:ring-2 focus:ring-accent/40 ${state === 'missing' ? 'opacity-40' : ''}`}
+                              title={tooltip}
+                              aria-label={`${loc.toUpperCase()}: ${tooltip}`}
+                              tabIndex={0}
+                            >
+                              <span className="block">{loc}</span>
+                              <span
+                                aria-hidden="true"
+                                className={`mt-1 block h-2 w-2 rounded-full ${dotClass}`}
                               />
-                            </div>
+                            </span>
                           )
                         })}
                       </div>
