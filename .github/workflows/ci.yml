@@ -6,8 +6,6 @@ on:
   push:
     branches-ignore:
       - main
-  pull_request:
-    types: [opened, synchronize, reopened]
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -40,21 +38,21 @@ jobs:
     env:
       DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/viernulvier_test
       JWT_SECRET: test-secret-for-ci
-      ADMIN_USERNAME: admin
-      ADMIN_PASSWORD: password123
       NODE_ENV: test
+      SKIP_TEST_DB_START: 1
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js (latest LTS)
+        uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: npm
           cache-dependency-path: backend/package-lock.json
 
       - run: npm ci
-      - run: npx prisma generate
-      - run: npx prisma migrate deploy
       # Fail CI on any lint warning. Placeholder exceptions are handled inline.
       - run: npm run lint -- --max-warnings=0
       - run: npm run build
