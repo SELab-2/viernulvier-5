@@ -1,81 +1,112 @@
-import type { ReactNode } from 'react'
+import { useMemo, useState } from 'react'
+import { logoutAdmin } from '../../api/adminAuth'
+import { getAdminRouteConfig } from '../../admin/paths'
+import { clearPrimedAdminSession } from '../../auth/primedAdminSession'
+import { getActiveLocale, getMessages, setActiveLocale } from '../../i18n'
+import type { Locale } from '../../i18n/types'
+import type { Theme } from '../shared/TopBarControls'
+import AdminFooter from './AdminFooter'
+import { AdminMessagesContext } from './AdminMessagesContext'
+import AdminTopBar from './AdminTopBar'
 
-// TODO: for now these are public, make or use private/admin navbar and footer
-import PublicNavbar from './../public/PublicNavbar'
-import PublicFooter from './../public/PublicFooter'
-import ProductionSidebar from './ProductionSidebar'
-import ProductionEditHeader from './ProductionEditHeader'
-import EventsEdit from './ManageEvents'
-
-type AdminLayoutProps = {
-    title: string
-    productionSettingsLabel: string,
-    archiveLabel: string
-    searchAriaLabel: string
-    searchPlaceholder: string
-    statusLabel: string
-    genreLabel: string
-    bannerLabel: string
-    extraPicturesLabel: string
-    artistLabel: string
-    backLabel: string
-    saveAsDraftLabel: string
-    publishLabel: string
-    back: () => void
-    saveAsDraft: () => void
-    publish: () => void
-    children: ReactNode
+interface AdminLayoutProps {
+  children: React.ReactNode
+  showFooter?: boolean
+  mainClassName?: string
+  showLogout?: boolean
+  sidebar?: React.ReactNode
+  header?: React.ReactNode
 }
 
-function AdminLayout({ 
-    title,
-    productionSettingsLabel,
-    archiveLabel, 
-    searchAriaLabel, 
-    searchPlaceholder, 
-    statusLabel,
-    genreLabel,
-    bannerLabel,
-    extraPicturesLabel,
-    artistLabel,
-    backLabel,
-    saveAsDraftLabel,
-    publishLabel,
-    back,
-    saveAsDraft,
-    publish,
-    children 
+function getMainClassName(mainClassName = ''): string {
+  return mainClassName ? `${mainClassName} flex-1` : 'flex-1'
+}
+
+function resolveTheme(): Theme {
+  const explicitTheme = document.documentElement.dataset.theme
+  if (explicitTheme === 'light' || explicitTheme === 'dark') {
+    return explicitTheme
+  }
+
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+}
+
+function getInitialLocale(): Locale {
+  return getActiveLocale(window.location.pathname)
+}
+
+function applyTheme(theme: Theme) {
+  document.documentElement.dataset.theme = theme
+  localStorage.setItem('theme', theme)
+}
+
+async function logoutAndRedirect(hostname: string | undefined): Promise<void> {
+  try {
+    await logoutAdmin()
+  } catch {
+    // Keep logout UX consistent even if the API call fails.
+  } finally {
+    clearPrimedAdminSession()
+    window.location.assign(getAdminRouteConfig(hostname ?? window.location.hostname).loginPath)
+  }
+}
+
+function AdminLayout({
+  children,
+  showFooter = true,
+  mainClassName,
+  showLogout = true,
+  sidebar,
+  header
 }: AdminLayoutProps) {
-    return (
-        <div className="flex flex-col min-h-screen bg-background text-foreground">
-            <PublicNavbar
-                title={title}
-                archiveLabel={archiveLabel}
-                searchAriaLabel={searchAriaLabel}
-                searchPlaceholder={searchPlaceholder}
-            />
-            <ProductionEditHeader
-                backLabel={backLabel}
-                saveAsDraftLabel={saveAsDraftLabel}
-                publishLabel={publishLabel}
-                back={back}
-                saveAsDraft={saveAsDraft}
-                publish={publish}   
-            />
-            <div className="flex flex-row">
-                <main className="mx-auto w-full flex-1">{children}</main>
-                <ProductionSidebar
-                    productionSettingsLabel={productionSettingsLabel}
-                    statusLabel={statusLabel}
-                    genreLabel={genreLabel}
-                    bannerLabel={bannerLabel}
-                    extraPicturesLabel={extraPicturesLabel}
-                    artistLabel={artistLabel}
-                />
+  const [theme, setTheme] = useState<Theme>(resolveTheme)
+  const [locale, setLocale] = useState<Locale>(getInitialLocale)
+
+  const messages = useMemo(() => getMessages(locale), [locale])
+  const { logoutLabel } = messages.auth
+
+  const handleLocaleChange = (nextLocale: Locale) => {
+    setLocale(nextLocale)
+    setActiveLocale(nextLocale)
+  }
+
+  const handleThemeChange = (nextTheme: Theme) => {
+    setTheme(nextTheme)
+    applyTheme(nextTheme)
+  }
+
+  const handleLogoutClick = () => logoutAndRedirect(window.location.hostname)
+
+  return (
+    <AdminMessagesContext.Provider value={messages}>
+      <div className="admin-shell min-h-screen flex flex-col bg-[var(--color-admin-bg)] text-foreground">
+        <AdminTopBar
+          locale={locale}
+          theme={theme}
+          logoutLabel={showLogout ? logoutLabel : undefined}
+          onLogout={showLogout ? handleLogoutClick : undefined}
+          onToggleLocale={() => handleLocaleChange(locale === 'nl' ? 'en' : 'nl')}
+          onToggleTheme={() => handleThemeChange(theme === 'light' ? 'dark' : 'light')}
+        />
+
+        {header && (
+          <div>
+            {header}
+          </div>
+        )}
+        <div className="bg-background flex flex-row">
+          <main className={getMainClassName(mainClassName)}>{children}</main>
+
+          {sidebar && (
+            <div>
+              {sidebar}
             </div>
-            <PublicFooter />
+          )}
         </div>
-    )
+        {showFooter ? <AdminFooter /> : null}
+      </div>
+    </AdminMessagesContext.Provider>
+  )
 }
 
 export default AdminLayout

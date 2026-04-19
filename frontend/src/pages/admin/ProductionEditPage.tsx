@@ -14,6 +14,8 @@ import { getMessages } from '../../i18n'
 import { useEffect, useState } from 'react'
 import { api } from '../../api/client'
 import EventPopup from '../../components/admin/EventPopup'
+import ProductionSidebar from '../../components/admin/ProductionSidebar'
+import ProductionEditHeader from '../../components/admin/ProductionEditHeader'
 
 const defaultForm : ProductionContent = {
     nl: {title: '', slug: '', content: ''},
@@ -132,22 +134,26 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
 
     return (
         <AdminLayout
-            title={messages.home.title}
-            productionSettingsLabel={messages.production.productionSettingsLabel}
-            archiveLabel={messages.nav.archive}
-            searchAriaLabel={messages.nav.searchAriaLabel}
-            searchPlaceholder={messages.nav.searchPlaceholder}
-            statusLabel={messages.production.statusLabel}
-            genreLabel={messages.production.genreLabel}
-            bannerLabel={messages.production.bannerLabel}
-            extraPicturesLabel={messages.production.extraPicturesLabel}
-            artistLabel={messages.production.artistLabel}
-            backLabel={messages.production.back}
-            saveAsDraftLabel={messages.production.saveOnDraft}
-            publishLabel={messages.production.publish}
-            back={back}
-            saveAsDraft={saveAsDraft}
-            publish={publish}   
+            header={
+                <ProductionEditHeader
+                    backLabel={messages.production.back}
+                    saveAsDraftLabel={messages.production.saveOnDraft}
+                    publishLabel={messages.production.publish}
+                    back={back}
+                    saveAsDraft={saveAsDraft}
+                    publish={publish}   
+                />
+            }
+            sidebar={
+                <ProductionSidebar
+                    productionSettingsLabel={messages.production.productionSettingsLabel}
+                    statusLabel={messages.production.statusLabel}
+                    genreLabel={messages.production.genreLabel}
+                    bannerLabel={messages.production.bannerLabel}
+                    extraPicturesLabel={messages.production.extraPicturesLabel}
+                    artistLabel={messages.production.artistLabel}
+                />
+            }
         >   
             <SectionHeading
                 title={messages.production.productionEditTitle}

@@ -11,7 +11,7 @@ function PublicFooter() {
             <div className="site-container py-14">
                 <div className="grid gap-12 md:grid-cols-2 xl:grid-cols-4">
                     <section>
-                        <img src="/logo-white.png" alt="VIERNULVIER" className="mb-5 h-10 w-auto" />
+                        <img src="/logo-white.png" alt={messages.footer.brandLogoAlt} className="mb-5 h-10 w-auto" />
                         <p className="max-w-xs text-base leading-7 text-grey">
                             {messages.footer.about}
                         </p>
@@ -34,7 +34,7 @@ function PublicFooter() {
                             <p>9000 Gent</p>
                             <p>info@viernulvier.gent</p>
                             <p>+32 (0)9 267 28 20</p>
-                            <p>Kunstencentrum VIERNULVIER vzw.</p>
+                            <p>{messages.footer.organizationName}</p>
                             <p>BTW BE 0423.063.619</p>
                         </address>
                     </section>
@@ -44,13 +44,13 @@ function PublicFooter() {
                         <p className="mb-5 max-w-xs text-base leading-7 text-grey">
                             {messages.footer.newsletterText}
                         </p>
-                        <form className="flex max-w-sm gap-2">
+                        <form className="grid max-w-sm grid-cols-1 gap-2 min-[1400px]:grid-cols-[1fr_auto]">
                             <input
                                 type="email"
                                 placeholder={messages.footer.newsletterPlaceholder}
-                                className="h-10 flex-1 rounded-md bg-zinc-900 px-4 text-sm text-white placeholder:text-zinc-400"
+                                className="h-10 min-w-0 rounded-md bg-zinc-900 px-4 text-sm text-white placeholder:text-zinc-400"
                             />
-                            <button type="submit" className="h-10 rounded-md bg-white px-5 text-sm font-semibold text-zinc-900">
+                            <button type="submit" className="h-10 w-full rounded-md bg-white px-5 text-sm font-semibold text-zinc-900 min-[1400px]:w-auto">
                                 {messages.footer.newsletterSubmit}
                             </button>
                         </form>

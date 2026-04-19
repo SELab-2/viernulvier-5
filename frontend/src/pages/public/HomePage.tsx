@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { getActiveLocale, getMessages, withLocalePath } from '../../i18n'
+import { getActiveLocale, withLocalePath } from '../../i18n'
 import PublicLayout from '../../components/public/PublicLayout'
 import PublicHeroSearch, { type HeroSearchFilters } from '../../components/public/PublicHeroSearch'
 import PublicPopularTags from '../../components/public/PublicPopularTags'
@@ -11,7 +11,6 @@ import PublicRecentDigitized from '../../components/public/PublicRecentDigitized
  * Public home page — displays the archive listing.
  */
 function HomePage() {
-    const messages = getMessages()
     const navigate = useNavigate()
     const [searchParams] = useSearchParams()
     const locale = getActiveLocale(window.location.pathname)
@@ -24,11 +23,6 @@ function HomePage() {
             location: searchParams.get('location') ?? undefined,
         }),
         [searchParams]
-    )
-
-    const genreOptions = useMemo(
-        () => messages.home.popularTags.map((tag) => ({ value: tag, label: tag })),
-        [messages.home.popularTags]
     )
 
     const handleSearch = (filters: HeroSearchFilters) => {
@@ -70,49 +64,15 @@ function HomePage() {
     }
 
     return (
-        <PublicLayout
-            title={messages.home.title}
-            archiveLabel={messages.nav.archive}
-            searchAriaLabel={messages.nav.searchAriaLabel}
-            searchPlaceholder={messages.nav.searchPlaceholder}
-        >
+        <PublicLayout>
             <PublicHeroSearch
                 key={searchParams.toString()}
-                heroTagline={messages.home.heroTagline}
-                titleTop={messages.home.heroTitleTop}
-                titleAccent={messages.home.heroTitleAccent}
-                titleBottom={messages.home.heroTitleBottom}
-                intro={messages.home.intro}
-                searchPlaceholder={messages.nav.searchPlaceholder}
-                searchYearLabel={messages.home.searchYear}
-                searchGenreLabel={messages.home.searchGenre}
-                searchLocationLabel={messages.home.searchLocation}
-                searchButtonLabel={messages.home.searchButton}
-                genreOptions={genreOptions}
                 initialFilters={initialFilters}
                 onSearch={handleSearch}
             />
-            <PublicPopularTags
-                label={messages.home.popularTagsLabel}
-                tags={messages.home.popularTags}
-                moreLabel={messages.home.popularTagsMore}
-                onTagClick={handlePopularTagClick}
-            />
-            <PublicLatestBlogPreview
-                heading={messages.home.latestBlogHeading}
-                subheading={messages.home.latestBlogSubheading}
-                title={messages.home.latestBlogTitle}
-                paragraphOne={messages.home.latestBlogParagraphOne}
-                paragraphTwoTitle={messages.home.latestBlogParagraphTwoTitle}
-                paragraphTwo={messages.home.latestBlogParagraphTwo}
-                readMoreLabel={messages.home.latestBlogReadMore}
-                viewAllLabel={messages.home.latestBlogViewAll}
-            />
+            <PublicPopularTags onTagClick={handlePopularTagClick} />
+            <PublicLatestBlogPreview />
             <PublicRecentDigitized
-                heading={messages.home.recentDigitizedHeading}
-                items={messages.home.recentDigitizedItems}
-                viewItemLabel={messages.home.recentDigitizedViewItem}
-                viewAllLabel={messages.home.recentDigitizedViewAll}
                 onViewItem={handleRecentDigitizedItemClick}
                 onViewAll={handleRecentDigitizedViewAll}
             />

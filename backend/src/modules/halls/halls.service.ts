@@ -1,33 +1,31 @@
 import type { 
-    PaginationQuery, 
-    HallListResponse, 
+    HallPaginationQuery, 
     HallResponse,
     CreateHallInput,
     UpdateHallInput
 } from './halls.schema.js'
 import { HallsRepository } from './halls.repository.js'
+import { PaginatedResult, calculateTotalPages } from '../../utils/pagination.js'
 
 export class HallsService {
     constructor(private readonly repository: HallsRepository) { }
 
-    async getHalls(options: PaginationQuery): Promise<HallListResponse> {
+    async getHalls(options: HallPaginationQuery): Promise<PaginatedResult<HallResponse>> {
         const { page, limit, spaceId, search, lang } = options
 
-        const [data, total] = await Promise.all([
+        const [items, total] = await Promise.all([
             this.repository.findAll({ page, limit, spaceId, search, lang }),
             this.repository.count({ spaceId, search, lang }),
         ])
 
-        const totalPages = Math.ceil(total / limit)
+        const totalPages = calculateTotalPages(total, limit)
 
         return {
-            data: data as any,
-            meta: {
-                total,
-                page,
-                limit,
-                totalPages,
-            },
+            items: items as any,
+            total,
+            page,
+            limit,
+            totalPages,
         }
     }
 
