@@ -44,7 +44,7 @@ export class BlogsRepository {
 
     async countInRange({ from, to }: { from: Date; to: Date }): Promise<number> {
         return this.mockBlogs.filter(
-            (b) => b.createdAt >= from && b.createdAt < to,
+            (b) => b.createdAt !== undefined && b.createdAt >= from && b.createdAt < to,
         ).length
     }
 
