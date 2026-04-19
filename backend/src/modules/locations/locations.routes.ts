@@ -3,9 +3,9 @@ import { LocationsRepository } from './locations.repository.js'
 import { LocationsService } from './locations.service.js'
 import { LocationsController } from './locations.controller.js'
 import { 
-    paginationQuerySchema, 
+    locationPaginationQuerySchema, 
     locationListSchema,
-    locationSchema,
+    singleLocationSchema,
     idParamSchema,
     errorSchema,
     createLocationSchema,
@@ -25,7 +25,7 @@ const locationsRoutes: FastifyPluginAsync = async (fastify) => {
         schema: {
             tags: ['locations'],
             summary: 'Get a paginated list of locations',
-            querystring: paginationQuerySchema,
+            querystring: locationPaginationQuerySchema,
             response: {
                 200: locationListSchema,
             },
@@ -39,7 +39,7 @@ const locationsRoutes: FastifyPluginAsync = async (fastify) => {
             summary: 'Get a location by ID',
             params: idParamSchema,
             response: {
-                200: locationSchema,
+                200: singleLocationSchema,
                 404: errorSchema
             },
         },
@@ -53,7 +53,7 @@ const locationsRoutes: FastifyPluginAsync = async (fastify) => {
             summary: 'Create a new location',
             body: createLocationSchema,
             response: {
-                201: locationSchema,
+                201: singleLocationSchema,
             },
         },
         handler: (request, reply) => controller.createLocation(request as any, reply),
@@ -67,7 +67,7 @@ const locationsRoutes: FastifyPluginAsync = async (fastify) => {
             params: idParamSchema,
             body: updateLocationSchema,
             response: {
-                200: locationSchema,
+                200: singleLocationSchema,
                 404: errorSchema
             },
         },
@@ -87,8 +87,6 @@ const locationsRoutes: FastifyPluginAsync = async (fastify) => {
         },
         handler: (request, reply) => controller.deleteLocation(request as any, reply),
     })
-
-    // Halls (prefix will be /api/archive/halls when registered in app.ts)
 }
 
 export default locationsRoutes
