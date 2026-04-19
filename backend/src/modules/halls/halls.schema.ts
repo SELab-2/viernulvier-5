@@ -1,4 +1,8 @@
 import { z } from 'zod'
+import { 
+    createPaginatedResponseSchema, 
+    createSingleResponseSchema 
+} from '../../utils/rest-schemas.js'
 
 const localizedTextSchema = z.object({
     nl: z.string().optional(),
@@ -6,12 +10,21 @@ const localizedTextSchema = z.object({
     en: z.string().optional(),
 }).nullable()
 
-export const paginationQuerySchema = z.object({
+export const hallPaginationQuerySchema = z.object({
     page: z.coerce.number().int().positive().default(1),
     limit: z.coerce.number().int().positive().max(100).default(20),
     spaceId: z.string().uuid().optional(),
     search: z.string().optional(),
     lang: z.string().optional().default('nl'),
+})
+
+/**
+ * Explicit links for the Hall resource.
+ */
+export const hallLinksSchema = z.object({
+    self: z.string().url().default('https://example.com/'),
+    space: z.string().url().optional().nullable().default('https://example.com/'),
+    events: z.string().url().optional().nullable().default('https://example.com/'),
 })
 
 export const hallSchema = z.object({
@@ -26,17 +39,11 @@ export const hallSchema = z.object({
     space_id: z.string().uuid().nullable(),
     created_at: z.coerce.date(),
     updated_at: z.coerce.date(),
+    links: hallLinksSchema.optional(),
 })
 
-export const hallListSchema = z.object({
-    data: z.array(hallSchema),
-    meta: z.object({
-        total: z.number(),
-        page: z.number(),
-        limit: z.number(),
-        totalPages: z.number(),
-    }),
-})
+export const hallListSchema = createPaginatedResponseSchema(hallSchema)
+export const singleHallSchema = createSingleResponseSchema(hallSchema)
 
 export const idParamSchema = z.object({
     id: z.string().uuid(),
@@ -59,7 +66,7 @@ export const errorSchema = z.object({
     message: z.string(),
 })
 
-export type PaginationQuery = z.infer<typeof paginationQuerySchema>
+export type HallPaginationQuery = z.infer<typeof hallPaginationQuerySchema>
 export type HallResponse = z.infer<typeof hallSchema>
 export type HallListResponse = z.infer<typeof hallListSchema>
 export type CreateHallInput = z.infer<typeof createHallSchema>

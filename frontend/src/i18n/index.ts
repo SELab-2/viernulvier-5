@@ -9,6 +9,9 @@ const MESSAGES: Record<Locale, Messages> = {
   en,
 }
 
+const LOCALE_STORAGE_KEY = 'locale'
+const LOCALE_PATH_REGEX = /^\/(nl|en)(?=\/|$)/i
+
 export function resolveLocale(rawLocale?: string): Locale {
   if (!rawLocale) {
     return DEFAULT_LOCALE
@@ -27,8 +30,58 @@ export function resolveLocale(rawLocale?: string): Locale {
   return DEFAULT_LOCALE
 }
 
+export function getLocaleFromPath(pathname: string): Locale | undefined {
+  const match = pathname.match(LOCALE_PATH_REGEX)
+  if (!match?.[1]) {
+    return undefined
+  }
+
+  return resolveLocale(match[1])
+}
+
+export function withLocalePath(pathname: string, locale: Locale): string {
+  const normalizedPath = pathname.startsWith('/') ? pathname : `/${pathname}`
+  const stripped = normalizedPath.replace(LOCALE_PATH_REGEX, '') || '/'
+
+  if (stripped === '/') {
+    return `/${locale}`
+  }
+
+  return `/${locale}${stripped}`
+}
+
+export function getActiveLocale(pathname?: string): Locale {
+  if (typeof window !== 'undefined') {
+    const localeFromPath = getLocaleFromPath(pathname ?? window.location.pathname)
+    if (localeFromPath) {
+      return localeFromPath
+    }
+
+    const savedLocale = window.localStorage.getItem(LOCALE_STORAGE_KEY)
+    if (savedLocale) {
+      return resolveLocale(savedLocale)
+    }
+
+    if (document?.documentElement?.lang) {
+      return resolveLocale(document.documentElement.lang)
+    }
+
+    return resolveLocale(window.navigator.language)
+  }
+
+  return DEFAULT_LOCALE
+}
+
+export function setActiveLocale(locale: Locale) {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  window.localStorage.setItem(LOCALE_STORAGE_KEY, locale)
+  document.documentElement.lang = locale
+}
+
 export function getMessages(locale?: Locale): Messages {
-  // Keep NL as the scaffold default until language switching is wired.
-  const activeLocale = locale ?? DEFAULT_LOCALE
+  const activeLocale = locale ?? getActiveLocale()
   return MESSAGES[activeLocale]
 }
