@@ -1,0 +1,52 @@
+name: Notify on Discord when a review is requested
+
+on:
+  pull_request:
+    types: [review_requested]
+
+jobs:
+  notify:
+    runs-on: self-hosted
+
+    permissions:
+      pull-requests: read
+
+    steps:
+      - name: Notify Discord
+        uses: actions/github-script@v8
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const DISCORD_MAP = {
+              laveenae: "1489694586098946129",
+              LiamVDB1: "1489694455723462787",
+              sarahvlan: "1489694521603133521",
+              tuurdaneels: "1489694424530161816",
+              Jorenve: "1489694554721616162",
+              julesbauw: "1489694485490303206",
+              jminjuk2: "1489694397779017898",
+              ninavandezande: "1489694279088476273"
+            };
+
+            const pr = context.payload.pull_request;
+            const reviewer = context.payload.requested_reviewer;
+
+            if (!reviewer) {
+              core.info("No reviewer in payload.");
+              return;
+            }
+
+            const roleId = DISCORD_MAP[reviewer.login];
+            const mention = roleId ? `<@&${roleId}>` : reviewer.login;
+
+            const message = {
+              content: `📣 **Review Requested**\n${mention}\n📦 **${pr.title}**\n🔗 ${pr.html_url}`
+            };
+
+            await fetch(process.env.DISCORD_WEBHOOK, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(message)
+            }); 
