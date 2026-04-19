@@ -49,6 +49,46 @@ function makeDateFormatter(locale: Locale): Intl.DateTimeFormat {
   })
 }
 
+type PageItem = number | 'ellipsis-left' | 'ellipsis-right'
+
+function getPaginationItems(current: number, totalPages: number, siblings = 1): PageItem[] {
+  const pageNeighbours = siblings * 2 + 3
+  const totalBlocks = pageNeighbours + 2
+
+  if (totalPages <= totalBlocks) {
+    return Array.from({ length: totalPages }, (_, i) => i + 1)
+  }
+
+  const leftSibling = Math.max(current - siblings, 2)
+  const rightSibling = Math.min(current + siblings, totalPages - 1)
+  const hasLeftGap = leftSibling > 2
+  const hasRightGap = rightSibling < totalPages - 1
+
+  const items: PageItem[] = [1]
+
+  if (!hasLeftGap && hasRightGap) {
+    const leftRange = Array.from({ length: pageNeighbours - 1 }, (_, i) => i + 2)
+    items.push(...leftRange, 'ellipsis-right', totalPages)
+    return items
+  }
+
+  if (hasLeftGap && !hasRightGap) {
+    const rightRange = Array.from(
+      { length: pageNeighbours - 1 },
+      (_, i) => totalPages - (pageNeighbours - 2) + i,
+    )
+    items.push('ellipsis-left', ...rightRange)
+    return items
+  }
+
+  const middleRange = Array.from(
+    { length: rightSibling - leftSibling + 1 },
+    (_, i) => leftSibling + i,
+  )
+  items.push('ellipsis-left', ...middleRange, 'ellipsis-right', totalPages)
+  return items
+}
+
 type DashboardPageContentProps = {
   onUserRoleChange: (nextUserRole: string | undefined) => void
 }
@@ -134,12 +174,7 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
   const from = (page - 1) * PAGE_SIZE + 1
   const to = Math.min(page * PAGE_SIZE, total)
 
-  const windowSize = Math.min(totalPages, 3)
-  const windowStart = Math.min(
-    Math.max(1, page - Math.floor(windowSize / 2)),
-    Math.max(1, totalPages - windowSize + 1),
-  )
-  const visiblePages = Array.from({ length: windowSize }, (_, i) => windowStart + i)
+  const paginationItems = getPaginationItems(page, totalPages, 1)
 
   return (
     <section className="mx-auto flex w-full max-w-[960px] flex-col gap-6">
@@ -323,20 +358,35 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
               ‹
             </button>
 
-            {visiblePages.map((p) => (
-              <button
-                key={p}
-                aria-label={String(p)}
-                onClick={() => setPage(p)}
-                className={`flex h-8 w-8 items-center justify-center rounded-md border text-sm transition ${
-                  p === page
-                    ? 'border-accent bg-accent font-semibold text-white'
-                    : 'border-[var(--color-admin-card-border)] bg-white text-[#0f172a] hover:bg-slate-50 dark:bg-[#111318] dark:text-white dark:hover:bg-slate-800'
-                }`}
-              >
-                {p}
-              </button>
-            ))}
+            {paginationItems.map((item, index) => {
+              if (item === 'ellipsis-left' || item === 'ellipsis-right') {
+                return (
+                  <span
+                    key={`${item}-${index}`}
+                    aria-hidden="true"
+                    className="flex h-8 w-8 items-center justify-center text-sm text-slate-400 dark:text-slate-500"
+                  >
+                    …
+                  </span>
+                )
+              }
+
+              return (
+                <button
+                  key={item}
+                  aria-label={String(item)}
+                  aria-current={item === page ? 'page' : undefined}
+                  onClick={() => setPage(item)}
+                  className={`flex h-8 w-8 items-center justify-center rounded-md border text-sm transition ${
+                    item === page
+                      ? 'border-accent bg-accent font-semibold text-white'
+                      : 'border-[var(--color-admin-card-border)] bg-white text-[#0f172a] hover:bg-slate-50 dark:bg-[#111318] dark:text-white dark:hover:bg-slate-800'
+                  }`}
+                >
+                  {item}
+                </button>
+              )
+            })}
 
             <button
               aria-label={d.paginationNext}
