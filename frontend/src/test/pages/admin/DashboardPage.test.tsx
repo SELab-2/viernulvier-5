@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import type { Messages } from '../../../i18n/types'
 import { AdminMessagesContext } from '../../../components/admin/AdminMessagesContext'
 import DashboardPage from '../../../pages/admin/DashboardPage'
@@ -25,7 +25,8 @@ const mockMessages = vi.hoisted(() => ({
       actionEdit: 'Edit',
       emptyRecent: 'No recent archive items found.',
       paginationShowing: (from: number, to: number, total: number) => `Showing ${from}-${to} of ${total} results`,
-      paginationDefault: 'Showing recent results',
+      paginationPrev: 'Previous page',
+      paginationNext: 'Next page',
       notSyncedYet: 'Not yet synced',
       lastSync: 'last sync',
       syncStatusPending: 'sync status pending',
@@ -34,15 +35,12 @@ const mockMessages = vi.hoisted(() => ({
       visitorsChange: 'placeholder',
       editorsActive: (count: number) => `${count} editors active`,
       statProductions: 'Productions',
-      statEvents: 'Events',
+      statBlogConcepts: 'Blog Concepts',
       statVisitors: 'Visitors',
       statMediaItems: 'Media Items',
-      statImportedArchive: 'imported archive',
-      statLinkedEvents: 'linked play dates',
+      deltaVsLastMonth: 'vs last month',
       statLastSync: 'last sync',
       statSyncPending: 'sync status pending',
-      statLiveData: '+ live data',
-      statLinked: '+ linked',
     },
   },
 }))
@@ -55,7 +53,7 @@ vi.mock('../../../components/admin/AdminLayout', () => ({
 }))
 
 vi.mock('../../../components/admin/useDashboardSummary', () => ({
-  useDashboardSummary: () => useDashboardSummaryMock(),
+  useDashboardSummary: (args: { page: number; limit: number }) => useDashboardSummaryMock(args),
 }))
 
 describe('DashboardPage', () => {
@@ -82,9 +80,11 @@ describe('DashboardPage', () => {
         counts: {
           productions: 1284,
           events: 42,
+          blogs: 7,
           mediaItems: 8492,
           editors: 3,
         },
+        totalRecentItems: 1,
         lastScrapedAt: '2026-03-03T00:00:00.000Z',
         recentItems: [
           {
@@ -124,9 +124,11 @@ describe('DashboardPage', () => {
         counts: {
           productions: 0,
           events: 0,
+          blogs: 0,
           mediaItems: 0,
           editors: 0,
         },
+        totalRecentItems: 0,
         lastScrapedAt: null,
         recentItems: [],
       },
@@ -147,5 +149,258 @@ describe('DashboardPage', () => {
     render(<DashboardPage />)
 
     expect(screen.getByText('Dashboard kon niet geladen worden.')).toBeInTheDocument()
+  })
+
+  it('renders Blog Concepts label', () => {
+    useDashboardSummaryMock.mockReturnValue({
+      isLoading: false,
+      error: null,
+      summary: {
+        counts: {
+          productions: 10,
+          events: 5,
+          blogs: 3,
+          mediaItems: 100,
+          editors: 2,
+        },
+        totalRecentItems: 0,
+        lastScrapedAt: null,
+        recentItems: [],
+        deltas: {
+          productions: { changePct: null, direction: 'flat' },
+          blogs: { changePct: null, direction: 'flat' },
+        },
+      },
+    })
+
+    render(<DashboardPage />)
+
+    expect(screen.getByText('Blog Concepts')).toBeInTheDocument()
+  })
+
+  it('productions pill shows +12% with green class when changePct=12 direction=up', () => {
+    useDashboardSummaryMock.mockReturnValue({
+      isLoading: false,
+      error: null,
+      summary: {
+        counts: { productions: 10, events: 5, blogs: 3, mediaItems: 100, editors: 2 },
+        totalRecentItems: 0,
+        lastScrapedAt: null,
+        recentItems: [],
+        deltas: {
+          productions: { changePct: 12, direction: 'up' },
+          blogs: { changePct: null, direction: 'flat' },
+        },
+      },
+    })
+
+    render(<DashboardPage />)
+
+    const pill = screen.getByText('+12%')
+    expect(pill).toBeInTheDocument()
+    expect(pill.className).toContain('text-[#10b981]')
+  })
+
+  it('productions pill shows -5% when changePct=-5 direction=down', () => {
+    useDashboardSummaryMock.mockReturnValue({
+      isLoading: false,
+      error: null,
+      summary: {
+        counts: { productions: 10, events: 5, blogs: 3, mediaItems: 100, editors: 2 },
+        totalRecentItems: 0,
+        lastScrapedAt: null,
+        recentItems: [],
+        deltas: {
+          productions: { changePct: -5, direction: 'down' },
+          blogs: { changePct: null, direction: 'flat' },
+        },
+      },
+    })
+
+    render(<DashboardPage />)
+
+    expect(screen.getByText('-5%')).toBeInTheDocument()
+  })
+
+  it('productions pill shows em dash and no vs-last-month note when changePct=null', () => {
+    useDashboardSummaryMock.mockReturnValue({
+      isLoading: false,
+      error: null,
+      summary: {
+        counts: { productions: 10, events: 5, blogs: 3, mediaItems: 100, editors: 2 },
+        totalRecentItems: 0,
+        lastScrapedAt: null,
+        recentItems: [],
+        deltas: {
+          productions: { changePct: null, direction: 'flat' },
+          blogs: { changePct: null, direction: 'flat' },
+        },
+      },
+    })
+
+    render(<DashboardPage />)
+
+    expect(screen.getAllByText('—').length).toBeGreaterThan(0)
+    expect(screen.queryByText('vs last month')).not.toBeInTheDocument()
+  })
+
+  it('blogs pill shows 0% when changePct=0 direction=flat', () => {
+    useDashboardSummaryMock.mockReturnValue({
+      isLoading: false,
+      error: null,
+      summary: {
+        counts: { productions: 10, events: 5, blogs: 3, mediaItems: 100, editors: 2 },
+        totalRecentItems: 0,
+        lastScrapedAt: null,
+        recentItems: [],
+        deltas: {
+          productions: { changePct: null, direction: 'flat' },
+          blogs: { changePct: 0, direction: 'flat' },
+        },
+      },
+    })
+
+    render(<DashboardPage />)
+
+    expect(screen.getByText('0%')).toBeInTheDocument()
+  })
+
+  it('shows pagination meta line when totalRecentItems > 0', () => {
+    useDashboardSummaryMock.mockReturnValue({
+      isLoading: false,
+      error: null,
+      summary: {
+        counts: {
+          productions: 10,
+          events: 5,
+          blogs: 3,
+          mediaItems: 100,
+          editors: 2,
+        },
+        totalRecentItems: 7,
+        lastScrapedAt: null,
+        recentItems: [
+          {
+            id: '1',
+            title: 'Test item',
+            type: 'Productie',
+            status: 'available',
+            languageStatus: { nl: 'complete', en: 'complete' },
+            updatedAt: '2026-01-01T00:00:00.000Z',
+          },
+          {
+            id: '2',
+            title: 'Test item 2',
+            type: 'Productie',
+            status: 'available',
+            languageStatus: { nl: 'complete', en: 'complete' },
+            updatedAt: '2026-01-01T00:00:00.000Z',
+          },
+          {
+            id: '3',
+            title: 'Test item 3',
+            type: 'Productie',
+            status: 'available',
+            languageStatus: { nl: 'complete', en: 'complete' },
+            updatedAt: '2026-01-01T00:00:00.000Z',
+          },
+        ],
+      },
+    })
+
+    render(<DashboardPage />)
+
+    expect(screen.getByText('Showing 1-3 of 7 results')).toBeInTheDocument()
+  })
+
+  it('does not show pagination meta line when totalRecentItems = 0', () => {
+    useDashboardSummaryMock.mockReturnValue({
+      isLoading: false,
+      error: null,
+      summary: {
+        counts: {
+          productions: 0,
+          events: 0,
+          blogs: 0,
+          mediaItems: 0,
+          editors: 0,
+        },
+        totalRecentItems: 0,
+        lastScrapedAt: null,
+        recentItems: [],
+      },
+    })
+
+    render(<DashboardPage />)
+
+    expect(screen.queryByText(/of \d+ results/)).not.toBeInTheDocument()
+  })
+
+  it('renders pagination buttons', () => {
+    useDashboardSummaryMock.mockReturnValue({
+      isLoading: false,
+      error: null,
+      summary: {
+        counts: {
+          productions: 10,
+          events: 5,
+          blogs: 3,
+          mediaItems: 100,
+          editors: 2,
+        },
+        totalRecentItems: 7,
+        lastScrapedAt: null,
+        recentItems: [],
+      },
+    })
+
+    render(<DashboardPage />)
+
+    expect(screen.getByRole('button', { name: 'Previous page' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Next page' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '1' })).toBeInTheDocument()
+  })
+
+  it('clicking page 2 button calls hook with page=2', () => {
+    useDashboardSummaryMock.mockReturnValue({
+      isLoading: false,
+      error: null,
+      summary: {
+        counts: {
+          productions: 10,
+          events: 5,
+          blogs: 3,
+          mediaItems: 100,
+          editors: 2,
+        },
+        totalRecentItems: 7,
+        lastScrapedAt: null,
+        recentItems: [],
+      },
+    })
+
+    render(<DashboardPage />)
+
+    const page2Button = screen.getByRole('button', { name: '2' })
+    fireEvent.click(page2Button)
+
+    expect(useDashboardSummaryMock.mock.calls.some(([args]) => args?.page === 2)).toBe(true)
+  })
+
+  it('Prev button is disabled on page 1', () => {
+    useDashboardSummaryMock.mockReturnValue({
+      isLoading: false,
+      error: null,
+      summary: {
+        counts: { productions: 10, events: 5, blogs: 3, mediaItems: 100, editors: 2 },
+        totalRecentItems: 7,
+        lastScrapedAt: null,
+        recentItems: [],
+      },
+    })
+
+    render(<DashboardPage />)
+
+    expect(screen.getByRole('button', { name: 'Previous page' })).toBeDisabled()
   })
 })
