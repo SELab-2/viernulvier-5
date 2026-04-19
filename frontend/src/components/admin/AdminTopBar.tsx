@@ -13,11 +13,7 @@ type AdminTopBarProps = {
     onLogout?: () => void
     onToggleLocale: () => void
     onSelectTheme: (theme: Theme) => void
-    themeToggleDark: string
-    themeToggleLight: string
-    localeToggleAriaLabel: string
     onOpenSidebar?: () => void
-    openSidebarLabel?: string
     openerRef?: RefObject<HTMLButtonElement | null>
     showSidebar?: boolean
 }
@@ -29,11 +25,7 @@ function AdminTopBar({
     onLogout,
     onToggleLocale,
     onSelectTheme,
-    themeToggleDark,
-    themeToggleLight,
-    localeToggleAriaLabel,
     onOpenSidebar,
-    openSidebarLabel,
     openerRef,
     showSidebar = false,
 }: AdminTopBarProps) {
@@ -48,7 +40,7 @@ function AdminTopBar({
                             ref={openerRef}
                             type="button"
                             onClick={onOpenSidebar}
-                            aria-label={openSidebarLabel}
+                            aria-label={messages.admin.openSidebarLabel}
                             className="mr-2 inline-flex h-8 w-8 items-center justify-center rounded text-white transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/40 lg:hidden"
                         >
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5">
@@ -72,14 +64,14 @@ function AdminTopBar({
 
                     <SegmentedThemeToggle
                         theme={theme}
-                        darkLabel={themeToggleDark}
-                        lightLabel={themeToggleLight}
+                        darkLabel={messages.admin.themeToggleDark}
+                        lightLabel={messages.admin.themeToggleLight}
                         onSelectTheme={onSelectTheme}
                     />
 
                     <NextLocaleToggle
                         locale={locale}
-                        ariaLabel={localeToggleAriaLabel}
+                        ariaLabel={messages.admin.localeToggleAriaLabel}
                         onToggleLocale={onToggleLocale}
                         className="text-md text-white max-[480px]:text-sm"
                     />
