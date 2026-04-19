@@ -18,7 +18,8 @@
         "db:migrate": "prisma migrate dev && prisma generate",
         "db:push": "prisma db push",
         "db:seed": "tsx prisma/seed.ts",
-        "db:studio": "prisma studio"
+        "db:studio": "prisma studio",
+        "scraper": "tsx src/scraper/sync_database.ts"
     },
     "dependencies": {
         "@fastify/cookie": "^11.0.0",
