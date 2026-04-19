@@ -88,17 +88,16 @@ function AdminLayout({
           onToggleLocale={() => handleLocaleChange(locale === 'nl' ? 'en' : 'nl')}
           onToggleTheme={() => handleThemeChange(theme === 'light' ? 'dark' : 'light')}
         />
-
         {header && (
           <div>
             {header}
           </div>
         )}
-        <div className="bg-background flex flex-row">
+        <div className="bg-background flex">
           <main className={getMainClassName(mainClassName)}>{children}</main>
 
           {sidebar && (
-            <div>
+            <div className='flex'>
               {sidebar}
             </div>
           )}
