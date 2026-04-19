@@ -68,11 +68,25 @@ function AdminLayout({
           onOpenSidebar={showSidebar ? openMobileSidebar : undefined}
           openerRef={openerRef}
         />
+<<<<<<< HEAD
 
         <div className={['flex w-full items-stretch flex-1', showSidebar ? 'lg:min-h-[calc(100vh-4.5rem)]' : ''].filter(Boolean).join(' ')}>
           {showSidebar ? (
             <div className="hidden lg:flex lg:shrink-0">
               <AdminSidebar userName={userName} userRole={userRole} />
+=======
+        {header && (
+          <div>
+            {header}
+          </div>
+        )}
+        <div className="bg-background flex">
+          <main className={getMainClassName(mainClassName)}>{children}</main>
+
+          {sidebar && (
+            <div className='flex'>
+              {sidebar}
+>>>>>>> d52c8b4 (fix sidebar)
             </div>
           ) : null}
 
