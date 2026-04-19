@@ -13,10 +13,37 @@ export type AdminNavigationItem = {
 }
 
 import { getAdminRouteConfig } from '../../admin/paths'
+import type { Messages } from '../../i18n/types'
 
 export type AdminNavigationGroup = {
     primary: AdminNavigationItem[]
     secondary: AdminNavigationItem[]
+}
+
+type AdminNavMessages = Messages['admin']['nav']
+
+export function getNavLabel(id: AdminNavItemId, nav: AdminNavMessages): string {
+    const labelMap: Record<AdminNavItemId, string> = {
+        dashboard: nav.dashboard,
+        productions: nav.productions,
+        gallery: nav.gallery,
+        organisation: nav.organisation,
+        settings: nav.settings,
+    }
+
+    return labelMap[id]
+}
+
+export function getNavIconAlt(id: AdminNavItemId, nav: AdminNavMessages): string {
+    const altMap: Record<AdminNavItemId, string> = {
+        dashboard: nav.dashboardIconAlt,
+        productions: nav.productionsIconAlt,
+        gallery: nav.galleryIconAlt,
+        organisation: nav.organisationIconAlt,
+        settings: nav.settingsIconAlt,
+    }
+
+    return altMap[id]
 }
 
 export function getAdminNavigationItems(hostname: string = window.location.hostname): AdminNavigationGroup {
