@@ -169,7 +169,6 @@ describe('Taxonomies Routes', () => {
             const tag = await app.prisma.tag.create({
                 data: {
                     name: { nl: 'Test Tag' },
-                    code: 'test-code'
                 }
             })
 

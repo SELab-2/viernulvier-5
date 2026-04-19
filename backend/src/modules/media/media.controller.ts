@@ -39,7 +39,7 @@ export class MediaController {
             ...item,
             links: {
                 self: `${baseUrl}/items/${item.id}`,
-                gallery: item.gallery_id ? `${baseUrl}/galleries/${item.gallery_id}` : undefined,
+                gallery: item.gallery_id ? `${baseUrl}/galleries/${item.gallery_id}` : null,
                 crops: `${baseUrl}/items/crops?itemId=${item.id}`,
             }
         }
@@ -50,7 +50,7 @@ export class MediaController {
             ...crop,
             links: {
                 self: `${baseUrl}/items/crops/${crop.id}`,
-                item: crop.item_id ? `${baseUrl}/items/${crop.item_id}` : undefined,
+                item: crop.item_id ? `${baseUrl}/items/${crop.item_id}` : null,
             }
         }
     }

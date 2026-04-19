@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { getActiveLocale, getMessages, setActiveLocale, withLocalePath } from '../../i18n'
+import { NextLocaleToggle, SegmentedThemeToggle } from '../shared/TopBarControls'
 
 type Theme = 'light' | 'dark'
 
@@ -11,23 +12,6 @@ function resolveTheme(): Theme {
     }
 
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-}
-
-function SunIcon({ className }: { className: string }) {
-    return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
-            <circle cx="12" cy="12" r="4" />
-            <path d="M12 2.5v2.5M12 19v2.5M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2.5 12H5M19 12h2.5M4.2 19.8L6 18M18 6l1.8-1.8" />
-        </svg>
-    )
-}
-
-function MoonIcon({ className }: { className: string }) {
-    return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
-            <path d="M20.6 14.6a8.5 8.5 0 1 1-11.2-11.2 7 7 0 1 0 11.2 11.2Z" />
-        </svg>
-    )
 }
 
 function SearchIcon({ className }: { className: string }) {
@@ -52,55 +36,6 @@ function CloseIcon({ className }: { className: string }) {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
             <path d="M6 6l12 12M18 6 6 18" strokeLinecap="round" />
         </svg>
-    )
-}
-
-type ThemeToggleProps = {
-    theme: Theme
-    applyTheme: (nextTheme: Theme) => void
-}
-
-function ThemeToggle({ theme, applyTheme }: ThemeToggleProps) {
-    return (
-        <div className="inline-flex h-8 w-16 items-center border border-border bg-grey">
-            <button
-                type="button"
-                onClick={() => applyTheme('dark')}
-                className={`inline-flex h-8 w-8 items-center justify-center cursor-pointer text-black transition-colors ${theme === 'dark' ? 'bg-white' : 'bg-grey'}`}
-                aria-label="Donkere modus"
-                aria-pressed={theme === 'dark'}
-            >
-                <MoonIcon className="h-4 w-4" />
-            </button>
-            <button
-                type="button"
-                onClick={() => applyTheme('light')}
-                className={`inline-flex h-8 w-8 items-center justify-center cursor-pointer text-black transition-colors ${theme === 'light' ? 'bg-white' : 'bg-grey'}`}
-                aria-label="Lichte modus"
-                aria-pressed={theme === 'light'}
-            >
-                <SunIcon className="h-4 w-4" />
-            </button>
-        </div>
-    )
-}
-
-type LocaleToggleButtonProps = {
-    locale: 'nl' | 'en'
-    onToggle: () => void
-    className: string
-}
-
-function LocaleToggleButton({ locale, onToggle, className }: LocaleToggleButtonProps) {
-    return (
-        <button
-            type="button"
-            onClick={onToggle}
-            className={className}
-            aria-label="Wissel taal"
-        >
-            {locale === 'nl' ? 'EN' : 'NL'}
-        </button>
     )
 }
 
@@ -178,7 +113,7 @@ function PublicNavbar() {
             <div className="site-container flex h-16 items-center justify-between max-[480px]:h-14">
                 <div className="flex items-end gap-1">
                     <Link to={withLocalePath('/', locale)} className="inline-flex items-center" aria-label={messages.home.title}>
-                        <img src="/logo-white.png" alt="VIERNULVIER Logo" className="h-8 w-auto max-[480px]:h-7" />
+                        <img src="/logo-white.png" alt={messages.common.brandLogoAlt} className="h-8 w-auto max-[480px]:h-7" />
                     </Link>
                     <h3 className="text-lg leading-none font-light text-grey max-[480px]:text-base">| {messages.nav.archive}</h3>
                 </div>
@@ -186,23 +121,29 @@ function PublicNavbar() {
                 <button
                     type="button"
                     className="hidden h-9 w-9 items-center justify-center text-white max-[480px]:inline-flex"
-                    aria-label={isMobileMenuOpen ? 'Sluit menu' : 'Open menu'}
+                    aria-label={isMobileMenuOpen ? messages.nav.closeMenuLabel : messages.nav.openMenuLabel}
                     aria-expanded={isMobileMenuOpen}
                     onClick={() => setIsMobileMenuOpen((open) => !open)}
                 >
                     {isMobileMenuOpen ? <CloseIcon className="h-5 w-5" /> : <HamburgerIcon className="h-5 w-5" />}
                 </button>
 
-                <nav aria-label="Hoofdnavigatie" className="max-[480px]:hidden">
+                <nav aria-label={messages.nav.navAriaLabel} className="max-[480px]:hidden">
                     <ul className="flex items-center gap-6 text-sm font-medium text-white">
                         <li>
                             <div className="flex items-center gap-4">
-                                <ThemeToggle theme={theme} applyTheme={applyTheme} />
+                                <SegmentedThemeToggle
+                                    theme={theme}
+                                    darkLabel={messages.auth.darkModeLabel}
+                                    lightLabel={messages.auth.lightModeLabel}
+                                    onSelectTheme={applyTheme}
+                                />
 
-                                <LocaleToggleButton
+                                <NextLocaleToggle
                                     locale={locale}
-                                    onToggle={toggleLocale}
-                                    className="inline-flex h-8 items-center justify-center cursor-pointer text-md font-semibold text-white max-[480px]:text-sm"
+                                    ariaLabel={messages.auth.localeToggleLabel}
+                                    onToggleLocale={toggleLocale}
+                                    className="text-md text-white max-[480px]:text-sm"
                                 />
 
                                 <SearchToggleButton
@@ -232,12 +173,18 @@ function PublicNavbar() {
             >
                 <div className="site-container space-y-3 text-xs text-white">
                     <div className="flex items-center justify-between">
-                        <ThemeToggle theme={theme} applyTheme={applyTheme} />
+                        <SegmentedThemeToggle
+                            theme={theme}
+                            darkLabel={messages.auth.darkModeLabel}
+                            lightLabel={messages.auth.lightModeLabel}
+                            onSelectTheme={applyTheme}
+                        />
 
-                        <LocaleToggleButton
+                        <NextLocaleToggle
                             locale={locale}
-                            onToggle={toggleLocale}
-                            className="inline-flex h-8 items-center justify-center cursor-pointer text-sm font-semibold text-white"
+                            ariaLabel={messages.auth.localeToggleLabel}
+                            onToggleLocale={toggleLocale}
+                            className="text-sm text-white"
                         />
 
                         <SearchToggleButton
