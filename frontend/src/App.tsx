@@ -31,6 +31,7 @@ function App() {
             <Routes>
                 {!adminRoutes.isAdminHost ? (
                     <>
+<<<<<<< HEAD
                         <Route path="/" element={<HomePage />} />
                         <Route path="/nl" element={<HomePage />} />
                         <Route path="/en" element={<HomePage />} />
@@ -40,6 +41,17 @@ function App() {
                         <Route path="/archive/:id" element={<ArchiveDetailPage />} />
                         <Route path="/nl/archive/:id" element={<ArchiveDetailPage />} />
                         <Route path="/en/archive/:id" element={<ArchiveDetailPage />} />
+=======
+                        <Route path="/admin/login" element={<LoginPage />} />
+                        <Route path="/admin" element={<DashboardPage />} />
+                        <Route path="/admin/archive/:id/edit" element={<ArchiveEditPage />} />
+                        <Route path="/admin/production/new" element={<ProductionEditPage create/>} />
+                        <Route path="/en/admin/production/new" element={<ProductionEditPage create/>} />
+                        <Route path="/nl/admin/production/new" element={<ProductionEditPage create/>} />
+                        <Route path="/admin/production/:id/edit" element={<ProductionEditPage />} />
+                        <Route path="/en/admin/production/:id/edit" element={<ProductionEditPage />} />
+                        <Route path="/nl/admin/production/:id/edit" element={<ProductionEditPage />} />
+>>>>>>> 616bbee (separate creating and editing a productions)
                     </>
                 ) : null}
 
