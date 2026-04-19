@@ -43,7 +43,6 @@ export async function main() {
   await Scraper.sync_productions(cutoff_timestamp);
   await Scraper.sync_events(cutoff_timestamp);
   await Scraper.sync_event_prices(cutoff_timestamp);
-  await Scraper.sync_tags(cutoff_timestamp);
 
   await prisma.last_scraped.deleteMany({});
   await prisma.last_scraped.create({
