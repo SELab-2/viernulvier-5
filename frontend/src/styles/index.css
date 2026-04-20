@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 
 /*
  * Global styles for the VIERNULVIER archive website.
@@ -198,5 +199,13 @@ button:disabled {
 @media (min-width: 768px) {
 	.site-container {
 		width: min(100% - 3rem, var(--layout-content-max-width));
+	}
+}
+
+@media (max-width: 1279px) {
+	.admin-shell {
+		background:
+			radial-gradient(circle at top, rgba(255, 255, 255, 0.35), transparent 30%),
+			var(--color-admin-bg);
 	}
 }
