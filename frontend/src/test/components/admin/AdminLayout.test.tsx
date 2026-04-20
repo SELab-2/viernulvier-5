@@ -1,4 +1,4 @@
-import type { RefObject } from 'react'
+import { useEffect, type RefObject } from 'react'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
@@ -6,7 +6,7 @@ import type { Theme } from '../../../components/shared/TopBarControls'
 import AdminLayout from '../../../components/admin/AdminLayout'
 import { useAdminMessages } from '../../../components/admin/AdminMessagesContext'
 
-const adminTopBarProps = vi.hoisted(() => ({
+const adminTopBarPropsRef = vi.hoisted(() => ({
   current: null as null | {
     locale: string
     theme: string
@@ -22,29 +22,31 @@ const clearPrimedAdminSessionMock = vi.hoisted(() => vi.fn())
 const getActiveLocaleMock = vi.hoisted(() => vi.fn())
 const setActiveLocaleMock = vi.hoisted(() => vi.fn())
 
-vi.mock('../../../components/admin/AdminTopBar', () => ({
-  default: ({
-    locale,
-    theme,
-    logoutLabel,
-    onLogout,
-    onToggleLocale,
-    onSelectTheme,
-    onOpenSidebar,
-    openerRef,
-  }: {
-    locale: string
-    theme: string
-    logoutLabel?: string
-    onLogout?: () => void
-    onToggleLocale: () => void
-    onSelectTheme: (theme: Theme) => void
-    onOpenSidebar?: () => void
-    openerRef?: RefObject<HTMLButtonElement | null>
-  }) => {
-    const messages = useAdminMessages()
+type MockAdminTopBarProps = {
+  locale: string
+  theme: string
+  logoutLabel?: string
+  onLogout?: () => void
+  onToggleLocale: () => void
+  onSelectTheme: (theme: Theme) => void
+  onOpenSidebar?: () => void
+  openerRef?: RefObject<HTMLButtonElement | null>
+}
 
-    adminTopBarProps.current = {
+function MockAdminTopBar({
+  locale,
+  theme,
+  logoutLabel,
+  onLogout,
+  onToggleLocale,
+  onSelectTheme,
+  onOpenSidebar,
+  openerRef,
+}: MockAdminTopBarProps) {
+  const messages = useAdminMessages()
+
+  useEffect(() => {
+    adminTopBarPropsRef.current = {
       locale,
       theme,
       logoutLabel,
@@ -54,21 +56,25 @@ vi.mock('../../../components/admin/AdminTopBar', () => ({
       onOpenSidebar,
       openerRef,
     }
+  })
 
-    return (
-      <div>
-        <span>{`topbar-${locale}-${theme}`}</span>
-        {logoutLabel && onLogout ? (
-          <button type="button" onClick={onLogout}>{logoutLabel}</button>
-        ) : null}
-        {onOpenSidebar ? (
-          <button ref={openerRef} type="button" onClick={onOpenSidebar}>{messages.admin.openSidebarLabel}</button>
-        ) : null}
-        <button type="button" onClick={() => onSelectTheme('dark')}>Select dark</button>
-        <button type="button" onClick={() => onSelectTheme('light')}>Select light</button>
-      </div>
-    )
-  },
+  return (
+    <div>
+      <span>{`topbar-${locale}-${theme}`}</span>
+      {logoutLabel && onLogout ? (
+        <button type="button" onClick={onLogout}>{logoutLabel}</button>
+      ) : null}
+      {onOpenSidebar ? (
+        <button ref={openerRef} type="button" onClick={onOpenSidebar}>{messages.admin.openSidebarLabel}</button>
+      ) : null}
+      <button type="button" onClick={() => onSelectTheme('dark')}>Select dark</button>
+      <button type="button" onClick={() => onSelectTheme('light')}>Select light</button>
+    </div>
+  )
+}
+
+vi.mock('../../../components/admin/AdminTopBar', () => ({
+  default: MockAdminTopBar,
 }))
 
 vi.mock('../../../components/admin/AdminFooter', () => ({
@@ -121,7 +127,7 @@ vi.mock('../../../i18n', () => ({
 
 describe('AdminLayout', () => {
   beforeEach(() => {
-    adminTopBarProps.current = null
+    adminTopBarPropsRef.current = null
     clearPrimedAdminSessionMock.mockReset()
     getActiveLocaleMock.mockReset()
     getActiveLocaleMock.mockReturnValue('nl')
@@ -182,7 +188,7 @@ describe('AdminLayout', () => {
     )
 
     expect(getActiveLocaleMock).toHaveBeenCalledWith('/admin')
-    expect(adminTopBarProps.current).toMatchObject({
+    expect(adminTopBarPropsRef.current).toMatchObject({
       locale: 'en',
       theme: 'dark',
       logoutLabel: 'Log out',
