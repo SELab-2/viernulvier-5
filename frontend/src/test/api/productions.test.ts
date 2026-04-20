@@ -107,4 +107,56 @@ describe('productions api', () => {
 
         await expect(getProductionById('dab70000-0000-0000-0000-000000000001')).rejects.toThrow()
     })
+
+    it('returns genres and tags when present', async () => {
+        fetchMock.mockResolvedValueOnce({
+            ok: true,
+            status: 200,
+            json: vi.fn().mockResolvedValueOnce({
+                data: {
+                    ...baseProduction,
+                    genres: [
+                        {
+                            id: '35dbb2ad-e32a-4779-b7eb-93085531dbc4',
+                            type: 'theater',
+                            name: { nl: 'Concert', en: 'Concert' },
+                            slug: { nl: 'muziek', en: 'music' },
+                        },
+                    ],
+                    tags: [
+                        {
+                            id: 'bfb14b61-f916-4368-a89b-20ab9fa63f8d',
+                            type: 'theater',
+                            name: { nl: 'in De Vooruit', en: 'at De Vooruit' },
+                            slug: { nl: 'invooruit', en: 'invooruit' },
+                        },
+                    ],
+                },
+                links: { self: 'http://localhost' },
+            }),
+        } as unknown as Response)
+
+        const result = await getProductionById('dab70000-0000-0000-0000-000000000001')
+
+        expect(result.data.genres).toHaveLength(1)
+        expect(result.data.genres?.[0].name).toEqual({ nl: 'Concert', en: 'Concert' })
+        expect(result.data.tags).toHaveLength(1)
+        expect(result.data.tags?.[0].name).toEqual({ nl: 'in De Vooruit', en: 'at De Vooruit' })
+    })
+
+    it('returns undefined genres and tags when absent from the response', async () => {
+        fetchMock.mockResolvedValueOnce({
+            ok: true,
+            status: 200,
+            json: vi.fn().mockResolvedValueOnce({
+                data: baseProduction,
+                links: { self: 'http://localhost' },
+            }),
+        } as unknown as Response)
+
+        const result = await getProductionById('dab70000-0000-0000-0000-000000000001')
+
+        expect(result.data.genres).toBeUndefined()
+        expect(result.data.tags).toBeUndefined()
+    })
 })

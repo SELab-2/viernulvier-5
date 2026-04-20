@@ -109,6 +109,8 @@ const baseProduction = {
     poster_gallery_id: null,
     uitdatabank_theme: null,
     uitdatabank_type: null,
+    genres: [],
+    tags: [],
     created_at: new Date('2026-03-26T15:28:32.000Z'),
     updated_at: new Date('2026-03-27T08:20:10.000Z'),
 }
@@ -192,6 +194,58 @@ describe('ArchiveDetailPage', () => {
         await waitFor(() => {
             expect(screen.queryByRole('img')).not.toBeInTheDocument()
         })
+    })
+
+    it('renders genre and tag pills in the hero when a gallery image is available', async () => {
+        getProductionByIdMock.mockResolvedValue({
+            data: {
+                ...baseProduction,
+                genres: [
+                    { id: '35dbb2ad-e32a-4779-b7eb-93085531dbc4', type: 'theater', name: { nl: 'Concert', en: 'Concert' }, slug: { nl: 'muziek', en: 'music' } },
+                ],
+                tags: [
+                    { id: 'bfb14b61-f916-4368-a89b-20ab9fa63f8d', type: 'theater', name: { nl: 'in De Vooruit', en: 'at De Vooruit' }, slug: { nl: 'invooruit', en: 'invooruit' } },
+                ],
+            },
+        })
+        getGalleryItemsMock.mockResolvedValue({
+            data: [{
+                id: '9e110000-0000-0000-0000-000000000001',
+                type: 'foto',
+                original_filename: 'photo.jpg',
+                position: 0,
+                width: 1920,
+                height: 1080,
+                format: 'image/jpeg',
+                gallery_id: 'e9e00000-0000-0000-0000-000000000001',
+                title: null,
+                description: null,
+                credits: null,
+                link: null,
+                apiId: null,
+                created_at: new Date(),
+                updated_at: new Date(),
+            }],
+        })
+        getItemCropsMock.mockResolvedValue({
+            data: [{ name: 'banner', url: 'https://example.com/banner.jpg', id: '1', apiId: null, item_id: '9e110000-0000-0000-0000-000000000001', created_at: new Date(), updated_at: new Date() }],
+        })
+
+        renderPage()
+
+        expect(await screen.findByText('Concert')).toBeInTheDocument()
+        expect(await screen.findByText('in De Vooruit')).toBeInTheDocument()
+    })
+
+    it('does not render genre or tag pills when both are empty', async () => {
+        getProductionByIdMock.mockResolvedValue({
+            data: { ...baseProduction, genres: [], tags: [] },
+        })
+
+        renderPage()
+
+        await screen.findByText('Terug')
+        expect(screen.queryByText('Concert')).not.toBeInTheDocument()
     })
 
     it('renders the events section heading', async () => {
