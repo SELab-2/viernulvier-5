@@ -26,7 +26,7 @@ export default {
     sync_hall,
     sync_productions,
     sync_spaces,
-  sync_genres,
+  sync_tags,
   sync_galleries,
   sync_items,
   sync_crops,
@@ -679,14 +679,14 @@ async function sync_productions(cutoff_timestamp: Date | undefined = undefined) 
 
 
 
-async function sync_genres(cutoff_timestamp: Date | undefined = undefined){
+async function sync_tags(cutoff_timestamp: Date | undefined = undefined){
   let totalProcessed = 0;
   let pageCount = 0;
 
   for await (const { members: rawPage, totalItems } of Fetcher.fetchGenrePages(cutoff_timestamp)) {
     pageCount++;
     totalProcessed += rawPage.length;
-    updateStatus("Genres", createProgressBar(totalProcessed, totalItems));
+    updateStatus("Tags", createProgressBar(totalProcessed, totalItems));
 
     if (rawPage.length === 0) break;
     const page = filterByCutoff(rawPage, cutoff_timestamp);
@@ -710,7 +710,7 @@ async function sync_genres(cutoff_timestamp: Date | undefined = undefined){
     });
   }
 
-  finishStatus(`\u2705 Completed syncing ${totalProcessed} genres from ${pageCount} pages`);
+  finishStatus(`\u2705 Completed syncing ${totalProcessed} tags from ${pageCount} pages`);
 }
 
 
