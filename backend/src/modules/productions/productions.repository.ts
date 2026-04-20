@@ -24,16 +24,16 @@ export class ProductionsRepository {
 
     async count(options: { search?: string; lang?: string }) {
         const { search, lang = 'nl' } = options
-        const where = search ? {
-            title: {
+        const where: any = {}
+        
+        if (search) {
+            where.title = {
                 path: [lang],
                 string_contains: search,
-            },
-        } : {}
+            }
+        }
 
-        return this.prisma.production.count({
-            where: where as any,
-        })
+        return this.prisma.production.count({ where })
     }
 
     async findById(id: string) {
