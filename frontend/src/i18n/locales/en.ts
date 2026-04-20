@@ -120,6 +120,13 @@ const en: Messages = {
     paginationPrevious: '<',
     paginationNext: '>',
   },
+  event: {
+    editLabel: 'Edit event',
+    addLabel: 'Add event',
+    timeLabel: 'Time',
+    locationLabel: 'Location',
+    tagsLabel: 'Extra tags',
+  },
   auth: {
     localeToggleLabel: 'Switch language',
     darkModeLabel: 'Dark mode',
