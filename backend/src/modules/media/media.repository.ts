@@ -28,7 +28,6 @@ export class MediaRepository {
             where: { id },
             include: {
                 items: true,
-                tags: true,
                 media_gallery_productions: true,
                 poster_gallery_productions: true,
                 review_gallery_productions: true
