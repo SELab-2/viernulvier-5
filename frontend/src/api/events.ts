@@ -20,4 +20,4 @@ export const eventSchema = z.object({
 export type Event = z.infer<typeof eventSchema>
 
 export const getEventsByProductionId = (productionId: string) =>
-    api.get<{ data: Event[] }>(`/archive/events?production_id=${productionId}`)
+    api.get<{ data: Event[] }>(`/archive/events?productionId=${productionId}`)
