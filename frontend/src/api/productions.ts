@@ -7,6 +7,15 @@ export const localizedTextSchema = z.object({
     en: z.string().optional(),
 }).nullable()
 
+export const genreSchema = z.object({
+    id: z.string().uuid(),
+    type: z.string().nullable(),
+    name: localizedTextSchema,
+    slug: localizedTextSchema,
+})
+
+export type Genre = z.infer<typeof genreSchema>
+
 export const productionSchema = z.object({
     id: z.string().uuid(),
     apiId: z.string().nullable(),
@@ -35,7 +44,9 @@ export const productionSchema = z.object({
     description_short: localizedTextSchema,
     eticket_info: localizedTextSchema,
     custom_data: localizedTextSchema,
-
+    genres: z.array(genreSchema).optional(),
+    tags: z.array(genreSchema).optional(),
+    
     media_gallery_id: z.string().uuid().nullable(),
     review_gallery_id: z.string().uuid().nullable(),
     poster_gallery_id: z.string().uuid().nullable(),
