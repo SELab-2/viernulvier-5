@@ -23,15 +23,16 @@ export class ProductionsController {
             links: {
                 self: `${baseUrl}/productions/${prodId}`,
                 events: `${baseUrl}/events?production_id=${prodId}`,
-                media_gallery: production.media_gallery_id ? `${baseUrl}/media/galleries/${production.media_gallery_id}` : undefined,
-                review_gallery: production.review_gallery_id ? `${baseUrl}/media/galleries/${production.review_gallery_id}` : undefined,
-                poster_gallery: production.poster_gallery_id ? `${baseUrl}/media/galleries/${production.poster_gallery_id}` : undefined,
-                uitdatabank_theme: production.uitdatabank_theme ? `${baseUrl}/uitdatabank/themes/${production.uitdatabank_theme}` : undefined,
-                uitdatabank_type: production.uitdatabank_type ? `${baseUrl}/uitdatabank/types/${production.uitdatabank_type}` : undefined,
+                genres: `${baseUrl}/genres?productionId=${prodId}`,
+                tags: `${baseUrl}/tags?productionId=${prodId}`,
+                media_gallery: production.media_gallery_id ? `${baseUrl}/media/galleries/${production.media_gallery_id}` : null,
+                review_gallery: production.review_gallery_id ? `${baseUrl}/media/galleries/${production.review_gallery_id}` : null,
+                poster_gallery: production.poster_gallery_id ? `${baseUrl}/media/galleries/${production.poster_gallery_id}` : null,
+                uitdatabank_theme: production.uitdatabank_theme ? `${baseUrl}/uitdatabank/themes/${production.uitdatabank_theme}` : null,
+                uitdatabank_type: production.uitdatabank_type ? `${baseUrl}/uitdatabank/types/${production.uitdatabank_type}` : null,
             }
         }
     }
-
     async getProductions(request: FastifyRequest<{ Querystring: PaginationQuery }>, reply: FastifyReply) {
         const productions = await this.service.getProductions(request.query)
         const baseUrl = this.getBaseUrl(request)
