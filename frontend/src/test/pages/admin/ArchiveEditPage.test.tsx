@@ -16,11 +16,13 @@ const mockMessages: Pick<Messages, 'admin'> = {
     nav: {
       dashboard: 'Dashboard',
       productions: 'Productions',
+      posters: 'Posters',
       gallery: 'Gallery',
       organisation: 'Organisation',
       settings: 'Settings',
       dashboardIconAlt: 'Dashboard icon',
       productionsIconAlt: 'Productions icon',
+      postersIconAlt: 'Posters icon',
       galleryIconAlt: 'Gallery icon',
       organisationIconAlt: 'Organisation icon',
       settingsIconAlt: 'Settings icon',

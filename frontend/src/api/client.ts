@@ -11,16 +11,19 @@ export async function apiFetch<T>(
     options: RequestInit = {}
 ): Promise<T> {
     const url = `${API_BASE}${endpoint}`
+    const isFormDataBody = typeof FormData !== 'undefined' && options.body instanceof FormData
 
     let response: Response
 
     try {
         response = await fetch(url, {
             credentials: 'include', // Include cookies for auth
-            headers: {
-                'Content-Type': 'application/json',
-                ...options.headers,
-            },
+            headers: isFormDataBody
+                ? options.headers
+                : {
+                    'Content-Type': 'application/json',
+                    ...options.headers,
+                },
             ...options,
         })
     } catch (error) {
