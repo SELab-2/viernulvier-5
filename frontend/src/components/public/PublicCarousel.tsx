@@ -231,7 +231,7 @@ function PublicCarousel() {
                 setMode('fallback-recent')
                 setItems(prioritizedFallbackItems)
                 setActiveIndex(0)
-            } catch (fetchError) {
+            } catch {
                 if (abortController.signal.aborted) {
                     return
                 }
