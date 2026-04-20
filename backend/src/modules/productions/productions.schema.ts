@@ -23,12 +23,24 @@ export const paginationQuerySchema = z.object({
 export const productionLinksSchema = z.object({
     self: z.string().url().default('https://example.com/'),
     events: z.string().url().optional().nullable().default('https://example.com/'),
+    genres: z.string().url().optional().nullable().default('https://example.com/'),
+    tags: z.string().url().optional().nullable().default('https://example.com/'),
     media_gallery: z.string().url().optional().nullable().default('https://example.com/'),
     review_gallery: z.string().url().optional().nullable().default('https://example.com/'),
     poster_gallery: z.string().url().optional().nullable().default('https://example.com/'),
     uitdatabank_theme: z.string().url().optional().nullable().default('https://example.com/'),
     uitdatabank_type: z.string().url().optional().nullable().default('https://example.com/'),
 })
+
+
+
+const genreSchema = z.object({
+    id: z.string().uuid().optional(),
+}).passthrough();
+
+const tagSchema = z.object({
+    id: z.string().uuid().optional(),
+}).passthrough();
 
 export const productionSchema = z.object({
     id: z.string().uuid(),
@@ -57,6 +69,8 @@ export const productionSchema = z.object({
     description_short: localizedTextSchema,
     eticket_info: localizedTextSchema,
     custom_data: localizedTextSchema,
+    genres: z.array(genreSchema).optional(),
+    tags: z.array(tagSchema).optional(),
     media_gallery_id: z.string().uuid().nullable(),
     review_gallery_id: z.string().uuid().nullable(),
     poster_gallery_id: z.string().uuid().nullable(),
@@ -97,6 +111,8 @@ export const updateProductionSchema = z.object({
     description_short: localizedTextSchema.optional(),
     eticket_info: localizedTextSchema.optional(),
     custom_data: localizedTextSchema.optional(),
+    genres: z.array(genreSchema).optional(),
+    tags: z.array(tagSchema).optional(),
     media_gallery_id: z.string().uuid().nullable().optional(),
     review_gallery_id: z.string().uuid().nullable().optional(),
     poster_gallery_id: z.string().uuid().nullable().optional(),
