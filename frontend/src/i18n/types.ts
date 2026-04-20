@@ -57,6 +57,7 @@ export type Messages = {
     heading: string
     subtitle: string
     productionsTab: string
+    postersTab: string
     blogTab: string
     resultsCount: string
     resultsSuffix: string
@@ -149,11 +150,13 @@ export type Messages = {
     nav: {
       dashboard: string
       productions: string
+      posters: string
       gallery: string
       organisation: string
       settings: string
       dashboardIconAlt: string
       productionsIconAlt: string
+      postersIconAlt: string
       galleryIconAlt: string
       organisationIconAlt: string
       settingsIconAlt: string

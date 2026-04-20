@@ -13,6 +13,7 @@ import SearchPage from './pages/public/SearchPage'
 const LoginPage = lazy(() => import('./pages/admin/LoginPage'))
 const DashboardPage = lazy(() => import('./pages/admin/DashboardPage'))
 const ArchiveEditPage = lazy(() => import('./pages/admin/ArchiveEditPage'))
+const PostersPage = lazy(() => import('./pages/admin/PostersPage'))
 
 /**
  * Root App component.
@@ -71,6 +72,14 @@ function App() {
                             element={
                                 <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
                                     <ArchiveEditPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+                        <Route
+                            path={adminRoutes.postersPath}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <PostersPage />
                                 </ProtectedAdminRoute>
                             }
                         />
