@@ -24,15 +24,18 @@ export class LocationsRepository {
 
     async count(options: { search?: string; lang?: string }) {
         const { search, lang = 'nl' } = options
-        const where = search ? {
-            name: {
-                path: [lang],
-                string_contains: search,
-            },
-        } : {}
+        
+        if (!search) {
+            return this.prisma.location.count({})
+        }
 
         return this.prisma.location.count({
-            where: where as any,
+            where: {
+                name: {
+                    path: [lang],
+                    string_contains: search,
+                },
+            } as any,
         })
     }
 
