@@ -5,22 +5,24 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import AdminLayout from './AdminLayout'
+import AdminLayout from '../../../components/admin/AdminLayout'
 
-vi.mock('../../auth/useAdminSession', () => ({
-  useAdminSession: () => ({
-    isLoading: false,
-    isAuthenticated: true,
-    user: { id: '1', username: 'admin', role: 'ADMIN' },
-  }),
+const mockedSession = vi.hoisted(() => ({
+  isLoading: false,
+  isAuthenticated: true,
+  user: { id: '1', username: 'admin', role: 'ADMIN' },
+}))
+
+vi.mock('../../../auth/useAdminSession', () => ({
+  useAdminSession: () => mockedSession,
 }))
 
 // Minimal stubs to keep the test focussed on the settings wiring.
-vi.mock('./AdminFooter', () => ({
+vi.mock('../../../components/admin/AdminFooter', () => ({
   default: () => <div>Footer</div>,
 }))
 
-vi.mock('../../i18n', () => ({
+vi.mock('../../../i18n', () => ({
   getActiveLocale: () => 'nl',
   getMessages: () => ({
     auth: {
@@ -39,6 +41,26 @@ vi.mock('../../i18n', () => ({
       rights: 'Alle rechten voorbehouden',
     },
     common: { loading: 'Laden...', brandName: 'VIERNULVIER', brandLogoAlt: 'VIERNULVIER' },
+    admin: {
+      themeToggleDark: 'Donker',
+      themeToggleLight: 'Licht',
+      localeToggleAriaLabel: 'Wissel taal',
+      openSidebarLabel: 'Open navigatie',
+      closeSidebarLabel: 'Sluit navigatie',
+      navigationDrawerLabel: 'Navigatie',
+      nav: {
+        dashboard: 'Dashboard',
+        productions: 'Producties',
+        gallery: 'Galerij',
+        organisation: 'Organisatie',
+        settings: 'Instellingen',
+        dashboardIconAlt: 'Dashboard',
+        productionsIconAlt: 'Producties',
+        galleryIconAlt: 'Galerij',
+        organisationIconAlt: 'Organisatie',
+        settingsIconAlt: 'Instellingen',
+      },
+    },
     settings: {
       title: 'Instellingen',
       subtitle: 'Beheer je account.',

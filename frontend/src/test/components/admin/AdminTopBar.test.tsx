@@ -1,15 +1,23 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
-import type { Messages } from '../../i18n/types'
-import { AdminMessagesContext } from './AdminMessagesContext'
-import AdminTopBar from './AdminTopBar'
+import type { Messages } from '../../../i18n/types'
+import { AdminMessagesContext } from '../../../components/admin/AdminMessagesContext'
+import AdminTopBar from '../../../components/admin/AdminTopBar'
 
-const testMessages: Pick<Messages, 'common'> = {
+const testMessages: Pick<Messages, 'common' | 'admin'> = {
   common: {
     loading: 'Laden...',
     brandName: 'VIERNULVIER',
     brandLogoAlt: 'VIERNULVIER',
   },
+  admin: {
+    themeToggleDark: 'Donker',
+    themeToggleLight: 'Licht',
+    localeToggleAriaLabel: 'Wissel taal',
+    openSidebarLabel: 'Open navigatie',
+    closeSidebarLabel: 'Sluit navigatie',
+    navigationDrawerLabel: 'Navigatie',
+  } as Messages['admin'],
 }
 
 function renderWithMessages(ui: React.ReactElement) {
@@ -28,9 +36,6 @@ describe('AdminTopBar', () => {
         theme="light"
         onToggleLocale={vi.fn()}
         onSelectTheme={vi.fn()}
-        themeToggleDark="Donker"
-        themeToggleLight="Licht"
-        localeToggleAriaLabel="Wissel taal"
       />,
     )
 
@@ -44,9 +49,6 @@ describe('AdminTopBar', () => {
         theme="light"
         onToggleLocale={vi.fn()}
         onSelectTheme={vi.fn()}
-        themeToggleDark="Donker"
-        themeToggleLight="Licht"
-        localeToggleAriaLabel="Wissel taal"
       />,
     )
 

@@ -1,8 +1,8 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import type { Messages } from '../../i18n/types'
-import { AdminMessagesContext } from './AdminMessagesContext'
-import SettingsModal from './SettingsModal'
+import type { Messages } from '../../../i18n/types'
+import { AdminMessagesContext } from '../../../components/admin/AdminMessagesContext'
+import SettingsModal from '../../../components/admin/SettingsModal'
 
 const adminUser = {
   id: '1',
