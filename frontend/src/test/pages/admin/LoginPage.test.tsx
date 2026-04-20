@@ -245,7 +245,6 @@ describe('LoginPage', () => {
     expect(screen.queryByRole('button', { name: 'Log out' })).not.toBeInTheDocument()
   })
 
-
   it('does not render a password reset control', () => {
     render(
       <MemoryRouter>
