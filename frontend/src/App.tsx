@@ -45,6 +45,7 @@ function App() {
                         <Route path="/admin/login" element={<LoginPage />} />
                         <Route path="/admin" element={<DashboardPage />} />
                         <Route path="/admin/archive/:id/edit" element={<ArchiveEditPage />} />
+<<<<<<< HEAD
                         <Route path="/admin/production/new" element={<ProductionEditPage create/>} />
                         <Route path="/en/admin/production/new" element={<ProductionEditPage create/>} />
                         <Route path="/nl/admin/production/new" element={<ProductionEditPage create/>} />
@@ -52,6 +53,14 @@ function App() {
                         <Route path="/en/admin/production/:id/edit" element={<ProductionEditPage />} />
                         <Route path="/nl/admin/production/:id/edit" element={<ProductionEditPage />} />
 >>>>>>> 616bbee (separate creating and editing a productions)
+=======
+                        <Route path="/admin/productions/new" element={<ProductionEditPage create/>} />
+                        <Route path="/en/admin/productions/new" element={<ProductionEditPage create/>} />
+                        <Route path="/nl/admin/productions/new" element={<ProductionEditPage create/>} />
+                        <Route path="/admin/productions/:id/edit" element={<ProductionEditPage />} />
+                        <Route path="/en/admin/productions/:id/edit" element={<ProductionEditPage />} />
+                        <Route path="/nl/admin/productions/:id/edit" element={<ProductionEditPage />} />
+>>>>>>> 3d8778f (feat: publishing and drafting the contents of a production)
                     </>
                 ) : null}
 

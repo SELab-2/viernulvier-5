@@ -8,11 +8,11 @@ export type Language = 'nl' | 'en'
  */
 export interface ProductionFields {
     /** The title of the production */
-    title: string
+    title?: string
     /** The URL slug: production/{slug} */
-    slug: string
+    slug?: string
     /** content of the production */
-    content: string // TODO: depending on what text-editor is used, this type has to change
+    content?: string// TODO: depending on what text-editor is used, this type has to change
 }
 
 /**

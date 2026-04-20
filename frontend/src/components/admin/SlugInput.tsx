@@ -1,6 +1,8 @@
+import type { ProductionFields } from "../../types/production"
+
 type SlugInputProps = {
-    slug: string
-    onChange: (value: string) => void
+    slug?: string
+    onChange: (field: keyof ProductionFields, value: string) => void
 }
 
 function SlugInput({slug, onChange}: SlugInputProps) {
@@ -16,7 +18,7 @@ function SlugInput({slug, onChange}: SlugInputProps) {
             <input
                 type="text"
                 value={slug}
-                onChange={ (value) => onChange(value.target.value)}
+                onChange={ (value) => onChange('slug' ,value.target.value)}
                 placeholder="url-slug"
                 className="px-4 rounded-r-xl w-full bg-surface text-sm font-bold text-foreground placeholder:text-muted outline-none"
             />
