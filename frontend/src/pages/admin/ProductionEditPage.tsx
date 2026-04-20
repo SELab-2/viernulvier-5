@@ -49,58 +49,84 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
     const [prod, setProd] = useState<ProductionResponse>()
     const [languageTab, setLanguageTab] = useState<Locale>('nl')
     const [form, setForm] = useState<ProductionContent>(defaultForm)
-    const [slug, setSlug] = useState("")
-    const [title, setTitle] = useState("")
-    const [content, setContent] = useState("")
 
     const languageOptions: { key: Language, label: string}[] = [
         { key: 'nl', label: messages.production.dutchOption},
         { key: 'en', label: messages.production.englishOption},
     ]
 
-
     useEffect(() => {
         if (create) return 
 
+        // TODO: make use of the slug
         api.get<ProductionResponse>(`/archive/productions/${id}`)
             .then( data => {
                 console.log(data)
+                // slug is redundant? only if we just how them how it looks?
+                setForm({
+                    nl: {title: data?.title?.nl, slug: '', content: data?.description?.nl},
+                    en: {title: data?.title?.en, slug: '', content: data?.description?.en},
+                })
                 setProd(data)
             })
             .catch( err => {
                 console.error(err)
             })
-    }, [prod])
+    }, [id])
 
 
     const back = () => {
         navigate("/admin")
     }
+
+    const saveProduction = async (asDraft: boolean = false) => {
+        // TODO: an extra field is required in the prisma schema for drafts
+        try {
+            if (create){
+                const res = await api.post<ProductionResponse>('/archive/productions', {
+                    title: {
+                        nl: form.nl.title,
+                        en: form.en.title,
+                    },
+                    description: {
+                        nl: form.nl.content,
+                        en: form.en.content,
+                    },
+                    // isDraft: asDraft
+                })
+
+                // TODO: Use a slug
+                navigate(`/admin/productions/${res.id}/edit`, { replace: true })
+            } else {
+                await api.put(`/archive/productions/${id}`, {
+                    title: {
+                        nl: form.nl.title,
+                        en: form.en.title,
+                    },
+                    description: {
+                        nl: form.nl.content,
+                        en: form.en.content,
+                    }
+                    // isDraft: asDraft
+                })
+            } 
+        } catch (err) {
+            console.error('Failed to save', err)
+        }
+    }
     
-    const saveAsDraft = () => {
-        // TODO: save as draft impl.
+    const saveAsDraft = async () => {
+        saveProduction(true)
     }
 
     const publish = () => {
-        // TODO: publish impl.
+        saveProduction(false)
     }
 
     const setTab = (key: Locale) => {
         setLanguageTab(key)
 
         // TODO: proper impl 
-    }
-
-    const changeTitle = (value: string) => {
-        setTitle(value)
-    }
-
-    const changeSlug = (value: string) => {
-        setSlug(value)
-    }
-    
-    const changeContent = (value: string) => {
-        setContent(value)
     }
 
     const makeEvent = () => {
@@ -118,7 +144,7 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
         console.log("deleting event")
     }
 
-    const changeLanguage = (field: keyof ProductionFields, value: string) => {
+    const onChangeForm = (field: keyof ProductionFields, value: string) => {
         setForm(prev => ({
             ...prev,
             [languageTab]: { ...prev[languageTab] , [field]: value }
@@ -168,15 +194,8 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
             />
 
             <ProductionContentTab
-                title={title}
-                slug={slug}
-                content={content}
-                currentTab={form}
-                changeLanguage={changeLanguage}
-                changeTitle={changeTitle}
-                changeSlug={changeSlug}
-                changeContent={changeContent}
                 fields={form[languageTab]}
+                onChange={onChangeForm}
 
                 titleLabel={messages.production.title}
                 slugLabel={messages.production.slug}
