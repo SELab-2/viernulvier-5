@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useAdminMessages } from '../../components/admin/AdminMessagesContext'
 import AdminLayout from '../../components/admin/AdminLayout'
+import { buildStatCards, pillClasses } from '../../components/admin/hooks/dashboardStatCards'
+import { useDashboardFormatters } from '../../components/admin/hooks/useDashboardFormatters'
 import { useDashboardSummary } from '../../components/admin/hooks/useDashboardSummary'
-import type { Locale } from '../../i18n/types'
+import { usePagination } from '../../components/admin/hooks/usePagination'
 
 const PAGE_SIZE_OPTIONS = [3, 6, 9, 12, 15, 18] as const
 type FixedPageSize = (typeof PAGE_SIZE_OPTIONS)[number]
@@ -45,89 +47,6 @@ function computeAutoPageSize(viewportHeightPx: number): FixedPageSize {
   return best
 }
 
-type DeltaInfo = { changePct: number | null; direction: 'up' | 'down' | 'flat' }
-
-function makeCountFormatter(locale: Locale): Intl.NumberFormat {
-  return new Intl.NumberFormat(locale === 'nl' ? 'nl-BE' : 'en-GB')
-}
-
-function makeSignFormatter(locale: Locale): Intl.NumberFormat {
-  return new Intl.NumberFormat(locale === 'nl' ? 'nl-BE' : 'en-GB', {
-    signDisplay: 'exceptZero',
-    maximumFractionDigits: 0,
-  })
-}
-
-function formatDeltaPill(delta: DeltaInfo | undefined, signFormatter: Intl.NumberFormat): string {
-  if (!delta || delta.changePct === null) {
-    return '—'
-  }
-
-  return signFormatter.format(delta.changePct) + '%'
-}
-
-function pillClasses(delta: DeltaInfo | undefined): string {
-  const direction = delta?.direction ?? 'flat'
-
-  if (direction === 'up') {
-    return 'bg-[#ecfdf5] text-[#10b981]'
-  }
-
-  if (direction === 'down') {
-    return 'bg-[#fef2f2] text-[#ef4444]'
-  }
-
-  return 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
-}
-
-function makeDateFormatter(locale: Locale): Intl.DateTimeFormat {
-  return new Intl.DateTimeFormat(locale === 'nl' ? 'nl-BE' : 'en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  })
-}
-
-type PageItem = number | 'ellipsis-left' | 'ellipsis-right'
-
-function getPaginationItems(current: number, totalPages: number, siblings = 1): PageItem[] {
-  const pageNeighbours = siblings * 2 + 3
-  const totalBlocks = pageNeighbours + 2
-
-  if (totalPages <= totalBlocks) {
-    return Array.from({ length: totalPages }, (_, i) => i + 1)
-  }
-
-  const leftSibling = Math.max(current - siblings, 2)
-  const rightSibling = Math.min(current + siblings, totalPages - 1)
-  const hasLeftGap = leftSibling > 2
-  const hasRightGap = rightSibling < totalPages - 1
-
-  const items: PageItem[] = [1]
-
-  if (!hasLeftGap && hasRightGap) {
-    const leftRange = Array.from({ length: pageNeighbours - 1 }, (_, i) => i + 2)
-    items.push(...leftRange, 'ellipsis-right', totalPages)
-    return items
-  }
-
-  if (hasLeftGap && !hasRightGap) {
-    const rightRange = Array.from(
-      { length: pageNeighbours - 1 },
-      (_, i) => totalPages - (pageNeighbours - 2) + i,
-    )
-    items.push('ellipsis-left', ...rightRange)
-    return items
-  }
-
-  const middleRange = Array.from(
-    { length: rightSibling - leftSibling + 1 },
-    (_, i) => leftSibling + i,
-  )
-  items.push('ellipsis-left', ...middleRange, 'ellipsis-right', totalPages)
-  return items
-}
-
 type DashboardPageContentProps = {
   onUserRoleChange: (nextUserRole: string | undefined) => void
 }
@@ -168,77 +87,25 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
     onUserRoleChange(summary ? d.editorsActive(summary.counts.editors) : undefined)
   }, [d, onUserRoleChange, summary])
 
-  const htmlLang = document.documentElement.lang as Locale | undefined
-  const activeLocale: Locale = htmlLang === 'en' ? 'en' : 'nl'
-  const countFormatter = makeCountFormatter(activeLocale)
-  const dateFormatter = makeDateFormatter(activeLocale)
-  const signFormatter = makeSignFormatter(activeLocale)
-
-  function formatCount(value: number): string {
-    return countFormatter.format(value)
-  }
-
-  function formatDate(value: string | null): string {
-    if (!value) {
-      return d.notSyncedYet
-    }
-
-    return dateFormatter.format(new Date(value))
-  }
-
-  const productionsDelta = summary?.deltas?.productions
-  const blogsDelta = summary?.deltas?.blogs
-
-  const stats = [
-    {
-      label: d.statProductions,
-      value: summary ? formatCount(summary.counts.productions) : '—',
-      change: formatDeltaPill(productionsDelta, signFormatter),
-      note: productionsDelta?.changePct !== null && productionsDelta !== undefined ? d.deltaVsLastMonth : null,
-      accent: 'bg-[rgba(236,19,55,0.1)] text-[#ec1337]',
-      pill: pillClasses(productionsDelta),
-      iconSrc: '/admin/dashboard/productions-icon.svg',
-      iconAlt: d.statProductions,
-    },
-    {
-      label: d.statBlogConcepts,
-      value: summary ? formatCount(summary.counts.blogs) : '—',
-      change: formatDeltaPill(blogsDelta, signFormatter),
-      note: blogsDelta?.changePct !== null && blogsDelta !== undefined ? d.deltaVsLastMonth : null,
-      accent: 'bg-[rgba(245,158,11,0.1)] text-[#f59e0b]',
-      pill: pillClasses(blogsDelta),
-      iconSrc: '/admin/dashboard/concepts-icon.svg',
-      iconAlt: d.statBlogConcepts,
-    },
-    {
-      label: d.statVisitors,
-      value: d.visitorsPlaceholder,
-      change: d.visitorsChange,
-      note: d.visitorsNote,
-      accent: 'bg-[rgba(59,130,246,0.1)] text-[#2563eb]',
-      pill: 'bg-[rgba(59,130,246,0.08)] text-[#2563eb]',
-      iconSrc: '/admin/dashboard/visitors-icon.svg',
-      iconAlt: d.statVisitors,
-    },
-    {
-      label: d.statMediaItems,
-      value: summary ? formatCount(summary.counts.mediaItems) : '—',
-      change: summary?.lastScrapedAt ? formatDate(summary.lastScrapedAt) : d.visitorsChange,
-      note: summary?.lastScrapedAt ? d.statLastSync : d.statSyncPending,
-      accent: 'bg-[rgba(168,85,247,0.1)] text-accent',
-      pill: 'bg-[#ecfdf5] text-[#10b981]',
-      iconSrc: '/admin/dashboard/media-icon.svg',
-      iconAlt: d.statMediaItems,
-    },
-  ]
+  const { formatCount, formatDate, formatDelta } = useDashboardFormatters()
+  const stats = buildStatCards(summary, {
+    formatCount,
+    formatDate,
+    formatDelta,
+    pillClasses,
+    messages: d,
+  })
 
   const recentItems = summary?.recentItems ?? []
   const total = summary?.totalRecentItems ?? 0
   const totalPages = Math.max(1, Math.ceil(total / pageSize))
-  const from = (page - 1) * pageSize + 1
-  const to = Math.min(page * pageSize, total)
-
-  const paginationItems = getPaginationItems(page, totalPages, 1)
+  const { items: paginationItems, from, to } = usePagination({
+    page,
+    totalPages,
+    siblings: 1,
+    pageSize,
+    totalItems: total,
+  })
 
   return (
     <section className="mx-auto flex w-full max-w-[960px] flex-col gap-6 xl:max-w-[1280px] 2xl:max-w-[1536px]">
