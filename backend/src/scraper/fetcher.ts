@@ -149,8 +149,8 @@ export async function* fetchEventPricePages(cutoff?: Date): AsyncGenerator<{ mem
     yield* fetchPagesFromURL<APIEventPrice>("/api/v1/events/prices?page=1", false, cutoff);
 }
 
-export async function* fetchCropPages(): AsyncGenerator<APICrop[]> {
-    yield* fetchPagesFromURL<APICrop>("/api/v1/media/items/crops?page=1");
+export async function* fetchCropPages(cutoff?: Date): AsyncGenerator<{ members: APICrop[], totalItems: number }> {
+    yield* fetchPagesFromURL<APICrop>("/api/v1/media/items/crops?page=1", false, cutoff);
 }
 
 export async function* fetchUitKeywordPages(cutoff?: Date): AsyncGenerator<{ members: APIUitKeyword[], totalItems: number }>{
