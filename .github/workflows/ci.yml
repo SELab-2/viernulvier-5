@@ -1,6 +1,6 @@
 name: CI
 
-# Runs on every push to any branch (except main) and on pull request updates.
+# Runs on pull request updates.
 # Concurrency ensures stale runs are cancelled when new commits are pushed.
 on: 
   pull_request:
