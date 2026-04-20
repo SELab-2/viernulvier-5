@@ -3,8 +3,7 @@ name: Coverage Report
 # Runs on pull requests so coverage is posted as PR comments.
 # This workflow is informational and does not block merging.
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
+  push:
     branches:
       - main
       - development
