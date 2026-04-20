@@ -20,7 +20,7 @@
         "db:seed": "tsx prisma/seed.ts",
         "db:studio": "prisma studio",
         "scraper": "tsx src/scraper/sync_database.ts",
-        "db:import-legacy": "tsx src/import/import-legacy-csv.ts --productions ./data/productions.csv --events ./data/events.csv"
+        "import-legacy": "tsx src/import/import-legacy-csv.ts --productions ./data/productions.csv --events ./data/events.csv"
     },
     "dependencies": {
         "@fastify/cookie": "^11.0.0",
