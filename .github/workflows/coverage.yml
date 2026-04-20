@@ -4,9 +4,8 @@ name: Coverage Report
 # This workflow is informational and does not block merging.
 on:
   push:
-    branches:
-      - main
-      - development
+    branches: []
+      
 
 concurrency:
   group: coverage-${{ github.ref }}
