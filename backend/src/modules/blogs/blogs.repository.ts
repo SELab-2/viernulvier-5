@@ -63,6 +63,17 @@ export class BlogsRepository {
         return this.prisma.blog.count({ where })
     }
 
+    async countInRange({ from, to }: { from: Date; to: Date }): Promise<number> {
+        return this.prisma.blog.count({
+            where: {
+                createdAt: {
+                    gte: from,
+                    lt: to,
+                },
+            },
+        })
+    }
+
     async findById(id: string): Promise<BlogResponse | null> {
         const blog = await this.prisma.blog.findUnique({
             where: { id },
