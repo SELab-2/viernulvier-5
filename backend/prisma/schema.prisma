@@ -78,8 +78,11 @@ model file {
   updated_at    DateTime  @default(now()) @db.Timestamp(6)
   id            String    @id @default(uuid()) @db.Uuid
   name          String?   @db.VarChar
+  description   String?   @db.VarChar
+  gallery_id    String?   @db.Uuid
   file_location String?
   type          filetype?
+  gallery       gallery?  @relation(fields: [gallery_id], references: [id])
 }
 
 enum filetype {
