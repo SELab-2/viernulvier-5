@@ -522,7 +522,7 @@ export class ProductionsRepository {
     }
 
     async findById(id: string) {
-        return this.prisma.production.findUnique({
+        const production = await this.prisma.production.findUnique({
             where: { id },
             include: {
                 events: {
@@ -557,8 +557,17 @@ export class ProductionsRepository {
                         },
                     },
                 },
+                tag_production: {
+                    include: {
+                        tag: true,
+                    },
+                },
             }
-        })
+        });
+
+        if (!production) return null;
+
+        return production;
     }
 
     async create(data: any) {

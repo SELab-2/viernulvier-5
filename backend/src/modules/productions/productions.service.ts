@@ -5,7 +5,7 @@ import type {
     ProductionResponse,
     CreateProductionInput 
 } from './productions.schema.js'
-import { PaginatedResult, calculateTotalPages } from '../../utils/pagination.js'
+import { PaginatedResult, calculateTotalPages, sanitizePage } from '../../utils/pagination.js'
 
 export class ProductionsService {
     constructor(private readonly repository: ProductionsRepository) { }
@@ -220,38 +220,37 @@ export class ProductionsService {
             ? await this.repository.findSearchIds(normalizedSearch, lang ?? 'nl')
             : undefined
 
-        const [items, total] = await Promise.all([
-            this.repository.findAll({
-                page,
-                limit,
-                search: normalizedSearch,
-                searchIds,
-                lang,
-                genres: normalizedGenres,
-                locations: normalizedLocations,
-                yearFrom: safeYearFrom,
-                yearTo: safeYearTo,
-                onThisDayDate,
-                sort,
-            }),
-            this.repository.count({
-                search: normalizedSearch,
-                searchIds,
-                lang,
-                genres: normalizedGenres,
-                locations: normalizedLocations,
-                yearFrom: safeYearFrom,
-                yearTo: safeYearTo,
-                onThisDayDate,
-            }),
-        ])
-
+        const total = await this.repository.count({
+            search: normalizedSearch,
+            searchIds,
+            lang,
+            genres: normalizedGenres,
+            locations: normalizedLocations,
+            yearFrom: safeYearFrom,
+            yearTo: safeYearTo,
+            onThisDayDate,
+        })
         const totalPages = calculateTotalPages(total, limit)
+        const sanitizedPage = sanitizePage(page, totalPages)
+
+        const items = await this.repository.findAll({
+            page: sanitizedPage,
+            limit,
+            search: normalizedSearch,
+            searchIds,
+            lang,
+            genres: normalizedGenres,
+            locations: normalizedLocations,
+            yearFrom: safeYearFrom,
+            yearTo: safeYearTo,
+            onThisDayDate,
+            sort,
+        })
 
         return {
             items: items.map((item) => this.mapProductionResponse(item, onThisDayDate)) as any,
             total,
-            page,
+            page: sanitizedPage,
             limit,
             totalPages,
         }
