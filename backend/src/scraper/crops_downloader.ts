@@ -19,7 +19,7 @@ async function get_crops(): Promise<crop[]> {
             },
             OR: [
                 {name: "FE3_header"},
-                {name: "FE3_grid"}
+                {name: "FE3_boxed"}
             ]
         }
     });

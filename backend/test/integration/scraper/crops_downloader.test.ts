@@ -38,7 +38,7 @@ describe("download_crops", () => {
     it("downloads crops and stores file_location", async () => {
         const crops = [
             { url: "https://img/1.jpg", name: "FE3_header" },
-            {  url: "https://img/2.jpg", name: "FE3_grid" },
+            {  url: "https://img/2.jpg", name: "FE3_boxed" },
         ];
         await prisma.$transaction(
             crops.map(crop => prisma.crop.create({ data: crop }))
@@ -151,7 +151,7 @@ describe("download_crops", () => {
         expect(updatedCrops.length).toBe(0);
     });
 
-    it("does not attempt download when name isnt FE3_header or FE3_grid is null", async () => {
+    it("does not attempt download when name isnt FE3_header or FE3_boxed is null", async () => {
         const crops = [
             { url: "https://idk", name: "FE3_cropped" },
         ];
