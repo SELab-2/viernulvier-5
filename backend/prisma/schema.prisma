@@ -7,15 +7,15 @@ datasource db {
 }
 
 model crop {
-  created_at DateTime @default(now()) @db.Timestamp(6)
-  updated_at DateTime @default(now()) @db.Timestamp(6)
-  id         String    @id @db.Uuid @default(uuid())
-  apiId      String?   @db.VarChar @unique
-  name       String?  @db.VarChar
-  url        String?  @db.VarChar
-  item_id    String?  @db.Uuid
+  created_at    DateTime @default(now()) @db.Timestamp(6)
+  updated_at    DateTime @default(now()) @db.Timestamp(6)
+  id            String   @id @default(uuid()) @db.Uuid
+  apiId         String?  @unique @db.VarChar
+  name          String?  @db.VarChar
+  url           String?  @db.VarChar
+  item_id       String?  @db.Uuid
   file_location String?
-  item       item?     @relation("item_crops", fields: [item_id], references: [id])
+  item          item?    @relation("item_crops", fields: [item_id], references: [id])
 }
 
 model event {
@@ -71,16 +71,12 @@ model gallery {
   review_gallery_productions production[] @relation("production_review_gallery")
 }
 
-
-
-
 model genre {
   created_at       DateTime           @default(now()) @db.Timestamp(6)
   updated_at       DateTime           @default(now()) @db.Timestamp(6)
   id               String             @id @default(uuid()) @db.Uuid
   apiId            String?            @unique @db.VarChar
   type             String?            @db.VarChar
-  use_as           String?            @db.VarChar
   vendor_id        String?            @db.VarChar
   name             Json?
   slug             Json?
