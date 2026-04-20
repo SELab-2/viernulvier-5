@@ -17,6 +17,7 @@ type ProductionApiItem = {
     teaser: LocalizedText
     description_short: LocalizedText
     description: LocalizedText
+    created_at?: string
     on_this_day_event_date?: string | null
     image_url?: string | null
     venue_name?: string | null
@@ -24,6 +25,8 @@ type ProductionApiItem = {
     production_genres?: string[]
     performer_type: string | null
 }
+
+type CarouselMode = 'on-this-day' | 'fallback-recent'
 
 type PaginatedApiResponse<T> = {
     data: T[]
@@ -33,6 +36,35 @@ type PaginatedApiResponse<T> = {
         limit: number
         totalPages: number
     }
+}
+
+const NON_GENRE_TAG_VALUES = new Set([
+    'group',
+    'in de vooruit',
+    'by viernulvier',
+    'te gast',
+    'nederlands gesproken',
+    'engels gesproken',
+    'frans gesproken',
+    'cadeaubon geldig',
+])
+
+function getDisplayTag(item: ProductionApiItem, locale: Locale): string {
+    const normalizedProductionGenres = (item.production_genres ?? [])
+        .map((value) => value.trim())
+        .filter((value) => value.length > 0)
+        .filter((value) => !NON_GENRE_TAG_VALUES.has(value.toLowerCase()))
+
+    if (normalizedProductionGenres.length > 0) {
+        return normalizedProductionGenres[0]
+    }
+
+    const normalizedPerformerType = item.performer_type?.trim() ?? ''
+    if (normalizedPerformerType.length > 0 && !NON_GENRE_TAG_VALUES.has(normalizedPerformerType.toLowerCase())) {
+        return normalizedPerformerType
+    }
+
+    return locale === 'nl' ? 'productie' : 'production'
 }
 
 function getLocalizedText(text: LocalizedText, locale: Locale): string {
@@ -75,18 +107,16 @@ function formatDate(value: Date, locale: Locale): string {
     }).format(value)
 }
 
-function formatReferenceDate(value: Date): string {
-    const year = String(value.getFullYear())
-    const month = String(value.getMonth() + 1).padStart(2, '0')
-    const day = String(value.getDate()).padStart(2, '0')
-    return `${year}-${month}-${day}`
-}
+function mapProductionToCarouselItem(item: ProductionApiItem, locale: Locale, mode: CarouselMode): SearchResultItem | null {
+    const rawDate = mode === 'on-this-day'
+        ? item.on_this_day_event_date
+        : item.on_this_day_event_date ?? item.created_at
 
-function mapProductionToCarouselItem(item: ProductionApiItem, locale: Locale): SearchResultItem | null {
-    const eventDate = item.on_this_day_event_date ? new Date(item.on_this_day_event_date) : null
-    if (!eventDate) {
+    if (!rawDate) {
         return null
     }
+
+    const eventDate = new Date(rawDate)
 
     if (Number.isNaN(eventDate.getTime())) {
         return null
@@ -105,7 +135,7 @@ function mapProductionToCarouselItem(item: ProductionApiItem, locale: Locale): S
 
     return {
         id: item.id,
-        tag: (item.production_genres ?? []).find((value) => value.trim().length > 0) ?? item.performer_type?.trim() ?? (locale === 'nl' ? 'productie' : 'production'),
+        tag: getDisplayTag(item, locale),
         date: formatDate(eventDate, locale),
         title,
         excerpt,
@@ -114,16 +144,32 @@ function mapProductionToCarouselItem(item: ProductionApiItem, locale: Locale): S
     }
 }
 
+function prioritizeItemsWithImage(items: SearchResultItem[]): SearchResultItem[] {
+    const withImage: SearchResultItem[] = []
+    const withoutImage: SearchResultItem[] = []
+
+    for (const item of items) {
+        if (item.imageUrl && item.imageUrl.trim().length > 0) {
+            withImage.push(item)
+        } else {
+            withoutImage.push(item)
+        }
+    }
+
+    return [...withImage, ...withoutImage]
+}
+
 function PublicCarousel() {
     const locale = getActiveLocale(window.location.pathname)
     const messages = getMessages(locale)
     const [items, setItems] = useState<SearchResultItem[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+    const [mode, setMode] = useState<CarouselMode>('on-this-day')
     const [activeIndex, setActiveIndex] = useState(0)
     const scrollerRef = useRef<HTMLDivElement | null>(null)
-    const today = useMemo(() => new Date(), [])
-    const referenceDate = useMemo(() => formatReferenceDate(today), [today])
+    // Temporary test setup: force On This Day to January 1.
+    const referenceDate = useMemo(() => `${new Date().getFullYear()}-01-01`, [])
 
     useEffect(() => {
         const abortController = new AbortController()
@@ -132,8 +178,28 @@ function PublicCarousel() {
             setIsLoading(true)
             setError(null)
 
+            const loadFallbackItems = async () => {
+                const fallbackParams = new URLSearchParams({
+                    page: '1',
+                    limit: '100',
+                    lang: locale,
+                    sort: 'recent',
+                })
+
+                const fallbackResponse = await apiFetch<PaginatedApiResponse<ProductionApiItem>>(
+                    `/archive/productions?${fallbackParams.toString()}`,
+                    { signal: abortController.signal },
+                )
+
+                const fallbackItems = fallbackResponse.data
+                    .map((item) => mapProductionToCarouselItem(item, locale, 'fallback-recent'))
+                    .filter((item): item is SearchResultItem => item !== null)
+
+                return prioritizeItemsWithImage(fallbackItems)
+            }
+
             try {
-                const params = new URLSearchParams({
+                const onThisDayParams = new URLSearchParams({
                     page: '1',
                     limit: '100',
                     lang: locale,
@@ -142,25 +208,45 @@ function PublicCarousel() {
                     sort: 'oldest',
                 })
 
-                const response = await apiFetch<PaginatedApiResponse<ProductionApiItem>>(
-                    `/v1/archive/productions?${params.toString()}`,
+                const onThisDayResponse = await apiFetch<PaginatedApiResponse<ProductionApiItem>>(
+                    `/archive/productions?${onThisDayParams.toString()}`,
                     { signal: abortController.signal },
                 )
 
-                const mappedItems = response.data
-                    .map((item) => mapProductionToCarouselItem(item, locale))
+                const onThisDayItems = onThisDayResponse.data
+                    .map((item) => mapProductionToCarouselItem(item, locale, 'on-this-day'))
                     .filter((item): item is SearchResultItem => item !== null)
 
-                setItems(mappedItems)
+                const prioritizedOnThisDayItems = prioritizeItemsWithImage(onThisDayItems)
+
+                if (prioritizedOnThisDayItems.length > 0) {
+                    setMode('on-this-day')
+                    setItems(prioritizedOnThisDayItems)
+                    setActiveIndex(0)
+                    return
+                }
+
+                const prioritizedFallbackItems = await loadFallbackItems()
+
+                setMode('fallback-recent')
+                setItems(prioritizedFallbackItems)
                 setActiveIndex(0)
             } catch (fetchError) {
                 if (abortController.signal.aborted) {
                     return
                 }
 
-                const message = fetchError instanceof Error ? fetchError.message : 'Request failed'
-                setError(message)
-                setItems([])
+                try {
+                    const prioritizedFallbackItems = await loadFallbackItems()
+                    setMode('fallback-recent')
+                    setItems(prioritizedFallbackItems)
+                    setActiveIndex(0)
+                } catch (fallbackError) {
+                    const message = fallbackError instanceof Error ? fallbackError.message : 'Request failed'
+                    setError(message)
+                    setMode('on-this-day')
+                    setItems([])
+                }
             } finally {
                 if (!abortController.signal.aborted) {
                     setIsLoading(false)
@@ -173,7 +259,7 @@ function PublicCarousel() {
         return () => {
             abortController.abort()
         }
-    }, [locale, referenceDate, today])
+    }, [locale, referenceDate])
 
     const handleScroll = () => {
         const scroller = scrollerRef.current
@@ -214,12 +300,16 @@ function PublicCarousel() {
         })
     }
 
+    const heading = mode === 'fallback-recent'
+        ? messages.home.onThisDayFallbackHeading
+        : messages.home.onThisDayHeading
+
     return (
         <section className="bg-foreground/3 py-16">
             <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="flex flex-wrap items-end justify-between gap-4">
                     <div>
-                        <h2 className="text-4xl lowercase text-foreground sm:text-5xl">{messages.home.onThisDayHeading}</h2>
+                        <h2 className="text-4xl lowercase text-foreground sm:text-5xl">{heading}</h2>
                         <p className="mt-2 text-lg text-muted">{messages.home.onThisDaySubheading}</p>
                     </div>
                     <Link

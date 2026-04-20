@@ -21,13 +21,15 @@ export type Messages = {
     searchGenre: string
     searchLocation: string
     searchButton: string
-    popularTagsLabel: string
-    popularTagsMore: string
-    popularTags: string[]
     onThisDayHeading: string
     onThisDaySubheading: string
     onThisDayViewAll: string
     onThisDayEmpty: string
+    onThisDayFallbackHeading: string
+    onThisDayFallbackSubheading: string
+    popularTagsLabel: string
+    popularTagsMore: string
+    popularTags: string[]
     latestBlogHeading: string
     latestBlogSubheading: string
     latestBlogTitle: string

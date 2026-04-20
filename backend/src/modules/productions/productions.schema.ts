@@ -31,6 +31,7 @@ export const paginationQuerySchema = z.object({
     yearFrom: z.coerce.number().int().optional(),
     yearTo: z.coerce.number().int().optional(),
     onThisDay: z.coerce.boolean().optional().default(false),
+<<<<<<< Updated upstream
     referenceDate: z
         .string()
         .regex(/^\d{4}-\d{2}-\d{2}$/)
@@ -38,6 +39,9 @@ export const paginationQuerySchema = z.object({
             message: 'referenceDate must be a valid YYYY-MM-DD date',
         })
         .optional(),
+=======
+    referenceDate: z.string().optional(),
+>>>>>>> Stashed changes
     sort: z.enum(['relevance', 'recent', 'oldest']).optional().default('relevance'),
     lang: z.string().optional().default('nl'),
 })
@@ -83,6 +87,7 @@ export const productionSchema = z.object({
     eticket_info: localizedTextSchema,
     custom_data: customDataSchema,
     image_url: z.string().nullable().optional(),
+    on_this_day_event_date: z.string().datetime().nullable().optional(),
     venue_name: z.string().nullable().optional(),
     venue_names: z.array(z.string()).optional(),
     production_genres: z.array(z.string()).optional(),
