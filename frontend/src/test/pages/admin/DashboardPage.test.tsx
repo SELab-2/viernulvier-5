@@ -57,7 +57,7 @@ vi.mock('../../../components/admin/AdminLayout', () => ({
   },
 }))
 
-vi.mock('../../../components/admin/useDashboardSummary', () => ({
+vi.mock('../../../components/admin/hooks/useDashboardSummary', () => ({
   useDashboardSummary: (args: { page: number; limit: number }) => useDashboardSummaryMock(args),
 }))
 
