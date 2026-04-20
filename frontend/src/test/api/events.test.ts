@@ -31,7 +31,7 @@ describe('events api', () => {
         const result = await getEventsByProductionId('dab70000-0000-0000-0000-000000000001')
 
         expect(fetchMock).toHaveBeenCalledWith(
-            '/api/v1/archive/events?production_id=dab70000-0000-0000-0000-000000000001',
+            '/api/v1/archive/events?productionId=dab70000-0000-0000-0000-000000000001',
             expect.objectContaining({ credentials: 'include' }),
         )
         expect(result.data).toHaveLength(1)
