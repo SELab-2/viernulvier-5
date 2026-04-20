@@ -65,9 +65,31 @@ model gallery {
   apiId                      String?      @unique @db.VarChar
   name                       String?      @db.VarChar
   items                      item[]
+  other_files                file[]
   media_gallery_productions  production[] @relation("production_media_gallery")
   poster_gallery_productions production[] @relation("production_poster_gallery")
   review_gallery_productions production[] @relation("production_review_gallery")
+  other_gallery_productions  production[] @relation("production_other_gallery")
+  production                 production[]
+}
+
+model file {
+  created_at    DateTime  @default(now()) @db.Timestamp(6)
+  updated_at    DateTime  @default(now()) @db.Timestamp(6)
+  id            String    @id @default(uuid()) @db.Uuid
+  name          String?   @db.VarChar
+  description   String?   @db.VarChar
+  gallery_id    String?   @db.Uuid
+  file_location String?
+  type          filetype?
+  gallery       gallery?  @relation(fields: [gallery_id], references: [id])
+}
+
+enum filetype {
+  video
+  image
+  pdf
+  other
 }
 
 model genre {
@@ -201,6 +223,7 @@ model production {
   media_gallery_id         String?                   @db.Uuid
   review_gallery_id        String?                   @db.Uuid
   poster_gallery_id        String?                   @db.Uuid
+  other_gallery_id         String?                   @db.Uuid
   uitdatabank_theme        String?                   @db.Uuid
   uitdatabank_type         String?                   @db.Uuid
   events                   event[]                   @relation("event_production")
@@ -209,9 +232,12 @@ model production {
   media_gallery            gallery?                  @relation("production_media_gallery", fields: [media_gallery_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   poster_gallery           gallery?                  @relation("production_poster_gallery", fields: [poster_gallery_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   review_gallery           gallery?                  @relation("production_review_gallery", fields: [review_gallery_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  other_gallery            gallery?                  @relation("production_other_gallery", fields: [other_gallery_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   uitdatabank_themes       uitdatabank_theme?        @relation(fields: [uitdatabank_theme], references: [id], onDelete: NoAction, onUpdate: NoAction)
   uitdatabank_types        uitdatabank_type?         @relation(fields: [uitdatabank_type], references: [id], onDelete: NoAction, onUpdate: NoAction)
   uit_keywords_productions uit_keywords_production[]
+  gallery                  gallery?                  @relation(fields: [galleryId], references: [id])
+  galleryId                String?                   @db.Uuid
 }
 
 model space {
