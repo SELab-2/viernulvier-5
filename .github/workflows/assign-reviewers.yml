@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - name: Pick and assign reviewers, and notify on Discord
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL}}
         with:
