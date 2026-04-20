@@ -43,7 +43,7 @@ export async function apiFetch<T>(
                     ? errorPayload
                     : '') || `HTTP ${response.status}`
 
-        throw new Error(`${message} (${response.status} ${response.statusText})`)
+        throw new Error(message)
     }
 
     // Handle 204 No Content
