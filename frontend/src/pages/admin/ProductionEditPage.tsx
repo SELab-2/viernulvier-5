@@ -9,7 +9,7 @@ import type { Locale } from '../../i18n/types'
 import type { Event } from '../../types/event'
 import type { ProductionResponse } from '../../../../backend/src/modules/productions/productions.schema'
 
-import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { getMessages } from '../../i18n'
 import { useEffect, useState } from 'react'
 import { api } from '../../api/client'
@@ -49,6 +49,7 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
     const [prod, setProd] = useState<ProductionResponse>()
     const [languageTab, setLanguageTab] = useState<Locale>('nl')
     const [form, setForm] = useState<ProductionContent>(defaultForm)
+    const [popupOpen, setPopupOpen] = useState(false)
 
     const languageOptions: { key: Language, label: string}[] = [
         { key: 'nl', label: messages.production.dutchOption},
@@ -130,6 +131,7 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
     }
 
     const makeEvent = () => {
+        setPopupOpen(true)
         // TODO: impl
         console.log("Making event")
     }
@@ -221,9 +223,18 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
                 actionsLabel={messages.production.eventsActionsLabel}
             />
 
-            {/* <EventPopup>
+            {popupOpen && (
+                <EventPopup
+                    onClose={() => setPopupOpen(false)}
+                    isEdit={true}
 
-            </EventPopup> */}
+                    editLabel={messages.event.editLabel}
+                    addLabel={messages.event.addLabel}
+                    timeLabel={messages.event.timeLabel}
+                    locationLabel={messages.event.locationLabel}
+                    tagsLabel={messages.event.tagsLabel}
+                />
+            )}
         </AdminLayout>
     )
 }

@@ -95,6 +95,13 @@ const en: Messages = {
     eventsCommentLabel: 'Comment',
     eventsActionsLabel: 'Actions'
   },
+  event: {
+    editLabel: 'Edit event',
+    addLabel: 'Add event',
+    timeLabel: 'Time',
+    locationLabel: 'Location',
+    tagsLabel: 'Extra tags',
+  },
   auth: {
     localeToggleLabel: 'Switch language',
     darkModeLabel: 'Dark mode',

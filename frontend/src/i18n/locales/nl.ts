@@ -95,6 +95,13 @@ const nl: Messages = {
     eventsCommentLabel: 'Opmerkking',
     eventsActionsLabel: 'Acties'
   },
+  event: {
+    editLabel: 'Event bewerken',
+    addLabel: 'Event toevoegen',
+    timeLabel: 'Tijd',
+    locationLabel: 'Locatie',
+    tagsLabel: 'Extra tags',
+  },
   auth: {
     localeToggleLabel: 'Wissel taal',
     darkModeLabel: 'Donkere modus',
