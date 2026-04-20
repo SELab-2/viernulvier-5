@@ -27,7 +27,12 @@ type FindAllOptions = {
     locations?: string[]
     yearFrom?: number
     yearTo?: number
+<<<<<<< Updated upstream
     onThisDayDate?: Date
+=======
+    onThisDay?: boolean
+    referenceDate?: Date
+>>>>>>> Stashed changes
     sort?: 'relevance' | 'recent' | 'oldest'
     lang?: string
 }
@@ -39,6 +44,7 @@ export class ProductionsRepository {
 
     constructor(private readonly prisma: PrismaClient) { }
 
+<<<<<<< Updated upstream
     private async ensurePgTrgmAvailable(): Promise<boolean> {
         if (this.pgTrgmAvailable !== null) {
             return this.pgTrgmAvailable
@@ -210,6 +216,10 @@ export class ProductionsRepository {
 
     private async buildWhere(options: CountOptions): Promise<Prisma.productionWhereInput> {
         const { search, searchIds, genres, locations, yearFrom, yearTo, onThisDayDate, lang = 'nl' } = options
+=======
+    private buildWhere(options: CountOptions): Prisma.productionWhereInput {
+        const { search, genres, locations, yearFrom, yearTo, onThisDay, referenceDate, lang = 'nl' } = options
+>>>>>>> Stashed changes
         const andFilters: Prisma.productionWhereInput[] = []
 
         if (onThisDayDate) {
@@ -341,6 +351,50 @@ export class ProductionsRepository {
             }
 
             andFilters.push({ created_at: createdAt })
+        }
+
+        if (onThisDay) {
+            const effectiveReferenceDate =
+                referenceDate instanceof Date && !Number.isNaN(referenceDate.getTime())
+                    ? referenceDate
+                    : new Date()
+
+            const month = effectiveReferenceDate.getUTCMonth()
+            const day = effectiveReferenceDate.getUTCDate()
+            const endYear = effectiveReferenceDate.getUTCFullYear() - 1
+
+            const previousYearRanges = Array.from(
+                { length: Math.max(0, endYear - 1900 + 1) },
+                (_, index) => {
+                    const year = 1900 + index
+                    return {
+                        gte: new Date(Date.UTC(year, month, day, 0, 0, 0, 0)),
+                        lte: new Date(Date.UTC(year, month, day, 23, 59, 59, 999)),
+                    }
+                },
+            )
+
+            if (previousYearRanges.length === 0) {
+                andFilters.push({
+                    events: {
+                        some: {
+                            id: {
+                                equals: '__no_on_this_day_match__',
+                            },
+                        },
+                    },
+                })
+            } else {
+                andFilters.push({
+                    events: {
+                        some: {
+                            OR: previousYearRanges.map((range) => ({
+                                starts_at: range,
+                            })),
+                        },
+                    },
+                })
+            }
         }
 
         return andFilters.length > 0 ? { AND: andFilters } : {}

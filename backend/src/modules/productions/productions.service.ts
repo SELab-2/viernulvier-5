@@ -1,9 +1,9 @@
 import { ProductionsRepository } from './productions.repository.js'
-import type { 
-    PaginationQuery, 
-    UpdateProductionInput, 
+import type {
+    PaginationQuery,
+    UpdateProductionInput,
     ProductionResponse,
-    CreateProductionInput 
+    CreateProductionInput
 } from './productions.schema.js'
 import { PaginatedResult, calculateTotalPages } from '../../utils/pagination.js'
 
@@ -150,32 +150,38 @@ export class ProductionsService {
         return Array.from(uniqueGenres)
     }
 
-    private getOnThisDayEventDate(production: any, onThisDayDate?: Date): Date | null {
+    private getOnThisDayEventDate(production: any, onThisDayDate?: Date): string | null {
         if (!onThisDayDate) {
             return null
         }
 
         const targetMonth = onThisDayDate.getUTCMonth()
         const targetDay = onThisDayDate.getUTCDate()
+        const targetYear = onThisDayDate.getUTCFullYear()
         const events = Array.isArray(production.events) ? production.events : []
 
         const matchingDates = events
             .map((event: any) => (event?.starts_at ? new Date(event.starts_at) : null))
             .filter((value: Date | null): value is Date => value instanceof Date && !Number.isNaN(value.getTime()))
-            .filter((value: Date) => value.getUTCMonth() === targetMonth && value.getUTCDate() === targetDay)
+            .filter(
+                (value: Date) =>
+                    value.getUTCMonth() === targetMonth &&
+                    value.getUTCDate() === targetDay &&
+                    value.getUTCFullYear() < targetYear,
+            )
             .sort((a: Date, b: Date) => a.getTime() - b.getTime())
 
-        return matchingDates[0] ?? null
+        return matchingDates[0]?.toISOString() ?? null
     }
 
     private mapProductionResponse(production: any, onThisDayDate?: Date): ProductionResponse {
         return {
             ...production,
             image_url: this.extractImageUrl(production),
+            on_this_day_event_date: this.getOnThisDayEventDate(production, onThisDayDate),
             venue_name: this.extractVenueName(production),
             venue_names: this.extractVenueNames(production),
             production_genres: this.extractProductionGenres(production),
-            on_this_day_event_date: this.getOnThisDayEventDate(production, onThisDayDate),
         }
     }
 
@@ -249,7 +255,9 @@ export class ProductionsService {
         const totalPages = calculateTotalPages(total, limit)
 
         return {
-            items: items.map((item) => this.mapProductionResponse(item, onThisDayDate)) as any,
+            items: items
+                .map((item) => this.mapProductionResponse(item, onThisDayDate))
+                .filter((item) => !onThisDay || item.on_this_day_event_date !== null) as any,
             total,
             page,
             limit,
