@@ -4,7 +4,8 @@ name: Coverage Report
 # This workflow is informational and does not block merging.
 on:
   push:
-    branches: []
+    branches:
+      - this-will-never-be-a-real-branch
       
 
 concurrency:
