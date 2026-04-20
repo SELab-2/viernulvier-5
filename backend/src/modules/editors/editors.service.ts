@@ -7,7 +7,7 @@ import type {
     CreateEditorInput, 
     UpdateEditorInput 
 } from './editors.schema.js'
-import { PaginatedResult, calculateTotalPages } from '../../utils/pagination.js'
+import { PaginatedResult, calculateTotalPages, sanitizePage } from '../../utils/pagination.js'
 
 export class EditorsService {
     constructor(private readonly repository: EditorsRepository) { }
@@ -15,17 +15,20 @@ export class EditorsService {
     async getEditors(options: EditorPaginationQuery): Promise<PaginatedResult<EditorResponse>> {
         const { page, limit, search } = options
 
-        const [items, total] = await Promise.all([
-            this.repository.listEditors({ page, limit, search }),
-            this.repository.countEditors({ search }),
-        ])
-
+        const total = await this.repository.countEditors({ search })
         const totalPages = calculateTotalPages(total, limit)
+        const sanitizedPage = sanitizePage(page, totalPages)
+
+        const items = await this.repository.listEditors({ 
+            page: sanitizedPage, 
+            limit, 
+            search 
+        })
 
         return {
             items: items as any,
             total,
-            page,
+            page: sanitizedPage,
             limit,
             totalPages,
         }
