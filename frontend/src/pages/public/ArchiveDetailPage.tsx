@@ -126,6 +126,8 @@ function ArchiveDetailPageContent() {
     const info = localize(production?.info, locale)
     const video1 = localize(production?.video_1, locale)
     const video2 = localize(production?.video_2, locale)
+    const genres = production?.genres || []
+    const tags = production?.tags || []
 
     const videos = [video1, video2]
         .filter(Boolean)
@@ -148,6 +150,9 @@ function ArchiveDetailPageContent() {
                         title={title}
                         superTitle={superTitle}
                         artist={artist}
+                        genres={genres}
+                        tags={tags}
+                        locale={locale}
                     />
                 )}
             </div>
@@ -229,6 +234,13 @@ function ArchiveDetailPageContent() {
                         <div dangerouslySetInnerHTML={{ __html: info.replace(/\r?\n/g, '<br />') }} />
                     </div>
                 )}
+
+                {/* Debug / inspection */}
+                <div className="mt-8">
+                    <pre className="bg-gray-100 p-4 text-xs overflow-auto">
+                        {JSON.stringify(production, null, 2)}
+                    </pre>
+                </div>
             </div>
         </>
     )
