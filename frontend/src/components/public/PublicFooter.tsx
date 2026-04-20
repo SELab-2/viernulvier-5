@@ -11,7 +11,7 @@ function PublicFooter() {
             <div className="site-container py-14">
                 <div className="grid gap-12 md:grid-cols-2 xl:grid-cols-4">
                     <section>
-                        <img src="/logo-white.png" alt="VIERNULVIER" className="mb-5 h-10 w-auto" />
+                        <img src="/logo-white.png" alt={messages.footer.brandLogoAlt} className="mb-5 h-10 w-auto" />
                         <p className="max-w-xs text-base leading-7 text-grey">
                             {messages.footer.about}
                         </p>
@@ -34,7 +34,7 @@ function PublicFooter() {
                             <p>9000 Gent</p>
                             <p>info@viernulvier.gent</p>
                             <p>+32 (0)9 267 28 20</p>
-                            <p>Kunstencentrum VIERNULVIER vzw.</p>
+                            <p>{messages.footer.organizationName}</p>
                             <p>BTW BE 0423.063.619</p>
                         </address>
                     </section>
