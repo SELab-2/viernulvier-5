@@ -37,7 +37,7 @@ function ArchiveDetailPageContent() {
     }
 
     const formatHtml = (html: string) => {
-        const hptm = html
+        return html
             // 1. remove empty <p> first (before adding <br /> chaos)
             .replace(/<p>(\s|&nbsp;|<br\s*\/?>)*<\/p>/g, '')
 
@@ -48,9 +48,6 @@ function ArchiveDetailPageContent() {
             .replace(/(<br\s*\/?>\s*)+$/g, '')
 
             .trim()
-
-        console.log(hptm)
-        return hptm
     }
 
     useEffect(() => {
