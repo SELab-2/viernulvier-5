@@ -1,78 +1,134 @@
-import type { PrismaClient } from '@prisma/client'
+import { Prisma, type PrismaClient } from '@prisma/client'
 import type { CreateBlogInput, UpdateBlogInput, BlogResponse, BlogPaginationQuery } from './blogs.schema.js'
-import { randomUUID } from 'crypto'
+import { AppError } from '../../errors/app-error.js'
 
-// Skeleton implementation that can be used with real Prisma later
-// For now, it uses an in-memory store to allow tests to pass since the DB model doesn't exist yet.
 export class BlogsRepository {
-    private mockBlogs: BlogResponse[] = []
-
     constructor(private readonly prisma: PrismaClient) {}
+
+    private readonly blogInclude = {
+        blog_production: {
+            select: {
+                production_id: true,
+            },
+        },
+    } as const
+
+    private mapBlog(blog: {
+        id: string
+        title: string | null
+        content: unknown
+        createdAt: Date
+        updatedAt: Date
+        blog_production: Array<{ production_id: string }>
+    }): BlogResponse {
+        return {
+            id: blog.id,
+            title: blog.title,
+            content: blog.content,
+            productions: blog.blog_production.map((relation) => relation.production_id),
+            createdAt: blog.createdAt,
+            updatedAt: blog.updatedAt,
+        }
+    }
 
     async findAll(options: BlogPaginationQuery): Promise<BlogResponse[]> {
         const { page, limit, search } = options
         const skip = (page - 1) * limit
 
-        let results = [...this.mockBlogs]
+        const where = search
+            ? {
+                title: { contains: search, mode: 'insensitive' as const },
+            }
+            : undefined
 
-        if (search) {
-            const searchLower = search.toLowerCase()
-            results = results.filter(b => 
-                b.title.toLowerCase().includes(searchLower) || 
-                b.content.toLowerCase().includes(searchLower)
-            )
-        }
+        const blogs = await this.prisma.blog.findMany({
+            where,
+            include: this.blogInclude,
+            skip,
+            take: limit,
+            orderBy: { createdAt: 'desc' },
+        })
 
-        // Simple mock pagination
-        return results.slice(skip, skip + limit)
+        return blogs.map((blog) => this.mapBlog(blog))
     }
-
     async count(options: { search?: string }): Promise<number> {
         const { search } = options
-        let results = [...this.mockBlogs]
 
-        if (search) {
-            const searchLower = search.toLowerCase()
-            results = results.filter(b => 
-                b.title.toLowerCase().includes(searchLower) || 
-                b.content.toLowerCase().includes(searchLower)
-            )
-        }
+        const where = search
+            ? {
+                title: { contains: search, mode: 'insensitive' as const },
+            }
+            : undefined
 
-        return results.length
+        return this.prisma.blog.count({ where })
     }
 
     async findById(id: string): Promise<BlogResponse | null> {
-        return this.mockBlogs.find(b => b.id === id) || null
+        const blog = await this.prisma.blog.findUnique({
+            where: { id },
+            include: this.blogInclude,
+        })
+
+        return blog ? this.mapBlog(blog) : null
     }
 
     async create(data: CreateBlogInput): Promise<BlogResponse> {
-        const newBlog: BlogResponse = {
-            id: randomUUID(),
-            ...data,
-            createdAt: new Date(),
-            updatedAt: new Date()
-        }
-        this.mockBlogs.push(newBlog)
-        return newBlog
+        const productionIds = data.productionIds ?? []
+
+        const blog = await this.prisma.blog.create({
+            data: {
+                title: data.title,
+                content: (data.content ?? null) as Prisma.InputJsonValue,
+                blog_production: {
+                    create: productionIds.map((productionId) => ({
+                        production: {
+                            connect: { id: productionId },
+                        },
+                    })),
+                },
+            },
+            include: this.blogInclude,
+        })
+
+        return this.mapBlog(blog)
     }
 
     async update(id: string, data: UpdateBlogInput): Promise<BlogResponse> {
-        const index = this.mockBlogs.findIndex(b => b.id === id)
-        if (index === -1) throw new Error('Blog not found')
-        
-        const updatedBlog = {
-            ...this.mockBlogs[index],
-            ...data,
-            updatedAt: new Date()
-        }
-        this.mockBlogs[index] = updatedBlog
-        return updatedBlog
+        const existing = await this.prisma.blog.findUnique({ where: { id } })
+        if (!existing) throw new AppError('Blog not found')
+
+        const updatedBlog = await this.prisma.blog.update({
+            where: { id },
+            data: {
+                ...(data.title !== undefined ? { title: data.title } : {}),
+                ...(data.content !== undefined ? { content: data.content as Prisma.InputJsonValue } : {}),
+                ...(data.productionIds !== undefined
+                    ? {
+                        blog_production: {
+                            deleteMany: {},
+                            create: (data.productionIds ?? []).map((productionId) => ({
+                                production: {
+                                    connect: { id: productionId },
+                                },
+                            })),
+                        },
+                    }
+                    : {}),
+            },
+            include: this.blogInclude,
+        })
+
+        return this.mapBlog(updatedBlog)
     }
 
     async delete(id: string): Promise<void> {
-        const index = this.mockBlogs.findIndex(b => b.id === id)
-        if (index === -1) throw new Error('Blog not found')
-        this.mockBlogs.splice(index, 1)
+        const existing = await this.prisma.blog.findUnique({ where: { id } })
+        if (!existing) throw new AppError('Blog not found')
+
+        await this.prisma.$transaction([
+            this.prisma.blog_production.deleteMany({ where: { blog_id: id } }),
+            this.prisma.blog.delete({ where: { id } }),
+        ])
+
     }
 }

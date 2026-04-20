@@ -14,7 +14,7 @@ model crop {
   name       String?  @db.VarChar
   url        String?  @db.VarChar
   item_id    String?  @db.Uuid
-  item       item?    @relation("item_crops", fields: [item_id], references: [id])
+  item       item?     @relation("item_crops", fields: [item_id], references: [id])
 }
 
 model event {
@@ -169,6 +169,25 @@ model location {
   spaces         space[]  @relation("space_location")
 }
 
+model blog {
+  id              String            @id @db.Uuid @default(uuid())
+  title           String?           @db.Text
+  content         Json?
+  blog_production blog_production[]
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt DateTime  @default(now()) @map("updated_at") @db.Timestamp(6)
+}
+
+model blog_production {
+  blog_id       String     @db.Uuid
+  production_id String     @db.Uuid
+  blog          blog       @relation(fields: [blog_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  production    production @relation(fields: [production_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([blog_id, production_id])
+}
+
 model production {
   created_at               DateTime                  @default(now()) @db.Timestamp(6)
   updated_at               DateTime                  @default(now()) @db.Timestamp(6)
@@ -203,6 +222,7 @@ model production {
   poster_gallery_id        String?                   @db.Uuid
   uitdatabank_theme        String?                   @db.Uuid
   uitdatabank_type         String?                   @db.Uuid
+  blog_production          blog_production[]
   events                   event[]                   @relation("event_production")
   genre_production         genre_production[]
   tag_production           tag_production[]
