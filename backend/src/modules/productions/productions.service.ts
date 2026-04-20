@@ -5,7 +5,7 @@ import type {
     ProductionResponse,
     CreateProductionInput 
 } from './productions.schema.js'
-import { PaginatedResult, calculateTotalPages } from '../../utils/pagination.js'
+import { PaginatedResult, calculateTotalPages, sanitizePage } from '../../utils/pagination.js'
 
 export class ProductionsService {
     constructor(private readonly repository: ProductionsRepository) { }
@@ -13,17 +13,21 @@ export class ProductionsService {
     async getProductions(options: PaginationQuery): Promise<PaginatedResult<ProductionResponse>> {
         const { page, limit, search, lang } = options
 
-        const [items, total] = await Promise.all([
-            this.repository.findAll({ page, limit, search, lang }),
-            this.repository.count({ search, lang }),
-        ])
-
+        const total = await this.repository.count({ search, lang })
         const totalPages = calculateTotalPages(total, limit)
+        const sanitizedPage = sanitizePage(page, totalPages)
+
+        const items = await this.repository.findAll({ 
+            page: sanitizedPage, 
+            limit, 
+            search, 
+            lang 
+        })
 
         return {
             items: items as any,
             total,
-            page,
+            page: sanitizedPage,
             limit,
             totalPages,
         }
