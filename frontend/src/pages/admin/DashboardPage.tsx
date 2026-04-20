@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useAdminMessages } from '../../components/admin/AdminMessagesContext'
 import AdminLayout from '../../components/admin/AdminLayout'
-import { useDashboardSummary } from '../../components/admin/useDashboardSummary'
+import { useDashboardSummary } from '../../components/admin/hooks/useDashboardSummary'
 import type { Locale } from '../../i18n/types'
 
 const PAGE_SIZE_OPTIONS = [3, 6, 9, 12, 15, 18] as const
