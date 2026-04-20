@@ -2,10 +2,7 @@ name: CI
 
 # Runs on every push to any branch (except main) and on pull request updates.
 # Concurrency ensures stale runs are cancelled when new commits are pushed.
-on:
-  push:
-    branches:
-      - main
+on: push
 
 concurrency:
   group: ci-${{ github.ref }}
