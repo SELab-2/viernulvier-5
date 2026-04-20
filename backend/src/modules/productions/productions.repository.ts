@@ -24,30 +24,36 @@ export class ProductionsRepository {
 
     async count(options: { search?: string; lang?: string }) {
         const { search, lang = 'nl' } = options
-        const where = search ? {
-            title: {
+        const where: any = {}
+        
+        if (search) {
+            where.title = {
                 path: [lang],
                 string_contains: search,
-            },
-        } : {}
+            }
+        }
 
-        return this.prisma.production.count({
-            where: where as any,
-        })
+        return this.prisma.production.count({ where })
     }
 
     async findById(id: string) {
-        return this.prisma.production.findUnique({
+        const production = await this.prisma.production.findUnique({
             where: { id },
             include: {
-                events: true,
-                genre_production: {
-                    include: {
-                        genre: true
-                    }
-                }
+                genre_production: { include: { genre: true } },
+                tag_production: { include: { tag: true } }
             }
-        })
+        });
+
+        if (!production) return null;
+
+        const { genre_production, tag_production, ...rest } = production;
+
+        return {
+            ...rest,
+            genres: genre_production.map((gp) => gp.genre),
+            tags: tag_production.map((tp) => tp.tag),
+        };
     }
 
     async create(data: any) {
