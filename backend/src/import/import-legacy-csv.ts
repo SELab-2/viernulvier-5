@@ -1,11 +1,11 @@
 /**
  * Legacy CSV Importer
  *
- * Imports productions from productions.csv and events from events-voorstellingen.csv
+ * Imports productions from productions.csv and events from events.csv
  * into the existing Prisma schema.
  *
  * Usage:
- *   npx tsx import-legacy-csv.ts --productions ./productions.csv --events ./events-voorstellingen.csv
+ *   npx tsx import-legacy-csv.ts --productions ./productions.csv --events ./events.csv
  *
  * Both flags are optional — you can run only one if needed.
  */
@@ -102,7 +102,7 @@ async function importProductions(filePath: string) {
         const apiId = legacyApiId(numericId);
 
         // Build title as a JSON object (same pattern as live productions).
-        // The CSV has Dutch titles; we store under "nl" key.
+        // The CSV has (it seems mostly) Dutch titles; we store under "nl" key.
         const titleJson = row.Titel ? { nl: row.Titel.trim() } : null;
         const taglineJson = row.Ondertitel ? { nl: row.Ondertitel.trim() } : null;
 
