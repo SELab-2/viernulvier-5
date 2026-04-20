@@ -12,7 +12,6 @@ import type {
   APIGallery,
   APIItem,
   APIEventPrice,
-  APITag,
   APICrop,
   APIUitKeyword,
   APIUitTheme,
@@ -31,7 +30,6 @@ export default {
   sync_items,
   sync_crops,
   sync_event_prices,
-  sync_tags,
   sync_uit_keywords,
   sync_uit_themes,
   sync_uit_types,
@@ -249,7 +247,6 @@ function mapGenre(genre: APIGenre){
     updated_at: sanitizeTimestampRequired(genre.updated_at),
     apiId: genre["@id"],
     type: genre.type,
-    use_as: genre.use_as,
     vendor_id: genre.vendor_id,
     name: genre.name,
     slug: genre.slug,
@@ -297,26 +294,6 @@ function mapEventPrice(price: APIEventPrice){
     box_office_id: price.box_office_id,
     contigent_id: price.contingent_id,
     expires_at: sanitizeTimestampOptional(price.expires_at),
-  }
-}
-
-function mapTag(tag: APITag){
-  return {
-    created_at: sanitizeTimestampRequired(tag.created_at),
-    updated_at: sanitizeTimestampRequired(tag.updated_at),
-    apiId: tag["@id"],
-    source: tag.source,
-    sourcetype: tag.sourceType,
-    enable: tag.enable,
-    code: tag.code,
-    name: tag.name,
-    short_description: tag.short_description,
-    url: tag.url,
-    url_title: tag.url_title,
-    expires_after: tag.expires_after,
-    automatically_assigned: tag.automatically_assigned,
-    external: tag.external,
-    // gallery_id: done separately inside function
   }
 }
 
@@ -623,13 +600,11 @@ async function sync_productions(cutoff_timestamp: Date | undefined = undefined) 
         }
 
         for (const genre of production.genres) {
-          let db_genre = undefined
-          if (production.genres) {
-            db_genre = await tx.genre.findUnique({
-              where: {apiId: genre}
-            });
-          }
-          if (db_genre !== undefined) {
+          const [db_genre, db_tag] = await Promise.all([
+            tx.genre.findUnique({ where: { apiId: genre } }),
+            tx.tag.findUnique({ where: { apiId: genre } })
+          ]);
+          if (db_genre !== null) {
             await tx.genre_production.upsert({
               where: {
                 genre_id_production_id: {
@@ -641,6 +616,21 @@ async function sync_productions(cutoff_timestamp: Date | undefined = undefined) 
               create: {
                 production_id: db_production.id,
                 genre_id: db_genre!.id,
+              }
+            });
+          }
+          if (db_tag !== null) {
+            await tx.tag_production.upsert({
+              where: {
+                tag_id_production_id: {
+                  tag_id: db_tag!.id,
+                  production_id: db_production.id,
+                }
+              },
+              update: {}, // if it already exists, you don't need to update it
+              create: {
+                production_id: db_production.id,
+                tag_id: db_tag!.id,
               }
             });
           }
@@ -664,14 +654,33 @@ async function sync_genres(cutoff_timestamp: Date | undefined = undefined){
     if (page.length === 0) break;
     page = filterByCutoff(page, cutoff_timestamp);
 
-    await prisma.$transaction(
-        page.map(genre =>
-            prisma.genre.upsert({
-              where: { apiId: genre["@id"] },
-              update: mapGenre(genre),
-              create: mapGenre(genre),
-            })
-        )
+    await prisma.$transaction(async (tx) => {
+          for (const genre of page) {
+            if (genre.use_as !== null && genre.use_as.toLowerCase() == "tag") {
+              await tx.tag.upsert({
+                where: {apiId: genre["@id"]},
+                update: mapGenre(genre),
+                create: mapGenre(genre),
+              });
+            } else {
+              await tx.genre.upsert({
+                  where: { apiId: genre["@id"] },
+                  update: mapGenre(genre),
+                  create: mapGenre(genre),
+                })
+            }
+
+          }
+        }
+
+    // await prisma.$transaction(
+    //     page.map(genre =>
+    //         prisma.genre.upsert({
+    //           where: { apiId: genre["@id"] },
+    //           update: mapGenre(genre),
+    //           create: mapGenre(genre),
+    //         })
+    //     )
     );
 
     totalProcessed += page.length;
@@ -833,47 +842,6 @@ async function sync_event_prices(cutoff_timestamp: Date | undefined = undefined)
   log(`Completed syncing ${totalProcessed} event_prices from ${pageCount} pages`);
 }
 
-async function sync_tags(cutoff_timestamp: Date | undefined = undefined){
-  let totalProcessed = 0;
-  let pageCount = 0;
-
-  for await (let page of Fetcher.fetchTagPages()) {
-    pageCount++;
-    log(`Processing page ${pageCount} with ${page.length} tags`);
-
-    if (page.length === 0) break;
-    page = filterByCutoff(page, cutoff_timestamp);
-
-    await prisma.$transaction(async (tx) => {
-          for (const tag of page) {
-
-            let gallery = null;
-            if (tag.gallery) {
-                gallery = await tx.gallery.findUnique({
-                where: {apiId: tag.gallery}
-              });
-            }
-
-            await tx.tag.upsert({
-              where: {apiId: tag["@id"]},
-              update: {
-                ...mapTag(tag),
-                gallery_id: gallery?.id || null,
-              },
-              create: {
-                ...mapTag(tag),
-                gallery_id: gallery?.id || null,
-              },
-            });
-          }
-        }
-    );
-
-    totalProcessed += page.length;
-  }
-
-  log(`Completed syncing ${totalProcessed} tags from ${pageCount} pages`);
-}
 
 async function sync_crops(cutoff_timestamp: Date | undefined = undefined){
   let totalProcessed = 0;

@@ -9,25 +9,30 @@ import type {
     CreateTagInput,
     UpdateTagInput
 } from './taxonomies.schema.js'
-import { PaginatedResult, calculateTotalPages } from '../../utils/pagination.js'
+import { PaginatedResult, calculateTotalPages, sanitizePage } from '../../utils/pagination.js'
 
 export class TaxonomiesService {
     constructor(private readonly repository: TaxonomiesRepository) { }
 
     async getGenres(options: GenrePaginationQuery): Promise<PaginatedResult<GenreResponse>> {
-        const { page, limit, search, lang } = options
+        const { page, limit, search, lang, productionId } = options
 
-        const [items, total] = await Promise.all([
-            this.repository.findAllGenres({ page, limit, search, lang }),
-            this.repository.countGenres({ search, lang }),
-        ])
+        const total = await this.repository.countGenres({ search, lang, productionId })
 
         const totalPages = calculateTotalPages(total, limit)
+        const sanitizedPage = sanitizePage(page, totalPages)
+
+        const items = await this.repository.findAllGenres({ 
+            page: sanitizedPage, 
+            limit, 
+            search, 
+            lang 
+        })
 
         return {
             items: items as any,
             total,
-            page,
+            page: sanitizedPage,
             limit,
             totalPages,
         }
@@ -50,19 +55,24 @@ export class TaxonomiesService {
     }
 
     async getTags(options: TagPaginationQuery): Promise<PaginatedResult<TagResponse>> {
-        const { page, limit, search, lang } = options
+        const { page, limit, search, lang, productionId } = options
 
-        const [items, total] = await Promise.all([
-            this.repository.findAllTags({ page, limit, search, lang }),
-            this.repository.countTags({ search, lang }),
-        ])
+        const total = await this.repository.countTags({ search, lang, productionId })
 
         const totalPages = calculateTotalPages(total, limit)
+        const sanitizedPage = sanitizePage(page, totalPages)
+
+        const items = await this.repository.findAllTags({ 
+            page: sanitizedPage, 
+            limit, 
+            search, 
+            lang 
+        })
 
         return {
             items: items as any,
             total,
-            page,
+            page: sanitizedPage,
             limit,
             totalPages,
         }
