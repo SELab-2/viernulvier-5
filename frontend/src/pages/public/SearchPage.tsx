@@ -103,9 +103,22 @@ type PaginatedApiResponse<T> = {
     }
 }
 
+type PosterApiItem = {
+    id: string
+    title: string
+    file_url: string
+    created_at: string
+    production: {
+        id: string
+        title: string
+    } | null
+}
+
 type SearchSort = 'relevance' | 'recent' | 'oldest'
+type SearchTab = 'productions' | 'posters'
 
 type SearchFilterState = {
+    tab: SearchTab
     query: string
     yearFrom: number
     yearTo: number
@@ -117,6 +130,7 @@ type SearchFilterState = {
 }
 
 type SearchFilterOverrides = {
+    tab?: SearchTab
     query?: string
     yearFrom?: number
     yearTo?: number
@@ -125,6 +139,10 @@ type SearchFilterOverrides = {
     sort?: SearchSort
     page?: number
     limit?: number
+}
+
+function normalizeTab(value: string | null): SearchTab {
+    return value === 'posters' ? 'posters' : 'productions'
 }
 
 function getLocalizedText(text: LocalizedText, locale: Locale): string {
@@ -146,6 +164,7 @@ function normalizePageSize(value: number): number {
 }
 
 function parseSearchFilterState(searchParams: URLSearchParams): SearchFilterState {
+    const tab = normalizeTab(searchParams.get('tab'))
     const query = (searchParams.get('q') ?? '').trim()
     const legacyYear = Number(searchParams.get('year') ?? String(MAX_PERIOD_YEAR))
     const yearFromParam = Number(searchParams.get('yearFrom') ?? String(MIN_PERIOD_YEAR))
@@ -162,6 +181,7 @@ function parseSearchFilterState(searchParams: URLSearchParams): SearchFilterStat
     const limit = normalizePageSize(limitParam)
 
     return {
+        tab,
         query,
         yearFrom,
         yearTo,
@@ -177,6 +197,7 @@ function buildSearchParams(filters: SearchFilterOverrides): URLSearchParams {
     const params = new URLSearchParams()
     const trimmedQuery = filters.query?.trim() ?? ''
 
+    if (filters.tab && filters.tab !== 'productions') params.set('tab', filters.tab)
     if (trimmedQuery) params.set('q', trimmedQuery)
     if (filters.yearFrom && filters.yearFrom > MIN_PERIOD_YEAR) params.set('yearFrom', String(filters.yearFrom))
     if (filters.yearTo && filters.yearTo < MAX_PERIOD_YEAR) params.set('yearTo', String(filters.yearTo))
@@ -236,6 +257,25 @@ function normalizeGenreValue(value: string): string {
     }
 
     return GENRE_ALIASES[normalized] ?? normalized
+}
+
+function mapPosterToSearchEntry(item: PosterApiItem, locale: Locale): SearchEntry {
+    const searchMessages = getMessages(locale).search
+    const date = formatDate(item.created_at, locale)
+    const productionTitle = item.production?.title?.trim() || searchMessages.fallbackVenue
+
+    return {
+        id: item.id,
+        tag: searchMessages.postersTab,
+        date,
+        title: item.title,
+        excerpt: productionTitle,
+        venue: productionTitle,
+        imageUrl: item.file_url,
+        year: new Date(item.created_at).getFullYear() || MIN_PERIOD_YEAR,
+        genre: '',
+        location: '',
+    }
 }
 
 function mapProductionToSearchEntry(item: ProductionApiItem, locale: Locale, preferredGenre?: string): SearchEntry {
@@ -622,9 +662,10 @@ type FilterPanelProps = {
     shareLabel?: string
     onShare?: () => void
     locationSuggestions?: string[]
+    activeTab: SearchTab
 }
 
-function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, onShare, locationSuggestions = [] }: FilterPanelProps) {
+function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, onShare, locationSuggestions = [], activeTab }: FilterPanelProps) {
     const [searchParams] = useSearchParams()
     const navigate = useNavigate()
     const locale = getActiveLocale(window.location.pathname)
@@ -665,6 +706,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
         const timerId = window.setTimeout(() => {
             pushFilters({
                 query: nextQuery || undefined,
+                tab: activeTab,
                 yearFrom: safeFromYear,
                 yearTo: safeToYear,
                 genres: selectedGenres,
@@ -680,13 +722,31 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
     }, [searchInput, query, safeFromYear, safeToYear, selectedGenres, selectedLocations, sort, safeLimit, pushFilters])
 
     const handleSearchSubmit = () => {
-        pushFilters({ query: searchInput.trim() || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: safeLimit })
+        pushFilters({
+            tab: activeTab,
+            query: searchInput.trim() || undefined,
+            yearFrom: safeFromYear,
+            yearTo: safeToYear,
+            genres: selectedGenres,
+            locations: selectedLocations,
+            sort,
+            limit: safeLimit,
+        })
     }
 
     const handleGenreChange = (next: string) => {
         const nextGenres = selectedGenres.includes(next) ? [] : [next]
 
-        pushFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: nextGenres, locations: selectedLocations, sort, limit: safeLimit })
+        pushFilters({
+            tab: activeTab,
+            query: query || undefined,
+            yearFrom: safeFromYear,
+            yearTo: safeToYear,
+            genres: nextGenres,
+            locations: selectedLocations,
+            sort,
+            limit: safeLimit,
+        })
     }
 
     const handleLocationChange = (next: string) => {
@@ -694,7 +754,16 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
             ? selectedLocations.filter((value) => value !== next)
             : [...selectedLocations, next]
 
-        pushFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: selectedGenres, locations: nextLocations, sort, limit: safeLimit })
+        pushFilters({
+            tab: activeTab,
+            query: query || undefined,
+            yearFrom: safeFromYear,
+            yearTo: safeToYear,
+            genres: selectedGenres,
+            locations: nextLocations,
+            sort,
+            limit: safeLimit,
+        })
     }
 
     const handleAddLocation = () => {
@@ -706,6 +775,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
 
         pushFilters({
             query: query || undefined,
+            tab: activeTab,
             yearFrom: safeFromYear,
             yearTo: safeToYear,
             genres: selectedGenres,
@@ -745,6 +815,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
 
         pushFilters({
             query: query || undefined,
+            tab: activeTab,
             yearFrom: safeFromYear,
             yearTo: safeToYear,
             genres: selectedGenres,
@@ -758,16 +829,39 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
 
     const handleFromYearChange = (next: number) => {
         const clampedNext = Math.min(next, safeToYear)
-        pushFilters({ query: query || undefined, yearFrom: clampedNext, yearTo: safeToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: safeLimit })
+        pushFilters({
+            tab: activeTab,
+            query: query || undefined,
+            yearFrom: clampedNext,
+            yearTo: safeToYear,
+            genres: selectedGenres,
+            locations: selectedLocations,
+            sort,
+            limit: safeLimit,
+        })
     }
 
     const handleToYearChange = (next: number) => {
         const clampedNext = Math.max(next, safeFromYear)
-        pushFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: clampedNext, genres: selectedGenres, locations: selectedLocations, sort, limit: safeLimit })
+        pushFilters({
+            tab: activeTab,
+            query: query || undefined,
+            yearFrom: safeFromYear,
+            yearTo: clampedNext,
+            genres: selectedGenres,
+            locations: selectedLocations,
+            sort,
+            limit: safeLimit,
+        })
     }
 
     const handleReset = () => {
-        pushFilters({ yearFrom: MIN_PERIOD_YEAR, yearTo: MAX_PERIOD_YEAR, sort, limit: safeLimit })
+        if (activeTab === 'posters') {
+            pushFilters({ tab: activeTab })
+            return
+        }
+
+        pushFilters({ tab: activeTab, yearFrom: MIN_PERIOD_YEAR, yearTo: MAX_PERIOD_YEAR, sort, limit: safeLimit })
     }
 
     const handleSliderPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -799,6 +893,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
         label,
         value: CANONICAL_GENRE_VALUES[index] ?? label.toLowerCase(),
     }))
+
     return (
         <aside className={`flex h-full flex-col ${className}`}>
             <h2 className="text-3xl text-foreground">{s.heading}</h2>
@@ -827,130 +922,134 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
                 </form>
             ) : null}
 
-            <div className="mt-8 border-t border-border pt-5">
-                <div className="mb-4 flex items-center justify-between">
-                    <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground">{s.genreLabel}</h3>
-                </div>
-                <div className="space-y-2 text-sm text-text-accent">
-                    {genreOptions.map(({ label, value }) => {
-                        return (
-                            <label key={value} className="flex items-center gap-2.5 text-foreground/90 transition-all duration-200 hover:translate-x-0.5 hover:text-foreground cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    checked={selectedGenres.includes(value)}
-                                    onChange={() => handleGenreChange(value)}
-                                    className="filter-checkbox cursor-pointer"
-                                />
-                                <span>{label}</span>
-                            </label>
-                        )
-                    })}
-                </div>
-            </div>
-
-            <div className="mt-6 border-t border-border pt-5">
-                <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground">{s.periodLabel}</h3>
-                <div ref={sliderRef} className="range-slider mt-5" onPointerDown={handleSliderPointerDown}>
-                    <div className="range-track" />
-                    <div className="range-track-active" style={{ left: `${fromPercent}%`, width: `${toPercent - fromPercent}%` }} />
-
-                    <input
-                        type="range"
-                        min={MIN_PERIOD_YEAR}
-                        max={MAX_PERIOD_YEAR}
-                        value={safeFromYear}
-                        onChange={(event) => handleFromYearChange(Number(event.target.value))}
-                        className="range-input"
-                        aria-label="Start year"
-                    />
-                    <input
-                        type="range"
-                        min={MIN_PERIOD_YEAR}
-                        max={MAX_PERIOD_YEAR}
-                        value={safeToYear}
-                        onChange={(event) => handleToYearChange(Number(event.target.value))}
-                        className="range-input"
-                        aria-label="End year"
-                    />
-                </div>
-                <div className="mt-2 flex items-center justify-between text-xs text-muted">
-                    <span>{MIN_PERIOD_YEAR}</span>
-                    <span className="rounded-full bg-foreground px-2 py-0.5 font-semibold text-surface">
-                        {safeFromYear} - {safeToYear}
-                    </span>
-                    <span>{MAX_PERIOD_YEAR}</span>
-                </div>
-            </div>
-
-            <div className="mt-6 border-t border-border pt-5 pb-5">
-                <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground">{s.locationLabel}</h3>
-                <div className="mt-4 space-y-3 text-sm text-text-accent">
-                    <div className="flex items-center gap-2">
-                        <input
-                            type="text"
-                            value={locationInput}
-                            onChange={(event) => setLocationInput(event.target.value)}
-                            onFocus={() => setIsLocationSuggestionsOpen(true)}
-                            onBlur={() => {
-                                window.setTimeout(() => {
-                                    setIsLocationSuggestionsOpen(false)
-                                }, 120)
-                            }}
-                            onKeyDown={(event) => {
-                                if (event.key === 'Enter') {
-                                    event.preventDefault()
-                                    handleAddLocation()
-                                }
-                            }}
-                            placeholder={s.locationSearchPlaceholder}
-                            className="h-10 w-full rounded-full border border-border bg-surface px-4 text-sm text-foreground"
-                        />
-                        <button
-                            type="button"
-                            className="h-10 rounded-full border border-border bg-surface px-3 text-xs font-semibold text-foreground"
-                            onClick={handleAddLocation}
-                        >
-                            {s.addLocationLabel}
-                        </button>
+            {activeTab === 'productions' ? (
+                <>
+                    <div className="mt-8 border-t border-border pt-5">
+                        <div className="mb-4 flex items-center justify-between">
+                            <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground">{s.genreLabel}</h3>
+                        </div>
+                        <div className="space-y-2 text-sm text-text-accent">
+                            {genreOptions.map(({ label, value }) => {
+                                return (
+                                    <label key={value} className="flex cursor-pointer items-center gap-2.5 text-foreground/90 transition-all duration-200 hover:translate-x-0.5 hover:text-foreground">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedGenres.includes(value)}
+                                            onChange={() => handleGenreChange(value)}
+                                            className="filter-checkbox cursor-pointer"
+                                        />
+                                        <span>{label}</span>
+                                    </label>
+                                )
+                            })}
+                        </div>
                     </div>
 
-                    {isLocationSuggestionsOpen && locationSuggestionItems.length > 0 ? (
-                        <div className="max-h-52 overflow-auto rounded-2xl border border-border bg-surface p-1">
-                            {locationSuggestionItems.map((value) => (
-                                <button
-                                    key={value}
-                                    type="button"
-                                    className="flex w-full items-center rounded-xl px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-accent/10"
-                                    onClick={() => handleSelectLocationSuggestion(value)}
-                                >
-                                    {value}
-                                </button>
-                            ))}
-                        </div>
-                    ) : null}
+                    <div className="mt-6 border-t border-border pt-5">
+                        <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground">{s.periodLabel}</h3>
+                        <div ref={sliderRef} className="range-slider mt-5" onPointerDown={handleSliderPointerDown}>
+                            <div className="range-track" />
+                            <div className="range-track-active" style={{ left: `${fromPercent}%`, width: `${toPercent - fromPercent}%` }} />
 
-                    {selectedLocations.length > 0 ? (
-                        <div className="flex flex-wrap items-center gap-2">
-                            {selectedLocations.map((value) => (
-                                <button
-                                    key={value}
-                                    type="button"
-                                    onClick={() => handleLocationChange(value)}
-                                    className="inline-flex items-center gap-1.5 rounded-full bg-accent/15 px-3 py-1 text-xs text-accent"
-                                >
-                                    <span>{getLocationLabel(value)}</span>
-                                    <span className="text-sm leading-none">×</span>
-                                </button>
-                            ))}
+                            <input
+                                type="range"
+                                min={MIN_PERIOD_YEAR}
+                                max={MAX_PERIOD_YEAR}
+                                value={safeFromYear}
+                                onChange={(event) => handleFromYearChange(Number(event.target.value))}
+                                className="range-input"
+                                aria-label="Start year"
+                            />
+                            <input
+                                type="range"
+                                min={MIN_PERIOD_YEAR}
+                                max={MAX_PERIOD_YEAR}
+                                value={safeToYear}
+                                onChange={(event) => handleToYearChange(Number(event.target.value))}
+                                className="range-input"
+                                aria-label="End year"
+                            />
                         </div>
-                    ) : null}
-                </div>
-            </div>
+                        <div className="mt-2 flex items-center justify-between text-xs text-muted">
+                            <span>{MIN_PERIOD_YEAR}</span>
+                            <span className="rounded-full bg-foreground px-2 py-0.5 font-semibold text-surface">
+                                {safeFromYear} - {safeToYear}
+                            </span>
+                            <span>{MAX_PERIOD_YEAR}</span>
+                        </div>
+                    </div>
+
+                    <div className="mt-6 border-t border-border pt-5 pb-5">
+                        <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground">{s.locationLabel}</h3>
+                        <div className="mt-4 space-y-3 text-sm text-text-accent">
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="text"
+                                    value={locationInput}
+                                    onChange={(event) => setLocationInput(event.target.value)}
+                                    onFocus={() => setIsLocationSuggestionsOpen(true)}
+                                    onBlur={() => {
+                                        window.setTimeout(() => {
+                                            setIsLocationSuggestionsOpen(false)
+                                        }, 120)
+                                    }}
+                                    onKeyDown={(event) => {
+                                        if (event.key === 'Enter') {
+                                            event.preventDefault()
+                                            handleAddLocation()
+                                        }
+                                    }}
+                                    placeholder={s.locationSearchPlaceholder}
+                                    className="h-10 w-full rounded-full border border-border bg-surface px-4 text-sm text-foreground"
+                                />
+                                <button
+                                    type="button"
+                                    className="h-10 rounded-full border border-border bg-surface px-3 text-xs font-semibold text-foreground"
+                                    onClick={handleAddLocation}
+                                >
+                                    {s.addLocationLabel}
+                                </button>
+                            </div>
+
+                            {isLocationSuggestionsOpen && locationSuggestionItems.length > 0 ? (
+                                <div className="max-h-52 overflow-auto rounded-2xl border border-border bg-surface p-1">
+                                    {locationSuggestionItems.map((value) => (
+                                        <button
+                                            key={value}
+                                            type="button"
+                                            className="flex w-full items-center rounded-xl px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-accent/10"
+                                            onClick={() => handleSelectLocationSuggestion(value)}
+                                        >
+                                            {value}
+                                        </button>
+                                    ))}
+                                </div>
+                            ) : null}
+
+                            {selectedLocations.length > 0 ? (
+                                <div className="flex flex-wrap items-center gap-2">
+                                    {selectedLocations.map((value) => (
+                                        <button
+                                            key={value}
+                                            type="button"
+                                            onClick={() => handleLocationChange(value)}
+                                            className="inline-flex items-center gap-1.5 rounded-full bg-accent/15 px-3 py-1 text-xs text-accent"
+                                        >
+                                            <span>{getLocationLabel(value)}</span>
+                                            <span className="text-sm leading-none">×</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            ) : null}
+                        </div>
+                    </div>
+                </>
+            ) : null}
 
             <div className="mt-auto space-y-3">
                 <button
                     type="button"
-                    className="h-10 w-full rounded-full border border-border bg-surface text-sm font-semibold text-foreground md:hidden transition-colors duration-200"
+                    className="h-10 w-full rounded-full border border-border bg-surface text-sm font-semibold text-foreground transition-colors duration-200 md:hidden"
                     onClick={() => {
                         onShare?.()
                     }}
@@ -985,6 +1084,7 @@ function MobileSearchForm() {
         const filterState = parseSearchFilterState(searchParams)
         const params = buildSearchParams({
             query: nextQuery,
+            tab: filterState.tab,
             yearFrom: filterState.yearFrom,
             yearTo: filterState.yearTo,
             genres: filterState.genres,
@@ -1055,6 +1155,7 @@ function SearchPage() {
     const allAvailableHalls = useAllHalls(locale)
 
     const filterState = useMemo(() => parseSearchFilterState(searchParams), [searchParams])
+    const activeTab = filterState.tab
     const query = filterState.query
     const safeFromYear = filterState.yearFrom
     const safeToYear = filterState.yearTo
@@ -1083,19 +1184,19 @@ function SearchPage() {
                     params.set('search', query)
                 }
 
-                if (selectedGenres.length > 0) {
+                if (activeTab === 'productions' && selectedGenres.length > 0) {
                     params.set('genres', selectedGenres.join(','))
                 }
 
-                if (selectedLocations.length > 0) {
+                if (activeTab === 'productions' && selectedLocations.length > 0) {
                     params.set('locations', selectedLocations.join(','))
                 }
 
-                if (safeFromYear > MIN_PERIOD_YEAR) {
+                if (activeTab === 'productions' && safeFromYear > MIN_PERIOD_YEAR) {
                     params.set('yearFrom', String(safeFromYear))
                 }
 
-                if (safeToYear < MAX_PERIOD_YEAR) {
+                if (activeTab === 'productions' && safeToYear < MAX_PERIOD_YEAR) {
                     params.set('yearTo', String(safeToYear))
                 }
 
@@ -1103,13 +1204,18 @@ function SearchPage() {
                     params.set('sort', sort)
                 }
 
-                const response = await apiFetch<PaginatedApiResponse<ProductionApiItem>>(
-                    `/archive/productions?${params.toString()}`,
-                    { signal: abortController.signal }
-                )
+                const response = activeTab === 'posters'
+                    ? await apiFetch<PaginatedApiResponse<PosterApiItem>>(`/archive/posters?${params.toString()}`, {
+                        signal: abortController.signal,
+                    })
+                    : await apiFetch<PaginatedApiResponse<ProductionApiItem>>(`/archive/productions?${params.toString()}`, {
+                        signal: abortController.signal,
+                    })
 
                 const preferredGenre = selectedGenres.length === 1 ? selectedGenres[0] : undefined
-                const mappedEntries = response.data.map((item) => mapProductionToSearchEntry(item, locale, preferredGenre))
+                const mappedEntries = activeTab === 'posters'
+                    ? (response.data as PosterApiItem[]).map((item) => mapPosterToSearchEntry(item, locale))
+                    : (response.data as ProductionApiItem[]).map((item) => mapProductionToSearchEntry(item, locale, preferredGenre))
                 setApiRawItems(response.data)
                 setApiEntries(mappedEntries)
                 setTotalResults(response.meta?.total ?? mappedEntries.length)
@@ -1136,7 +1242,7 @@ function SearchPage() {
         return () => {
             abortController.abort()
         }
-    }, [query, locale, selectedGenres, selectedLocations, safeFromYear, safeToYear, sort, page, pageSize])
+    }, [activeTab, query, locale, selectedGenres, selectedLocations, safeFromYear, safeToYear, sort, page, pageSize])
 
     const navigateWithFilters = (filters: SearchFilterOverrides) => {
         const params = buildSearchParams(filters)
@@ -1204,6 +1310,7 @@ function SearchPage() {
 
         navigateWithFilters({
             query: query || undefined,
+            tab: activeTab,
             yearFrom: safeFromYear,
             yearTo: safeToYear,
             genres: selectedGenres,
@@ -1218,6 +1325,7 @@ function SearchPage() {
         const safeSort = normalizeSort(nextSort)
         navigateWithFilters({
             query: query || undefined,
+            tab: activeTab,
             yearFrom: safeFromYear,
             yearTo: safeToYear,
             genres: selectedGenres,
@@ -1230,6 +1338,7 @@ function SearchPage() {
     const handleRemoveGenreChip = (genreToRemove: string) => {
         navigateWithFilters({
             query: query || undefined,
+            tab: activeTab,
             yearFrom: safeFromYear,
             yearTo: safeToYear,
             genres: selectedGenres.filter((value) => value !== genreToRemove),
@@ -1242,6 +1351,7 @@ function SearchPage() {
     const handleRemoveLocationChip = (locationToRemove: string) => {
         navigateWithFilters({
             query: query || undefined,
+            tab: activeTab,
             yearFrom: safeFromYear,
             yearTo: safeToYear,
             genres: selectedGenres,
@@ -1254,6 +1364,7 @@ function SearchPage() {
     const handleResetPeriodChip = () => {
         navigateWithFilters({
             query: query || undefined,
+            tab: activeTab,
             yearFrom: MIN_PERIOD_YEAR,
             yearTo: MAX_PERIOD_YEAR,
             genres: selectedGenres,
@@ -1271,7 +1382,9 @@ function SearchPage() {
         }, 1800)
     }
 
-    const filterChips: Array<{ key: string; label: string; onRemove: () => void }> = [
+    const filterChips: Array<{ key: string; label: string; onRemove: () => void }> = activeTab === 'posters'
+        ? []
+        : [
         ...selectedGenres.map((value) => ({
             key: `genre-${value}`,
             label: getGenreLabel(value, locale),
@@ -1296,6 +1409,10 @@ function SearchPage() {
     const locationSuggestions = useMemo(() => {
         const normalizedLocale = locale === 'en' ? 'en' : 'nl'
         const uniqueValues = new Set<string>()
+
+        if (activeTab !== 'productions') {
+            return []
+        }
 
         // 1. Add predefined aliases
         Object.values(LOCATION_ALIASES).forEach(v => uniqueValues.add(v))
@@ -1322,7 +1439,7 @@ function SearchPage() {
         return Array.from(uniqueValues).sort((a, b) =>
             a.localeCompare(b, normalizedLocale === 'nl' ? 'nl-BE' : 'en-GB', { sensitivity: 'base' }),
         )
-    }, [allAvailableHalls, fetchedDetails, locale])
+    }, [activeTab, allAvailableHalls, fetchedDetails, locale])
 
     return (
         <PublicLayout>
@@ -1335,6 +1452,7 @@ function SearchPage() {
                     <FilterPanel
                         className="hidden w-80 shrink-0 self-stretch rounded-2xl border border-border bg-surface-inset px-5 py-5 md:my-6 md:flex md:min-h-[calc(100vh-7rem)]"
                         locationSuggestions={locationSuggestions}
+                        activeTab={activeTab}
                     />
 
                     <div className="flex w-full items-start">
@@ -1378,6 +1496,7 @@ function SearchPage() {
                                             showSearch={false}
                                             shareLabel={shareCopied ? m.search.shareCopiedLabel : m.search.shareLabel}
                                             locationSuggestions={locationSuggestions}
+                                            activeTab={activeTab}
                                             onShare={() => {
                                                 void handleShare()
                                             }}
@@ -1391,7 +1510,38 @@ function SearchPage() {
                             <div className="flex flex-wrap items-center justify-between gap-4">
                                 <div>
                                     <h1 className="text-3xl leading-none text-foreground">
-                                        <span className="underline decoration-accent decoration-2 underline-offset-4">{m.search.productionsTab}</span>{' '}
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                navigateWithFilters({
+                                                    tab: 'productions',
+                                                    query: query || undefined,
+                                                    yearFrom: safeFromYear,
+                                                    yearTo: safeToYear,
+                                                    genres: selectedGenres,
+                                                    locations: selectedLocations,
+                                                    sort,
+                                                    limit: pageSize,
+                                                })
+                                            }}
+                                            className={activeTab === 'productions' ? 'underline decoration-accent decoration-2 underline-offset-4' : 'text-muted'}
+                                        >
+                                            {m.search.productionsTab}
+                                        </button>{' '}
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                navigateWithFilters({
+                                                    tab: 'posters',
+                                                    query: query || undefined,
+                                                    sort,
+                                                    limit: pageSize,
+                                                })
+                                            }}
+                                            className={activeTab === 'posters' ? 'underline decoration-accent decoration-2 underline-offset-4' : 'text-muted'}
+                                        >
+                                            {m.search.postersTab}
+                                        </button>{' '}
                                         <span className="text-muted">{m.search.blogTab}</span>
                                     </h1>
                                     <p className="mt-2 text-sm text-muted">
