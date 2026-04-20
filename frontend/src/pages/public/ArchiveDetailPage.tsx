@@ -233,11 +233,11 @@ function ArchiveDetailPageContent() {
                 )}
 
                 {/* Debug / inspection */}
-                <div className="mt-8">
+                {/* <div className="mt-8">
                     <pre className="bg-gray-100 p-4 text-xs overflow-auto">
                         {JSON.stringify(production, null, 2)}
                     </pre>
-                </div>
+                </div> */}
             </div>
         </>
     )
