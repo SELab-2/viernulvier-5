@@ -53,6 +53,7 @@ export const productionLinksSchema = z.object({
     media_gallery: z.string().url().optional().nullable().default('https://example.com/'),
     review_gallery: z.string().url().optional().nullable().default('https://example.com/'),
     poster_gallery: z.string().url().optional().nullable().default('https://example.com/'),
+    poster: z.string().url().optional().nullable().default('https://example.com/'),
     uitdatabank_theme: z.string().url().optional().nullable().default('https://example.com/'),
     uitdatabank_type: z.string().url().optional().nullable().default('https://example.com/'),
 })
@@ -66,6 +67,16 @@ const genreSchema = z.object({
 const tagSchema = z.object({
     id: z.string().uuid().optional(),
 }).passthrough();
+
+const posterResourceSchema = z.object({
+    id: z.string().uuid(),
+    title: z.string(),
+    mime_type: z.string().nullable(),
+    original_filename: z.string().nullable(),
+    file_size_bytes: z.number().int().nullable(),
+    created_at: z.coerce.date(),
+    updated_at: z.coerce.date(),
+})
 
 export const productionSchema = z.object({
     id: z.string().uuid(),
@@ -99,6 +110,8 @@ export const productionSchema = z.object({
     venue_names: z.array(z.string()).optional(),
     production_genres: z.array(z.string()).optional(),
     on_this_day_event_date: z.coerce.date().nullable().optional(),
+    poster: posterResourceSchema.nullable().optional(),
+    poster_file_url: z.string().nullable().optional(),
     media_gallery: gallerySchema.optional(),
     poster_gallery: gallerySchema.optional(),
     genres: z.array(genreSchema).optional(),

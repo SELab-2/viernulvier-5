@@ -96,6 +96,10 @@ export class ProductionsService {
     }
 
     private extractImageUrl(production: any): string | null {
+        if (production?.poster?.id) {
+            return `/api/v1/archive/posters/${production.poster.id}/file`
+        }
+
         const posterItems = Array.isArray(production.poster_gallery?.items) ? production.poster_gallery.items : []
         const mediaItems = Array.isArray(production.media_gallery?.items) ? production.media_gallery.items : []
         const sortedItems = this.sortImageItems([...posterItems, ...mediaItems])
@@ -169,6 +173,18 @@ export class ProductionsService {
     }
 
     private mapProductionResponse(production: any, onThisDayDate?: Date): ProductionResponse {
+        const mappedPoster = production?.poster
+            ? {
+                id: production.poster.id,
+                title: String(production.poster.title ?? ''),
+                mime_type: production.poster.mime_type ?? null,
+                original_filename: production.poster.original_filename ?? null,
+                file_size_bytes: production.poster.file_size_bytes ?? null,
+                created_at: production.poster.created_at,
+                updated_at: production.poster.updated_at,
+            }
+            : null
+
         return {
             ...production,
             image_url: this.extractImageUrl(production),
@@ -176,6 +192,8 @@ export class ProductionsService {
             venue_names: this.extractVenueNames(production),
             production_genres: this.extractProductionGenres(production),
             on_this_day_event_date: this.getOnThisDayEventDate(production, onThisDayDate),
+            poster: mappedPoster,
+            poster_file_url: production?.poster?.id ? `/api/v1/archive/posters/${production.poster.id}/file` : null,
         }
     }
 

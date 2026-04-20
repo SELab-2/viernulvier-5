@@ -402,6 +402,17 @@ export class ProductionsRepository {
                     },
                 },
                 include: {
+                    poster: {
+                        select: {
+                            id: true,
+                            title: true,
+                            mime_type: true,
+                            original_filename: true,
+                            file_size_bytes: true,
+                            created_at: true,
+                            updated_at: true,
+                        },
+                    },
                     poster_gallery: {
                         include: {
                             items: {
@@ -463,6 +474,17 @@ export class ProductionsRepository {
             take: limit,
             orderBy: this.buildOrderBy(sort),
             include: {
+                poster: {
+                    select: {
+                        id: true,
+                        title: true,
+                        mime_type: true,
+                        original_filename: true,
+                        file_size_bytes: true,
+                        created_at: true,
+                        updated_at: true,
+                    },
+                },
                 poster_gallery: {
                     include: {
                         items: {
@@ -525,6 +547,17 @@ export class ProductionsRepository {
         const production = await this.prisma.production.findUnique({
             where: { id },
             include: {
+                poster: {
+                    select: {
+                        id: true,
+                        title: true,
+                        mime_type: true,
+                        original_filename: true,
+                        file_size_bytes: true,
+                        created_at: true,
+                        updated_at: true,
+                    },
+                },
                 events: {
                     include: {
                         hall: {
