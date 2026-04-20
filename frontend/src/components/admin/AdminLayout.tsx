@@ -1,70 +1,56 @@
-import { useMemo, useState } from 'react'
-import { logoutAdmin } from '../../api/adminAuth'
-import { getAdminRouteConfig } from '../../admin/paths'
-import { clearPrimedAdminSession } from '../../auth/primedAdminSession'
-import { getActiveLocale, getMessages, setActiveLocale } from '../../i18n'
-import type { Locale } from '../../i18n/types'
-import type { Theme } from '../shared/TopBarControls'
+import { useCallback, useMemo, useRef, useState } from 'react'
+import { logoutAndRedirect } from '../../auth/adminLogout'
+import { getMessages } from '../../i18n'
 import AdminFooter from './AdminFooter'
 import { AdminMessagesContext } from './AdminMessagesContext'
+import AdminSidebar from './AdminSidebar'
 import AdminTopBar from './AdminTopBar'
+import { useFocusTrap } from './useFocusTrap'
+import { useLocale } from './useLocale'
+import { useTheme } from './useTheme'
 
-interface AdminLayoutProps {
+type AdminLayoutProps = {
   children: React.ReactNode
   showFooter?: boolean
   mainClassName?: string
   showLogout?: boolean
+  userName?: string
+  userRole?: string
+  showSidebar?: boolean
 }
 
 function getMainClassName(mainClassName = ''): string {
-  return mainClassName ? `${mainClassName} flex-1` : 'flex-1'
+  return ['min-w-0', 'flex-1', mainClassName].filter(Boolean).join(' ')
 }
 
-function resolveTheme(): Theme {
-  const explicitTheme = document.documentElement.dataset.theme
-  if (explicitTheme === 'light' || explicitTheme === 'dark') {
-    return explicitTheme
-  }
-
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-}
-
-function getInitialLocale(): Locale {
-  return getActiveLocale(window.location.pathname)
-}
-
-function applyTheme(theme: Theme) {
-  document.documentElement.dataset.theme = theme
-  localStorage.setItem('theme', theme)
-}
-
-async function logoutAndRedirect(hostname: string | undefined): Promise<void> {
-  try {
-    await logoutAdmin()
-  } catch {
-    // Keep logout UX consistent even if the API call fails.
-  } finally {
-    clearPrimedAdminSession()
-    window.location.assign(getAdminRouteConfig(hostname ?? window.location.hostname).loginPath)
-  }
-}
-
-function AdminLayout({ children, showFooter = true, mainClassName, showLogout = true }: AdminLayoutProps) {
-  const [theme, setTheme] = useState<Theme>(resolveTheme)
-  const [locale, setLocale] = useState<Locale>(getInitialLocale)
-
+function AdminLayout({
+  children,
+  showFooter = true,
+  mainClassName = '',
+  showLogout = true,
+  userName = 'Artevelde stagiair',
+  userRole = 'Administrator',
+  showSidebar = false,
+}: AdminLayoutProps) {
+  const { locale, handleLocaleChange } = useLocale()
+  const { theme, handleThemeChange } = useTheme()
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
+  const drawerRef = useRef<HTMLDivElement>(null)
+  const openerRef = useRef<HTMLButtonElement>(null)
   const messages = useMemo(() => getMessages(locale), [locale])
-  const { logoutLabel } = messages.auth
 
-  const handleLocaleChange = (nextLocale: Locale) => {
-    setLocale(nextLocale)
-    setActiveLocale(nextLocale)
-  }
+  const closeMobileSidebar = useCallback(() => {
+    setMobileSidebarOpen(false)
+    openerRef.current?.focus()
+  }, [])
 
-  const handleThemeChange = (nextTheme: Theme) => {
-    setTheme(nextTheme)
-    applyTheme(nextTheme)
-  }
+  useFocusTrap({
+    containerRef: drawerRef,
+    active: mobileSidebarOpen,
+    onDeactivate: closeMobileSidebar,
+  })
+
+  const openMobileSidebar = () => setMobileSidebarOpen(true)
 
   const handleLogoutClick = () => logoutAndRedirect(window.location.hostname)
 
@@ -74,12 +60,48 @@ function AdminLayout({ children, showFooter = true, mainClassName, showLogout = 
         <AdminTopBar
           locale={locale}
           theme={theme}
-          logoutLabel={showLogout ? logoutLabel : undefined}
+          logoutLabel={showLogout ? messages.auth.logoutLabel : undefined}
           onLogout={showLogout ? handleLogoutClick : undefined}
           onToggleLocale={() => handleLocaleChange(locale === 'nl' ? 'en' : 'nl')}
-          onToggleTheme={() => handleThemeChange(theme === 'light' ? 'dark' : 'light')}
+          onSelectTheme={handleThemeChange}
+          showSidebar={showSidebar}
+          onOpenSidebar={showSidebar ? openMobileSidebar : undefined}
+          openerRef={openerRef}
         />
-        <main className={getMainClassName(mainClassName)}>{children}</main>
+
+        <div className={['flex w-full items-stretch flex-1', showSidebar ? 'lg:min-h-[calc(100vh-4.5rem)]' : ''].filter(Boolean).join(' ')}>
+          {showSidebar ? (
+            <div className="hidden lg:flex lg:shrink-0">
+              <AdminSidebar userName={userName} userRole={userRole} />
+            </div>
+          ) : null}
+
+          {showSidebar && mobileSidebarOpen ? (
+            <>
+              <div
+                className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+                aria-hidden="true"
+                onClick={closeMobileSidebar}
+              />
+              <div
+                ref={drawerRef}
+                role="dialog"
+                aria-modal="true"
+                aria-label={messages.admin.navigationDrawerLabel}
+                className="fixed inset-y-0 left-0 z-50 flex lg:hidden"
+              >
+                <AdminSidebar
+                  userName={userName}
+                  userRole={userRole}
+                  onClose={closeMobileSidebar}
+                />
+              </div>
+            </>
+          ) : null}
+
+          <main className={getMainClassName(mainClassName)}>{children}</main>
+        </div>
+
         {showFooter ? <AdminFooter /> : null}
       </div>
     </AdminMessagesContext.Provider>
