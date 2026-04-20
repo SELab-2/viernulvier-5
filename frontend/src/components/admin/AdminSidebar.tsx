@@ -1,40 +1,12 @@
 import { NavLink } from 'react-router-dom'
-import type { Messages } from '../../i18n/types'
 import { useAdminMessages } from './AdminMessagesContext'
-import { getAdminNavigationItems } from './adminNavigation'
-import type { AdminNavItemId } from './adminNavigation'
+import { getAdminNavigationItems, getNavIconAlt, getNavLabel } from './adminNavigation'
 
 type AdminSidebarProps = {
   userName: string
   userRole: string
   onOpenSettings: () => void
   onClose?: () => void
-}
-
-type AdminNavMessages = Messages['admin']['nav']
-
-function getNavLabel(id: AdminNavItemId, nav: AdminNavMessages): string {
-  const labelMap: Record<AdminNavItemId, string> = {
-    dashboard: nav.dashboard,
-    productions: nav.productions,
-    gallery: nav.gallery,
-    organisation: nav.organisation,
-    settings: nav.settings,
-  }
-
-  return labelMap[id]
-}
-
-function getNavIconAlt(id: AdminNavItemId, nav: AdminNavMessages): string {
-  const altMap: Record<AdminNavItemId, string> = {
-    dashboard: nav.dashboardIconAlt,
-    productions: nav.productionsIconAlt,
-    gallery: nav.galleryIconAlt,
-    organisation: nav.organisationIconAlt,
-    settings: nav.settingsIconAlt,
-  }
-
-  return altMap[id]
 }
 
 function SettingsIcon({ className }: { className: string }) {

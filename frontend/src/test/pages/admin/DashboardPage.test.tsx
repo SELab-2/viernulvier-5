@@ -41,6 +41,11 @@ const mockMessages = vi.hoisted(() => ({
       deltaVsLastMonth: 'vs last month',
       statLastSync: 'last sync',
       statSyncPending: 'sync status pending',
+      languageStatusComplete: 'Translation complete',
+      languageStatusAttention: 'Translation needs attention',
+      languageStatusMissing: 'Translation missing',
+      pageSizeLabel: 'Per page',
+      pageSizeAuto: 'Auto',
     },
   },
 }))
@@ -52,7 +57,7 @@ vi.mock('../../../components/admin/AdminLayout', () => ({
   },
 }))
 
-vi.mock('../../../components/admin/useDashboardSummary', () => ({
+vi.mock('../../../components/admin/hooks/useDashboardSummary', () => ({
   useDashboardSummary: (args: { page: number; limit: number }) => useDashboardSummaryMock(args),
 }))
 
@@ -385,6 +390,60 @@ describe('DashboardPage', () => {
     fireEvent.click(page2Button)
 
     expect(useDashboardSummaryMock.mock.calls.some(([args]) => args?.page === 2)).toBe(true)
+  })
+
+  it('changing the page-size selector refetches with the new limit and resets to page 1', () => {
+    useDashboardSummaryMock.mockReturnValue({
+      isLoading: false,
+      error: null,
+      summary: {
+        counts: { productions: 10, events: 5, blogs: 3, mediaItems: 100, editors: 2 },
+        totalRecentItems: 30,
+        lastScrapedAt: null,
+        recentItems: [],
+      },
+    })
+
+    useDashboardSummaryMock.mockClear()
+
+    render(<DashboardPage />)
+
+    const initialCalls = useDashboardSummaryMock.mock.calls.length
+    const select = screen.getByLabelText('Per page') as HTMLSelectElement
+    fireEvent.change(select, { target: { value: '9' } })
+
+    const latestCall = useDashboardSummaryMock.mock.calls.at(-1)?.[0]
+    expect(useDashboardSummaryMock.mock.calls.length).toBeGreaterThan(initialCalls)
+    expect(latestCall).toMatchObject({ page: 1, limit: 9 })
+  })
+
+  it('defaults to Auto mode and picks a limit based on viewport height', () => {
+    const originalInnerHeight = window.innerHeight
+    Object.defineProperty(window, 'innerHeight', { value: 1200, configurable: true, writable: true })
+    window.localStorage.removeItem('admin:dashboard:pageSize')
+
+    useDashboardSummaryMock.mockReturnValue({
+      isLoading: false,
+      error: null,
+      summary: {
+        counts: { productions: 10, events: 5, blogs: 3, mediaItems: 100, editors: 2 },
+        totalRecentItems: 30,
+        lastScrapedAt: null,
+        recentItems: [],
+      },
+    })
+
+    useDashboardSummaryMock.mockClear()
+
+    try {
+      render(<DashboardPage />)
+
+      const firstCall = useDashboardSummaryMock.mock.calls[0]?.[0]
+      expect(firstCall?.limit).toBeGreaterThanOrEqual(9)
+      expect(firstCall?.limit).toBeLessThanOrEqual(18)
+    } finally {
+      Object.defineProperty(window, 'innerHeight', { value: originalInnerHeight, configurable: true, writable: true })
+    }
   })
 
   it('Prev button is disabled on page 1', () => {

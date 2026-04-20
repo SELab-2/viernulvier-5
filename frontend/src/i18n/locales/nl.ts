@@ -223,6 +223,11 @@ const nl: Messages = {
       deltaVsLastMonth: 'vs vorige maand',
       statLastSync: 'laatste sync',
       statSyncPending: 'syncstatus volgt',
+      languageStatusComplete: 'Vertaling volledig',
+      languageStatusAttention: 'Vertaling heeft aandacht nodig',
+      languageStatusMissing: 'Vertaling ontbreekt',
+      pageSizeLabel: 'Per pagina',
+      pageSizeAuto: 'Auto',
     },
     archiveEdit: {
       pageTitle: 'Archief item bewerken',

@@ -1,52 +1,50 @@
 import { useEffect, useState } from 'react'
 import { useAdminMessages } from '../../components/admin/AdminMessagesContext'
 import AdminLayout from '../../components/admin/AdminLayout'
-import { useDashboardSummary } from '../../components/admin/useDashboardSummary'
-import type { Locale } from '../../i18n/types'
+import { buildStatCards, pillClasses } from '../../components/admin/hooks/dashboardStatCards'
+import { useDashboardFormatters } from '../../components/admin/hooks/useDashboardFormatters'
+import { useDashboardSummary } from '../../components/admin/hooks/useDashboardSummary'
+import { usePagination } from '../../components/admin/hooks/usePagination'
 
-const PAGE_SIZE = 3
+const PAGE_SIZE_OPTIONS = [3, 6, 9, 12, 15, 18] as const
+type FixedPageSize = (typeof PAGE_SIZE_OPTIONS)[number]
+type PageSizeSetting = 'auto' | FixedPageSize
+const DEFAULT_PAGE_SIZE_SETTING: PageSizeSetting = 'auto'
+const PAGE_SIZE_STORAGE_KEY = 'admin:dashboard:pageSize'
 
-type DeltaInfo = { changePct: number | null; direction: 'up' | 'down' | 'flat' }
+const ROW_HEIGHT_PX = 72
+const CHROME_HEIGHT_PX = 520
+const MIN_AUTO_ROWS: FixedPageSize = 3
+const MAX_AUTO_ROWS: FixedPageSize = 18
 
-function makeCountFormatter(locale: Locale): Intl.NumberFormat {
-  return new Intl.NumberFormat(locale === 'nl' ? 'nl-BE' : 'en-GB')
-}
-
-function makeSignFormatter(locale: Locale): Intl.NumberFormat {
-  return new Intl.NumberFormat(locale === 'nl' ? 'nl-BE' : 'en-GB', {
-    signDisplay: 'exceptZero',
-    maximumFractionDigits: 0,
-  })
-}
-
-function formatDeltaPill(delta: DeltaInfo | undefined, signFormatter: Intl.NumberFormat): string {
-  if (!delta || delta.changePct === null) {
-    return '—'
+function readStoredPageSize(): PageSizeSetting {
+  if (typeof window === 'undefined') {
+    return DEFAULT_PAGE_SIZE_SETTING
   }
 
-  return signFormatter.format(delta.changePct) + '%'
-}
-
-function pillClasses(delta: DeltaInfo | undefined): string {
-  const direction = delta?.direction ?? 'flat'
-
-  if (direction === 'up') {
-    return 'bg-[#ecfdf5] text-[#10b981]'
+  const raw = window.localStorage.getItem(PAGE_SIZE_STORAGE_KEY)
+  if (raw === 'auto') {
+    return 'auto'
   }
 
-  if (direction === 'down') {
-    return 'bg-[#fef2f2] text-[#ef4444]'
-  }
-
-  return 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+  const parsed = raw === null ? NaN : Number(raw)
+  return (PAGE_SIZE_OPTIONS as readonly number[]).includes(parsed)
+    ? (parsed as FixedPageSize)
+    : DEFAULT_PAGE_SIZE_SETTING
 }
 
-function makeDateFormatter(locale: Locale): Intl.DateTimeFormat {
-  return new Intl.DateTimeFormat(locale === 'nl' ? 'nl-BE' : 'en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  })
+function computeAutoPageSize(viewportHeightPx: number): FixedPageSize {
+  const available = Math.max(0, viewportHeightPx - CHROME_HEIGHT_PX)
+  const rawRows = Math.floor(available / ROW_HEIGHT_PX)
+  const clamped = Math.min(MAX_AUTO_ROWS, Math.max(MIN_AUTO_ROWS, rawRows))
+
+  let best: FixedPageSize = MIN_AUTO_ROWS
+  for (const option of PAGE_SIZE_OPTIONS) {
+    if (option <= clamped) {
+      best = option
+    }
+  }
+  return best
 }
 
 type DashboardPageContentProps = {
@@ -56,93 +54,61 @@ type DashboardPageContentProps = {
 function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
   const messages = useAdminMessages()
   const d = messages.admin.dashboard
+  const [pageSizeSetting, setPageSizeSetting] = useState<PageSizeSetting>(readStoredPageSize)
+  const [autoSize, setAutoSize] = useState<FixedPageSize>(() =>
+    typeof window === 'undefined' ? MIN_AUTO_ROWS : computeAutoPageSize(window.innerHeight),
+  )
   const [page, setPage] = useState(1)
 
-  const { summary, isLoading, error } = useDashboardSummary({ page, limit: PAGE_SIZE })
+  useEffect(() => {
+    if (pageSizeSetting !== 'auto' || typeof window === 'undefined') {
+      return
+    }
+
+    const onResize = () => setAutoSize(computeAutoPageSize(window.innerHeight))
+    onResize()
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [pageSizeSetting])
+
+  const pageSize: FixedPageSize = pageSizeSetting === 'auto' ? autoSize : pageSizeSetting
+
+  const handlePageSizeChange = (nextSetting: PageSizeSetting) => {
+    setPageSizeSetting(nextSetting)
+    setPage(1)
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(PAGE_SIZE_STORAGE_KEY, String(nextSetting))
+    }
+  }
+
+  const { summary, isLoading, error } = useDashboardSummary({ page, limit: pageSize })
 
   useEffect(() => {
     onUserRoleChange(summary ? d.editorsActive(summary.counts.editors) : undefined)
   }, [d, onUserRoleChange, summary])
 
-  const htmlLang = document.documentElement.lang as Locale | undefined
-  const activeLocale: Locale = htmlLang === 'en' ? 'en' : 'nl'
-  const countFormatter = makeCountFormatter(activeLocale)
-  const dateFormatter = makeDateFormatter(activeLocale)
-  const signFormatter = makeSignFormatter(activeLocale)
-
-  function formatCount(value: number): string {
-    return countFormatter.format(value)
-  }
-
-  function formatDate(value: string | null): string {
-    if (!value) {
-      return d.notSyncedYet
-    }
-
-    return dateFormatter.format(new Date(value))
-  }
-
-  const productionsDelta = summary?.deltas?.productions
-  const blogsDelta = summary?.deltas?.blogs
-
-  const stats = [
-    {
-      label: d.statProductions,
-      value: summary ? formatCount(summary.counts.productions) : '—',
-      change: formatDeltaPill(productionsDelta, signFormatter),
-      note: productionsDelta?.changePct !== null && productionsDelta !== undefined ? d.deltaVsLastMonth : null,
-      accent: 'bg-[rgba(236,19,55,0.1)] text-[#ec1337]',
-      pill: pillClasses(productionsDelta),
-      iconSrc: '/admin/dashboard/productions-icon.svg',
-      iconAlt: d.statProductions,
-    },
-    {
-      label: d.statBlogConcepts,
-      value: summary ? formatCount(summary.counts.blogs) : '—',
-      change: formatDeltaPill(blogsDelta, signFormatter),
-      note: blogsDelta?.changePct !== null && blogsDelta !== undefined ? d.deltaVsLastMonth : null,
-      accent: 'bg-[rgba(245,158,11,0.1)] text-[#f59e0b]',
-      pill: pillClasses(blogsDelta),
-      iconSrc: '/admin/dashboard/concepts-icon.svg',
-      iconAlt: d.statBlogConcepts,
-    },
-    {
-      label: d.statVisitors,
-      value: d.visitorsPlaceholder,
-      change: d.visitorsChange,
-      note: d.visitorsNote,
-      accent: 'bg-[rgba(59,130,246,0.1)] text-[#2563eb]',
-      pill: 'bg-[rgba(59,130,246,0.08)] text-[#2563eb] dark:bg-blue-950/50 dark:text-blue-300',
-      iconSrc: '/admin/dashboard/visitors-icon.svg',
-      iconAlt: d.statVisitors,
-    },
-    {
-      label: d.statMediaItems,
-      value: summary ? formatCount(summary.counts.mediaItems) : '—',
-      change: summary?.lastScrapedAt ? formatDate(summary.lastScrapedAt) : d.visitorsChange,
-      note: summary?.lastScrapedAt ? d.statLastSync : d.statSyncPending,
-      accent: 'bg-[rgba(168,85,247,0.1)] text-accent',
-      pill: 'bg-[#ecfdf5] text-[#10b981] dark:bg-emerald-950/50 dark:text-emerald-300',
-      iconSrc: '/admin/dashboard/media-icon.svg',
-      iconAlt: d.statMediaItems,
-    },
-  ]
+  const { formatCount, formatDate, formatDelta } = useDashboardFormatters()
+  const stats = buildStatCards(summary, {
+    formatCount,
+    formatDate,
+    formatDelta,
+    pillClasses,
+    messages: d,
+  })
 
   const recentItems = summary?.recentItems ?? []
   const total = summary?.totalRecentItems ?? 0
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
-  const from = (page - 1) * PAGE_SIZE + 1
-  const to = Math.min(page * PAGE_SIZE, total)
-
-  const windowSize = Math.min(totalPages, 3)
-  const windowStart = Math.min(
-    Math.max(1, page - Math.floor(windowSize / 2)),
-    Math.max(1, totalPages - windowSize + 1),
-  )
-  const visiblePages = Array.from({ length: windowSize }, (_, i) => windowStart + i)
+  const totalPages = Math.max(1, Math.ceil(total / pageSize))
+  const { items: paginationItems, from, to } = usePagination({
+    page,
+    totalPages,
+    siblings: 1,
+    pageSize,
+    totalItems: total,
+  })
 
   return (
-    <section className="mx-auto flex w-full max-w-[960px] flex-col gap-6">
+    <section className="mx-auto flex w-full max-w-[960px] flex-col gap-6 xl:max-w-[1280px] 2xl:max-w-[1536px]">
       <header className="space-y-1">
         <h1 className="text-[2rem] leading-9 font-normal tracking-[-0.05em] text-[#0f172a] dark:text-white">
           {d.pageTitle}
@@ -178,7 +144,7 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
                 <p className="text-sm font-medium text-[#475569] dark:text-slate-400">{card.label}</p>
                 <p className="text-2xl leading-8 font-bold text-[#0f172a] dark:text-white">{isLoading ? '...' : card.value}</p>
               </div>
-              <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${card.accent}`}>
+              <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${card.accent}`}>
                 <img src={card.iconSrc} alt={card.iconAlt} className="h-5 w-5 shrink-0" />
               </div>
             </div>
@@ -263,12 +229,26 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
                             : state === 'attention'
                               ? 'bg-[#f59e0b]'
                               : 'bg-[#cbd5e1]'
+                          const tooltip = state === 'complete'
+                            ? d.languageStatusComplete
+                            : state === 'attention'
+                              ? d.languageStatusAttention
+                              : d.languageStatusMissing
 
                           return (
-                            <div key={loc} className={state === 'missing' ? 'opacity-40' : ''}>
-                              <div>{loc}</div>
-                              <div className={`mt-1 h-2 w-2 rounded-full ${dotClass}`} />
-                            </div>
+                            <span
+                              key={loc}
+                              className={`inline-block cursor-help rounded-sm focus:outline-none focus:ring-2 focus:ring-accent/40 ${state === 'missing' ? 'opacity-40' : ''}`}
+                              title={tooltip}
+                              aria-label={`${loc.toUpperCase()}: ${tooltip}`}
+                              tabIndex={0}
+                            >
+                              <span className="block">{loc}</span>
+                              <span
+                                aria-hidden="true"
+                                className={`mt-1 block h-2 w-2 rounded-full ${dotClass}`}
+                              />
+                            </span>
                           )
                         })}
                       </div>
@@ -293,8 +273,8 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
                     </td>
                   </tr>
                 ) : null}
-                {!isLoading && recentItems.length > 0 && recentItems.length < PAGE_SIZE
-                  ? Array.from({ length: PAGE_SIZE - recentItems.length }).map((_, i) => (
+                {!isLoading && recentItems.length > 0 && recentItems.length < pageSize
+                  ? Array.from({ length: pageSize - recentItems.length }).map((_, i) => (
                       <tr key={`placeholder-${i}`} className="h-[72px] border-t border-slate-100 dark:border-slate-800" aria-hidden>
                         <td colSpan={6} />
                       </tr>
@@ -305,12 +285,33 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
           </div>
         </div>
 
-        <div className="flex items-center justify-between">
-          {!isLoading && total > 0 ? (
-            <p className="text-xs text-slate-500 dark:text-slate-400">{d.paginationShowing(from, to, total)}</p>
-          ) : (
-            <span />
-          )}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-4">
+            {!isLoading && total > 0 ? (
+              <p className="text-xs text-slate-500 dark:text-slate-400">{d.paginationShowing(from, to, total)}</p>
+            ) : null}
+
+            <label className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+              <span>{d.pageSizeLabel}</span>
+              <select
+                value={pageSizeSetting}
+                onChange={(event) => {
+                  const raw = event.target.value
+                  handlePageSizeChange(raw === 'auto' ? 'auto' : (Number(raw) as FixedPageSize))
+                }}
+                className="rounded-md border border-[var(--color-admin-card-border)] bg-white px-2 py-1 text-xs text-[#0f172a] transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-accent/40 dark:bg-[#111318] dark:text-white dark:hover:bg-slate-800"
+              >
+                <option value="auto">
+                  {pageSizeSetting === 'auto' ? `${d.pageSizeAuto} (${autoSize})` : d.pageSizeAuto}
+                </option>
+                {PAGE_SIZE_OPTIONS.map((size) => (
+                  <option key={size} value={size}>
+                    {size}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
 
           <div className="flex items-center gap-2">
             <button
@@ -322,20 +323,35 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
               ‹
             </button>
 
-            {visiblePages.map((p) => (
-              <button
-                key={p}
-                aria-label={String(p)}
-                onClick={() => setPage(p)}
-                className={`flex h-8 w-8 items-center justify-center rounded-md border text-sm transition ${
-                  p === page
-                    ? 'border-accent bg-accent font-semibold text-white'
-                    : 'border-[var(--color-admin-card-border)] bg-white text-[#0f172a] hover:bg-slate-50 dark:bg-[#111318] dark:text-white dark:hover:bg-slate-800'
-                }`}
-              >
-                {p}
-              </button>
-            ))}
+            {paginationItems.map((item, index) => {
+              if (item === 'ellipsis-left' || item === 'ellipsis-right') {
+                return (
+                  <span
+                    key={`${item}-${index}`}
+                    aria-hidden="true"
+                    className="flex h-8 w-8 items-center justify-center text-sm text-slate-400 dark:text-slate-500"
+                  >
+                    …
+                  </span>
+                )
+              }
+
+              return (
+                <button
+                  key={item}
+                  aria-label={String(item)}
+                  aria-current={item === page ? 'page' : undefined}
+                  onClick={() => setPage(item)}
+                  className={`flex h-8 w-8 items-center justify-center rounded-md border text-sm transition ${
+                    item === page
+                      ? 'border-accent bg-accent font-semibold text-white'
+                      : 'border-[var(--color-admin-card-border)] bg-white text-[#0f172a] hover:bg-slate-50 dark:bg-[#111318] dark:text-white dark:hover:bg-slate-800'
+                  }`}
+                >
+                  {item}
+                </button>
+              )
+            })}
 
             <button
               aria-label={d.paginationNext}

@@ -223,6 +223,11 @@ const en: Messages = {
       deltaVsLastMonth: 'vs last month',
       statLastSync: 'last sync',
       statSyncPending: 'sync status pending',
+      languageStatusComplete: 'Translation complete',
+      languageStatusAttention: 'Translation needs attention',
+      languageStatusMissing: 'Translation missing',
+      pageSizeLabel: 'Per page',
+      pageSizeAuto: 'Auto',
     },
     archiveEdit: {
       pageTitle: 'Edit archive item',

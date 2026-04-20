@@ -1,10 +1,10 @@
 import { renderHook, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { useDashboardSummary } from './useDashboardSummary'
+import { useDashboardSummary } from '../../../components/admin/hooks/useDashboardSummary'
 
 const apiGetMock = vi.hoisted(() => vi.fn())
 
-vi.mock('../../api/client', () => ({
+vi.mock('../../../api/client', () => ({
   api: {
     get: apiGetMock,
   },

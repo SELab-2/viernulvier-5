@@ -1,17 +1,16 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import type { SessionUser } from '../../api/adminAuth'
-import { logoutAdmin } from '../../api/adminAuth'
-import { getAdminRouteConfig } from '../../admin/paths'
-import { clearPrimedAdminSession } from '../../auth/primedAdminSession'
+import { logoutAndRedirect } from '../../auth/adminLogout'
 import { useAdminSession } from '../../auth/useAdminSession'
-import { getActiveLocale, getMessages, setActiveLocale } from '../../i18n'
-import type { Locale } from '../../i18n/types'
-import type { Theme } from '../shared/TopBarControls'
+import { getMessages } from '../../i18n'
 import AdminFooter from './AdminFooter'
 import { AdminMessagesContext } from './AdminMessagesContext'
 import AdminSidebar from './AdminSidebar'
 import AdminTopBar from './AdminTopBar'
 import SettingsModal from './SettingsModal'
+import { useFocusTrap } from './useFocusTrap'
+import { useLocale } from './useLocale'
+import { useTheme } from './useTheme'
 
 type AdminLayoutProps = {
   children: React.ReactNode
@@ -23,40 +22,8 @@ type AdminLayoutProps = {
   showSidebar?: boolean
 }
 
-const FOCUSABLE_SELECTOR =
-  'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-
 function getMainClassName(mainClassName = ''): string {
   return ['min-w-0', 'flex-1', mainClassName].filter(Boolean).join(' ')
-}
-
-function getInitialLocale(): Locale {
-  return getActiveLocale(window.location.pathname)
-}
-
-function resolveTheme(): Theme {
-  const explicitTheme = document.documentElement.dataset.theme
-  if (explicitTheme === 'light' || explicitTheme === 'dark') {
-    return explicitTheme
-  }
-
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-}
-
-function applyTheme(theme: Theme) {
-  document.documentElement.dataset.theme = theme
-  localStorage.setItem('theme', theme)
-}
-
-async function logoutAndRedirect(hostname: string | undefined): Promise<void> {
-  try {
-    await logoutAdmin()
-  } catch {
-    // Keep logout UX consistent even if the API call fails.
-  } finally {
-    clearPrimedAdminSession()
-    window.location.assign(getAdminRouteConfig(hostname ?? window.location.hostname).loginPath)
-  }
 }
 
 function AdminLayout({
@@ -68,8 +35,8 @@ function AdminLayout({
   userRole,
   showSidebar = false,
 }: AdminLayoutProps) {
-  const [locale, setLocale] = useState<Locale>(getInitialLocale)
-  const [theme, setTheme] = useState<Theme>(resolveTheme)
+  const { locale, handleLocaleChange } = useLocale()
+  const { theme, handleThemeChange } = useTheme()
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const drawerRef = useRef<HTMLDivElement>(null)
@@ -84,80 +51,18 @@ function AdminLayout({
     setSessionUser(user ?? null)
   }
 
-  const getFocusableElements = useCallback((): HTMLElement[] => {
-    if (!drawerRef.current) {
-      return []
-    }
-
-    return Array.from(drawerRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR))
-  }, [])
-
-  const openMobileSidebar = () => setMobileSidebarOpen(true)
-
   const closeMobileSidebar = useCallback(() => {
     setMobileSidebarOpen(false)
     openerRef.current?.focus()
   }, [])
 
-  useEffect(() => {
-    if (!mobileSidebarOpen) {
-      return
-    }
+  useFocusTrap({
+    containerRef: drawerRef,
+    active: mobileSidebarOpen,
+    onDeactivate: closeMobileSidebar,
+  })
 
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        closeMobileSidebar()
-        return
-      }
-
-      if (event.key !== 'Tab') {
-        return
-      }
-
-      const focusable = getFocusableElements()
-      if (focusable.length === 0) {
-        return
-      }
-
-      const first = focusable[0]
-      const last = focusable[focusable.length - 1]
-
-      if (event.shiftKey) {
-        if (document.activeElement === first) {
-          event.preventDefault()
-          last.focus()
-        }
-        return
-      }
-
-      if (document.activeElement === last) {
-        event.preventDefault()
-        first.focus()
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [mobileSidebarOpen, closeMobileSidebar, getFocusableElements])
-
-  useEffect(() => {
-    if (!mobileSidebarOpen || !drawerRef.current) {
-      return
-    }
-
-    const focusable = drawerRef.current.querySelector<HTMLElement>(FOCUSABLE_SELECTOR)
-    focusable?.focus()
-  }, [mobileSidebarOpen])
-
-  const handleLocaleChange = (nextLocale: Locale) => {
-    setLocale(nextLocale)
-    setActiveLocale(nextLocale)
-  }
-
-  const handleThemeChange = (nextTheme: Theme) => {
-    setTheme(nextTheme)
-    applyTheme(nextTheme)
-  }
+  const openMobileSidebar = () => setMobileSidebarOpen(true)
 
   const handleLogoutClick = () => logoutAndRedirect(window.location.hostname)
   const sidebarUserName = sessionUser?.username ?? userName ?? ''
@@ -173,12 +78,8 @@ function AdminLayout({
           onLogout={showLogout ? handleLogoutClick : undefined}
           onToggleLocale={() => handleLocaleChange(locale === 'nl' ? 'en' : 'nl')}
           onSelectTheme={handleThemeChange}
-          themeToggleDark={messages.admin.themeToggleDark}
-          themeToggleLight={messages.admin.themeToggleLight}
-          localeToggleAriaLabel={messages.admin.localeToggleAriaLabel}
           showSidebar={showSidebar}
           onOpenSidebar={showSidebar ? openMobileSidebar : undefined}
-          openSidebarLabel={messages.admin.openSidebarLabel}
           openerRef={openerRef}
         />
 
