@@ -571,12 +571,13 @@ async function sync_productions(cutoff_timestamp: Date | undefined = undefined) 
       }
 
       // Fetch all required relations in bulk
-      const [galleries, themes, types, keywords, genres] = await Promise.all([
+      const [galleries, themes, types, keywords, genres, tags] = await Promise.all([
         tx.gallery.findMany({ where: { apiId: { in: Array.from(galleryIds) } } }),
         tx.uitdatabank_theme.findMany({ where: { apiId: { in: Array.from(themeIds) } } }),
         tx.uitdatabank_type.findMany({ where: { apiId: { in: Array.from(typeIds) } } }),
         tx.uitdatabank_keyword.findMany({ where: { apiId: { in: Array.from(keywordIds) } } }),
         tx.genre.findMany({ where: { apiId: { in: Array.from(genreIds) } } }),
+        tx.tag.findMany({ where: { apiId: { in: Array.from(genreIds) } } }),
       ]);
 
       // Create lookup maps
@@ -585,6 +586,7 @@ async function sync_productions(cutoff_timestamp: Date | undefined = undefined) 
       const typeMap = new Map(types.map(t => [t.apiId, t.id]));
       const keywordMap = new Map(keywords.map(k => [k.apiId, k.id]));
       const genreMap = new Map(genres.map(g => [g.apiId, g.id]));
+      const tagMap = new Map(tags.map(t => [t.apiId, t.id]));
 
       for (const production of page) {
         const db_production = await tx.production.upsert({
@@ -629,36 +631,43 @@ async function sync_productions(cutoff_timestamp: Date | undefined = undefined) 
           }
         }
 
-        for (const genre of production.genres) {
-          const [db_genre, db_tag] = await Promise.all([
-            tx.genre.findUnique({ where: { apiId: genre } }),
-            tx.tag.findUnique({ where: { apiId: genre } })
-          ]);
-          if (db_genre !== null) {
-            await tx.genre_production.upsert({
-              where: {
-                genre_id_production_id: {
-                  genre_id: db_genre!.id,
+        // Link genres
+        if (production.genres) {
+          for (const genreApiId of production.genres) {
+            const genreId = genreMap.get(genreApiId);
+            const tagId = tagMap.get(genreApiId);
+
+            if (genreId) {
+              await tx.genre_production.upsert({
+                where: {
+                  genre_id_production_id: {
+                    genre_id: genreId,
+                    production_id: db_production.id,
+                  }
+                },
+                update: {}, // exists, no update needed
+                create: {
                   production_id: db_production.id,
                   genre_id: genreId,
                 }
               });
             }
-          }
-          if (db_tag !== null) {
-            await tx.tag_production.upsert({
-              where: {
-                tag_id_production_id: {
-                  tag_id: db_tag!.id,
+
+            if (tagId) {
+              await tx.tag_production.upsert({
+                where: {
+                  tag_id_production_id: {
+                    tag_id: tagId,
+                    production_id: db_production.id,
+                  }
+                },
+                update: {}, // exists, no update needed
+                create: {
                   production_id: db_production.id,
+                  tag_id: tagId,
                 }
-              },
-              update: {}, // if it already exists, you don't need to update it
-              create: {
-                production_id: db_production.id,
-                tag_id: db_tag!.id,
-              }
-            });
+              });
+            }
           }
         }
       }
@@ -683,33 +692,22 @@ async function sync_genres(cutoff_timestamp: Date | undefined = undefined){
     const page = filterByCutoff(rawPage, cutoff_timestamp);
 
     await prisma.$transaction(async (tx) => {
-          for (const genre of page) {
-            if (genre.use_as !== null && genre.use_as.toLowerCase() == "tag") {
-              await tx.tag.upsert({
-                where: {apiId: genre["@id"]},
-                update: mapGenre(genre),
-                create: mapGenre(genre),
-              });
-            } else {
-              await tx.genre.upsert({
-                  where: { apiId: genre["@id"] },
-                  update: mapGenre(genre),
-                  create: mapGenre(genre),
-                })
-            }
-
-          }
+      for (const genre of page) {
+        if (genre.use_as !== null && genre.use_as.toLowerCase() === "tag") {
+          await tx.tag.upsert({
+            where: { apiId: genre["@id"] },
+            update: mapGenre(genre),
+            create: mapGenre(genre),
+          });
+        } else {
+          await tx.genre.upsert({
+            where: { apiId: genre["@id"] },
+            update: mapGenre(genre),
+            create: mapGenre(genre),
+          });
         }
-
-    // await prisma.$transaction(
-    //     page.map(genre =>
-    //         prisma.genre.upsert({
-    //           where: { apiId: genre["@id"] },
-    //           update: mapGenre(genre),
-    //           create: mapGenre(genre),
-    //         })
-    //     )
-    );
+      }
+    });
   }
 
   finishStatus(`\u2705 Completed syncing ${totalProcessed} genres from ${pageCount} pages`);
