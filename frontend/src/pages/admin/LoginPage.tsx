@@ -20,7 +20,7 @@ const LOGIN_ERROR_KEYS = {
 
 type LoginErrorKey = keyof typeof LOGIN_ERROR_KEYS
 
-const adminIconSrc = '/admin-icon.svg'
+const adminIconSrc = '/admin/admin-login-icon.svg'
 
 function mapLoginError(message: string): LoginErrorKey {
   if (message === 'Invalid credentials') {
