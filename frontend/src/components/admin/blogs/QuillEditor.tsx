@@ -98,7 +98,7 @@ function QuillEditor({ value, onChange, onJsonChange, placeholder, onImageUpload
         }
 
         quillRef.current = quill
-    }, [handleImageUpload, onChange, placeholder, value])
+    }, [handleImageUpload, onChange,onJsonChange, placeholder, value])
 
     useEffect(() => {
         const quill = quillRef.current
