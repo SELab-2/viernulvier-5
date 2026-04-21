@@ -39,7 +39,7 @@ export async function main() {
   await Scraper.sync_crops(cutoff_timestamp);
   await Scraper.sync_items(cutoff_timestamp);
   await Scraper.sync_galleries(cutoff_timestamp);
-  await Scraper.sync_genres(cutoff_timestamp);
+  await Scraper.sync_tags(cutoff_timestamp);
   await Scraper.sync_productions(cutoff_timestamp);
   await Scraper.sync_events(cutoff_timestamp);
   await Scraper.sync_event_prices(cutoff_timestamp);
