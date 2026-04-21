@@ -5,14 +5,11 @@ import 'quill/dist/quill.snow.css'
 import { api } from '../../api/client'
 import PublicLayout from '../../components/public/PublicLayout'
 import { getActiveLocale, withLocalePath } from '../../i18n'
+import ProductionCard from '../../components/blogs/ProductionCard'
 import {
     getLocalizedContent,
     getLocalizedTitle,
     hasLocalizedTitle,
-    getProductionDate,
-    getProductionExcerpt,
-    getProductionLabel,
-    getProductionVenue,
     normalizeContent,
     type BlogDetailResponse,
     type BlogDetails,
@@ -160,35 +157,12 @@ function BlogDetailPage() {
                                 {!isLoadingProductions && productions.length > 0 ? (
                                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                                         {productions.map((production) => (
-                                            <Link
+                                            <ProductionCard
                                                 key={production.id}
-                                                to={withLocalePath(`/productions/${production.id}`, locale)}
-                                                className="rounded-xl border border-border bg-background transition hover:border-[var(--color-accent)]/60"
-                                            >
-                                                <article className="flex w-full flex-col p-3">
-                                                    <div className="relative h-24 overflow-hidden rounded-md bg-gradient-to-br from-accent to-accent/50">
-                                                        {production.image_url ? (
-                                                            <img
-                                                                src={production.image_url}
-                                                                alt={getProductionLabel(production, locale)}
-                                                                className="absolute inset-0 h-full w-full object-cover"
-                                                                loading="lazy"
-                                                                referrerPolicy="no-referrer"
-                                                            />
-                                                        ) : null}
-                                                        <div className="absolute inset-0 bg-black/20" />
-                                                    </div>
-
-                                                    <p className="mt-2 text-xs text-text-accent">{getProductionDate(production, locale)}</p>
-                                                    <h3 className="mt-1 line-clamp-2 text-lg leading-tight text-foreground [overflow-wrap:anywhere]">
-                                                        {getProductionLabel(production, locale)}
-                                                    </h3>
-                                                    <p className="mt-1 line-clamp-2 text-sm text-text-accent">{getProductionExcerpt(production, locale)}</p>
-                                                    <p className="mt-2 text-xs font-semibold lowercase tracking-wide text-text-accent">
-                                                        {getProductionVenue(production)}
-                                                    </p>
-                                                </article>
-                                            </Link>
+                                                production={production}
+                                                locale={locale}
+                                                href={withLocalePath(`/productions/${production.id}`, locale)}
+                                            />
                                         ))}
                                     </div>
                                 ) : null}

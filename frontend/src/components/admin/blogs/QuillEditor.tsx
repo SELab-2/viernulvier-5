@@ -19,6 +19,8 @@ const toolbarOptions = [
     ['clean'],
 ]
 
+
+//TODO: we should upload files to the server instead if saving them in the content json
 function fileToDataUrl(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
         const reader = new FileReader()

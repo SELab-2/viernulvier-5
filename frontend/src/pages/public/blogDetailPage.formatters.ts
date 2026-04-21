@@ -1,4 +1,5 @@
 import type { Locale } from '../../i18n/types'
+import type { ProductionCardItem } from '../../components/blogs/ProductionCard'
 
 export type BlogDetails = {
     id: string
@@ -25,24 +26,9 @@ type LocalizedBlogTitle = {
     en?: string | null
 }
 
-type LocalizedText = {
-    nl?: string | null
-    en?: string | null
-    fr?: string | null
-} | null
+type LocalizedText = ProductionCardItem['title']
 
-export type BlogLinkedProduction = {
-    id: string
-    title: LocalizedText
-    description_short?: LocalizedText
-    description?: LocalizedText
-    teaser?: LocalizedText
-    image_url?: string | null
-    created_at?: string
-    venue_name?: string | null
-    venue_names?: string[]
-    attendance_mode?: string | null
-}
+export type BlogLinkedProduction = ProductionCardItem
 
 export type ProductionDetailResponse = {
     data: BlogLinkedProduction
@@ -84,6 +70,10 @@ export function getLocalizedTitle(title: unknown, locale: Locale): string {
     }
 
     return ''
+}
+
+export function getProductionLabel(production: BlogLinkedProduction, locale: Locale): string {
+    return getLocalizedText(production.title, locale) || production.id
 }
 
 // checks wether language exists in Title
@@ -128,10 +118,6 @@ function toPlainText(value: string): string {
         .trim()
 }
 
-export function getProductionLabel(production: BlogLinkedProduction, locale: Locale): string {
-    return getLocalizedText(production.title, locale) || production.id
-}
-
 export function getProductionExcerpt(production: BlogLinkedProduction, locale: Locale): string {
     const raw = getLocalizedText(production.description_short ?? null, locale)
         || getLocalizedText(production.description ?? null, locale)
@@ -149,23 +135,4 @@ export function getProductionVenue(production: BlogLinkedProduction): string {
     }
 
     return production.venue_name?.trim() || production.attendance_mode?.trim() || ''
-}
-
-export function getProductionDate(production: BlogLinkedProduction, locale: Locale): string {
-    if (!production.created_at) {
-        return ''
-    }
-
-    const date = new Date(production.created_at)
-    if (Number.isNaN(date.getTime())) {
-        return ''
-    }
-
-    const dateLocale = locale === 'nl' ? 'nl-BE' : 'en-GB'
-
-    return new Intl.DateTimeFormat(dateLocale, {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-    }).format(date)
 }

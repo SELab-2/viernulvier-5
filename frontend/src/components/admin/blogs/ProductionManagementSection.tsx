@@ -1,24 +1,13 @@
+import { getActiveLocale, getMessages } from '../../../i18n'
+import ProductionCard, { type ProductionCardItem } from '../../blogs/ProductionCard'
 import ProductionPickerPopup from './ProductionPickerPopup'
-import { getMessages } from '../../../i18n'
 
-type LocalizedText = {
-    nl?: string
-    fr?: string
-    en?: string
-} | null
+export type ProductionItem = ProductionCardItem
 
-export type ProductionItem = {
-    id: string
-    title: LocalizedText
-    description_short?: LocalizedText
-    description?: LocalizedText
-    teaser?: LocalizedText
-    image_url?: string | null
-    created_at?: string
-    venue_name?: string | null
-    venue_names?: string[]
-    attendance_mode?: string | null
-}
+
+/*
+This section will display selected productions, is able to remove production and select production (by starting a popup)
+*/
 
 type ProductionManagementSectionProps = {
     selectedProductions: ProductionItem[]
@@ -34,7 +23,6 @@ type ProductionManagementSectionProps = {
     onProductionSearchQueryChange: (query: string) => void
     onAddProduction: () => void
     onRemoveProduction: (productionId: string) => void
-    getProductionLabel: (production: ProductionItem) => string
 }
 
 function ProductionManagementSection({
@@ -51,10 +39,9 @@ function ProductionManagementSection({
     onProductionSearchQueryChange,
     onAddProduction,
     onRemoveProduction,
-    getProductionLabel,
 }: ProductionManagementSectionProps) {
-
-    const messages = getMessages();
+    const locale = getActiveLocale(window.location.pathname)
+    const messages = getMessages(locale)
 
     return (
         <>
@@ -78,41 +65,50 @@ function ProductionManagementSection({
                                     {messages.blogs.manageProductionButton}
                                 </p>
                             ) : (
-                                <ul className="mb-4 space-y-2">
-                                    {selectedProductions.map((production) => (
-                                        <li
-                                            key={production.id}
-                                            className="rounded-lg border border-border px-3 py-2 text-sm text-foreground flex justify-between items-center"
-                                        >
-                                            <span>{getProductionLabel(production)}</span>
-                                            <button
-                                                type="button"
-                                                onClick={() => onRemoveProduction(production.id)}
-                                                aria-label="Verwijder productie"
-                                                className="ml-2 text-muted transition hover:text-red-600"
+                                <div className="mb-4 overflow-x-auto pb-2">
+                                    <ul className="flex min-w-max gap-3">
+                                        {selectedProductions.map((production) => (
+                                            <li
+                                                key={production.id}
+                                                className="list-none shrink-0 w-[320px]"
                                             >
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    width="18"
-                                                    height="18"
-                                                    viewBox="0 0 24 24"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    strokeWidth="2"
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    className="lucide lucide-trash2-icon lucide-trash-2"
-                                                >
-                                                    <path d="M10 11v6" />
-                                                    <path d="M14 11v6" />
-                                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
-                                                    <path d="M3 6h18" />
-                                                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                                                </svg>
-                                            </button>
-                                        </li>
-                                    ))}
-                                </ul>
+                                                <ProductionCard
+                                                    production={production}
+                                                    locale={locale}
+                                                    selected
+                                                    className="overflow-hidden"
+                                                    action={
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => onRemoveProduction(production.id)}
+                                                            aria-label="Verwijder productie"
+                                                            className="rounded-full border border-border bg-background/90 p-2 text-muted transition hover:border-red-500 hover:text-red-600"
+                                                        >
+                                                            <svg
+                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                width="18"
+                                                                height="18"
+                                                                viewBox="0 0 24 24"
+                                                                fill="none"
+                                                                stroke="currentColor"
+                                                                strokeWidth="2"
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                                className="lucide lucide-trash2-icon lucide-trash-2"
+                                                            >
+                                                                <path d="M10 11v6" />
+                                                                <path d="M14 11v6" />
+                                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                                                                <path d="M3 6h18" />
+                                                                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                                            </svg>
+                                                        </button>
+                                                    }
+                                                />
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
                             )}
 
                             {productionsError ? (
@@ -133,7 +129,6 @@ function ProductionManagementSection({
                 onSelect={onSelectProductionToAdd}
                 onSearchQueryChange={onProductionSearchQueryChange}
                 onAdd={onAddProduction}
-                getProductionLabel={getProductionLabel}
             />
         </>
     )
