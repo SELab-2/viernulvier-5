@@ -129,14 +129,9 @@ describe('getPreferredCropUrl', () => {
         expect(getPreferredCropUrl(crops)).toBe('https://example.com/FE3_grid.jpg')
     })
 
-    it('falls back to banner when FE3_header and FE3_grid are missing', () => {
+    it('doesn\'t fall back to anything else when FE3_header and FE3_grid are missing', () => {
         const crops = [makeCrop('cms'), makeCrop('banner')]
-        expect(getPreferredCropUrl(crops)).toBe('https://example.com/banner.jpg')
-    })
-
-    it('falls back to cms when all higher priority crops are missing', () => {
-        const crops = [makeCrop('cms')]
-        expect(getPreferredCropUrl(crops)).toBe('https://example.com/cms.jpg')
+        expect(getPreferredCropUrl(crops)).toBe(null)
     })
 
     it('returns null when no crop matches the fallback order', () => {
@@ -145,7 +140,7 @@ describe('getPreferredCropUrl', () => {
     })
 
     it('respects priority order regardless of array order', () => {
-        const crops = [makeCrop('banner'), makeCrop('FE3_grid'), makeCrop('FE3_header'), makeCrop('cms')]
+        const crops = [makeCrop('banner'),makeCrop('FE3_grid'), makeCrop('FE3_header'), makeCrop('cms')]
         expect(getPreferredCropUrl(crops)).toBe('https://example.com/FE3_header.jpg')
     })
 })
