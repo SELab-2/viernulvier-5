@@ -1,7 +1,7 @@
 import "dotenv/config";
 import axios from "axios";
 import axiosRetry from "axios-retry";
-import { updateStatus } from "./logger";
+import { log, updateStatus } from "./logger";
 
 
 // if we request too fast, for rate limits
@@ -52,50 +52,60 @@ async function fetchInChunks<T>(urls: string[], chunkSize: number): Promise<T[]>
 }
 
 
-async function* fetchPagesFromURL<T = any>(url: string, per_item: boolean=false): AsyncGenerator<{ members: T[], totalItems: number }> {
+async function* fetchPagesFromURL<T = any>(url: string, per_item: boolean=false, cutoff_timestamp?: Date): AsyncGenerator<{ members: T[], totalItems: number }> {
     let currentUrl = url;
-    // Append itemsPerPage to the initial URL if not present, set to API limit of 30
-    if (!currentUrl.includes("itemsPerPage=")) {
-        const separator = currentUrl.includes("?") ? "&" : "?";
-        currentUrl += `${separator}itemsPerPage=30`;
-    }
+    const baseUrl = "https://www.viernulvier.gent";
 
     while (true) {
-        const link = api.replace("{url}", currentUrl);
-        const response = await axios.get(link, { headers: headers });
+        // Build the full URL object
+        const link = currentUrl.startsWith('http') ? currentUrl : `${baseUrl}${currentUrl.startsWith('/') ? '' : '/'}${currentUrl}`;
+        const urlObj = new URL(link);
 
-        
+        // Ensure itemsPerPage is set
+        if (!urlObj.searchParams.has("itemsPerPage")) {
+            urlObj.searchParams.set("itemsPerPage", "30");
+        }
+
+        // Force the date filter if it's missing (helps if view.next doesn't include it)
+        if (cutoff_timestamp && !urlObj.searchParams.has("updated_at[after]")) {
+            urlObj.searchParams.set("updated_at[after]", cutoff_timestamp.toISOString());
+        }
+
+        const finalUrl = urlObj.toString();
+        log(`GET ${finalUrl}`);
+        const response = await axios.get(finalUrl, { headers: headers });
+
         if (response.status !== 200) {
             console.error("Error:", response.status, response.statusText);
             break;
         }
-        
+
         const data = response.data;
-        const totalItems = data["totalItems"] || 0;
-        
-        // If no view, this is a single item response
-        if (data.view === undefined) {
-            yield { members: data.member || [data], totalItems: totalItems || 1 };
+        // Support both hydra-prefixed and non-prefixed keys
+        const totalItems = data["totalItems"] || data["hydra:totalItems"] || 0;
+        const view = data["view"] || data["hydra:view"];
+        const members = data["member"] || data["hydra:member"];
+
+        // If no view, this might be a single item or the last page
+        if (view === undefined) {
+            yield { members: members || [data], totalItems: totalItems || 1 };
             break;
         }
-        
-        const view = data["view"];
-        const members = data["member"];
+
         if (per_item && members && members.length > 0) {
             updateStatus("Network", `Fetching details for ${members.length} items...`);
-            const itemUrls = members.map((m: any) => m["@id"]);
-            // Use a chunk size of 10 for parallel fetching
+            const itemUrls = members.map((m: any) => m["@id"] || m["id"]);
             const return_members = await fetchInChunks<T>(itemUrls, 10);
             yield { members: return_members, totalItems };
         } else {
             yield { members: members || [], totalItems };
         }
-        
-        if (!view || !("next" in view)) {
+
+        if (!view || !("next" in view || "hydra:next" in view)) {
             break;
         }
-        
-        currentUrl = view.next;
+
+        currentUrl = view.next || view["hydra:next"];
     }
 }
 
@@ -103,62 +113,55 @@ async function* fetchPagesFromURL<T = any>(url: string, per_item: boolean=false)
 
 
 // Paginated versions that yield pages one at a time
-export async function* fetchProductionsPages(): AsyncGenerator<{ members: APIProduction[], totalItems: number }> {
-    yield* fetchPagesFromURL<APIProduction>("/api/v1/productions?page=1");
+export async function* fetchProductionsPages(cutoff?: Date): AsyncGenerator<{ members: APIProduction[], totalItems: number }> {
+    yield* fetchPagesFromURL<APIProduction>("/api/v1/productions?page=1", false, cutoff);
 }
 
-export async function* fetchEventsPages(): AsyncGenerator<{ members: APIEvent[], totalItems: number }> {
-    yield* fetchPagesFromURL<APIEvent>("/api/v1/events?page=1");
-    // depending on per page or per item, the 'production' field will have @type and @id or be filled in
+export async function* fetchEventsPages(cutoff?: Date): AsyncGenerator<{ members: APIEvent[], totalItems: number }> {
+    yield* fetchPagesFromURL<APIEvent>("/api/v1/events?page=1", false, cutoff);
 }
 
-export async function* fetchLocationsPages(): AsyncGenerator<{ members: APILocation[], totalItems: number }> {
-    yield* fetchPagesFromURL<APILocation>("/api/v1/locations?page=1");
-    // depending on per page or per item, the 'space' field will have a string or be filled in
+export async function* fetchLocationsPages(cutoff?: Date): AsyncGenerator<{ members: APILocation[], totalItems: number }> {
+    yield* fetchPagesFromURL<APILocation>("/api/v1/locations?page=1", false, cutoff);
 }
 
-export async function* fetchSpacesPages(): AsyncGenerator<{ members: APISpace[], totalItems: number }> {
-    yield* fetchPagesFromURL<APISpace>("/api/v1/spaces?page=1");
-    // depending on per page or per item, the 'location' and 'halls' fields will have a string or be filled in
+export async function* fetchSpacesPages(cutoff?: Date): AsyncGenerator<{ members: APISpace[], totalItems: number }> {
+    yield* fetchPagesFromURL<APISpace>("/api/v1/spaces?page=1", false, cutoff);
 }
 
-export async function* fetchHallsPages(): AsyncGenerator<{ members: APIHall[], totalItems: number }> {
-    yield* fetchPagesFromURL<APIHall>("/api/v1/halls?page=1");
-    // depending on per page or per item, the 'space' field will have a string or be filled in
+export async function* fetchHallsPages(cutoff?: Date): AsyncGenerator<{ members: APIHall[], totalItems: number }> {
+    yield* fetchPagesFromURL<APIHall>("/api/v1/halls?page=1", false, cutoff);
 }
 
-export async function* fetchGenrePages(): AsyncGenerator<{ members: APIGenre[], totalItems: number }> {
-    yield* fetchPagesFromURL<APIGenre>("/api/v1/genres?page=1");
+export async function* fetchGenrePages(cutoff?: Date): AsyncGenerator<{ members: APIGenre[], totalItems: number }> {
+    yield* fetchPagesFromURL<APIGenre>("/api/v1/genres?page=1", false, cutoff);
 
 }
-export async function* fetchGalleryPages(): AsyncGenerator<{ members: APIGallery[], totalItems: number }> {
-    yield* fetchPagesFromURL<APIGallery>("/api/v1/media/galleries?page=1");
-    // depending on per page or per item, the 'items' field will have a string or be filled in
+export async function* fetchGalleryPages(cutoff?: Date): AsyncGenerator<{ members: APIGallery[], totalItems: number }> {
+    yield* fetchPagesFromURL<APIGallery>("/api/v1/media/galleries?page=1", false, cutoff);
 }
 
-export async function* fetchItemPages(): AsyncGenerator<{ members: APIItem[], totalItems: number }> {
-    yield* fetchPagesFromURL<APIItem>("/api/v1/media/items?page=1", true);
-    // depending on per page or per item, the 'crop' field will be absent.
+export async function* fetchItemPages(cutoff?: Date): AsyncGenerator<{ members: APIItem[], totalItems: number }> {
+    yield* fetchPagesFromURL<APIItem>("/api/v1/media/items?page=1", true, cutoff);
 }
 
-export async function* fetchEventPricePages(): AsyncGenerator<{ members: APIEventPrice[], totalItems: number }>{
-    yield* fetchPagesFromURL<APIEventPrice>("/api/v1/events/prices?page=1");
-    // depending on per page or per item, the 'event', 'price', 'rank' fields will have a string or be filled in
+export async function* fetchEventPricePages(cutoff?: Date): AsyncGenerator<{ members: APIEventPrice[], totalItems: number }>{
+    yield* fetchPagesFromURL<APIEventPrice>("/api/v1/events/prices?page=1", false, cutoff);
 }
 
-export async function* fetchCropPages(): AsyncGenerator<{ members: APICrop[], totalItems: number }> {
-    yield* fetchPagesFromURL<APICrop>("/api/v1/media/items/crops?page=1");
+export async function* fetchCropPages(cutoff?: Date): AsyncGenerator<{ members: APICrop[], totalItems: number }> {
+    yield* fetchPagesFromURL<APICrop>("/api/v1/media/items/crops?page=1", false, cutoff);
 }
 
-export async function* fetchUitKeywordPages(): AsyncGenerator<{ members: APIUitKeyword[], totalItems: number }>{
-    yield* fetchPagesFromURL<APIUitKeyword>("/api/v1/uitdatabank/keywords?page=1");
+export async function* fetchUitKeywordPages(cutoff?: Date): AsyncGenerator<{ members: APIUitKeyword[], totalItems: number }>{
+    yield* fetchPagesFromURL<APIUitKeyword>("/api/v1/uitdatabank/keywords?page=1", false, cutoff);
 }
 
-export async function* fetchUitThemePages(): AsyncGenerator<{ members: APIUitTheme[], totalItems: number }>{
-    yield* fetchPagesFromURL<APIUitTheme>("/api/v1/uitdatabank/themes?page=1");
+export async function* fetchUitThemePages(cutoff?: Date): AsyncGenerator<{ members: APIUitTheme[], totalItems: number }>{
+    yield* fetchPagesFromURL<APIUitTheme>("/api/v1/uitdatabank/themes?page=1", false, cutoff);
 }
 
-export async function* fetchUitTypePages(): AsyncGenerator<{ members: APIUitType[], totalItems: number }>{
-    yield* fetchPagesFromURL<APIUitType>("/api/v1/uitdatabank/types?page=1");
+export async function* fetchUitTypePages(cutoff?: Date): AsyncGenerator<{ members: APIUitType[], totalItems: number }>{
+    yield* fetchPagesFromURL<APIUitType>("/api/v1/uitdatabank/types?page=1", false, cutoff);
 }
 
