@@ -18,6 +18,17 @@ export function calculateTotalPages(total: number, limit: number): number {
 }
 
 /**
+ * Clamp a requested page into the available page range.
+ */
+export function sanitizePage(page: number, totalPages: number): number {
+    if (totalPages <= 0) {
+        return 1
+    }
+
+    return Math.min(Math.max(page, 1), totalPages)
+}
+
+/**
  * Builds links for a paginated resource.
  */
 export function buildPaginationLinks(baseUrl: string, page: number, limit: number, totalPages: number) {

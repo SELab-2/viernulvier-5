@@ -4,6 +4,7 @@ import { apiFetch } from '../../api/client'
 import { getActiveLocale, getMessages, withLocalePath } from '../../i18n'
 import type { Locale } from '../../i18n/types'
 import SearchResultCard, { type SearchResultItem } from './search/SearchResultCard'
+import SectionTitle from './SectionTitle'
 
 type LocalizedText = {
     nl?: string
@@ -166,7 +167,6 @@ function PublicCarousel() {
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [mode, setMode] = useState<CarouselMode>('on-this-day')
-    const [activeIndex, setActiveIndex] = useState(0)
     const scrollerRef = useRef<HTMLDivElement | null>(null)
     const referenceDate = useMemo(() => {
         const now = new Date()
@@ -226,7 +226,6 @@ function PublicCarousel() {
                 if (prioritizedOnThisDayItems.length > 0) {
                     setMode('on-this-day')
                     setItems(prioritizedOnThisDayItems)
-                    setActiveIndex(0)
                     return
                 }
 
@@ -234,7 +233,6 @@ function PublicCarousel() {
 
                 setMode('fallback-recent')
                 setItems(prioritizedFallbackItems)
-                setActiveIndex(0)
             } catch {
                 if (abortController.signal.aborted) {
                     return
@@ -244,7 +242,6 @@ function PublicCarousel() {
                     const prioritizedFallbackItems = await loadFallbackItems()
                     setMode('fallback-recent')
                     setItems(prioritizedFallbackItems)
-                    setActiveIndex(0)
                 } catch (fallbackError) {
                     const message = fallbackError instanceof Error ? fallbackError.message : 'Request failed'
                     setError(message)
@@ -265,33 +262,6 @@ function PublicCarousel() {
         }
     }, [locale, referenceDate])
 
-    const handleScroll = () => {
-        const scroller = scrollerRef.current
-        if (!scroller) {
-            return
-        }
-
-        const cards = Array.from(scroller.children) as HTMLElement[]
-        if (cards.length === 0) {
-            setActiveIndex(0)
-            return
-        }
-
-        const currentLeft = scroller.scrollLeft
-        let nearestIndex = 0
-        let nearestDistance = Number.POSITIVE_INFINITY
-
-        cards.forEach((card, index) => {
-            const distance = Math.abs(card.offsetLeft - currentLeft)
-            if (distance < nearestDistance) {
-                nearestDistance = distance
-                nearestIndex = index
-            }
-        })
-
-        setActiveIndex(nearestIndex)
-    }
-
     const scrollByPage = (direction: -1 | 1) => {
         const scroller = scrollerRef.current
         if (!scroller) {
@@ -311,14 +281,11 @@ function PublicCarousel() {
     return (
         <section className="bg-foreground/3 py-16">
             <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="flex flex-wrap items-end justify-between gap-4">
-                    <div>
-                        <h2 className="text-4xl lowercase text-foreground sm:text-5xl">{heading}</h2>
-                        <p className="mt-2 text-lg text-muted">{messages.home.onThisDaySubheading}</p>
-                    </div>
+                <div className="relative flex flex-col items-center sm:block">
+                    <SectionTitle title={heading} subtitle={messages.home.onThisDaySubheading} align="center" />
                     <Link
                         to={withLocalePath('/zoeken', locale)}
-                        className="text-lg font-semibold text-foreground transition-opacity hover:opacity-70"
+                        className="mt-2 text-lg font-semibold text-foreground transition-opacity hover:opacity-70 sm:absolute sm:right-0 sm:top-1/2 sm:-translate-y-1/2 sm:mt-0"
                     >
                         {messages.home.onThisDayViewAll} →
                     </Link>
@@ -332,18 +299,18 @@ function PublicCarousel() {
                     <>
                         <div
                             ref={scrollerRef}
-                            onScroll={handleScroll}
-                            className="mt-8 flex snap-x snap-mandatory gap-6 overflow-x-auto pb-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                            className="mt-8 flex snap-x snap-mandatory gap-6 overflow-x-auto py-6 px-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                         >
                             {items.map((item, index) => (
-                                <div
+                                <Link
+                                    to={withLocalePath(`/archive/${item.id}`, locale)}
                                     key={item.id}
                                     className={`flex w-[280px] shrink-0 snap-start border border-border bg-surface p-4 transition-transform duration-300 hover:rotate-0 hover:shadow-lg sm:w-[310px] ${
                                         index % 2 === 0 ? '-rotate-3' : 'rotate-3'
                                     }`}
                                 >
                                     <SearchResultCard item={item} />
-                                </div>
+                                </Link>
                             ))}
                         </div>
 
@@ -356,9 +323,6 @@ function PublicCarousel() {
                             >
                                 ‹
                             </button>
-                            <p className="text-lg text-foreground">
-                                {Math.min(activeIndex + 1, items.length)} / {items.length}
-                            </p>
                             <button
                                 type="button"
                                 className="h-10 w-10 rounded-full border border-border transition-colors hover:bg-surface"
