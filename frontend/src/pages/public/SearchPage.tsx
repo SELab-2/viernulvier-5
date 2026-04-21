@@ -1207,9 +1207,13 @@ function SearchPage() {
                                 </div>
                             </div>
                         ) : pageItems.length > 0 ? (
-                            <div className="mt-5 grid gap-x-5 gap-y-8 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                            <div className="mt-5 grid items-stretch gap-x-5 gap-y-8 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                                 {pageItems.map((item) => (
-                                    <SearchResultCard key={item.id} item={item} />
+                                    <SearchResultCard
+                                        key={item.id}
+                                        item={item}
+                                        detailHref={withLocalePath(`/archive/${item.id}`, locale)}
+                                    />
                                 ))}
                             </div>
                         ) : (

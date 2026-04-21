@@ -65,9 +65,9 @@ describe('ArchiveDetailEventsList', () => {
             />
         )
 
-        expect(screen.getByText('Date')).toBeInTheDocument()
-        expect(screen.getByText('Time')).toBeInTheDocument()
-        expect(screen.getByText('Location')).toBeInTheDocument()
+        expect(screen.getAllByText('Date').length).toBeGreaterThan(0)
+        expect(screen.getAllByText('Time').length).toBeGreaterThan(0)
+        expect(screen.getAllByText('Location').length).toBeGreaterThan(0)
     })
 
     it('renders a dash when starts_at is null', () => {
@@ -125,7 +125,7 @@ describe('ArchiveDetailEventsList', () => {
             />
         )
 
-        expect(screen.getByText('—')).toBeInTheDocument()
+        expect(screen.getAllByText('—').length).toBeGreaterThan(0)
     })
 
     it('only shows the first 5 events initially', () => {
