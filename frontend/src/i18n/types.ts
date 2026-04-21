@@ -47,6 +47,58 @@ export type Messages = {
       description: string
     }>
   }
+  search: {
+    heading: string
+    subtitle: string
+    productionsTab: string
+    blogTab: string
+    resultsCount: string
+    resultsSuffix: string
+    sortLabel: string
+    sortDefault: string
+    sortRecent: string
+    sortOldest: string
+    shareLabel: string
+    shareCopiedLabel: string
+    filterOpenLabel: string
+    filterCloseLabel: string
+    filterCloseOverlayLabel: string
+    noResults: string
+    loadErrorPrefix: string
+    activeFilterTags: string[]
+    searchPlaceholder: string
+    fallbackUntitled: string
+    fallbackTag: string
+    fallbackVenue: string
+    resultsPerPageAriaLabel: string
+    resultsPerPageSuffix: string
+    loadingStatusLabel: string
+    loadingQuotes: string[]
+    genreLabel: string
+    genres: string[]
+    periodLabel: string
+    periodMin: string
+    periodCurrent: string
+    periodMax: string
+    locationLabel: string
+    locationSearchPlaceholder: string
+    addLocationLabel: string
+    locations: string[]
+    resetFiltersLabel: string
+    paginationPrevious: string
+    paginationNext: string
+    paginationPages: string[]
+    paginationCurrent: string
+    items: Array<{
+      id: string
+      tag: string
+      date: string
+      title: string
+      excerpt: string
+      venue: string
+      imageClassName: string
+    }>
+  }
   auth: {
     localeToggleLabel: string
     darkModeLabel: string
@@ -102,5 +154,68 @@ export type Messages = {
     cookies: string
     disclaimer: string
     rights: string
+  }
+  admin: {
+    themeToggleDark: string
+    themeToggleLight: string
+    localeToggleAriaLabel: string
+    openSidebarLabel: string
+    closeSidebarLabel: string
+    navigationDrawerLabel: string
+    nav: {
+      dashboard: string
+      productions: string
+      gallery: string
+      organisation: string
+      settings: string
+      dashboardIconAlt: string
+      productionsIconAlt: string
+      galleryIconAlt: string
+      organisationIconAlt: string
+      settingsIconAlt: string
+    }
+    dashboard: {
+      pageTitle: string
+      pageSubtitle: string
+      pageNote: string
+      loadingMessage: string
+      recentlyEdited: string
+      tableColTitle: string
+      tableColType: string
+      tableColStatus: string
+      tableColLanguage: string
+      tableColDate: string
+      tableColActions: string
+      statusAvailable: string
+      actionView: string
+      actionEdit: string
+      emptyRecent: string
+      paginationShowing: (from: number, to: number, total: number) => string
+      paginationPrev: string
+      paginationNext: string
+      notSyncedYet: string
+      lastSync: string
+      syncStatusPending: string
+      visitorsPlaceholder: string
+      visitorsNote: string
+      visitorsChange: string
+      editorsActive: (count: number) => string
+      statProductions: string
+      statBlogConcepts: string
+      statVisitors: string
+      statMediaItems: string
+      deltaVsLastMonth: string
+      statLastSync: string
+      statSyncPending: string
+      languageStatusComplete: string
+      languageStatusAttention: string
+      languageStatusMissing: string
+      pageSizeLabel: string
+      pageSizeAuto: string
+    }
+    archiveEdit: {
+      pageTitle: string
+      itemIdLabel: string
+    }
   }
 }
