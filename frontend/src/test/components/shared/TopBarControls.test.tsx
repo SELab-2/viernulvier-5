@@ -39,6 +39,44 @@ describe('TopBarControls', () => {
     expect(onSelectTheme).toHaveBeenCalledWith('light')
   })
 
+  it('passes the explicit theme value — dark button always calls onSelectTheme("dark")', () => {
+    const onSelectTheme = vi.fn()
+
+    render(
+      <SegmentedThemeToggle
+        theme="light"
+        darkLabel="Donkere modus"
+        lightLabel="Lichte modus"
+        onSelectTheme={onSelectTheme}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Donkere modus' }))
+    expect(onSelectTheme).toHaveBeenCalledWith('dark')
+    expect(onSelectTheme).not.toHaveBeenCalledWith('light')
+  })
+
+  it('calling the same segment twice passes the same value both times (idempotent)', () => {
+    const onSelectTheme = vi.fn()
+
+    render(
+      <SegmentedThemeToggle
+        theme="dark"
+        darkLabel="Donkere modus"
+        lightLabel="Lichte modus"
+        onSelectTheme={onSelectTheme}
+      />,
+    )
+
+    const lightButton = screen.getByRole('button', { name: 'Lichte modus' })
+    fireEvent.click(lightButton)
+    fireEvent.click(lightButton)
+
+    expect(onSelectTheme).toHaveBeenCalledTimes(2)
+    expect(onSelectTheme).toHaveBeenNthCalledWith(1, 'light')
+    expect(onSelectTheme).toHaveBeenNthCalledWith(2, 'light')
+  })
+
   it('renders the compact theme control variant', () => {
     const onSelectTheme = vi.fn()
 
