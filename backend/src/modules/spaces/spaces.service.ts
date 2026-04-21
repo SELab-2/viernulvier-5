@@ -1,33 +1,36 @@
 import type { 
-    PaginationQuery, 
-    SpaceListResponse, 
+    SpacePaginationQuery, 
     SpaceResponse,
     CreateSpaceInput,
     UpdateSpaceInput
 } from './spaces.schema.js'
 import { SpacesRepository } from './spaces.repository.js'
+import { PaginatedResult, calculateTotalPages, sanitizePage } from '../../utils/pagination.js'
 
 export class SpacesService {
     constructor(private readonly repository: SpacesRepository) { }
 
-    async getSpaces(options: PaginationQuery): Promise<SpaceListResponse> {
-        const { page, limit, search, lang } = options
+    async getSpaces(options: SpacePaginationQuery): Promise<PaginatedResult<SpaceResponse>> {
+        const { page, limit, locationId, search, lang } = options
 
-        const [data, total] = await Promise.all([
-            this.repository.findAll({ page, limit, search, lang }),
-            this.repository.count({ search, lang }),
-        ])
+        const total = await this.repository.count({ locationId, search, lang })
+        const totalPages = calculateTotalPages(total, limit)
+        const sanitizedPage = sanitizePage(page, totalPages)
 
-        const totalPages = Math.ceil(total / limit)
+        const items = await this.repository.findAll({ 
+            page: sanitizedPage, 
+            limit, 
+            locationId, 
+            search, 
+            lang 
+        })
 
         return {
-            data: data as any,
-            meta: {
-                total,
-                page,
-                limit,
-                totalPages,
-            },
+            items: items as any,
+            total,
+            page: sanitizedPage,
+            limit,
+            totalPages,
         }
     }
 
