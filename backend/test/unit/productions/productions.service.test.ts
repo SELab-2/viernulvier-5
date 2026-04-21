@@ -5,6 +5,8 @@ function createRepositoryMock() {
     return {
         findById: vi.fn(),
         findAll: vi.fn(),
+        findFilteredIds: vi.fn(),
+        findManyByIds: vi.fn(),
         count: vi.fn(),
         findSearchIds: vi.fn(),
         create: vi.fn(),
@@ -77,5 +79,46 @@ describe('ProductionsService image selection', () => {
         const result = await service.getProduction(productionId)
 
         expect(result?.image_url).toBe('https://cdn.example.com/pos1-grid.jpg')
+    })
+
+    it('orchestrates relevance ordering and sanitizes page in the service layer', async () => {
+        repository.findSearchIds.mockResolvedValue(['third', 'first', 'second'])
+        repository.count.mockResolvedValue(2)
+        repository.findFilteredIds.mockResolvedValue(['first', 'third'])
+        repository.findManyByIds.mockResolvedValue([
+            {
+                id: 'first',
+                events: [],
+                genre_production: [],
+                poster_gallery: { items: [] },
+                media_gallery: { items: [] },
+            },
+        ])
+
+        const result = await service.getProductions({
+            page: 5,
+            limit: 1,
+            search: 'festival',
+            sort: 'relevance',
+            lang: 'nl',
+            onThisDay: false,
+        } as any)
+
+        expect(repository.findAll).not.toHaveBeenCalled()
+        expect(repository.findFilteredIds).toHaveBeenCalledWith({
+            search: 'festival',
+            searchIds: ['third', 'first', 'second'],
+            lang: 'nl',
+            genres: undefined,
+            locations: undefined,
+            yearFrom: undefined,
+            yearTo: undefined,
+            onThisDayDate: undefined,
+            rankedIds: ['third', 'first', 'second'],
+        })
+        expect(repository.findManyByIds).toHaveBeenCalledWith(['first'])
+        expect(result.page).toBe(2)
+        expect(result.items).toHaveLength(1)
+        expect(result.items[0]?.id).toBe('first')
     })
 })

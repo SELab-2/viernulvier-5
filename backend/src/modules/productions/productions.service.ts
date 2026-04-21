@@ -5,7 +5,7 @@ import type {
     ProductionResponse,
     CreateProductionInput
 } from './productions.schema.js'
-import { PaginatedResult, calculateTotalPages } from '../../utils/pagination.js'
+import { PaginatedResult, calculateTotalPages, sanitizePage } from '../../utils/pagination.js'
 
 export class ProductionsService {
     constructor(private readonly repository: ProductionsRepository) { }
@@ -226,40 +226,49 @@ export class ProductionsService {
             ? await this.repository.findSearchIds(normalizedSearch, lang ?? 'nl')
             : undefined
 
-        const [items, total] = await Promise.all([
-            this.repository.findAll({
-                page,
-                limit,
-                search: normalizedSearch,
-                searchIds,
-                lang,
-                genres: normalizedGenres,
-                locations: normalizedLocations,
-                yearFrom: safeYearFrom,
-                yearTo: safeYearTo,
-                onThisDayDate,
-                sort,
-            }),
-            this.repository.count({
-                search: normalizedSearch,
-                searchIds,
-                lang,
-                genres: normalizedGenres,
-                locations: normalizedLocations,
-                yearFrom: safeYearFrom,
-                yearTo: safeYearTo,
-                onThisDayDate,
-            }),
-        ])
+        const commonOptions = {
+            search: normalizedSearch,
+            searchIds,
+            lang,
+            genres: normalizedGenres,
+            locations: normalizedLocations,
+            yearFrom: safeYearFrom,
+            yearTo: safeYearTo,
+            onThisDayDate,
+        }
 
+        const total = await this.repository.count(commonOptions)
         const totalPages = calculateTotalPages(total, limit)
+        const sanitizedPage = sanitizePage(page, totalPages)
+
+        let items: Awaited<ReturnType<typeof this.repository.findAll>>
+
+        if (sort === 'relevance' && normalizedSearch && searchIds && searchIds.length > 0) {
+            const skip = (sanitizedPage - 1) * limit
+            const filteredIds = await this.repository.findFilteredIds({
+                ...commonOptions,
+                rankedIds: searchIds,
+            })
+            const filteredIdSet = new Set(filteredIds)
+            const orderedFilteredIds = searchIds.filter((id) => filteredIdSet.has(id))
+            const pagedIds = orderedFilteredIds.slice(skip, skip + limit)
+
+            items = pagedIds.length === 0 ? [] : await this.repository.findManyByIds(pagedIds)
+        } else {
+            items = await this.repository.findAll({
+                ...commonOptions,
+                page: sanitizedPage,
+                limit,
+                sort,
+            })
+        }
 
         return {
             items: items
                 .map((item) => this.mapProductionResponse(item, onThisDayDate))
                 .filter((item) => !onThisDay || item.on_this_day_event_date !== null) as any,
             total,
-            page,
+            page: sanitizedPage,
             limit,
             totalPages,
         }
