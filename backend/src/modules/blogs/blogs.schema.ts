@@ -19,8 +19,9 @@ export const blogLinksSchema = z.object({
 
 export const blogSchema = z.object({
     id: z.string().uuid(),
-    title: z.string().min(1),
-    content: z.string().min(1),
+    title: z.string().nullable().optional(),
+    content: z.unknown().nullable().optional(),
+    productions: z.array(z.string().uuid()),
     createdAt: z.coerce.date().optional(),
     updatedAt: z.coerce.date().optional(),
     links: blogLinksSchema.optional(),
@@ -29,8 +30,17 @@ export const blogSchema = z.object({
 export const blogListSchema = createPaginatedResponseSchema(blogSchema)
 export const singleBlogSchema = createSingleResponseSchema(blogSchema)
 
-export const createBlogSchema = blogSchema.omit({ id: true, createdAt: true, updatedAt: true, links: true })
-export const updateBlogSchema = createBlogSchema.partial()
+export const createBlogSchema = z.object({
+    title: z.string().min(1).optional(),
+    content: z.unknown().optional(),
+    productionIds: z.array(z.string().uuid()),
+})
+
+export const updateBlogSchema = z.object({
+    title: z.string().min(1).optional(),
+    content: z.unknown().optional(),
+    productionIds: z.array(z.string().uuid()).optional(),
+})
 
 export const blogIdSchema = z.object({
     id: z.string().uuid(),

@@ -885,7 +885,6 @@ async function sync_event_prices(cutoff_timestamp: Date | undefined = undefined)
   finishStatus(`\u2705 Completed syncing ${totalProcessed} event_prices from ${pageCount} pages`);
 }
 
-
 async function sync_crops(cutoff_timestamp: Date | undefined = undefined){
   let totalProcessed = 0;
   let pageCount = 0;
