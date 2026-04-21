@@ -7,7 +7,7 @@ import type {
     CreateEventInput,
     EventPriceResponse
 } from './events.schema.js'
-import { PaginatedResult, calculateTotalPages } from '../../utils/pagination.js'
+import { PaginatedResult, calculateTotalPages, sanitizePage } from '../../utils/pagination.js'
 
 export class EventsService {
     constructor(private readonly repository: EventsRepository) { }
@@ -15,17 +15,22 @@ export class EventsService {
     async getEvents(options: EventPaginationQuery): Promise<PaginatedResult<EventResponse>> {
         const { page, limit, productionId, search, lang } = options
 
-        const [items, total] = await Promise.all([
-            this.repository.findAll({ page, limit, productionId, search, lang }),
-            this.repository.count({ productionId, search, lang }),
-        ])
-
+        const total = await this.repository.count({ productionId, search, lang })
         const totalPages = calculateTotalPages(total, limit)
+        const sanitizedPage = sanitizePage(page, totalPages)
+
+        const items = await this.repository.findAll({ 
+            page: sanitizedPage, 
+            limit, 
+            productionId, 
+            search, 
+            lang 
+        })
 
         return {
             items: items as any,
             total,
-            page,
+            page: sanitizedPage,
             limit,
             totalPages,
         }
@@ -34,17 +39,21 @@ export class EventsService {
     async getPrices(options: EventPricePaginationQuery): Promise<PaginatedResult<EventPriceResponse>> {
         const { page, limit, eventId, search } = options
 
-        const [items, total] = await Promise.all([
-            this.repository.findAllPrices({ page, limit, eventId, search }),
-            this.repository.countPrices({ eventId, search }),
-        ])
-
+        const total = await this.repository.countPrices({ eventId, search })
         const totalPages = calculateTotalPages(total, limit)
+        const sanitizedPage = sanitizePage(page, totalPages)
+
+        const items = await this.repository.findAllPrices({ 
+            page: sanitizedPage, 
+            limit, 
+            eventId, 
+            search 
+        })
 
         return {
             items: items as any,
             total,
-            page,
+            page: sanitizedPage,
             limit,
             totalPages,
         }
