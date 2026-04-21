@@ -1,4 +1,4 @@
-import QuillEditor from './QuillEditor'
+import QuillEditor from './blogs/QuillEditor'
 
 type BlogsTabContentProps = {
     titleLabel: string

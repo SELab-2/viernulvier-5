@@ -1,5 +1,5 @@
 import ProductionPickerPopup from './ProductionPickerPopup'
-import { getMessages } from '../../i18n'
+import { getMessages } from '../../../i18n'
 
 type LocalizedText = {
     nl?: string

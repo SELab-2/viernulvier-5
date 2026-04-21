@@ -8,8 +8,9 @@ import SectionHeading from '../../components/admin/SectionHeading'
 import BlogsTab from '../../components/admin/BlogsTab'
 import BlogsTabContent from '../../components/admin/BlogsTabContent'
 import PublicNavbar from '../../components/public/PublicNavbar'
-//import ProductionEditHeader from '../../components/admin/ProductionEditHeader'
-import ProductionManagementSection, { type ProductionItem } from '../../components/admin/ProductionManagementSection'
+
+import EditHeader from '../../components/admin/EditHeader'
+import ProductionManagementSection, { type ProductionItem } from '../../components/admin/blogs/ProductionManagementSection'
 
 import type { Language, BlogContent } from '../../types/blog'
 import type { Locale } from '../../i18n/types'
@@ -360,7 +361,7 @@ function CreateBlogPage() {
     return (
         <>
             <PublicNavbar />
-            <ProductionEditHeader
+            <EditHeader
                 backLabel={messages.production.back}
                 saveAsDraftLabel={messages.production.saveOnDraft}
                 publishLabel={messages.production.publish}

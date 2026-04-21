@@ -281,6 +281,12 @@ const nl: Messages = {
     },
   },
 
+  editHeader: {
+    back: 'Terug',
+    publish: 'Publiceer',
+    saveOnDraft: 'Bewaar als '
+  },
+
   blogs: {
       title: 'titel',
       content: 'content',

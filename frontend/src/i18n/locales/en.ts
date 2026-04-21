@@ -281,6 +281,12 @@ const en: Messages = {
     },
   },
 
+  editHeader: {
+    back: 'Back',
+    publish: 'Publish',
+    saveOnDraft: 'Save as draft'
+  },
+
   blogs: {
       title: 'title',
       content: 'content',

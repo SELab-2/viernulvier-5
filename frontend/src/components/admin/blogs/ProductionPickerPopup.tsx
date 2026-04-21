@@ -1,4 +1,4 @@
-import { getMessages } from '../../i18n'
+import { getMessages } from '../../../i18n'
 
 
 type LocalizedText = {
