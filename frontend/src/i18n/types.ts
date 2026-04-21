@@ -88,17 +88,6 @@ export type Messages = {
     resetFiltersLabel: string
     paginationPrevious: string
     paginationNext: string
-    paginationPages: string[]
-    paginationCurrent: string
-    items: Array<{
-      id: string
-      tag: string
-      date: string
-      title: string
-      excerpt: string
-      venue: string
-      imageClassName: string
-    }>
   }
   auth: {
     loginTitle: string
