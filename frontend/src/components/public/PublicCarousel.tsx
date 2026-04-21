@@ -168,8 +168,12 @@ function PublicCarousel() {
     const [mode, setMode] = useState<CarouselMode>('on-this-day')
     const [activeIndex, setActiveIndex] = useState(0)
     const scrollerRef = useRef<HTMLDivElement | null>(null)
-    // Temporary test setup: force On This Day to January 1.
-    const referenceDate = useMemo(() => `${new Date().getFullYear()}-01-01`, [])
+    const referenceDate = useMemo(() => {
+        const now = new Date()
+        const month = String(now.getMonth() + 1).padStart(2, '0')
+        const day = String(now.getDate()).padStart(2, '0')
+        return `${now.getFullYear()}-${month}-${day}`
+    }, [])
 
     useEffect(() => {
         const abortController = new AbortController()
