@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { api, apiFetch } from '../../api/client'
 import { getMessages } from '../../i18n'
-import Quill from 'quill'
 
 import { useNavigate, useParams } from 'react-router-dom'
 import SectionHeading from '../../components/admin/SectionHeading'
@@ -11,33 +10,16 @@ import PublicNavbar from '../../components/public/PublicNavbar'
 
 import EditHeader from '../../components/admin/EditHeader'
 import ProductionManagementSection, { type ProductionItem } from '../../components/admin/blogs/ProductionManagementSection'
+import {
+    formatBlogDetailForForm,
+    validateBlogPublishInput,
+    type BlogDetailResponse,
+    type ProductionDetailResponse,
+    type ProductionListResponse,
+} from './createBlogPage.formatters'
 
 import type { Language, BlogContent } from '../../types/blog'
 import type { Locale } from '../../i18n/types'
-
-type ProductionListResponse = {
-    data: ProductionItem[]
-}
-
-type Title = {
-    nl: string,
-    en: string
-}
-
-type ProductionDetailResponse = {
-    data: ProductionItem
-}
-
-type BlogDetail = {
-    id: string
-    title?: string | null
-    content?: unknown
-    productions?: string[]
-}
-
-type BlogDetailResponse = {
-    data: BlogDetail
-}
 
 function mergeUniqueProductions(productionList: ProductionItem[]): ProductionItem[] {
     const byId = new Map<string, ProductionItem>()
@@ -48,26 +30,6 @@ function mergeUniqueProductions(productionList: ProductionItem[]): ProductionIte
 
     return Array.from(byId.values())
 }
-
-function getEditorHtml(value: unknown): string {
-    if (!value) {
-        return ''
-    }
-
-    if (typeof value === 'string') {
-        return value
-    }
-
-    if (typeof value === 'object' && value !== null && 'ops' in value) {
-        const container = document.createElement('div')
-        const quill = new Quill(container)
-        quill.setContents(value as never)
-        return quill.root.innerHTML
-    }
-
-    return ''
-}
-
 const defaultForm: BlogContent = {
     nl: { title: '', content: '' },
     en: { title: '', content: '' },
@@ -126,21 +88,9 @@ function CreateBlogPage() {
                     return
                 }
 
-                
-                const localizedTitle = JSON.parse(response.data.title!) as Title
-                const localizedContent = response.data.content as BlogContent
-
-                setForm({
-                    nl: {
-                        title: localizedTitle.nl,
-                        content: getEditorHtml(localizedContent.nl),
-                    },
-                    en: {
-                        title: localizedTitle.en,
-                        content: getEditorHtml(localizedContent.en),
-                    },
-                })
-                setContentJson(localizedContent)
+                const { form: formattedForm, contentJson: formattedContentJson } = formatBlogDetailForForm(response.data)
+                setForm(formattedForm)
+                setContentJson(formattedContentJson)
 
                 setSelectedProductionIds(response.data.productions ?? [])
             } catch (loadError) {
@@ -282,6 +232,19 @@ function CreateBlogPage() {
 
     //TODO: navigate to blog page after succesfull publishing?
     const publish = async () => {
+        const validation = validateBlogPublishInput(form, contentJson)
+        if (validation === 'atLeastOneLanguageRequired') {
+            setError(messages.blogs.noTitleError)
+            setSuccess('')
+            return
+        }
+
+        if (validation === 'filledLanguageNeedsTitle') {
+            setError(messages.blogs.filledLanguageNeedsTitleError)
+            setSuccess('')
+            return
+        }
+
         // Combine all language versions into single JSON content
         const combinedContent = {
             nl: (contentJson.nl ?? form.nl.content) || null,
@@ -291,12 +254,6 @@ function CreateBlogPage() {
         const blogTitle = {
             nl: form.nl.title || null,
             en: form.en.title || null,
-        }
-
-        if (!form.nl.title && !form.en.title) {
-            setError(messages.blogs.noTitleError)
-            setSuccess('')
-            return
         }
 
         setIsSaving(true)
@@ -316,10 +273,10 @@ function CreateBlogPage() {
                     method: 'PATCH',
                     body: JSON.stringify(payload),
                 })
-                setSuccess(`Blog updated successfully. ID: ${response.data.id}`)
+                navigate(`/blogs/${response.data.id}`)
             } else {
                 const response = await api.post<{ data: { id: string } }>('/archive/blogs', payload)
-                setSuccess(`Blog saved successfully. ID: ${response.data.id}`)
+                navigate(`/blogs/${response.data.id}`)
             }
         } catch (saveError) {
             setError(saveError instanceof Error ? saveError.message : 'Failed to save blog.')

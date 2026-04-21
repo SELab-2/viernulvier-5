@@ -210,8 +210,8 @@ export type Messages = {
   }
 
   blogs: {
-    dutchOption:string,
-    englishOption:string,
+    dutchOption:string
+    englishOption:string
     title: string
     content: string
     editBlogTitle: string
@@ -222,6 +222,7 @@ export type Messages = {
     manageProductionButton: string
     savingButton: string
     noTitleError:string
+    filledLanguageNeedsTitleError: string
 
     productionPopUp : {
       title:string
