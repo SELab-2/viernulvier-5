@@ -1,4 +1,8 @@
 import { z } from 'zod'
+import { 
+    createPaginatedResponseSchema, 
+    createSingleResponseSchema
+} from '../../utils/rest-schemas.js'
 
 const localizedTextSchema = z.object({
     nl: z.string().optional(),
@@ -6,12 +10,62 @@ const localizedTextSchema = z.object({
     en: z.string().optional(),
 }).nullable()
 
+const customDataSchema = z.unknown().nullable()
+
+const galleryItemSchema = z.object({
+    id: z.string().uuid(),
+    link: z.unknown().nullable(),
+}).passthrough()
+
+const gallerySchema = z.object({
+    id: z.string().uuid(),
+    items: z.array(galleryItemSchema),
+}).passthrough().nullable()
+
 export const paginationQuerySchema = z.object({
     page: z.coerce.number().int().positive().default(1),
     limit: z.coerce.number().int().positive().max(100).default(20),
     search: z.string().optional(),
+    genres: z.string().optional(),
+    locations: z.string().optional(),
+    yearFrom: z.coerce.number().int().optional(),
+    yearTo: z.coerce.number().int().optional(),
+    onThisDay: z.coerce.boolean().optional().default(false),
+    referenceDate: z
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/)
+        .refine((value) => !Number.isNaN(new Date(`${value}T00:00:00.000Z`).getTime()), {
+            message: 'referenceDate must be a valid YYYY-MM-DD date',
+        })
+        .optional(),
+    sort: z.enum(['relevance', 'recent', 'oldest']).optional().default('relevance'),
     lang: z.string().optional().default('nl'),
 })
+
+/**
+ * Explicit links for the Production resource.
+ */
+export const productionLinksSchema = z.object({
+    self: z.string().url().default('https://example.com/'),
+    events: z.string().url().optional().nullable().default('https://example.com/'),
+    genres: z.string().url().optional().nullable().default('https://example.com/'),
+    tags: z.string().url().optional().nullable().default('https://example.com/'),
+    media_gallery: z.string().url().optional().nullable().default('https://example.com/'),
+    review_gallery: z.string().url().optional().nullable().default('https://example.com/'),
+    poster_gallery: z.string().url().optional().nullable().default('https://example.com/'),
+    uitdatabank_theme: z.string().url().optional().nullable().default('https://example.com/'),
+    uitdatabank_type: z.string().url().optional().nullable().default('https://example.com/'),
+})
+
+
+
+const genreSchema = z.object({
+    id: z.string().uuid().optional(),
+}).passthrough();
+
+const tagSchema = z.object({
+    id: z.string().uuid().optional(),
+}).passthrough();
 
 export const productionSchema = z.object({
     id: z.string().uuid(),
@@ -39,7 +93,16 @@ export const productionSchema = z.object({
     info: localizedTextSchema,
     description_short: localizedTextSchema,
     eticket_info: localizedTextSchema,
-    custom_data: localizedTextSchema,
+    custom_data: customDataSchema,
+    image_url: z.string().nullable().optional(),
+    venue_name: z.string().nullable().optional(),
+    venue_names: z.array(z.string()).optional(),
+    production_genres: z.array(z.string()).optional(),
+    on_this_day_event_date: z.coerce.date().nullable().optional(),
+    media_gallery: gallerySchema.optional(),
+    poster_gallery: gallerySchema.optional(),
+    genres: z.array(genreSchema).optional(),
+    tags: z.array(tagSchema).optional(),
     media_gallery_id: z.string().uuid().nullable(),
     review_gallery_id: z.string().uuid().nullable(),
     poster_gallery_id: z.string().uuid().nullable(),
@@ -47,17 +110,12 @@ export const productionSchema = z.object({
     uitdatabank_type: z.string().uuid().nullable(),
     created_at: z.coerce.date(),
     updated_at: z.coerce.date(),
+    // RESTful links inside the resource
+    links: productionLinksSchema.optional(),
 })
 
-export const productionListSchema = z.object({
-    data: z.array(productionSchema),
-    meta: z.object({
-        total: z.number(),
-        page: z.number(),
-        limit: z.number(),
-        totalPages: z.number(),
-    }),
-})
+export const productionListSchema = createPaginatedResponseSchema(productionSchema)
+export const singleProductionSchema = createSingleResponseSchema(productionSchema)
 
 export const updateProductionSchema = z.object({
     apiId: z.string().nullable().optional(),
@@ -84,7 +142,11 @@ export const updateProductionSchema = z.object({
     info: localizedTextSchema.optional(),
     description_short: localizedTextSchema.optional(),
     eticket_info: localizedTextSchema.optional(),
-    custom_data: localizedTextSchema.optional(),
+    custom_data: customDataSchema.optional(),
+    media_gallery: gallerySchema.optional(),
+    poster_gallery: gallerySchema.optional(),
+    genres: z.array(genreSchema).optional(),
+    tags: z.array(tagSchema).optional(),
     media_gallery_id: z.string().uuid().nullable().optional(),
     review_gallery_id: z.string().uuid().nullable().optional(),
     poster_gallery_id: z.string().uuid().nullable().optional(),

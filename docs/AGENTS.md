@@ -102,7 +102,13 @@ Common backend env vars:
 ### Start local database
 
 ```bash
-docker compose up -d
+docker compose -f docker-compose-db.yml up -d
+```
+
+To start the full Docker stack, use:
+
+```bash
+docker compose up -d --build
 ```
 
 ### Prepare database
