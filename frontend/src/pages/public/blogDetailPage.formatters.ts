@@ -60,15 +60,15 @@ export function parsePossibleJson(value: unknown): unknown {
     }
 }
 
-export function getLocalizedContent(content: unknown, locale: Locale): unknown {
+export function getLocalizedContent(content: unknown, locale: Locale): string|null {
     const parsed = parsePossibleJson(content)
 
     if (typeof parsed === 'object' && parsed !== null && ('nl' in parsed || 'en' in parsed)) {
         const localized = parsed as LocalizedBlogContent
-        return localized[locale] ?? localized.nl ?? localized.en ?? null
+        return localized[locale] as string ?? localized.nl ?? localized.en ?? null
     }
 
-    return parsed
+    return parsed as string
 }
 
 export function getLocalizedTitle(title: unknown, locale: Locale): string {
@@ -84,6 +84,18 @@ export function getLocalizedTitle(title: unknown, locale: Locale): string {
     }
 
     return ''
+}
+
+// checks wether language exists in Title
+export function hasLocalizedTitle(title: unknown, locale: Locale): boolean {
+    const parsed = parsePossibleJson(title)
+
+    if (typeof parsed === 'object' && parsed !== null && ('nl' in parsed || 'en' in parsed)) {
+        const localized = parsed as LocalizedBlogTitle
+        return typeof localized[locale] === 'string' && localized[locale]!.trim().length > 0
+    }
+
+    return typeof parsed === 'string' && parsed.trim().length > 0
 }
 
 export function normalizeContent(content: unknown): QuillDelta | null {

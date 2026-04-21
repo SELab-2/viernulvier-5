@@ -282,12 +282,18 @@ const en: Messages = {
   },
 
   editHeader: {
-    back: 'Back',
+    back: '← Back',
     publish: 'Publish',
     saveOnDraft: 'Save as draft'
   },
 
   blogs: {
+      languageError:'Blog does not exist in this language',
+      detailPageBack:'← Back to Homepage',
+      loadingBlog: 'Loading blog...',
+      loadingProductions: 'Loading productions...',
+      relatedProductions: 'Related productions',
+      untitledBlog: 'Untitled blog',
       dutchOption:'Dutch',
       englishOption:'English',
       title: 'title',
@@ -304,7 +310,7 @@ const en: Messages = {
       deleteConfirm: 'Are you sure you want to delete this blog?',
       deleteError: 'Failed to delete blog.',
       blogNotFound: 'This blog does not exist.',
-      noTitleError: "Please add a title in at least one language before saving.",
+      noTitleError: "Please fill in at least one language before publishing.",
         filledLanguageNeedsTitleError: 'If a language is filled in, it must include a title.',
       productionPopUp: {
           title: 'Choose a production',

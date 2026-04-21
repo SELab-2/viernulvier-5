@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { api, apiFetch } from '../../api/client'
-import { getMessages } from '../../i18n'
+import { getActiveLocale, getMessages } from '../../i18n'
 
 import { useNavigate, useParams } from 'react-router-dom'
 import SectionHeading from '../../components/admin/SectionHeading'
@@ -73,6 +73,7 @@ function CreateBlogPage() {
     const [productionsError, setProductionsError] = useState('')
 
     const navigate = useNavigate()
+    const locale = getActiveLocale(window.location.pathname)
     const messages = getMessages()
 
     const languageOptions: { key: Language; label: string }[] = [
@@ -133,44 +134,63 @@ function CreateBlogPage() {
 
     // Load productions for popup (filtered by query)
     useEffect(() => {
+        const abortController = new AbortController()
+
         const fetchProductions = async () => {
             setIsLoadingProductions(true)
             setProductionsError('')
 
             try {
                 const query = productionSearchQuery.trim()
-                const endpoint = query
-                    ? `/archive/productions?page=1&search=${encodeURIComponent(query)}`
-                    : '/archive/productions?page=1'
+                const params = new URLSearchParams({
+                    page: '1',
+                    limit: '100',
+                    sort: 'relevance',
+                    lang: locale,
+                })
 
-                const response = await api.get<ProductionListResponse>(endpoint)
-                const normalizedQuery = query.toLowerCase()
-                const titleFiltered = normalizedQuery
-                    ? response.data.filter((production) => getProductionLabel(production).toLowerCase().includes(normalizedQuery))
-                    : response.data
+                if (query) {
+                    params.set('search', query)
+                }
 
-                setProductions(mergeUniqueProductions(titleFiltered))
+                const endpoint = `/archive/productions?${params.toString()}`
+
+                const response = await apiFetch<ProductionListResponse>(endpoint, {
+                    signal: abortController.signal,
+                })
+
+                setProductions(mergeUniqueProductions(response.data))
 
                 setProductionToAdd((current) => {
-                    if (titleFiltered.length === 0) {
+                    if (response.data.length === 0) {
                         return ''
                     }
 
-                    if (titleFiltered.some((production) => production.id === current)) {
+                    if (response.data.some((production) => production.id === current)) {
                         return current
                     }
 
-                    return titleFiltered[0].id
+                    return response.data[0].id
                 })
             } catch (loadError) {
+                if (abortController.signal.aborted) {
+                    return
+                }
+
                 setProductionsError(loadError instanceof Error ? loadError.message : 'Failed to load productions.')
             } finally {
-                setIsLoadingProductions(false)
+                if (!abortController.signal.aborted) {
+                    setIsLoadingProductions(false)
+                }
             }
         }
 
         void fetchProductions()
-    }, [productionSearchQuery])
+
+        return () => {
+            abortController.abort()
+        }
+    }, [productionSearchQuery, locale])
 
     useEffect(() => {
         const missingIds = selectedProductionIds.filter((id) => !productions.some((production) => production.id === id))
