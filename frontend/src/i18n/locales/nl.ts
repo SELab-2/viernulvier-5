@@ -300,6 +300,7 @@ const nl: Messages = {
       manageProductionButton: "Nieuwe productie toevoegen",
       savingButton: "Publiceren...",
       noTitleError: "Voeg een titel in ten minste één taal toe voordat u opslaat.",
+        filledLanguageNeedsTitleError: "Als een taal is ingevuld, moet die ook een titel hebben.",
       productionPopUp : {
           title:"Kies een production",
           cancelButton: "Annuleren",

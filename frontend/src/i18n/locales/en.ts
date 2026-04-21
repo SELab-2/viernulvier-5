@@ -300,6 +300,7 @@ const en: Messages = {
       manageProductionButton: 'Add new production',
       savingButton: 'Publishing...',
       noTitleError: "Please add a title in at least one language before saving.",
+        filledLanguageNeedsTitleError: 'If a language is filled in, it must include a title.',
       productionPopUp: {
           title: 'Choose a production',
           cancelButton: 'Cancel',
