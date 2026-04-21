@@ -24,8 +24,8 @@ function getLocalized(obj: any) {
   return obj as { nl: string; en: string; fr: string };
 }
 
-async function* singlePage<T>(data: T[]): AsyncGenerator<T[]> {
-  yield data;
+async function* singlePage<T>(data: T[]): AsyncGenerator<{ members: T[], totalItems: number }> {
+  yield { members: data, totalItems: data.length };
 }
 
 // ------------------------------------------------------------------
@@ -289,8 +289,8 @@ vi.mock('../../../src/scraper/fetcher', () => {
     } as APIUitType,
   ];
 
-  async function* pages<T>(pages: T[][]): AsyncGenerator<T[]> {
-    for (const p of pages) yield p;
+  async function* pages<T>(pageList: T[][]): AsyncGenerator<{ members: T[], totalItems: number }> {
+    for (const p of pageList) yield { members: p, totalItems: p.length };
   }
   return {
     fetchLocationsPages: () => pages([locations]),
