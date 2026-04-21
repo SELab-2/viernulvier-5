@@ -897,7 +897,6 @@ async function sync_crops(cutoff_timestamp: Date | undefined = undefined){
     if (rawPage.length === 0) break;
     const page = filterByCutoff(rawPage, cutoff_timestamp);
 
-
     await prisma.$transaction(
         page.filter(crop => crop.name?.toLowerCase() === "fe3_header" || crop.name?.toLowerCase() == "fe3_boxed")
             .map(crop =>
