@@ -1,22 +1,31 @@
 import { useParams } from 'react-router-dom'
+import { useAdminMessages } from '../../components/admin/AdminMessagesContext'
+import AdminLayout from '../../components/admin/AdminLayout'
+
+function ArchiveEditPageContent() {
+  const { id } = useParams<{ id: string }>()
+  const messages = useAdminMessages()
+  const ae = messages.admin.archiveEdit
+
+  return (
+    <section className="site-container max-w-4xl">
+      <div className="admin-auth-card rounded-[1rem] bg-surface px-8 py-8 max-[640px]:px-5 max-[640px]:py-6">
+        <h1 className="text-3xl font-bold tracking-[-0.04em] text-foreground">{ae.pageTitle}</h1>
+        <p className="mt-3 text-sm leading-6 text-muted">{ae.itemIdLabel} {id}</p>
+      </div>
+    </section>
+  )
+}
 
 /**
  * Admin page for editing an archive item.
  */
 function ArchiveEditPage() {
-    const { id } = useParams<{ id: string }>()
-
-    return (
-        <main className="min-h-screen bg-gray-100">
-            <div className="max-w-4xl mx-auto px-4 py-8">
-                <h1 className="text-3xl font-bold text-gray-900 mb-4">
-                    Archief Item Bewerken
-                </h1>
-                <p className="text-gray-600">Item ID: {id}</p>
-                {/* TODO: Edit form */}
-            </div>
-        </main>
-    )
+  return (
+    <AdminLayout mainClassName="px-4 py-8 lg:px-8 lg:py-8" showSidebar>
+      <ArchiveEditPageContent />
+    </AdminLayout>
+  )
 }
 
 export default ArchiveEditPage

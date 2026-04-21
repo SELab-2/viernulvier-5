@@ -12,12 +12,32 @@ const editorSelect = {
 export class EditorsRepository {
     constructor(private readonly prisma: PrismaClient) { }
 
-    async listEditors() {
+    async listEditors(options: { page: number; limit: number; search?: string }) {
+        const { page, limit, search } = options
+        const skip = (page - 1) * limit
+
+        const where: any = { role: Role.EDITOR }
+        if (search) {
+            where.username = { contains: search, mode: 'insensitive' }
+        }
+
         return this.prisma.adminUser.findMany({
-            where: { role: Role.EDITOR },
+            where,
             select: editorSelect,
+            skip,
+            take: limit,
             orderBy: { username: 'asc' },
         })
+    }
+
+    async countEditors(options: { search?: string }) {
+        const { search } = options
+        const where: any = { role: Role.EDITOR }
+        if (search) {
+            where.username = { contains: search, mode: 'insensitive' }
+        }
+
+        return this.prisma.adminUser.count({ where })
     }
 
     async findEditorById(id: string) {
