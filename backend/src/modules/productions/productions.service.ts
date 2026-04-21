@@ -233,7 +233,7 @@ export class ProductionsService {
             ? await this.repository.findSearchIds(normalizedSearch, lang ?? 'nl')
             : undefined
 
-        const total = await this.repository.count({
+        const commonOptions = {
             search: normalizedSearch,
             searchIds,
             lang,
@@ -242,23 +242,25 @@ export class ProductionsService {
             yearFrom: safeYearFrom,
             yearTo: safeYearTo,
             onThisDayDate,
-        })
+        }
+
+        const total = await this.repository.count(commonOptions)
         const totalPages = calculateTotalPages(total, limit)
         const sanitizedPage = sanitizePage(page, totalPages)
 
-        const items = await this.repository.findAll({
-            page: sanitizedPage,
-            limit,
-            search: normalizedSearch,
-            searchIds,
-            lang,
-            genres: normalizedGenres,
-            locations: normalizedLocations,
-            yearFrom: safeYearFrom,
-            yearTo: safeYearTo,
-            onThisDayDate,
-            sort,
-        })
+        let items: Awaited<ReturnType<typeof this.repository.findAll>>
+
+        if (sort === 'relevance' && normalizedSearch && searchIds && searchIds.length > 0) {
+            const skip = (sanitizedPage - 1) * limit
+            const filteredIds = await this.repository.findFilteredIds({ ...commonOptions, rankedIds: searchIds })
+            const filteredIdSet = new Set(filteredIds)
+            const orderedFilteredIds = searchIds.filter((id) => filteredIdSet.has(id))
+            const pagedIds = orderedFilteredIds.slice(skip, skip + limit)
+
+            items = pagedIds.length === 0 ? [] : await this.repository.findManyByIds(pagedIds)
+        } else {
+            items = await this.repository.findAll({ ...commonOptions, page: sanitizedPage, limit, sort })
+        }
 
         return {
             items: items.map((item) => this.mapProductionResponse(item)) as any,
