@@ -149,13 +149,6 @@ export class TaxonomiesRepository {
     async findTagById(id: string) {
         return this.prisma.tag.findUnique({
             where: { id },
-            include: {
-                tag_production: {
-                    include: {
-                        production: true
-                    }
-                }
-            }
         })
     }
 

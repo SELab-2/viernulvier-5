@@ -145,9 +145,6 @@ export class MediaRepository {
     async findCropById(id: string) {
         return this.prisma.crop.findUnique({
             where: { id },
-            include: {
-                item: true
-            }
         })
     }
 
