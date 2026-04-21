@@ -370,6 +370,71 @@ function useProductionImages(items: ProductionApiItem[]) {
     return images
 }
 
+function useProductionDates(items: ProductionApiItem[], locale: Locale) {
+    const [dates, setDates] = useState<Record<string, string>>({})
+
+    useEffect(() => {
+        const fetchDates = async () => {
+            const itemsToFetch = items.filter(item => item.links?.events)
+            if (itemsToFetch.length === 0) return
+
+            const now = new Date()
+            const results = await Promise.allSettled(
+                itemsToFetch.map(async (item) => {
+                    try {
+                        const eventsPath = getRelativePath(item.links?.events)
+                        if (!eventsPath) return null
+
+                        // Fetch past events (limit 100 to be safe)
+                        const res = await apiFetch<{ data: Array<{ starts_at: string }> }>(`${eventsPath}&limit=100`)
+                        const pastEvents = (res.data || [])
+                            .map(e => new Date(e.starts_at))
+                            .filter(d => d < now)
+                            .sort((a, b) => a.getTime() - b.getTime())
+
+                        if (pastEvents.length === 0) return { id: item.id, displayDate: '' }
+
+                        const formatDateLocal = (date: Date) => {
+                            return new Intl.DateTimeFormat(locale === 'nl' ? 'nl-BE' : 'en-GB', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric',
+                            }).format(date)
+                        }
+
+                        if (pastEvents.length === 1) {
+                            return { id: item.id, displayDate: formatDateLocal(pastEvents[0]) }
+                        }
+
+                        const firstYear = pastEvents[0].getFullYear()
+                        const lastYear = pastEvents[pastEvents.length - 1].getFullYear()
+
+                        if (firstYear === lastYear) {
+                             return { id: item.id, displayDate: `${formatDateLocal(pastEvents[0])} - ${formatDateLocal(pastEvents[pastEvents.length - 1])}` }
+                        }
+                        
+                        return { id: item.id, displayDate: `${firstYear} - ${lastYear}` }
+                    } catch (err) {
+                        return null
+                    }
+                })
+            )
+
+            const newDates: Record<string, string> = {}
+            results.forEach(res => {
+                if (res.status === 'fulfilled' && res.value) {
+                    newDates[res.value.id] = res.value.displayDate
+                }
+            })
+            setDates(prev => ({ ...prev, ...newDates }))
+        }
+
+        fetchDates()
+    }, [items, locale])
+
+    return dates
+}
+
 async function copyCurrentUrl() {
     const currentUrl = window.location.href
 
@@ -878,6 +943,7 @@ function SearchPage() {
     const [apiError, setApiError] = useState<string | null>(null)
 
     const fetchedImages = useProductionImages(apiRawItems)
+    const fetchedDates = useProductionDates(apiRawItems, locale)
 
     const filterState = useMemo(() => parseSearchFilterState(searchParams), [searchParams])
     const query = filterState.query
@@ -895,6 +961,7 @@ function SearchPage() {
         const loadSearchEntries = async () => {
             setIsLoading(true)
             setApiError(null)
+            setApiRawItems([]) // Clear old data
 
             try {
                 const params = new URLSearchParams({
@@ -971,11 +1038,18 @@ function SearchPage() {
 
     const currentPage = Math.min(page, totalPages)
     const pageItems = useMemo(() => {
-        return apiEntries.map(item => ({
-            ...item,
-            imageUrl: fetchedImages[item.id] || item.imageUrl
-        }))
-    }, [apiEntries, fetchedImages])
+        if (!apiEntries) return []
+        return apiEntries
+            .map(item => {
+                const fetchedDate = fetchedDates[item.id]
+                return {
+                    ...item,
+                    imageUrl: fetchedImages[item.id] || item.imageUrl,
+                    date: fetchedDate !== undefined && fetchedDate !== '' ? fetchedDate : item.date
+                }
+            })
+            .filter(item => fetchedDates[item.id] !== '')
+    }, [apiEntries, fetchedImages, fetchedDates])
 
     // Compacte paginering: 1,2,3,...,laatste
     function getCompactPageLabels(current: number, total: number): string[] {

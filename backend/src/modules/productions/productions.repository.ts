@@ -211,6 +211,18 @@ export class ProductionsRepository {
     private async buildWhere(options: CountOptions): Promise<Prisma.productionWhereInput> {
         const { search, searchIds, genres, locations, yearFrom, yearTo, onThisDayDate, lang = 'nl' } = options
         const andFilters: Prisma.productionWhereInput[] = []
+        const now = new Date()
+
+        // Requirement: Only show productions that have at least one event in the past
+        andFilters.push({
+            events: {
+                some: {
+                    starts_at: {
+                        lt: now
+                    }
+                }
+            }
+        })
 
         if (onThisDayDate) {
             const matchingProductionIds = await this.findProductionIdsOnMonthDay(onThisDayDate)
@@ -233,6 +245,7 @@ export class ProductionsRepository {
         }
 
         if (genres && genres.length > 0) {
+            // ... (keep existing genres logic)
             andFilters.push({
                 genre_production: {
                     some: {
@@ -277,6 +290,7 @@ export class ProductionsRepository {
         }
 
         if (locations && locations.length > 0) {
+            // ... (keep existing locations logic)
             andFilters.push({
                 OR: locations.map((location) => ({
                     OR: [
@@ -330,17 +344,27 @@ export class ProductionsRepository {
         }
 
         if (typeof yearFrom === 'number' || typeof yearTo === 'number') {
-            const createdAt: Prisma.DateTimeFilter = {}
+            const eventDateFilter: Prisma.DateTimeFilter = {}
 
             if (typeof yearFrom === 'number') {
-                createdAt.gte = new Date(Date.UTC(yearFrom, 0, 1, 0, 0, 0, 0))
+                eventDateFilter.gte = new Date(Date.UTC(yearFrom, 0, 1, 0, 0, 0, 0))
             }
 
             if (typeof yearTo === 'number') {
-                createdAt.lte = new Date(Date.UTC(yearTo, 11, 31, 23, 59, 59, 999))
+                eventDateFilter.lte = new Date(Date.UTC(yearTo, 11, 31, 23, 59, 59, 999))
             }
 
-            andFilters.push({ created_at: createdAt })
+            // Filter productions where at least one PAST event is within the year range
+            andFilters.push({
+                events: {
+                    some: {
+                        AND: [
+                            { starts_at: { lt: now } },
+                            { starts_at: eventDateFilter }
+                        ]
+                    }
+                }
+            })
         }
 
         return andFilters.length > 0 ? { AND: andFilters } : {}
