@@ -401,54 +401,6 @@ export class ProductionsRepository {
                         in: pagedIds,
                     },
                 },
-                include: {
-                    poster_gallery: {
-                        include: {
-                            items: {
-                                take: 10,
-                                orderBy: { created_at: 'asc' },
-                                include: {
-                                    crops: {
-                                        orderBy: { created_at: 'asc' },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                    media_gallery: {
-                        include: {
-                            items: {
-                                take: 10,
-                                orderBy: { created_at: 'asc' },
-                                include: {
-                                    crops: {
-                                        orderBy: { created_at: 'asc' },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                    events: {
-                        take: 50,
-                        orderBy: { starts_at: 'asc' },
-                        include: {
-                            hall: {
-                                select: {
-                                    name: true,
-                                },
-                            },
-                        },
-                    },
-                    genre_production: {
-                        include: {
-                            genre: {
-                                select: {
-                                    name: true,
-                                },
-                            },
-                        },
-                    },
-                },
             })
 
             const rowsById = new Map(rows.map((item) => [item.id, item]))
@@ -462,54 +414,6 @@ export class ProductionsRepository {
             skip,
             take: limit,
             orderBy: this.buildOrderBy(sort),
-            include: {
-                poster_gallery: {
-                    include: {
-                        items: {
-                            take: 10,
-                            orderBy: { created_at: 'asc' },
-                            include: {
-                                crops: {
-                                    orderBy: { created_at: 'asc' },
-                                },
-                            },
-                        },
-                    },
-                },
-                media_gallery: {
-                    include: {
-                        items: {
-                            take: 10,
-                            orderBy: { created_at: 'asc' },
-                            include: {
-                                crops: {
-                                    orderBy: { created_at: 'asc' },
-                                },
-                            },
-                        },
-                    },
-                },
-                events: {
-                    take: 50,
-                    orderBy: { starts_at: 'asc' },
-                    include: {
-                        hall: {
-                            select: {
-                                name: true,
-                            },
-                        },
-                    },
-                },
-                genre_production: {
-                    include: {
-                        genre: {
-                            select: {
-                                name: true,
-                            },
-                        },
-                    },
-                },
-            },
         })
     }
 
@@ -524,45 +428,6 @@ export class ProductionsRepository {
     async findById(id: string) {
         const production = await this.prisma.production.findUnique({
             where: { id },
-            include: {
-                events: {
-                    include: {
-                        hall: {
-                            select: {
-                                name: true,
-                            },
-                        },
-                    },
-                },
-                genre_production: {
-                    include: {
-                        genre: true
-                    }
-                },
-                poster_gallery: {
-                    include: {
-                        items: {
-                            include: {
-                                crops: true,
-                            },
-                        },
-                    },
-                },
-                media_gallery: {
-                    include: {
-                        items: {
-                            include: {
-                                crops: true,
-                            },
-                        },
-                    },
-                },
-                tag_production: {
-                    include: {
-                        tag: true,
-                    },
-                },
-            }
         });
 
         if (!production) return null;

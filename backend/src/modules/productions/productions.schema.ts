@@ -12,16 +12,6 @@ const localizedTextSchema = z.object({
 
 const customDataSchema = z.unknown().nullable()
 
-const galleryItemSchema = z.object({
-    id: z.string().uuid(),
-    link: z.unknown().nullable(),
-}).passthrough()
-
-const gallerySchema = z.object({
-    id: z.string().uuid(),
-    items: z.array(galleryItemSchema),
-}).passthrough().nullable()
-
 export const paginationQuerySchema = z.object({
     page: z.coerce.number().int().positive().default(1),
     limit: z.coerce.number().int().positive().max(100).default(20),
@@ -59,14 +49,6 @@ export const productionLinksSchema = z.object({
 
 
 
-const genreSchema = z.object({
-    id: z.string().uuid().optional(),
-}).passthrough();
-
-const tagSchema = z.object({
-    id: z.string().uuid().optional(),
-}).passthrough();
-
 export const productionSchema = z.object({
     id: z.string().uuid(),
     apiId: z.string().nullable(),
@@ -94,15 +76,6 @@ export const productionSchema = z.object({
     description_short: localizedTextSchema,
     eticket_info: localizedTextSchema,
     custom_data: customDataSchema,
-    image_url: z.string().nullable().optional(),
-    venue_name: z.string().nullable().optional(),
-    venue_names: z.array(z.string()).optional(),
-    production_genres: z.array(z.string()).optional(),
-    on_this_day_event_date: z.coerce.date().nullable().optional(),
-    media_gallery: gallerySchema.optional(),
-    poster_gallery: gallerySchema.optional(),
-    genres: z.array(genreSchema).optional(),
-    tags: z.array(tagSchema).optional(),
     media_gallery_id: z.string().uuid().nullable(),
     review_gallery_id: z.string().uuid().nullable(),
     poster_gallery_id: z.string().uuid().nullable(),
@@ -143,10 +116,6 @@ export const updateProductionSchema = z.object({
     description_short: localizedTextSchema.optional(),
     eticket_info: localizedTextSchema.optional(),
     custom_data: customDataSchema.optional(),
-    media_gallery: gallerySchema.optional(),
-    poster_gallery: gallerySchema.optional(),
-    genres: z.array(genreSchema).optional(),
-    tags: z.array(tagSchema).optional(),
     media_gallery_id: z.string().uuid().nullable().optional(),
     review_gallery_id: z.string().uuid().nullable().optional(),
     poster_gallery_id: z.string().uuid().nullable().optional(),
