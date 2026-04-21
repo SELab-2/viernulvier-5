@@ -245,47 +245,29 @@ export class ProductionsRepository {
         }
 
         if (genres && genres.length > 0) {
-            // ... (keep existing genres logic)
+            const genreFilters: any[] = []
+            const tagFilters: any[] = []
+
+            for (const genre of genres) {
+                const searchTerms = this.expandGenreTerms(genre)
+                const languages = Array.from(new Set([lang, 'nl', 'en', 'fr'])).filter(Boolean) as string[]
+
+                for (const term of searchTerms) {
+                    for (const l of languages) {
+                        genreFilters.push({ genre: { name: { path: [l], string_contains: term, mode: 'insensitive' } } })
+                        genreFilters.push({ genre: { slug: { path: [l], string_contains: term, mode: 'insensitive' } } })
+                        
+                        tagFilters.push({ tag: { name: { path: [l], string_contains: term, mode: 'insensitive' } } })
+                        tagFilters.push({ tag: { slug: { path: [l], string_contains: term, mode: 'insensitive' } } })
+                    }
+                }
+            }
+
             andFilters.push({
-                genre_production: {
-                    some: {
-                        genre: {
-                            OR: genres.flatMap((genre) => {
-                                const searchTerms = this.expandGenreTerms(genre)
-                                return searchTerms.flatMap((term) => [
-                                    {
-                                        name: {
-                                            path: [lang],
-                                            string_contains: term,
-                                            mode: 'insensitive' as const,
-                                        },
-                                    },
-                                    {
-                                        name: {
-                                            path: ['nl'],
-                                            string_contains: term,
-                                            mode: 'insensitive' as const,
-                                        },
-                                    },
-                                    {
-                                        name: {
-                                            path: ['en'],
-                                            string_contains: term,
-                                            mode: 'insensitive' as const,
-                                        },
-                                    },
-                                    {
-                                        name: {
-                                            path: ['fr'],
-                                            string_contains: term,
-                                            mode: 'insensitive' as const,
-                                        },
-                                    },
-                                ])
-                            }),
-                        },
-                    },
-                },
+                OR: [
+                    { genre_production: { some: { OR: genreFilters } } },
+                    { tag_production: { some: { OR: tagFilters } } }
+                ]
             })
         }
 

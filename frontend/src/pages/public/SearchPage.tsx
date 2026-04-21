@@ -435,6 +435,61 @@ function useProductionDates(items: ProductionApiItem[], locale: Locale) {
     return dates
 }
 
+function useProductionTaxonomies(items: ProductionApiItem[], locale: Locale) {
+    const [taxonomies, setTaxonomies] = useState<Record<string, string>>({})
+
+    useEffect(() => {
+        const fetchTaxonomies = async () => {
+            const itemsToFetch = items.filter(item => item.links?.genres || item.links?.tags)
+            if (itemsToFetch.length === 0) return
+
+            const results = await Promise.allSettled(
+                itemsToFetch.map(async (item) => {
+                    try {
+                        // 1. Try Genres
+                        const genresPath = getRelativePath(item.links?.genres)
+                        if (genresPath) {
+                            const res = await apiFetch<{ data: Array<{ slug: LocalizedText, name: LocalizedText }> }>(genresPath)
+                            const firstGenre = res.data?.[0]
+                            if (firstGenre) {
+                                const label = getLocalizedText(firstGenre.slug, locale) || getLocalizedText(firstGenre.name, locale)
+                                if (label) return { id: item.id, label }
+                            }
+                        }
+
+                        // 2. Fallback to Tags
+                        const tagsPath = getRelativePath(item.links?.tags)
+                        if (tagsPath) {
+                            const res = await apiFetch<{ data: Array<{ slug: LocalizedText, name: LocalizedText }> }>(tagsPath)
+                            const firstTag = res.data?.[0]
+                            if (firstTag) {
+                                const label = getLocalizedText(firstTag.slug, locale) || getLocalizedText(firstTag.name, locale)
+                                if (label) return { id: item.id, label }
+                            }
+                        }
+
+                        return { id: item.id, label: '' }
+                    } catch (err) {
+                        return null
+                    }
+                })
+            )
+
+            const newTaxonomies: Record<string, string> = {}
+            results.forEach(res => {
+                if (res.status === 'fulfilled' && res.value) {
+                    newTaxonomies[res.value.id] = res.value.label
+                }
+            })
+            setTaxonomies(prev => ({ ...prev, ...newTaxonomies }))
+        }
+
+        fetchTaxonomies()
+    }, [items, locale])
+
+    return taxonomies
+}
+
 async function copyCurrentUrl() {
     const currentUrl = window.location.href
 
@@ -944,6 +999,7 @@ function SearchPage() {
 
     const fetchedImages = useProductionImages(apiRawItems)
     const fetchedDates = useProductionDates(apiRawItems, locale)
+    const fetchedTaxonomies = useProductionTaxonomies(apiRawItems, locale)
 
     const filterState = useMemo(() => parseSearchFilterState(searchParams), [searchParams])
     const query = filterState.query
@@ -1042,14 +1098,16 @@ function SearchPage() {
         return apiEntries
             .map(item => {
                 const fetchedDate = fetchedDates[item.id]
+                const fetchedTaxonomy = fetchedTaxonomies[item.id]
                 return {
                     ...item,
                     imageUrl: fetchedImages[item.id] || item.imageUrl,
-                    date: fetchedDate !== undefined && fetchedDate !== '' ? fetchedDate : item.date
+                    date: fetchedDate !== undefined && fetchedDate !== '' ? fetchedDate : item.date,
+                    tag: fetchedTaxonomy !== undefined && fetchedTaxonomy !== '' ? fetchedTaxonomy : item.tag
                 }
             })
             .filter(item => fetchedDates[item.id] !== '')
-    }, [apiEntries, fetchedImages, fetchedDates])
+    }, [apiEntries, fetchedImages, fetchedDates, fetchedTaxonomies])
 
     // Compacte paginering: 1,2,3,...,laatste
     function getCompactPageLabels(current: number, total: number): string[] {
