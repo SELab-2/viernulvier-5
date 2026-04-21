@@ -215,6 +215,8 @@ export type Messages = {
   }
 
   blogs: {
+    dutchOption:string,
+    englishOption:string,
     title: string
     content: string
     editBlogTitle: string

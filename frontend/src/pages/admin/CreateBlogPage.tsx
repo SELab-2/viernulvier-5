@@ -102,8 +102,8 @@ function CreateBlogPage() {
     const messages = getMessages()
 
     const languageOptions: { key: Language; label: string }[] = [
-        { key: 'nl', label: messages.production.dutchOption },
-        { key: 'en', label: messages.production.englishOption },
+        { key: 'nl', label: messages.blogs.dutchOption },
+        { key: 'en', label: messages.blogs.englishOption },
     ]
 
     useEffect(() => {
@@ -362,9 +362,9 @@ function CreateBlogPage() {
         <>
             <PublicNavbar />
             <EditHeader
-                backLabel={messages.production.back}
-                saveAsDraftLabel={messages.production.saveOnDraft}
-                publishLabel={messages.production.publish}
+                backLabel={messages.editHeader.back}
+                saveAsDraftLabel={messages.editHeader.saveOnDraft}
+                publishLabel={messages.editHeader.publish}
                 back={back}
                 saveAsDraft={saveAsDraft}
                 publish={publish}   
@@ -419,7 +419,7 @@ function CreateBlogPage() {
                             disabled={isSaving || isLoadingBlog}
                             className="rounded-lg bg-[var(--color-accent)] px-5 py-3 font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                            {isSaving ? (messages.blogs.savingButton) : (messages.production.publish)}
+                            {isSaving ? (messages.blogs.savingButton) : (messages.editHeader.publish)}
                         </button>
 
                         {error ? <p className="text-sm text-red-500">{error}</p> : null}

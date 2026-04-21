@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react'
 import Quill from 'quill'
 import 'quill/dist/quill.snow.css'
-import './QuillEditor.css'
+import '../../../styles/QuillEditor.css'
 
 type QuillEditorProps = {
     value: string
