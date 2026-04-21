@@ -207,4 +207,26 @@ export type Messages = {
       itemIdLabel: string
     }
   }
+
+  blogs: {
+    title: string
+    content: string
+    editBlogTitle: string
+    editBlogDescription: string
+    createBlogTitle: string
+    createBlogDescription: string
+    manageProduction: string
+    manageProductionButton: string
+    savingButton: string
+    noTitleError:string
+
+    productionPopUp : {
+      title:string
+      cancelButton: string
+      addButton: string
+      close: string
+      queryHint: string
+      noProductionFound:string
+    }
+  }
 }
