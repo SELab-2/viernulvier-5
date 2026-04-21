@@ -228,6 +228,27 @@ const en: Messages = {
       itemIdLabel: 'Item ID:',
     },
   },
+
+  blogs: {
+      title: 'title',
+      content: 'content',
+      editBlogTitle: 'Edit blog',
+      editBlogDescription: 'Edit an existing blog',
+      createBlogTitle: 'Create blog',
+      createBlogDescription: 'Create a new blog',
+      manageProduction: 'Manage productions',
+      manageProductionButton: 'Add new production',
+      savingButton: 'Publishing...',
+      noTitleError: "Please add a title in at least one language before saving.",
+      productionPopUp: {
+          title: 'Choose a production',
+          cancelButton: 'Cancel',
+          addButton: 'Add',
+          close: 'Close',
+          queryHint: 'Search production',
+          noProductionFound: 'No production found'
+      },
+  },
 }
 
 export default en

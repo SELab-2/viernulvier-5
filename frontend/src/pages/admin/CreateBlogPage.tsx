@@ -388,8 +388,8 @@ function CreateBlogPage() {
                 changeTitle={changeTitle}
                 changeContent={changeContent}
                 onJsonChange={handleJsonChange}
-                titleLabel={messages.production.title}
-                contentLabel={messages.production.content}
+                titleLabel={messages.blogs.title}
+                contentLabel={messages.blogs.content}
             />
 
             <ProductionManagementSection

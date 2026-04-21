@@ -228,6 +228,27 @@ const nl: Messages = {
       itemIdLabel: 'Item-ID:',
     },
   },
+
+  blogs: {
+      title: 'titel',
+      content: 'content',
+      editBlogTitle: "Bewerk blog",
+      editBlogDescription: "Bewerk een bestaande blog",
+      createBlogTitle: "Creëer blog",
+      createBlogDescription: "Creëer een nieuwe blog",
+      manageProduction: "Producties beheren",
+      manageProductionButton: "Nieuwe productie toevoegen",
+      savingButton: "Publiceren...",
+      noTitleError: "Voeg een titel in ten minste één taal toe voordat u opslaat.",
+      productionPopUp : {
+          title:"Kies een production",
+          cancelButton: "Annuleren",
+          addButton: "Toevoegen",
+          close: "Sluiten",
+          queryHint: "Zoek productie",
+          noProductionFound: "Geen producties beschikbaar"
+      }
+  }
 }
 
 export default nl
