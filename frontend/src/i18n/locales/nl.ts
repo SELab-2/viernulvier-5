@@ -231,11 +231,13 @@ const nl: Messages = {
 
   editHeader: {
     back: 'Terug',
-    publish: 'Publiceer',
-    saveOnDraft: 'Bewaar als '
+    publish: 'Publiceren',
+    saveOnDraft: 'Opslaan als draft'
   },
 
   blogs: {
+      dutchOption:'Nederlands',
+      englishOption:'Engels',
       title: 'titel',
       content: 'content',
       editBlogTitle: "Bewerk blog",

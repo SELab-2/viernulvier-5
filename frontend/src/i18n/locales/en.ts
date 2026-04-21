@@ -236,6 +236,8 @@ const en: Messages = {
   },
 
   blogs: {
+      dutchOption:'Dutch',
+      englishOption:'English',
       title: 'title',
       content: 'content',
       editBlogTitle: 'Edit blog',
