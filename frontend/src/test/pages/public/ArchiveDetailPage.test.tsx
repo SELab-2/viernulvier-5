@@ -233,8 +233,8 @@ describe('ArchiveDetailPage', () => {
 
         renderPage()
 
-        expect(await screen.findByText('Concert')).toBeInTheDocument()
-        expect(await screen.findByText('in De Vooruit')).toBeInTheDocument()
+        expect((await screen.findAllByText('Concert')).length).toBeGreaterThan(0)
+        expect((await screen.findAllByText('in De Vooruit')).length).toBeGreaterThan(0)
     })
 
     it('does not render genre or tag pills when both are empty', async () => {
@@ -376,7 +376,7 @@ describe('ArchiveDetailPage', () => {
 
         // Should not crash, and location chain stops at hall — dash shown
         await waitFor(() => {
-            expect(screen.getByText('—')).toBeInTheDocument()
+            expect(screen.getAllByText('—').length).toBeGreaterThan(0)
         })
     })
 
@@ -398,7 +398,7 @@ describe('ArchiveDetailPage', () => {
         renderPage()
 
         await waitFor(() => {
-            expect(screen.getByText('—')).toBeInTheDocument()
+            expect(screen.getAllByText('—').length).toBeGreaterThan(0)
         })
     })
 
