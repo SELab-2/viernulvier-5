@@ -5,84 +5,21 @@ import 'quill/dist/quill.snow.css'
 import { api } from '../../api/client'
 import PublicLayout from '../../components/public/PublicLayout'
 import { getActiveLocale, withLocalePath } from '../../i18n'
-
-type BlogDetails = {
-    id: string
-    title?: string | null
-    content?: unknown
-}
-
-type BlogDetailResponse = {
-    data: BlogDetails
-}
-
-type QuillDelta = {
-    ops: Array<Record<string, unknown>>
-}
+import {
+    getLocalizedContent,
+    getLocalizedTitle,
+    getProductionDate,
+    getProductionExcerpt,
+    getProductionLabel,
+    getProductionVenue,
+    normalizeContent,
+    type BlogDetailResponse,
+    type BlogDetails,
+    type BlogLinkedProduction,
+    type ProductionDetailResponse,
+} from './blogDetailPage.formatters'
 
 type QuillSetContentsArg = Parameters<Quill['setContents']>[0]
-
-type LocalizedBlogContent = {
-    nl?: unknown
-    en?: unknown
-}
-
-type LocalizedBlogTitle = {
-    nl?: string | null
-    en?: string | null
-}
-
-function parsePossibleJson(value: unknown): unknown {
-    if (typeof value !== 'string') {
-        return value
-    }
-
-    try {
-        return JSON.parse(value) as unknown
-    } catch {
-        return value
-    }
-}
-
-function getLocalizedContent(content: unknown, locale: 'nl' | 'en'): unknown {
-    const parsed = parsePossibleJson(content)
-
-    if (typeof parsed === 'object' && parsed !== null && ('nl' in parsed || 'en' in parsed)) {
-        const localized = parsed as LocalizedBlogContent
-        return localized[locale] ?? localized.nl ?? localized.en ?? null
-    }
-
-    return parsed
-}
-
-function getLocalizedTitle(title: unknown, locale: 'nl' | 'en'): string {
-    const parsed = parsePossibleJson(title)
-
-    if (typeof parsed === 'object' && parsed !== null && ('nl' in parsed || 'en' in parsed)) {
-        const localized = parsed as LocalizedBlogTitle
-        return (localized[locale] ?? localized.nl ?? localized.en ?? '').trim()
-    }
-
-    if (typeof parsed === 'string') {
-        return parsed.trim()
-    }
-
-    return ''
-}
-
-function normalizeContent(content: unknown): QuillDelta | null {
-    if (!content) {
-        return null
-    }
-
-    const parsed = parsePossibleJson(content)
-
-    if (typeof parsed === 'object' && parsed !== null && 'ops' in parsed) {
-        return parsed as QuillDelta
-    }
-
-    return null
-}
 
 function QuillReadOnly({ content }: { content: unknown }) {
     const containerRef = useRef<HTMLDivElement | null>(null)
@@ -119,7 +56,9 @@ function BlogDetailPage() {
     const { id } = useParams<{ id: string }>()
     const locale = getActiveLocale(window.location.pathname)
     const [blog, setBlog] = useState<BlogDetails | null>(null)
+    const [productions, setProductions] = useState<BlogLinkedProduction[]>([])
     const [isLoading, setIsLoading] = useState(true)
+    const [isLoadingProductions, setIsLoadingProductions] = useState(false)
     const [error, setError] = useState('')
 
     useEffect(() => {
@@ -140,6 +79,22 @@ function BlogDetailPage() {
 
                 if (isActive) {
                     setBlog(response.data)
+
+                    const linkedProductionIds = response.data.productions ?? []
+                    if (linkedProductionIds.length === 0) {
+                        setProductions([])
+                        return
+                    }
+
+                    setIsLoadingProductions(true)
+
+                    const linkedProductionResponses = await Promise.all(
+                        linkedProductionIds.map((productionId) => api.get<ProductionDetailResponse>(`/archive/productions/${productionId}`)),
+                    )
+
+                    if (isActive) {
+                        setProductions(linkedProductionResponses.map((entry) => entry.data))
+                    }
                 }
             } catch (loadError) {
                 if (isActive) {
@@ -148,6 +103,7 @@ function BlogDetailPage() {
             } finally {
                 if (isActive) {
                     setIsLoading(false)
+                    setIsLoadingProductions(false)
                 }
             }
         }
@@ -178,6 +134,50 @@ function BlogDetailPage() {
                     <article className="mx-auto max-w-4xl">
                         <h1 className="mb-6 text-4xl font-semibold text-foreground">{getLocalizedTitle(blog.title, locale) || 'Untitled blog'}</h1>
                         <QuillReadOnly content={getLocalizedContent(blog.content, locale)} />
+
+                        <section className="mt-10">
+                            <h2 className="mb-4 text-2xl font-semibold text-foreground">
+                                {locale === 'nl' ? 'Gerelateerde producties' : 'Related productions'}
+                            </h2>
+
+                            {isLoadingProductions ? <p className="text-sm text-muted">{locale === 'nl' ? 'Producties laden...' : 'Loading productions...'}</p> : null}
+
+                            {!isLoadingProductions && productions.length > 0 ? (
+                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                    {productions.map((production) => (
+                                        <Link
+                                            key={production.id}
+                                            to={withLocalePath(`/productions/${production.id}`, locale)}
+                                            className="rounded-xl border border-border bg-background transition hover:border-[var(--color-accent)]/60"
+                                        >
+                                            <article className="flex w-full flex-col p-3">
+                                                <div className="relative h-24 overflow-hidden rounded-md bg-gradient-to-br from-accent to-accent/50">
+                                                    {production.image_url ? (
+                                                        <img
+                                                            src={production.image_url}
+                                                            alt={getProductionLabel(production, locale)}
+                                                            className="absolute inset-0 h-full w-full object-cover"
+                                                            loading="lazy"
+                                                            referrerPolicy="no-referrer"
+                                                        />
+                                                    ) : null}
+                                                    <div className="absolute inset-0 bg-black/20" />
+                                                </div>
+
+                                                <p className="mt-2 text-xs text-text-accent">{getProductionDate(production, locale)}</p>
+                                                <h3 className="mt-1 line-clamp-2 text-lg leading-tight text-foreground [overflow-wrap:anywhere]">
+                                                    {getProductionLabel(production, locale)}
+                                                </h3>
+                                                <p className="mt-1 line-clamp-2 text-sm text-text-accent">{getProductionExcerpt(production, locale)}</p>
+                                                <p className="mt-2 text-xs font-semibold lowercase tracking-wide text-text-accent">
+                                                    {getProductionVenue(production)}
+                                                </p>
+                                            </article>
+                                        </Link>
+                                    ))}
+                                </div>
+                            ) : null}
+                        </section>
                     </article>
                 ) : null}
             </section>

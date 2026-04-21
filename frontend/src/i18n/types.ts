@@ -221,6 +221,11 @@ export type Messages = {
     manageProduction: string
     manageProductionButton: string
     savingButton: string
+    deletingButton: string
+    deleteButton: string
+    deleteConfirm: string
+    deleteError: string
+    blogNotFound: string
     noTitleError:string
     filledLanguageNeedsTitleError: string
 
