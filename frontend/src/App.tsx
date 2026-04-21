@@ -4,6 +4,7 @@ import { getMessages } from './i18n'
 import { getAdminRouteConfig } from './admin/paths'
 import ProtectedAdminRoute, { AdminEntryRoute } from './pages/admin/ProtectedAdminRoute'
 
+
 // Public pages
 import HomePage from './pages/public/HomePage'
 import ArchiveDetailPage from './pages/public/ArchiveDetailPage'
@@ -14,6 +15,7 @@ const LoginPage = lazy(() => import('./pages/admin/LoginPage'))
 const DashboardPage = lazy(() => import('./pages/admin/DashboardPage'))
 const ArchiveEditPage = lazy(() => import('./pages/admin/ArchiveEditPage'))
 
+import CreateBlogPage from './pages/admin/CreateBlogPage'
 /**
  * Root App component.
  *
@@ -40,6 +42,11 @@ function App() {
                         <Route path="/archive/:id" element={<ArchiveDetailPage />} />
                         <Route path="/nl/archive/:id" element={<ArchiveDetailPage />} />
                         <Route path="/en/archive/:id" element={<ArchiveDetailPage />} />
+                        
+                        <Route path="/blogs/:id" element={<BlogDetailPage />} />
+                        <Route path="/nl/blogs/:id" element={<BlogDetailPage />} />
+                        <Route path="/en/blogs/:id" element={<BlogDetailPage />} />
+
                     </>
                 ) : null}
 
@@ -74,6 +81,14 @@ function App() {
                                 </ProtectedAdminRoute>
                             }
                         />
+
+                        <Route path="/admin/blogs/create" element={<CreateBlogPage/>} />
+                        <Route path="/en/admin/blogs/create" element={<CreateBlogPage/>} />
+                        <Route path="/nl/admin/blogs/create" element={<CreateBlogPage/>} />
+
+                        <Route path="/admin/blogs/:id/edit" element={<CreateBlogPage/>} />
+                        <Route path="/en/admin/blogs/:id/edit" element={<CreateBlogPage/>} />
+                        <Route path="/nl/admin/blogs/:id/edit" element={<CreateBlogPage/>} />
                     </>
                 ) : null}
             </Routes>
