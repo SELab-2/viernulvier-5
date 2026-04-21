@@ -203,6 +203,12 @@ export type Messages = {
     }
   }
 
+  editHeader: {
+    back: string
+    publish: string
+    saveOnDraft: string
+  }
+
   blogs: {
     title: string
     content: string
