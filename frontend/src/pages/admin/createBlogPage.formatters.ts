@@ -69,23 +69,32 @@ function parseLocalizedBlogTitle(value: string | null | undefined): LocalizedBlo
 
 function parseBlogContent(value: unknown): BlogContent {
     if (!isObject(value)) {
+        const html = getEditorHtml(value)
         return {
-            nl: { title: '', content: '' },
-            en: { title: '', content: '' },
+            nl: { title: '', content: html },
+            en: { title: '', content: html },
         }
     }
 
-    const nlValue = isObject(value.nl) ? value.nl : null
-    const enValue = isObject(value.en) ? value.en : null
+    const extractLocaleContent = (localeValue: unknown): string => {
+        if (isObject(localeValue) && 'content' in localeValue) {
+            return getEditorHtml((localeValue as { content?: unknown }).content)
+        }
+
+        return getEditorHtml(localeValue)
+    }
+
+    const nlContent = extractLocaleContent(value.nl)
+    const enContent = extractLocaleContent(value.en)
 
     return {
         nl: {
-            title: typeof nlValue?.title === 'string' ? nlValue.title : '',
-            content: getEditorHtml(nlValue?.content),
+            title: '',
+            content: nlContent,
         },
         en: {
-            title: typeof enValue?.title === 'string' ? enValue.title : '',
-            content: getEditorHtml(enValue?.content),
+            title: '',
+            content: enContent,
         },
     }
 }
@@ -97,6 +106,14 @@ export function formatBlogDetailForForm(blogDetail: BlogDetail): {
     const localizedTitle = parseLocalizedBlogTitle(blogDetail.title)
 
     const parsedContent = parseBlogContent(blogDetail.content)
+
+    const normalizeLocaleJson = (localeValue: unknown): unknown | null => {
+        if (isObject(localeValue) && 'content' in localeValue) {
+            return (localeValue as { content?: unknown }).content ?? null
+        }
+
+        return localeValue ?? null
+    }
 
     return {
         form: {
@@ -110,8 +127,12 @@ export function formatBlogDetailForForm(blogDetail: BlogDetail): {
             },
         },
         contentJson: {
-            nl: isObject(blogDetail.content) && 'nl' in blogDetail.content ? blogDetail.content.nl ?? null : null,
-            en: isObject(blogDetail.content) && 'en' in blogDetail.content ? blogDetail.content.en ?? null : null,
+            nl: isObject(blogDetail.content) && 'nl' in blogDetail.content
+                ? normalizeLocaleJson(blogDetail.content.nl)
+                : normalizeLocaleJson(blogDetail.content),
+            en: isObject(blogDetail.content) && 'en' in blogDetail.content
+                ? normalizeLocaleJson(blogDetail.content.en)
+                : normalizeLocaleJson(blogDetail.content),
         },
     }
 }

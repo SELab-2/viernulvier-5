@@ -21,6 +21,18 @@ import {
 import type { Language, BlogContent } from '../../types/blog'
 import type { Locale } from '../../i18n/types'
 
+
+/*
+With this page you can create or edit a blog, the blog will look like this:
+
+{
+    title: { nl: '' , en: ''},
+    content: { nl: '', en: ''},
+    productionIds: []
+}
+
+*/
+
 function mergeUniqueProductions(productionList: ProductionItem[]): ProductionItem[] {
     const byId = new Map<string, ProductionItem>()
 
@@ -380,10 +392,6 @@ function CreateBlogPage() {
         setIsProductionPopupOpen(true)
     }
 
-    const getProductionLabel = (production: ProductionItem) => {
-        return production.title?.nl ?? production.title?.en ?? production.title?.fr ?? production.id
-    }
-
     if (isEditMode && isBlogNotFound) {
         return (
             <>
@@ -444,7 +452,6 @@ function CreateBlogPage() {
                 onProductionSearchQueryChange={setProductionSearchQuery}
                 onAddProduction={addProduction}
                 onRemoveProduction={removeProduction}
-                getProductionLabel={getProductionLabel}
             />
 
             <section className="relative px-4 py-4 overflow-hidden">

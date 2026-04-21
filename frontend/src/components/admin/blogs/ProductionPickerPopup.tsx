@@ -30,7 +30,6 @@ type ProductionPickerPopupProps = {
     onSelect: (productionId: string) => void
     onSearchQueryChange: (query: string) => void
     onAdd: () => void
-    getProductionLabel: (production: ProductionItem) => string
 }
 
 function ProductionPickerPopup({
@@ -43,7 +42,6 @@ function ProductionPickerPopup({
     onSelect,
     onSearchQueryChange,
     onAdd,
-    getProductionLabel,
 }: ProductionPickerPopupProps) {
     if (!isOpen) {
         return null
@@ -60,6 +58,10 @@ function ProductionPickerPopup({
         }
 
         return value.nl ?? value.en ?? value.fr ?? ''
+    }
+
+    const getProductionLabel = (production: ProductionItem): string => {
+        return getLocalizedText(production.title) || production.id
     }
 
     const toPlainText = (value: string): string =>
