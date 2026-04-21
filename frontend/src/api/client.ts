@@ -37,11 +37,13 @@ export async function apiFetch<T>(
         const message =
             (typeof errorPayload === 'object' && errorPayload !== null && 'message' in errorPayload
                 ? String((errorPayload as { message?: unknown }).message ?? '')
+                : typeof errorPayload === 'object' && errorPayload !== null && 'error' in errorPayload
+                    ? String((errorPayload as { error?: unknown }).error ?? '')
                 : typeof errorPayload === 'string'
                     ? errorPayload
                     : '') || `HTTP ${response.status}`
 
-        throw new Error(`${message} (${response.status} ${response.statusText})`)
+        throw new Error(message)
     }
 
     // Handle 204 No Content

@@ -13,7 +13,6 @@ import type {
   APIGallery,
   APIItem,
   APIEventPrice,
-  APITag,
   APICrop,
   APIUitKeyword,
   APIUitTheme,
@@ -32,7 +31,6 @@ export default {
   sync_items,
   sync_crops,
   sync_event_prices,
-  sync_tags,
   sync_uit_keywords,
   sync_uit_themes,
   sync_uit_types,
@@ -250,7 +248,6 @@ function mapGenre(genre: APIGenre){
     updated_at: sanitizeTimestampRequired(genre.updated_at),
     apiId: genre["@id"],
     type: genre.type,
-    use_as: genre.use_as,
     vendor_id: genre.vendor_id,
     name: genre.name,
     slug: genre.slug,
@@ -298,26 +295,6 @@ function mapEventPrice(price: APIEventPrice){
     box_office_id: price.box_office_id,
     contigent_id: price.contingent_id,
     expires_at: sanitizeTimestampOptional(price.expires_at),
-  }
-}
-
-function mapTag(tag: APITag){
-  return {
-    created_at: sanitizeTimestampRequired(tag.created_at),
-    updated_at: sanitizeTimestampRequired(tag.updated_at),
-    apiId: tag["@id"],
-    source: tag.source,
-    sourcetype: tag.sourceType,
-    enable: tag.enable,
-    code: tag.code,
-    name: tag.name,
-    short_description: tag.short_description,
-    url: tag.url,
-    url_title: tag.url_title,
-    expires_after: tag.expires_after,
-    automatically_assigned: tag.automatically_assigned,
-    external: tag.external,
-    // gallery_id: done separately inside function
   }
 }
 
@@ -577,7 +554,6 @@ async function sync_productions(cutoff_timestamp: Date | undefined = undefined) 
       const themeIds = new Set<string>();
       const typeIds = new Set<string>();
       const keywordIds = new Set<string>();
-      const genreIds = new Set<string>();
 
       for (const prod of page) {
         if (prod.media_gallery) galleryIds.add(prod.media_gallery);
@@ -588,18 +564,14 @@ async function sync_productions(cutoff_timestamp: Date | undefined = undefined) 
         if (prod.uitdatabank_keywords) {
           prod.uitdatabank_keywords.forEach(k => keywordIds.add(k));
         }
-        if (prod.genres) {
-          prod.genres.forEach(g => genreIds.add(g));
-        }
       }
 
       // Fetch all required relations in bulk
-      const [galleries, themes, types, keywords, genres] = await Promise.all([
+      const [galleries, themes, types, keywords] = await Promise.all([
         tx.gallery.findMany({ where: { apiId: { in: Array.from(galleryIds) } } }),
         tx.uitdatabank_theme.findMany({ where: { apiId: { in: Array.from(themeIds) } } }),
         tx.uitdatabank_type.findMany({ where: { apiId: { in: Array.from(typeIds) } } }),
         tx.uitdatabank_keyword.findMany({ where: { apiId: { in: Array.from(keywordIds) } } }),
-        tx.genre.findMany({ where: { apiId: { in: Array.from(genreIds) } } }),
       ]);
 
       // Create lookup maps
@@ -607,7 +579,6 @@ async function sync_productions(cutoff_timestamp: Date | undefined = undefined) 
       const themeMap = new Map(themes.map(t => [t.apiId, t.id]));
       const typeMap = new Map(types.map(t => [t.apiId, t.id]));
       const keywordMap = new Map(keywords.map(k => [k.apiId, k.id]));
-      const genreMap = new Map(genres.map(g => [g.apiId, g.id]));
 
       for (const production of page) {
         const db_production = await tx.production.upsert({
@@ -652,22 +623,41 @@ async function sync_productions(cutoff_timestamp: Date | undefined = undefined) 
           }
         }
 
-        // Link genres
         if (production.genres) {
           for (const genre of production.genres) {
-            const genreId = genreMap.get(genre);
-            if (genreId) {
+            const [db_genre, db_tag] = await Promise.all([
+              tx.genre.findUnique({ where: { apiId: genre } }),
+              tx.tag.findUnique({ where: { apiId: genre } })
+            ]);
+
+            if (db_genre !== null) {
               await tx.genre_production.upsert({
                 where: {
                   genre_id_production_id: {
-                    genre_id: genreId,
+                    genre_id: db_genre.id,
                     production_id: db_production.id,
                   }
                 },
-                update: {}, // exists, no update needed
+                update: {},
                 create: {
                   production_id: db_production.id,
-                  genre_id: genreId,
+                  genre_id: db_genre.id,
+                }
+              });
+            }
+
+            if (db_tag !== null) {
+              await tx.tag_production.upsert({
+                where: {
+                  tag_id_production_id: {
+                    tag_id: db_tag.id,
+                    production_id: db_production.id,
+                  }
+                },
+                update: {},
+                create: {
+                  production_id: db_production.id,
+                  tag_id: db_tag.id,
                 }
               });
             }
@@ -694,14 +684,33 @@ async function sync_genres(cutoff_timestamp: Date | undefined = undefined){
     if (rawPage.length === 0) break;
     const page = filterByCutoff(rawPage, cutoff_timestamp);
 
-    await prisma.$transaction(
-        page.map(genre =>
-            prisma.genre.upsert({
-              where: { apiId: genre["@id"] },
-              update: mapGenre(genre),
-              create: mapGenre(genre),
-            })
-        )
+    await prisma.$transaction(async (tx) => {
+          for (const genre of page) {
+            if (genre.use_as !== null && genre.use_as.toLowerCase() == "tag") {
+              await tx.tag.upsert({
+                where: {apiId: genre["@id"]},
+                update: mapGenre(genre),
+                create: mapGenre(genre),
+              });
+            } else {
+              await tx.genre.upsert({
+                  where: { apiId: genre["@id"] },
+                  update: mapGenre(genre),
+                  create: mapGenre(genre),
+                })
+            }
+
+          }
+        }
+
+    // await prisma.$transaction(
+    //     page.map(genre =>
+    //         prisma.genre.upsert({
+    //           where: { apiId: genre["@id"] },
+    //           update: mapGenre(genre),
+    //           create: mapGenre(genre),
+    //         })
+    //     )
     );
   }
 
@@ -878,56 +887,6 @@ async function sync_event_prices(cutoff_timestamp: Date | undefined = undefined)
   }
 
   finishStatus(`\u2705 Completed syncing ${totalProcessed} event_prices from ${pageCount} pages`);
-}
-
-async function sync_tags(cutoff_timestamp: Date | undefined = undefined){
-  let totalProcessed = 0;
-  let pageCount = 0;
-
-  for await (const { members: rawPage, totalItems } of Fetcher.fetchTagPages()) {
-    pageCount++;
-    totalProcessed += rawPage.length;
-    updateStatus("Tags", createProgressBar(totalProcessed, totalItems));
-
-    if (rawPage.length === 0) break;
-    const page = filterByCutoff(rawPage, cutoff_timestamp);
-
-    await prisma.$transaction(async (tx) => {
-          // Collect all gallery apiIds for bulk lookup
-          const galleryApiIds = new Set<string>();
-          for (const tag of page) {
-            if (tag.gallery) galleryApiIds.add(tag.gallery);
-          }
-
-          // Fetch all required galleries in bulk
-          const db_galleries = await tx.gallery.findMany({
-            where: { apiId: { in: Array.from(galleryApiIds) } },
-            select: { id: true, apiId: true }
-          });
-
-          // Create lookup map
-          const galleryMap = new Map(db_galleries.map(g => [g.apiId, g.id]));
-
-          for (const tag of page) {
-            const galleryId = tag.gallery ? galleryMap.get(tag.gallery) : null;
-
-            await tx.tag.upsert({
-              where: {apiId: tag["@id"]},
-              update: {
-                ...mapTag(tag),
-                gallery_id: galleryId || null,
-              },
-              create: {
-                ...mapTag(tag),
-                gallery_id: galleryId || null,
-              },
-            });
-          }
-        }
-    );
-  }
-
-  finishStatus(`\u2705 Completed syncing ${totalProcessed} tags from ${pageCount} pages`);
 }
 
 async function sync_crops(cutoff_timestamp: Date | undefined = undefined){

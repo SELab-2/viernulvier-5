@@ -34,10 +34,13 @@ export function sanitizePage(page: number, totalPages: number): number {
 export function buildPaginationLinks(baseUrl: string, page: number, limit: number, totalPages: number) {
     const buildUrl = (p: number) => `${baseUrl}?page=${p}&limit=${limit}`
     
+    // If we're beyond total pages, prev should lead back to the last valid page
+    const prevPage = page > totalPages ? totalPages : page - 1
+    
     return {
         self: buildUrl(page),
         next: (totalPages > 0 && page < totalPages) ? buildUrl(page + 1) : null,
-        prev: (totalPages > 0 && page > 1) ? buildUrl(page - 1) : null,
+        prev: (totalPages > 0 && page > 1 && prevPage > 0) ? buildUrl(prevPage) : null,
         first: totalPages > 0 ? buildUrl(1) : buildUrl(page),
         last: totalPages > 0 ? buildUrl(totalPages) : buildUrl(page),
     }

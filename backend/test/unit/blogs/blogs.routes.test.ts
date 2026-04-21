@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import type { FastifyInstance } from 'fastify'
 import { buildTestApp } from '../../helpers/build-app.js'
+import { Role } from '../../../src/domain/role.js'
 
 describe('Blogs Routes', () => {
     let app: FastifyInstance
@@ -26,38 +27,46 @@ describe('Blogs Routes', () => {
             expect(body).toHaveProperty('meta')
             expect(body).toHaveProperty('links')
             expect(Array.isArray(body.data)).toBe(true)
-            expect(body.data.length).toBe(0)
+            expect(body.meta).toHaveProperty('total')
         })
     })
 
     describe('POST /api/v1/archive/blogs', () => {
         it('should create a blog with 201 Created and links', async () => {
-            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+            const token = app.jwt.sign({ sub: 'admin', username: 'admin', role: Role.ADMIN })
+            const production = await app.prisma.production.create({ data: {} })
             const payload = {
                 title: 'Test Blog',
-                content: 'This is a test blog content.'
+                content: { text: 'This is a test blog content.' },
+                productionIds: [production.id]
             }
 
-            const response = await app.inject({
-                method: 'POST',
-                url: '/api/v1/archive/blogs',
-                headers: { authorization: `Bearer ${token}` },
-                payload
-            })
+            try {
+                const response = await app.inject({
+                    method: 'POST',
+                    url: '/api/v1/archive/blogs',
+                    headers: { authorization: `Bearer ${token}` },
+                    payload
+                })
 
-            expect(response.statusCode).toBe(201)
-            const body = JSON.parse(response.payload)
-            expect(body.data.title).toBe(payload.title)
-            expect(body.data.content).toBe(payload.content)
-            expect(body.data).toHaveProperty('id')
-            expect(body.links).toHaveProperty('self')
+                expect(response.statusCode).toBe(201)
+                const body = JSON.parse(response.payload)
+                expect(body.data.title).toBe(payload.title)
+                expect(body.data.content).toEqual(payload.content)
+                expect(body.data.productions).toEqual(payload.productionIds)
+                expect(body.data).toHaveProperty('id')
+                expect(body.links).toHaveProperty('self')
+            } finally {
+                await app.prisma.blog_production.deleteMany({ where: { production_id: production.id } })
+                await app.prisma.production.delete({ where: { id: production.id } })
+            }
         })
 
         it('should return 401 Unauthorized when no token is provided', async () => {
             const response = await app.inject({
                 method: 'POST',
                 url: '/api/v1/archive/blogs',
-                payload: { title: 'Test', content: 'Test' }
+                payload: { title: 'Test', content: { text: 'Test' }, productionIds: ['00000000-0000-0000-0000-000000000001'] }
             })
 
             expect(response.statusCode).toBe(401)
@@ -66,28 +75,35 @@ describe('Blogs Routes', () => {
 
     describe('GET /api/v1/archive/blogs/:id', () => {
         it('should return a blog by ID with links', async () => {
-            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+            const token = app.jwt.sign({ sub: 'admin', username: 'admin', role: Role.ADMIN })
+            const production = await app.prisma.production.create({ data: {} })
             
             // Create a blog first
-            const postResponse = await app.inject({
-                method: 'POST',
-                url: '/api/v1/archive/blogs',
-                headers: { authorization: `Bearer ${token}` },
-                payload: { title: 'Find Me', content: 'Content' }
-            })
-            const created = JSON.parse(postResponse.payload)
+            try {
+                const postResponse = await app.inject({
+                    method: 'POST',
+                    url: '/api/v1/archive/blogs',
+                    headers: { authorization: `Bearer ${token}` },
+                    payload: { title: 'Find Me', content: { text: 'Content' }, productionIds: [production.id] }
+                })
+                const created = JSON.parse(postResponse.payload)
 
-            const response = await app.inject({
-                method: 'GET',
-                url: `/api/v1/archive/blogs/${created.data.id}`,
-            })
+                const response = await app.inject({
+                    method: 'GET',
+                    url: `/api/v1/archive/blogs/${created.data.id}`,
+                })
 
-            expect(response.statusCode).toBe(200)
-            const body = JSON.parse(response.payload)
-            expect(body.data.id).toBe(created.data.id)
-            expect(body.data.title).toBe('Find Me')
-            expect(body.data).toHaveProperty('links')
-            expect(body.data.links).toHaveProperty('self')
+                expect(response.statusCode).toBe(200)
+                const body = JSON.parse(response.payload)
+                expect(body.data.id).toBe(created.data.id)
+                expect(body.data.title).toBe('Find Me')
+                expect(body.data.productions).toEqual([production.id])
+                expect(body.data).toHaveProperty('links')
+                expect(body.data.links).toHaveProperty('self')
+            } finally {
+                await app.prisma.blog_production.deleteMany({ where: { production_id: production.id } })
+                await app.prisma.production.delete({ where: { id: production.id } })
+            }
         })
 
         it('should return 404 for non-existent ID', async () => {
@@ -103,34 +119,43 @@ describe('Blogs Routes', () => {
 
     describe('PATCH /api/v1/archive/blogs/:id', () => {
         it('should update a blog and return new structure', async () => {
-            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+            const token = app.jwt.sign({ sub: 'admin', username: 'admin', role: Role.ADMIN })
+            const productionA = await app.prisma.production.create({ data: {} })
+            const productionB = await app.prisma.production.create({ data: {} })
             
-            // Create
-            const postResponse = await app.inject({
-                method: 'POST',
-                url: '/api/v1/archive/blogs',
-                headers: { authorization: `Bearer ${token}` },
-                payload: { title: 'Old Title', content: 'Old Content' }
-            })
-            const created = JSON.parse(postResponse.payload)
+            try {
+                // Create
+                const postResponse = await app.inject({
+                    method: 'POST',
+                    url: '/api/v1/archive/blogs',
+                    headers: { authorization: `Bearer ${token}` },
+                    payload: { title: 'Old Title', content: { text: 'Old Content' }, productionIds: [productionA.id] }
+                })
+                const created = JSON.parse(postResponse.payload)
 
-            // Update
-            const response = await app.inject({
-                method: 'PATCH',
-                url: `/api/v1/archive/blogs/${created.data.id}`,
-                headers: { authorization: `Bearer ${token}` },
-                payload: { title: 'New Title' }
-            })
+                // Update
+                const response = await app.inject({
+                    method: 'PATCH',
+                    url: `/api/v1/archive/blogs/${created.data.id}`,
+                    headers: { authorization: `Bearer ${token}` },
+                    payload: { title: 'New Title', productionIds: [productionB.id] }
+                })
 
-            expect(response.statusCode).toBe(200)
-            const body = JSON.parse(response.payload)
-            expect(body.data.title).toBe('New Title')
-            expect(body.data.content).toBe('Old Content')
-            expect(body.data).toHaveProperty('links')
+                expect(response.statusCode).toBe(200)
+                const body = JSON.parse(response.payload)
+                expect(body.data.title).toBe('New Title')
+                expect(body.data.content).toEqual({ text: 'Old Content' })
+                expect(body.data.productions).toEqual([productionB.id])
+                expect(body.data).toHaveProperty('links')
+            } finally {
+                await app.prisma.blog_production.deleteMany({ where: { production_id: productionA.id } })
+                await app.prisma.blog_production.deleteMany({ where: { production_id: productionB.id } })
+                await app.prisma.production.deleteMany({ where: { id: { in: [productionA.id, productionB.id] } } })
+            }
         })
 
         it('should return 404 for non-existent blog', async () => {
-            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+            const token = app.jwt.sign({ sub: 'admin', username: 'admin', role: Role.ADMIN })
             const uuid = '00000000-0000-0000-0000-000000000000'
             const response = await app.inject({
                 method: 'PATCH',
@@ -144,36 +169,42 @@ describe('Blogs Routes', () => {
 
     describe('DELETE /api/v1/archive/blogs/:id', () => {
         it('should delete a blog', async () => {
-            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+            const token = app.jwt.sign({ sub: 'admin', username: 'admin', role: Role.ADMIN })
+            const production = await app.prisma.production.create({ data: {} })
             
-            // Create
-            const postResponse = await app.inject({
-                method: 'POST',
-                url: '/api/v1/archive/blogs',
-                headers: { authorization: `Bearer ${token}` },
-                payload: { title: 'To Delete', content: 'Content' }
-            })
-            const created = JSON.parse(postResponse.payload)
+            try {
+                // Create
+                const postResponse = await app.inject({
+                    method: 'POST',
+                    url: '/api/v1/archive/blogs',
+                    headers: { authorization: `Bearer ${token}` },
+                    payload: { title: 'To Delete', content: { text: 'Content' }, productionIds: [production.id] }
+                })
+                const created = JSON.parse(postResponse.payload)
 
-            // Delete
-            const response = await app.inject({
-                method: 'DELETE',
-                url: `/api/v1/archive/blogs/${created.data.id}`,
-                headers: { authorization: `Bearer ${token}` }
-            })
+                // Delete
+                const response = await app.inject({
+                    method: 'DELETE',
+                    url: `/api/v1/archive/blogs/${created.data.id}`,
+                    headers: { authorization: `Bearer ${token}` }
+                })
 
-            expect(response.statusCode).toBe(204)
+                expect(response.statusCode).toBe(204)
 
-            // Verify 404
-            const getResponse = await app.inject({
-                method: 'GET',
-                url: `/api/v1/archive/blogs/${created.data.id}`,
-            })
-            expect(getResponse.statusCode).toBe(404)
+                // Verify 404
+                const getResponse = await app.inject({
+                    method: 'GET',
+                    url: `/api/v1/archive/blogs/${created.data.id}`,
+                })
+                expect(getResponse.statusCode).toBe(404)
+            } finally {
+                await app.prisma.blog_production.deleteMany({ where: { production_id: production.id } })
+                await app.prisma.production.delete({ where: { id: production.id } })
+            }
         })
 
         it('should return 404 for non-existent blog', async () => {
-            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
+            const token = app.jwt.sign({ sub: 'admin', username: 'admin', role: Role.ADMIN })
             const uuid = '00000000-0000-0000-0000-000000000000'
             const response = await app.inject({
                 method: 'DELETE',
