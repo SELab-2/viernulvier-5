@@ -1,6 +1,8 @@
 import { MediaRepository } from './media.repository.js'
 import type { 
-    PaginationQuery, 
+    GalleryPaginationQuery,
+    ItemPaginationQuery,
+    CropPaginationQuery,
     GalleryResponse, 
     ItemResponse, 
     CropResponse,
@@ -11,17 +13,32 @@ import type {
     CreateCropInput,
     UpdateCropInput
 } from './media.schema.js'
+import { PaginatedResult, calculateTotalPages, sanitizePage } from '../../utils/pagination.js'
 
 export class MediaService {
     constructor(private readonly repository: MediaRepository) { }
 
-    async getGalleries(options: PaginationQuery) {
+    async getGalleries(options: GalleryPaginationQuery): Promise<PaginatedResult<GalleryResponse>> {
         const { page, limit, search, lang } = options
-        const [data, total] = await Promise.all([
-            this.repository.findAllGalleries({ page, limit, search, lang }),
-            this.repository.countGalleries({ search, lang }),
-        ])
-        return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } }
+
+        const total = await this.repository.countGalleries({ search, lang })
+        const totalPages = calculateTotalPages(total, limit)
+        const sanitizedPage = sanitizePage(page, totalPages)
+
+        const items = await this.repository.findAllGalleries({ 
+            page: sanitizedPage, 
+            limit, 
+            search, 
+            lang 
+        })
+
+        return {
+            items: items as any,
+            total,
+            page: sanitizedPage,
+            limit,
+            totalPages,
+        }
     }
 
     async getGallery(id: string): Promise<GalleryResponse | null> {
@@ -40,13 +57,28 @@ export class MediaService {
         await this.repository.deleteGallery(id)
     }
 
-    async getItems(options: PaginationQuery) {
-        const { page, limit, search, lang } = options
-        const [data, total] = await Promise.all([
-            this.repository.findAllItems({ page, limit, search, lang }),
-            this.repository.countItems({ search, lang }),
-        ])
-        return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } }
+    async getItems(options: ItemPaginationQuery): Promise<PaginatedResult<ItemResponse>> {
+        const { page, limit, galleryId, search, lang } = options
+
+        const total = await this.repository.countItems({ galleryId, search, lang })
+        const totalPages = calculateTotalPages(total, limit)
+        const sanitizedPage = sanitizePage(page, totalPages)
+
+        const items = await this.repository.findAllItems({ 
+            page: sanitizedPage, 
+            limit, 
+            galleryId, 
+            search, 
+            lang 
+        })
+
+        return {
+            items: items as any,
+            total,
+            page: sanitizedPage,
+            limit,
+            totalPages,
+        }
     }
 
     async getItem(id: string): Promise<ItemResponse | null> {
@@ -65,13 +97,28 @@ export class MediaService {
         await this.repository.deleteItem(id)
     }
 
-    async getCrops(options: PaginationQuery) {
-        const { page, limit, search, lang } = options
-        const [data, total] = await Promise.all([
-            this.repository.findAllCrops({ page, limit, search, lang }),
-            this.repository.countCrops({ search, lang }),
-        ])
-        return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } }
+    async getCrops(options: CropPaginationQuery): Promise<PaginatedResult<CropResponse>> {
+        const { page, limit, itemId, search, lang } = options
+
+        const total = await this.repository.countCrops({ itemId, search, lang })
+        const totalPages = calculateTotalPages(total, limit)
+        const sanitizedPage = sanitizePage(page, totalPages)
+
+        const items = await this.repository.findAllCrops({ 
+            page: sanitizedPage, 
+            limit, 
+            itemId, 
+            search, 
+            lang 
+        })
+
+        return {
+            items: items as any,
+            total,
+            page: sanitizedPage,
+            limit,
+            totalPages,
+        }
     }
 
     async getCrop(id: string): Promise<CropResponse | null> {
