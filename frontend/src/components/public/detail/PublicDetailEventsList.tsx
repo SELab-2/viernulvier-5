@@ -3,6 +3,7 @@ import type { Event } from '../../../api/events'
 import type { Location } from '../../../api/locations'
 import { usePublicMessages } from '../PublicMessagesContext'
 import { localize } from '../../../utils/localize'
+import { toPlainText } from '../../../utils/text'
 
 type ArchiveDetailEventsListProps = {
     events: Event[]
@@ -14,7 +15,7 @@ function ArchiveDetailEventsList({ events, locationsByEvent, locale }: ArchiveDe
     const messages = usePublicMessages()
     const [showAll, setShowAll] = useState(false)
     const visible = showAll ? events : events.slice(0, 5)
-    const remarkLabel = locale.startsWith('nl') ? 'Opmerking' : 'Remark'
+    const remarkLabel = messages.detail.remark
 
     if (events.length === 0) {
         return <p>{messages.detail.noEvents}</p>
@@ -94,23 +95,6 @@ function ArchiveDetailEventsList({ events, locationsByEvent, locale }: ArchiveDe
             )}
         </div>
     )
-}
-
-function toPlainText(value: string | null | undefined): string {
-    if (!value) {
-        return ''
-    }
-
-    return value
-        .replace(/<[^>]*>/g, ' ')
-        .replace(/&nbsp;/gi, ' ')
-        .replace(/&amp;/gi, '&')
-        .replace(/&quot;/gi, '"')
-        .replace(/&#39;|&apos;/gi, "'")
-        .replace(/&lt;/gi, '<')
-        .replace(/&gt;/gi, '>')
-        .replace(/\s+/g, ' ')
-        .trim()
 }
 
 export default ArchiveDetailEventsList

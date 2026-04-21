@@ -13,11 +13,13 @@ function ArchiveDetailGallery({ images }: ArchiveDetailGalleryProps) {
     return (
         <div className="relative w-full">
             <div className="w-full h-[300px] md:h-[400px] rounded-xl overflow-hidden">
-                <img
-                    src={images[current] || ''}
-                    alt={`Gallery image ${current + 1}`}
-                    className="w-full h-full object-cover"
-                />
+                {images[current] && (
+                    <img
+                        src={images[current]!}
+                        alt={`Gallery image ${current + 1}`}
+                        className="w-full h-full object-cover"
+                    />
+                )}
             </div>
 
             {images.length > 1 && (

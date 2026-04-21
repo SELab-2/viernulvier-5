@@ -75,11 +75,9 @@ describe('ArchiveDetailGallery', () => {
         expect(screen.getByText('1 / 3')).toBeInTheDocument()
     })
 
-    it('does not set a src when the current image is null', () => {
+    it('does not render an image when the current image is null', () => {
         render(<ArchiveDetailGallery images={[null, 'https://example.com/2.jpg']} />)
 
-        const img = screen.getByRole('img')
-        const src = img.getAttribute('src')
-        expect(src === null || src === '').toBe(true)
+        expect(screen.queryByRole('img')).not.toBeInTheDocument()
     })
 })
