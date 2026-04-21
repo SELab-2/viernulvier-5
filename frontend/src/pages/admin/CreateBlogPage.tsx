@@ -8,7 +8,7 @@ import SectionHeading from '../../components/admin/SectionHeading'
 import BlogsTab from '../../components/admin/BlogsTab'
 import BlogsTabContent from '../../components/admin/BlogsTabContent'
 import PublicNavbar from '../../components/public/PublicNavbar'
-import ProductionEditHeader from '../../components/admin/ProductionEditHeader'
+//import ProductionEditHeader from '../../components/admin/ProductionEditHeader'
 import ProductionManagementSection, { type ProductionItem } from '../../components/admin/ProductionManagementSection'
 
 import type { Language, BlogContent } from '../../types/blog'
