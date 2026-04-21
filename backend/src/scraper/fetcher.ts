@@ -19,7 +19,7 @@ import type {
     APISpace,
     APIHall,
     APILocation,
-    APIGenre, APIGallery, APIItem, APIEventPrice, APITag, APICrop, APIUitKeyword, APIUitTheme, APIUitType,
+    APIGenre, APIGallery, APIItem, APIEventPrice, APICrop, APIUitKeyword, APIUitTheme, APIUitType,
 
 } from "./APItypes";
 
@@ -144,11 +144,6 @@ export async function* fetchItemPages(): AsyncGenerator<{ members: APIItem[], to
 export async function* fetchEventPricePages(): AsyncGenerator<{ members: APIEventPrice[], totalItems: number }>{
     yield* fetchPagesFromURL<APIEventPrice>("/api/v1/events/prices?page=1");
     // depending on per page or per item, the 'event', 'price', 'rank' fields will have a string or be filled in
-}
-
-export async function* fetchTagPages(): AsyncGenerator<{ members: APITag[], totalItems: number }>{
-    yield* fetchPagesFromURL<APITag>("/api/v1/tags?page=1");
-    // depending on per page or per item, the 'gallery' field will have a string or be filled in
 }
 
 export async function* fetchCropPages(): AsyncGenerator<{ members: APICrop[], totalItems: number }> {
