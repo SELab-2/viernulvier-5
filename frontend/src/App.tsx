@@ -16,6 +16,7 @@ const DashboardPage = lazy(() => import('./pages/admin/DashboardPage'))
 const ArchiveEditPage = lazy(() => import('./pages/admin/ArchiveEditPage'))
 
 import CreateBlogPage from './pages/admin/CreateBlogPage'
+import BlogDetailPage from './pages/public/BlogDetailPage'
 /**
  * Root App component.
  *
