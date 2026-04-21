@@ -129,9 +129,11 @@ export type Messages = {
     navBack: string
     events: string
     noEvents: string
+    loadError: string
     date: string
     time: string
     location: string
+    remark: string
     showLess: string
     showMore: string
     credits: string

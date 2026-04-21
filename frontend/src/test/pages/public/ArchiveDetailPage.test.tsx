@@ -20,6 +20,7 @@ vi.mock('../../../i18n', () => ({
     getMessages: (locale: string) => ({
         nav: { archive: 'Archief', searchAriaLabel: 'Zoeken', searchPlaceholder: 'Zoek...' },
         home: { title: 'Home' },
+        search: { shareLabel: 'Deel', shareCopiedLabel: 'Gekopieerd naar klembord' },
         detail: {
             navBack: 'Terug',
             dates: 'Speeldata',
@@ -27,7 +28,9 @@ vi.mock('../../../i18n', () => ({
             date: 'Datum',
             time: 'Uur',
             location: 'Locatie',
+            remark: 'Opmerking',
             noEvents: 'Geen voorstellingen gevonden.',
+            loadError: 'Kon de productie niet laden.',
             showMore: locale === 'en' ? 'Show more' : 'Meer tonen',
             showLess: locale === 'en' ? 'Show less' : 'Minder tonen',
             credits: 'Credits',
@@ -291,7 +294,7 @@ describe('ArchiveDetailPage', () => {
         })
     })
 
-    it('only shows past events', async () => {
+    it('shows all events regardless of date', async () => {
         const pastEvent = {
             id: 'evt-past-0000-0000-0000-000000000001',
             starts_at: new Date('2020-01-01T13:00:00.000Z'),
@@ -319,9 +322,10 @@ describe('ArchiveDetailPage', () => {
             expect(getEventsByProductionIdMock).toHaveBeenCalled()
         })
 
-        // Only the past event should be in the rendered list; the future one should be filtered out.
-        // We verify this indirectly through the location chain not being triggered for the future event.
-        expect(getLocationByIdMock).not.toHaveBeenCalled()
+        // Both past and future events should be shown on an archive page
+        await waitFor(() => {
+            expect(screen.getByText(/2020/)).toBeInTheDocument()
+        })
     })
 
     it('logs an error to the console when the production fetch fails', async () => {

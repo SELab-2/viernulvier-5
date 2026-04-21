@@ -16,12 +16,6 @@ import { getHallById } from '../../api/halls'
 import { getSpaceById } from '../../api/spaces'
 import { getLocationById, type Location } from '../../api/locations'
 
-type ProductionWithRelations = Production & {
-    genre_production?: Array<{ genre?: Genre | null }>
-    tag_production?: Array<{ tag?: Genre | null }>
-    production_genres?: string[]
-}
-
 function ArchiveDetailPageContent() {
     const navigate = useNavigate()
     const messages = usePublicMessages()
@@ -34,6 +28,7 @@ function ArchiveDetailPageContent() {
     const [events, setEvents] = useState<Event[]>([])
     const [locationsByEvent, setLocationsByEvent] = useState<Record<string, Location>>({})
     const [shareCopied, setShareCopied] = useState(false)
+    const [loadError, setLoadError] = useState(false)
 
     const handleGoBack = () => {
         if (window.history.length > 1) {
@@ -89,13 +84,9 @@ function ArchiveDetailPageContent() {
                 ])
 
                 const prod = prodRes.data
-                const now = new Date()
-                const pastEvents = eventsRes.data.filter(
-                    (e) => e.starts_at && new Date(e.starts_at) < now
-                )
 
                 setProduction(prod)
-                setEvents(pastEvents)
+                setEvents(eventsRes.data)
 
                 if (prod.media_gallery_id) {
                     const galleryRes = await getGalleryItems(prod.media_gallery_id)
@@ -106,6 +97,7 @@ function ArchiveDetailPageContent() {
                         const heroUrl = getPreferredCropUrl(firstCrops.data)
                         setImageUrl(heroUrl)
 
+                        // First item is used as the hero banner above; remaining items go in the gallery
                         const remainingItems = items.slice(1)
                         const allCrops = await Promise.all(remainingItems.map((item) => getItemCrops(item.id)))
                         setGalleryImages(allCrops.map((res) => getPreferredCropUrl(res.data)).filter(Boolean) as string[])
@@ -113,7 +105,7 @@ function ArchiveDetailPageContent() {
                 }
 
                 const locationResults = await Promise.all(
-                    pastEvents.map(async (event) => {
+                    eventsRes.data.map(async (event) => {
                         if (!event.hall_id) return null
                         try {
                             const hall = (await getHallById(event.hall_id)).data
@@ -136,6 +128,7 @@ function ArchiveDetailPageContent() {
 
             } catch (error) {
                 console.error('Error loading data:', error)
+                setLoadError(true)
             }
         }
 
@@ -156,13 +149,21 @@ function ArchiveDetailPageContent() {
     const genres = collectGenres(production, locale)
     const tags = collectTags(production, locale)
     const hasSidebar = Boolean(info) || genres.length > 0 || tags.length > 0
-    const shareLabel = messages.search?.shareLabel ?? (locale.startsWith('nl') ? 'Deel' : 'Share')
-    const shareCopiedLabel = messages.search?.shareCopiedLabel ?? (locale.startsWith('nl') ? 'Gekopieerd naar klembord' : 'Copied to clipboard')
+    const shareLabel = messages.search.shareLabel
+    const shareCopiedLabel = messages.search.shareCopiedLabel
 
     const videos = [video1, video2]
         .filter(Boolean)
         .map((url) => getYouTubeEmbedUrl(url as string))
         .filter(Boolean)
+
+    if (loadError) {
+        return (
+            <div className="site-container mt-8">
+                <p className="text-sm text-text-accent">{messages.detail.loadError}</p>
+            </div>
+        )
+    }
 
     return (
         <>
@@ -309,80 +310,28 @@ function ArchiveDetailPageContent() {
                     ) : null}
                 </div>
 
-                {/* Debug / inspection */}
-                {/* <div className="mt-8">
-                    <pre className="bg-gray-100 p-4 text-xs overflow-auto">
-                        {JSON.stringify(production, null, 2)}
-                    </pre>
-                </div> */}
             </div>
         </>
     )
 }
 
-function toGenreChip(label: string, idPrefix: string, index: number): Genre {
-    return {
-        id: `${idPrefix}-${index}-${label.toLowerCase()}`,
-        type: null,
-        name: { nl: label, en: label, fr: label },
-        slug: null,
-    }
-}
-
 function collectGenres(production: Production | null, locale: string): Genre[] {
-    if (!production) {
-        return []
-    }
-
-    const productionWithRelations = production as ProductionWithRelations
-    const directGenres = Array.isArray(production.genres) ? production.genres : []
-    const relationGenres = Array.isArray(productionWithRelations.genre_production)
-        ? productionWithRelations.genre_production
-              .map((entry) => entry?.genre)
-              .filter((value: unknown): value is Genre => Boolean(value))
-        : []
-
-    const mappedProductionGenres = Array.isArray(productionWithRelations.production_genres)
-        ? productionWithRelations.production_genres
-              .map((value: unknown) => (typeof value === 'string' ? value.trim() : ''))
-              .filter((value: string) => value.length > 0)
-              .map((label: string, index: number) => toGenreChip(label, 'genre-text', index))
-        : []
-
-    const all = [...directGenres, ...relationGenres, ...mappedProductionGenres]
+    if (!production) return []
     const seen = new Set<string>()
-
-    return all.filter((genre) => {
+    return (production.genres ?? []).filter((genre) => {
         const key = (localize(genre.name, locale) ?? '').trim().toLowerCase()
-        if (!key || seen.has(key)) {
-            return false
-        }
+        if (!key || seen.has(key)) return false
         seen.add(key)
         return true
     })
 }
 
 function collectTags(production: Production | null, locale: string): Genre[] {
-    if (!production) {
-        return []
-    }
-
-    const productionWithRelations = production as ProductionWithRelations
-    const directTags = Array.isArray(production.tags) ? production.tags : []
-    const relationTags = Array.isArray(productionWithRelations.tag_production)
-        ? productionWithRelations.tag_production
-              .map((entry) => entry?.tag)
-              .filter((value: unknown): value is Genre => Boolean(value))
-        : []
-
-    const all = [...directTags, ...relationTags]
+    if (!production) return []
     const seen = new Set<string>()
-
-    return all.filter((tag) => {
+    return (production.tags ?? []).filter((tag) => {
         const key = (localize(tag.name, locale) ?? '').trim().toLowerCase()
-        if (!key || seen.has(key)) {
-            return false
-        }
+        if (!key || seen.has(key)) return false
         seen.add(key)
         return true
     })
