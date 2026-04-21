@@ -5,7 +5,7 @@ import type {
     ThemeResponse,
     TypeResponse
 } from './uitdatabank.schema.js'
-import { PaginatedResult, calculateTotalPages } from '../../utils/pagination.js'
+import { PaginatedResult, calculateTotalPages, sanitizePage } from '../../utils/pagination.js'
 
 export class UitdatabankService {
     constructor(private readonly repository: UitdatabankRepository) { }
@@ -13,17 +13,20 @@ export class UitdatabankService {
     async getKeywords(options: UitdatabankPaginationQuery): Promise<PaginatedResult<KeywordResponse>> {
         const { page, limit, search } = options
 
-        const [items, total] = await Promise.all([
-            this.repository.findAllKeywords({ page, limit, search }),
-            this.repository.countKeywords(search),
-        ])
-
+        const total = await this.repository.countKeywords(search)
         const totalPages = calculateTotalPages(total, limit)
+        const sanitizedPage = sanitizePage(page, totalPages)
+
+        const items = await this.repository.findAllKeywords({ 
+            page: sanitizedPage, 
+            limit, 
+            search 
+        })
 
         return {
             items: items as any,
             total,
-            page,
+            page: sanitizedPage,
             limit,
             totalPages,
         }
@@ -36,17 +39,20 @@ export class UitdatabankService {
     async getThemes(options: UitdatabankPaginationQuery): Promise<PaginatedResult<ThemeResponse>> {
         const { page, limit, search } = options
 
-        const [items, total] = await Promise.all([
-            this.repository.findAllThemes({ page, limit, search }),
-            this.repository.countThemes(search),
-        ])
-
+        const total = await this.repository.countThemes(search)
         const totalPages = calculateTotalPages(total, limit)
+        const sanitizedPage = sanitizePage(page, totalPages)
+
+        const items = await this.repository.findAllThemes({ 
+            page: sanitizedPage, 
+            limit, 
+            search 
+        })
 
         return {
             items: items as any,
             total,
-            page,
+            page: sanitizedPage,
             limit,
             totalPages,
         }
@@ -59,17 +65,20 @@ export class UitdatabankService {
     async getTypes(options: UitdatabankPaginationQuery): Promise<PaginatedResult<TypeResponse>> {
         const { page, limit, search } = options
 
-        const [items, total] = await Promise.all([
-            this.repository.findAllTypes({ page, limit, search }),
-            this.repository.countTypes(search),
-        ])
-
+        const total = await this.repository.countTypes(search)
         const totalPages = calculateTotalPages(total, limit)
+        const sanitizedPage = sanitizePage(page, totalPages)
+
+        const items = await this.repository.findAllTypes({ 
+            page: sanitizedPage, 
+            limit, 
+            search 
+        })
 
         return {
             items: items as any,
             total,
-            page,
+            page: sanitizedPage,
             limit,
             totalPages,
         }
