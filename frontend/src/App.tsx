@@ -43,6 +43,9 @@ function App() {
                         <Route path="/archive/:id" element={<ArchiveDetailPage />} />
                         <Route path="/nl/archive/:id" element={<ArchiveDetailPage />} />
                         <Route path="/en/archive/:id" element={<ArchiveDetailPage />} />
+                        <Route path="/productions/:id" element={<ArchiveDetailPage />} />
+                        <Route path="/nl/productions/:id" element={<ArchiveDetailPage />} />
+                        <Route path="/en/productions/:id" element={<ArchiveDetailPage />} />
                         
                         <Route path="/blogs/:id" element={<BlogDetailPage />} />
                         <Route path="/nl/blogs/:id" element={<BlogDetailPage />} />

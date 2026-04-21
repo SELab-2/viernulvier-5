@@ -299,6 +299,11 @@ const nl: Messages = {
       manageProduction: "Producties beheren",
       manageProductionButton: "Nieuwe productie toevoegen",
       savingButton: "Publiceren...",
+      deletingButton: "Verwijderen...",
+      deleteButton: "Verwijder blog",
+      deleteConfirm: "Weet je zeker dat je deze blog wilt verwijderen?",
+      deleteError: "Blog verwijderen mislukt.",
+      blogNotFound: "Deze blog bestaat niet.",
       noTitleError: "Voeg een titel in ten minste één taal toe voordat u opslaat.",
         filledLanguageNeedsTitleError: "Als een taal is ingevuld, moet die ook een titel hebben.",
       productionPopUp : {

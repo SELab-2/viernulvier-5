@@ -10,6 +10,14 @@ type LocalizedText = {
 type ProductionItem = {
     id: string
     title: LocalizedText
+    description_short?: LocalizedText
+    description?: LocalizedText
+    teaser?: LocalizedText
+    image_url?: string | null
+    created_at?: string
+    venue_name?: string | null
+    venue_names?: string[]
+    attendance_mode?: string | null
 }
 
 type ProductionPickerPopupProps = {
@@ -46,6 +54,55 @@ function ProductionPickerPopup({
     const limitedProductions = productions.slice(0, 100)
     const hasOptions = limitedProductions.length > 0
 
+    const getLocalizedText = (value: LocalizedText | undefined): string => {
+        if (!value) {
+            return ''
+        }
+
+        return value.nl ?? value.en ?? value.fr ?? ''
+    }
+
+    const toPlainText = (value: string): string =>
+        value
+            .replace(/<[^>]*>/g, ' ')
+            .replace(/&nbsp;/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim()
+
+    const getProductionExcerpt = (production: ProductionItem): string => {
+        const raw = getLocalizedText(production.description_short) || getLocalizedText(production.description) || getLocalizedText(production.teaser)
+        const fallback = getProductionLabel(production)
+        const plain = toPlainText(raw || fallback)
+        return plain.length > 140 ? `${plain.slice(0, 137)}...` : plain
+    }
+
+    const getProductionVenue = (production: ProductionItem): string => {
+        const venues = (production.venue_names ?? []).map((value) => value.trim()).filter((value) => value.length > 0)
+        if (venues.length > 0) {
+            return venues.join(' • ')
+        }
+
+        const fallback = production.venue_name?.trim() || production.attendance_mode?.trim() || '-'
+        return fallback
+    }
+
+    const getProductionDate = (production: ProductionItem): string => {
+        if (!production.created_at) {
+            return ''
+        }
+
+        const date = new Date(production.created_at)
+        if (Number.isNaN(date.getTime())) {
+            return ''
+        }
+
+        return new Intl.DateTimeFormat(undefined, {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+        }).format(date)
+    }
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" onClick={onClose}>
             <div
@@ -72,22 +129,47 @@ function ProductionPickerPopup({
                         className="mb-3 w-full rounded-lg border border-border bg-transparent px-4 py-3 text-sm text-foreground outline-none transition focus:border-[var(--color-accent)]"
                     />
 
-                    <select
-                        value={selectedProductionId}
-                        onChange={(event) => onSelect(event.target.value)}
-                        disabled={!hasOptions || isLoading}
-                        className="w-full rounded-lg border border-border bg-transparent px-4 py-3 text-sm text-foreground outline-none transition focus:border-[var(--color-accent)]"
-                    >
+                    <div className="max-h-[420px] space-y-3 overflow-y-auto pr-1">
                         {hasOptions ? (
-                            limitedProductions.map((production) => (
-                                <option key={production.id} value={production.id}>
-                                    {getProductionLabel(production)}
-                                </option>
-                            ))
+                            limitedProductions.map((production) => {
+                                const isSelected = production.id === selectedProductionId
+
+                                return (
+                                    <button
+                                        key={production.id}
+                                        type="button"
+                                        onClick={() => onSelect(production.id)}
+                                        className={`w-full rounded-xl border text-left transition ${isSelected ? 'border-[var(--color-accent)] bg-surface' : 'border-border bg-background hover:border-[var(--color-accent)]/50'}`}
+                                    >
+                                        <article className="flex w-full flex-col p-3">
+                                            <div className="relative h-24 overflow-hidden rounded-md bg-gradient-to-br from-accent to-accent/50">
+                                                {production.image_url ? (
+                                                    <img
+                                                        src={production.image_url}
+                                                        alt={getProductionLabel(production)}
+                                                        className="absolute inset-0 h-full w-full object-cover"
+                                                        loading="lazy"
+                                                        referrerPolicy="no-referrer"
+                                                    />
+                                                ) : null}
+                                                <div className="absolute inset-0 bg-black/20" />
+                                            </div>
+                                            <p className="mt-2 text-xs text-text-accent">{getProductionDate(production)}</p>
+                                            <h4 className="mt-1 line-clamp-2 text-lg leading-tight text-foreground [overflow-wrap:anywhere]">
+                                                {getProductionLabel(production)}
+                                            </h4>
+                                            <p className="mt-1 line-clamp-2 text-sm text-text-accent">{getProductionExcerpt(production)}</p>
+                                            <p className="mt-2 text-xs font-semibold lowercase tracking-wide text-text-accent">{getProductionVenue(production)}</p>
+                                        </article>
+                                    </button>
+                                )
+                            })
                         ) : (
-                            <option value="">{messages.blogs.productionPopUp.noProductionFound}</option>
+                            <p className="rounded-lg border border-border px-3 py-2 text-sm text-muted">
+                                {messages.blogs.productionPopUp.noProductionFound}
+                            </p>
                         )}
-                    </select>
+                    </div>
                 </div>
 
                 <div className="flex items-center justify-end gap-3">

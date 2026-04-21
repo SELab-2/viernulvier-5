@@ -10,6 +10,14 @@ type LocalizedText = {
 export type ProductionItem = {
     id: string
     title: LocalizedText
+    description_short?: LocalizedText
+    description?: LocalizedText
+    teaser?: LocalizedText
+    image_url?: string | null
+    created_at?: string
+    venue_name?: string | null
+    venue_names?: string[]
+    attendance_mode?: string | null
 }
 
 type ProductionManagementSectionProps = {

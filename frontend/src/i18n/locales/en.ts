@@ -299,6 +299,11 @@ const en: Messages = {
       manageProduction: 'Manage productions',
       manageProductionButton: 'Add new production',
       savingButton: 'Publishing...',
+      deletingButton: 'Deleting...',
+      deleteButton: 'Delete blog',
+      deleteConfirm: 'Are you sure you want to delete this blog?',
+      deleteError: 'Failed to delete blog.',
+      blogNotFound: 'This blog does not exist.',
       noTitleError: "Please add a title in at least one language before saving.",
         filledLanguageNeedsTitleError: 'If a language is filled in, it must include a title.',
       productionPopUp: {

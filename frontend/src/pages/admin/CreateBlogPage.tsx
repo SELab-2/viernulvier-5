@@ -30,6 +30,16 @@ function mergeUniqueProductions(productionList: ProductionItem[]): ProductionIte
 
     return Array.from(byId.values())
 }
+
+function isNotFoundError(error: unknown): boolean {
+    if (!(error instanceof Error)) {
+        return false
+    }
+
+    return /not found|404/i.test(error.message)
+}
+
+// default value of form
 const defaultForm: BlogContent = {
     nl: { title: '', content: '' },
     en: { title: '', content: '' },
@@ -49,6 +59,8 @@ function CreateBlogPage() {
     })
     const [isLoadingBlog, setIsLoadingBlog] = useState(false)
     const [isSaving, setIsSaving] = useState(false)
+    const [isDeleting, setIsDeleting] = useState(false)
+    const [isBlogNotFound, setIsBlogNotFound] = useState(false)
     const [error, setError] = useState('')
     const [success, setSuccess] = useState('')
 
@@ -73,6 +85,7 @@ function CreateBlogPage() {
             setForm(defaultForm)
             setContentJson({ nl: null, en: null })
             setSelectedProductionIds([])
+            setIsBlogNotFound(false)
             return
         }
 
@@ -80,6 +93,7 @@ function CreateBlogPage() {
 
         const loadBlog = async () => {
             setIsLoadingBlog(true)
+            setIsBlogNotFound(false)
             setError('')
 
             try {
@@ -95,6 +109,12 @@ function CreateBlogPage() {
                 setSelectedProductionIds(response.data.productions ?? [])
             } catch (loadError) {
                 if (isActive) {
+                    if (isNotFoundError(loadError)) {
+                        setIsBlogNotFound(true)
+                        setError('')
+                        return
+                    }
+
                     setError(loadError instanceof Error ? loadError.message : 'Failed to load blog.')
                 }
             } finally {
@@ -124,18 +144,23 @@ function CreateBlogPage() {
                     : '/archive/productions?page=1'
 
                 const response = await api.get<ProductionListResponse>(endpoint)
-                setProductions((current) => mergeUniqueProductions([...current, ...response.data]))
+                const normalizedQuery = query.toLowerCase()
+                const titleFiltered = normalizedQuery
+                    ? response.data.filter((production) => getProductionLabel(production).toLowerCase().includes(normalizedQuery))
+                    : response.data
+
+                setProductions(mergeUniqueProductions(titleFiltered))
 
                 setProductionToAdd((current) => {
-                    if (response.data.length === 0) {
+                    if (titleFiltered.length === 0) {
                         return ''
                     }
 
-                    if (response.data.some((production) => production.id === current)) {
+                    if (titleFiltered.some((production) => production.id === current)) {
                         return current
                     }
 
-                    return response.data[0].id
+                    return titleFiltered[0].id
                 })
             } catch (loadError) {
                 setProductionsError(loadError instanceof Error ? loadError.message : 'Failed to load productions.')
@@ -230,6 +255,30 @@ function CreateBlogPage() {
         // TODO: save as draft impl.
     }
 
+    const removeBlog = async () => {
+        if (!isEditMode || !blogId) {
+            return
+        }
+
+        const shouldDelete = window.confirm(messages.blogs.deleteConfirm)
+        if (!shouldDelete) {
+            return
+        }
+
+        setIsDeleting(true)
+        setError('')
+        setSuccess('')
+
+        try {
+            await api.delete<unknown>(`/archive/blogs/${blogId}`)
+            navigate('/admin/dashboard')
+        } catch (deleteError) {
+            setError(deleteError instanceof Error ? deleteError.message : messages.blogs.deleteError)
+        } finally {
+            setIsDeleting(false)
+        }
+    }
+
     //TODO: navigate to blog page after succesfull publishing?
     const publish = async () => {
         const validation = validateBlogPublishInput(form, contentJson)
@@ -315,6 +364,17 @@ function CreateBlogPage() {
         return production.title?.nl ?? production.title?.en ?? production.title?.fr ?? production.id
     }
 
+    if (isEditMode && isBlogNotFound) {
+        return (
+            <>
+                <PublicNavbar />
+                <section className="px-8 py-8">
+                    <p className="text-base text-foreground">{messages.blogs.blogNotFound}</p>
+                </section>
+            </>
+        )
+    }
+
     return (
         <>
             <PublicNavbar />
@@ -373,11 +433,22 @@ function CreateBlogPage() {
                         <button
                             type="button"
                             onClick={publish}
-                            disabled={isSaving || isLoadingBlog}
+                            disabled={isSaving || isLoadingBlog || isDeleting}
                             className="rounded-lg bg-[var(--color-accent)] px-5 py-3 font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             {isSaving ? (messages.blogs.savingButton) : (messages.editHeader.publish)}
                         </button>
+
+                        {isEditMode ? (
+                            <button
+                                type="button"
+                                onClick={removeBlog}
+                                disabled={isSaving || isLoadingBlog || isDeleting}
+                                className="rounded-lg border px-5 py-3 font-semibold transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                                {isDeleting ? messages.blogs.deletingButton : messages.blogs.deleteButton}
+                            </button>
+                        ) : null}
 
                         {error ? <p className="text-sm text-red-500">{error}</p> : null}
                         {success ? <p className="text-sm text-green-600">{success}</p> : null}
