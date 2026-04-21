@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import AdminLayout from '../../components/admin/AdminLayout'
 import { useAdminMessages } from '../../components/admin/AdminMessagesContext'
-import { apiFetch } from '../../api/client'
+import { apiFetch, normalizeApiAssetUrl } from '../../api/client'
 
 type LocalizedText = {
   nl?: string
@@ -59,11 +59,14 @@ function PostersPageContent() {
   const [productions, setProductions] = useState<ProductionItem[]>([])
   const [title, setTitle] = useState('')
   const [productionId, setProductionId] = useState('')
+  const [productionSearchInput, setProductionSearchInput] = useState('')
+  const [isProductionDropdownOpen, setIsProductionDropdownOpen] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [search, setSearch] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [productionError, setProductionError] = useState<string | null>(null)
 
   const pageTitle = messages.admin.nav.posters
 
@@ -75,33 +78,110 @@ function PostersPageContent() {
     })
   }, [productions])
 
-  const loadData = async (searchQuery: string = '') => {
+  const filteredProductions = useMemo(() => {
+    const needle = productionSearchInput.trim().toLowerCase()
+    if (!needle) {
+      return sortedProductions.slice(0, 12)
+    }
+
+    return sortedProductions
+      .filter((production) => {
+        const label = getLocalizedTitle(production.title) || production.id
+        return label.toLowerCase().includes(needle)
+      })
+      .slice(0, 12)
+  }, [productionSearchInput, sortedProductions])
+
+  const fetchProductionsWithFallback = useCallback(async () => {
+    const urls = [
+      '/archive/productions?page=1&limit=100&sort=recent',
+      '/archive/productions?page=1&limit=100',
+      '/archive/productions?page=1&limit=100&lang=nl',
+    ]
+
+    let lastError: unknown = null
+
+    for (const url of urls) {
+      try {
+        const response = await apiFetch<PaginatedApiResponse<ProductionItem>>(url)
+        return response.data
+      } catch (requestError) {
+        lastError = requestError
+      }
+    }
+
+    throw lastError instanceof Error ? lastError : new Error('Producties konden niet geladen worden.')
+  }, [])
+
+  const loadData = useCallback(async (searchQuery: string = '') => {
     setIsLoading(true)
     setError(null)
+    setProductionError(null)
 
-    try {
-      const [posterResponse, productionResponse] = await Promise.all([
-        apiFetch<PaginatedApiResponse<PosterItem>>(`/archive/posters?page=1&limit=80${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''}`),
-        apiFetch<PaginatedApiResponse<ProductionItem>>('/archive/productions?page=1&limit=200&sort=recent'),
-      ])
+    const [postersResult, productionsResult] = await Promise.allSettled([
+      apiFetch<PaginatedApiResponse<PosterItem>>(`/archive/posters?page=1&limit=80${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''}`),
+      fetchProductionsWithFallback(),
+    ])
 
-      setPosters(posterResponse.data)
-      setProductions(productionResponse.data)
-
-      if (!productionId && productionResponse.data.length > 0) {
-        setProductionId(productionResponse.data[0].id)
-      }
-    } catch (requestError) {
-      const message = requestError instanceof Error ? requestError.message : 'Request failed'
-      setError(message)
-    } finally {
-      setIsLoading(false)
+    if (postersResult.status === 'fulfilled') {
+      setPosters(postersResult.value.data)
+    } else {
+      setPosters([])
     }
-  }
+
+    if (productionsResult.status === 'fulfilled') {
+      setProductions(productionsResult.value)
+      setProductionId((currentProductionId) => currentProductionId || productionsResult.value[0]?.id || '')
+    } else {
+      setProductions([])
+    }
+
+    const postersError = postersResult.status === 'rejected'
+      ? postersResult.reason instanceof Error
+        ? postersResult.reason.message
+        : 'Affiches konden niet geladen worden.'
+      : null
+
+    const productionsError = productionsResult.status === 'rejected'
+      ? productionsResult.reason instanceof Error
+        ? productionsResult.reason.message
+        : 'Producties konden niet geladen worden.'
+      : null
+
+    if (productionsError || postersError) {
+      setError(productionsError ?? postersError)
+    }
+
+    if (productionsError) {
+      setProductionError(productionsError)
+    }
+
+    setIsLoading(false)
+  }, [fetchProductionsWithFallback])
 
   useEffect(() => {
-    void loadData(search)
-  }, [])
+    void loadData()
+  }, [loadData])
+
+  useEffect(() => {
+    if (!productionId) {
+      return
+    }
+
+    const selectedProduction = sortedProductions.find((production) => production.id === productionId)
+    if (!selectedProduction) {
+      return
+    }
+
+    const label = getLocalizedTitle(selectedProduction.title) || selectedProduction.id
+    setProductionSearchInput(label)
+  }, [productionId, sortedProductions])
+
+  const handleSelectProduction = (production: ProductionItem) => {
+    setProductionId(production.id)
+    setProductionSearchInput(getLocalizedTitle(production.title) || production.id)
+    setIsProductionDropdownOpen(false)
+  }
 
   const handleCreatePoster = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -174,17 +254,52 @@ function PostersPageContent() {
 
           <label className="flex flex-col gap-2 text-sm text-foreground">
             <span>Productie</span>
-            <select
-              value={productionId}
-              onChange={(event) => setProductionId(event.target.value)}
-              className="h-10 rounded-md border border-[var(--color-admin-card-border)] px-3"
-            >
-              {sortedProductions.map((production) => (
-                <option key={production.id} value={production.id}>
-                  {getLocalizedTitle(production.title) || production.id}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <input
+                type="text"
+                value={productionSearchInput}
+                onChange={(event) => {
+                  setProductionSearchInput(event.target.value)
+                  setProductionId('')
+                }}
+                onFocus={() => setIsProductionDropdownOpen(true)}
+                onBlur={() => {
+                  window.setTimeout(() => {
+                    setIsProductionDropdownOpen(false)
+                  }, 120)
+                }}
+                placeholder="Zoek productie"
+                className="h-10 w-full rounded-md border border-[var(--color-admin-card-border)] px-3"
+              />
+
+              {isProductionDropdownOpen ? (
+                <div className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-md border border-[var(--color-admin-card-border)] bg-white shadow-sm dark:bg-[#111318]">
+                  {filteredProductions.length === 0 ? (
+                    <p className="px-3 py-2 text-xs text-muted">Geen producties gevonden</p>
+                  ) : (
+                    filteredProductions.map((production) => {
+                      const label = getLocalizedTitle(production.title) || production.id
+
+                      return (
+                        <button
+                          key={production.id}
+                          type="button"
+                          className="block w-full px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-[var(--color-admin-card-bg)]"
+                          onMouseDown={(event) => {
+                            event.preventDefault()
+                            handleSelectProduction(production)
+                          }}
+                        >
+                          {label}
+                        </button>
+                      )
+                    })
+                  )}
+                </div>
+              ) : null}
+            </div>
+            {sortedProductions.length === 0 ? <span className="text-xs text-muted">Geen producties beschikbaar</span> : null}
+            {productionError ? <span className="text-xs text-red-600">{productionError}</span> : null}
           </label>
 
           <label className="flex flex-col gap-2 text-sm text-foreground md:col-span-2">
@@ -247,7 +362,7 @@ function PostersPageContent() {
               <article key={poster.id} className="overflow-hidden rounded-xl border border-[var(--color-admin-card-border)]">
                 <div className="aspect-[4/3] bg-slate-100">
                   <img
-                    src={poster.file_url}
+                    src={normalizeApiAssetUrl(poster.file_url)}
                     alt={poster.title}
                     className="h-full w-full object-cover"
                     loading="lazy"

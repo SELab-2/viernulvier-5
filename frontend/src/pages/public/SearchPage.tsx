@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { getActiveLocale, getMessages, withLocalePath } from '../../i18n'
 import type { Locale } from '../../i18n/types'
-import { apiFetch } from '../../api/client'
+import { apiFetch, normalizeApiAssetUrl } from '../../api/client'
 import PublicLayout from '../../components/public/PublicLayout'
 import SearchPagination from '../../components/public/search/SearchPagination'
 import SearchResultCard, { type SearchResultItem } from '../../components/public/search/SearchResultCard'
@@ -271,7 +271,7 @@ function mapPosterToSearchEntry(item: PosterApiItem, locale: Locale): SearchEntr
         title: item.title,
         excerpt: productionTitle,
         venue: productionTitle,
-        imageUrl: item.file_url,
+        imageUrl: normalizeApiAssetUrl(item.file_url),
         year: new Date(item.created_at).getFullYear() || MIN_PERIOD_YEAR,
         genre: '',
         location: '',
@@ -719,7 +719,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
         return () => {
             window.clearTimeout(timerId)
         }
-    }, [searchInput, query, safeFromYear, safeToYear, selectedGenres, selectedLocations, sort, safeLimit, pushFilters])
+    }, [searchInput, query, activeTab, safeFromYear, safeToYear, selectedGenres, selectedLocations, sort, safeLimit, pushFilters])
 
     const handleSearchSubmit = () => {
         pushFilters({

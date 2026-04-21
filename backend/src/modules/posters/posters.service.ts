@@ -1,8 +1,8 @@
 import { PaginatedResult, calculateTotalPages, sanitizePage } from '../../utils/pagination.js'
 import type { PosterPaginationQuery, UpdatePosterInput } from './posters.schema.js'
-import { PostersRepository } from './posters.repository.js'
+import { PostersRepository, type PosterRecord } from './posters.repository.js'
 
-type PosterRaw = Awaited<ReturnType<PostersRepository['findById']>>
+type PosterRaw = PosterRecord | null
 
 type CreatePosterInput = {
     title: string

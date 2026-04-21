@@ -1,5 +1,36 @@
 const API_BASE = '/api/v1'
 
+export function normalizeApiAssetUrl(value: string | null | undefined): string | undefined {
+    if (!value) {
+        return undefined
+    }
+
+    const trimmed = value.trim()
+    if (!trimmed) {
+        return undefined
+    }
+
+    if (trimmed.startsWith('/api/')) {
+        return trimmed
+    }
+
+    if (typeof window === 'undefined') {
+        return trimmed
+    }
+
+    try {
+        const url = new URL(trimmed, window.location.origin)
+
+        if (url.pathname.startsWith('/api/')) {
+            return `${url.pathname}${url.search}${url.hash}`
+        }
+    } catch {
+        return trimmed
+    }
+
+    return trimmed
+}
+
 /**
  * API client for communicating with the Fastify backend.
  *

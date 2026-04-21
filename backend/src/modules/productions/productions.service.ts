@@ -96,13 +96,8 @@ export class ProductionsService {
     }
 
     private extractImageUrl(production: any): string | null {
-        if (production?.poster?.id) {
-            return `/api/v1/archive/posters/${production.poster.id}/file`
-        }
-
-        const posterItems = Array.isArray(production.poster_gallery?.items) ? production.poster_gallery.items : []
         const mediaItems = Array.isArray(production.media_gallery?.items) ? production.media_gallery.items : []
-        const sortedItems = this.sortImageItems([...posterItems, ...mediaItems])
+        const sortedItems = this.sortImageItems(mediaItems)
 
         for (const item of sortedItems) {
             const crops = Array.isArray(item?.crops) ? item.crops : []
