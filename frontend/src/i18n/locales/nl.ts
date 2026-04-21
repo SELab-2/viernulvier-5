@@ -230,12 +230,18 @@ const nl: Messages = {
   },
 
   editHeader: {
-    back: 'Terug',
+    back: '← Terug',
     publish: 'Publiceren',
     saveOnDraft: 'Opslaan als draft'
   },
 
   blogs: {
+      languageError:'Blog bestaat niet in deze taal',
+      detailPageBack:'← terug naar hoofdpagina',
+      loadingBlog: 'Blog wordt geladen...',
+      loadingProductions: 'Producties laden...',
+      relatedProductions: 'Gerelateerde producties',
+      untitledBlog: 'Zonder titel',
       dutchOption:'Nederlands',
       englishOption:'Engels',
       title: 'titel',
@@ -252,7 +258,7 @@ const nl: Messages = {
       deleteConfirm: "Weet je zeker dat je deze blog wilt verwijderen?",
       deleteError: "Blog verwijderen mislukt.",
       blogNotFound: "Deze blog bestaat niet.",
-      noTitleError: "Voeg een titel in ten minste één taal toe voordat u opslaat.",
+      noTitleError: "Vul minstens één taal in voordat je publiceert.",
         filledLanguageNeedsTitleError: "Als een taal is ingevuld, moet die ook een titel hebben.",
       productionPopUp : {
           title:"Kies een production",
