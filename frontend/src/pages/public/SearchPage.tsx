@@ -80,6 +80,17 @@ type ProductionApiItem = {
     performer_type: string | null
     attendance_mode: string | null
     created_at: string
+    links?: {
+        self: string
+        events: string
+        genres: string
+        tags: string
+        media_gallery: string | null
+        review_gallery: string | null
+        poster_gallery: string | null
+        uitdatabank_theme: string | null
+        uitdatabank_type: string | null
+    }
 }
 
 type PaginatedApiResponse<T> = {
@@ -283,9 +294,80 @@ function mapProductionToSearchEntry(item: ProductionApiItem, locale: Locale, pre
         venue,
         imageUrl: item.image_url ?? undefined,
         year,
-        genre: normalizedGenre,
+        genre: normalizedGenre || '',
         location: normalizedLocation,
     }
+}
+
+function getRelativePath(url: string | null | undefined): string | null {
+    if (!url) return null
+    const parts = url.split('/api/v1')
+    return parts.length > 1 ? parts[1] : url
+}
+
+function useProductionImages(items: ProductionApiItem[]) {
+    const [images, setImages] = useState<Record<string, string>>({})
+
+    useEffect(() => {
+        const fetchImages = async () => {
+            const itemsToFetch = items.filter(item => !item.image_url && item.links?.media_gallery)
+            
+            if (itemsToFetch.length === 0) return
+
+            const results = await Promise.allSettled(
+                itemsToFetch.map(async (item) => {
+                    const galleryPath = getRelativePath(item.links?.media_gallery)
+                    if (!galleryPath) return null
+
+                    try {
+                        // 1. Production -> Gallery
+                        const galleryRes = await apiFetch<{ data: { links: { items: string } } }>(galleryPath)
+                        const itemsPath = getRelativePath(galleryRes.data?.links?.items)
+                        if (!itemsPath) return null
+
+                        // 2. Gallery -> Items
+                        const itemsRes = await apiFetch<{ data: any[] }>(itemsPath)
+                        const galleryItems = itemsRes.data || []
+                        
+                        // 3. Find first item with crops
+                        for (const galleryItem of galleryItems) {
+                            if (!galleryItem.links?.crops) continue
+                            
+                            // 4. Item -> Crops
+                            const cropsPath = getRelativePath(galleryItem.links.crops)
+                            if (!cropsPath) continue
+                            const cropsRes = await apiFetch<{ data: any[] }>(cropsPath)
+                            const crops = cropsRes.data || []
+                            
+                            // 5. Find target crop
+                            const targetCrop = crops.find((c: any) => c.name === 'FE3_header') || 
+                                             crops.find((c: any) => c.name === 'FE3_grid') || 
+                                             crops[0]
+                            
+                            if (targetCrop?.url) {
+                                return { id: item.id, url: targetCrop.url }
+                            }
+                        }
+                    } catch (err) {
+                        // Silently fail
+                    }
+                    return null
+                })
+            )
+
+            const newImages: Record<string, string> = {}
+            results.forEach(res => {
+                if (res.status === 'fulfilled' && res.value) {
+                    newImages[res.value.id] = res.value.url
+                }
+            })
+            setImages(prev => ({ ...prev, ...newImages }))
+        }
+
+        fetchImages()
+    }, [items])
+
+    return images
 }
 
 async function copyCurrentUrl() {
@@ -789,10 +871,13 @@ function SearchPage() {
     const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false)
     const [shareCopied, setShareCopied] = useState(false)
     const [apiEntries, setApiEntries] = useState<SearchEntry[]>([])
+    const [apiRawItems, setApiRawItems] = useState<ProductionApiItem[]>([])
     const [totalResults, setTotalResults] = useState(0)
     const [totalPages, setTotalPages] = useState(1)
     const [isLoading, setIsLoading] = useState(true)
     const [apiError, setApiError] = useState<string | null>(null)
+
+    const fetchedImages = useProductionImages(apiRawItems)
 
     const filterState = useMemo(() => parseSearchFilterState(searchParams), [searchParams])
     const query = filterState.query
@@ -849,6 +934,7 @@ function SearchPage() {
 
                 const preferredGenre = selectedGenres.length === 1 ? selectedGenres[0] : undefined
                 const mappedEntries = response.data.map((item) => mapProductionToSearchEntry(item, locale, preferredGenre))
+                setApiRawItems(response.data)
                 setApiEntries(mappedEntries)
                 setTotalResults(response.meta?.total ?? mappedEntries.length)
                 setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
@@ -884,7 +970,12 @@ function SearchPage() {
     }
 
     const currentPage = Math.min(page, totalPages)
-    const pageItems = apiEntries
+    const pageItems = useMemo(() => {
+        return apiEntries.map(item => ({
+            ...item,
+            imageUrl: fetchedImages[item.id] || item.imageUrl
+        }))
+    }, [apiEntries, fetchedImages])
 
     // Compacte paginering: 1,2,3,...,laatste
     function getCompactPageLabels(current: number, total: number): string[] {
