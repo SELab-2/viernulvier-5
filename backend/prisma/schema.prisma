@@ -69,7 +69,6 @@ model gallery {
   media_gallery_productions  production[] @relation("production_media_gallery")
   poster_gallery_productions production[] @relation("production_poster_gallery")
   review_gallery_productions production[] @relation("production_review_gallery")
-  other_gallery_productions  production[] @relation("production_other_gallery")
   production                 production[]
 }
 
@@ -192,13 +191,13 @@ model location {
 }
 
 model blog {
-  id              String            @id @db.Uuid @default(uuid())
+  id              String            @id @default(uuid()) @db.Uuid
   title           String?           @db.Text
   content         Json?
   blog_production blog_production[]
 
-  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt DateTime  @default(now()) @map("updated_at") @db.Timestamp(6)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamp(6)
 }
 
 model blog_production {
@@ -242,7 +241,6 @@ model production {
   media_gallery_id         String?                   @db.Uuid
   review_gallery_id        String?                   @db.Uuid
   poster_gallery_id        String?                   @db.Uuid
-  other_gallery_id         String?                   @db.Uuid
   uitdatabank_theme        String?                   @db.Uuid
   uitdatabank_type         String?                   @db.Uuid
   blog_production          blog_production[]
@@ -252,7 +250,6 @@ model production {
   media_gallery            gallery?                  @relation("production_media_gallery", fields: [media_gallery_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   poster_gallery           gallery?                  @relation("production_poster_gallery", fields: [poster_gallery_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   review_gallery           gallery?                  @relation("production_review_gallery", fields: [review_gallery_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  other_gallery            gallery?                  @relation("production_other_gallery", fields: [other_gallery_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   uitdatabank_themes       uitdatabank_theme?        @relation(fields: [uitdatabank_theme], references: [id], onDelete: NoAction, onUpdate: NoAction)
   uitdatabank_types        uitdatabank_type?         @relation(fields: [uitdatabank_type], references: [id], onDelete: NoAction, onUpdate: NoAction)
   uit_keywords_productions uit_keywords_production[]
