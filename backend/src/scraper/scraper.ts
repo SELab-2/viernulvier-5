@@ -26,7 +26,7 @@ export default {
     sync_hall,
     sync_productions,
     sync_spaces,
-  sync_genres,
+  sync_tags,
   sync_galleries,
   sync_items,
   sync_crops,
@@ -342,7 +342,7 @@ async function sync_locations(cutoff_timestamp: Date | undefined = undefined) {
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const { members: rawPage, totalItems } of Fetcher.fetchLocationsPages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchLocationsPages(cutoff_timestamp)) {
     pageCount++;
     totalProcessed += rawPage.length;
     updateStatus("Locations", createProgressBar(totalProcessed, totalItems));
@@ -371,7 +371,7 @@ async function sync_hall(cutoff_timestamp: Date | undefined = undefined) {
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const { members: rawPage, totalItems } of Fetcher.fetchHallsPages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchHallsPages(cutoff_timestamp)) {
     pageCount++;
     totalProcessed += rawPage.length;
     updateStatus("Halls", createProgressBar(totalProcessed, totalItems));
@@ -421,7 +421,7 @@ async function sync_spaces(cutoff_timestamp: Date | undefined = undefined) {
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const { members: rawPage, totalItems } of Fetcher.fetchSpacesPages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchSpacesPages(cutoff_timestamp)) {
     pageCount++;
     totalProcessed += rawPage.length;
     updateStatus("Spaces", createProgressBar(totalProcessed, totalItems));
@@ -471,7 +471,7 @@ async function sync_events(cutoff_timestamp: Date | undefined = undefined) {
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const { members: rawPage, totalItems } of Fetcher.fetchEventsPages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchEventsPages(cutoff_timestamp)) {
     pageCount++;
     totalProcessed += rawPage.length;
     updateStatus("Events", createProgressBar(totalProcessed, totalItems));
@@ -540,7 +540,7 @@ async function sync_productions(cutoff_timestamp: Date | undefined = undefined) 
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const { members: rawPage, totalItems } of Fetcher.fetchProductionsPages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchProductionsPages(cutoff_timestamp)) {
     pageCount++;
     totalProcessed += rawPage.length;
     updateStatus("Productions", createProgressBar(totalProcessed, totalItems));
@@ -554,6 +554,7 @@ async function sync_productions(cutoff_timestamp: Date | undefined = undefined) 
       const themeIds = new Set<string>();
       const typeIds = new Set<string>();
       const keywordIds = new Set<string>();
+      const genreIds = new Set<string>();
 
       for (const prod of page) {
         if (prod.media_gallery) galleryIds.add(prod.media_gallery);
@@ -564,14 +565,19 @@ async function sync_productions(cutoff_timestamp: Date | undefined = undefined) 
         if (prod.uitdatabank_keywords) {
           prod.uitdatabank_keywords.forEach(k => keywordIds.add(k));
         }
+        if (prod.genres) {
+          prod.genres.forEach(g => genreIds.add(g));
+        }
       }
 
       // Fetch all required relations in bulk
-      const [galleries, themes, types, keywords] = await Promise.all([
+      const [galleries, themes, types, keywords, genres, tags] = await Promise.all([
         tx.gallery.findMany({ where: { apiId: { in: Array.from(galleryIds) } } }),
         tx.uitdatabank_theme.findMany({ where: { apiId: { in: Array.from(themeIds) } } }),
         tx.uitdatabank_type.findMany({ where: { apiId: { in: Array.from(typeIds) } } }),
         tx.uitdatabank_keyword.findMany({ where: { apiId: { in: Array.from(keywordIds) } } }),
+        tx.genre.findMany({ where: { apiId: { in: Array.from(genreIds) } } }),
+        tx.tag.findMany({ where: { apiId: { in: Array.from(genreIds) } } }),
       ]);
 
       // Create lookup maps
@@ -579,6 +585,8 @@ async function sync_productions(cutoff_timestamp: Date | undefined = undefined) 
       const themeMap = new Map(themes.map(t => [t.apiId, t.id]));
       const typeMap = new Map(types.map(t => [t.apiId, t.id]));
       const keywordMap = new Map(keywords.map(k => [k.apiId, k.id]));
+      const genreMap = new Map(genres.map(g => [g.apiId, g.id]));
+      const tagMap = new Map(tags.map(t => [t.apiId, t.id]));
 
       for (const production of page) {
         const db_production = await tx.production.upsert({
@@ -623,41 +631,40 @@ async function sync_productions(cutoff_timestamp: Date | undefined = undefined) 
           }
         }
 
+        // Link genres
         if (production.genres) {
-          for (const genre of production.genres) {
-            const [db_genre, db_tag] = await Promise.all([
-              tx.genre.findUnique({ where: { apiId: genre } }),
-              tx.tag.findUnique({ where: { apiId: genre } })
-            ]);
+          for (const genreApiId of production.genres) {
+            const genreId = genreMap.get(genreApiId);
+            const tagId = tagMap.get(genreApiId);
 
-            if (db_genre !== null) {
+            if (genreId) {
               await tx.genre_production.upsert({
                 where: {
                   genre_id_production_id: {
-                    genre_id: db_genre.id,
+                    genre_id: genreId,
                     production_id: db_production.id,
                   }
                 },
-                update: {},
+                update: {}, // exists, no update needed
                 create: {
                   production_id: db_production.id,
-                  genre_id: db_genre.id,
+                  genre_id: genreId,
                 }
               });
             }
 
-            if (db_tag !== null) {
+            if (tagId) {
               await tx.tag_production.upsert({
                 where: {
                   tag_id_production_id: {
-                    tag_id: db_tag.id,
+                    tag_id: tagId,
                     production_id: db_production.id,
                   }
                 },
-                update: {},
+                update: {}, // exists, no update needed
                 create: {
                   production_id: db_production.id,
-                  tag_id: db_tag.id,
+                  tag_id: tagId,
                 }
               });
             }
@@ -672,49 +679,38 @@ async function sync_productions(cutoff_timestamp: Date | undefined = undefined) 
 
 
 
-async function sync_genres(cutoff_timestamp: Date | undefined = undefined){
+async function sync_tags(cutoff_timestamp: Date | undefined = undefined){
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const { members: rawPage, totalItems } of Fetcher.fetchGenrePages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchGenrePages(cutoff_timestamp)) {
     pageCount++;
     totalProcessed += rawPage.length;
-    updateStatus("Genres", createProgressBar(totalProcessed, totalItems));
+    updateStatus("Tags", createProgressBar(totalProcessed, totalItems));
 
     if (rawPage.length === 0) break;
     const page = filterByCutoff(rawPage, cutoff_timestamp);
 
     await prisma.$transaction(async (tx) => {
-          for (const genre of page) {
-            if (genre.use_as !== null && genre.use_as.toLowerCase() == "tag") {
-              await tx.tag.upsert({
-                where: {apiId: genre["@id"]},
-                update: mapGenre(genre),
-                create: mapGenre(genre),
-              });
-            } else {
-              await tx.genre.upsert({
-                  where: { apiId: genre["@id"] },
-                  update: mapGenre(genre),
-                  create: mapGenre(genre),
-                })
-            }
-
-          }
+      for (const genre of page) {
+        if (genre.use_as !== null && genre.use_as.toLowerCase() === "tag") {
+          await tx.tag.upsert({
+            where: { apiId: genre["@id"] },
+            update: mapGenre(genre),
+            create: mapGenre(genre),
+          });
+        } else {
+          await tx.genre.upsert({
+            where: { apiId: genre["@id"] },
+            update: mapGenre(genre),
+            create: mapGenre(genre),
+          });
         }
-
-    // await prisma.$transaction(
-    //     page.map(genre =>
-    //         prisma.genre.upsert({
-    //           where: { apiId: genre["@id"] },
-    //           update: mapGenre(genre),
-    //           create: mapGenre(genre),
-    //         })
-    //     )
-    );
+      }
+    });
   }
 
-  finishStatus(`\u2705 Completed syncing ${totalProcessed} genres from ${pageCount} pages`);
+  finishStatus(`\u2705 Completed syncing ${totalProcessed} tags from ${pageCount} pages`);
 }
 
 
@@ -722,7 +718,7 @@ async function sync_galleries(cutoff_timestamp: Date | undefined = undefined){
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const { members: rawPage, totalItems } of Fetcher.fetchGalleryPages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchGalleryPages(cutoff_timestamp)) {
     pageCount++;
     totalProcessed += rawPage.length;
     updateStatus("Galleries", createProgressBar(totalProcessed, totalItems));
@@ -783,7 +779,7 @@ async function sync_items(cutoff_timestamp: Date | undefined = undefined){
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const { members: rawPage, totalItems } of Fetcher.fetchItemPages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchItemPages(cutoff_timestamp)) {
     pageCount++;
     totalProcessed += rawPage.length;
     updateStatus("Items", createProgressBar(totalProcessed, totalItems));
@@ -843,7 +839,7 @@ async function sync_event_prices(cutoff_timestamp: Date | undefined = undefined)
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const { members: rawPage, totalItems } of Fetcher.fetchEventPricePages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchEventPricePages(cutoff_timestamp)) {
     pageCount++;
     totalProcessed += rawPage.length;
     updateStatus("Prices", createProgressBar(totalProcessed, totalItems));
@@ -893,7 +889,7 @@ async function sync_crops(cutoff_timestamp: Date | undefined = undefined){
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const { members: rawPage, totalItems } of Fetcher.fetchCropPages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchCropPages(cutoff_timestamp)) {
     pageCount++;
     totalProcessed += rawPage.length;
     updateStatus("Crops", createProgressBar(totalProcessed, totalItems));
@@ -919,7 +915,7 @@ async function sync_uit_keywords(cutoff_timestamp: Date | undefined = undefined)
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const { members: rawPage, totalItems } of Fetcher.fetchUitKeywordPages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchUitKeywordPages(cutoff_timestamp)) {
     pageCount++;
     totalProcessed += rawPage.length;
     updateStatus("Keywords", createProgressBar(totalProcessed, totalItems));
@@ -946,7 +942,7 @@ async function sync_uit_themes(cutoff_timestamp: Date | undefined = undefined){
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const { members: rawPage, totalItems } of Fetcher.fetchUitThemePages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchUitThemePages(cutoff_timestamp)) {
     pageCount++;
     totalProcessed += rawPage.length;
     updateStatus("Themes", createProgressBar(totalProcessed, totalItems));
@@ -973,7 +969,7 @@ async function sync_uit_types(cutoff_timestamp: Date | undefined = undefined){
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (const { members: rawPage, totalItems } of Fetcher.fetchUitTypePages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchUitTypePages(cutoff_timestamp)) {
     pageCount++;
     totalProcessed += rawPage.length;
     updateStatus("Types", createProgressBar(totalProcessed, totalItems));
