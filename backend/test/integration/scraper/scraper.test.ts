@@ -352,7 +352,7 @@ beforeAll(async () => {
   await Scraper.sync_uit_keywords();
   await Scraper.sync_uit_themes();
   await Scraper.sync_uit_types();
-  await Scraper.sync_genres();
+  await Scraper.sync_tags();
   await Scraper.sync_productions();
   await Scraper.sync_events();
   await Scraper.sync_event_prices();
@@ -696,7 +696,7 @@ describe('scraper integration full coverage', () => {
     await Scraper.sync_uit_keywords();
     await Scraper.sync_uit_themes();
     await Scraper.sync_uit_types();
-    await Scraper.sync_genres();
+    await Scraper.sync_tags();
     await Scraper.sync_productions();
     await Scraper.sync_event_prices();
 
@@ -756,7 +756,7 @@ describe('scraper integration full coverage', () => {
       await Scraper.sync_hall();
       await Scraper.sync_events();
       await Scraper.sync_productions();
-      await Scraper.sync_genres();
+      await Scraper.sync_tags();
       await Scraper.sync_galleries();
       await Scraper.sync_items();
       await Scraper.sync_crops();
