@@ -1,0 +1,19 @@
+services:
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: vnv_backend
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    ports:
+      - 3001:3001
+    networks:
+        - vnv_net
+
+    # TODO: add dev frontend
+
+networks:
+  vnv_net:
+    external: true

@@ -1,37 +1,40 @@
 import { TaxonomiesRepository } from './taxonomies.repository.js'
 import type { 
-    PaginationQuery, 
-    GenreListResponse, 
-    TagListResponse,
-    GenreResponse,
+    GenrePaginationQuery,
+    TagPaginationQuery,
+    GenreResponse, 
     TagResponse,
     CreateGenreInput,
     UpdateGenreInput,
     CreateTagInput,
     UpdateTagInput
 } from './taxonomies.schema.js'
+import { PaginatedResult, calculateTotalPages, sanitizePage } from '../../utils/pagination.js'
 
 export class TaxonomiesService {
     constructor(private readonly repository: TaxonomiesRepository) { }
 
-    async getGenres(options: PaginationQuery): Promise<GenreListResponse> {
-        const { page, limit, search, lang } = options
+    async getGenres(options: GenrePaginationQuery): Promise<PaginatedResult<GenreResponse>> {
+        const { page, limit, search, lang, productionId } = options
 
-        const [data, total] = await Promise.all([
-            this.repository.findAllGenres({ page, limit, search, lang }),
-            this.repository.countGenres({ search, lang }),
-        ])
+        const total = await this.repository.countGenres({ search, lang, productionId })
 
-        const totalPages = Math.ceil(total / limit)
+        const totalPages = calculateTotalPages(total, limit)
+        const sanitizedPage = sanitizePage(page, totalPages)
+
+        const items = await this.repository.findAllGenres({ 
+            page: sanitizedPage, 
+            limit, 
+            search, 
+            lang 
+        })
 
         return {
-            data: data as any,
-            meta: {
-                total,
-                page,
-                limit,
-                totalPages,
-            },
+            items: items as any,
+            total,
+            page: sanitizedPage,
+            limit,
+            totalPages,
         }
     }
 
@@ -51,24 +54,27 @@ export class TaxonomiesService {
         await this.repository.deleteGenre(id)
     }
 
-    async getTags(options: PaginationQuery): Promise<TagListResponse> {
-        const { page, limit, search, lang } = options
+    async getTags(options: TagPaginationQuery): Promise<PaginatedResult<TagResponse>> {
+        const { page, limit, search, lang, productionId } = options
 
-        const [data, total] = await Promise.all([
-            this.repository.findAllTags({ page, limit, search, lang }),
-            this.repository.countTags({ search, lang }),
-        ])
+        const total = await this.repository.countTags({ search, lang, productionId })
 
-        const totalPages = Math.ceil(total / limit)
+        const totalPages = calculateTotalPages(total, limit)
+        const sanitizedPage = sanitizePage(page, totalPages)
+
+        const items = await this.repository.findAllTags({ 
+            page: sanitizedPage, 
+            limit, 
+            search, 
+            lang 
+        })
 
         return {
-            data: data as any,
-            meta: {
-                total,
-                page,
-                limit,
-                totalPages,
-            },
+            items: items as any,
+            total,
+            page: sanitizedPage,
+            limit,
+            totalPages,
         }
     }
 
