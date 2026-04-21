@@ -7,13 +7,12 @@ type ArchiveDetailHeroProps = {
     superTitle?: string | null
     artist?: string | null
     genres?: Genre[]
-    tags?: Genre[]
     locale: string
     shareLabel?: string
     onShare?: () => void
 }
 
-function ArchiveDetailHero({ imageUrl, title, superTitle, artist, genres, tags, locale, shareLabel, onShare }: ArchiveDetailHeroProps) {
+function ArchiveDetailHero({ imageUrl, title, superTitle, artist, genres, locale, shareLabel, onShare }: ArchiveDetailHeroProps) {
     return (
         <div className="relative h-[360px] w-full overflow-hidden rounded-xl md:h-[430px]">
             <img
