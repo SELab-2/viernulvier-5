@@ -370,11 +370,11 @@ function useProductionImages(items: ProductionApiItem[]) {
     return images
 }
 
-function useProductionDates(items: ProductionApiItem[], locale: Locale) {
-    const [dates, setDates] = useState<Record<string, string>>({})
+function useProductionEventDetails(items: ProductionApiItem[], locale: Locale) {
+    const [details, setDetails] = useState<Record<string, { date: string, venue: string }>>({})
 
     useEffect(() => {
-        const fetchDates = async () => {
+        const fetchDetails = async () => {
             const itemsToFetch = items.filter(item => item.links?.events)
             if (itemsToFetch.length === 0) return
 
@@ -385,16 +385,17 @@ function useProductionDates(items: ProductionApiItem[], locale: Locale) {
                         const eventsPath = getRelativePath(item.links?.events)
                         if (!eventsPath) return null
 
-                        // Fetch past events (limit 100 to be safe)
-                        const res = await apiFetch<{ data: Array<{ starts_at: string }> }>(`${eventsPath}&limit=100`)
+                        // 1. Fetch events
+                        const res = await apiFetch<{ data: Array<{ starts_at: string, links: { hall: string } }> }>(`${eventsPath}&limit=50`)
                         const pastEvents = (res.data || [])
-                            .map(e => new Date(e.starts_at))
-                            .filter(d => d < now)
-                            .sort((a, b) => a.getTime() - b.getTime())
+                            .filter(e => new Date(e.starts_at) < now)
+                            .sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime())
 
-                        if (pastEvents.length === 0) return { id: item.id, displayDate: '' }
+                        if (pastEvents.length === 0) return { id: item.id, date: '', venue: '' }
 
-                        const formatDateLocal = (date: Date) => {
+                        // 2. Format Date
+                        const formatDateLocal = (dateStr: string) => {
+                            const date = new Date(dateStr)
                             return new Intl.DateTimeFormat(locale === 'nl' ? 'nl-BE' : 'en-GB', {
                                 day: '2-digit',
                                 month: '2-digit',
@@ -402,37 +403,56 @@ function useProductionDates(items: ProductionApiItem[], locale: Locale) {
                             }).format(date)
                         }
 
+                        let displayDate = ''
                         if (pastEvents.length === 1) {
-                            return { id: item.id, displayDate: formatDateLocal(pastEvents[0]) }
+                            displayDate = formatDateLocal(pastEvents[0].starts_at)
+                        } else {
+                            const firstYear = new Date(pastEvents[0].starts_at).getFullYear()
+                            const lastYear = new Date(pastEvents[pastEvents.length - 1].starts_at).getFullYear()
+                            displayDate = firstYear === lastYear 
+                                ? `${formatDateLocal(pastEvents[0].starts_at)} - ${formatDateLocal(pastEvents[pastEvents.length - 1].starts_at)}`
+                                : `${firstYear} - ${lastYear}`
                         }
 
-                        const firstYear = pastEvents[0].getFullYear()
-                        const lastYear = pastEvents[pastEvents.length - 1].getFullYear()
+                        // 3. Fetch Venue Names (Halls)
+                        const venueNames = new Set<string>()
+                        const hallResults = await Promise.allSettled(
+                            pastEvents.slice(0, 5).map(async (event) => {
+                                const hallPath = getRelativePath(event.links?.hall)
+                                if (!hallPath) return null
+                                const hallRes = await apiFetch<{ data: { name: LocalizedText } }>(hallPath)
+                                return getLocalizedText(hallRes.data.name, locale)
+                            })
+                        )
 
-                        if (firstYear === lastYear) {
-                             return { id: item.id, displayDate: `${formatDateLocal(pastEvents[0])} - ${formatDateLocal(pastEvents[pastEvents.length - 1])}` }
-                        }
-                        
-                        return { id: item.id, displayDate: `${firstYear} - ${lastYear}` }
+                        hallResults.forEach(hr => {
+                            if (hr.status === 'fulfilled' && hr.value) {
+                                venueNames.add(hr.value)
+                            }
+                        })
+
+                        const displayVenue = Array.from(venueNames).join(' • ')
+
+                        return { id: item.id, date: displayDate, venue: displayVenue }
                     } catch (err) {
                         return null
                     }
                 })
             )
 
-            const newDates: Record<string, string> = {}
+            const newDetails: Record<string, { date: string, venue: string }> = {}
             results.forEach(res => {
                 if (res.status === 'fulfilled' && res.value) {
-                    newDates[res.value.id] = res.value.displayDate
+                    newDetails[res.value.id] = { date: res.value.date, venue: res.value.venue }
                 }
             })
-            setDates(prev => ({ ...prev, ...newDates }))
+            setDetails(prev => ({ ...prev, ...newDetails }))
         }
 
-        fetchDates()
+        fetchDetails()
     }, [items, locale])
 
-    return dates
+    return details
 }
 
 function useProductionTaxonomies(items: ProductionApiItem[], locale: Locale) {
@@ -488,6 +508,29 @@ function useProductionTaxonomies(items: ProductionApiItem[], locale: Locale) {
     }, [items, locale])
 
     return taxonomies
+}
+
+function useAllHalls(locale: Locale) {
+    const [halls, setHalls] = useState<string[]>([])
+
+    useEffect(() => {
+        const fetchHalls = async () => {
+            try {
+                // Fetch more halls to be sure
+                const res = await apiFetch<{ data: Array<{ name: LocalizedText }> }>('/archive/halls?limit=500')
+                const names = (res.data || [])
+                    .map(h => getLocalizedText(h.name, locale))
+                    .filter(Boolean)
+                
+                setHalls(Array.from(new Set(names)).sort())
+            } catch (err) {
+                // Silently fail
+            }
+        }
+        fetchHalls()
+    }, [locale])
+
+    return halls
 }
 
 async function copyCurrentUrl() {
@@ -998,8 +1041,9 @@ function SearchPage() {
     const [apiError, setApiError] = useState<string | null>(null)
 
     const fetchedImages = useProductionImages(apiRawItems)
-    const fetchedDates = useProductionDates(apiRawItems, locale)
+    const fetchedDetails = useProductionEventDetails(apiRawItems, locale)
     const fetchedTaxonomies = useProductionTaxonomies(apiRawItems, locale)
+    const allAvailableHalls = useAllHalls(locale)
 
     const filterState = useMemo(() => parseSearchFilterState(searchParams), [searchParams])
     const query = filterState.query
@@ -1097,17 +1141,18 @@ function SearchPage() {
         if (!apiEntries) return []
         return apiEntries
             .map(item => {
-                const fetchedDate = fetchedDates[item.id]
+                const detail = fetchedDetails[item.id]
                 const fetchedTaxonomy = fetchedTaxonomies[item.id]
                 return {
                     ...item,
                     imageUrl: fetchedImages[item.id] || item.imageUrl,
-                    date: fetchedDate !== undefined && fetchedDate !== '' ? fetchedDate : item.date,
+                    date: detail?.date !== undefined && detail.date !== '' ? detail.date : item.date,
+                    venue: detail?.venue !== undefined && detail.venue !== '' ? detail.venue : item.venue,
                     tag: fetchedTaxonomy !== undefined && fetchedTaxonomy !== '' ? fetchedTaxonomy : item.tag
                 }
             })
-            .filter(item => fetchedDates[item.id] !== '')
-    }, [apiEntries, fetchedImages, fetchedDates, fetchedTaxonomies])
+            .filter(item => fetchedDetails[item.id]?.date !== '')
+    }, [apiEntries, fetchedImages, fetchedDetails, fetchedTaxonomies])
 
     // Compacte paginering: 1,2,3,...,laatste
     function getCompactPageLabels(current: number, total: number): string[] {
@@ -1241,23 +1286,34 @@ function SearchPage() {
 
     const locationSuggestions = useMemo(() => {
         const normalizedLocale = locale === 'en' ? 'en' : 'nl'
-        const values = new Set<string>(Object.values(LOCATION_ALIASES))
+        const uniqueValues = new Set<string>()
 
-        apiEntries.forEach((entry) => {
-            entry.venue
-                .split('•')
-                .map((part) => part.trim())
-                .filter((part) => part.length > 0)
-                .forEach((part) => {
-                    values.add(part)
-                    values.add(part.toLowerCase())
-                })
+        // 1. Add predefined aliases
+        Object.values(LOCATION_ALIASES).forEach(v => uniqueValues.add(v))
+
+        // 2. Add dynamically fetched halls from global DB list
+        allAvailableHalls.forEach(hall => {
+            const exists = Array.from(uniqueValues).some(v => v.toLowerCase() === hall.toLowerCase())
+            if (!exists) uniqueValues.add(hall)
         })
 
-        return Array.from(values).sort((a, b) =>
+        // 3. Add venues currently visible on cards (ensures "De Vooruit - Café" etc. are always there)
+        Object.values(fetchedDetails).forEach(detail => {
+            if (detail.venue) {
+                detail.venue.split(' • ').forEach(v => {
+                    const trimmed = v.trim()
+                    if (trimmed) {
+                        const exists = Array.from(uniqueValues).some(uv => uv.toLowerCase() === trimmed.toLowerCase())
+                        if (!exists) uniqueValues.add(trimmed)
+                    }
+                })
+            }
+        })
+
+        return Array.from(uniqueValues).sort((a, b) =>
             a.localeCompare(b, normalizedLocale === 'nl' ? 'nl-BE' : 'en-GB', { sensitivity: 'base' }),
         )
-    }, [apiEntries, locale])
+    }, [allAvailableHalls, fetchedDetails, locale])
 
     return (
         <PublicLayout>
