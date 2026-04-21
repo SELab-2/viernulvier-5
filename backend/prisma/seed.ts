@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import { Pool } from 'pg'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { config } from 'dotenv'
@@ -21,6 +22,7 @@ const prisma = new PrismaClient({ adapter })
  */
 async function main() {
     console.log('🌱 Seeding database...')
+
     const adminPasswordHash = await hashPassword('admin123')
     const editorPasswordHash = await hashPassword('editor123')
 
@@ -49,6 +51,8 @@ async function main() {
             role: 'EDITOR',
         },
     })
+
+    // Seed script intentionally only provisions admin/editor users.
 
     console.log('✅ Seed complete')
 }
