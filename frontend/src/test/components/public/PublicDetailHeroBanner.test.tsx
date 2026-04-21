@@ -126,22 +126,7 @@ describe('ArchiveDetailHero', () => {
         expect(screen.getByText('Concert')).toBeInTheDocument()
     })
 
-    it('renders tag pills when tags are provided', () => {
-        render(
-            <ArchiveDetailHero
-                imageUrl="https://example.com/hero.jpg"
-                title="Kapiteinsavond"
-                locale="nl"
-                tags={[
-                    { id: 'bfb14b61-f916-4368-a89b-20ab9fa63f8d', type: 'theater', name: { nl: 'in De Vooruit', en: 'at De Vooruit' }, slug: { nl: 'invooruit', en: 'invooruit' } },
-                ]}
-            />
-        )
-
-        expect(screen.getByText('in De Vooruit')).toBeInTheDocument()
-    })
-
-    it('renders both genre and tag pills together', () => {
+    it('does not render non-genre labels in hero pills', () => {
         render(
             <ArchiveDetailHero
                 imageUrl="https://example.com/hero.jpg"
@@ -150,24 +135,38 @@ describe('ArchiveDetailHero', () => {
                 genres={[
                     { id: '35dbb2ad-e32a-4779-b7eb-93085531dbc4', type: 'theater', name: { nl: 'Concert', en: 'Concert' }, slug: { nl: 'muziek', en: 'music' } },
                 ]}
-                tags={[
-                    { id: 'bfb14b61-f916-4368-a89b-20ab9fa63f8d', type: 'theater', name: { nl: 'in De Vooruit', en: 'at De Vooruit' }, slug: { nl: 'invooruit', en: 'invooruit' } },
+            />
+        )
+
+        expect(screen.getByText('Concert')).toBeInTheDocument()
+        expect(screen.queryByText('in De Vooruit')).not.toBeInTheDocument()
+    })
+
+    it('renders only genre pills when multiple genres are provided', () => {
+        render(
+            <ArchiveDetailHero
+                imageUrl="https://example.com/hero.jpg"
+                title="Kapiteinsavond"
+                locale="nl"
+                genres={[
+                    { id: '35dbb2ad-e32a-4779-b7eb-93085531dbc4', type: 'theater', name: { nl: 'Concert', en: 'Concert' }, slug: { nl: 'muziek', en: 'music' } },
+                    { id: '8edda54e-a1c4-486d-9fd4-c2e43cb2fe2f', type: 'theater', name: { nl: 'Performance', en: 'Performance' }, slug: { nl: 'performance', en: 'performance' } },
                 ]}
             />
         )
 
         expect(screen.getByText('Concert')).toBeInTheDocument()
-        expect(screen.getByText('in De Vooruit')).toBeInTheDocument()
+        expect(screen.getByText('Performance')).toBeInTheDocument()
+        expect(screen.queryByText('in De Vooruit')).not.toBeInTheDocument()
     })
 
-    it('does not render the pill container when genres and tags are both empty', () => {
+    it('does not render the pill container when genres are empty', () => {
         render(
             <ArchiveDetailHero
                 imageUrl="https://example.com/hero.jpg"
                 title="Kapiteinsavond"
                 locale="nl"
                 genres={[]}
-                tags={[]}
             />
         )
 
@@ -190,7 +189,7 @@ describe('ArchiveDetailHero', () => {
         expect(screen.queryByRole('listitem')).not.toBeInTheDocument()
     })
 
-    it('uses the correct locale for genre and tag names', () => {
+    it('uses the correct locale for genre names', () => {
         render(
             <ArchiveDetailHero
                 imageUrl="https://example.com/hero.jpg"
@@ -199,14 +198,10 @@ describe('ArchiveDetailHero', () => {
                 genres={[
                     { id: '35dbb2ad-e32a-4779-b7eb-93085531dbc4', type: 'theater', name: { nl: 'Concert', en: 'Concert EN' }, slug: null },
                 ]}
-                tags={[
-                    { id: 'bfb14b61-f916-4368-a89b-20ab9fa63f8d', type: 'theater', name: { nl: 'in De Vooruit', en: 'at De Vooruit' }, slug: null },
-                ]}
             />
         )
 
         expect(screen.getByText('Concert EN')).toBeInTheDocument()
-        expect(screen.getByText('at De Vooruit')).toBeInTheDocument()
-        expect(screen.queryByText('in De Vooruit')).not.toBeInTheDocument()
+        expect(screen.queryByText('at De Vooruit')).not.toBeInTheDocument()
     })
 })

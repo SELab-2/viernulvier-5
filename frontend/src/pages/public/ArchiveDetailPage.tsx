@@ -16,6 +16,12 @@ import { getHallById } from '../../api/halls'
 import { getSpaceById } from '../../api/spaces'
 import { getLocationById, type Location } from '../../api/locations'
 
+type ProductionWithRelations = Production & {
+    genre_production?: Array<{ genre?: Genre | null }>
+    tag_production?: Array<{ tag?: Genre | null }>
+    production_genres?: string[]
+}
+
 function ArchiveDetailPageContent() {
     const navigate = useNavigate()
     const messages = usePublicMessages()
@@ -175,7 +181,6 @@ function ArchiveDetailPageContent() {
                         superTitle={superTitle}
                         artist={artist}
                         genres={genres}
-                        tags={tags}
                         locale={locale}
                         shareLabel={shareCopied ? shareCopiedLabel : shareLabel}
                         onShare={() => {
@@ -329,15 +334,16 @@ function collectGenres(production: Production | null, locale: string): Genre[] {
         return []
     }
 
+    const productionWithRelations = production as ProductionWithRelations
     const directGenres = Array.isArray(production.genres) ? production.genres : []
-    const relationGenres = Array.isArray((production as any).genre_production)
-        ? (production as any).genre_production
-              .map((entry: any) => entry?.genre)
+    const relationGenres = Array.isArray(productionWithRelations.genre_production)
+        ? productionWithRelations.genre_production
+              .map((entry) => entry?.genre)
               .filter((value: unknown): value is Genre => Boolean(value))
         : []
 
-    const mappedProductionGenres = Array.isArray((production as any).production_genres)
-        ? (production as any).production_genres
+    const mappedProductionGenres = Array.isArray(productionWithRelations.production_genres)
+        ? productionWithRelations.production_genres
               .map((value: unknown) => (typeof value === 'string' ? value.trim() : ''))
               .filter((value: string) => value.length > 0)
               .map((label: string, index: number) => toGenreChip(label, 'genre-text', index))
@@ -361,10 +367,11 @@ function collectTags(production: Production | null, locale: string): Genre[] {
         return []
     }
 
+    const productionWithRelations = production as ProductionWithRelations
     const directTags = Array.isArray(production.tags) ? production.tags : []
-    const relationTags = Array.isArray((production as any).tag_production)
-        ? (production as any).tag_production
-              .map((entry: any) => entry?.tag)
+    const relationTags = Array.isArray(productionWithRelations.tag_production)
+        ? productionWithRelations.tag_production
+              .map((entry) => entry?.tag)
               .filter((value: unknown): value is Genre => Boolean(value))
         : []
 
