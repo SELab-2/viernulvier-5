@@ -129,6 +129,21 @@ function getLocalizedText(text: LocalizedText, locale: Locale): string {
     return values.find((value) => typeof value === 'string' && value.trim().length > 0)?.trim() ?? ''
 }
 
+function toLocalizedText(value: unknown): LocalizedText {
+    if (!value || typeof value !== 'object') {
+        return null
+    }
+
+    const source = value as Record<string, unknown>
+    const pick = (input: unknown): string | undefined => (typeof input === 'string' ? input : undefined)
+
+    return {
+        nl: pick(source.nl),
+        en: pick(source.en),
+        fr: pick(source.fr),
+    }
+}
+
 function normalizeSort(value: string): SearchSort {
     const normalized = value.trim().toLowerCase()
     return normalized === 'recent' || normalized === 'oldest' || normalized === 'relevance' ? normalized : 'relevance'
@@ -832,7 +847,7 @@ function MobileSearchForm({ className = 'mb-5 md:hidden' }: { className?: string
         const path = withLocalePath('/zoeken', locale)
         const qs = params.toString()
         navigate(qs ? `${path}?${qs}` : path)
-    }, [filterState, locale, navigate])
+    }, [searchParams, locale, navigate])
 
     useEffect(() => {
         const nextQuery = searchInput.trim()
@@ -963,10 +978,10 @@ function SearchPage() {
                         return mapProductionToSearchEntry(
                             {
                                 id: item.id,
-                                title: item.title as any,
-                                teaser: item.teaser as any,
-                                description_short: item.description_short as any,
-                                description: item.description as any,
+                                title: toLocalizedText(item.title),
+                                teaser: toLocalizedText(item.teaser),
+                                description_short: toLocalizedText(item.description_short),
+                                description: toLocalizedText(item.description),
                                 image_url: item.image_url,
                                 venue_name: item.venue_name,
                                 venue_names: item.venue_names,
