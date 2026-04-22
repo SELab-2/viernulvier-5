@@ -350,7 +350,7 @@ function useProductionImages(items: ProductionApiItem[]) {
                             
                             // 5. Find target crop
                             const targetCrop = crops.find((c) => c.name === 'FE3_header') || 
-                                             crops.find((c) => c.name === 'FE3_grid') || 
+                                             crops.find((c) => c.name === 'FEA_boxed') || 
                                              crops[0]
                             
                             if (targetCrop?.url) {
