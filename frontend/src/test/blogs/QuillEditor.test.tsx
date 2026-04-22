@@ -270,7 +270,7 @@ describe('QuillEditor', () => {
       onload: null | (() => void) = null
       onerror: null | (() => void) = null
 
-      readAsDataURL(_file: File) {
+      readAsDataURL() {
         this.result = 'data:image/png;base64,abc123'
         this.onload?.()
       }
