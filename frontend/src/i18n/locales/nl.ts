@@ -266,7 +266,7 @@ const nl: Messages = {
       publishConfirmCancel: "Annuleren",
       publishConfirmProceed: "Toch publiceren",
       productionPopUp : {
-          title:"Kies een production",
+          title:"Kies een productie",
           cancelButton: "Annuleren",
           addButton: "Toevoegen",
           close: "Sluiten",

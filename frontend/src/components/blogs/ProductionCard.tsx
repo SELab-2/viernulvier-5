@@ -11,6 +11,7 @@ type LocalizedText = {
 export type ProductionCardItem = {
     id: string
     title: LocalizedText
+    artist?: LocalizedText
     description_short?: LocalizedText
     description?: LocalizedText
     teaser?: LocalizedText
@@ -50,6 +51,32 @@ function getProductionLabel(production: ProductionCardItem, locale: Locale): str
     return getLocalizedText(production.title, locale) || production.id
 }
 
+function getProductionDisplayTitle(production: ProductionCardItem, locale: Locale): string {
+    const title = getLocalizedText(production.title, locale)
+    const artist = getLocalizedText(production.artist ?? null, locale)
+
+    if (title && artist) {
+        const normalizedTitle = title.trim().toLowerCase()
+        const normalizedArtist = artist.trim().toLowerCase()
+
+        if (normalizedTitle === normalizedArtist) {
+            return title
+        }
+
+        return `${title} — ${artist}`
+    }
+
+    if (title) {
+        return title
+    }
+
+    if (artist) {
+        return artist
+    }
+
+    return production.id
+}
+
 function getProductionExcerpt(production: ProductionCardItem, locale: Locale): string {
     const raw = getLocalizedText(production.description_short ?? null, locale)
         || getLocalizedText(production.description ?? null, locale)
@@ -58,15 +85,6 @@ function getProductionExcerpt(production: ProductionCardItem, locale: Locale): s
 
     const plain = toPlainText(raw)
     return plain.length > 160 ? `${plain.slice(0, 157)}...` : plain
-}
-
-function getProductionVenue(production: ProductionCardItem): string {
-    const venues = (production.venue_names ?? []).map((value) => value.trim()).filter((value) => value.length > 0)
-    if (venues.length > 0) {
-        return venues.join(' • ')
-    }
-
-    return production.venue_name?.trim() || production.attendance_mode?.trim() || ''
 }
 
 function getProductionDate(production: ProductionCardItem, locale: Locale): string {
@@ -88,9 +106,9 @@ function getProductionDate(production: ProductionCardItem, locale: Locale): stri
 
 function ProductionCard({ production, locale, href, className = '', selected = false, action }: ProductionCardProps) {
     const label = getProductionLabel(production, locale)
+    const displayTitle = getProductionDisplayTitle(production, locale)
     const excerpt = getProductionExcerpt(production, locale)
     const date = getProductionDate(production, locale)
-    const venue = getProductionVenue(production)
 
     const cardClassName = [
         'relative rounded-xl border transition',
@@ -116,9 +134,8 @@ function ProductionCard({ production, locale, href, className = '', selected = f
             </div>
 
             <p className="mt-2 text-xs text-text-accent">{date}</p>
-            <h3 className="mt-1 line-clamp-2 text-lg leading-tight text-foreground [overflow-wrap:anywhere]">{label}</h3>
+            <h3 className="mt-1 line-clamp-2 text-lg leading-tight text-foreground [overflow-wrap:anywhere]">{displayTitle}</h3>
             <p className="mt-1 line-clamp-2 text-sm text-text-accent">{excerpt}</p>
-            <p className="mt-2 text-xs font-semibold lowercase tracking-wide text-text-accent">{venue}</p>
         </article>
     )
 

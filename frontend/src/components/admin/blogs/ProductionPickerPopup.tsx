@@ -10,6 +10,7 @@ type LocalizedText = {
 type ProductionItem = {
     id: string
     title: LocalizedText
+    artist?: LocalizedText
     description_short?: LocalizedText
     description?: LocalizedText
     teaser?: LocalizedText
@@ -64,6 +65,24 @@ function ProductionPickerPopup({
         return getLocalizedText(production.title) || production.id
     }
 
+    const getProductionDisplayTitle = (production: ProductionItem): string => {
+        const title = getLocalizedText(production.title)
+        const artist = getLocalizedText(production.artist)
+
+        if (title && artist) {
+            const normalizedTitle = title.trim().toLowerCase()
+            const normalizedArtist = artist.trim().toLowerCase()
+
+            if (normalizedTitle === normalizedArtist) {
+                return title
+            }
+
+            return `${title} — ${artist}`
+        }
+
+        return title || artist || production.id
+    }
+
     const toPlainText = (value: string): string =>
         value
             .replace(/<[^>]*>/g, ' ')
@@ -76,16 +95,6 @@ function ProductionPickerPopup({
         const fallback = getProductionLabel(production)
         const plain = toPlainText(raw || fallback)
         return plain.length > 140 ? `${plain.slice(0, 137)}...` : plain
-    }
-
-    const getProductionVenue = (production: ProductionItem): string => {
-        const venues = (production.venue_names ?? []).map((value) => value.trim()).filter((value) => value.length > 0)
-        if (venues.length > 0) {
-            return venues.join(' • ')
-        }
-
-        const fallback = production.venue_name?.trim() || production.attendance_mode?.trim() || '-'
-        return fallback
     }
 
     const getProductionDate = (production: ProductionItem): string => {
@@ -158,10 +167,9 @@ function ProductionPickerPopup({
                                             </div>
                                             <p className="mt-2 text-xs text-text-accent">{getProductionDate(production)}</p>
                                             <h4 className="mt-1 line-clamp-2 text-lg leading-tight text-foreground [overflow-wrap:anywhere]">
-                                                {getProductionLabel(production)}
+                                                {getProductionDisplayTitle(production)}
                                             </h4>
                                             <p className="mt-1 line-clamp-2 text-sm text-text-accent">{getProductionExcerpt(production)}</p>
-                                            <p className="mt-2 text-xs font-semibold lowercase tracking-wide text-text-accent">{getProductionVenue(production)}</p>
                                         </article>
                                     </button>
                                 )
