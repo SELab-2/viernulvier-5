@@ -175,8 +175,18 @@ export class ProductionsService {
     }
 
     private mapProductionResponse(production: any, onThisDayDate?: Date): ProductionResponse {
+        const linksToGenres = Array.isArray(production.genre_production) ? production.genre_production : []
+        const linksToTags = Array.isArray(production.tag_production) ? production.tag_production : []
+
+        const genres = linksToGenres.map((link: any) => link?.genre).filter(Boolean)
+        const tags = linksToTags.map((link: any) => link?.tag).filter(Boolean)
+
+        const { genre_production: _genreProduction, tag_production: _tagProduction, ...rest } = production
+
         return {
-            ...production,
+            ...rest,
+            genres,
+            tags,
             image_url: this.extractImageUrl(production),
             on_this_day_event_date: this.getOnThisDayEventDate(production, onThisDayDate),
             venue_name: this.extractVenueName(production),

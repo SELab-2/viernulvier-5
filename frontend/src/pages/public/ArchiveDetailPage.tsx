@@ -9,7 +9,7 @@ import { usePublicMessages } from '../../components/public/PublicMessagesContext
 import ArchiveDetailHero from '../../components/public/detail/PublicDetailHeroBanner'
 import ArchiveDetailEventsList from '../../components/public/detail/PublicDetailEventsList'
 import ArchiveDetailGallery from '../../components/public/detail/PublicDetailGallery'
-import { getProductionById, type Genre, type Production } from '../../api/productions'
+import { getProductionById, type Production } from '../../api/productions'
 import { getGalleryItems, getItemCrops, getPreferredCropUrl } from '../../api/media'
 import { getEventsByProductionId, type Event } from '../../api/events'
 import { getHallById } from '../../api/halls'
@@ -146,8 +146,8 @@ function ArchiveDetailPageContent() {
     const info = localize(production?.info, locale)
     const video1 = localize(production?.video_1, locale)
     const video2 = localize(production?.video_2, locale)
-    const genres = collectGenres(production, locale)
-    const tags = collectTags(production, locale)
+    const genres = production?.genres ?? []
+    const tags = production?.tags ?? []
     const hasSidebar = Boolean(info) || genres.length > 0 || tags.length > 0
     const shareLabel = messages.search.shareLabel
     const shareCopiedLabel = messages.search.shareCopiedLabel
@@ -281,7 +281,7 @@ function ArchiveDetailPageContent() {
                                 {(genres.length > 0 || tags.length > 0) ? (
                                     <div className="mt-6 border-t border-border pt-4">
                                         <p className="mb-3 text-xs font-semibold uppercase tracking-[0.15em] text-text-accent">
-                                            Tags
+                                            Tags & genres
                                         </p>
                                         <div className="flex flex-wrap gap-2">
                                             {genres.map((genre) => {
@@ -313,28 +313,6 @@ function ArchiveDetailPageContent() {
             </div>
         </>
     )
-}
-
-function collectGenres(production: Production | null, locale: string): Genre[] {
-    if (!production) return []
-    const seen = new Set<string>()
-    return (production.genres ?? []).filter((genre) => {
-        const key = (localize(genre.name, locale) ?? '').trim().toLowerCase()
-        if (!key || seen.has(key)) return false
-        seen.add(key)
-        return true
-    })
-}
-
-function collectTags(production: Production | null, locale: string): Genre[] {
-    if (!production) return []
-    const seen = new Set<string>()
-    return (production.tags ?? []).filter((tag) => {
-        const key = (localize(tag.name, locale) ?? '').trim().toLowerCase()
-        if (!key || seen.has(key)) return false
-        seen.add(key)
-        return true
-    })
 }
 
 function ArchiveDetailPage() {
