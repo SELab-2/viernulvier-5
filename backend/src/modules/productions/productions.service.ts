@@ -181,7 +181,9 @@ export class ProductionsService {
         const genres = linksToGenres.map((link: any) => link?.genre).filter(Boolean)
         const tags = linksToTags.map((link: any) => link?.tag).filter(Boolean)
 
-        const { genre_production: _genreProduction, tag_production: _tagProduction, ...rest } = production
+        const rest = { ...production }
+        delete rest.genre_production
+        delete rest.tag_production
 
         return {
             ...rest,
