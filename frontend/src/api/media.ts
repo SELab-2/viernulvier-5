@@ -50,7 +50,7 @@ export const getItemCrops = (itemId: string) => {
     return api.get<CropsResponse>(`/archive/media/items/crops?itemId=${itemId}`)
 }
 
-const CROP_FALLBACK_ORDER = ['FE3_header', 'FE3_grid']
+const CROP_FALLBACK_ORDER = ['FE3_header', 'FE3_boxed']
 
 export const getPreferredCropUrl = (crops: Crop[]): string | null => {
     for (const name of CROP_FALLBACK_ORDER) {
