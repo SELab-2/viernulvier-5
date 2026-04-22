@@ -168,7 +168,7 @@ function hasRichContent(value: unknown): boolean {
     return true
 }
 
-export type BlogPublishValidation = 'ok' | 'atLeastOneLanguageRequired' | 'filledLanguageNeedsTitle'
+export type BlogPublishValidation = 'allLanguageFilled' | 'notAllLanguageFilled' | 'atLeastOneLanguageRequired' | 'filledLanguageNeedsTitle'
 
 export function validateBlogPublishInput(
     form: BlogContent,
@@ -196,5 +196,9 @@ export function validateBlogPublishInput(
         return 'filledLanguageNeedsTitle'
     }
 
-    return 'ok'
+    if (states.every((state) => state.isFilled)) {
+        return 'allLanguageFilled'
+    }
+
+    return 'notAllLanguageFilled'
 }

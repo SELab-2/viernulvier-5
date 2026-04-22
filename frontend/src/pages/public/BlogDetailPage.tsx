@@ -143,7 +143,9 @@ function BlogDetailPage() {
 
                 {!isLoading && !error && blog ? (
                     <article className="mx-auto max-w-4xl">
-                        <h1 className="mb-6 text-4xl font-semibold text-foreground">{getLocalizedTitle(blog.title, locale) || message.blogs.untitledBlog}</h1>
+                        <h1 className="mb-6 text-4xl font-semibold leading-tight text-foreground [overflow-wrap:anywhere]">
+                            {getLocalizedTitle(blog.title, locale) || message.blogs.untitledBlog}
+                        </h1>
                         <QuillReadOnly content={getLocalizedContent(blog.content, locale)} />
 
                         {isLoadingProductions || productions.length > 0 ? (

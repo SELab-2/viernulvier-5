@@ -56,7 +56,7 @@ describe('validateBlogPublishInput', () => {
       { nl: null, en: null },
     )
 
-    expect(result).toBe('ok')
+    expect(result).toBe('allLanguageFilled')
   })
 
   it('treats embedded json ops content as filled and valid when title exists', () => {
@@ -67,7 +67,7 @@ describe('validateBlogPublishInput', () => {
       { nl: { ops: [{ insert: { image: 'https://example.com/image.jpg' } }] }, en: null },
     )
 
-    expect(result).toBe('ok')
+    expect(result).toBe('allLanguageFilled')
   })
 
   it('treats whitespace-only html/json content as empty', () => {

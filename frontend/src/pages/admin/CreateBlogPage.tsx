@@ -51,6 +51,39 @@ function isNotFoundError(error: unknown): boolean {
     return /not found|404/i.test(error.message)
 }
 
+function hasTextContent(value: string): boolean {
+    const stripped = value.replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').trim()
+    return stripped.length > 0
+}
+
+function hasRichContent(value: unknown): boolean {
+    if (!value) {
+        return false
+    }
+
+    if (typeof value === 'string') {
+        return hasTextContent(value)
+    }
+
+    if (typeof value === 'object' && value !== null && 'ops' in value && Array.isArray((value as { ops?: unknown[] }).ops)) {
+        return (value as { ops: unknown[] }).ops.some((op) => {
+            if (typeof op !== 'object' || op === null || !('insert' in op)) {
+                return false
+            }
+
+            const insert = (op as { insert?: unknown }).insert
+
+            if (typeof insert === 'string') {
+                return insert.trim().length > 0
+            }
+
+            return Boolean(insert)
+        })
+    }
+
+    return true
+}
+
 // default value of form
 const defaultForm: BlogContent = {
     nl: { title: '', content: '' },
@@ -75,6 +108,8 @@ function CreateBlogPage() {
     const [isBlogNotFound, setIsBlogNotFound] = useState(false)
     const [error, setError] = useState('')
     const [success, setSuccess] = useState('')
+    const [isPublishConfirmOpen, setIsPublishConfirmOpen] = useState(false)
+    const [publishConfirmMessage, setPublishConfirmMessage] = useState('')
 
     const [productions, setProductions] = useState<ProductionItem[]>([])
     const [selectedProductionIds, setSelectedProductionIds] = useState<string[]>([])
@@ -287,45 +322,15 @@ function CreateBlogPage() {
         // TODO: save as draft impl.
     }
 
-    const removeBlog = async () => {
-        if (!isEditMode || !blogId) {
-            return
-        }
+    const isLocaleFilled = (localeValue: Locale) => {
+        const title = form[localeValue].title.trim()
+        const htmlContent = form[localeValue].content
+        const jsonContent = contentJson[localeValue]
 
-        const shouldDelete = window.confirm(messages.blogs.deleteConfirm)
-        if (!shouldDelete) {
-            return
-        }
-
-        setIsDeleting(true)
-        setError('')
-        setSuccess('')
-
-        try {
-            await api.delete<unknown>(`/archive/blogs/${blogId}`)
-            navigate('/admin/dashboard')
-        } catch (deleteError) {
-            setError(deleteError instanceof Error ? deleteError.message : messages.blogs.deleteError)
-        } finally {
-            setIsDeleting(false)
-        }
+        return title.length > 0 || hasTextContent(htmlContent) || hasRichContent(jsonContent)
     }
 
-    //TODO: navigate to blog page after succesfull publishing?
-    const publish = async () => {
-        const validation = validateBlogPublishInput(form, contentJson)
-        if (validation === 'atLeastOneLanguageRequired') {
-            setError(messages.blogs.noTitleError)
-            setSuccess('')
-            return
-        }
-
-        if (validation === 'filledLanguageNeedsTitle') {
-            setError(messages.blogs.filledLanguageNeedsTitleError)
-            setSuccess('')
-            return
-        }
-
+    const submitPublish = async () => {
         // Combine all language versions into single JSON content
         const combinedContent = {
             nl: (contentJson.nl ?? form.nl.content) || null,
@@ -364,6 +369,76 @@ function CreateBlogPage() {
         } finally {
             setIsSaving(false)
         }
+    }
+
+
+    // pop up for confirming pop
+    const requestPublish = () => {
+        const validation = validateBlogPublishInput(form, contentJson)
+
+        if (validation === 'atLeastOneLanguageRequired') {
+            setError(messages.blogs.noTitleError)
+            setSuccess('')
+            return
+        }
+
+        if (validation === 'filledLanguageNeedsTitle') {
+            setError(messages.blogs.filledLanguageNeedsTitleError)
+            setSuccess('')
+            return
+        }
+
+        if (validation === 'notAllLanguageFilled') {
+            const missingLanguageMessage = isLocaleFilled('nl')
+                ? messages.blogs.publishConfirmWithoutEnglish
+                : messages.blogs.publishConfirmWithoutDutch
+
+            setPublishConfirmMessage(missingLanguageMessage)
+            setIsPublishConfirmOpen(true)
+            setError('')
+            setSuccess('')
+            return
+        }
+
+        void submitPublish()
+    }
+
+    const confirmPublish = () => {
+        setIsPublishConfirmOpen(false)
+        void submitPublish()
+    }
+
+    const cancelPublishConfirmation = () => {
+        setIsPublishConfirmOpen(false)
+    }
+
+    const removeBlog = async () => {
+        if (!isEditMode || !blogId) {
+            return
+        }
+
+        const shouldDelete = window.confirm(messages.blogs.deleteConfirm)
+        if (!shouldDelete) {
+            return
+        }
+
+        setIsDeleting(true)
+        setError('')
+        setSuccess('')
+
+        try {
+            await api.delete<unknown>(`/archive/blogs/${blogId}`)
+            navigate('/admin/dashboard')
+        } catch (deleteError) {
+            setError(deleteError instanceof Error ? deleteError.message : messages.blogs.deleteError)
+        } finally {
+            setIsDeleting(false)
+        }
+    }
+
+    //TODO: navigate to blog page after succesfull publishing?
+    const publish = async () => {
+        requestPublish()
     }
 
     const addProduction = () => {
@@ -482,6 +557,46 @@ function CreateBlogPage() {
                     </div>
                 </div>
             </section>
+
+            {isPublishConfirmOpen ? (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label={messages.blogs.publishConfirmTitle}
+                    onClick={cancelPublishConfirmation}
+                >
+                    <div
+                        className="w-full max-w-md rounded-2xl border border-border bg-background p-6 shadow-xl"
+                        onClick={(event) => event.stopPropagation()}
+                    >
+                        <h3 className="text-xl font-bold tracking-wide text-foreground">
+                            {messages.blogs.publishConfirmTitle}
+                        </h3>
+                        <p className="mt-3 text-sm leading-6 text-muted">
+                            {publishConfirmMessage}
+                        </p>
+
+                        <div className="mt-6 flex items-center justify-end gap-3">
+                            <button
+                                type="button"
+                                onClick={cancelPublishConfirmation}
+                                className="rounded-full border border-border px-4 py-2 text-sm text-foreground transition hover:bg-surface"
+                            >
+                                {messages.blogs.publishConfirmCancel}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={confirmPublish}
+                                disabled={isSaving}
+                                className="rounded-full bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                                {messages.blogs.publishConfirmProceed}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            ) : null}
         </>
     )
 }

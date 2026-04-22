@@ -243,6 +243,11 @@ describe('CreateBlogPage', () => {
     })
     fireEvent.click(screen.getAllByRole('button', { name: 'Publiceren' })[0])
 
+    expect(await screen.findByRole('dialog')).toHaveAttribute('aria-label', messages.blogs.publishConfirmTitle)
+    expect(screen.getByText(messages.blogs.publishConfirmWithoutEnglish)).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: messages.blogs.publishConfirmProceed }))
+
     await waitFor(() => {
       expect(apiMock.post).toHaveBeenCalledTimes(1)
       expect(apiMock.post).toHaveBeenCalledWith(
@@ -258,6 +263,29 @@ describe('CreateBlogPage', () => {
       )
       expect(navigate).toHaveBeenCalledWith('/blogs/blog-created')
     })
+  })
+
+  it('shows the Dutch warning when publishing without a Dutch version', async () => {
+    mockCreateSuccess()
+    renderCreatePage()
+
+    await waitFor(() => {
+      expect(apiFetchMock).toHaveBeenCalledWith(
+        '/archive/productions?page=1&limit=100&sort=relevance&lang=nl',
+        expect.any(Object),
+      )
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: messages.blogs.englishOption }))
+    fireEvent.change(screen.getByLabelText('blog title'), {
+      target: { value: 'English title' },
+    })
+    fireEvent.change(screen.getByLabelText('blog content'), {
+      target: { value: '<p>English content</p>' },
+    })
+    fireEvent.click(screen.getAllByRole('button', { name: 'Publiceren' })[0])
+
+    expect(await screen.findByRole('dialog')).toHaveTextContent(messages.blogs.publishConfirmWithoutDutch)
   })
 
   it('edits an existing blog and submits a PATCH request', async () => {

@@ -260,6 +260,11 @@ const nl: Messages = {
       blogNotFound: "Deze blog bestaat niet.",
       noTitleError: "Vul minstens één taal in voordat je publiceert.",
         filledLanguageNeedsTitleError: "Als een taal is ingevuld, moet die ook een titel hebben.",
+      publishConfirmTitle: "Blog toch publiceren?",
+      publishConfirmWithoutEnglish: "Weet je zeker dat je wilt publiceren zonder Engelse versie?",
+      publishConfirmWithoutDutch: "Weet je zeker dat je wilt publiceren zonder Nederlandse versie?",
+      publishConfirmCancel: "Annuleren",
+      publishConfirmProceed: "Toch publiceren",
       productionPopUp : {
           title:"Kies een production",
           cancelButton: "Annuleren",

@@ -235,6 +235,11 @@ export type Messages = {
     blogNotFound: string
     noTitleError:string
     filledLanguageNeedsTitleError: string
+    publishConfirmTitle: string
+    publishConfirmWithoutEnglish: string
+    publishConfirmWithoutDutch: string
+    publishConfirmCancel: string
+    publishConfirmProceed: string
 
     productionPopUp : {
       title:string

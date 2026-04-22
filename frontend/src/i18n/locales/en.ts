@@ -260,6 +260,11 @@ const en: Messages = {
       blogNotFound: 'This blog does not exist.',
       noTitleError: "Please fill in at least one language before publishing.",
         filledLanguageNeedsTitleError: 'If a language is filled in, it must include a title.',
+      publishConfirmTitle: 'Publish anyway?',
+      publishConfirmWithoutEnglish: 'Are you sure you want to publish without an English version?',
+      publishConfirmWithoutDutch: 'Are you sure you want to publish without a Dutch version?',
+      publishConfirmCancel: 'Cancel',
+      publishConfirmProceed: 'Publish anyway',
       productionPopUp: {
           title: 'Choose a production',
           cancelButton: 'Cancel',
