@@ -46,6 +46,12 @@ export type Messages = {
       title: string
       description: string
     }>
+    onThisDayHeading: string
+    onThisDaySubheading: string
+    onThisDayViewAll: string
+    onThisDayEmpty: string
+    onThisDayFallbackHeading: string
+    onThisDayFallbackSubheading: string
   }
   search: {
     heading: string
@@ -87,9 +93,9 @@ export type Messages = {
     resetFiltersLabel: string
     paginationPrevious: string
     paginationNext: string
-    paginationPages: string[]
-    paginationCurrent: string
-    items: Array<{
+    paginationPages?: string[]
+    paginationCurrent?: string
+    items?: Array<{
       id: string
       tag: string
       date: string

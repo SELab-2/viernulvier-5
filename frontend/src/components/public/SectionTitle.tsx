@@ -6,7 +6,7 @@ type SectionTitleProps = {
 function SectionTitle({ title, subtitle }: SectionTitleProps) {
     return (
         <div className="mb-10 text-center">
-            <h2 className="text-4xl lowercase text-foreground">{title}</h2>
+            <h2 className="text-4xl text-foreground">{title}</h2>
             {subtitle ? <p className="mt-2 text-md text-muted">{subtitle}</p> : null}
         </div>
     )
