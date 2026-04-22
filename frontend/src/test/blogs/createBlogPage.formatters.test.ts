@@ -48,7 +48,7 @@ describe('validateBlogPublishInput', () => {
     expect(result).toBe('filledLanguageNeedsTitle')
   })
 
-  it('returns ok when one language has both title and content', () => {
+  it('returns notAllLanguageFilled when one language has both title and content', () => {
     const result = validateBlogPublishInput(
       createForm({
         nl: { title: 'Titel', content: '<p>Inhoud</p>' },
@@ -56,10 +56,10 @@ describe('validateBlogPublishInput', () => {
       { nl: null, en: null },
     )
 
-    expect(result).toBe('allLanguageFilled')
+    expect(result).toBe('notAllLanguageFilled')
   })
 
-  it('treats embedded json ops content as filled and valid when title exists', () => {
+  it('treats embedded json ops content as filled and returns notAllLanguageFilled when only one language is complete', () => {
     const result = validateBlogPublishInput(
       createForm({
         nl: { title: 'Titel', content: '' },
@@ -67,7 +67,7 @@ describe('validateBlogPublishInput', () => {
       { nl: { ops: [{ insert: { image: 'https://example.com/image.jpg' } }] }, en: null },
     )
 
-    expect(result).toBe('allLanguageFilled')
+    expect(result).toBe('notAllLanguageFilled')
   })
 
   it('treats whitespace-only html/json content as empty', () => {
@@ -91,6 +91,17 @@ describe('validateBlogPublishInput', () => {
     )
 
     expect(result).toBe('filledLanguageNeedsTitle')
+  })
+
+  it('returns filledLanguageNeedsContent when a language has title but no content', () => {
+    const result = validateBlogPublishInput(
+      createForm({
+        nl: { title: 'Titel zonder content', content: '' },
+      }),
+      { nl: null, en: null },
+    )
+
+    expect(result).toBe('filledLanguageNeedsContent')
   })
 })
 

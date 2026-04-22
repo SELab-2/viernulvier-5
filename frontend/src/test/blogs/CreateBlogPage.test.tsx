@@ -224,6 +224,19 @@ describe('CreateBlogPage', () => {
     expect(apiMock.post).not.toHaveBeenCalled()
   })
 
+  it('shows an error when a language has title but no content', async () => {
+    renderCreatePage()
+
+    fireEvent.change(screen.getByLabelText('blog title'), {
+      target: { value: 'Alleen titel' },
+    })
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'Publiceren' })[0])
+
+    expect(await screen.findByText('Als een taal een titel heeft, moet die ook content hebben.')).toBeInTheDocument()
+    expect(apiMock.post).not.toHaveBeenCalled()
+  })
+
   it('creates a blog when publish succeeds', async () => {
     mockCreateSuccess()
     renderCreatePage()
@@ -412,6 +425,7 @@ describe('CreateBlogPage', () => {
       target: { value: '<p>Nieuwe inhoud</p>' },
     })
     fireEvent.click(screen.getAllByRole('button', { name: 'Publiceren' })[0])
+    fireEvent.click(await screen.findByRole('button', { name: messages.blogs.publishConfirmProceed }))
 
     expect(await screen.findByText('Failed to save blog.')).toBeInTheDocument()
   })
@@ -470,7 +484,7 @@ describe('CreateBlogPage', () => {
     })
 
     fireEvent.click(screen.getByRole('button', { name: 'Producties beheren' }))
-    expect(screen.getByText('Kies een production')).toBeInTheDocument()
+    expect(screen.getByText('Kies een productie')).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: /Eerste productie/i }))
     fireEvent.click(screen.getByRole('button', { name: 'Toevoegen' }))

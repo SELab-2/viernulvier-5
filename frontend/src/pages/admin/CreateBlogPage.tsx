@@ -388,6 +388,12 @@ function CreateBlogPage() {
             return
         }
 
+        if (validation === 'filledLanguageNeedsContent') {
+            setError(messages.blogs.filledLanguageNeedsContentError)
+            setSuccess('')
+            return
+        }
+
         if (validation === 'notAllLanguageFilled') {
             const missingLanguageMessage = isLocaleFilled('nl')
                 ? messages.blogs.publishConfirmWithoutEnglish

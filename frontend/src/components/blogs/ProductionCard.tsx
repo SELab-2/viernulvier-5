@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import type { Locale } from '../../i18n/types'
+import { toPlainText } from '../../utils/text'
 
 type LocalizedText = {
     nl?: string
@@ -37,14 +38,6 @@ function getLocalizedText(value: LocalizedText, locale: Locale): string {
     }
 
     return (value[locale] ?? value.nl ?? value.en ?? value.fr ?? '').trim()
-}
-
-function toPlainText(value: string): string {
-    return value
-        .replace(/<[^>]*>/g, ' ')
-        .replace(/&nbsp;/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim()
 }
 
 function getProductionLabel(production: ProductionCardItem, locale: Locale): string {

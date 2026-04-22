@@ -54,14 +54,17 @@ describe('BlogDetailPage', () => {
     document.documentElement.lang = 'nl'
   })
 
-  it('shows an error when the blog does not exist in the active language', async () => {
+  it('falls back to the available language when active language is missing', async () => {
     setPath('/nl/blogs/blog-1')
 
     apiGetMock.mockResolvedValueOnce({
       data: {
         id: 'blog-1',
         title: JSON.stringify({ nl: '', en: 'English title' }),
-        content: 'Blog content',
+        content: {
+          nl: '',
+          en: JSON.stringify({ ops: [{ insert: 'English content' }] }),
+        },
         productions: [],
       },
     })
@@ -74,7 +77,9 @@ describe('BlogDetailPage', () => {
       </MemoryRouter>,
     )
 
-    expect(await screen.findByText(messages.blogs.languageError)).toBeInTheDocument()
+    expect(await screen.findByText('English title')).toBeInTheDocument()
+    expect(screen.getByText('English content')).toBeInTheDocument()
+    expect(screen.queryByText(messages.blogs.languageError)).not.toBeInTheDocument()
     expect(screen.queryByText('Gerelateerde producties')).not.toBeInTheDocument()
   })
 

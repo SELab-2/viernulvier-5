@@ -1,5 +1,6 @@
 import type { Locale } from '../../i18n/types'
 import type { ProductionCardItem } from '../../components/blogs/ProductionCard'
+import { toPlainText } from '../../utils/text'
 
 export type BlogDetails = {
     id: string
@@ -24,6 +25,28 @@ type LocalizedBlogContent = {
 type LocalizedBlogTitle = {
     nl?: string | null
     en?: string | null
+}
+
+function getPreferredLocalizedValue<T extends string | unknown>(
+    localized: { nl?: T; en?: T },
+    locale: Locale,
+): T | null {
+    const alternateLocale: Locale = locale === 'nl' ? 'en' : 'nl'
+    const candidates = [localized[locale], localized[alternateLocale], localized.nl, localized.en]
+
+    for (const candidate of candidates) {
+        if (candidate == null) {
+            continue
+        }
+
+        if (typeof candidate === 'string' && candidate.trim().length === 0) {
+            continue
+        }
+
+        return candidate
+    }
+
+    return null
 }
 
 type LocalizedText = ProductionCardItem['title']
@@ -51,7 +74,8 @@ export function getLocalizedContent(content: unknown, locale: Locale): string|nu
 
     if (typeof parsed === 'object' && parsed !== null && ('nl' in parsed || 'en' in parsed)) {
         const localized = parsed as LocalizedBlogContent
-        return localized[locale] as string ?? localized.nl ?? localized.en ?? null
+        const preferred = getPreferredLocalizedValue(localized, locale)
+        return preferred as string | null
     }
 
     return parsed as string
@@ -62,7 +86,8 @@ export function getLocalizedTitle(title: unknown, locale: Locale): string {
 
     if (typeof parsed === 'object' && parsed !== null && ('nl' in parsed || 'en' in parsed)) {
         const localized = parsed as LocalizedBlogTitle
-        return (localized[locale] ?? localized.nl ?? localized.en ?? '').trim()
+        const preferred = getPreferredLocalizedValue(localized, locale)
+        return typeof preferred === 'string' ? preferred.trim() : ''
     }
 
     if (typeof parsed === 'string') {
@@ -108,14 +133,6 @@ function getLocalizedText(value: LocalizedText, locale: Locale): string {
     }
 
     return (value[locale] ?? value.nl ?? value.en ?? value.fr ?? '').trim()
-}
-
-function toPlainText(value: string): string {
-    return value
-        .replace(/<[^>]*>/g, ' ')
-        .replace(/&nbsp;/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim()
 }
 
 export function getProductionExcerpt(production: BlogLinkedProduction, locale: Locale): string {

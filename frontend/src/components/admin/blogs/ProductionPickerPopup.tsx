@@ -1,4 +1,5 @@
 import { getMessages } from '../../../i18n'
+import { toPlainText } from '../../../utils/text'
 
 
 type LocalizedText = {
@@ -82,13 +83,6 @@ function ProductionPickerPopup({
 
         return title || artist || production.id
     }
-
-    const toPlainText = (value: string): string =>
-        value
-            .replace(/<[^>]*>/g, ' ')
-            .replace(/&nbsp;/g, ' ')
-            .replace(/\s+/g, ' ')
-            .trim()
 
     const getProductionExcerpt = (production: ProductionItem): string => {
         const raw = getLocalizedText(production.description_short) || getLocalizedText(production.description) || getLocalizedText(production.teaser)

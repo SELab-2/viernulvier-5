@@ -9,7 +9,6 @@ import ProductionCard from '../../components/blogs/ProductionCard'
 import {
     getLocalizedContent,
     getLocalizedTitle,
-    hasLocalizedTitle,
     normalizeContent,
     type BlogDetailResponse,
     type BlogDetails,
@@ -81,15 +80,7 @@ function BlogDetailPage() {
 
                 if (isActive) {
                     setBlog(response.data)
-                    
-                    // check blog in this lanuage exists
-                    const titleExists = hasLocalizedTitle(response.data.title, locale)
 
-                    if (!titleExists){
-                        setError(message.blogs.languageError)
-                        return
-                    }
-                                    
                     // load all productions
                     const linkedProductionIds = response.data.productions ?? []
                     if (linkedProductionIds.length === 0) {
@@ -124,7 +115,7 @@ function BlogDetailPage() {
         return () => {
             isActive = false
         }
-    }, [id, locale, message.blogs.languageError])
+    }, [id, locale])
 
     return (
         <PublicLayout>

@@ -260,6 +260,7 @@ const en: Messages = {
       blogNotFound: 'This blog does not exist.',
       noTitleError: "Please fill in at least one language before publishing.",
         filledLanguageNeedsTitleError: 'If a language is filled in, it must include a title.',
+      filledLanguageNeedsContentError: 'If a language has a title, it must include content.',
       publishConfirmTitle: 'Publish anyway?',
       publishConfirmWithoutEnglish: 'Are you sure you want to publish without an English version?',
       publishConfirmWithoutDutch: 'Are you sure you want to publish without a Dutch version?',

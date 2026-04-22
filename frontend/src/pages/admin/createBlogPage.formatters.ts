@@ -168,7 +168,12 @@ function hasRichContent(value: unknown): boolean {
     return true
 }
 
-export type BlogPublishValidation = 'allLanguageFilled' | 'notAllLanguageFilled' | 'atLeastOneLanguageRequired' | 'filledLanguageNeedsTitle'
+export type BlogPublishValidation =
+    | 'allLanguageFilled'
+    | 'notAllLanguageFilled'
+    | 'atLeastOneLanguageRequired'
+    | 'filledLanguageNeedsTitle'
+    | 'filledLanguageNeedsContent'
 
 export function validateBlogPublishInput(
     form: BlogContent,
@@ -185,7 +190,7 @@ export function validateBlogPublishInput(
         const hasContent = hasTextContent(htmlContent) || hasRichContent(jsonContent)
         const isFilled = hasTitle || hasContent
 
-        return { hasTitle, isFilled }
+        return { hasTitle, hasContent, isFilled }
     })
 
     if (!states.some((state) => state.isFilled)) {
@@ -194,6 +199,10 @@ export function validateBlogPublishInput(
 
     if (states.some((state) => state.isFilled && !state.hasTitle)) {
         return 'filledLanguageNeedsTitle'
+    }
+
+    if (states.some((state) => state.hasTitle && !state.hasContent)) {
+        return 'filledLanguageNeedsContent'
     }
 
     if (states.every((state) => state.isFilled)) {
