@@ -1,4 +1,4 @@
-import type { Genre } from "../../../api/productions"
+import type { Genre } from "../../../api/genres"
 import { localize } from "../../../utils/localize"
 
 type ArchiveDetailHeroProps = {
