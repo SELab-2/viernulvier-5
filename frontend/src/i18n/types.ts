@@ -125,6 +125,7 @@ export type Messages = {
     productionSettingsLabel: string
     statusLabel: string
     genreLabel: string
+    tagLabel: string
     bannerLabel: string
     extraPicturesLabel: string
     artistLabel: string

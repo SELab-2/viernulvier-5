@@ -7,10 +7,7 @@ import ProtectedAdminRoute, { AdminEntryRoute } from './pages/admin/ProtectedAdm
 // Public pages
 import HomePage from './pages/public/HomePage'
 import ArchiveDetailPage from './pages/public/ArchiveDetailPage'
-<<<<<<< HEAD
 import SearchPage from './pages/public/SearchPage'
-=======
->>>>>>> c48b41e (name change Production -> Archive)
 
 // Admin pages (lazy loaded — not included in public bundle)
 const LoginPage = lazy(() => import('./pages/admin/LoginPage'))
@@ -34,7 +31,6 @@ function App() {
             <Routes>
                 {!adminRoutes.isAdminHost ? (
                     <>
-<<<<<<< HEAD
                         <Route path="/" element={<HomePage />} />
                         <Route path="/nl" element={<HomePage />} />
                         <Route path="/en" element={<HomePage />} />
@@ -44,29 +40,8 @@ function App() {
                         <Route path="/archive/:id" element={<ArchiveDetailPage />} />
                         <Route path="/nl/archive/:id" element={<ArchiveDetailPage />} />
                         <Route path="/en/archive/:id" element={<ArchiveDetailPage />} />
-=======
-                        <Route path="/admin/login" element={<LoginPage />} />
-                        <Route path="/admin" element={<DashboardPage />} />
-<<<<<<< HEAD
                         <Route path="/admin/archive/:id/edit" element={<ArchiveEditPage />} />
-<<<<<<< HEAD
-                        <Route path="/admin/production/new" element={<ProductionEditPage create/>} />
-                        <Route path="/en/admin/production/new" element={<ProductionEditPage create/>} />
-                        <Route path="/nl/admin/production/new" element={<ProductionEditPage create/>} />
-                        <Route path="/admin/production/:id/edit" element={<ProductionEditPage />} />
-                        <Route path="/en/admin/production/:id/edit" element={<ProductionEditPage />} />
-                        <Route path="/nl/admin/production/:id/edit" element={<ProductionEditPage />} />
->>>>>>> 616bbee (separate creating and editing a productions)
-=======
-                        <Route path="/admin/productions/new" element={<ProductionEditPage create/>} />
-                        <Route path="/en/admin/productions/new" element={<ProductionEditPage create/>} />
-                        <Route path="/nl/admin/productions/new" element={<ProductionEditPage create/>} />
-                        <Route path="/admin/productions/:id/edit" element={<ProductionEditPage />} />
-                        <Route path="/en/admin/productions/:id/edit" element={<ProductionEditPage />} />
-                        <Route path="/nl/admin/productions/:id/edit" element={<ProductionEditPage />} />
->>>>>>> 3d8778f (feat: publishing and drafting the contents of a production)
-=======
->>>>>>> c48b41e (name change Production -> Archive)
+                        <Route path="/admin/productions/new" element={<ArchiveEditPage create />} />
                     </>
                 ) : null}
 

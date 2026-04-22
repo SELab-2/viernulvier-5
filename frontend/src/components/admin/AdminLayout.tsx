@@ -11,6 +11,8 @@ import { useTheme } from './useTheme'
 
 type AdminLayoutProps = {
   children: React.ReactNode
+  sidebar?: React.ReactNode
+  header?: React.ReactNode
   showFooter?: boolean
   mainClassName?: string
   showLogout?: boolean
@@ -25,6 +27,8 @@ function getMainClassName(mainClassName = ''): string {
 
 function AdminLayout({
   children,
+  sidebar,
+  header,
   showFooter = true,
   mainClassName = '',
   showLogout = true,
@@ -68,25 +72,11 @@ function AdminLayout({
           onOpenSidebar={showSidebar ? openMobileSidebar : undefined}
           openerRef={openerRef}
         />
-<<<<<<< HEAD
 
         <div className={['flex w-full items-stretch flex-1', showSidebar ? 'lg:min-h-[calc(100vh-4.5rem)]' : ''].filter(Boolean).join(' ')}>
           {showSidebar ? (
             <div className="hidden lg:flex lg:shrink-0">
               <AdminSidebar userName={userName} userRole={userRole} />
-=======
-        {header && (
-          <div>
-            {header}
-          </div>
-        )}
-        <div className="bg-background flex overflow-hidden">
-          <main className={getMainClassName(mainClassName)}>{children}</main>
-
-          {sidebar && (
-            <div className='flex'>
-              {sidebar}
->>>>>>> d52c8b4 (fix sidebar)
             </div>
           ) : null}
 
@@ -113,9 +103,24 @@ function AdminLayout({
             </>
           ) : null}
 
+          {/* {header && (
+            <div>
+              {header}
+            </div>
+          )}
+
+          <div className="bg-background flex overflow-hidden">
+            <main className={getMainClassName(mainClassName)}>{children}</main>
+
+            {sidebar && (
+              <div className='flex'>
+                {sidebar}
+              </div>
+            )}
+          </div> */}
+
           <main className={getMainClassName(mainClassName)}>{children}</main>
         </div>
-
         {showFooter ? <AdminFooter /> : null}
       </div>
     </AdminMessagesContext.Provider>

@@ -75,7 +75,6 @@ const en: Messages = {
       },
     ],
   },
-<<<<<<< HEAD
   search: {
     heading: 'Archive',
     subtitle: 'Discover 20+ years of artistic history.',
@@ -120,7 +119,7 @@ const en: Messages = {
     resetFiltersLabel: 'reset filters',
     paginationPrevious: '<',
     paginationNext: '>',
-=======
+  },
   production: {
     productionSettingsLabel: 'Production Settings',
     statusLabel: 'Status',
@@ -147,7 +146,6 @@ const en: Messages = {
     eventsLocationLabel: 'Location',
     eventsCommentLabel: 'Comment',
     eventsActionsLabel: 'Actions'
->>>>>>> 4b3b9e1 (bundle the fields into one object, some UI changes and code cleanup)
   },
   event: {
     saveButtonLabel: 'Save event',
@@ -182,16 +180,6 @@ const en: Messages = {
     statisticsLabel: 'Statistics',
     archiveLabel: 'Archive',
     logoutLabel: 'Log out',
-  },
-  production: {
-    editTitle: 'Edit production',
-    editSubTitle: 'Manage archive details and translation for this event',
-    title: 'Title',
-    slug: 'Slug',
-    content: 'Content',
-    back: '← Back to overview',
-    saveOnDraft: 'Save as draft',
-    publish: 'Publish',
   },
   footer: {
     brandLogoAlt: 'VIERNULVIER logo',

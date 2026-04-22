@@ -1,36 +1,3 @@
-<<<<<<< HEAD
-import { useParams } from 'react-router-dom'
-import { useAdminMessages } from '../../components/admin/AdminMessagesContext'
-import AdminLayout from '../../components/admin/AdminLayout'
-
-function ArchiveEditPageContent() {
-  const { id } = useParams<{ id: string }>()
-  const messages = useAdminMessages()
-  const ae = messages.admin.archiveEdit
-
-  return (
-    <section className="site-container max-w-4xl">
-      <div className="admin-auth-card rounded-[1rem] bg-surface px-8 py-8 max-[640px]:px-5 max-[640px]:py-6">
-        <h1 className="text-3xl font-bold tracking-[-0.04em] text-foreground">{ae.pageTitle}</h1>
-        <p className="mt-3 text-sm leading-6 text-muted">{ae.itemIdLabel} {id}</p>
-      </div>
-    </section>
-  )
-}
-
-/**
- * Admin page for editing an archive item.
- */
-function ArchiveEditPage() {
-  return (
-    <AdminLayout mainClassName="px-4 py-8 lg:px-8 lg:py-8" showSidebar>
-      <ArchiveEditPageContent />
-    </AdminLayout>
-  )
-}
-
-export default ArchiveEditPage
-=======
 import ArchiveTabContent from '../../components/admin/ArchiveTabContent'
 import ArchiveTab from '../../components/admin/ArchiveTab'
 import AdminLayout from '../../components/admin/AdminLayout'
@@ -387,45 +354,79 @@ function ArchiveEditPage({ create } : ProductionEditPageProps) {
                 />
             }
         >   
-            <SectionHeading
-                title={messages.production.productionEditTitle}
-                subTitle={messages.production.productionEditSubTitle}
+            <ArchiveEditHeader
+                backLabel={messages.production.back}
+                publishLabel={messages.production.publish}
+                back={back}
+                publish={publish}   
+                // saveAsDraftLabel={messages.production.saveOnDraft}
+                // saveAsDraft={saveAsDraft}
             />
 
-            {/* Tabs for english and dutch contents of a production */}
-            <ArchiveTab
-                language={languageTab}
-                options={languageOptions}
-                setTab={setTab}
-            />
+            <div className='bg-background flex'>
+                <div className='flex-1 overflow-hidden'>
+                    <SectionHeading
+                        title={messages.production.productionEditTitle}
+                        subTitle={messages.production.productionEditSubTitle}
+                    />
 
-            <ArchiveTabContent
-                fields={form.content[languageTab]}
-                onChange={onChangeContent}
+                    {/* Tabs for english and dutch contents of a production */}
+                    <ArchiveTab
+                        language={languageTab}
+                        options={languageOptions}
+                        setTab={setTab}
+                    />
 
-                titleLabel={messages.production.title}
-                slugLabel={messages.production.slug}
-                contentLabel={messages.production.content}
-            />
+                    <ArchiveTabContent
+                        fields={form.content[languageTab]}
+                        onChange={onChangeContent}
 
-            <SectionHeading
-                title={messages.production.eventsEditTitle}
-                subTitle={messages.production.eventsEditSubTitle}
-            />
+                        titleLabel={messages.production.title}
+                        slugLabel={messages.production.slug}
+                        contentLabel={messages.production.content}
+                    />
 
-            <EventsEdit
-                events={form.events}
-                makeEvent={makeEvent}
-                editEvent={editEvent}
-                deleteEvent={deleteEvent}
+                    <SectionHeading
+                        title={messages.production.eventsEditTitle}
+                        subTitle={messages.production.eventsEditSubTitle}
+                    />
 
-                makeLabel={messages.production.makeEventsLabel}
-                dateLabel={messages.production.eventsDateLabel}
-                timeLabel={messages.production.eventsTimeLabel}
-                locationLabel={messages.production.eventsLocationLabel}
-                commentLabel={messages.production.eventsCommentLabel}
-                actionsLabel={messages.production.eventsActionsLabel}
-            />
+                    <EventsEdit
+                        events={form.events}
+                        makeEvent={makeEvent}
+                        editEvent={editEvent}
+                        deleteEvent={deleteEvent}
+
+                        makeLabel={messages.production.makeEventsLabel}
+                        dateLabel={messages.production.eventsDateLabel}
+                        timeLabel={messages.production.eventsTimeLabel}
+                        locationLabel={messages.production.eventsLocationLabel}
+                        commentLabel={messages.production.eventsCommentLabel}
+                        actionsLabel={messages.production.eventsActionsLabel}
+                    />
+                </div>
+
+                <ArchiveSidebar
+                    fields={form.settings}
+                    tag={tagInput}
+                    genre={genreInput}
+                    onAddTag={onAddProductionTag}
+                    onChangeTag={onChangeProductionTagInput}
+                    onRemoveTag={onRemoveProductionTag}
+                    onAddGenre={onAddProductionGenre}
+                    onChangeGenre={onChangeProductionGenreInput}
+                    onRemoveGenre={onRemoveProductionGenre}
+                    onChange={changeSettings}
+
+                    productionSettingsLabel={messages.production.productionSettingsLabel}
+                    statusLabel={messages.production.statusLabel}
+                    genreLabel={messages.production.genreLabel}
+                    tagLabel={messages.production.tagLabel}
+                    bannerLabel={messages.production.bannerLabel}
+                    extraPicturesLabel={messages.production.extraPicturesLabel}
+                    artistLabel={messages.production.artistLabel}
+                />
+            </div>
 
             {popupOpen && (
                 <EventPopup
@@ -453,4 +454,3 @@ function ArchiveEditPage({ create } : ProductionEditPageProps) {
 }
 
 export default ArchiveEditPage
->>>>>>> c48b41e (name change Production -> Archive)
