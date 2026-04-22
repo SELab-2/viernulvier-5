@@ -75,6 +75,7 @@ const en: Messages = {
       },
     ],
   },
+<<<<<<< HEAD
   search: {
     heading: 'Archive',
     subtitle: 'Discover 20+ years of artistic history.',
@@ -119,6 +120,34 @@ const en: Messages = {
     resetFiltersLabel: 'reset filters',
     paginationPrevious: '<',
     paginationNext: '>',
+=======
+  production: {
+    productionSettingsLabel: 'Production Settings',
+    statusLabel: 'Status',
+    genreLabel: 'Genres',
+    tagLabel: 'Tags',
+    bannerLabel: 'Banner',
+    extraPicturesLabel: 'Extra pictures',
+    artistLabel: 'Artist',
+    dutchOption: 'Dutch',
+    englishOption: 'English',
+    productionEditTitle: 'Edit production',
+    productionEditSubTitle: 'Manage archive details and translation for this event',
+    title: 'Title',
+    slug: 'Slug',
+    content: 'Content',
+    back: '← Back to overview',
+    saveOnDraft: 'Save as draft',
+    publish: 'Publish',
+    eventsEditTitle: 'Manage events',
+    eventsEditSubTitle: 'Manage events for this production',
+    makeEventsLabel: 'Add event',
+    eventsDateLabel: 'Date',
+    eventsTimeLabel: 'Time',
+    eventsLocationLabel: 'Location',
+    eventsCommentLabel: 'Comment',
+    eventsActionsLabel: 'Actions'
+>>>>>>> 4b3b9e1 (bundle the fields into one object, some UI changes and code cleanup)
   },
   event: {
     saveButtonLabel: 'Save event',

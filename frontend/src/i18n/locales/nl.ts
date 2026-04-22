@@ -75,6 +75,7 @@ const nl: Messages = {
       },
     ],
   },
+<<<<<<< HEAD
   search: {
     heading: 'Archief',
     subtitle: 'Ontdek 20+ jaren van artistieke geschiedenis.',
@@ -119,6 +120,34 @@ const nl: Messages = {
     resetFiltersLabel: 'reset filters',
     paginationPrevious: '<',
     paginationNext: '>',
+=======
+  production: {
+    productionSettingsLabel: 'Productie instellingen',
+    statusLabel: 'Status',
+    genreLabel: 'Genres',
+    tagLabel: 'Tags',
+    bannerLabel: 'Banner',
+    extraPicturesLabel: "Extra foto's",
+    artistLabel: 'Artiest',
+    dutchOption: 'Nederlands',
+    englishOption: 'Engels',
+    productionEditTitle: 'Productie bewerken',
+    productionEditSubTitle: 'Beheer archiefdetails en vertalingen voor deze voorstelling',
+    title: 'Titel',
+    slug: 'Slug',
+    content: 'Inhoud',
+    back: '← Terug naar overzicht',
+    saveOnDraft: 'Opslaan als draft',
+    publish: 'Publiceren',
+    eventsEditTitle: 'Events beheren',
+    eventsEditSubTitle: 'Beheer de events voor deze productie',
+    makeEventsLabel: 'Event toevoegen',
+    eventsDateLabel: 'Datum',
+    eventsTimeLabel: 'Tijd',
+    eventsLocationLabel: 'Locatie',
+    eventsCommentLabel: 'Opmerkking',
+    eventsActionsLabel: 'Acties'
+>>>>>>> 4b3b9e1 (bundle the fields into one object, some UI changes and code cleanup)
   },
   event: {
     saveButtonLabel: 'Event opslaan',

@@ -1,18 +1,18 @@
-import type { ProductionContent, ProductionFields } from "../../types/production"
+import type { ProductionContent, ProductionContentFields } from "../../types/production"
 import SlugInput from "./SlugInput"
 
 type ProductionContentTabProps = {
-    fields: ProductionFields
+    fields: ProductionContentFields
     titleLabel: string
     contentLabel: string
     slugLabel: string
 
     // currentTab: ProductionContent
     // changeLanguage: (field: keyof ProductionFields, value: string) => void
-    onChange: (field: keyof ProductionFields, value: string) => void
+    onChange: (field: keyof ProductionContentFields, value: string) => void
 }
 
-function ProductionContentTab({
+function ProductionTabContent({
     fields, 
     titleLabel, 
     slugLabel, 
@@ -52,4 +52,4 @@ function ProductionContentTab({
     )
 }
 
-export default ProductionContentTab
+export default ProductionTabContent
