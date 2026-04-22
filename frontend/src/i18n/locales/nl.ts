@@ -80,6 +80,7 @@ const nl: Messages = {
     subtitle: 'Ontdek 20+ jaren van artistieke geschiedenis.',
     productionsTab: 'Producties',
     blogTab: 'Blog',
+    allTab: 'Alles',
     resultsCount: '142',
     resultsSuffix: 'resultaten gevonden',
     sortLabel: 'Sorteer op',

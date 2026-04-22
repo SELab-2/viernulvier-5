@@ -12,6 +12,7 @@ type SearchEntry = SearchResultItem & {
     year: number
     genre: string
     location: string
+    type: 'production' | 'blog'
 }
 
 const DEFAULT_PAGE_SIZE = 12
@@ -104,7 +105,7 @@ type SearchFilterState = {
     sort: SearchSort
     page: number
     limit: number
-    tab: 'productions' | 'blogs'
+    tab: 'productions' | 'blogs' | 'all'
 }
 
 type SearchFilterOverrides = {
@@ -116,7 +117,7 @@ type SearchFilterOverrides = {
     sort?: SearchSort
     page?: number
     limit?: number
-    tab?: 'productions' | 'blogs'
+    tab?: 'productions' | 'blogs' | 'all'
 }
 
 function getLocalizedText(text: LocalizedText, locale: Locale): string {
@@ -153,7 +154,8 @@ function parseSearchFilterState(searchParams: URLSearchParams): SearchFilterStat
     const limitParam = Number(searchParams.get('limit') ?? String(DEFAULT_PAGE_SIZE))
     const limit = normalizePageSize(limitParam)
 
-    const tab = searchParams.get('tab') === 'blogs' ? 'blogs' : 'productions'
+    const tabParam = searchParams.get('tab')
+    const tab: 'productions' | 'blogs' | 'all' = tabParam === 'blogs' ? 'blogs' : tabParam === 'all' ? 'all' : 'productions'
 
     return {
         query,
@@ -181,6 +183,7 @@ function buildSearchParams(filters: SearchFilterOverrides): URLSearchParams {
     if (filters.page && filters.page > 1) params.set('page', String(filters.page))
     if (filters.limit && filters.limit !== DEFAULT_PAGE_SIZE) params.set('limit', String(filters.limit))
     if (filters.tab === 'blogs') params.set('tab', 'blogs')
+    if (filters.tab === 'all') params.set('tab', 'all')
 
     return params
 }
@@ -292,6 +295,7 @@ function mapProductionToSearchEntry(item: ProductionApiItem, locale: Locale, pre
         year,
         genre: normalizedGenre,
         location: normalizedLocation,
+        type: 'production' as const,
     }
 }
 
@@ -303,6 +307,24 @@ type BlogApiItem = {
     createdAt: string
     updatedAt: string
     links?: { self: string }
+}
+
+type SearchApiItem = {
+    id: string
+    type: 'production' | 'blog'
+    title?: unknown
+    teaser?: unknown
+    description_short?: unknown
+    description?: unknown
+    content?: unknown
+    image_url?: string | null
+    venue_name?: string | null
+    venue_names?: string[]
+    production_genres?: string[]
+    performer_type?: string | null
+    attendance_mode?: string | null
+    created_at?: string
+    productions?: string[]
 }
 
 function getBlogExcerpt(content: unknown, locale: Locale, fallback: string): string {
@@ -343,6 +365,7 @@ function mapBlogToSearchEntry(item: BlogApiItem, locale: Locale): SearchEntry {
         year,
         genre: '',
         location: '',
+        type: 'blog' as const,
     }
 }
 
@@ -903,6 +926,63 @@ function SearchPage() {
                     setApiEntries(mappedEntries)
                     setTotalResults(response.meta?.total ?? mappedEntries.length)
                     setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
+                } else if (tab === 'all') {
+                    // Single RESTful call to the unified search endpoint
+                    const searchParams = new URLSearchParams({
+                        page: String(page),
+                        limit: String(pageSize),
+                        lang: locale,
+                    })
+                    if (query) searchParams.set('search', query)
+                    searchParams.set('yearFrom', String(safeFromYear))
+                    searchParams.set('yearTo', String(safeToYear))
+                    if (selectedGenres.length > 0) searchParams.set('genres', selectedGenres.join(','))
+                    if (selectedLocations.length > 0) searchParams.set('locations', selectedLocations.join(','))
+                    if (sort === 'recent' || sort === 'oldest') searchParams.set('sort', sort)
+
+                    const response = await apiFetch<PaginatedApiResponse<SearchApiItem>>(
+                        `/archive/search?${searchParams.toString()}`,
+                        { signal: abortController.signal }
+                    )
+
+                    const preferredGenre = selectedGenres.length === 1 ? selectedGenres[0] : undefined
+                    const mappedEntries = response.data.map((item): SearchEntry => {
+                        if (item.type === 'blog') {
+                            return mapBlogToSearchEntry(
+                                {
+                                    id: item.id,
+                                    title: item.title,
+                                    content: item.content,
+                                    productions: item.productions ?? [],
+                                    createdAt: item.created_at ?? '',
+                                    updatedAt: item.created_at ?? '',
+                                },
+                                locale,
+                            )
+                        }
+                        return mapProductionToSearchEntry(
+                            {
+                                id: item.id,
+                                title: item.title as any,
+                                teaser: item.teaser as any,
+                                description_short: item.description_short as any,
+                                description: item.description as any,
+                                image_url: item.image_url,
+                                venue_name: item.venue_name,
+                                venue_names: item.venue_names,
+                                production_genres: item.production_genres,
+                                performer_type: item.performer_type ?? null,
+                                attendance_mode: item.attendance_mode ?? null,
+                                created_at: item.created_at ?? '',
+                            },
+                            locale,
+                            preferredGenre,
+                        )
+                    })
+
+                    setApiEntries(mappedEntries)
+                    setTotalResults(response.meta?.total ?? mappedEntries.length)
+                    setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
                 } else {
                     params.set('lang', locale)
 
@@ -1195,6 +1275,13 @@ function SearchPage() {
                                     <h1 className="flex items-center gap-3 text-3xl leading-none text-foreground">
                                         <button
                                             type="button"
+                                            onClick={() => navigateWithFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: pageSize, page: 1, tab: 'all' })}
+                                            className={tab === 'all' ? 'underline decoration-accent decoration-2 underline-offset-4' : 'text-muted transition-colors hover:text-foreground'}
+                                        >
+                                            {m.search.allTab}
+                                        </button>
+                                        <button
+                                            type="button"
                                             onClick={() => navigateWithFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: pageSize, page: 1, tab: 'productions' })}
                                             className={tab === 'productions' ? 'underline decoration-accent decoration-2 underline-offset-4' : 'text-muted transition-colors hover:text-foreground'}
                                         >
@@ -1318,7 +1405,7 @@ function SearchPage() {
                                         key={item.id}
                                         item={{
                                             ...item,
-                                            detailHref: tab === 'blogs'
+                                            detailHref: item.type === 'blog'
                                                 ? withLocalePath('/blogs/' + item.id, locale)
                                                 : withLocalePath('/productions/' + item.id, locale),
                                         }}
