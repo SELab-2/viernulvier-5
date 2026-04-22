@@ -12,6 +12,7 @@ import SearchPage from './pages/public/SearchPage'
 // Admin pages (lazy loaded — not included in public bundle)
 const LoginPage = lazy(() => import('./pages/admin/LoginPage'))
 const DashboardPage = lazy(() => import('./pages/admin/DashboardPage'))
+const ProductionsPage = lazy(() => import('./pages/admin/ProductionsPage'))
 const ArchiveEditPage = lazy(() => import('./pages/admin/ArchiveEditPage'))
 
 /**
@@ -63,6 +64,14 @@ function App() {
                             element={
                                 <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
                                     <DashboardPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+                        <Route
+                            path={adminRoutes.productionsPath}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <ProductionsPage />
                                 </ProtectedAdminRoute>
                             }
                         />

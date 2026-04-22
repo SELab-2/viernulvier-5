@@ -47,12 +47,12 @@ export function getNavIconAlt(id: AdminNavItemId, nav: AdminNavMessages): string
 }
 
 export function getAdminNavigationItems(hostname: string = window.location.hostname): AdminNavigationGroup {
-    const { dashboardPath } = getAdminRouteConfig(hostname)
+    const { dashboardPath, productionsPath } = getAdminRouteConfig(hostname)
 
     return {
         primary: [
             { id: 'dashboard', to: dashboardPath, iconSrc: '/admin/sidebar-dashboard.svg' },
-            { id: 'productions', disabled: true, iconSrc: '/admin/sidebar-productions.svg' },
+            { id: 'productions', to: productionsPath, iconSrc: '/admin/sidebar-productions.svg' },
             { id: 'gallery', disabled: true, iconSrc: '/admin/sidebar-gallery.svg' },
             { id: 'organisation', disabled: true, iconSrc: '/admin/sidebar-organization.svg' },
         ],
