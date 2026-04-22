@@ -915,8 +915,7 @@ async function sync_crops(cutoff_timestamp: Date | undefined = undefined){
     actualDownloaded += prisma_crops.length;
   }
 
-  finishStatus(`\u2705 Completed syncing ${totalProcessed} crops from ${pageCount} pages and downloaded
-   and stored${actualDownloaded} crops`);
+  finishStatus(`\u2705 Completed syncing ${totalProcessed} crops from ${pageCount} pages and downloaded ${actualDownloaded} crops`);
 }
 
 async function sync_uit_keywords(cutoff_timestamp: Date | undefined = undefined){
