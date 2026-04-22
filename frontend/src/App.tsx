@@ -7,12 +7,15 @@ import ProtectedAdminRoute, { AdminEntryRoute } from './pages/admin/ProtectedAdm
 // Public pages
 import HomePage from './pages/public/HomePage'
 import ArchiveDetailPage from './pages/public/ArchiveDetailPage'
+<<<<<<< HEAD
 import SearchPage from './pages/public/SearchPage'
+=======
+>>>>>>> c48b41e (name change Production -> Archive)
 
 // Admin pages (lazy loaded — not included in public bundle)
 const LoginPage = lazy(() => import('./pages/admin/LoginPage'))
 const DashboardPage = lazy(() => import('./pages/admin/DashboardPage'))
-const ArchiveEditPage = lazy(() => import('./pages/admin/ProductionEditPage'))
+const ArchiveEditPage = lazy(() => import('./pages/admin/ArchiveEditPage'))
 
 /**
  * Root App component.
@@ -44,6 +47,7 @@ function App() {
 =======
                         <Route path="/admin/login" element={<LoginPage />} />
                         <Route path="/admin" element={<DashboardPage />} />
+<<<<<<< HEAD
                         <Route path="/admin/archive/:id/edit" element={<ArchiveEditPage />} />
 <<<<<<< HEAD
                         <Route path="/admin/production/new" element={<ProductionEditPage create/>} />
@@ -61,6 +65,8 @@ function App() {
                         <Route path="/en/admin/productions/:id/edit" element={<ProductionEditPage />} />
                         <Route path="/nl/admin/productions/:id/edit" element={<ProductionEditPage />} />
 >>>>>>> 3d8778f (feat: publishing and drafting the contents of a production)
+=======
+>>>>>>> c48b41e (name change Production -> Archive)
                     </>
                 ) : null}
 
@@ -87,11 +93,11 @@ function App() {
                                 </ProtectedAdminRoute>
                             }
                         />
-                        {/* <Route
+                        <Route
                             path={adminRoutes.productionEditPath}
                             element={
                                 <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
-                                    <ProductionEditPage create />
+                                    <ArchiveEditPage create />
                                 </ProtectedAdminRoute>
                             }
                         />
@@ -99,10 +105,10 @@ function App() {
                             path={adminRoutes.productionCreatePath}
                             element={
                                 <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
-                                    <ProductionEditPage />
+                                    <ArchiveEditPage />
                                 </ProtectedAdminRoute>
                             }
-                        /> */}
+                        />
                     </>
                 ) : null}
             </Routes>

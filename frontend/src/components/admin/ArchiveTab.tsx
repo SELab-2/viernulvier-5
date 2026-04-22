@@ -1,12 +1,12 @@
 import type { Language } from "../../types/production"
 
-type ProductionTabProps = {
+type ArchiveTabProps = {
     language: Language // QUESTION: maybe a separate type for languages in /types/production.tsx?
     options: { key: Language, label: string}[]
     setTab: (key: Language) => void
 }
 
-function ProductionTab({options, language, setTab}: ProductionTabProps) {
+function ArchiveTab({options, language, setTab}: ArchiveTabProps) {
 
     return (
         <div className="px-4 flex border-b border-border">
@@ -31,4 +31,4 @@ function ProductionTab({options, language, setTab}: ProductionTabProps) {
         </div>
     )
 }
-export default ProductionTab
+export default ArchiveTab

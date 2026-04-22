@@ -1,4 +1,4 @@
-type ProductionEditHeaderProps = {
+type ArchiveEditHeaderProps = {
     back: () => void
     // saveAsDraft: () => void // Extra draft feature
     publish: () => void
@@ -7,14 +7,14 @@ type ProductionEditHeaderProps = {
     publishLabel: string
 }
 
-function ProductionEditHeader({
+function ArchiveEditHeader({
     backLabel, 
     // saveAsDraftLabe, // Extra draft feature
     publishLabel, 
     back, 
     // saveAsDraft, // Extra draft feature
     publish
-}: ProductionEditHeaderProps) {
+}: ArchiveEditHeaderProps) {
     return (
         <header className="flex items-center gap-3 border border-border bg-surface px-6 py-4">
             <button onClick={back}>
@@ -40,4 +40,4 @@ function ProductionEditHeader({
     )
 }
 
-export default ProductionEditHeader
+export default ArchiveEditHeader
