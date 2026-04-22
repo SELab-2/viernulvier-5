@@ -103,23 +103,25 @@ function AdminLayout({
             </>
           ) : null}
 
-          {/* {header && (
-            <div>
-              {header}
-            </div>
-          )}
-
-          <div className="bg-background flex overflow-hidden">
-            <main className={getMainClassName(mainClassName)}>{children}</main>
-
-            {sidebar && (
-              <div className='flex'>
-                {sidebar}
+          <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+            {header && (
+              <div className="shrink-0">
+                {header}
               </div>
             )}
-          </div> */}
 
-          <main className={getMainClassName(mainClassName)}>{children}</main>
+            <div className="flex-1 flex overflow-visible">
+              <main className={`${getMainClassName(mainClassName)}`}>
+                {children}
+              </main>
+
+              {sidebar && (
+                <aside className="w-80 shrink-0 border-l border-border bg-surface hidden xl:block">
+                  {sidebar}
+                </aside>
+              )}
+            </div>
+          </div>
         </div>
         {showFooter ? <AdminFooter /> : null}
       </div>

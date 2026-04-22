@@ -211,16 +211,26 @@ function ArchiveEditPage({ create } : ProductionEditPageProps) {
     // }
 
     // Adding a tag to a new or existing production
-    const onAddProductionTag = () => {
-        const trimmed = tagInput.trim()
-        if (!trimmed || form.settings.tags.includes(trimmed)) return
+    const onAddProductionTag = (tagName?: string) => {
+        const trimmed = (tagName || tagInput).trim()
+        if (!trimmed) return
+        
+        // Case-insensitive check
+        const exists = form.settings.tags.some(t => t.toLowerCase() === trimmed.toLowerCase())
+        if (exists) return
+
         changeSettings('tags', [...form.settings.tags, trimmed])
         setTagInput('')
     }
 
-    const onAddProductionGenre = () => {
-        const trimmed = genreInput.trim()
-        if (!trimmed || form.settings.genres.includes(trimmed)) return
+    const onAddProductionGenre = (genreName?: string) => {
+        const trimmed = (genreName || genreInput).trim()
+        if (!trimmed) return
+
+        // Case-insensitive check
+        const exists = form.settings.genres.some(g => g.toLowerCase() === trimmed.toLowerCase())
+        if (exists) return
+
         changeSettings('genres', [...form.settings.genres, trimmed])
         setGenreInput('')
     }
@@ -354,79 +364,45 @@ function ArchiveEditPage({ create } : ProductionEditPageProps) {
                 />
             }
         >   
-            <ArchiveEditHeader
-                backLabel={messages.production.back}
-                publishLabel={messages.production.publish}
-                back={back}
-                publish={publish}   
-                // saveAsDraftLabel={messages.production.saveOnDraft}
-                // saveAsDraft={saveAsDraft}
+            <SectionHeading
+                title={messages.production.productionEditTitle}
+                subTitle={messages.production.productionEditSubTitle}
             />
 
-            <div className='bg-background flex'>
-                <div className='flex-1 overflow-hidden'>
-                    <SectionHeading
-                        title={messages.production.productionEditTitle}
-                        subTitle={messages.production.productionEditSubTitle}
-                    />
+            {/* Tabs for english and dutch contents of a production */}
+            <ArchiveTab
+                language={languageTab}
+                options={languageOptions}
+                setTab={setTab}
+            />
 
-                    {/* Tabs for english and dutch contents of a production */}
-                    <ArchiveTab
-                        language={languageTab}
-                        options={languageOptions}
-                        setTab={setTab}
-                    />
+            <ArchiveTabContent
+                fields={form.content[languageTab]}
+                onChange={onChangeContent}
 
-                    <ArchiveTabContent
-                        fields={form.content[languageTab]}
-                        onChange={onChangeContent}
+                titleLabel={messages.production.title}
+                slugLabel={messages.production.slug}
+                contentLabel={messages.production.content}
+            />
 
-                        titleLabel={messages.production.title}
-                        slugLabel={messages.production.slug}
-                        contentLabel={messages.production.content}
-                    />
+            <SectionHeading
+                title={messages.production.eventsEditTitle}
+                subTitle={messages.production.eventsEditSubTitle}
+            />
 
-                    <SectionHeading
-                        title={messages.production.eventsEditTitle}
-                        subTitle={messages.production.eventsEditSubTitle}
-                    />
+            <EventsEdit
+                events={form.events}
+                makeEvent={makeEvent}
+                editEvent={editEvent}
+                deleteEvent={deleteEvent}
 
-                    <EventsEdit
-                        events={form.events}
-                        makeEvent={makeEvent}
-                        editEvent={editEvent}
-                        deleteEvent={deleteEvent}
-
-                        makeLabel={messages.production.makeEventsLabel}
-                        dateLabel={messages.production.eventsDateLabel}
-                        timeLabel={messages.production.eventsTimeLabel}
-                        locationLabel={messages.production.eventsLocationLabel}
-                        commentLabel={messages.production.eventsCommentLabel}
-                        actionsLabel={messages.production.eventsActionsLabel}
-                    />
-                </div>
-
-                <ArchiveSidebar
-                    fields={form.settings}
-                    tag={tagInput}
-                    genre={genreInput}
-                    onAddTag={onAddProductionTag}
-                    onChangeTag={onChangeProductionTagInput}
-                    onRemoveTag={onRemoveProductionTag}
-                    onAddGenre={onAddProductionGenre}
-                    onChangeGenre={onChangeProductionGenreInput}
-                    onRemoveGenre={onRemoveProductionGenre}
-                    onChange={changeSettings}
-
-                    productionSettingsLabel={messages.production.productionSettingsLabel}
-                    statusLabel={messages.production.statusLabel}
-                    genreLabel={messages.production.genreLabel}
-                    tagLabel={messages.production.tagLabel}
-                    bannerLabel={messages.production.bannerLabel}
-                    extraPicturesLabel={messages.production.extraPicturesLabel}
-                    artistLabel={messages.production.artistLabel}
-                />
-            </div>
+                makeLabel={messages.production.makeEventsLabel}
+                dateLabel={messages.production.eventsDateLabel}
+                timeLabel={messages.production.eventsTimeLabel}
+                locationLabel={messages.production.eventsLocationLabel}
+                commentLabel={messages.production.eventsCommentLabel}
+                actionsLabel={messages.production.eventsActionsLabel}
+            />
 
             {popupOpen && (
                 <EventPopup

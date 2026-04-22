@@ -8,13 +8,15 @@ import type { Language, ProductionContent, ProductionContentFields, ProductionFo
 import type { Locale } from '../../i18n/types'
 import type { Event, EventForm } from '../../types/event'
 import type { ProductionResponse } from '../../../../backend/src/modules/productions/productions.schema'
-import type { LocationResponse } from '../../../../backend/src/modules/locations/locations.schema'
+// import type { LocationResponse } from '../../../../backend/src/modules/locations/locations.schema'
 
 import { useNavigate, useParams } from 'react-router-dom'
 import { getMessages } from '../../i18n'
 import { useEffect, useState } from 'react'
 import { api } from '../../api/client'
 import EventPopup from '../../components/admin/EventPopup'
+import ProductionSidebar from '../../components/admin/ProductionSidebar'
+import ProductionEditHeader from '../../components/admin/ProductionEditHeader'
 
 const defaultContentForm : ProductionContent = {
     nl: {title: '', slug: '', content: ''},
@@ -42,7 +44,7 @@ const defaultEventForm : EventForm = {
     tags: []
 }
 
-const defaultEvents: Event[] = []
+// const defaultEvents: Event[] = []
 
 type ProductionEditPageProps = {
     /**
@@ -69,12 +71,10 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
 
     // Production state
     const [form, setForm] = useState<ProductionForm>(defaultForm)
-    const [prod, setProd] = useState<ProductionResponse>()
+    // const [prod, setProd] = useState<ProductionResponse>()
     const [languageTab, setLanguageTab] = useState<Locale>('nl')
-    // const [form, setForm] = useState<ProductionContent>(defaultForm)
     const [tagInput, setTagInput] = useState('')
     const [genreInput, setGenreInput] = useState('')
-    const [tags, setTags] = useState<string[]>([])
     
     // Event state
     const [popupOpen, setPopupOpen] = useState(false)
@@ -89,57 +89,19 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
 
     // Load all data of an existing production or create a new one
     useEffect(() => {
-        // api.get<LocationResponse>(`/archive/locations`)
-        //     .then()
-        //     .catch()
         if (create) return 
-
-        // TODO: make use of the slug
-        // const fetch = async () => {
-        //     const production = await api.get<ProductionResponse>(`/archinve/productions/${id}`)
-
-
-        // }
-        // const production = await api.get<ProductionResponse>(`/archive/productions/${id}`)
-
-        // api.get<ProductionResponse>(`/archive/productions/${id}`)
-        //     .then( data => {
-        //         setForm({
-        //             content: {
-        //                 nl: {title: data?.title?.nl, slug: '', content: data?.description?.nl},
-        //                 en: {title: data?.title?.en, slug: '', content: data?.description?.en},
-        //             },
-        //             genres: [],
-        //             artist: '',
-        //             events: [],
-        //             banner: '',
-        //             extraPictures: []
-        //         })
-        //         setProd(data)
-        //     })
-        //     .catch( err => {
-        //         console.error(err)
-        //     })
-    }, [id])
+        // TODO: implement fetching production data
+    }, [id, create])
 
     const back = () => {
         navigate("/admin")
     }
 
     const publish = async () => {
-        saveProduction(
-            // false
-        )
+        saveProduction()
     }
 
-    // const saveAsDraft = async () => {
-    //     saveProduction(true)
-    // }
-
-    // Prodcution functions
-
-    const saveProduction = async ( /* asDraft: boolean = false // Extra draft feature */ ) => {
-        // TODO: an extra field is required in the schema for drafts
+    const saveProduction = async () => {
         try {
             if (create){
                 const res = await api.post<ProductionResponse>('/archive/productions', {
@@ -155,10 +117,8 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
                         nl: form.settings.artist,
                         en: form.settings.artist,
                     },
-                    // isDraft: asDraft
                 })
 
-                // TODO: Use a slug
                 navigate(`/admin/productions/${res.id}/edit`, { replace: true })
             } else {
                 await api.put(`/archive/productions/${id}`, {
@@ -170,7 +130,6 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
                         nl: form.content?.nl.content,
                         en: form.content?.en.content,
                     }
-                    // isDraft: asDraft
                 })
             } 
         } catch (err) {
@@ -202,35 +161,31 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
         }))
     }
 
-    // const onChangeForm = (field: keyof ProductionContentFields, value: string) => {
-    //     setForm(prev => ({
-    //         ...prev,
-    //         [languageTab]: { ...prev[languageTab] , [field]: value }
-    //     }))
-    // }
-
     // Adding a tag to a new or existing production
-    const onAddProductionTag = () => {
-        const trimmed = tagInput.trim()
-        if (!trimmed || form.settings.tags.includes(trimmed)) return
+    const onAddProductionTag = (tagName?: string) => {
+        const trimmed = (tagName || tagInput).trim()
+        if (!trimmed) return
+
+        // Case-insensitive check
+        const exists = form.settings.tags.some(t => t.toLowerCase() === trimmed.toLowerCase())
+        if (exists) return
+
         changeSettings('tags', [...form.settings.tags, trimmed])
         setTagInput('')
     }
 
-    const onAddProductionGenre = () => {
-        const trimmed = genreInput.trim()
-        if (!trimmed || form.settings.genres.includes(trimmed)) return
+    const onAddProductionGenre = (genreName?: string) => {
+        const trimmed = (genreName || genreInput).trim()
+        if (!trimmed) return
+
+        // Case-insensitive check
+        const exists = form.settings.genres.some(g => g.toLowerCase() === trimmed.toLowerCase())
+        if (exists) return
+
         changeSettings('genres', [...form.settings.genres, trimmed])
         setGenreInput('')
     }
     
-    // const onAddProductionGenre = () => {
-    //     const trimmed = genreInput.trim()
-    //     if (!trimmed || form.settings.genres.includes(trimmed)) return
-    //     changeSettings('genres', [...form.settings.tags, trimmed])
-    //     setGenreInput('')
-    // }
-
     // Adding a tag to a new or existing event
     const onAddEventTag = () => {
         const trimmed = eventTagInput.trim()
@@ -265,7 +220,7 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
 
     const makeEvent = () => {
         setEventForm(defaultEventForm)
-        setEditingEvent(undefined) // creating a new event, so set to undefined
+        setEditingEvent(undefined)
         setEventTagInput('')
         setPopupOpen(true)
     }
@@ -293,7 +248,6 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
 
     const saveEvent = () => {
         if (editingEvent) {
-            // left here
             setForm(prev => ({
                 ...prev,
                 events: (prev.events.map(e => e.key === editingEvent.key 
@@ -304,7 +258,6 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
             setForm(prev => ({
                 ...prev,
                 events: [...prev.events, {...eventForm, key: crypto.randomUUID()}]
-
             }))
         }
         setPopupOpen(false)
@@ -320,32 +273,12 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
 
     return (
         <AdminLayout
-<<<<<<< HEAD
-            title={messages.home.title}
-            productionSettingsLabel={messages.production.productionSettingsLabel}
-            archiveLabel={messages.nav.archive}
-            searchAriaLabel={messages.nav.searchAriaLabel}
-            searchPlaceholder={messages.nav.searchPlaceholder}
-            statusLabel={messages.production.statusLabel}
-            genreLabel={messages.production.genreLabel}
-            bannerLabel={messages.production.bannerLabel}
-            extraPicturesLabel={messages.production.extraPicturesLabel}
-            artistLabel={messages.production.artistLabel}
-            backLabel={messages.production.back}
-            saveAsDraftLabel={messages.production.saveOnDraft}
-            publishLabel={messages.production.publish}
-            back={back}
-            saveAsDraft={saveAsDraft}
-            publish={publish}   
-=======
             header={
                 <ProductionEditHeader
                     backLabel={messages.production.back}
                     publishLabel={messages.production.publish}
                     back={back}
                     publish={publish}   
-                    // saveAsDraftLabel={messages.production.saveOnDraft}
-                    // saveAsDraft={saveAsDraft}
                 />
             }
             sidebar={
@@ -370,7 +303,6 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
                     artistLabel={messages.production.artistLabel}
                 />
             }
->>>>>>> 77e6774 (feat: changing UI and an attempt to make the code simpler)
         >   
             <SectionHeading
                 title={messages.production.productionEditTitle}
