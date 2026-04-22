@@ -6,8 +6,9 @@ import EventsEdit from '../../components/admin/ManageEvents'
 
 import type { Language, ProductionContent, ProductionFields } from '../../types/production'
 import type { Locale } from '../../i18n/types'
-import type { Event } from '../../types/event'
+import type { Event, EventForm } from '../../types/event'
 import type { ProductionResponse } from '../../../../backend/src/modules/productions/productions.schema'
+import type { LocationResponse } from '../../../../backend/src/modules/locations/locations.schema'
 
 import { useNavigate, useParams } from 'react-router-dom'
 import { getMessages } from '../../i18n'
@@ -21,6 +22,15 @@ const defaultForm : ProductionContent = {
     nl: {title: '', slug: '', content: ''},
     en: {title: '', slug: '', content: ''}
 }
+
+const defaultEventForm : EventForm = {
+    startDateTime: '',
+    endDateTime: '',
+    location: '',
+    tags: []
+}
+
+const defaultEvents: Event[] = []
 
 type ProductionEditPageProps = {
     /**
@@ -45,25 +55,35 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
     const navigate = useNavigate()
     const { id } = useParams()          // current production id
 
-    // TODO: for now this is fine but later we want maybe variable length language tabs...
+    // Production state
     const [prod, setProd] = useState<ProductionResponse>()
     const [languageTab, setLanguageTab] = useState<Locale>('nl')
     const [form, setForm] = useState<ProductionContent>(defaultForm)
+    const [tagInput, setTagInput] = useState('')
+    const [tags, setTags] = useState<string[]>([])
+    
+    // Event state
     const [popupOpen, setPopupOpen] = useState(false)
+    const [events, setEvents] = useState<Event[]>(defaultEvents)
+    const [editingEvent, setEditingEvent] = useState<Event | undefined>()
+    const [eventForm, setEventForm] = useState<EventForm>(defaultEventForm)
+    const [eventTagInput, setEventTagInput] = useState('')
 
     const languageOptions: { key: Language, label: string}[] = [
         { key: 'nl', label: messages.production.dutchOption},
         { key: 'en', label: messages.production.englishOption},
     ]
 
+    // Load all data of an existing production or create a new one
     useEffect(() => {
+        api.get<LocationResponse>(`/archive/locations`)
+            .then()
+            .catch()
         if (create) return 
 
         // TODO: make use of the slug
         api.get<ProductionResponse>(`/archive/productions/${id}`)
             .then( data => {
-                console.log(data)
-                // slug is redundant? only if we just how them how it looks?
                 setForm({
                     nl: {title: data?.title?.nl, slug: '', content: data?.description?.nl},
                     en: {title: data?.title?.en, slug: '', content: data?.description?.en},
@@ -75,13 +95,24 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
             })
     }, [id])
 
-
     const back = () => {
         navigate("/admin")
     }
 
-    const saveProduction = async (asDraft: boolean = false) => {
-        // TODO: an extra field is required in the prisma schema for drafts
+    const publish = async () => {
+        saveProduction(
+            // false
+        )
+    }
+
+    // const saveAsDraft = async () => {
+    //     saveProduction(true)
+    // }
+
+    // Prodcution functions
+
+    const saveProduction = async ( /* asDraft: boolean = false // Extra draft feature */ ) => {
+        // TODO: an extra field is required in the schema for drafts
         try {
             if (create){
                 const res = await api.post<ProductionResponse>('/archive/productions', {
@@ -115,35 +146,9 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
             console.error('Failed to save', err)
         }
     }
-    
-    const saveAsDraft = async () => {
-        saveProduction(true)
-    }
-
-    const publish = () => {
-        saveProduction(false)
-    }
 
     const setTab = (key: Locale) => {
         setLanguageTab(key)
-
-        // TODO: proper impl 
-    }
-
-    const makeEvent = () => {
-        setPopupOpen(true)
-        // TODO: impl
-        console.log("Making event")
-    }
-
-    const editEvent = () => {
-        // TODO: impl
-        console.log("editing event")
-    }
-
-    const deleteEvent = () => {
-        // TODO: impl
-        console.log("deleting event")
     }
 
     const onChangeForm = (field: keyof ProductionFields, value: string) => {
@@ -151,29 +156,104 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
             ...prev,
             [languageTab]: { ...prev[languageTab] , [field]: value }
         }))
-        // TODO: change field into a proper type ?
     }
 
-    const placeholderEvents: Event[] = [
-        { key: "1", date: "01-10-2016", time: "15:45", location: "Viernulvier", comment: "yes"},
-        { key: "2", date: "06-10-2016", time: "10:15", location: "Viernulvier", comment: "no"},
-        { key: "3", date: "12-10-2016", time: "16:00", location: "Viernulvier", comment: "maybe"}
-    ]
+    // Adding a tag to a new or existing production
+    const onAddTag = () => {
+        const trimmed = tagInput.trim()
+        if (!trimmed || tags.includes(trimmed)) return  
+        setTags(prev => [...prev, trimmed])
+        setTagInput('')
+    }
+
+    // Adding a tag to a new or existing event
+    const onAddEventTag = () => {
+        const trimmed = eventTagInput.trim()
+        if(!trimmed || eventForm.tags.includes(trimmed)) return
+        setEventForm(prev => ({...prev, tags: [...prev.tags, trimmed]}))
+        setEventTagInput('')
+    }
+
+    const onChangeProductionTagInput = (tag: string) => {
+        setTagInput(tag)
+    }
+
+    const onRemoveProductionTag = (tag: string) => {
+        setTags(prev => prev.filter(e => e !== tag))
+    }
+
+    // Event functions
+    const onChangeEventForm = (field: keyof EventForm, value: string) => {
+        setEventForm(prev => ({
+            ...prev,
+            [field]: value
+        }))
+    }
+
+    const makeEvent = () => {
+        setEventForm(defaultEventForm)
+        setEditingEvent(undefined) // creating a new event, so set to undefined
+        setEventTagInput('')
+        setPopupOpen(true)
+    }
+
+    const editEvent = (key: string) => {
+        const event = events.find(e => e.key === key)
+        if (!event) return
+        setEditingEvent(event)
+        setEventForm({
+            startDateTime: event.startDateTime,
+            endDateTime: event.endDateTime,
+            location: event.location,
+            tags: event.tags
+        })
+        setEventTagInput('')
+        setPopupOpen(true)
+    }
+
+    const deleteEvent = (key: string) => {
+        setEvents(prev => prev.filter(e => e.key !== key))
+    }
+
+    const saveEvent = () => {
+        if (editingEvent) {
+            setEvents(prev => prev.map(e => e.key === editingEvent.key
+                ? { ...eventForm, key: e.key } : e
+            ))
+        } else {
+            setEvents(prev => [...prev, {...eventForm, key: crypto.randomUUID()}])
+        }
+        setPopupOpen(false)
+    }
+
+    const onChangeEventTagInput = (tag: string) => {
+        setEventTagInput(tag)
+    }
+
+    const onRemoveEventTag = (tag: string) => {
+        setEventForm(prev => ({...prev, tags: prev.tags.filter(t => t !== tag)}))
+    }
 
     return (
         <AdminLayout
             header={
                 <ProductionEditHeader
                     backLabel={messages.production.back}
-                    saveAsDraftLabel={messages.production.saveOnDraft}
                     publishLabel={messages.production.publish}
                     back={back}
-                    saveAsDraft={saveAsDraft}
                     publish={publish}   
+                    // saveAsDraftLabel={messages.production.saveOnDraft}
+                    // saveAsDraft={saveAsDraft}
                 />
             }
             sidebar={
                 <ProductionSidebar
+                    tag={tagInput}
+                    tags={tags}
+                    onAddTag={onAddTag}
+                    onChangeTag={onChangeProductionTagInput}
+                    onRemoveTag={onRemoveProductionTag}
+
                     productionSettingsLabel={messages.production.productionSettingsLabel}
                     statusLabel={messages.production.statusLabel}
                     genreLabel={messages.production.genreLabel}
@@ -210,7 +290,7 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
             />
 
             <EventsEdit
-                events={placeholderEvents}
+                events={events}
                 makeEvent={makeEvent}
                 editEvent={editEvent}
                 deleteEvent={deleteEvent}
@@ -225,9 +305,18 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
 
             {popupOpen && (
                 <EventPopup
+                    fields={eventForm}
+                    isEdit={editingEvent !== undefined}
+                    locations={[]}
+                    eventTag={eventTagInput}
+                    onSave={saveEvent}
                     onClose={() => setPopupOpen(false)}
-                    isEdit={true}
+                    onChange={onChangeEventForm}
+                    onAddTag={onAddEventTag}
+                    onChangeTag={onChangeEventTagInput}
+                    onRemoveTag={onRemoveEventTag}
 
+                    saveButtonLabel={messages.event.saveButtonLabel}
                     editLabel={messages.event.editLabel}
                     addLabel={messages.event.addLabel}
                     timeLabel={messages.event.timeLabel}

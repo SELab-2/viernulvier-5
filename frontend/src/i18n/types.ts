@@ -106,6 +106,7 @@ export type Messages = {
   },
   event: {
     // event edit-popup
+    saveButtonLabel: string
     editLabel: string
     addLabel: string
     timeLabel: string

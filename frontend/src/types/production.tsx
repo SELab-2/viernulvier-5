@@ -19,3 +19,16 @@ export interface ProductionFields {
  * The contents of a production based on the language
  */
 export type ProductionContent = Record<Language, ProductionFields>
+
+/**
+ * All possible data that can be filled in the edit/create page
+ * about a production
+ */
+export type ProductionForm = {
+    content?: ProductionContent
+    genres?: string[]
+    banner?: string
+    extraPictures?: string[]
+    artist?: string
+    events: Event[]
+}

@@ -96,9 +96,10 @@ const nl: Messages = {
     eventsActionsLabel: 'Acties'
   },
   event: {
+    saveButtonLabel: 'Event opslaan',
     editLabel: 'Event bewerken',
     addLabel: 'Event toevoegen',
-    timeLabel: 'Tijd',
+    timeLabel: 'Tijd (start - einde)',
     locationLabel: 'Locatie',
     tagsLabel: 'Extra tags',
   },

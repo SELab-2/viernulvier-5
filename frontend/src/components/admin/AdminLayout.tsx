@@ -93,7 +93,7 @@ function AdminLayout({
             {header}
           </div>
         )}
-        <div className="bg-background flex">
+        <div className="bg-background flex overflow-hidden">
           <main className={getMainClassName(mainClassName)}>{children}</main>
 
           {sidebar && (
