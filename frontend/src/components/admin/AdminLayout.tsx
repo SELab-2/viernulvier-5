@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import type { SessionUser } from '../../api/adminAuth'
 import { logoutAndRedirect } from '../../auth/adminLogout'
 import { useAdminSession } from '../../auth/useAdminSession'
