@@ -124,12 +124,12 @@ describe('getPreferredCropUrl', () => {
         expect(getPreferredCropUrl(crops)).toBe('https://example.com/FE3_header.jpg')
     })
 
-    it('falls back to FE3_grid when FE3_header is missing', () => {
-        const crops = [makeCrop('cms'), makeCrop('FE3_grid'), makeCrop('banner')]
-        expect(getPreferredCropUrl(crops)).toBe('https://example.com/FE3_grid.jpg')
+    it('falls back to FE3_boxed when FE3_header is missing', () => {
+        const crops = [makeCrop('cms'), makeCrop('FE3_boxed'), makeCrop('banner')]
+        expect(getPreferredCropUrl(crops)).toBe('https://example.com/FE3_boxed.jpg')
     })
 
-    it('doesn\'t fall back to anything else when FE3_header and FE3_grid are missing', () => {
+    it('doesn\'t fall back to anything else when FE3_header and FE3_boxed are missing', () => {
         const crops = [makeCrop('cms'), makeCrop('banner')]
         expect(getPreferredCropUrl(crops)).toBe(null)
     })
@@ -140,7 +140,7 @@ describe('getPreferredCropUrl', () => {
     })
 
     it('respects priority order regardless of array order', () => {
-        const crops = [makeCrop('banner'),makeCrop('FE3_grid'), makeCrop('FE3_header'), makeCrop('cms')]
+        const crops = [makeCrop('banner'),makeCrop('FE3_boxed'), makeCrop('FE3_header'), makeCrop('cms')]
         expect(getPreferredCropUrl(crops)).toBe('https://example.com/FE3_header.jpg')
     })
 })
