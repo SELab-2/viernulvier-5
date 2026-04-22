@@ -11,6 +11,7 @@ vi.mock('../../../components/public/PublicMessagesContext', () => ({
             date: 'Date',
             time: 'Time',
             location: 'Location',
+            remark: 'Remark',
             showMore: 'Show more',
             showLess: 'Show less',
         },

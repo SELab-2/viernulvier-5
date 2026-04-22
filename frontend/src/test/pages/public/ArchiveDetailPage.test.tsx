@@ -20,6 +20,7 @@ vi.mock('../../../i18n', () => ({
     getMessages: (locale: string) => ({
         nav: { archive: 'Archief', searchAriaLabel: 'Zoeken', searchPlaceholder: 'Zoek...' },
         home: { title: 'Home' },
+        search: { shareLabel: 'Deel', shareCopiedLabel: 'Gekopieerd naar klembord' },
         detail: {
             navBack: 'Terug',
             dates: 'Speeldata',
@@ -27,7 +28,9 @@ vi.mock('../../../i18n', () => ({
             date: 'Datum',
             time: 'Uur',
             location: 'Locatie',
+            remark: 'Opmerking',
             noEvents: 'Geen voorstellingen gevonden.',
+            loadError: 'Kon de productie niet laden.',
             showMore: locale === 'en' ? 'Show more' : 'Meer tonen',
             showLess: locale === 'en' ? 'Show less' : 'Minder tonen',
             credits: 'Credits',

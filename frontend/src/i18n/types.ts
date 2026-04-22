@@ -26,6 +26,12 @@ export type Messages = {
     searchGenre: string
     searchLocation: string
     searchButton: string
+    onThisDayHeading: string
+    onThisDaySubheading: string
+    onThisDayViewAll: string
+    onThisDayEmpty: string
+    onThisDayFallbackHeading: string
+    onThisDayFallbackSubheading: string
     popularTagsLabel: string
     popularTagsMore: string
     popularTags: string[]
@@ -87,17 +93,6 @@ export type Messages = {
     resetFiltersLabel: string
     paginationPrevious: string
     paginationNext: string
-    paginationPages: string[]
-    paginationCurrent: string
-    items: Array<{
-      id: string
-      tag: string
-      date: string
-      title: string
-      excerpt: string
-      venue: string
-      imageClassName: string
-    }>
   }
   auth: {
     localeToggleLabel: string
@@ -129,9 +124,11 @@ export type Messages = {
     navBack: string
     events: string
     noEvents: string
+    loadError: string
     date: string
     time: string
     location: string
+    remark: string
     showLess: string
     showMore: string
     credits: string

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { NextLocaleToggle, SegmentedThemeToggle } from '../shared/TopBarControls'
 import { withLocalePath } from '../../i18n'
+import { NextLocaleToggle, SegmentedThemeToggle } from '../shared/TopBarControls'
 import { usePublicMessages } from './PublicMessagesContext'
 
 type Theme = 'light' | 'dark'

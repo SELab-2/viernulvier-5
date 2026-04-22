@@ -15,8 +15,16 @@ type SearchResultCardProps = {
     detailHref: string
 }
 
+function capitalizeFirst(value: string): string {
+    if (value.length === 0) {
+        return value
+    }
+
+    return value.charAt(0).toUpperCase() + value.slice(1)
+}
+
 function SearchResultCard({ item, detailHref }: SearchResultCardProps) {
-    const normalizedTitle = item.title.trim()
+    const normalizedTitle = capitalizeFirst(item.title.trim())
     const displayTitle = normalizedTitle.length > 110 ? `${normalizedTitle.slice(0, 107)}...` : normalizedTitle
 
     return (
