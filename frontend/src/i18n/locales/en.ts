@@ -121,9 +121,10 @@ const en: Messages = {
     paginationNext: '>',
   },
   event: {
+    saveButtonLabel: 'Save event',
     editLabel: 'Edit event',
     addLabel: 'Add event',
-    timeLabel: 'Time',
+    timeLabel: 'Time (start - end)',
     locationLabel: 'Location',
     tagsLabel: 'Extra tags',
   },

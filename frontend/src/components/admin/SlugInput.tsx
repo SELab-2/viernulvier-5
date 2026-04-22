@@ -8,7 +8,7 @@ type SlugInputProps = {
 function SlugInput({slug, onChange}: SlugInputProps) {
 
     // get the domain of the slug
-    const baseURL = window.location.origin.split('/')[2]
+    const baseURL = window.location.host
 
     return (
         <div className="border borderborder flex h-12 mb-8 rounded-xl border-r border-border bg-background">
