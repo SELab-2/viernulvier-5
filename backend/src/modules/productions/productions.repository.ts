@@ -222,7 +222,7 @@ export class ProductionsRepository {
             const tagFilters: any[] = []
 
             for (const genre of genres) {
-                const searchTerms = this.expandGenreTerms(genre)
+                const searchTerms = expandGenreTerms(genre)
                 const languages = Array.from(new Set([lang, 'nl', 'en', 'fr'])).filter(Boolean) as string[]
 
                 for (const term of searchTerms) {
@@ -335,17 +335,6 @@ export class ProductionsRepository {
 
     private get productionInclude() {
         return {
-            poster: {
-                select: {
-                    id: true,
-                    title: true,
-                    mime_type: true,
-                    original_filename: true,
-                    file_size_bytes: true,
-                    created_at: true,
-                    updated_at: true,
-                },
-            },
             poster_gallery: {
                 include: {
                     items: {
@@ -449,17 +438,6 @@ export class ProductionsRepository {
         const production = await this.prisma.production.findUnique({
             where: { id },
             include: {
-                poster: {
-                    select: {
-                        id: true,
-                        title: true,
-                        mime_type: true,
-                        original_filename: true,
-                        file_size_bytes: true,
-                        created_at: true,
-                        updated_at: true,
-                    },
-                },
                 events: {
                     include: {
                         hall: {

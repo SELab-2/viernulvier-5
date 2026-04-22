@@ -57,7 +57,6 @@ export function getAdminNavigationItems(hostname: string = window.location.hostn
             { id: 'dashboard', to: dashboardPath, iconSrc: '/admin/sidebar-dashboard.svg' },
             { id: 'productions', disabled: true, iconSrc: '/admin/sidebar-productions.svg' },
             { id: 'posters', to: postersPath, iconSrc: '/admin/sidebar-gallery.svg' },
-            { id: 'gallery', disabled: true, iconSrc: '/admin/sidebar-gallery.svg' },
             { id: 'organisation', disabled: true, iconSrc: '/admin/sidebar-organization.svg' },
         ],
         secondary: [

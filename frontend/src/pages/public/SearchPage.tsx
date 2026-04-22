@@ -269,12 +269,13 @@ function mapPosterToSearchEntry(item: PosterApiItem, locale: Locale): SearchEntr
         tag: searchMessages.postersTab,
         date,
         title: item.title,
-        excerpt: productionTitle,
+        excerpt: '',
         venue: productionTitle,
         imageUrl: normalizeApiAssetUrl(item.file_url),
         year: new Date(item.created_at).getFullYear() || MIN_PERIOD_YEAR,
         genre: '',
         location: '',
+        isProductionReference: true,
     }
 }
 
@@ -566,7 +567,7 @@ function useAllHalls(locale: Locale) {
         const fetchHalls = async () => {
             try {
                 // Fetch more halls to be sure
-                const res = await apiFetch<{ data: Array<{ name: LocalizedText }> }>('/archive/halls?limit=500')
+                const res = await apiFetch<{ data: Array<{ name: LocalizedText }> }>('/archive/halls?limit=100')
                 const names = (res.data || [])
                     .map(h => getLocalizedText(h.name, locale))
                     .filter(Boolean)
@@ -1216,7 +1217,7 @@ function SearchPage() {
                 const mappedEntries = activeTab === 'posters'
                     ? (response.data as PosterApiItem[]).map((item) => mapPosterToSearchEntry(item, locale))
                     : (response.data as ProductionApiItem[]).map((item) => mapProductionToSearchEntry(item, locale, preferredGenre))
-                setApiRawItems(response.data)
+                setApiRawItems(activeTab === 'productions' ? (response.data as ProductionApiItem[]) : [])
                 setApiEntries(mappedEntries)
                 setTotalResults(response.meta?.total ?? mappedEntries.length)
                 setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))

@@ -6,6 +6,7 @@ import type { FastifyReply, FastifyRequest } from 'fastify'
 import type { CreatePosterInput, PosterPaginationQuery, PosterResponse, UpdatePosterInput } from './posters.schema.js'
 import type { PostersService } from './posters.service.js'
 import { buildPaginationLinks } from '../../utils/pagination.js'
+import { env } from '../../config/env.js'
 
 const MAX_FILE_SIZE_BYTES = 15 * 1024 * 1024
 const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
@@ -130,7 +131,7 @@ export class PostersController {
             }
 
             const fileBuffer = parseBase64Payload(body.file_base64)
-            const uploadDir = path.resolve(process.cwd(), 'uploads/posters')
+            const uploadDir = path.resolve(process.cwd(), env.POSTER_LOCATION)
             await mkdir(uploadDir, { recursive: true })
 
             const originalName = fileName || 'poster-file'

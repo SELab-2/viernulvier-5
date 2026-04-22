@@ -6,6 +6,7 @@ export type SearchResultItem = {
     excerpt: string
     venue: string
     imageUrl?: string
+    isProductionReference?: boolean
 }
 
 type SearchResultCardProps = {
@@ -41,8 +42,12 @@ function SearchResultCard({ item }: SearchResultCardProps) {
             <div className="flex flex-1 flex-col">
                 <p className="mt-3 text-xs text-text-accent">{item.date}</p>
                 <h3 className="mt-1 line-clamp-3 text-2xl leading-none text-foreground [overflow-wrap:anywhere]">{displayTitle}</h3>
-                <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-text-accent">{item.excerpt}</p>
-                <p className="mt-auto pt-4 text-xs font-semibold lowercase tracking-wide text-text-accent">{item.venue}</p>
+                {item.excerpt && !item.isProductionReference ? (
+                    <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-text-accent">{item.excerpt}</p>
+                ) : null}
+                <p className="mt-auto pt-4 text-xs font-semibold lowercase tracking-wide text-text-accent">
+                    {item.isProductionReference ? `∋ ${item.venue}` : item.venue}
+                </p>
             </div>
         </article>
     )

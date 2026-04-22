@@ -68,6 +68,11 @@ const posterResourceSchema = z.object({
     updated_at: z.coerce.date(),
 })
 
+const gallerySchema = z.object({
+    id: z.string().uuid().optional(),
+    items: z.array(z.unknown()).optional(),
+}).passthrough()
+
 export const productionSchema = z.object({
     id: z.string().uuid(),
     apiId: z.string().nullable(),
@@ -102,8 +107,8 @@ export const productionSchema = z.object({
     on_this_day_event_date: z.coerce.date().nullable().optional(),
     poster: posterResourceSchema.nullable().optional(),
     poster_file_url: z.string().nullable().optional(),
-    media_gallery: gallerySchema.optional(),
-    poster_gallery: gallerySchema.optional(),
+    media_gallery: gallerySchema.nullable().optional(),
+    poster_gallery: gallerySchema.nullable().optional(),
     genres: z.array(genreSchema).optional(),
     tags: z.array(tagSchema).optional(),
     media_gallery_id: z.string().uuid().nullable(),

@@ -204,5 +204,32 @@ export type Messages = {
       pageTitle: string
       itemIdLabel: string
     }
+    posters: {
+      pageTitle: string
+      pageSubtitle: string
+      formTitleLabel: string
+      formProductionLabel: string
+      formFileLabel: string
+      submitButton: string
+      submittingButton: string
+      overviewHeading: string
+      searchPlaceholder: string
+      searchButton: string
+      loadingMessage: string
+      emptyMessage: string
+      noProductionsAvailable: string
+      searchProductionPlaceholder: string
+      noProductionsFound: string
+      deleteButton: string
+      deletingButton: string
+      deleteConfirm: string
+      deleteError: string
+      validationTitleRequired: string
+      validationProductionRequired: string
+      validationFileRequired: string
+      loadPostersError: string
+      loadProductionsError: string
+      noProductionAssigned: string
+    }
   }
 }
