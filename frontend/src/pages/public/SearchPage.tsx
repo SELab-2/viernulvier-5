@@ -442,6 +442,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
     const selectedLocations = filterState.locations
     const sort = filterState.sort
     const safeLimit = filterState.limit
+    const tab = filterState.tab
     const sliderRef = useRef<HTMLDivElement | null>(null)
 
     const [searchInput, setSearchInput] = useState(query)
@@ -475,22 +476,23 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
                 locations: selectedLocations,
                 sort,
                 limit: safeLimit,
+                tab,
             })
         }, SEARCH_INPUT_DEBOUNCE_MS)
 
         return () => {
             window.clearTimeout(timerId)
         }
-    }, [searchInput, query, safeFromYear, safeToYear, selectedGenres, selectedLocations, sort, safeLimit, pushFilters])
+    }, [searchInput, query, safeFromYear, safeToYear, selectedGenres, selectedLocations, sort, safeLimit, tab, pushFilters])
 
     const handleSearchSubmit = () => {
-        pushFilters({ query: searchInput.trim() || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: safeLimit })
+        pushFilters({ query: searchInput.trim() || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: safeLimit, tab })
     }
 
     const handleGenreChange = (next: string) => {
         const nextGenres = selectedGenres.includes(next) ? [] : [next]
 
-        pushFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: nextGenres, locations: selectedLocations, sort, limit: safeLimit })
+        pushFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: nextGenres, locations: selectedLocations, sort, limit: safeLimit, tab })
     }
 
     const handleLocationChange = (next: string) => {
@@ -498,7 +500,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
             ? selectedLocations.filter((value) => value !== next)
             : [...selectedLocations, next]
 
-        pushFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: selectedGenres, locations: nextLocations, sort, limit: safeLimit })
+        pushFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: selectedGenres, locations: nextLocations, sort, limit: safeLimit, tab })
     }
 
     const handleAddLocation = () => {
@@ -516,6 +518,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
             locations: [...selectedLocations, nextLocation],
             sort,
             limit: safeLimit,
+            tab,
         })
         setLocationInput('')
         setIsLocationSuggestionsOpen(false)
@@ -555,6 +558,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
             locations: [...selectedLocations, nextLocation],
             sort,
             limit: safeLimit,
+            tab,
         })
         setLocationInput('')
         setIsLocationSuggestionsOpen(false)
@@ -562,16 +566,16 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
 
     const handleFromYearChange = (next: number) => {
         const clampedNext = Math.min(next, safeToYear)
-        pushFilters({ query: query || undefined, yearFrom: clampedNext, yearTo: safeToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: safeLimit })
+        pushFilters({ query: query || undefined, yearFrom: clampedNext, yearTo: safeToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: safeLimit, tab })
     }
 
     const handleToYearChange = (next: number) => {
         const clampedNext = Math.max(next, safeFromYear)
-        pushFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: clampedNext, genres: selectedGenres, locations: selectedLocations, sort, limit: safeLimit })
+        pushFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: clampedNext, genres: selectedGenres, locations: selectedLocations, sort, limit: safeLimit, tab })
     }
 
     const handleReset = () => {
-        pushFilters({ yearFrom: MIN_PERIOD_YEAR, yearTo: MAX_PERIOD_YEAR, sort, limit: safeLimit })
+        pushFilters({ yearFrom: MIN_PERIOD_YEAR, yearTo: MAX_PERIOD_YEAR, sort, limit: safeLimit, tab })
     }
 
     const handleSliderPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -631,6 +635,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
                 </form>
             ) : null}
 
+            {tab !== 'blogs' ? (
             <div className="mt-8 border-t border-border pt-5">
                 <div className="mb-4 flex items-center justify-between">
                     <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground">{s.genreLabel}</h3>
@@ -651,6 +656,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
                     })}
                 </div>
             </div>
+            ) : null}
 
             <div className="mt-6 border-t border-border pt-5">
                 <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground">{s.periodLabel}</h3>
@@ -686,6 +692,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
                 </div>
             </div>
 
+            {tab !== 'blogs' ? (
             <div className="mt-6 border-t border-border pt-5 pb-5">
                 <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground">{s.locationLabel}</h3>
                 <div className="mt-4 space-y-3 text-sm text-text-accent">
@@ -750,6 +757,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
                     ) : null}
                 </div>
             </div>
+            ) : null}
 
             <div className="mt-auto space-y-3">
                 <button
@@ -773,12 +781,13 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
     )
 }
 
-function MobileSearchForm() {
+function MobileSearchForm({ className = 'mb-5 md:hidden' }: { className?: string }) {
     const [searchParams] = useSearchParams()
     const navigate = useNavigate()
     const locale = getActiveLocale(window.location.pathname)
     const { search: s } = getMessages(locale)
-    const query = useMemo(() => parseSearchFilterState(searchParams).query, [searchParams])
+    const filterState = useMemo(() => parseSearchFilterState(searchParams), [searchParams])
+    const query = filterState.query
     const [searchInput, setSearchInput] = useState(query)
 
     useEffect(() => {
@@ -795,11 +804,12 @@ function MobileSearchForm() {
             locations: filterState.locations,
             sort: filterState.sort,
             limit: filterState.limit,
+            tab: filterState.tab,
         })
         const path = withLocalePath('/zoeken', locale)
         const qs = params.toString()
         navigate(qs ? `${path}?${qs}` : path)
-    }, [searchParams, locale, navigate])
+    }, [filterState, locale, navigate])
 
     useEffect(() => {
         const nextQuery = searchInput.trim()
@@ -822,7 +832,7 @@ function MobileSearchForm() {
     }
 
     return (
-        <form className="mb-5 md:hidden" onSubmit={handleSubmit}>
+        <form className={className} onSubmit={handleSubmit}>
             <div className="relative">
                 <input
                     type="text"
@@ -862,6 +872,7 @@ function SearchPage() {
     const page = filterState.page
     const pageSize = filterState.limit
     const tab = filterState.tab
+    const isBlogTab = tab === 'blogs'
 
     useEffect(() => {
         const abortController = new AbortController()
@@ -881,6 +892,9 @@ function SearchPage() {
                 }
 
                 if (tab === 'blogs') {
+                    params.set('yearFrom', String(safeFromYear))
+                    params.set('yearTo', String(safeToYear))
+
                     const response = await apiFetch<PaginatedApiResponse<BlogApiItem>>(
                         `/archive/blogs?${params.toString()}`,
                         { signal: abortController.signal }
@@ -1174,7 +1188,7 @@ function SearchPage() {
                                 </>
                             ) : null}
 
-                            <MobileSearchForm key={searchParams.toString()} />
+                            <MobileSearchForm key={searchParams.toString()} className="mb-5 md:hidden" />
 
                             <div className="flex flex-wrap items-center justify-between gap-4">
                                 <div>
@@ -1199,63 +1213,65 @@ function SearchPage() {
                                     </p>
                                 </div>
 
-                                <div className="flex items-center gap-3">
-                                    <label className="text-sm text-muted">{m.search.sortLabel}</label>
-                                    <select
-                                        className="h-9 rounded-full border border-border bg-surface px-4 text-sm text-foreground transition-all cursor-pointer duration-200 hover:border-accent/45 hover:text-accent"
-                                        value={sort}
-                                        onChange={(event) => handleSortChange(event.target.value)}
-                                    >
-                                        <option value="relevance">{m.search.sortDefault}</option>
-                                        <option value="recent">{m.search.sortRecent}</option>
-                                        <option value="oldest">{m.search.sortOldest}</option>
-                                    </select>
-                                    <select
-                                        className="h-9 rounded-full border border-border bg-surface px-4 text-sm text-foreground transition-all cursor-pointer duration-200 hover:border-accent/45 hover:text-accent"
-                                        value={String(pageSize)}
-                                        onChange={(event) => {
-                                            const nextLimit = Number(event.target.value)
-                                            navigateWithFilters({
-                                                query: query || undefined,
-                                                yearFrom: safeFromYear,
-                                                yearTo: safeToYear,
-                                                genres: selectedGenres,
-                                                locations: selectedLocations,
-                                                sort,
-                                                page: 1,
-                                                limit: nextLimit,
-                                                tab,
-                                            })
-                                        }}
-                                        aria-label={m.search.resultsPerPageAriaLabel}
-                                    >
-                                        {PAGE_SIZE_OPTIONS.map((option) => (
-                                            <option key={option} value={option}>
-                                                {`${option} ${m.search.resultsPerPageSuffix}`}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    <button
-                                        type="button"
-                                        className="group hidden h-9 items-center gap-2 rounded-full border border-border bg-surface px-3 text-sm text-foreground transition-all cursor-pointer duration-200 hover:border-accent/45 hover:text-accent md:inline-flex"
-                                        onClick={() => {
-                                            void handleShare()
-                                        }}
-                                    >
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5" aria-hidden="true">
-                                            <circle cx="18" cy="5" r="3" />
-                                            <circle cx="6" cy="12" r="3" />
-                                            <circle cx="18" cy="19" r="3" />
-                                            <path d="M8.59 13.51 15.42 17.49M15.41 6.51 8.59 10.49" strokeLinecap="round" />
-                                        </svg>
-                                        <span>{shareCopied ? m.search.shareCopiedLabel : m.search.shareLabel}</span>
-                                    </button>
-                                </div>
+                                {!isBlogTab ? (
+                                    <div className="flex items-center gap-3">
+                                        <label className="text-sm text-muted">{m.search.sortLabel}</label>
+                                        <select
+                                            className="h-9 rounded-full border border-border bg-surface px-4 text-sm text-foreground transition-all cursor-pointer duration-200 hover:border-accent/45 hover:text-accent"
+                                            value={sort}
+                                            onChange={(event) => handleSortChange(event.target.value)}
+                                        >
+                                            <option value="relevance">{m.search.sortDefault}</option>
+                                            <option value="recent">{m.search.sortRecent}</option>
+                                            <option value="oldest">{m.search.sortOldest}</option>
+                                        </select>
+                                        <select
+                                            className="h-9 rounded-full border border-border bg-surface px-4 text-sm text-foreground transition-all cursor-pointer duration-200 hover:border-accent/45 hover:text-accent"
+                                            value={String(pageSize)}
+                                            onChange={(event) => {
+                                                const nextLimit = Number(event.target.value)
+                                                navigateWithFilters({
+                                                    query: query || undefined,
+                                                    yearFrom: safeFromYear,
+                                                    yearTo: safeToYear,
+                                                    genres: selectedGenres,
+                                                    locations: selectedLocations,
+                                                    sort,
+                                                    page: 1,
+                                                    limit: nextLimit,
+                                                    tab,
+                                                })
+                                            }}
+                                            aria-label={m.search.resultsPerPageAriaLabel}
+                                        >
+                                            {PAGE_SIZE_OPTIONS.map((option) => (
+                                                <option key={option} value={option}>
+                                                    {`${option} ${m.search.resultsPerPageSuffix}`}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <button
+                                            type="button"
+                                            className="group hidden h-9 items-center gap-2 rounded-full border border-border bg-surface px-3 text-sm text-foreground transition-all cursor-pointer duration-200 hover:border-accent/45 hover:text-accent md:inline-flex"
+                                            onClick={() => {
+                                                void handleShare()
+                                            }}
+                                        >
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5" aria-hidden="true">
+                                                <circle cx="18" cy="5" r="3" />
+                                                <circle cx="6" cy="12" r="3" />
+                                                <circle cx="18" cy="19" r="3" />
+                                                <path d="M8.59 13.51 15.42 17.49M15.41 6.51 8.59 10.49" strokeLinecap="round" />
+                                            </svg>
+                                            <span>{shareCopied ? m.search.shareCopiedLabel : m.search.shareLabel}</span>
+                                        </button>
+                                    </div>
+                                ) : null}
                             </div>
 
-                        {filterChips.length > 0 ? (
+                        {(isBlogTab ? filterChips.filter((chip) => chip.key === 'period') : filterChips).length > 0 ? (
                             <div className="mt-5 flex flex-wrap items-center gap-2">
-                                {filterChips.map((chip) => (
+                                {(isBlogTab ? filterChips.filter((chip) => chip.key === 'period') : filterChips).map((chip) => (
                                     <button
                                         key={chip.key}
                                         type="button"

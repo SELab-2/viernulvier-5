@@ -11,16 +11,18 @@ export class BlogsService {
     constructor(private readonly repository: BlogsRepository) {}
 
     async getBlogs(options: BlogPaginationQuery): Promise<PaginatedResult<BlogResponse>> {
-        const { page, limit, search } = options
+        const { page, limit, search, yearFrom, yearTo } = options
 
-        const total = await this.repository.count({ search })
+        const total = await this.repository.count({ search, yearFrom, yearTo })
         const totalPages = calculateTotalPages(total, limit)
         const sanitizedPage = sanitizePage(page, totalPages)
 
         const items = await this.repository.findAll({ 
             page: sanitizedPage, 
             limit, 
-            search 
+            search,
+            yearFrom,
+            yearTo,
         })
 
         return {
