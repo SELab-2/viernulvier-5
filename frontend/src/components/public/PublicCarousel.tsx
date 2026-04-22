@@ -302,15 +302,14 @@ function PublicCarousel() {
                             className="mt-8 flex snap-x snap-mandatory gap-6 overflow-x-auto py-6 px-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                         >
                             {items.map((item, index) => (
-                                <Link
-                                    to={withLocalePath(`/archive/${item.id}`, locale)}
+                                <div
                                     key={item.id}
-                                    className={`flex w-[280px] shrink-0 snap-start border border-border bg-surface p-4 transition-transform duration-300 hover:rotate-0 hover:shadow-lg sm:w-[310px] ${
+                                    className={`w-[280px] shrink-0 snap-start border border-border bg-surface p-4 transition-transform duration-300 hover:rotate-0 hover:shadow-lg sm:w-[310px] ${
                                         index % 2 === 0 ? '-rotate-3' : 'rotate-3'
                                     }`}
                                 >
-                                    <SearchResultCard item={item} />
-                                </Link>
+                                    <SearchResultCard item={item} detailHref={withLocalePath(`/archive/${item.id}`, locale)} />
+                                </div>
                             ))}
                         </div>
 
