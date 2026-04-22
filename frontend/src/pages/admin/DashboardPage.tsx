@@ -165,14 +165,14 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
 
         <div className="overflow-hidden rounded-[12px] border border-[var(--color-admin-card-border)] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.05)] dark:bg-[#111318]">
           <div className="overflow-x-auto">
-            <table className="w-full table-fixed border-collapse">
+            <table className="w-full min-w-[720px] table-fixed border-collapse">
               <colgroup>
-                <col />
-                <col className="w-[140px]" />
-                <col className="w-[200px]" />
-                <col className="w-[120px]" />
-                <col className="w-[140px]" />
-                <col className="w-[120px]" />
+                <col className="w-[30%]" />
+                <col className="w-[12%]" />
+                <col className="w-[20%]" />
+                <col className="w-[10%]" />
+                <col className="w-[16%]" />
+                <col className="w-[12%]" />
               </colgroup>
               <thead className="bg-[rgba(248,250,252,0.7)] dark:bg-slate-900/60">
                 <tr>
@@ -196,7 +196,7 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
               <tbody>
                 {recentItems.map((item) => (
                   <tr key={item.id} className="h-[72px] border-t border-slate-100 dark:border-slate-800">
-                    <td className="w-[40%] max-w-0 px-4 py-4">
+                    <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-slate-100 text-xs font-semibold text-slate-500 dark:bg-slate-800 dark:text-slate-300">
                           {item.title.slice(0, 2).toUpperCase()}
