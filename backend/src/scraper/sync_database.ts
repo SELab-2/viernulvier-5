@@ -3,7 +3,6 @@ import { prisma } from "./prisma";
 import { log } from "./logger";
 
 import Scraper from './scraper';
-import CropsDownloader from './crops_downloader';
 
 // contains the data of the last sync with the API, the scraper will only add data updated or created after this timestamp
 
@@ -38,7 +37,6 @@ export async function main() {
   await Scraper.sync_uit_types(cutoff_timestamp);
 
   await Scraper.sync_crops(cutoff_timestamp);
-  await CropsDownloader.download_crops();
 
   await Scraper.sync_items(cutoff_timestamp);
   await Scraper.sync_galleries(cutoff_timestamp);
