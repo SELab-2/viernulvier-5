@@ -40,6 +40,7 @@ const mockMessages: Pick<Messages, 'admin'> = {
       statusAvailable: 'Available in archive',
       actionView: 'View',
       actionEdit: 'Edit',
+      actionDelete: 'Delete',
       emptyRecent: 'No recent archive items found.',
       paginationShowing: (from: number, to: number, total: number) => `Showing ${from}-${to} of ${total} results`,
       paginationPrev: 'Previous page',

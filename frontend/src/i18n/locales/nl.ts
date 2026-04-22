@@ -199,6 +199,7 @@ const nl: Messages = {
       statusAvailable: 'Beschikbaar in archief',
       actionView: 'Bekijk',
       actionEdit: 'Bewerk',
+      actionDelete: 'Verwijder',
       emptyRecent: 'Nog geen recente archiefitems gevonden.',
       paginationShowing: (from: number, to: number, total: number) => `Toont ${from}-${to} van ${total} resultaten`,
       paginationPrev: 'Vorige pagina',

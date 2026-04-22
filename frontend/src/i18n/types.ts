@@ -173,6 +173,7 @@ export type Messages = {
       statusAvailable: string
       actionView: string
       actionEdit: string
+      actionDelete: string
       emptyRecent: string
       paginationShowing: (from: number, to: number, total: number) => string
       paginationPrev: string
