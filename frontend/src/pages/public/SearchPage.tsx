@@ -103,6 +103,7 @@ type SearchFilterState = {
     sort: SearchSort
     page: number
     limit: number
+    tab: 'productions' | 'blogs'
 }
 
 type SearchFilterOverrides = {
@@ -114,6 +115,7 @@ type SearchFilterOverrides = {
     sort?: SearchSort
     page?: number
     limit?: number
+    tab?: 'productions' | 'blogs'
 }
 
 function getLocalizedText(text: LocalizedText, locale: Locale): string {
@@ -150,6 +152,8 @@ function parseSearchFilterState(searchParams: URLSearchParams): SearchFilterStat
     const limitParam = Number(searchParams.get('limit') ?? String(DEFAULT_PAGE_SIZE))
     const limit = normalizePageSize(limitParam)
 
+    const tab = searchParams.get('tab') === 'blogs' ? 'blogs' : 'productions'
+
     return {
         query,
         yearFrom,
@@ -159,6 +163,7 @@ function parseSearchFilterState(searchParams: URLSearchParams): SearchFilterStat
         sort,
         page,
         limit,
+        tab,
     }
 }
 
@@ -174,6 +179,7 @@ function buildSearchParams(filters: SearchFilterOverrides): URLSearchParams {
     if (filters.sort && filters.sort !== 'relevance') params.set('sort', filters.sort)
     if (filters.page && filters.page > 1) params.set('page', String(filters.page))
     if (filters.limit && filters.limit !== DEFAULT_PAGE_SIZE) params.set('limit', String(filters.limit))
+    if (filters.tab === 'blogs') params.set('tab', 'blogs')
 
     return params
 }
@@ -285,6 +291,36 @@ function mapProductionToSearchEntry(item: ProductionApiItem, locale: Locale, pre
         year,
         genre: normalizedGenre,
         location: normalizedLocation,
+    }
+}
+
+type BlogApiItem = {
+    id: string
+    title?: string | null
+    content?: unknown
+    productions: string[]
+    createdAt: string
+    updatedAt: string
+    links?: { self: string }
+}
+
+function mapBlogToSearchEntry(item: BlogApiItem, locale: Locale): SearchEntry {
+    const searchMessages = getMessages(locale).search
+    const title = item.title?.trim() || searchMessages.fallbackUntitled
+    const date = item.createdAt ? formatDate(item.createdAt, locale) : '-'
+    const year = item.createdAt ? new Date(item.createdAt).getFullYear() : MIN_PERIOD_YEAR
+
+    return {
+        id: item.id,
+        tag: searchMessages.blogTab,
+        date,
+        title,
+        excerpt: title,
+        venue: '',
+        imageUrl: undefined,
+        year,
+        genre: '',
+        location: '',
     }
 }
 
@@ -803,6 +839,7 @@ function SearchPage() {
     const sort = filterState.sort
     const page = filterState.page
     const pageSize = filterState.limit
+    const tab = filterState.tab
 
     useEffect(() => {
         const abortController = new AbortController()
@@ -815,43 +852,55 @@ function SearchPage() {
                 const params = new URLSearchParams({
                     page: String(page),
                     limit: String(pageSize),
-                    lang: locale,
                 })
 
                 if (query) {
                     params.set('search', query)
                 }
 
-                if (selectedGenres.length > 0) {
-                    params.set('genres', selectedGenres.join(','))
+                if (tab === 'blogs') {
+                    const response = await apiFetch<PaginatedApiResponse<BlogApiItem>>(
+                        `/archive/blogs?${params.toString()}`,
+                        { signal: abortController.signal }
+                    )
+                    const mappedEntries = response.data.map((item) => mapBlogToSearchEntry(item, locale))
+                    setApiEntries(mappedEntries)
+                    setTotalResults(response.meta?.total ?? mappedEntries.length)
+                    setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
+                } else {
+                    params.set('lang', locale)
+
+                    if (selectedGenres.length > 0) {
+                        params.set('genres', selectedGenres.join(','))
+                    }
+
+                    if (selectedLocations.length > 0) {
+                        params.set('locations', selectedLocations.join(','))
+                    }
+
+                    if (safeFromYear > MIN_PERIOD_YEAR) {
+                        params.set('yearFrom', String(safeFromYear))
+                    }
+
+                    if (safeToYear < MAX_PERIOD_YEAR) {
+                        params.set('yearTo', String(safeToYear))
+                    }
+
+                    if (sort === 'recent' || sort === 'oldest') {
+                        params.set('sort', sort)
+                    }
+
+                    const response = await apiFetch<PaginatedApiResponse<ProductionApiItem>>(
+                        `/archive/productions?${params.toString()}`,
+                        { signal: abortController.signal }
+                    )
+
+                    const preferredGenre = selectedGenres.length === 1 ? selectedGenres[0] : undefined
+                    const mappedEntries = response.data.map((item) => mapProductionToSearchEntry(item, locale, preferredGenre))
+                    setApiEntries(mappedEntries)
+                    setTotalResults(response.meta?.total ?? mappedEntries.length)
+                    setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
                 }
-
-                if (selectedLocations.length > 0) {
-                    params.set('locations', selectedLocations.join(','))
-                }
-
-                if (safeFromYear > MIN_PERIOD_YEAR) {
-                    params.set('yearFrom', String(safeFromYear))
-                }
-
-                if (safeToYear < MAX_PERIOD_YEAR) {
-                    params.set('yearTo', String(safeToYear))
-                }
-
-                if (sort === 'recent' || sort === 'oldest') {
-                    params.set('sort', sort)
-                }
-
-                const response = await apiFetch<PaginatedApiResponse<ProductionApiItem>>(
-                    `/archive/productions?${params.toString()}`,
-                    { signal: abortController.signal }
-                )
-
-                const preferredGenre = selectedGenres.length === 1 ? selectedGenres[0] : undefined
-                const mappedEntries = response.data.map((item) => mapProductionToSearchEntry(item, locale, preferredGenre))
-                setApiEntries(mappedEntries)
-                setTotalResults(response.meta?.total ?? mappedEntries.length)
-                setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
             } catch (error) {
                 if (abortController.signal.aborted) {
                     return
@@ -874,7 +923,7 @@ function SearchPage() {
         return () => {
             abortController.abort()
         }
-    }, [query, locale, selectedGenres, selectedLocations, safeFromYear, safeToYear, sort, page, pageSize])
+    }, [query, locale, selectedGenres, selectedLocations, safeFromYear, safeToYear, sort, page, pageSize, tab])
 
     const navigateWithFilters = (filters: SearchFilterOverrides) => {
         const params = buildSearchParams(filters)
@@ -934,6 +983,7 @@ function SearchPage() {
             sort,
             page: nextPage,
             limit: pageSize,
+            tab,
         })
     }
 
@@ -947,6 +997,7 @@ function SearchPage() {
             locations: selectedLocations,
             sort: safeSort,
             limit: pageSize,
+            tab,
         })
     }
 
@@ -959,6 +1010,7 @@ function SearchPage() {
             locations: selectedLocations,
             sort,
             limit: pageSize,
+            tab,
         })
     }
 
@@ -971,6 +1023,7 @@ function SearchPage() {
             locations: selectedLocations.filter((value) => value !== locationToRemove),
             sort,
             limit: pageSize,
+            tab,
         })
     }
 
@@ -983,6 +1036,7 @@ function SearchPage() {
             locations: selectedLocations,
             sort,
             limit: pageSize,
+            tab,
         })
     }
 
@@ -1102,9 +1156,21 @@ function SearchPage() {
 
                             <div className="flex flex-wrap items-center justify-between gap-4">
                                 <div>
-                                    <h1 className="text-3xl leading-none text-foreground">
-                                        <span className="underline decoration-accent decoration-2 underline-offset-4">{m.search.productionsTab}</span>{' '}
-                                        <span className="text-muted">{m.search.blogTab}</span>
+                                    <h1 className="flex items-center gap-3 text-3xl leading-none text-foreground">
+                                        <button
+                                            type="button"
+                                            onClick={() => navigateWithFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: pageSize, page: 1, tab: 'productions' })}
+                                            className={tab === 'productions' ? 'underline decoration-accent decoration-2 underline-offset-4' : 'text-muted transition-colors hover:text-foreground'}
+                                        >
+                                            {m.search.productionsTab}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => navigateWithFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: pageSize, page: 1, tab: 'blogs' })}
+                                            className={tab === 'blogs' ? 'underline decoration-accent decoration-2 underline-offset-4' : 'text-muted transition-colors hover:text-foreground'}
+                                        >
+                                            {m.search.blogTab}
+                                        </button>
                                     </h1>
                                     <p className="mt-2 text-sm text-muted">
                                         <strong className="text-foreground">{totalResults}</strong> {m.search.resultsSuffix}
@@ -1136,6 +1202,7 @@ function SearchPage() {
                                                 sort,
                                                 page: 1,
                                                 limit: nextLimit,
+                                                tab,
                                             })
                                         }}
                                         aria-label={m.search.resultsPerPageAriaLabel}
@@ -1209,7 +1276,15 @@ function SearchPage() {
                         ) : pageItems.length > 0 ? (
                             <div className="mt-5 grid gap-x-5 gap-y-8 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                                 {pageItems.map((item) => (
-                                    <SearchResultCard key={item.id} item={item} />
+                                    <SearchResultCard
+                                        key={item.id}
+                                        item={{
+                                            ...item,
+                                            detailHref: tab === 'blogs'
+                                                ? withLocalePath('/blogs/' + item.id, locale)
+                                                : withLocalePath('/productions/' + item.id, locale),
+                                        }}
+                                    />
                                 ))}
                             </div>
                         ) : (
