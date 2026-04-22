@@ -72,7 +72,8 @@ const en: Messages = {
   production: {
     productionSettingsLabel: 'Production Settings',
     statusLabel: 'Status',
-    genreLabel: 'Genre',
+    genreLabel: 'Genres',
+    tagLabel: 'Tags',
     bannerLabel: 'Banner',
     extraPicturesLabel: 'Extra pictures',
     artistLabel: 'Artist',

@@ -1,8 +1,8 @@
-import type { ProductionFields } from "../../types/production"
+import type { ProductionContentFields } from "../../types/production"
 
 type SlugInputProps = {
     slug?: string
-    onChange: (field: keyof ProductionFields, value: string) => void
+    onChange: (field: keyof ProductionContentFields, value: string) => void
 }
 
 function SlugInput({slug, onChange}: SlugInputProps) {

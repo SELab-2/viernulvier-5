@@ -72,7 +72,8 @@ const nl: Messages = {
   production: {
     productionSettingsLabel: 'Productie instellingen',
     statusLabel: 'Status',
-    genreLabel: 'Genre',
+    genreLabel: 'Genres',
+    tagLabel: 'Tags',
     bannerLabel: 'Banner',
     extraPicturesLabel: "Extra foto's",
     artistLabel: 'Artiest',

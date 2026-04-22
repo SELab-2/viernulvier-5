@@ -1,10 +1,10 @@
-import ProductionContentTab from '../../components/admin/ProductionTabContent'
+import ProductionTabContent from '../../components/admin/ProductionTabContent'
 import ProductionTab from '../../components/admin/ProductionTab'
 import AdminLayout from '../../components/admin/AdminLayout'
 import SectionHeading from '../../components/admin/SectionHeading'
 import EventsEdit from '../../components/admin/ManageEvents'
 
-import type { Language, ProductionContent, ProductionFields } from '../../types/production'
+import type { Language, ProductionContent, ProductionContentFields, ProductionForm, ProductionSettingsFields } from '../../types/production'
 import type { Locale } from '../../i18n/types'
 import type { Event, EventForm } from '../../types/event'
 import type { ProductionResponse } from '../../../../backend/src/modules/productions/productions.schema'
@@ -18,9 +18,23 @@ import EventPopup from '../../components/admin/EventPopup'
 import ProductionSidebar from '../../components/admin/ProductionSidebar'
 import ProductionEditHeader from '../../components/admin/ProductionEditHeader'
 
-const defaultForm : ProductionContent = {
+const defaultContentForm : ProductionContent = {
     nl: {title: '', slug: '', content: ''},
     en: {title: '', slug: '', content: ''}
+}
+
+const defaultSettingsForm : ProductionSettingsFields = {
+    artist: '',
+    banner: '',
+    extraPictures: [],
+    genres: [],
+    tags: []
+}
+
+const defaultForm : ProductionForm = {
+    content: defaultContentForm,
+    settings: defaultSettingsForm,
+    events: []
 }
 
 const defaultEventForm : EventForm = {
@@ -56,15 +70,16 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
     const { id } = useParams()          // current production id
 
     // Production state
+    const [form, setForm] = useState<ProductionForm>(defaultForm)
     const [prod, setProd] = useState<ProductionResponse>()
     const [languageTab, setLanguageTab] = useState<Locale>('nl')
-    const [form, setForm] = useState<ProductionContent>(defaultForm)
+    // const [form, setForm] = useState<ProductionContent>(defaultForm)
     const [tagInput, setTagInput] = useState('')
+    const [genreInput, setGenreInput] = useState('')
     const [tags, setTags] = useState<string[]>([])
     
     // Event state
     const [popupOpen, setPopupOpen] = useState(false)
-    const [events, setEvents] = useState<Event[]>(defaultEvents)
     const [editingEvent, setEditingEvent] = useState<Event | undefined>()
     const [eventForm, setEventForm] = useState<EventForm>(defaultEventForm)
     const [eventTagInput, setEventTagInput] = useState('')
@@ -76,23 +91,37 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
 
     // Load all data of an existing production or create a new one
     useEffect(() => {
-        api.get<LocationResponse>(`/archive/locations`)
-            .then()
-            .catch()
+        // api.get<LocationResponse>(`/archive/locations`)
+        //     .then()
+        //     .catch()
         if (create) return 
 
         // TODO: make use of the slug
-        api.get<ProductionResponse>(`/archive/productions/${id}`)
-            .then( data => {
-                setForm({
-                    nl: {title: data?.title?.nl, slug: '', content: data?.description?.nl},
-                    en: {title: data?.title?.en, slug: '', content: data?.description?.en},
-                })
-                setProd(data)
-            })
-            .catch( err => {
-                console.error(err)
-            })
+        // const fetch = async () => {
+        //     const production = await api.get<ProductionResponse>(`/archinve/productions/${id}`)
+
+
+        // }
+        // const production = await api.get<ProductionResponse>(`/archive/productions/${id}`)
+
+        // api.get<ProductionResponse>(`/archive/productions/${id}`)
+        //     .then( data => {
+        //         setForm({
+        //             content: {
+        //                 nl: {title: data?.title?.nl, slug: '', content: data?.description?.nl},
+        //                 en: {title: data?.title?.en, slug: '', content: data?.description?.en},
+        //             },
+        //             genres: [],
+        //             artist: '',
+        //             events: [],
+        //             banner: '',
+        //             extraPictures: []
+        //         })
+        //         setProd(data)
+        //     })
+        //     .catch( err => {
+        //         console.error(err)
+        //     })
     }, [id])
 
     const back = () => {
@@ -117,12 +146,16 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
             if (create){
                 const res = await api.post<ProductionResponse>('/archive/productions', {
                     title: {
-                        nl: form.nl.title,
-                        en: form.en.title,
+                        nl: form.content?.nl.title,
+                        en: form.content?.en.title,
                     },
                     description: {
-                        nl: form.nl.content,
-                        en: form.en.content,
+                        nl: form.content?.nl.content,
+                        en: form.content?.en.content,
+                    },
+                    artist: {
+                        nl: form.settings.artist,
+                        en: form.settings.artist,
                     },
                     // isDraft: asDraft
                 })
@@ -132,12 +165,12 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
             } else {
                 await api.put(`/archive/productions/${id}`, {
                     title: {
-                        nl: form.nl.title,
-                        en: form.en.title,
+                        nl: form.content?.nl.title,
+                        en: form.content?.en.title,
                     },
                     description: {
-                        nl: form.nl.content,
-                        en: form.en.content,
+                        nl: form.content?.nl.content,
+                        en: form.content?.en.content,
                     }
                     // isDraft: asDraft
                 })
@@ -151,25 +184,59 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
         setLanguageTab(key)
     }
 
-    const onChangeForm = (field: keyof ProductionFields, value: string) => {
+    const onChangeContent = (field: keyof ProductionContentFields, value: string) => {
         setForm(prev => ({
             ...prev,
-            [languageTab]: { ...prev[languageTab] , [field]: value }
+            content:  {
+                ...prev.content,
+                [languageTab] : {...prev.content[languageTab], [field]: value}
+            }
         }))
     }
 
+    const changeSettings = (field: keyof ProductionSettingsFields, value: any) => {
+        setForm(prev => ({
+            ...prev,
+            settings: {
+                ...prev.settings,
+                [field]: value
+            }
+        }))
+    }
+
+    // const onChangeForm = (field: keyof ProductionContentFields, value: string) => {
+    //     setForm(prev => ({
+    //         ...prev,
+    //         [languageTab]: { ...prev[languageTab] , [field]: value }
+    //     }))
+    // }
+
     // Adding a tag to a new or existing production
-    const onAddTag = () => {
+    const onAddProductionTag = () => {
         const trimmed = tagInput.trim()
-        if (!trimmed || tags.includes(trimmed)) return  
-        setTags(prev => [...prev, trimmed])
+        if (!trimmed || form.settings.tags.includes(trimmed)) return
+        changeSettings('tags', [...form.settings.tags, trimmed])
         setTagInput('')
     }
+
+    const onAddProductionGenre = () => {
+        const trimmed = genreInput.trim()
+        if (!trimmed || form.settings.genres.includes(trimmed)) return
+        changeSettings('genres', [...form.settings.genres, trimmed])
+        setGenreInput('')
+    }
+    
+    // const onAddProductionGenre = () => {
+    //     const trimmed = genreInput.trim()
+    //     if (!trimmed || form.settings.genres.includes(trimmed)) return
+    //     changeSettings('genres', [...form.settings.tags, trimmed])
+    //     setGenreInput('')
+    // }
 
     // Adding a tag to a new or existing event
     const onAddEventTag = () => {
         const trimmed = eventTagInput.trim()
-        if(!trimmed || eventForm.tags.includes(trimmed)) return
+        if(!trimmed ||  eventForm.tags.includes(trimmed)) return
         setEventForm(prev => ({...prev, tags: [...prev.tags, trimmed]}))
         setEventTagInput('')
     }
@@ -178,8 +245,16 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
         setTagInput(tag)
     }
 
+    const onChangeProductionGenreInput = (genre: string) => {
+        setGenreInput(genre)
+    }
+
     const onRemoveProductionTag = (tag: string) => {
-        setTags(prev => prev.filter(e => e !== tag))
+        changeSettings('tags', form.settings.tags.filter(t => t !== tag))
+    }
+
+    const onRemoveProductionGenre = (genre: string) => {
+        changeSettings('genres', form.settings.genres.filter(g => g !== genre))
     }
 
     // Event functions
@@ -198,7 +273,7 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
     }
 
     const editEvent = (key: string) => {
-        const event = events.find(e => e.key === key)
+        const event = form.events.find(e => e.key === key)
         if (!event) return
         setEditingEvent(event)
         setEventForm({
@@ -212,16 +287,27 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
     }
 
     const deleteEvent = (key: string) => {
-        setEvents(prev => prev.filter(e => e.key !== key))
+        setForm(prev => ({
+            ...prev,
+            events: prev.events.filter(e => e.key !== key)
+        }))
     }
 
     const saveEvent = () => {
         if (editingEvent) {
-            setEvents(prev => prev.map(e => e.key === editingEvent.key
-                ? { ...eventForm, key: e.key } : e
-            ))
+            // left here
+            setForm(prev => ({
+                ...prev,
+                events: (prev.events.map(e => e.key === editingEvent.key 
+                    ? {...eventForm, key: e.key} : e
+                ))
+            }))
         } else {
-            setEvents(prev => [...prev, {...eventForm, key: crypto.randomUUID()}])
+            setForm(prev => ({
+                ...prev,
+                events: [...prev.events, {...eventForm, key: crypto.randomUUID()}]
+
+            }))
         }
         setPopupOpen(false)
     }
@@ -248,15 +334,21 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
             }
             sidebar={
                 <ProductionSidebar
+                    fields={form.settings}
                     tag={tagInput}
-                    tags={tags}
-                    onAddTag={onAddTag}
+                    genre={genreInput}
+                    onAddTag={onAddProductionTag}
                     onChangeTag={onChangeProductionTagInput}
                     onRemoveTag={onRemoveProductionTag}
+                    onAddGenre={onAddProductionGenre}
+                    onChangeGenre={onChangeProductionGenreInput}
+                    onRemoveGenre={onRemoveProductionGenre}
+                    onChange={changeSettings}
 
                     productionSettingsLabel={messages.production.productionSettingsLabel}
                     statusLabel={messages.production.statusLabel}
                     genreLabel={messages.production.genreLabel}
+                    tagLabel={messages.production.tagLabel}
                     bannerLabel={messages.production.bannerLabel}
                     extraPicturesLabel={messages.production.extraPicturesLabel}
                     artistLabel={messages.production.artistLabel}
@@ -275,9 +367,9 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
                 setTab={setTab}
             />
 
-            <ProductionContentTab
-                fields={form[languageTab]}
-                onChange={onChangeForm}
+            <ProductionTabContent
+                fields={form.content[languageTab]}
+                onChange={onChangeContent}
 
                 titleLabel={messages.production.title}
                 slugLabel={messages.production.slug}
@@ -290,7 +382,7 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
             />
 
             <EventsEdit
-                events={events}
+                events={form.events}
                 makeEvent={makeEvent}
                 editEvent={editEvent}
                 deleteEvent={deleteEvent}
