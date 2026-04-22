@@ -637,22 +637,7 @@ async function sync_productions(cutoff_timestamp: Date | undefined = undefined) 
             const genreId = genreMap.get(genreApiId);
             const tagId = tagMap.get(genreApiId);
 
-            if (genreId) {
-              await tx.genre_production.upsert({
-                where: {
-                  genre_id_production_id: {
-                    genre_id: genreId,
-                    production_id: db_production.id,
-                  }
-                },
-                update: {}, // exists, no update needed
-                create: {
-                  production_id: db_production.id,
-                  genre_id: genreId,
-                }
-              });
-            }
-
+            // A production relation should map to either a tag or a genre, never both.
             if (tagId) {
               await tx.tag_production.upsert({
                 where: {
@@ -665,6 +650,28 @@ async function sync_productions(cutoff_timestamp: Date | undefined = undefined) 
                 create: {
                   production_id: db_production.id,
                   tag_id: tagId,
+                }
+              });
+              if (genreId) {
+                await tx.genre_production.deleteMany({
+                  where: {
+                    production_id: db_production.id,
+                    genre_id: genreId,
+                  },
+                });
+              }
+            } else if (genreId) {
+              await tx.genre_production.upsert({
+                where: {
+                  genre_id_production_id: {
+                    genre_id: genreId,
+                    production_id: db_production.id,
+                  }
+                },
+                update: {}, // exists, no update needed
+                create: {
+                  production_id: db_production.id,
+                  genre_id: genreId,
                 }
               });
             }
@@ -693,13 +700,27 @@ async function sync_tags(cutoff_timestamp: Date | undefined = undefined){
 
     await prisma.$transaction(async (tx) => {
       for (const genre of page) {
-        if (genre.use_as !== null && genre.use_as.toLowerCase() === "tag") {
+        const isTag = genre.use_as !== null && genre.use_as.toLowerCase() === "tag"
+
+        if (isTag) {
+          const existingGenre = await tx.genre.findUnique({ where: { apiId: genre["@id"] } })
+          if (existingGenre) {
+            await tx.genre_production.deleteMany({ where: { genre_id: existingGenre.id } })
+            await tx.genre.delete({ where: { id: existingGenre.id } })
+          }
+
           await tx.tag.upsert({
             where: { apiId: genre["@id"] },
             update: mapGenre(genre),
             create: mapGenre(genre),
           });
         } else {
+          const existingTag = await tx.tag.findUnique({ where: { apiId: genre["@id"] } })
+          if (existingTag) {
+            await tx.tag_production.deleteMany({ where: { tag_id: existingTag.id } })
+            await tx.tag.delete({ where: { id: existingTag.id } })
+          }
+
           await tx.genre.upsert({
             where: { apiId: genre["@id"] },
             update: mapGenre(genre),
