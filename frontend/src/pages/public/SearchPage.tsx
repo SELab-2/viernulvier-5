@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { getActiveLocale, getMessages, withLocalePath } from '../../i18n'
 import type { Locale } from '../../i18n/types'
 import { apiFetch } from '../../api/client'
+import { getLocalizedContent, getLocalizedTitle, normalizeContent } from './blogDetailPage.formatters'
 import PublicLayout from '../../components/public/PublicLayout'
 import SearchPagination from '../../components/public/search/SearchPagination'
 import SearchResultCard, { type SearchResultItem } from '../../components/public/search/SearchResultCard'
@@ -296,7 +297,7 @@ function mapProductionToSearchEntry(item: ProductionApiItem, locale: Locale, pre
 
 type BlogApiItem = {
     id: string
-    title?: string | null
+    title?: unknown
     content?: unknown
     productions: string[]
     createdAt: string
@@ -304,9 +305,30 @@ type BlogApiItem = {
     links?: { self: string }
 }
 
+function getBlogExcerpt(content: unknown, locale: Locale, fallback: string): string {
+    const localizedContent = getLocalizedContent(content, locale)
+
+    if (!localizedContent) {
+        return fallback
+    }
+
+    const delta = normalizeContent(localizedContent)
+    if (delta) {
+        const plain = delta.ops
+            .map((operation) => (typeof operation.insert === 'string' ? operation.insert : ''))
+            .join('')
+            .replace(/\s+/g, ' ')
+            .trim()
+
+        return plain || fallback
+    }
+
+    return toPlainText(localizedContent) || fallback
+}
+
 function mapBlogToSearchEntry(item: BlogApiItem, locale: Locale): SearchEntry {
     const searchMessages = getMessages(locale).search
-    const title = item.title?.trim() || searchMessages.fallbackUntitled
+    const title = getLocalizedTitle(item.title, locale) || searchMessages.fallbackUntitled
     const date = item.createdAt ? formatDate(item.createdAt, locale) : '-'
     const year = item.createdAt ? new Date(item.createdAt).getFullYear() : MIN_PERIOD_YEAR
 
@@ -315,7 +337,7 @@ function mapBlogToSearchEntry(item: BlogApiItem, locale: Locale): SearchEntry {
         tag: searchMessages.blogTab,
         date,
         title,
-        excerpt: title,
+        excerpt: getBlogExcerpt(item.content, locale, title),
         venue: '',
         imageUrl: undefined,
         year,
