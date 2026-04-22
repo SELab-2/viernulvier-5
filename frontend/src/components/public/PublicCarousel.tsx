@@ -121,7 +121,12 @@ function mapProductionToCarouselItem(item: ProductionApiItem, locale: Locale): S
 }
 
 function prioritizeItemsWithImage(items: SearchResultItem[]): SearchResultItem[] {
-    return [...items].sort((a) => (a.imageUrl ? -1 : 1))
+    // Stable sort: items with image come first, but otherwise keep order
+    return [...items].sort((a, b) => {
+        if (a.imageUrl && !b.imageUrl) return -1
+        if (!a.imageUrl && b.imageUrl) return 1
+        return 0
+    })
 }
 
 function getRelativePath(url: string | null | undefined): string | null {
@@ -180,7 +185,6 @@ function useProductionEventDetails(items: ProductionApiItem[], locale: Locale, r
                         const res = await apiFetch<{ data: Array<{ starts_at: string, links: { hall: string } }> }>(`${eventsPath}&limit=50`)
                         const pastEvents = (res.data || []).filter(e => new Date(e.starts_at) < now).sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime())
                         if (pastEvents.length === 0) return { id: item.id, date: '', venue: '' }
-
                         let displayDate = ''
                         const otdMatch = refDateObj ? pastEvents.find(e => {
                             const d = new Date(e.starts_at)
@@ -193,16 +197,15 @@ function useProductionEventDetails(items: ProductionApiItem[], locale: Locale, r
                             const y2 = new Date(pastEvents[pastEvents.length - 1].starts_at).getFullYear()
                             displayDate = y1 === y2 ? `${formatDate(pastEvents[0].starts_at, locale)} - ${formatDate(pastEvents[pastEvents.length - 1].starts_at, locale)}` : `${y1} - ${y2}`
                         }
-
-                        const venueNames = new Set<string>()
+                        const vNames = new Set<string>()
                         for (const e of pastEvents.slice(0, 3)) {
                             const hPath = getRelativePath(e.links?.hall)
                             if (hPath) {
                                 const hRes = await apiFetch<{ data: { name: LocalizedText } }>(hPath)
-                                if (hRes.data?.name) venueNames.add(getLocalizedText(hRes.data.name, locale))
+                                if (hRes.data?.name) vNames.add(getLocalizedText(hRes.data.name, locale))
                             }
                         }
-                        return { id: item.id, date: displayDate, venue: Array.from(venueNames).join(' • ') }
+                        return { id: item.id, date: displayDate, venue: Array.from(vNames).join(' • ') }
                     } catch { return null }
                 })
             )
@@ -271,6 +274,13 @@ function PublicCarousel() {
     const fetchedDetails = useProductionEventDetails(apiRawItems, locale, mode === 'on-this-day' ? referenceDate : undefined)
     const fetchedTaxonomies = useProductionTaxonomies(apiRawItems, locale)
 
+    // Fix: Force scroll to start when new items arrive
+    useEffect(() => {
+        if (scrollerRef.current && apiRawItems.length > 0) {
+            scrollerRef.current.scrollLeft = 0
+        }
+    }, [apiRawItems])
+
     useEffect(() => {
         const abortController = new AbortController()
         const load = async () => {
@@ -312,8 +322,8 @@ function PublicCarousel() {
 
     return (
         <section className="bg-foreground/3 py-16">
-            <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="relative flex flex-col items-center sm:block">
+            <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 text-left">
+                <div className="relative flex flex-col items-start sm:block">
                     <SectionTitle title={heading} subtitle={messages.home.onThisDaySubheading} />
                     <Link to={withLocalePath('/zoeken', locale)} className="mt-2 text-lg font-semibold text-foreground transition-opacity hover:opacity-70 sm:absolute sm:right-0 sm:top-1/2 sm:-translate-y-1/2 sm:mt-0">
                         {messages.home.onThisDayViewAll} →
