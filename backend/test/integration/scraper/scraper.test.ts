@@ -24,8 +24,8 @@ function getLocalized(obj: any) {
   return obj as { nl: string; en: string; fr: string };
 }
 
-async function* singlePage<T>(data: T[]): AsyncGenerator<T[]> {
-  yield data;
+async function* singlePage<T>(data: T[]): AsyncGenerator<{ members: T[], totalItems: number }> {
+  yield { members: data, totalItems: data.length };
 }
 
 // ------------------------------------------------------------------
@@ -289,8 +289,8 @@ vi.mock('../../../src/scraper/fetcher', () => {
     } as APIUitType,
   ];
 
-  async function* pages<T>(pages: T[][]): AsyncGenerator<T[]> {
-    for (const p of pages) yield p;
+  async function* pages<T>(pageList: T[][]): AsyncGenerator<{ members: T[], totalItems: number }> {
+    for (const p of pageList) yield { members: p, totalItems: p.length };
   }
   return {
     fetchLocationsPages: () => pages([locations]),
@@ -352,7 +352,7 @@ beforeAll(async () => {
   await Scraper.sync_uit_keywords();
   await Scraper.sync_uit_themes();
   await Scraper.sync_uit_types();
-  await Scraper.sync_genres();
+  await Scraper.sync_tags();
   await Scraper.sync_productions();
   await Scraper.sync_events();
   await Scraper.sync_event_prices();
@@ -696,7 +696,7 @@ describe('scraper integration full coverage', () => {
     await Scraper.sync_uit_keywords();
     await Scraper.sync_uit_themes();
     await Scraper.sync_uit_types();
-    await Scraper.sync_genres();
+    await Scraper.sync_tags();
     await Scraper.sync_productions();
     await Scraper.sync_event_prices();
 
@@ -756,7 +756,7 @@ describe('scraper integration full coverage', () => {
       await Scraper.sync_hall();
       await Scraper.sync_events();
       await Scraper.sync_productions();
-      await Scraper.sync_genres();
+      await Scraper.sync_tags();
       await Scraper.sync_galleries();
       await Scraper.sync_items();
       await Scraper.sync_crops();

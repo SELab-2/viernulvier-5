@@ -13,24 +13,29 @@ import type {
     CreateCropInput,
     UpdateCropInput
 } from './media.schema.js'
-import { PaginatedResult, calculateTotalPages } from '../../utils/pagination.js'
+import { PaginatedResult, calculateTotalPages, sanitizePage } from '../../utils/pagination.js'
 
 export class MediaService {
     constructor(private readonly repository: MediaRepository) { }
 
     async getGalleries(options: GalleryPaginationQuery): Promise<PaginatedResult<GalleryResponse>> {
         const { page, limit, search, lang } = options
-        const [items, total] = await Promise.all([
-            this.repository.findAllGalleries({ page, limit, search, lang }),
-            this.repository.countGalleries({ search, lang }),
-        ])
-        
+
+        const total = await this.repository.countGalleries({ search, lang })
         const totalPages = calculateTotalPages(total, limit)
+        const sanitizedPage = sanitizePage(page, totalPages)
+
+        const items = await this.repository.findAllGalleries({ 
+            page: sanitizedPage, 
+            limit, 
+            search, 
+            lang 
+        })
 
         return {
             items: items as any,
             total,
-            page,
+            page: sanitizedPage,
             limit,
             totalPages,
         }
@@ -54,17 +59,23 @@ export class MediaService {
 
     async getItems(options: ItemPaginationQuery): Promise<PaginatedResult<ItemResponse>> {
         const { page, limit, galleryId, search, lang } = options
-        const [items, total] = await Promise.all([
-            this.repository.findAllItems({ page, limit, galleryId, search, lang }),
-            this.repository.countItems({ galleryId, search, lang }),
-        ])
 
+        const total = await this.repository.countItems({ galleryId, search, lang })
         const totalPages = calculateTotalPages(total, limit)
+        const sanitizedPage = sanitizePage(page, totalPages)
+
+        const items = await this.repository.findAllItems({ 
+            page: sanitizedPage, 
+            limit, 
+            galleryId, 
+            search, 
+            lang 
+        })
 
         return {
             items: items as any,
             total,
-            page,
+            page: sanitizedPage,
             limit,
             totalPages,
         }
@@ -88,17 +99,23 @@ export class MediaService {
 
     async getCrops(options: CropPaginationQuery): Promise<PaginatedResult<CropResponse>> {
         const { page, limit, itemId, search, lang } = options
-        const [items, total] = await Promise.all([
-            this.repository.findAllCrops({ page, limit, itemId, search, lang }),
-            this.repository.countCrops({ itemId, search, lang }),
-        ])
 
+        const total = await this.repository.countCrops({ itemId, search, lang })
         const totalPages = calculateTotalPages(total, limit)
+        const sanitizedPage = sanitizePage(page, totalPages)
+
+        const items = await this.repository.findAllCrops({ 
+            page: sanitizedPage, 
+            limit, 
+            itemId, 
+            search, 
+            lang 
+        })
 
         return {
             items: items as any,
             total,
-            page,
+            page: sanitizedPage,
             limit,
             totalPages,
         }
