@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest'
 import type { ProductionItem } from '../../components/admin/blogs/ProductionManagementSection'
 import CreateBlogPage from '../../pages/admin/CreateBlogPage'
+import { getMessages } from '../../i18n'
 
 const navigate = vi.fn()
 let params: { id?: string } = {}
@@ -13,6 +14,7 @@ const apiMock = vi.hoisted(() => ({
 }))
 
 const apiFetchMock = vi.hoisted(() => vi.fn())
+const messages = getMessages('nl')
 
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom')
@@ -134,18 +136,22 @@ function mockCreateSuccess() {
   apiMock.post.mockResolvedValueOnce({ data: { id: 'blog-created' } })
 }
 
-function mockEditBlog() {
+function mockEditBlog(overrides?: {
+  title?: string
+  content?: { nl?: string | null; en?: string | null }
+  productions?: string[]
+}) {
   apiMock.get.mockImplementation(async (endpoint: string) => {
     if (endpoint === '/archive/blogs/blog-123') {
       return {
         data: {
           id: 'blog-123',
-          title: JSON.stringify({ nl: 'Bestaande titel', en: 'Existing title' }),
-          content: {
+          title: overrides?.title ?? JSON.stringify({ nl: 'Bestaande titel', en: 'Existing title' }),
+          content: overrides?.content ?? {
             nl: 'Bestaande inhoud',
             en: 'Existing content',
           },
-          productions: [],
+          productions: overrides?.productions ?? [],
         },
       }
     }
@@ -255,12 +261,24 @@ describe('CreateBlogPage', () => {
   })
 
   it('edits an existing blog and submits a PATCH request', async () => {
-    mockEditBlog()
+    mockEditBlog({
+      productions: ['production-1'],
+    })
     renderEditPage()
 
     await waitFor(() => {
       expect(apiMock.get).toHaveBeenCalledWith('/archive/blogs/blog-123')
     })
+
+    expect(screen.getByLabelText('blog title')).toHaveValue('Bestaande titel')
+    expect(screen.getByLabelText('blog content')).toHaveValue('Bestaande inhoud')
+    expect(screen.getByText('Eerste productie')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: messages.blogs.englishOption }))
+    expect(screen.getByLabelText('blog title')).toHaveValue('Existing title')
+    expect(screen.getByLabelText('blog content')).toHaveValue('Existing content')
+
+    fireEvent.click(screen.getByRole('button', { name: messages.blogs.dutchOption }))
 
     fireEvent.change(screen.getByLabelText('blog title'), {
       target: { value: 'Aangepaste titel' },
@@ -268,6 +286,7 @@ describe('CreateBlogPage', () => {
     fireEvent.click(screen.getAllByRole('button', { name: 'Publiceren' })[0])
 
     await waitFor(() => {
+      expect(apiMock.post).not.toHaveBeenCalled()
       expect(apiFetchMock).toHaveBeenCalledWith(
         '/archive/blogs/blog-123',
         expect.objectContaining({
@@ -304,6 +323,117 @@ describe('CreateBlogPage', () => {
     })
   })
 
+  it('does not delete a blog when confirmation is cancelled', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(false)
+    mockEditBlog()
+
+    renderEditPage()
+
+    await waitFor(() => {
+      expect(apiMock.get).toHaveBeenCalledWith('/archive/blogs/blog-123')
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Verwijder blog' }))
+
+    await waitFor(() => {
+      expect(apiMock.delete).not.toHaveBeenCalled()
+    })
+  })
+
+  it('shows a delete error when deleting fails with an unknown error', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
+    apiMock.delete.mockRejectedValueOnce('delete failed')
+    mockEditBlog()
+
+    renderEditPage()
+
+    await waitFor(() => {
+      expect(apiMock.get).toHaveBeenCalledWith('/archive/blogs/blog-123')
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Verwijder blog' }))
+
+    expect(await screen.findByText(messages.blogs.deleteError)).toBeInTheDocument()
+  })
+
+  it('shows not found state in edit mode when the blog does not exist', async () => {
+    apiMock.get.mockRejectedValueOnce(new Error('404 not found'))
+
+    renderEditPage()
+
+    expect(await screen.findByText(messages.blogs.blogNotFound)).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: messages.blogs.editBlogTitle })).not.toBeInTheDocument()
+  })
+
+  it('shows a load error in edit mode for non-404 failures', async () => {
+    apiMock.get.mockRejectedValueOnce(new Error('Failed to load existing blog'))
+
+    renderEditPage()
+
+    expect(await screen.findByText('Failed to load existing blog')).toBeInTheDocument()
+  })
+
+  it('shows a save error when creating a blog fails', async () => {
+    apiMock.post.mockRejectedValueOnce('create failed')
+    renderCreatePage()
+
+    fireEvent.change(screen.getByLabelText('blog title'), {
+      target: { value: 'Nieuwe blogtitel' },
+    })
+    fireEvent.change(screen.getByLabelText('blog content'), {
+      target: { value: '<p>Nieuwe inhoud</p>' },
+    })
+    fireEvent.click(screen.getAllByRole('button', { name: 'Publiceren' })[0])
+
+    expect(await screen.findByText('Failed to save blog.')).toBeInTheDocument()
+  })
+
+  it('updates existing blog content with PATCH body and does not create a new one', async () => {
+    mockEditBlog()
+
+    renderEditPage()
+
+    await waitFor(() => {
+      expect(apiMock.get).toHaveBeenCalledWith('/archive/blogs/blog-123')
+    })
+
+    fireEvent.change(screen.getByLabelText('blog content'), {
+      target: { value: '<p>Aangepaste NL content</p>' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'set json content' }))
+
+    fireEvent.click(screen.getByRole('button', { name: messages.blogs.englishOption }))
+    fireEvent.click(screen.getByRole('button', { name: 'set json content' }))
+    fireEvent.change(screen.getByLabelText('blog content'), {
+      target: { value: '<p>Updated EN content</p>' },
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: messages.blogs.dutchOption }))
+    fireEvent.click(screen.getAllByRole('button', { name: 'Publiceren' })[0])
+
+    await waitFor(() => {
+      expect(apiMock.post).not.toHaveBeenCalled()
+      expect(apiFetchMock).toHaveBeenCalledWith(
+        '/archive/blogs/blog-123',
+        expect.objectContaining({ method: 'PATCH', body: expect.any(String) }),
+      )
+    })
+
+    const patchCall = apiFetchMock.mock.calls.find(
+      ([endpoint, options]) => endpoint === '/archive/blogs/blog-123' && options?.method === 'PATCH',
+    )
+
+    expect(patchCall).toBeDefined()
+    const body = JSON.parse(String(patchCall?.[1]?.body)) as {
+      title: string
+      content: { nl: unknown; en: unknown }
+      productionIds: string[]
+    }
+
+    expect(body.content.nl).toEqual({ ops: [{ insert: '<p>Aangepaste NL content</p>' }] })
+    expect(body.content.en).toEqual({ ops: [{ insert: 'Existing content' }] })
+  })
+
   it('opens the production popup, adds a production, and removes it again', async () => {
     renderCreatePage()
 
@@ -322,4 +452,6 @@ describe('CreateBlogPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Verwijder productie' }))
     expect(screen.queryByText('Eerste productie')).not.toBeInTheDocument()
   })
+
+  
 })

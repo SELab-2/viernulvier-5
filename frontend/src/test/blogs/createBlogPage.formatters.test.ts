@@ -1,6 +1,26 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { formatBlogDetailForForm, validateBlogPublishInput } from '../../pages/admin/createBlogPage.formatters'
 import type { BlogContent } from '../../types/blog'
+
+vi.mock('quill', () => {
+  return {
+    default: class MockQuill {
+      root = { innerHTML: '' }
+
+      constructor() {
+        this.root = { innerHTML: '' }
+      }
+
+      setContents(value: { ops?: Array<{ insert?: unknown }> }) {
+        this.root.innerHTML = Array.isArray(value?.ops)
+          ? value.ops
+              .map((op) => (typeof op.insert === 'string' ? op.insert : ''))
+              .join('')
+          : ''
+      }
+    },
+  }
+})
 
 function createForm(overrides?: Partial<BlogContent>): BlogContent {
   return {
@@ -37,6 +57,40 @@ describe('validateBlogPublishInput', () => {
     )
 
     expect(result).toBe('ok')
+  })
+
+  it('treats embedded json ops content as filled and valid when title exists', () => {
+    const result = validateBlogPublishInput(
+      createForm({
+        nl: { title: 'Titel', content: '' },
+      }),
+      { nl: { ops: [{ insert: { image: 'https://example.com/image.jpg' } }] }, en: null },
+    )
+
+    expect(result).toBe('ok')
+  })
+
+  it('treats whitespace-only html/json content as empty', () => {
+    const result = validateBlogPublishInput(
+      createForm({
+        nl: { title: '', content: '<p>&nbsp;</p>' },
+        en: { title: '', content: '' },
+      }),
+      { nl: { ops: [{ insert: '   ' }, { attributes: { bold: true } }] }, en: null },
+    )
+
+    expect(result).toBe('atLeastOneLanguageRequired')
+  })
+
+  it('requires title when locale has non-ops rich content object', () => {
+    const result = validateBlogPublishInput(
+      createForm({
+        nl: { title: '', content: '' },
+      }),
+      { nl: { custom: true }, en: null },
+    )
+
+    expect(result).toBe('filledLanguageNeedsTitle')
   })
 })
 
@@ -75,5 +129,55 @@ describe('formatBlogDetailForForm', () => {
     expect(result.form.en.content).toContain('Legacy EN content')
     expect(result.contentJson.nl).toBe('<p>Legacy NL inhoud</p>')
     expect(result.contentJson.en).toBe('<p>Legacy EN content</p>')
+  })
+
+  it('handles invalid title json and locale delta content objects', () => {
+    const result = formatBlogDetailForForm({
+      id: 'blog-delta',
+      title: '{invalid json',
+      content: {
+        nl: { ops: [{ insert: 'NL delta tekst' }] },
+        en: { ops: [{ insert: 'EN delta text' }] },
+      },
+      productions: [],
+    })
+
+    expect(result.form.nl.title).toBe('')
+    expect(result.form.en.title).toBe('')
+    expect(result.form.nl.content).toContain('NL delta tekst')
+    expect(result.form.en.content).toContain('EN delta text')
+    expect(result.contentJson.nl).toEqual({ ops: [{ insert: 'NL delta tekst' }] })
+    expect(result.contentJson.en).toEqual({ ops: [{ insert: 'EN delta text' }] })
+  })
+
+  it('maps scalar content into both locales and json payload', () => {
+    const result = formatBlogDetailForForm({
+      id: 'blog-scalar',
+      title: null,
+      content: '<p>One shared content body</p>',
+      productions: [],
+    })
+
+    expect(result.form.nl.content).toContain('One shared content body')
+    expect(result.form.en.content).toContain('One shared content body')
+    expect(result.contentJson.nl).toBe('<p>One shared content body</p>')
+    expect(result.contentJson.en).toBe('<p>One shared content body</p>')
+  })
+
+  it('normalizes locale json when content wrappers are missing or undefined', () => {
+    const result = formatBlogDetailForForm({
+      id: 'blog-mixed',
+      title: JSON.stringify({ nl: 'Titel', en: 'Title' }),
+      content: {
+        nl: { raw: 'without-content-key' },
+        en: { content: undefined },
+      },
+      productions: [],
+    })
+
+    expect(result.form.nl.content).toBe('')
+    expect(result.form.en.content).toBe('')
+    expect(result.contentJson.nl).toEqual({ raw: 'without-content-key' })
+    expect(result.contentJson.en).toBeNull()
   })
 })
