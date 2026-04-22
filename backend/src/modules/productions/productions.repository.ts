@@ -1,12 +1,22 @@
 import { Prisma, type PrismaClient } from '@prisma/client'
-import {
-    expandGenreTerms,
-    type ProductionSearchLanguage,
-    PRODUCTION_SEARCH_THRESHOLDS,
-    PRODUCTION_SEARCH_WEIGHTS,
-    getProductionSearchLanguageFallbacks,
-    normalizeProductionSearchLanguage,
-} from '../../domain/genre-aliases.js'
+
+const GENRE_SEARCH_ALIASES: Record<string, string[]> = {
+    theater: ['theater', 'theatre'],
+    theatre: ['theatre', 'theater'],
+    dans: ['dans', 'dance'],
+    dance: ['dance', 'dans'],
+    concert: ['concert'],
+    nightlife: ['nightlife'],
+    talks: ['talks', 'talk'],
+    comedy: ['comedy', 'komedie'],
+    komedie: ['komedie', 'comedy'],
+    monument: ['monument'],
+    circus: ['circus'],
+    performance: ['performance', 'voorstelling'],
+    voorstelling: ['voorstelling', 'performance'],
+    'spoken word': ['spoken word'],
+    'listening session': ['listening session'],
+}
 
 type FindAllOptions = {
     page: number
@@ -28,16 +38,6 @@ export class ProductionsRepository {
     private pgTrgmAvailable: boolean | null = null
 
     constructor(private readonly prisma: PrismaClient) { }
-
-    private buildLocalizedTextExpression(
-        column: 'title' | 'description_short' | 'description' | 'teaser',
-        lang: ProductionSearchLanguage,
-    ): Prisma.Sql {
-        const fallbacks = getProductionSearchLanguageFallbacks(lang)
-        const localizedCandidates = fallbacks.map((fallbackLang) => `p.${column} ->> '${fallbackLang}'`).join(', ')
-
-        return Prisma.raw(`LOWER(COALESCE(${localizedCandidates}, ''))`)
-    }
 
     private async ensurePgTrgmAvailable(): Promise<boolean> {
         if (this.pgTrgmAvailable !== null) {
@@ -67,11 +67,8 @@ export class ProductionsRepository {
             return []
         }
 
-        const localizedLang = normalizeProductionSearchLanguage(lang)
-        const titleText = this.buildLocalizedTextExpression('title', localizedLang)
-        const descriptionShortText = this.buildLocalizedTextExpression('description_short', localizedLang)
-        const descriptionText = this.buildLocalizedTextExpression('description', localizedLang)
-        const teaserText = this.buildLocalizedTextExpression('teaser', localizedLang)
+        const normalizedLang = lang.trim().toLowerCase()
+        const localizedLang = normalizedLang === 'en' || normalizedLang === 'fr' ? normalizedLang : 'nl'
         const usePgTrgm = await this.ensurePgTrgmAvailable()
 
         if (usePgTrgm) {
@@ -81,10 +78,26 @@ export class ProductionsRepository {
                         SELECT
                             p.id,
                             p.created_at,
-                            ${titleText} AS title_text,
-                            ${descriptionShortText} AS description_short_text,
-                            ${descriptionText} AS description_text,
-                            ${teaserText} AS teaser_text
+                            LOWER(CASE
+                                WHEN ${localizedLang} = 'en' THEN COALESCE(p.title ->> 'en', p.title ->> 'nl', p.title ->> 'fr', '')
+                                WHEN ${localizedLang} = 'fr' THEN COALESCE(p.title ->> 'fr', p.title ->> 'nl', p.title ->> 'en', '')
+                                ELSE COALESCE(p.title ->> 'nl', p.title ->> 'en', p.title ->> 'fr', '')
+                            END) AS title_text,
+                            LOWER(CASE
+                                WHEN ${localizedLang} = 'en' THEN COALESCE(p.description_short ->> 'en', p.description_short ->> 'nl', p.description_short ->> 'fr', '')
+                                WHEN ${localizedLang} = 'fr' THEN COALESCE(p.description_short ->> 'fr', p.description_short ->> 'nl', p.description_short ->> 'en', '')
+                                ELSE COALESCE(p.description_short ->> 'nl', p.description_short ->> 'en', p.description_short ->> 'fr', '')
+                            END) AS description_short_text,
+                            LOWER(CASE
+                                WHEN ${localizedLang} = 'en' THEN COALESCE(p.description ->> 'en', p.description ->> 'nl', p.description ->> 'fr', '')
+                                WHEN ${localizedLang} = 'fr' THEN COALESCE(p.description ->> 'fr', p.description ->> 'nl', p.description ->> 'en', '')
+                                ELSE COALESCE(p.description ->> 'nl', p.description ->> 'en', p.description ->> 'fr', '')
+                            END) AS description_text,
+                            LOWER(CASE
+                                WHEN ${localizedLang} = 'en' THEN COALESCE(p.teaser ->> 'en', p.teaser ->> 'nl', p.teaser ->> 'fr', '')
+                                WHEN ${localizedLang} = 'fr' THEN COALESCE(p.teaser ->> 'fr', p.teaser ->> 'nl', p.teaser ->> 'en', '')
+                                ELSE COALESCE(p.teaser ->> 'nl', p.teaser ->> 'en', p.teaser ->> 'fr', '')
+                            END) AS teaser_text
                         FROM "production" p
                     )
                     SELECT id
@@ -94,34 +107,34 @@ export class ProductionsRepository {
                         description_short_text ILIKE CONCAT('%', CAST(${normalizedSearch} AS text), '%') OR
                         description_text ILIKE CONCAT('%', CAST(${normalizedSearch} AS text), '%') OR
                         teaser_text ILIKE CONCAT('%', CAST(${normalizedSearch} AS text), '%') OR
-                        similarity(title_text, CAST(${normalizedSearch} AS text)) >= ${PRODUCTION_SEARCH_THRESHOLDS.similarity} OR
-                        similarity(description_short_text, CAST(${normalizedSearch} AS text)) >= ${PRODUCTION_SEARCH_THRESHOLDS.similarity} OR
-                        similarity(description_text, CAST(${normalizedSearch} AS text)) >= ${PRODUCTION_SEARCH_THRESHOLDS.similarity} OR
-                        similarity(teaser_text, CAST(${normalizedSearch} AS text)) >= ${PRODUCTION_SEARCH_THRESHOLDS.similarity} OR
-                        word_similarity(title_text, CAST(${normalizedSearch} AS text)) >= ${PRODUCTION_SEARCH_THRESHOLDS.wordSimilarity} OR
-                        word_similarity(description_short_text, CAST(${normalizedSearch} AS text)) >= ${PRODUCTION_SEARCH_THRESHOLDS.wordSimilarity} OR
-                        word_similarity(description_text, CAST(${normalizedSearch} AS text)) >= ${PRODUCTION_SEARCH_THRESHOLDS.wordSimilarity} OR
-                        word_similarity(teaser_text, CAST(${normalizedSearch} AS text)) >= ${PRODUCTION_SEARCH_THRESHOLDS.wordSimilarity}
+                        similarity(title_text, CAST(${normalizedSearch} AS text)) >= 0.2 OR
+                        similarity(description_short_text, CAST(${normalizedSearch} AS text)) >= 0.2 OR
+                        similarity(description_text, CAST(${normalizedSearch} AS text)) >= 0.2 OR
+                        similarity(teaser_text, CAST(${normalizedSearch} AS text)) >= 0.2 OR
+                        word_similarity(title_text, CAST(${normalizedSearch} AS text)) >= 0.45 OR
+                        word_similarity(description_short_text, CAST(${normalizedSearch} AS text)) >= 0.45 OR
+                        word_similarity(description_text, CAST(${normalizedSearch} AS text)) >= 0.45 OR
+                        word_similarity(teaser_text, CAST(${normalizedSearch} AS text)) >= 0.45
                     ORDER BY (
                         CASE
-                            WHEN title_text = CAST(${normalizedSearch} AS text) THEN ${PRODUCTION_SEARCH_WEIGHTS.titleExact}
-                            WHEN title_text ILIKE CONCAT(CAST(${normalizedSearch} AS text), '%') THEN ${PRODUCTION_SEARCH_WEIGHTS.titlePrefix}
-                            WHEN title_text ILIKE CONCAT('%', CAST(${normalizedSearch} AS text), '%') THEN ${PRODUCTION_SEARCH_WEIGHTS.titleContains}
-                            WHEN description_short_text ILIKE CONCAT('%', CAST(${normalizedSearch} AS text), '%') THEN ${PRODUCTION_SEARCH_WEIGHTS.descriptionShortContains}
-                            WHEN description_text ILIKE CONCAT('%', CAST(${normalizedSearch} AS text), '%') THEN ${PRODUCTION_SEARCH_WEIGHTS.descriptionContains}
-                            WHEN teaser_text ILIKE CONCAT('%', CAST(${normalizedSearch} AS text), '%') THEN ${PRODUCTION_SEARCH_WEIGHTS.teaserContains}
+                            WHEN title_text = CAST(${normalizedSearch} AS text) THEN 1000
+                            WHEN title_text ILIKE CONCAT(CAST(${normalizedSearch} AS text), '%') THEN 900
+                            WHEN title_text ILIKE CONCAT('%', CAST(${normalizedSearch} AS text), '%') THEN 800
+                            WHEN description_short_text ILIKE CONCAT('%', CAST(${normalizedSearch} AS text), '%') THEN 380
+                            WHEN description_text ILIKE CONCAT('%', CAST(${normalizedSearch} AS text), '%') THEN 340
+                            WHEN teaser_text ILIKE CONCAT('%', CAST(${normalizedSearch} AS text), '%') THEN 320
                             ELSE 0
                         END
-                        + (similarity(title_text, CAST(${normalizedSearch} AS text)) * ${PRODUCTION_SEARCH_WEIGHTS.titleSimilarity})
-                        + (word_similarity(title_text, CAST(${normalizedSearch} AS text)) * ${PRODUCTION_SEARCH_WEIGHTS.titleWordSimilarity})
-                        + (similarity(description_short_text, CAST(${normalizedSearch} AS text)) * ${PRODUCTION_SEARCH_WEIGHTS.descriptionShortSimilarity})
-                        + (word_similarity(description_short_text, CAST(${normalizedSearch} AS text)) * ${PRODUCTION_SEARCH_WEIGHTS.descriptionShortWordSimilarity})
-                        + (similarity(description_text, CAST(${normalizedSearch} AS text)) * ${PRODUCTION_SEARCH_WEIGHTS.descriptionSimilarity})
-                        + (word_similarity(description_text, CAST(${normalizedSearch} AS text)) * ${PRODUCTION_SEARCH_WEIGHTS.descriptionWordSimilarity})
-                        + (similarity(teaser_text, CAST(${normalizedSearch} AS text)) * ${PRODUCTION_SEARCH_WEIGHTS.teaserSimilarity})
-                        + (word_similarity(teaser_text, CAST(${normalizedSearch} AS text)) * ${PRODUCTION_SEARCH_WEIGHTS.teaserWordSimilarity})
+                        + (similarity(title_text, CAST(${normalizedSearch} AS text)) * 220)
+                        + (word_similarity(title_text, CAST(${normalizedSearch} AS text)) * 200)
+                        + (similarity(description_short_text, CAST(${normalizedSearch} AS text)) * 80)
+                        + (word_similarity(description_short_text, CAST(${normalizedSearch} AS text)) * 70)
+                        + (similarity(description_text, CAST(${normalizedSearch} AS text)) * 70)
+                        + (word_similarity(description_text, CAST(${normalizedSearch} AS text)) * 65)
+                        + (similarity(teaser_text, CAST(${normalizedSearch} AS text)) * 60)
+                        + (word_similarity(teaser_text, CAST(${normalizedSearch} AS text)) * 55)
                     ) DESC, created_at DESC
-                    LIMIT ${PRODUCTION_SEARCH_THRESHOLDS.maxResults}
+                    LIMIT 5000
                 `,
             )
 
@@ -133,16 +146,42 @@ export class ProductionsRepository {
                 SELECT p.id
                 FROM "production" p
                 WHERE
-                    ${titleText} ILIKE CONCAT('%', CAST(${normalizedSearch} AS text), '%') OR
-                    ${descriptionShortText} ILIKE CONCAT('%', CAST(${normalizedSearch} AS text), '%') OR
-                    ${descriptionText} ILIKE CONCAT('%', CAST(${normalizedSearch} AS text), '%') OR
-                    ${teaserText} ILIKE CONCAT('%', CAST(${normalizedSearch} AS text), '%')
+                    LOWER(CASE
+                        WHEN ${localizedLang} = 'en' THEN COALESCE(p.title ->> 'en', p.title ->> 'nl', p.title ->> 'fr', '')
+                        WHEN ${localizedLang} = 'fr' THEN COALESCE(p.title ->> 'fr', p.title ->> 'nl', p.title ->> 'en', '')
+                        ELSE COALESCE(p.title ->> 'nl', p.title ->> 'en', p.title ->> 'fr', '')
+                    END) ILIKE CONCAT('%', CAST(${normalizedSearch} AS text), '%') OR
+                    LOWER(CASE
+                        WHEN ${localizedLang} = 'en' THEN COALESCE(p.description_short ->> 'en', p.description_short ->> 'nl', p.description_short ->> 'fr', '')
+                        WHEN ${localizedLang} = 'fr' THEN COALESCE(p.description_short ->> 'fr', p.description_short ->> 'nl', p.description_short ->> 'en', '')
+                        ELSE COALESCE(p.description_short ->> 'nl', p.description_short ->> 'en', p.description_short ->> 'fr', '')
+                    END) ILIKE CONCAT('%', CAST(${normalizedSearch} AS text), '%') OR
+                    LOWER(CASE
+                        WHEN ${localizedLang} = 'en' THEN COALESCE(p.description ->> 'en', p.description ->> 'nl', p.description ->> 'fr', '')
+                        WHEN ${localizedLang} = 'fr' THEN COALESCE(p.description ->> 'fr', p.description ->> 'nl', p.description ->> 'en', '')
+                        ELSE COALESCE(p.description ->> 'nl', p.description ->> 'en', p.description ->> 'fr', '')
+                    END) ILIKE CONCAT('%', CAST(${normalizedSearch} AS text), '%') OR
+                    LOWER(CASE
+                        WHEN ${localizedLang} = 'en' THEN COALESCE(p.teaser ->> 'en', p.teaser ->> 'nl', p.teaser ->> 'fr', '')
+                        WHEN ${localizedLang} = 'fr' THEN COALESCE(p.teaser ->> 'fr', p.teaser ->> 'nl', p.teaser ->> 'en', '')
+                        ELSE COALESCE(p.teaser ->> 'nl', p.teaser ->> 'en', p.teaser ->> 'fr', '')
+                    END) ILIKE CONCAT('%', CAST(${normalizedSearch} AS text), '%')
                 ORDER BY p.created_at DESC
-                LIMIT ${PRODUCTION_SEARCH_THRESHOLDS.maxResults}
+                LIMIT 5000
             `,
         )
 
         return rows.map((row) => row.id)
+    }
+
+    private expandGenreTerms(genre: string): string[] {
+        const normalized = genre.trim().toLowerCase()
+        if (!normalized) {
+            return []
+        }
+
+        const fromAliases = GENRE_SEARCH_ALIASES[normalized] ?? [normalized]
+        return Array.from(new Set(fromAliases))
     }
 
     async findSearchIds(search: string, lang = 'nl'): Promise<string[]> {
@@ -172,6 +211,18 @@ export class ProductionsRepository {
     private async buildWhere(options: CountOptions): Promise<Prisma.productionWhereInput> {
         const { search, searchIds, genres, locations, yearFrom, yearTo, onThisDayDate, lang = 'nl' } = options
         const andFilters: Prisma.productionWhereInput[] = []
+        const now = new Date()
+
+        // Requirement: Only show productions that have at least one event in the past
+        andFilters.push({
+            events: {
+                some: {
+                    starts_at: {
+                        lt: now
+                    }
+                }
+            }
+        })
 
         if (onThisDayDate) {
             const matchingProductionIds = await this.findProductionIdsOnMonthDay(onThisDayDate)
@@ -194,50 +245,34 @@ export class ProductionsRepository {
         }
 
         if (genres && genres.length > 0) {
+            const genreFilters: any[] = []
+            const tagFilters: any[] = []
+
+            for (const genre of genres) {
+                const searchTerms = this.expandGenreTerms(genre)
+                const languages = Array.from(new Set([lang, 'nl', 'en', 'fr'])).filter(Boolean) as string[]
+
+                for (const term of searchTerms) {
+                    for (const l of languages) {
+                        genreFilters.push({ genre: { name: { path: [l], string_contains: term, mode: 'insensitive' } } })
+                        genreFilters.push({ genre: { slug: { path: [l], string_contains: term, mode: 'insensitive' } } })
+                        
+                        tagFilters.push({ tag: { name: { path: [l], string_contains: term, mode: 'insensitive' } } })
+                        tagFilters.push({ tag: { slug: { path: [l], string_contains: term, mode: 'insensitive' } } })
+                    }
+                }
+            }
+
             andFilters.push({
-                genre_production: {
-                    some: {
-                        genre: {
-                            OR: genres.flatMap((genre) => {
-                                const searchTerms = expandGenreTerms(genre)
-                                return searchTerms.flatMap((term) => [
-                                    {
-                                        name: {
-                                            path: [lang],
-                                            string_contains: term,
-                                            mode: 'insensitive' as const,
-                                        },
-                                    },
-                                    {
-                                        name: {
-                                            path: ['nl'],
-                                            string_contains: term,
-                                            mode: 'insensitive' as const,
-                                        },
-                                    },
-                                    {
-                                        name: {
-                                            path: ['en'],
-                                            string_contains: term,
-                                            mode: 'insensitive' as const,
-                                        },
-                                    },
-                                    {
-                                        name: {
-                                            path: ['fr'],
-                                            string_contains: term,
-                                            mode: 'insensitive' as const,
-                                        },
-                                    },
-                                ])
-                            }),
-                        },
-                    },
-                },
+                OR: [
+                    { genre_production: { some: { OR: genreFilters } } },
+                    { tag_production: { some: { OR: tagFilters } } }
+                ]
             })
         }
 
         if (locations && locations.length > 0) {
+            // ... (keep existing locations logic)
             andFilters.push({
                 OR: locations.map((location) => ({
                     OR: [
@@ -291,17 +326,27 @@ export class ProductionsRepository {
         }
 
         if (typeof yearFrom === 'number' || typeof yearTo === 'number') {
-            const createdAt: Prisma.DateTimeFilter = {}
+            const eventDateFilter: Prisma.DateTimeFilter = {}
 
             if (typeof yearFrom === 'number') {
-                createdAt.gte = new Date(Date.UTC(yearFrom, 0, 1, 0, 0, 0, 0))
+                eventDateFilter.gte = new Date(Date.UTC(yearFrom, 0, 1, 0, 0, 0, 0))
             }
 
             if (typeof yearTo === 'number') {
-                createdAt.lte = new Date(Date.UTC(yearTo, 11, 31, 23, 59, 59, 999))
+                eventDateFilter.lte = new Date(Date.UTC(yearTo, 11, 31, 23, 59, 59, 999))
             }
 
-            andFilters.push({ created_at: createdAt })
+            // Filter productions where at least one PAST event is within the year range
+            andFilters.push({
+                events: {
+                    some: {
+                        AND: [
+                            { starts_at: { lt: now } },
+                            { starts_at: eventDateFilter }
+                        ]
+                    }
+                }
+            })
         }
 
         return andFilters.length > 0 ? { AND: andFilters } : {}
@@ -315,60 +360,59 @@ export class ProductionsRepository {
         return { created_at: 'desc' }
     }
 
-    private get productionInclude() {
-        return {
-            poster_gallery: {
-                include: {
-                    items: {
-                        take: 10,
-                        orderBy: { created_at: 'asc' as const },
-                        include: {
-                            crops: {
-                                orderBy: { created_at: 'asc' as const },
-                            },
-                        },
-                    },
-                },
-            },
-            media_gallery: {
-                include: {
-                    items: {
-                        take: 10,
-                        orderBy: { created_at: 'asc' as const },
-                        include: {
-                            crops: {
-                                orderBy: { created_at: 'asc' as const },
-                            },
-                        },
-                    },
-                },
-            },
-            events: {
-                take: 50,
-                orderBy: { starts_at: 'asc' as const },
-                include: {
-                    hall: {
-                        select: {
-                            name: true,
-                        },
-                    },
-                },
-            },
-            genre_production: {
-                include: {
-                    genre: {
-                        select: {
-                            name: true,
-                        },
-                    },
-                },
-            },
-        }
-    }
-
     async findAll(options: FindAllOptions) {
-        const { page, limit, sort } = options
+        const { page, limit, sort, search, searchIds, lang } = options
         const skip = (page - 1) * limit
+
+        if (sort === 'relevance' && search && search.trim().length > 0) {
+            const rankedSearchIds = Array.isArray(searchIds)
+                ? searchIds
+                : await this.findProductionIdsBySearch(search, lang)
+            if (rankedSearchIds.length === 0) {
+                return []
+            }
+
+            const filtersWithoutSearch = await this.buildWhere({
+                ...options,
+                search: undefined,
+            })
+
+            const filteredIds = await this.prisma.production.findMany({
+                where: {
+                    AND: [
+                        filtersWithoutSearch,
+                        {
+                            id: {
+                                in: rankedSearchIds,
+                            },
+                        },
+                    ],
+                },
+                select: {
+                    id: true,
+                },
+            })
+
+            const filteredIdSet = new Set(filteredIds.map((item) => item.id))
+            const orderedFilteredIds = rankedSearchIds.filter((id) => filteredIdSet.has(id))
+            const pagedIds = orderedFilteredIds.slice(skip, skip + limit)
+
+            if (pagedIds.length === 0) {
+                return []
+            }
+
+            const rows = await this.prisma.production.findMany({
+                where: {
+                    id: {
+                        in: pagedIds,
+                    },
+                },
+            })
+
+            const rowsById = new Map(rows.map((item) => [item.id, item]))
+            return pagedIds.map((id) => rowsById.get(id)).filter((item): item is NonNullable<typeof item> => Boolean(item))
+        }
+
         const where = await this.buildWhere(options)
 
         return this.prisma.production.findMany({
@@ -376,45 +420,7 @@ export class ProductionsRepository {
             skip,
             take: limit,
             orderBy: this.buildOrderBy(sort),
-            include: this.productionInclude,
         })
-    }
-
-    async findFilteredIds(options: CountOptions & { rankedIds: string[] }): Promise<string[]> {
-        const { rankedIds, ...countOptions } = options
-        const filtersWithoutSearch = await this.buildWhere({ ...countOptions, search: undefined })
-
-        const rows = await this.prisma.production.findMany({
-            where: {
-                AND: [
-                    filtersWithoutSearch,
-                    {
-                        id: {
-                            in: rankedIds,
-                        },
-                    },
-                ],
-            },
-            select: {
-                id: true,
-            },
-        })
-
-        return rows.map((row) => row.id)
-    }
-
-    async findManyByIds(ids: string[]) {
-        const rows = await this.prisma.production.findMany({
-            where: {
-                id: {
-                    in: ids,
-                },
-            },
-            include: this.productionInclude,
-        })
-
-        const rowsById = new Map(rows.map((item) => [item.id, item]))
-        return ids.map((id) => rowsById.get(id)).filter((item): item is NonNullable<typeof item> => Boolean(item))
     }
 
     async count(options: CountOptions) {
@@ -428,45 +434,6 @@ export class ProductionsRepository {
     async findById(id: string) {
         const production = await this.prisma.production.findUnique({
             where: { id },
-            include: {
-                events: {
-                    include: {
-                        hall: {
-                            select: {
-                                name: true,
-                            },
-                        },
-                    },
-                },
-                genre_production: {
-                    include: {
-                        genre: true
-                    }
-                },
-                poster_gallery: {
-                    include: {
-                        items: {
-                            include: {
-                                crops: true,
-                            },
-                        },
-                    },
-                },
-                media_gallery: {
-                    include: {
-                        items: {
-                            include: {
-                                crops: true,
-                            },
-                        },
-                    },
-                },
-                tag_production: {
-                    include: {
-                        tag: true,
-                    },
-                },
-            }
         });
 
         if (!production) return null;
