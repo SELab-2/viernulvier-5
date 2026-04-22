@@ -154,7 +154,7 @@ function BlogDetailPage() {
                                                 key={production.id}
                                                 production={production}
                                                 locale={locale}
-                                                href={withLocalePath(`/productions/${production.id}`, locale)}
+                                                href={withLocalePath(`/archive/${production.id}`, locale)}
                                             />
                                         ))}
                                     </div>

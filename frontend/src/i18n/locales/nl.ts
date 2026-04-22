@@ -252,6 +252,7 @@ const nl: Messages = {
       createBlogDescription: "Creëer een nieuwe blog",
       manageProduction: "Producties beheren",
       manageProductionButton: "Nieuwe productie toevoegen",
+      removeProductionAriaLabel: "Verwijder productie",
       savingButton: "Publiceren...",
       deletingButton: "Verwijderen...",
       deleteButton: "Verwijder blog",

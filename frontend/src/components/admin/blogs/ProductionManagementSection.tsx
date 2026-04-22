@@ -81,7 +81,7 @@ function ProductionManagementSection({
                                                         <button
                                                             type="button"
                                                             onClick={() => onRemoveProduction(production.id)}
-                                                            aria-label="Verwijder productie"
+                                                            aria-label={messages.blogs.removeProductionAriaLabel}
                                                             className="rounded-full border border-border bg-background/90 p-2 text-muted transition hover:border-red-500 hover:text-red-600"
                                                         >
                                                             <svg

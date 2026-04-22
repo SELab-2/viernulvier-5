@@ -38,7 +38,7 @@ describe('ProductionPickerPopup', () => {
       />,
     )
 
-    expect(screen.getByText('Kies een production')).toBeInTheDocument()
+    expect(screen.getByText('Kies een productie')).toBeInTheDocument()
 
     fireEvent.change(screen.getByPlaceholderText('Zoek productie'), {
       target: { value: 'tweede' },

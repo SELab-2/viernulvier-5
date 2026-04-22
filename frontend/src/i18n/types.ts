@@ -227,6 +227,7 @@ export type Messages = {
     createBlogDescription: string
     manageProduction: string
     manageProductionButton: string
+    removeProductionAriaLabel: string
     savingButton: string
     deletingButton: string
     deleteButton: string

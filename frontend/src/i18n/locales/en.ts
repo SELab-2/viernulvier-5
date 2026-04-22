@@ -252,6 +252,7 @@ const en: Messages = {
       createBlogDescription: 'Create a new blog',
       manageProduction: 'Manage productions',
       manageProductionButton: 'Add new production',
+      removeProductionAriaLabel: 'Remove production',
       savingButton: 'Publishing...',
       deletingButton: 'Deleting...',
       deleteButton: 'Delete blog',

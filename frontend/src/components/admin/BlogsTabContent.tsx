@@ -29,6 +29,7 @@ function BlogsTabContent({
                         <textarea
                             value={title}
                             onChange={(value) => changeTitle(value.target.value)}
+                            aria-label={titleLabel}
                             rows={2}
                             className="admin-detail-field min-h-12 resize-y py-3 text-sm leading-6 [overflow-wrap:anywhere]"
                         />

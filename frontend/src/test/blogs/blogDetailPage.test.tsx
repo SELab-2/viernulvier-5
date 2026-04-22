@@ -144,8 +144,8 @@ describe('BlogDetailPage', () => {
     expect(screen.queryByText('Blog content Engels')).not.toBeInTheDocument()
 
     expect(await screen.findByText('Gerelateerde producties')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /Eerste productie/i })).toHaveAttribute('href', '/nl/productions/production-1')
-    expect(screen.getByRole('link', { name: /Tweede productie/i })).toHaveAttribute('href', '/nl/productions/production-2')
+    expect(screen.getByRole('link', { name: /Eerste productie/i })).toHaveAttribute('href', '/nl/archive/production-1')
+    expect(screen.getByRole('link', { name: /Tweede productie/i })).toHaveAttribute('href', '/nl/archive/production-2')
   })
 
   it('renders English content when the active locale is en', async () => {
