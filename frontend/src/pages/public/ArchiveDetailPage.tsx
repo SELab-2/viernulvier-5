@@ -87,7 +87,7 @@ function ArchiveDetailPageContent() {
                 const now = Date.now()
                 const pastEvents = eventsRes.data.filter((event) => {
                     if (!event.starts_at) return false
-                    return event.starts_at.getTime() <= now
+                    return new Date(event.starts_at).getTime() <= now
                 })
 
                 setProduction(prod)
