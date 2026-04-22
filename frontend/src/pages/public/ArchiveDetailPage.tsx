@@ -21,6 +21,83 @@ function ArchiveDetailPageContent() {
     const messages = usePublicMessages()
     const locale = getActiveLocale(window.location.pathname)
     const { id } = useParams<{ id: string }>()
+    const locale = getActiveLocale(window.location.pathname)
+    
+    const [production, setProduction] = useState<Production | null>(null)
+    const [genres, setGenres] = useState<Genre[]>([])
+    const [tags, setTags] = useState<Tag[]>([])
+    const [gallery, setGallery] = useState<Gallery | null>(null)
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
+
+    useEffect(() => {
+        async function fetchAllData() {
+            setLoading(true)
+            try {
+                // 1. Fetch core production
+                const prodResponse = await apiFetch<{ data: Production }>(`/archive/productions/${id}`)
+                const prod = prodResponse.data
+                setProduction(prod)
+
+                // 2. Follow links for related data
+                const genresPath = getRelativePath(prod.links.genres)
+                const tagsPath = getRelativePath(prod.links.tags)
+                const galleryPath = getRelativePath(prod.links.media_gallery)
+
+                const [genresRes, tagsRes] = await Promise.allSettled([
+                    genresPath ? apiFetch<{ data: Genre[] }>(genresPath) : Promise.reject('No genres link'),
+                    tagsPath ? apiFetch<{ data: Tag[] }>(tagsPath) : Promise.reject('No tags link'),
+                ])
+
+                if (genresRes.status === 'fulfilled') setGenres(genresRes.value.data)
+                if (tagsRes.status === 'fulfilled') setTags(tagsRes.value.data)
+
+                if (galleryPath) {
+                    try {
+                        // 1. Production -> Gallery
+                        const galRes = await apiFetch<{ data: { id: string, links: { items: string } } }>(galleryPath)
+                        const itemsPath = getRelativePath(galRes.data?.links?.items)
+
+                        if (itemsPath) {
+                            // 2. Gallery -> Items
+                            const itemsRes = await apiFetch<{ data: GalleryItem[] }>(itemsPath)
+                            const firstItem = itemsRes.data?.[0]
+
+                            if (firstItem && firstItem.links?.crops) {
+                                // 3. Item -> Crops
+                                const cropsPath = getRelativePath(firstItem.links.crops)
+                                if (cropsPath) {
+                                    const cropsRes = await apiFetch<{ data: Array<{ name: string, url: string }> }>(cropsPath)
+                                    firstItem.crops = cropsRes.data
+                                }
+                            }
+                            setGallery({ id: galRes.data.id, items: itemsRes.data })
+                        }
+                    } catch {
+                        // Silently fail gallery fetch
+                    }
+                }
+
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Failed to fetch data')
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        if (id) fetchAllData()
+    }, [id])
+
+    if (loading) return <PublicLayout><div className="p-8 text-center">Laden...</div></PublicLayout>
+    if (error || !production) return <PublicLayout><div className="p-8 text-center text-red-500">Error: {error || 'Niet gevonden'}</div></PublicLayout>
+
+    const title = getLocalizedText(production.title, locale)
+    const description = getLocalizedText(production.description, locale) || getLocalizedText(production.description_short, locale)
+    const artist = getLocalizedText(production.artist, locale)
+
+    const firstItemCrops = gallery?.items[0]?.crops
+    const mainImage = firstItemCrops?.find(c => c.name === 'FE3_header')?.url 
+        || firstItemCrops?.[0]?.url
 
     const [production, setProduction] = useState<Production | null>(null)
     const [imageUrl, setImageUrl] = useState<string | null>(null)

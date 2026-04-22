@@ -18,14 +18,13 @@ export function calculateTotalPages(total: number, limit: number): number {
 }
 
 /**
- * Clamp a requested page into the available page range.
+ * Sanitize requested page number to be within valid bounds.
+ * If page > totalPages, it will return totalPages.
+ * If page < 1, it will return 1.
  */
 export function sanitizePage(page: number, totalPages: number): number {
-    if (totalPages <= 0) {
-        return 1
-    }
-
-    return Math.min(Math.max(page, 1), totalPages)
+    if (totalPages === 0) return 1
+    return Math.max(1, Math.min(page, totalPages))
 }
 
 /**

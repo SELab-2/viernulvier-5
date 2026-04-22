@@ -26,7 +26,8 @@ export class TaxonomiesService {
             page: sanitizedPage, 
             limit, 
             search, 
-            lang 
+            lang,
+            productionId
         })
 
         return {
@@ -66,7 +67,8 @@ export class TaxonomiesService {
             page: sanitizedPage, 
             limit, 
             search, 
-            lang 
+            lang,
+            productionId
         })
 
         return {
