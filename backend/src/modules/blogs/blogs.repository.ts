@@ -2,21 +2,10 @@ import { Prisma, type PrismaClient } from '@prisma/client'
 import type { CreateBlogInput, UpdateBlogInput, BlogResponse, BlogPaginationQuery } from './blogs.schema.js'
 import { AppError } from '../../errors/app-error.js'
 
+type BlogFilterOptions = Pick<BlogPaginationQuery, 'search' | 'yearFrom' | 'yearTo'>
+
 export class BlogsRepository {
     constructor(private readonly prisma: PrismaClient) {}
-
-    private combineSqlConditions(conditions: Prisma.Sql[], operator: 'AND' | 'OR'): Prisma.Sql {
-        if (conditions.length === 0) {
-            return Prisma.empty
-        }
-
-        let combined = conditions[0]
-        for (let index = 1; index < conditions.length; index += 1) {
-            combined = Prisma.sql`${combined} ${Prisma.raw(operator)} ${conditions[index]}`
-        }
-
-        return combined
-    }
 
     private parseSearchDate(search: string): { from: Date; to: Date } | null {
         const trimmed = search.trim()
@@ -48,45 +37,31 @@ export class BlogsRepository {
         return { from, to }
     }
 
-    private buildSearchWhereSql(options: Pick<BlogPaginationQuery, 'search' | 'yearFrom' | 'yearTo'>): Prisma.Sql {
-        const clauses: Prisma.Sql[] = []
+    private buildWhere(options: BlogFilterOptions): Prisma.blogWhereInput {
+        const conditions: Prisma.blogWhereInput[] = []
         const trimmedSearch = options.search?.trim()
 
         if (trimmedSearch) {
-            const likeSearch = `%${trimmedSearch}%`
-            const searchConditions: Prisma.Sql[] = [
-                Prisma.sql`title ILIKE ${likeSearch}`,
-                Prisma.sql`CAST(content AS TEXT) ILIKE ${likeSearch}`,
-            ]
-
             const dateRange = this.parseSearchDate(trimmedSearch)
             if (dateRange) {
-                searchConditions.push(
-                    Prisma.sql`("created_at" >= ${dateRange.from} AND "created_at" < ${dateRange.to})`,
-                )
+                conditions.push({ createdAt: { gte: dateRange.from, lt: dateRange.to } })
+            } else {
+                conditions.push({ title: { contains: trimmedSearch, mode: 'insensitive' } })
             }
-
-            const combinedSearch = this.combineSqlConditions(searchConditions, 'OR')
-            clauses.push(Prisma.sql`(${combinedSearch})`)
         }
 
         if (options.yearFrom || options.yearTo) {
-            const fromYear = options.yearFrom ?? 1970
-            const toYear = options.yearTo ?? 9999
-            const normalizedFromYear = Math.min(fromYear, toYear)
-            const normalizedToYear = Math.max(fromYear, toYear)
-            const from = new Date(Date.UTC(normalizedFromYear, 0, 1))
-            const to = new Date(Date.UTC(normalizedToYear + 1, 0, 1))
-
-            clauses.push(Prisma.sql`("created_at" >= ${from} AND "created_at" < ${to})`)
+            const fromYear = Math.min(options.yearFrom ?? 1970, options.yearTo ?? 9999)
+            const toYear = Math.max(options.yearFrom ?? 1970, options.yearTo ?? 9999)
+            conditions.push({
+                createdAt: {
+                    gte: new Date(Date.UTC(fromYear, 0, 1)),
+                    lt: new Date(Date.UTC(toYear + 1, 0, 1)),
+                },
+            })
         }
 
-        if (clauses.length === 0) {
-            return Prisma.empty
-        }
-
-        const combinedClauses = this.combineSqlConditions(clauses, 'AND')
-        return Prisma.sql`WHERE ${combinedClauses}`
+        return conditions.length > 0 ? { AND: conditions } : {}
     }
 
     private readonly blogInclude = {
@@ -118,28 +93,24 @@ export class BlogsRepository {
     async findAll(options: BlogPaginationQuery): Promise<BlogResponse[]> {
         const { page, limit } = options
         const skip = (page - 1) * limit
-
-        const whereSql = this.buildSearchWhereSql(options)
-
-        const blogIds = await this.prisma.$queryRaw<Array<{ id: string }>>(Prisma.sql`
-            SELECT id
-            FROM "blog"
-            ${whereSql}
-            ORDER BY "created_at" DESC
-            OFFSET ${skip}
-            LIMIT ${limit}
-        `)
-
-        if (blogIds.length === 0) {
-            return []
-        }
+        const where = this.buildWhere(options)
 
         const blogs = await this.prisma.blog.findMany({
-            where: {
-                id: {
-                    in: blogIds.map((blog) => blog.id),
-                },
-            },
+            where,
+            include: this.blogInclude,
+            orderBy: { createdAt: 'desc' },
+            skip,
+            take: limit,
+        })
+
+        return blogs.map((blog) => this.mapBlog(blog))
+    }
+
+    async findAllForSearch(options: BlogFilterOptions): Promise<BlogResponse[]> {
+        const where = this.buildWhere(options)
+
+        const blogs = await this.prisma.blog.findMany({
+            where,
             include: this.blogInclude,
             orderBy: { createdAt: 'desc' },
         })
@@ -147,15 +118,9 @@ export class BlogsRepository {
         return blogs.map((blog) => this.mapBlog(blog))
     }
 
-    async count(options: Pick<BlogPaginationQuery, 'search' | 'yearFrom' | 'yearTo'>): Promise<number> {
-        const whereSql = this.buildSearchWhereSql(options)
-        const result = await this.prisma.$queryRaw<Array<{ count: bigint }>>(Prisma.sql`
-            SELECT COUNT(*)::bigint AS count
-            FROM "blog"
-            ${whereSql}
-        `)
-
-        return Number(result[0]?.count ?? 0)
+    async count(options: BlogFilterOptions): Promise<number> {
+        const where = this.buildWhere(options)
+        return this.prisma.blog.count({ where })
     }
 
     async countInRange({ from, to }: { from: Date; to: Date }): Promise<number> {

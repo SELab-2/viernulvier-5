@@ -5,10 +5,6 @@ import type { PaginatedResult } from '../../utils/pagination.js'
 import { calculateTotalPages, sanitizePage } from '../../utils/pagination.js'
 import { ProductionsService } from '../productions/productions.service.js'
 
-// Maximum items fetched internally from each source to merge & paginate.
-// For a theatre archive this ceiling is never hit in practice.
-const INTERNAL_MAX = 1000
-
 export class SearchService {
     private readonly productionsService: ProductionsService
 
@@ -22,27 +18,25 @@ export class SearchService {
     async search(options: SearchQuery): Promise<PaginatedResult<SearchResultItem>> {
         const { page, limit, search, yearFrom, yearTo, genres, locations, sort, lang } = options
 
-        // --- fetch all matching items from both sources ---
+        const commonProductionOptions = {
+            search,
+            genres,
+            locations,
+            yearFrom,
+            yearTo,
+            sort,
+            lang,
+            onThisDay: false as const,
+        }
+
+        // Get total count of matching productions first, then fetch all without an artificial ceiling
+        const prodsPreview = await this.productionsService.getProductions({ ...commonProductionOptions, page: 1, limit: 1 })
+
         const [blogResults, prodResults] = await Promise.all([
-            this.blogsRepo.findAll({
-                page: 1,
-                limit: INTERNAL_MAX,
-                search,
-                yearFrom,
-                yearTo,
-            }),
-            this.productionsService.getProductions({
-                page: 1,
-                limit: INTERNAL_MAX,
-                search,
-                genres,
-                locations,
-                yearFrom,
-                yearTo,
-                sort,
-                lang,
-                onThisDay: false,
-            }),
+            this.blogsRepo.findAllForSearch({ search, yearFrom, yearTo }),
+            prodsPreview.total > 0
+                ? this.productionsService.getProductions({ ...commonProductionOptions, page: 1, limit: prodsPreview.total })
+                : Promise.resolve({ items: [], total: 0, page: 1, limit: 1, totalPages: 0 }),
         ])
 
         // --- map to a common shape ---
