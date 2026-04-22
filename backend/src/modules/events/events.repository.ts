@@ -91,9 +91,6 @@ export class EventsRepository {
     async findPriceById(id: string) {
         return this.prisma.event_price.findUnique({
             where: { id },
-            include: {
-                event: true
-            }
         })
     }
 
