@@ -84,10 +84,11 @@ function ArchiveDetailPageContent() {
                 ])
 
                 const prod = prodRes.data
-                const now = new Date()
-                const pastEvents = eventsRes.data.filter(
-                    (e) => e.starts_at && new Date(e.starts_at) < now
-                )
+                const now = Date.now()
+                const pastEvents = eventsRes.data.filter((event) => {
+                    if (!event.starts_at) return false
+                    return event.starts_at.getTime() <= now
+                })
 
                 setProduction(prod)
                 setEvents(pastEvents)
@@ -109,7 +110,7 @@ function ArchiveDetailPageContent() {
                 }
 
                 const locationResults = await Promise.all(
-                    eventsRes.data.map(async (event) => {
+                    pastEvents.map(async (event) => {
                         if (!event.hall_id) return null
                         try {
                             const hall = (await getHallById(event.hall_id)).data

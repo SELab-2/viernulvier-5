@@ -294,7 +294,7 @@ describe('ArchiveDetailPage', () => {
         })
     })
 
-    it('only shows past events', async () => {
+    it('shows only past events', async () => {
         const pastEvent = {
             id: 'evt-past-0000-0000-0000-000000000001',
             starts_at: new Date('2020-01-01T13:00:00.000Z'),
@@ -322,9 +322,11 @@ describe('ArchiveDetailPage', () => {
             expect(getEventsByProductionIdMock).toHaveBeenCalled()
         })
 
-        // Only the past event should be in the rendered list; the future one should be filtered out.
-        // We verify this indirectly through the location chain not being triggered for the future event.
-        expect(getLocationByIdMock).not.toHaveBeenCalled()
+        await waitFor(() => {
+            expect(screen.getByText(/2020/)).toBeInTheDocument()
+        })
+
+        expect(screen.queryByText(/2099/)).not.toBeInTheDocument()
     })
 
     it('logs an error to the console when the production fetch fails', async () => {
