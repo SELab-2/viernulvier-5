@@ -57,13 +57,6 @@ export class TaxonomiesRepository {
     async findGenreById(id: string) {
         return this.prisma.genre.findUnique({
             where: { id },
-            include: {
-                genre_production: {
-                    include: {
-                        production: true
-                    }
-                }
-            }
         })
     }
 
@@ -101,10 +94,7 @@ export class TaxonomiesRepository {
             };
         }
 
-        console.log("Filtering for production:", productionId);
-
         if (productionId) {
-            console.log("Filtering for production:", productionId);
             where.tag_production = {
                 some: {
                     production_id: productionId,
@@ -149,13 +139,6 @@ export class TaxonomiesRepository {
     async findTagById(id: string) {
         return this.prisma.tag.findUnique({
             where: { id },
-            include: {
-                tag_production: {
-                    include: {
-                        production: true
-                    }
-                }
-            }
         })
     }
 
@@ -178,4 +161,3 @@ export class TaxonomiesRepository {
         })
     }
 }
-
