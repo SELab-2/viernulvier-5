@@ -151,7 +151,7 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
         }))
     }
 
-    const changeSettings = (field: keyof ProductionSettingsFields, value: any) => {
+    const changeSettings = <K extends keyof ProductionSettingsFields>(field: K, value: ProductionSettingsFields[K]) => {
         setForm(prev => ({
             ...prev,
             settings: {

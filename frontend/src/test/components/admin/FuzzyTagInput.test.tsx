@@ -2,6 +2,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import FuzzyTagInput from '../../../components/admin/FuzzyTagInput'
 import { api } from '../../../api/client'
+import type { TagListResponse, TagResponse } from '../../../../../backend/src/modules/taxonomies/taxonomies.schema'
 
 // Mock the API client
 vi.mock('../../../api/client', () => ({
@@ -16,6 +17,18 @@ vi.mock('../../../components/admin/useLocale', () => ({
         locale: 'nl'
     })
 }))
+
+const createMockTag = (name: string): TagResponse => ({
+    id: 'mock-uuid',
+    apiId: null,
+    type: null,
+    vendor_id: null,
+    name: { nl: name, en: name, fr: '' },
+    slug: { nl: name.toLowerCase(), en: name.toLowerCase(), fr: '' },
+    description: null,
+    created_at: new Date(),
+    updated_at: new Date()
+})
 
 describe('FuzzyTagInput', () => {
     const defaultProps = {
@@ -46,13 +59,15 @@ describe('FuzzyTagInput', () => {
     })
 
     it('fetches and displays suggestions when typing', async () => {
-        const mockSuggestions = {
+        const mockSuggestions: TagListResponse = {
             data: [
-                { name: { nl: 'Suggestion 1', en: 'Suggestion 1' } },
-                { name: { nl: 'Suggestion 2', en: 'Suggestion 2' } }
-            ]
+                createMockTag('Suggestion 1'),
+                createMockTag('Suggestion 2')
+            ],
+            meta: { total: 2, page: 1, limit: 5, totalPages: 1 },
+            links: { self: '', next: null, prev: null, first: '', last: '' }
         };
-        (api.get as any).mockResolvedValue(mockSuggestions)
+        vi.mocked(api.get).mockResolvedValue(mockSuggestions)
 
         render(<FuzzyTagInput {...defaultProps} tag="sug" />)
         const input = screen.getByPlaceholderText('Add tag...')
@@ -69,21 +84,21 @@ describe('FuzzyTagInput', () => {
     })
 
     it('filters out existing tags from suggestions case-insensitively', async () => {
-        const mockSuggestions = {
+        const mockSuggestions: TagListResponse = {
             data: [
-                { name: { nl: 'ExistingTag', en: 'ExistingTag' } },
-                { name: { nl: 'NewTag', en: 'NewTag' } }
-            ]
+                createMockTag('ExistingTag'),
+                createMockTag('NewTag')
+            ],
+            meta: { total: 2, page: 1, limit: 5, totalPages: 1 },
+            links: { self: '', next: null, prev: null, first: '', last: '' }
         };
-        (api.get as any).mockResolvedValue(mockSuggestions)
+        vi.mocked(api.get).mockResolvedValue(mockSuggestions)
 
         render(<FuzzyTagInput {...defaultProps} tag="tag" />)
         const input = screen.getByPlaceholderText('Add tag...')
         fireEvent.focus(input)
 
         await waitFor(() => {
-            // "ExistingTag" should exist as a badge but NOT as a list item (suggestion)
-            // List items are <li> elements
             const suggestions = screen.queryAllByRole('listitem')
             const suggestionTexts = suggestions.map(s => s.textContent)
             expect(suggestionTexts).not.toContain('ExistingTag')
@@ -92,12 +107,14 @@ describe('FuzzyTagInput', () => {
     })
 
     it('calls addTag when clicking a suggestion', async () => {
-        const mockSuggestions = {
+        const mockSuggestions: TagListResponse = {
             data: [
-                { name: { nl: 'Suggestion 1', en: 'Suggestion 1' } }
-            ]
+                createMockTag('Suggestion 1')
+            ],
+            meta: { total: 1, page: 1, limit: 5, totalPages: 1 },
+            links: { self: '', next: null, prev: null, first: '', last: '' }
         };
-        (api.get as any).mockResolvedValue(mockSuggestions)
+        vi.mocked(api.get).mockResolvedValue(mockSuggestions)
 
         render(<FuzzyTagInput {...defaultProps} tag="sug" />)
         const input = screen.getByPlaceholderText('Add tag...')

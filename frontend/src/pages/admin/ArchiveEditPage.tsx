@@ -8,7 +8,6 @@ import type { Language, ProductionContent, ProductionContentFields, ProductionFo
 import type { Locale } from '../../i18n/types'
 import type { Event, EventForm } from '../../types/event'
 import type { ProductionResponse } from '../../../../backend/src/modules/productions/productions.schema'
-import type { LocationResponse } from '../../../../backend/src/modules/locations/locations.schema'
 
 import { useNavigate, useParams } from 'react-router-dom'
 import { getMessages } from '../../i18n'
@@ -43,8 +42,6 @@ const defaultEventForm : EventForm = {
     location: '',
     tags: []
 }
-
-const defaultEvents: Event[] = []
 
 type ProductionEditPageProps = {
     /**
@@ -121,7 +118,7 @@ function ArchiveEditPage({ create } : ProductionEditPageProps) {
         //     .catch( err => {
         //         console.error(err)
         //     })
-    }, [id])
+    }, [id, create])
 
     const back = () => {
         navigate("/admin")
@@ -193,7 +190,7 @@ function ArchiveEditPage({ create } : ProductionEditPageProps) {
         }))
     }
 
-    const changeSettings = (field: keyof ProductionSettingsFields, value: any) => {
+    const changeSettings = <K extends keyof ProductionSettingsFields>(field: K, value: ProductionSettingsFields[K]) => {
         setForm(prev => ({
             ...prev,
             settings: {
@@ -365,8 +362,8 @@ function ArchiveEditPage({ create } : ProductionEditPageProps) {
             }
         >   
             <SectionHeading
-                title={messages.production.productionEditTitle}
-                subTitle={messages.production.productionEditSubTitle}
+                title={messages.admin.archiveEdit.pageTitle}
+                subTitle={`${messages.admin.archiveEdit.itemIdLabel} ${id}`}
             />
 
             {/* Tabs for english and dutch contents of a production */}

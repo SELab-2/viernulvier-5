@@ -1,11 +1,11 @@
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { AdminMessagesContext } from '../../../components/admin/AdminMessagesContext'
 import ArchiveEditPage from '../../../pages/admin/ArchiveEditPage'
 import type { Messages } from '../../../i18n/types'
 
-const mockMessages: Pick<Messages, 'admin'> = {
+const mockMessages: Pick<Messages, 'admin' | 'production' | 'event'> = {
   admin: {
     themeToggleDark: 'Dark mode',
     themeToggleLight: 'Light mode',
@@ -66,10 +66,50 @@ const mockMessages: Pick<Messages, 'admin'> = {
     },
     archiveEdit: {
       pageTitle: 'Edit archive item',
-      itemIdLabel: 'Item ID:',
+      itemIdLabel: 'Item-ID:',
     },
   },
+  production: {
+    dutchOption: 'Dutch',
+    englishOption: 'English',
+    productionSettingsLabel: 'Production settings',
+    statusLabel: 'Status',
+    genreLabel: 'Genres',
+    tagLabel: 'Tags',
+    bannerLabel: 'Banner',
+    extraPicturesLabel: 'Extra pictures',
+    artistLabel: 'Artist',
+    productionEditTitle: 'Edit production',
+    productionEditSubTitle: 'Manage details',
+    title: 'Title',
+    slug: 'Slug',
+    content: 'Content',
+    back: 'Back',
+    saveOnDraft: 'Save as draft',
+    publish: 'Publish',
+    eventsEditTitle: 'Manage events',
+    eventsEditSubTitle: 'Manage events for this production',
+    makeEventsLabel: 'Add event',
+    eventsDateLabel: 'Date',
+    eventsTimeLabel: 'Time',
+    eventsLocationLabel: 'Location',
+    eventsCommentLabel: 'Comment',
+    eventsActionsLabel: 'Actions'
+  },
+  event: {
+    saveButtonLabel: 'Save event',
+    editLabel: 'Edit event',
+    addLabel: 'Add event',
+    timeLabel: 'Time',
+    locationLabel: 'Location',
+    tagsLabel: 'Tags',
+  }
 }
+
+vi.mock('../../../i18n', () => ({
+    getMessages: () => mockMessages,
+    getActiveLocale: () => 'en',
+}))
 
 vi.mock('../../../components/admin/AdminLayout', () => ({
   default: ({ children }: { children: React.ReactNode }) => (
@@ -81,21 +121,24 @@ vi.mock('../../../components/admin/AdminLayout', () => ({
 
 describe('ArchiveEditPage', () => {
   it('shows the archive id', () => {
-    window.history.replaceState(window.history.state, '', '/admin/archive/42/edit')
-
     render(
       <MemoryRouter initialEntries={['/admin/archive/42/edit']}>
-        <ArchiveEditPage />
+        <Routes>
+          <Route path="/admin/archive/:id/edit" element={<ArchiveEditPage />} />
+        </Routes>
       </MemoryRouter>,
     )
 
-    expect(screen.getByText(/Item ID:/)).toBeInTheDocument()
+    expect(screen.getByText(/Item-ID:/)).toBeInTheDocument()
+    expect(screen.getByText(/42/)).toBeInTheDocument()
   })
 
   it('renders the page title via i18n', () => {
     render(
       <MemoryRouter initialEntries={['/admin/archive/99/edit']}>
-        <ArchiveEditPage />
+        <Routes>
+          <Route path="/admin/archive/:id/edit" element={<ArchiveEditPage />} />
+        </Routes>
       </MemoryRouter>,
     )
 

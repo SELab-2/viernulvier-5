@@ -1,4 +1,4 @@
-import type { ProductionContent, ProductionContentFields } from "../../types/production"
+import type { ProductionContentFields } from "../../types/production"
 import SlugInput from "./SlugInput"
 
 type ArchiveContentTabProps = {
