@@ -43,16 +43,8 @@ function ArchiveDetailPageContent() {
             navigate(withLocalePath(prev, locale))
             return
         }
-        navigate(withLocalePath('', locale))
+        navigate(withLocalePath('/', locale))
     }
-
-    // const handleGoBack = () => {
-    //     if (window.history.length > 1) {
-    //         navigate(-1)
-    //     } else {
-    //         navigate(withLocalePath('/', locale))
-    //     }
-    // }
 
     const formatHtml = (html: string) => {
         return html

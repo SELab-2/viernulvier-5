@@ -271,17 +271,6 @@ describe('ArchiveDetailPage', () => {
         expect(await screen.findByText('Geen voorstellingen gevonden.')).toBeInTheDocument()
     })
 
-    it('navigates back when the back button is clicked and there is history', async () => {
-        vi.stubGlobal('history', { ...window.history, length: 5 })
-
-        renderPage()
-
-        const backButton = await screen.findByText('Terug')
-        fireEvent.click(backButton)
-
-        expect(navigate).toHaveBeenCalledWith(-1)
-    })
-
     it('navigates to home when there is no history', async () => {
         vi.stubGlobal('history', { ...window.history, length: 1 })
 
