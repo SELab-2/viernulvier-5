@@ -333,11 +333,17 @@ function PublicCarousel() {
                 {!isLoading && (error || carouselItems.length === 0) && <p className="mt-8 text-sm text-muted">{messages.home.onThisDayEmpty}</p>}
                 {!isLoading && carouselItems.length > 0 && (
                     <>
-                        <div ref={scrollerRef} className="mt-8 flex snap-x snap-mandatory gap-6 overflow-x-auto py-6 px-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                        <div
+                            ref={scrollerRef}
+                            className="mt-8 flex snap-x snap-mandatory gap-6 overflow-x-auto py-6 px-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                        >
                             {carouselItems.map((item, index) => (
-                                <Link to={withLocalePath(`/archive/${item.id}`, locale)} key={item.id} className={`flex w-[280px] shrink-0 snap-start border border-border bg-surface p-4 transition-transform duration-300 hover:rotate-0 hover:shadow-lg sm:w-[310px] ${index % 2 === 0 ? '-rotate-3' : 'rotate-3'}`}>
-                                    <SearchResultCard item={item} />
-                                </Link>
+                                <div
+                                    key={item.id}
+                                    className={`flex w-[280px] shrink-0 snap-start border border-border bg-surface p-4 transition-transform duration-300 hover:rotate-0 hover:shadow-lg sm:w-[310px] ${index % 2 === 0 ? '-rotate-3' : 'rotate-3'}`}
+                                >
+                                    <SearchResultCard item={item} detailHref={withLocalePath(`/archive/${item.id}`, locale)} />
+                                </div>
                             ))}
                         </div>
                         <div className="mt-2 flex items-center justify-end gap-4 text-2xl text-foreground">
@@ -346,6 +352,7 @@ function PublicCarousel() {
                         </div>
                     </>
                 )}
+
             </div>
         </section>
     )

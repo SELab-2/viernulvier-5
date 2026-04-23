@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom'
 
+const FALLBACK_IMAGE = '/fallback-hero.svg'
+
 export type SearchResultItem = {
     id: string
     tag: string
@@ -14,6 +16,12 @@ export type SearchResultItem = {
 
 type SearchResultCardProps = {
     item: SearchResultItem
+    detailHref: string
+}
+
+function capitalizeFirst(value: string): string {
+    if (value.length === 0) return value
+    return value.charAt(0).toUpperCase() + value.slice(1)
 }
 
 function capitalizeFirst(value: string): string {
@@ -31,9 +39,9 @@ function SearchResultCard({ item }: SearchResultCardProps) {
             <div className="relative h-32 overflow-hidden rounded-md sm:h-36 bg-gradient-to-br from-accent to-accent/50">
                 {item.imageUrl ? (
                     <img
-                        src={item.imageUrl}
+                        src={imageUrl}
                         alt={item.title}
-                        className="absolute inset-0 h-full w-full object-cover"
+                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                         loading="lazy"
                         referrerPolicy="no-referrer"
                     />

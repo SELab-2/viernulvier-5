@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest'
+import { MemoryRouter } from 'react-router-dom'
 import type { ProductionItem } from '../../components/admin/blogs/ProductionManagementSection'
 import CreateBlogPage from '../../pages/admin/CreateBlogPage'
 import { getMessages } from '../../i18n'
@@ -22,6 +23,13 @@ vi.mock('react-router-dom', async () => {
     ...actual,
     useNavigate: () => navigate,
     useParams: () => params,
+    useLocation: () => ({
+      pathname: window.location.pathname,
+      search: window.location.search,
+      hash: window.location.hash,
+      state: null,
+      key: 'test-location',
+    }),
   }
 })
 
@@ -163,13 +171,21 @@ function mockEditBlog(overrides?: {
 function renderCreatePage() {
   setPath('/nl/admin/blogs/create')
   params = {}
-  return render(<CreateBlogPage />)
+  return render(
+    <MemoryRouter initialEntries={[window.location.pathname]}>
+      <CreateBlogPage />
+    </MemoryRouter>,
+  )
 }
 
 function renderEditPage() {
   setPath('/nl/admin/blogs/blog-123/edit')
   params = { id: 'blog-123' }
-  return render(<CreateBlogPage />)
+  return render(
+    <MemoryRouter initialEntries={[window.location.pathname]}>
+      <CreateBlogPage />
+    </MemoryRouter>,
+  )
 }
 
 describe('CreateBlogPage', () => {
