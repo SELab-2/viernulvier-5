@@ -62,6 +62,8 @@ vi.mock('../../../components/public/PublicPillButton', () => ({
 
 const getProductionByIdMock = vi.hoisted(() => vi.fn())
 const getEventsByProductionIdMock = vi.hoisted(() => vi.fn())
+const getGenresByProductionIdMock = vi.hoisted(() => vi.fn())
+const getTagsByProductionIdMock = vi.hoisted(() => vi.fn())
 const getGalleryItemsMock = vi.hoisted(() => vi.fn())
 const getItemCropsMock = vi.hoisted(() => vi.fn())
 const getHallByIdMock = vi.hoisted(() => vi.fn())
@@ -70,6 +72,8 @@ const getLocationByIdMock = vi.hoisted(() => vi.fn())
 
 vi.mock('../../../api/productions', () => ({ getProductionById: getProductionByIdMock }))
 vi.mock('../../../api/events', () => ({ getEventsByProductionId: getEventsByProductionIdMock }))
+vi.mock('../../../api/genres', () => ({ getGenresByProductionId: getGenresByProductionIdMock}))
+vi.mock('../../../api/tags', () => ({ getTagsByProductionId: getTagsByProductionIdMock}))
 vi.mock('../../../api/media', () => ({
     getGalleryItems: getGalleryItemsMock,
     getItemCrops: getItemCropsMock,
@@ -112,8 +116,6 @@ const baseProduction = {
     poster_gallery_id: null,
     uitdatabank_theme: null,
     uitdatabank_type: null,
-    genres: [],
-    tags: [],
     created_at: new Date('2026-03-26T15:28:32.000Z'),
     updated_at: new Date('2026-03-27T08:20:10.000Z'),
 }
@@ -136,6 +138,27 @@ describe('ArchiveDetailPage', () => {
 
         getProductionByIdMock.mockResolvedValue({ data: baseProduction })
         getEventsByProductionIdMock.mockResolvedValue({ data: [] })
+        getGenresByProductionIdMock.mockResolvedValue({
+            data: [
+                {
+                    id: '1',
+                    type: 'theater',
+                    name: { nl: 'Concert', en: 'Concert' },
+                    slug: { nl: 'muziek', en: 'music' },
+                },
+            ],
+        })
+
+        getTagsByProductionIdMock.mockResolvedValue({
+            data: [
+                {
+                    id: '2',
+                    type: 'theater',
+                    name: { nl: 'in De Vooruit', en: 'at De Vooruit' },
+                    slug: { nl: 'invooruit', en: 'invooruit' },
+                },
+            ],
+        })
         getGalleryItemsMock.mockResolvedValue({ data: [] })
         getItemCropsMock.mockResolvedValue({ data: [] })
     })
@@ -199,16 +222,10 @@ describe('ArchiveDetailPage', () => {
         })
     })
 
-    it('renders genre and tag pills in the hero when a gallery image is available', async () => {
+    it('renders genre pills in the hero when a gallery image is available', async () => {
         getProductionByIdMock.mockResolvedValue({
             data: {
                 ...baseProduction,
-                genres: [
-                    { id: '35dbb2ad-e32a-4779-b7eb-93085531dbc4', type: 'theater', name: { nl: 'Concert', en: 'Concert' }, slug: { nl: 'muziek', en: 'music' } },
-                ],
-                tags: [
-                    { id: 'bfb14b61-f916-4368-a89b-20ab9fa63f8d', type: 'theater', name: { nl: 'in De Vooruit', en: 'at De Vooruit' }, slug: { nl: 'invooruit', en: 'invooruit' } },
-                ],
             },
         })
         getGalleryItemsMock.mockResolvedValue({
@@ -238,17 +255,6 @@ describe('ArchiveDetailPage', () => {
 
         expect((await screen.findAllByText('Concert')).length).toBeGreaterThan(0)
         expect((await screen.findAllByText('in De Vooruit')).length).toBeGreaterThan(0)
-    })
-
-    it('does not render genre or tag pills when both are empty', async () => {
-        getProductionByIdMock.mockResolvedValue({
-            data: { ...baseProduction, genres: [], tags: [] },
-        })
-
-        renderPage()
-
-        await screen.findByText('Terug')
-        expect(screen.queryByText('Concert')).not.toBeInTheDocument()
     })
 
     it('renders the events section heading', async () => {
