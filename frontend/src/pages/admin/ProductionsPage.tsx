@@ -165,10 +165,10 @@ function ProductionsPageContent() {
         totalItems: total,
     })
 
-    const tabs: { key: TabFilter; label: string }[] = [
+    const tabs: { key: TabFilter; label: string; disabled?: boolean }[] = [
         { key: 'all', label: `${t.admin.productions.tabAll}${tab === 'all' && total > 0 ? ` (${total})` : ''}` },
-        { key: 'published', label: t.admin.productions.tabPublished },
-        { key: 'concept', label: t.admin.productions.tabConcepts },
+        { key: 'published', label: t.admin.productions.tabPublished, disabled: true },
+        { key: 'concept', label: t.admin.productions.tabConcepts, disabled: true },
     ]
 
     return (
@@ -238,16 +238,20 @@ function ProductionsPageContent() {
 
                 <div className="border-b border-[var(--color-admin-card-border)] px-6">
                     <nav className="flex gap-6" role="tablist" aria-label={t.admin.productions.tabAriaLabel}>
-                        {tabs.map(({ key, label }) => (
+                        {tabs.map(({ key, label, disabled }) => (
                             <button
                                 key={key}
                                 role="tab"
                                 aria-selected={tab === key}
+                                aria-disabled={disabled}
+                                disabled={disabled}
                                 onClick={() => handleTabChange(key)}
                                 className={`py-3 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 ${
-                                    tab === key
-                                        ? 'border-b-2 border-accent text-accent'
-                                        : 'text-[#475569] hover:text-[#0f172a] dark:text-slate-400 dark:hover:text-white'
+                                    disabled
+                                        ? 'cursor-not-allowed text-slate-300 dark:text-slate-600'
+                                        : tab === key
+                                            ? 'border-b-2 border-accent text-accent'
+                                            : 'text-[#475569] hover:text-[#0f172a] dark:text-slate-400 dark:hover:text-white'
                                 }`}
                             >
                                 {label}
