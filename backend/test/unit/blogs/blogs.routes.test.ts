@@ -30,6 +30,66 @@ describe('Blogs Routes', () => {
             expect(Array.isArray(body.data)).toBe(true)
             expect(body.meta).toHaveProperty('total')
         })
+
+        it('should search blogs by title, content, and created date', async () => {
+            const token = app.jwt.sign({ sub: 'admin', username: 'admin', role: Role.ADMIN })
+            const production = await app.prisma.production.create({ data: {} })
+
+            try {
+                const titleBlogResponse = await app.inject({
+                    method: 'POST',
+                    url: '/api/v1/archive/blogs',
+                    headers: { authorization: `Bearer ${token}` },
+                    payload: {
+                        title: JSON.stringify({ nl: 'Unieke blogtitel', en: 'Unique blog title' }),
+                        content: { nl: JSON.stringify({ ops: [{ insert: 'Beschrijving alpha' }] }) },
+                        productionIds: [production.id],
+                    },
+                })
+                const titleBlog = JSON.parse(titleBlogResponse.payload).data
+
+                const contentBlogResponse = await app.inject({
+                    method: 'POST',
+                    url: '/api/v1/archive/blogs',
+                    headers: { authorization: `Bearer ${token}` },
+                    payload: {
+                        title: JSON.stringify({ nl: 'Andere titel', en: 'Other title' }),
+                        content: { nl: JSON.stringify({ ops: [{ insert: 'Beschrijving beta' }] }) },
+                        productionIds: [production.id],
+                    },
+                })
+                const contentBlog = JSON.parse(contentBlogResponse.payload).data
+
+                await app.prisma.blog.update({
+                    where: { id: contentBlog.id },
+                    data: { createdAt: new Date('2026-04-22T10:00:00.000Z') },
+                })
+
+                const titleSearchResponse = await app.inject({
+                    method: 'GET',
+                    url: '/api/v1/archive/blogs?search=Unieke%20blogtitel',
+                })
+                expect(titleSearchResponse.statusCode).toBe(200)
+                expect(JSON.parse(titleSearchResponse.payload).data.map((item: { id: string }) => item.id)).toContain(titleBlog.id)
+
+                const contentSearchResponse = await app.inject({
+                    method: 'GET',
+                    url: '/api/v1/archive/blogs?search=beta',
+                })
+                expect(contentSearchResponse.statusCode).toBe(200)
+                expect(JSON.parse(contentSearchResponse.payload).data.map((item: { id: string }) => item.id)).toContain(contentBlog.id)
+
+                const dateSearchResponse = await app.inject({
+                    method: 'GET',
+                    url: '/api/v1/archive/blogs?search=22/04/2026',
+                })
+                expect(dateSearchResponse.statusCode).toBe(200)
+                expect(JSON.parse(dateSearchResponse.payload).data.map((item: { id: string }) => item.id)).toContain(contentBlog.id)
+            } finally {
+                await app.prisma.blog_production.deleteMany({ where: { production_id: production.id } })
+                await app.prisma.production.delete({ where: { id: production.id } })
+            }
+        })
     })
 
     describe('POST /api/v1/archive/blogs', () => {

@@ -80,6 +80,7 @@ const en: Messages = {
     subtitle: 'Discover 20+ years of artistic history.',
     productionsTab: 'Productions',
     blogTab: 'Blog',
+    allTab: 'All',
     resultsCount: '142',
     resultsSuffix: 'results found',
     sortLabel: 'Sort by',
