@@ -58,6 +58,7 @@ export type Messages = {
     subtitle: string
     productionsTab: string
     blogTab: string
+    allTab: string
     resultsCount: string
     resultsSuffix: string
     sortLabel: string

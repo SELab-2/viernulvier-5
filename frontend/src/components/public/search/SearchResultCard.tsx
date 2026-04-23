@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+
 export type SearchResultItem = {
     id: string
     tag: string
@@ -6,6 +8,7 @@ export type SearchResultItem = {
     excerpt: string
     venue: string
     imageUrl?: string
+    detailHref?: string
 }
 
 type SearchResultCardProps = {
@@ -16,7 +19,7 @@ function SearchResultCard({ item }: SearchResultCardProps) {
     const normalizedTitle = item.title.trim()
     const displayTitle = normalizedTitle.length > 110 ? `${normalizedTitle.slice(0, 107)}...` : normalizedTitle
 
-    return (
+    const card = (
         <article className="flex w-full flex-col border-b border-border pb-5">
             <div className="relative h-32 overflow-hidden rounded-md sm:h-36 bg-gradient-to-br from-accent to-accent/50">
                 {item.imageUrl ? (
@@ -41,6 +44,15 @@ function SearchResultCard({ item }: SearchResultCardProps) {
             </div>
         </article>
     )
-}
 
+    if (item.detailHref) {
+        return (
+            <Link to={item.detailHref} className="block">
+                {card}
+            </Link>
+        )
+    }
+
+    return card
+}
 export default SearchResultCard
