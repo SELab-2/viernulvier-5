@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { createSingleResponseSchema } from '../../utils/rest-schemas.js'
 
 export const loginSchema = z.object({
-    username: z.string().min(1),
+    username: z.string().min(1).transform((value) => value.trim().toLowerCase()),
     password: z.string().min(6),
 })
 
@@ -35,7 +35,7 @@ export const authResponseSchema = z.object({
 })
 
 export const updateMeSchema = z.object({
-    username: z.string().min(1).optional(),
+    username: z.string().min(1).transform((value) => value.trim().toLowerCase()).optional(),
     currentPassword: z.string().min(6).optional(),
     newPassword: z.string().min(6).optional(),
 }).refine(
