@@ -100,6 +100,22 @@ function App() {
                                 </ProtectedAdminRoute>
                             }
                         />
+                        <Route
+                            path={adminRoutes.blogEditPath}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <CreateBlogPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+                        <Route
+                            path={adminRoutes.blogCreatePath}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <CreateBlogPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
                     </>
                 ) : null}
             </Routes>

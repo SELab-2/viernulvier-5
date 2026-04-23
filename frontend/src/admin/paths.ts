@@ -31,7 +31,7 @@ export function getAdminRouteConfig(hostname: string): AdminRouteConfig {
       archiveEditPath: '/archive/:id/edit',
       productionCreatePath: '/productions/new',
       blogEditPath: '/blogs/:id/edit',
-      blogCreatePath: '/blogs/:id/edit',
+      blogCreatePath: '/blogs/create',
     }
   }
 
@@ -48,7 +48,7 @@ export function getAdminRouteConfig(hostname: string): AdminRouteConfig {
       archiveEditPath: '/admin/archive/:id/edit',
       productionCreatePath: '/admin/productions/new',
       blogEditPath: '/admin/blogs/:id/edit',
-      blogCreatePath: '/admin/blogs/:id/edit',
+      blogCreatePath: '/admin/blogs/create',
     }
   }
 
@@ -64,6 +64,6 @@ export function getAdminRouteConfig(hostname: string): AdminRouteConfig {
     archiveEditPath: '/admin/archive/:id/edit',
     productionCreatePath: '/admin/productions/new',
     blogEditPath: '/admin/blogs/:id/edit',
-    blogCreatePath: '/admin/blogs/:id/edit'
+    blogCreatePath: '/admin/blogs/create'
   }
 }
