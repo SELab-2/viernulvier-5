@@ -59,13 +59,13 @@ export class BlogsRepository {
         content: unknown
         createdAt: Date
         updatedAt: Date
-        blog_production: Array<{ production_id: string }>
+        blog_production?: Array<{ production_id: string }>
     }): BlogResponse {
         return {
             id: blog.id,
             title: this.normalizeBlogTitle(blog.title),
             content: blog.content,
-            productions: blog.blog_production.map((relation) => relation.production_id),
+            productions: blog.blog_production?.map((relation) => relation.production_id) ?? [],
             createdAt: blog.createdAt,
             updatedAt: blog.updatedAt,
         }
@@ -157,7 +157,7 @@ export class BlogsRepository {
         const title = this.normalizeBlogTitle(data.title)
         const blog = await this.prisma.blog.create({
             data: {
-                title: title as Prisma.InputJsonValue | null,
+                title: title === null ? Prisma.JsonNull : (title as Prisma.InputJsonValue),
                 content: (data.content ?? null) as Prisma.InputJsonValue,
                 blog_production: {
                     create: data.productionIds.map((productionId) => ({
@@ -182,7 +182,9 @@ export class BlogsRepository {
         const updatedBlog = await this.prisma.blog.update({
             where: { id },
             data: {
-                ...(title !== undefined ? { title: title as Prisma.InputJsonValue | null } : {}),
+                ...(title !== undefined
+                    ? { title: title === null ? Prisma.JsonNull : (title as Prisma.InputJsonValue) }
+                    : {}),
                 ...(data.content !== undefined ? { content: data.content as Prisma.InputJsonValue } : {}),
                 ...(data.productionIds !== undefined
                     ? {
