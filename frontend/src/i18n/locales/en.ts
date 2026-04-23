@@ -297,6 +297,7 @@ const en: Messages = {
       deleteError: 'Failed to delete. Please try again.',
       paginationShowing: (from: number, to: number, total: number) => `Showing ${from}–${to} of ${total} results`,
       paginationPageLabel: (page: number) => `Page ${page}`,
+      tableColLinkedProductions: 'Linked productions',
     },
     productions: {
       pageTitle: 'Productions',

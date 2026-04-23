@@ -297,6 +297,7 @@ const nl: Messages = {
       deleteError: 'Verwijderen mislukt. Probeer opnieuw.',
       paginationShowing: (from: number, to: number, total: number) => `Toont ${from}–${to} van ${total} resultaten`,
       paginationPageLabel: (page: number) => `Pagina ${page}`,
+      tableColLinkedProductions: 'Gekoppelde producties'
     },
     productions: {
       pageTitle: 'Producties',

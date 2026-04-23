@@ -271,6 +271,7 @@ export type Messages = {
       deleteError: string
       paginationShowing: (from: number, to: number, total: number) => string
       paginationPageLabel: (page: number) => string
+      tableColLinkedProductions: string
     }
     productions: {
       pageTitle: string

@@ -28,11 +28,12 @@ export function BlogsTable({
                            }: BlogsTableProps) {
     const messages = useAdminMessages()
     const d = messages.admin.dashboard
+    const b = messages.admin.blogs
     const { formatDate } = useDashboardFormatters()
 
     const headings = [
         d.tableColTitle,
-        'Gekoppelde producties',
+        b.tableColLinkedProductions,
         d.tableColDate,
         d.tableColActions,
     ]
