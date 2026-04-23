@@ -1,10 +1,13 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import { getActiveLocale, getMessages, setActiveLocale } from '../../i18n'
 import type { Locale } from '../../i18n/types'
 import { PublicMessagesContext } from './PublicMessagesContext'
 import PublicNavbar from './PublicNavbar'
 import PublicFooter from './PublicFooter'
+import { useLocation } from 'react-router-dom'
+import { trackNavigation } from '../../utils/navigationHistory'
+
 
 type PublicLayoutProps = {
     children: ReactNode
@@ -23,6 +26,13 @@ function PublicLayout({ children }: PublicLayoutProps) {
         setLocale(nextLocale)
         setActiveLocale(nextLocale)
     }
+
+    const location = useLocation()
+
+    useEffect(() => {
+        trackNavigation(location.pathname)
+    }, [location.pathname])
+
 
     return (
         <PublicMessagesContext.Provider value={messages}>

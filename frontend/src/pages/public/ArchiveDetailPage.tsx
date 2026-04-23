@@ -17,7 +17,7 @@ import { getTagsByProductionId, type Tag } from '../../api/tags'
 import { getHallById } from '../../api/halls'
 import { getSpaceById } from '../../api/spaces'
 import { getLocationById, type Location } from '../../api/locations'
-
+import { getPreviousStrippedPath } from '../../utils/navigationHistory'
 
 function ArchiveDetailPageContent() {
     const navigate = useNavigate()
@@ -36,12 +36,23 @@ function ArchiveDetailPageContent() {
     const [loadError, setLoadError] = useState(false)
 
     const handleGoBack = () => {
-        if (window.history.length > 1) {
-            navigate(-1)
-        } else {
-            navigate(withLocalePath('/', locale))
+        const prev = getPreviousStrippedPath()
+        if (prev) {
+            // navigate directly to the previous page in the current locale
+            // this bypasses any locale-switch history entries entirely
+            navigate(withLocalePath(prev, locale))
+            return
         }
+        navigate(withLocalePath('', locale))
     }
+
+    // const handleGoBack = () => {
+    //     if (window.history.length > 1) {
+    //         navigate(-1)
+    //     } else {
+    //         navigate(withLocalePath('/', locale))
+    //     }
+    // }
 
     const formatHtml = (html: string) => {
         return html
