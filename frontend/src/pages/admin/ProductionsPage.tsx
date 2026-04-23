@@ -84,7 +84,7 @@ function ProductionsPageContent() {
     const [deletingId, setDeletingId] = useState<string | null>(null)
     const [reloadToken, setReloadToken] = useState(0)
 
-    // Debounce search query
+    // debounce search query
     useEffect(() => {
         const timer = window.setTimeout(() => {
             setDebouncedQuery(query)
@@ -93,13 +93,13 @@ function ProductionsPageContent() {
         return () => window.clearTimeout(timer)
     }, [query])
 
-    // Reset page on tab change
+    // reset page on tab change
     const handleTabChange = (next: TabFilter) => {
         setTab(next)
         setPage(1)
     }
 
-    // Data ophalen
+    // data ophalen
     useEffect(() => {
         const abortController = new AbortController()
 
@@ -168,7 +168,6 @@ function ProductionsPageContent() {
 
     return (
         <section className="mx-auto flex w-full max-w-[960px] flex-col gap-6 xl:max-w-[1280px] 2xl:max-w-[1536px]">
-            {/* ── Page header ── */}
             <header className="space-y-1">
                 <h1 className="text-[2rem] leading-9 font-normal tracking-[-0.05em] text-[#0f172a] dark:text-white">
                     Producties
@@ -178,14 +177,12 @@ function ProductionsPageContent() {
                 </p>
             </header>
 
-            {/* ── Error banner ── */}
             {error ? (
                 <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-200">
                     {error}
                 </div>
             ) : null}
 
-            {/* ── Toolbar: search + new button ── */}
             <div className="flex flex-wrap items-center gap-3">
                 <div className="relative flex-1 min-w-[200px]">
                     <svg
@@ -231,10 +228,9 @@ function ProductionsPageContent() {
                 </button>
             </div>
 
-            {/* ── Card with tabs + table ── */}
+
             <div className="overflow-hidden rounded-[12px] border border-[var(--color-admin-card-border)] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.05)] dark:bg-[#111318]">
 
-                {/* Tabs */}
                 <div className="border-b border-[var(--color-admin-card-border)] px-6">
                     <nav className="flex gap-6" role="tablist" aria-label="Producties filter">
                         {tabs.map(({ key, label }) => (
@@ -265,7 +261,6 @@ function ProductionsPageContent() {
                 />
             </div>
 
-            {/* ── Pagination ── */}
             <div className="flex flex-wrap items-center justify-between gap-3">
                 {!isLoading && total > 0 ? (
                     <p className="text-xs text-slate-500">
