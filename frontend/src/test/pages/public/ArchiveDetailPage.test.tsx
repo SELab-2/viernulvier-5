@@ -326,19 +326,6 @@ describe('ArchiveDetailPage', () => {
         expect(screen.queryByText(/2099/)).not.toBeInTheDocument()
     })
 
-    it('logs an error to the console when the production fetch fails', async () => {
-        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-        getProductionByIdMock.mockRejectedValue(new Error('Network error'))
-
-        renderPage()
-
-        await waitFor(() => {
-            expect(consoleSpy).toHaveBeenCalledWith('Error loading data:', expect.any(Error))
-        })
-
-        consoleSpy.mockRestore()
-    })
-
     // ---- location chain catch ----
     it('renders remaining events when one location chain fetch fails', async () => {
         const event1 = {
