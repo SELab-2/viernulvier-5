@@ -4,10 +4,9 @@ import AdminLayout from '../../components/admin/AdminLayout'
 import SectionHeading from '../../components/admin/SectionHeading'
 import EventsEdit from '../../components/admin/ManageEvents'
 
-import type { Language, ProductionContent, ProductionContentFields, ProductionForm, ProductionSettingsFields, LocalizedText } from '../../types/production'
+import type { Language, ProductionContent, ProductionContentFields, ProductionForm, ProductionSettingsFields, LocalizedText, ProductionResponse } from '../../types/production'
 import type { Locale } from '../../i18n/types'
 import type { Event, EventForm } from '../../types/event'
-import type { ProductionResponse } from '../../../../backend/src/modules/productions/productions.schema'
 
 import { useNavigate, useParams } from 'react-router-dom'
 import { getMessages } from '../../i18n'

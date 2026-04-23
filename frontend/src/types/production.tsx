@@ -35,6 +35,17 @@ export interface ProductionSettingsFields {
 }
 
 /**
+ * Basic structure for a production response from the API
+ */
+export interface ProductionResponse {
+    id: string
+    title: LocalizedText
+    description: LocalizedText
+    artist: LocalizedText
+    // Voeg hier andere velden toe indien nodig
+}
+
+/**
  * The contents of a production based on the language
  */
 export type ProductionContent = Record<Language, ProductionContentFields>
