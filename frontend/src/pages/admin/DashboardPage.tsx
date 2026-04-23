@@ -7,6 +7,7 @@ import { useDashboardFormatters } from '../../components/admin/hooks/useDashboar
 import { useDashboardSummary } from '../../components/admin/hooks/useDashboardSummary'
 import { usePagination } from '../../components/admin/hooks/usePagination'
 import { ProductionsTable } from '../../components/admin/AdminProductionsTable'
+import {getAdminRouteConfig} from "../../admin/paths.ts";
 
 const PAGE_SIZE_OPTIONS = [3, 6, 9, 12, 15, 18] as const
 type FixedPageSize = (typeof PAGE_SIZE_OPTIONS)[number]
@@ -55,6 +56,7 @@ type DashboardPageContentProps = {
 
 function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
   const navigate = useNavigate()
+  const { productionEditPath} = getAdminRouteConfig(window.location.hostname)
   const messages = useAdminMessages()
   const d = messages.admin.dashboard
   const [pageSizeSetting, setPageSizeSetting] = useState<PageSizeSetting>(readStoredPageSize)
@@ -171,7 +173,7 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
                 items={recentItems}
                 isLoading={isLoading}
                 pageSize={pageSize}
-                onEdit={(id) => navigate(`/admin/productions/${id}/edit`)}
+                onEdit={(id) => navigate(productionEditPath.replace(':id', id))}
             />
           </div>
 

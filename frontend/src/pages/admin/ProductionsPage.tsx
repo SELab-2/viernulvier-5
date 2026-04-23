@@ -8,6 +8,7 @@ import {
     type LanguageState
 } from '../../components/admin/AdminProductionsTable'
 import {useNavigate} from "react-router-dom";
+import { getAdminRouteConfig } from '../../admin/paths'
 
 
 type LocalizedText = {
@@ -70,6 +71,8 @@ function mapProductionApiItem(item: ProductionApiItem): Production {
 
 function ProductionsPageContent() {
     const navigate = useNavigate()
+    const { productionEditPath, productionCreatePath } = getAdminRouteConfig(window.location.hostname)
+
 
     const [tab, setTab] = useState<TabFilter>('all')
     const [query, setQuery] = useState('')
@@ -210,7 +213,7 @@ function ProductionsPageContent() {
                 </div>
 
                 <button
-                    onClick={() => navigate('/admin/productions/new')}
+                    onClick={() => navigate(productionCreatePath)}
                     className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-accent/90 focus:outline-none focus:ring-2 focus:ring-accent/40"
                 >
                     <svg
@@ -255,7 +258,7 @@ function ProductionsPageContent() {
                     items={productions}
                     isLoading={isLoading}
                     pageSize={PAGE_SIZE}
-                    onEdit={(id) => navigate(`/admin/productions/${id}/edit`)}
+                    onEdit={(id) => navigate(productionEditPath.replace(':id', id))}
                     onDelete={(id) => void handleDelete(id)}
                     deletingId={deletingId}
                 />

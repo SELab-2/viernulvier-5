@@ -83,6 +83,22 @@ function App() {
                                 </ProtectedAdminRoute>
                             }
                         />
+                        <Route
+                            path={adminRoutes.productionEditPath}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <ArchiveEditPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+                        <Route
+                            path={adminRoutes.productionCreatePath}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <ArchiveEditPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
                     </>
                 ) : null}
             </Routes>
