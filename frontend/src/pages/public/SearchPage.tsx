@@ -1289,22 +1289,11 @@ function SearchPage() {
 
                     const preferredGenre = selectedGenres.length === 1 ? selectedGenres[0] : undefined
                     const mappedEntries = response.data.map((item) => mapProductionToSearchEntry(item, locale, preferredGenre))
+                    setApiRawItems(response.data)
                     setApiEntries(mappedEntries)
                     setTotalResults(response.meta?.total ?? mappedEntries.length)
                     setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
                 }
-
-                const response = await apiFetch<PaginatedApiResponse<ProductionApiItem>>(
-                    `/archive/productions?${params.toString()}`,
-                    { signal: abortController.signal }
-                )
-
-                const preferredGenre = selectedGenres.length === 1 ? selectedGenres[0] : undefined
-                const mappedEntries = response.data.map((item) => mapProductionToSearchEntry(item, locale, preferredGenre))
-                setApiRawItems(response.data)
-                setApiEntries(mappedEntries)
-                setTotalResults(response.meta?.total ?? mappedEntries.length)
-                setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
             } catch (error) {
                 if (abortController.signal.aborted) {
                     return

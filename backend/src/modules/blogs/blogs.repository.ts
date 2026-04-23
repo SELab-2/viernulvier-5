@@ -84,6 +84,8 @@ export class BlogsRepository {
         }
 
         return conditions.length > 0 ? { AND: conditions } : {}
+    }
+
     private normalizeBlogTitle(title: CreateBlogInput['title'] | UpdateBlogInput['title'] | unknown): LocalizedBlogTitle | string | null {
         if (title == null) {
             return null
@@ -107,6 +109,16 @@ export class BlogsRepository {
         }
 
         return title as LocalizedBlogTitle | string | null
+    }
+
+    private toDatabaseBlogTitle(title: CreateBlogInput['title'] | UpdateBlogInput['title'] | unknown): string | null {
+        const normalized = this.normalizeBlogTitle(title)
+
+        if (normalized == null) {
+            return null
+        }
+
+        return typeof normalized === 'string' ? normalized : JSON.stringify(normalized)
     }
 
     private isLocalizedBlogTitle(value: unknown): value is LocalizedBlogTitle {
@@ -186,10 +198,10 @@ export class BlogsRepository {
     }
 
     async create(data: CreateBlogInput): Promise<BlogResponse> {
-        const title = this.normalizeBlogTitle(data.title)
+        const title = this.toDatabaseBlogTitle(data.title)
         const blog = await this.prisma.blog.create({
             data: {
-                title: title === null ? Prisma.JsonNull : (title as Prisma.InputJsonValue),
+                title,
                 content: (data.content ?? null) as Prisma.InputJsonValue,
                 blog_production: {
                     create: data.productionIds.map((productionId) => ({
@@ -209,13 +221,13 @@ export class BlogsRepository {
         const existing = await this.prisma.blog.findUnique({ where: { id } })
         if (!existing) throw new AppError('Blog not found')
 
-        const title = data.title !== undefined ? this.normalizeBlogTitle(data.title) : undefined
+        const title = data.title !== undefined ? this.toDatabaseBlogTitle(data.title) : undefined
 
         const updatedBlog = await this.prisma.blog.update({
             where: { id },
             data: {
                 ...(title !== undefined
-                    ? { title: title === null ? Prisma.JsonNull : (title as Prisma.InputJsonValue) }
+                    ? { title }
                     : {}),
                 ...(data.content !== undefined ? { content: data.content as Prisma.InputJsonValue } : {}),
                 ...(data.productionIds !== undefined
