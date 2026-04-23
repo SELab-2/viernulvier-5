@@ -6,16 +6,21 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import AdminLayout from '../../../components/admin/AdminLayout'
+import { AdminSessionProvider } from '../../../auth/AdminSessionContext'
 
-const mockedSession = vi.hoisted(() => ({
+const mockedSession = {
   isLoading: false,
   isAuthenticated: true,
   user: { id: '1', username: 'admin', role: 'ADMIN' },
-}))
+}
 
-vi.mock('../../../auth/useAdminSession', () => ({
-  useAdminSession: () => mockedSession,
-}))
+function renderWithSession(ui: React.ReactElement) {
+  return render(
+    <MemoryRouter>
+      <AdminSessionProvider value={mockedSession}>{ui}</AdminSessionProvider>
+    </MemoryRouter>,
+  )
+}
 
 // Minimal stubs to keep the test focussed on the settings wiring.
 vi.mock('../../../components/admin/AdminFooter', () => ({
@@ -136,12 +141,10 @@ describe('AdminLayout – settings modal integration', () => {
   })
 
   it('opens the settings modal when the settings button in the sidebar is clicked', () => {
-    render(
-      <MemoryRouter>
-        <AdminLayout showSidebar>
-          <span>Content</span>
-        </AdminLayout>
-      </MemoryRouter>,
+    renderWithSession(
+      <AdminLayout showSidebar>
+        <span>Content</span>
+      </AdminLayout>,
     )
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
@@ -154,12 +157,10 @@ describe('AdminLayout – settings modal integration', () => {
   })
 
   it('closes the settings modal when the close button inside it is clicked', () => {
-    render(
-      <MemoryRouter>
-        <AdminLayout showSidebar>
-          <span>Content</span>
-        </AdminLayout>
-      </MemoryRouter>,
+    renderWithSession(
+      <AdminLayout showSidebar>
+        <span>Content</span>
+      </AdminLayout>,
     )
 
     fireEvent.click(screen.getByRole('button', { name: 'Instellingen' }))
@@ -170,12 +171,10 @@ describe('AdminLayout – settings modal integration', () => {
   })
 
   it('does not show a settings button in the top bar', () => {
-    render(
-      <MemoryRouter>
-        <AdminLayout showSidebar>
-          <span>Content</span>
-        </AdminLayout>
-      </MemoryRouter>,
+    renderWithSession(
+      <AdminLayout showSidebar>
+        <span>Content</span>
+      </AdminLayout>,
     )
 
     // There is exactly one settings button (the one in the sidebar).
@@ -184,12 +183,10 @@ describe('AdminLayout – settings modal integration', () => {
   })
 
   it('updates the sidebar username after saving a new account username', async () => {
-    render(
-      <MemoryRouter>
-        <AdminLayout showSidebar>
-          <span>Content</span>
-        </AdminLayout>
-      </MemoryRouter>,
+    renderWithSession(
+      <AdminLayout showSidebar>
+        <span>Content</span>
+      </AdminLayout>,
     )
 
     expect(screen.getByText('admin')).toBeInTheDocument()

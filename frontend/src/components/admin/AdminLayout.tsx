@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useRef, useState } from 'react'
 import type { SessionUser } from '../../api/adminAuth'
+import { useOptionalAdminSession } from '../../auth/useAdminSessionContext'
 import { logoutAndRedirect } from '../../auth/adminLogout'
-import { useAdminSession } from '../../auth/useAdminSession'
 import { getMessages } from '../../i18n'
 import AdminFooter from './AdminFooter'
 import { AdminMessagesContext } from './AdminMessagesContext'
@@ -41,14 +41,15 @@ function AdminLayout({
   const [settingsOpen, setSettingsOpen] = useState(false)
   const drawerRef = useRef<HTMLDivElement>(null)
   const openerRef = useRef<HTMLButtonElement>(null)
-  const { user } = useAdminSession(showSidebar)
-  const [sessionUser, setSessionUser] = useState<SessionUser | null>(user ?? null)
-  const [prevUser, setPrevUser] = useState<SessionUser | null>(user ?? null)
+  const session = useOptionalAdminSession()
+  const contextUser = showSidebar ? session?.user ?? null : null
+  const [sessionUser, setSessionUser] = useState<SessionUser | null>(contextUser)
+  const [prevUser, setPrevUser] = useState<SessionUser | null>(contextUser)
   const messages = useMemo(() => getMessages(locale), [locale])
 
-  if (prevUser !== (user ?? null)) {
-    setPrevUser(user ?? null)
-    setSessionUser(user ?? null)
+  if (prevUser !== contextUser) {
+    setPrevUser(contextUser)
+    setSessionUser(contextUser)
   }
 
   const closeMobileSidebar = useCallback(() => {
