@@ -6,12 +6,23 @@ import { usePagination } from '../../components/admin/hooks/usePagination'
 import { BlogsTable, type BlogRow } from '../../components/admin/AdminBlogsTable'
 import { getAdminRouteConfig } from '../../admin/paths'
 
+type LocalizedText = {
+    nl?: string
+    en?: string
+    fr?: string
+} | null
+
 type BlogApiItem = {
     id: string
-    title?: string | null
+    title?: LocalizedText
     productions: string[]
     createdAt: string
     updatedAt: string
+}
+
+function getLocalizedTitle(text: LocalizedText | undefined): string {
+    if (!text) return ''
+    return (text.nl ?? text.en ?? text.fr ?? '').trim()
 }
 
 type PaginatedApiResponse<T> = {
@@ -29,7 +40,7 @@ const PAGE_SIZE = 10
 function mapBlogApiItem(item: BlogApiItem): BlogRow {
     return {
         id: item.id,
-        title: item.title?.trim() || '(Zonder titel)',
+        title: getLocalizedTitle(item.title) || '(Zonder titel)',
         productionCount: item.productions?.length ?? 0,
         createdAt: item.createdAt,
         updatedAt: item.updatedAt,
