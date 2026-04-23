@@ -159,7 +159,7 @@ const nl: Messages = {
     showLess: 'Toon minder',
     showMore: 'Toon meer',
     credits: 'Credits',
-    genresAndTags: 'Genres & tags',
+    genresAndTags: 'Genres & labels',
   },
   settings: {
     title: 'Instellingen',
