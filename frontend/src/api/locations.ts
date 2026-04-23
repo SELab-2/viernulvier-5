@@ -1,9 +1,15 @@
 import { api } from './client'
 import { z } from 'zod'
 
+export const localizedTextSchema = z.object({
+    nl: z.string().optional(),
+    fr: z.string().optional(),
+    en: z.string().optional(),
+}).nullable()
+
 export const locationSchema = z.object({
     id: z.string().uuid(),
-    name: z.string().nullable(),
+    name: localizedTextSchema,
     street: z.string().nullable(),
     number: z.string().nullable(),
     postal_code: z.string().nullable(),

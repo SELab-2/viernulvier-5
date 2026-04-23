@@ -102,7 +102,7 @@ describe('ArchiveDetailEventsList', () => {
 
     it('renders the location name directly when it is set', () => {
         const event = makeEvent()
-        const location = makeLocation({ name: 'Stadsschouwburg' })
+        const location = makeLocation({ name: { nl: 'Stadsschouwburg', fr: 'Théâtre de la Ville', en: 'City Theatre' } })
 
         render(
             <ArchiveDetailEventsList
