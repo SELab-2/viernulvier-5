@@ -541,7 +541,7 @@ function CreateBlogPage() {
                             type="button"
                             onClick={publish}
                             disabled={isSaving || isLoadingBlog || isDeleting}
-                            className="rounded-lg bg-[var(--color-accent)] px-5 py-3 font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                            className="text-sm text-white font-regular tracking-wide text-accent bg-accent py-2 px-4 rounded-full"
                         >
                             {isSaving ? (messages.blogs.savingButton) : (messages.editHeader.publish)}
                         </button>
@@ -551,7 +551,7 @@ function CreateBlogPage() {
                                 type="button"
                                 onClick={removeBlog}
                                 disabled={isSaving || isLoadingBlog || isDeleting}
-                                className="rounded-lg border px-5 py-3 font-semibold transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                                className="text-sm text-white font-regular tracking-wide text-accent bg-accent py-2 px-4 rounded-full"
                             >
                                 {isDeleting ? messages.blogs.deletingButton : messages.blogs.deleteButton}
                             </button>
