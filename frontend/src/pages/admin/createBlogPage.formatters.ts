@@ -19,7 +19,7 @@ export type LocalizedBlogTitle = {
 
 export type BlogDetail = {
     id: string
-    title?: string | null
+    title?: unknown
     content?: unknown
     productions?: string[]
 }
@@ -51,8 +51,19 @@ function getEditorHtml(value: unknown): string {
     return ''
 }
 
-function parseLocalizedBlogTitle(value: string | null | undefined): LocalizedBlogTitle {
+function parseLocalizedBlogTitle(value: unknown): LocalizedBlogTitle {
     if (!value) {
+        return { nl: '', en: '' }
+    }
+
+    if (isObject(value) && ('nl' in value || 'en' in value)) {
+        return {
+            nl: typeof value.nl === 'string' ? value.nl : '',
+            en: typeof value.en === 'string' ? value.en : '',
+        }
+    }
+
+    if (typeof value !== 'string') {
         return { nl: '', en: '' }
     }
 

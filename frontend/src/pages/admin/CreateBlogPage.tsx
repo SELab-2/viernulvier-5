@@ -121,7 +121,7 @@ function CreateBlogPage() {
 
     const navigate = useNavigate()
     const locale = getActiveLocale(window.location.pathname)
-    const messages = getMessages()
+    const messages = getMessages(locale)
 
     const languageOptions: { key: Language; label: string }[] = [
         { key: 'nl', label: messages.blogs.dutchOption },
@@ -348,8 +348,7 @@ function CreateBlogPage() {
 
         try {
             const payload = {
-                // TODO: would it be better to make blogTitle a json instead of string?
-                title: JSON.stringify(blogTitle),
+                title: blogTitle,
                 content: combinedContent,
                 productionIds: selectedProductionIds,
             }
