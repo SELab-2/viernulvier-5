@@ -40,7 +40,7 @@ export class SearchService {
                 ? this.productionsService.getProductions({ ...commonProductionOptions, page: 1, limit: prodsPreview.total })
                 : Promise.resolve({ items: [], total: 0, page: 1, limit: 1, totalPages: 0 }),
             !hasGenreOrLocationFilter
-                ? this.postersService.getPosters({ search, page: 1, limit: 1000, sort: 'recent', lang: 'nl' })
+                ? this.postersService.getPosters({ search, yearFrom, yearTo, page: 1, limit: 1000, sort: 'recent', lang: lang ?? 'nl' })
                 : Promise.resolve({ items: [], total: 0, page: 1, limit: 100, totalPages: 0 }),
         ])
 

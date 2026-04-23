@@ -1802,6 +1802,8 @@ function SearchPage() {
                                             ...item,
                                             detailHref: item.type === 'blog'
                                                 ? withLocalePath('/blogs/' + item.id, locale)
+                                                : item.type === 'poster'
+                                                    ? withLocalePath('/posters/' + item.id, locale)
                                                 : withLocalePath('/productions/' + item.id, locale),
                                         }}
                                     />

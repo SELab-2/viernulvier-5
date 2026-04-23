@@ -27,7 +27,20 @@ export class PostersService {
 
     async getPosters(options: PosterPaginationQuery): Promise<PaginatedResult<NonNullable<PosterRaw>>> {
         const normalizedSearch = options.search?.trim() || undefined
-        const total = await this.repository.count({ search: normalizedSearch })
+        const normalizedYearFrom = typeof options.yearFrom === 'number' ? Math.max(1900, options.yearFrom) : undefined
+        const normalizedYearTo = typeof options.yearTo === 'number' ? Math.min(3000, options.yearTo) : undefined
+
+        const safeYearFrom =
+            typeof normalizedYearFrom === 'number' && typeof normalizedYearTo === 'number'
+                ? Math.min(normalizedYearFrom, normalizedYearTo)
+                : normalizedYearFrom
+
+        const safeYearTo =
+            typeof normalizedYearFrom === 'number' && typeof normalizedYearTo === 'number'
+                ? Math.max(normalizedYearFrom, normalizedYearTo)
+                : normalizedYearTo
+
+        const total = await this.repository.count({ search: normalizedSearch, yearFrom: safeYearFrom, yearTo: safeYearTo })
         const totalPages = calculateTotalPages(total, options.limit)
         const page = sanitizePage(options.page, totalPages)
 
@@ -35,6 +48,8 @@ export class PostersService {
             page,
             limit: options.limit,
             search: normalizedSearch,
+            yearFrom: safeYearFrom,
+            yearTo: safeYearTo,
             sort: options.sort,
         })
 

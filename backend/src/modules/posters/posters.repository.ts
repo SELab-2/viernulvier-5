@@ -1,10 +1,12 @@
-import type { PrismaClient } from '@prisma/client'
+import type { Prisma, PrismaClient } from '@prisma/client'
 import type { CreatePosterPersistenceInput, UpdatePosterInput } from './posters.schema.js'
 
 type FindAllOptions = {
     page: number
     limit: number
     search?: string
+    yearFrom?: number
+    yearTo?: number
     sort?: 'recent' | 'oldest'
 }
 
@@ -27,17 +29,31 @@ export type PosterRecord = {
 export class PostersRepository {
     constructor(private readonly prisma: PrismaClient) {}
 
+    private buildWhere(options: Pick<FindAllOptions, 'search' | 'yearFrom' | 'yearTo'>): Prisma.posterWhereInput | undefined {
+        const { search, yearFrom, yearTo } = options
+        const where: Prisma.posterWhereInput = {}
+
+        if (search) {
+            where.title = {
+                contains: search,
+                mode: 'insensitive',
+            }
+        }
+
+        if (typeof yearFrom === 'number' || typeof yearTo === 'number') {
+            where.created_at = {
+                ...(typeof yearFrom === 'number' ? { gte: new Date(Date.UTC(yearFrom, 0, 1, 0, 0, 0, 0)) } : {}),
+                ...(typeof yearTo === 'number' ? { lte: new Date(Date.UTC(yearTo, 11, 31, 23, 59, 59, 999)) } : {}),
+            }
+        }
+
+        return Object.keys(where).length > 0 ? where : undefined
+    }
+
     async findAll(options: FindAllOptions) {
-        const { page, limit, search, sort = 'recent' } = options
+        const { page, limit, sort = 'recent' } = options
         const skip = (page - 1) * limit
-        const where = search
-            ? {
-                  title: {
-                      contains: search,
-                      mode: 'insensitive' as const,
-                  },
-              }
-            : undefined
+        const where = this.buildWhere(options)
 
         return this.prisma.poster.findMany({
             where,
@@ -57,16 +73,9 @@ export class PostersRepository {
         })
     }
 
-    async count(options: Pick<FindAllOptions, 'search'>) {
+    async count(options: Pick<FindAllOptions, 'search' | 'yearFrom' | 'yearTo'>) {
         return this.prisma.poster.count({
-            where: options.search
-                ? {
-                      title: {
-                          contains: options.search,
-                          mode: 'insensitive',
-                      },
-                  }
-                : undefined,
+            where: this.buildWhere(options),
         })
     }
 

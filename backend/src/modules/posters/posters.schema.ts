@@ -5,6 +5,8 @@ export const posterPaginationQuerySchema = z.object({
     page: z.coerce.number().int().positive().default(1),
     limit: z.coerce.number().int().positive().max(100).default(20),
     search: z.string().optional(),
+    yearFrom: z.coerce.number().int().optional(),
+    yearTo: z.coerce.number().int().optional(),
     sort: z.enum(['recent', 'oldest']).optional().default('recent'),
     lang: z.string().optional().default('nl'),
 })
