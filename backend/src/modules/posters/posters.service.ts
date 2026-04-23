@@ -1,17 +1,8 @@
 import { PaginatedResult, calculateTotalPages, sanitizePage } from '../../utils/pagination.js'
-import type { PosterPaginationQuery, UpdatePosterInput } from './posters.schema.js'
+import type { CreatePosterPersistenceInput, PosterPaginationQuery, UpdatePosterInput } from './posters.schema.js'
 import { PostersRepository, type PosterRecord } from './posters.repository.js'
 
 type PosterRaw = PosterRecord | null
-
-type CreatePosterInput = {
-    title: string
-    file_path: string
-    mime_type?: string | null
-    original_filename?: string | null
-    file_size_bytes?: number | null
-    production_id: string
-}
 
 function getLocalizedTitle(value: unknown, lang: string): string {
     if (!value || typeof value !== 'object') {
@@ -60,7 +51,7 @@ export class PostersService {
         return this.repository.findById(id)
     }
 
-    async createPoster(data: CreatePosterInput): Promise<NonNullable<PosterRaw>> {
+    async createPoster(data: CreatePosterPersistenceInput): Promise<NonNullable<PosterRaw>> {
         return this.repository.create(data)
     }
 

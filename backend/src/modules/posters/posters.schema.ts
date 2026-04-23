@@ -61,3 +61,11 @@ export type PosterPaginationQuery = z.infer<typeof posterPaginationQuerySchema>
 export type PosterResponse = z.infer<typeof posterSchema>
 export type UpdatePosterInput = z.infer<typeof updatePosterSchema>
 export type CreatePosterInput = z.infer<typeof createPosterSchema>
+export type CreatePosterPersistenceInput = {
+    title: string
+    file_path: string
+    mime_type?: string | null
+    original_filename?: string | null
+    file_size_bytes?: number | null
+    production_id: string
+}

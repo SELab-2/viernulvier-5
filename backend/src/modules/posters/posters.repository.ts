@@ -1,25 +1,11 @@
-import crypto from 'node:crypto'
-import { Prisma, type PrismaClient } from '@prisma/client'
+import type { PrismaClient } from '@prisma/client'
+import type { CreatePosterPersistenceInput, UpdatePosterInput } from './posters.schema.js'
 
 type FindAllOptions = {
     page: number
     limit: number
     search?: string
     sort?: 'recent' | 'oldest'
-}
-
-type CreatePosterInput = {
-    title: string
-    file_path: string
-    mime_type?: string | null
-    original_filename?: string | null
-    file_size_bytes?: number | null
-    production_id: string
-}
-
-type UpdatePosterInput = {
-    title?: string
-    production_id?: string
 }
 
 export type PosterRecord = {
@@ -41,118 +27,106 @@ export type PosterRecord = {
 export class PostersRepository {
     constructor(private readonly prisma: PrismaClient) {}
 
-    private readonly selectPosterSql = Prisma.sql`
-        SELECT
-            p.created_at,
-            p.updated_at,
-            p.id,
-            p.title,
-            p.file_path,
-            p.mime_type,
-            p.original_filename,
-            p.file_size_bytes,
-            p.production_id,
-            CASE
-                WHEN prod.id IS NULL THEN NULL
-                ELSE json_build_object('id', prod.id, 'title', prod.title)
-            END AS production
-        FROM poster p
-        LEFT JOIN production prod ON prod.id = p.production_id
-    `
-
     async findAll(options: FindAllOptions) {
         const { page, limit, search, sort = 'recent' } = options
         const skip = (page - 1) * limit
-        const whereClause = search
-            ? Prisma.sql`WHERE p.title ILIKE ${`%${search}%`}`
-            : Prisma.empty
-        const orderDirection = sort === 'oldest' ? Prisma.raw('ASC') : Prisma.raw('DESC')
+        const where = search
+            ? {
+                  title: {
+                      contains: search,
+                      mode: 'insensitive' as const,
+                  },
+              }
+            : undefined
 
-        return this.prisma.$queryRaw<PosterRecord[]>(Prisma.sql`
-            ${this.selectPosterSql}
-            ${whereClause}
-            ORDER BY p.created_at ${orderDirection}
-            OFFSET ${skip}
-            LIMIT ${limit}
-        `)
+        return this.prisma.poster.findMany({
+            where,
+            orderBy: {
+                created_at: sort === 'oldest' ? 'asc' : 'desc',
+            },
+            skip,
+            take: limit,
+            include: {
+                production: {
+                    select: {
+                        id: true,
+                        title: true,
+                    },
+                },
+            },
+        })
     }
 
     async count(options: Pick<FindAllOptions, 'search'>) {
-        const whereClause = options.search
-            ? Prisma.sql`WHERE title ILIKE ${`%${options.search}%`}`
-            : Prisma.empty
-        const result = await this.prisma.$queryRaw<Array<{ count: number }>>(Prisma.sql`
-            SELECT COUNT(*)::int AS count
-            FROM poster
-            ${whereClause}
-        `)
-
-        return result[0]?.count ?? 0
+        return this.prisma.poster.count({
+            where: options.search
+                ? {
+                      title: {
+                          contains: options.search,
+                          mode: 'insensitive',
+                      },
+                  }
+                : undefined,
+        })
     }
 
     async findById(id: string) {
-        const rows = await this.prisma.$queryRaw<PosterRecord[]>(Prisma.sql`
-            ${this.selectPosterSql}
-            WHERE p.id = ${id}
-            LIMIT 1
-        `)
-
-        return rows[0] ?? null
+        return this.prisma.poster.findUnique({
+            where: { id },
+            include: {
+                production: {
+                    select: {
+                        id: true,
+                        title: true,
+                    },
+                },
+            },
+        })
     }
 
-    async create(data: CreatePosterInput) {
-        const id = crypto.randomUUID()
-
-        const rows = await this.prisma.$queryRaw<Array<{ id: string }>>(Prisma.sql`
-            INSERT INTO poster (
-                id,
-                title,
-                file_path,
-                mime_type,
-                original_filename,
-                file_size_bytes,
-                production_id
-            )
-            VALUES (
-                ${id},
-                ${data.title},
-                ${data.file_path},
-                ${data.mime_type ?? null},
-                ${data.original_filename ?? null},
-                ${data.file_size_bytes ?? null},
-                ${data.production_id}
-            )
-            RETURNING id
-        `)
-
-        return this.findById(rows[0].id)
+    async create(data: CreatePosterPersistenceInput) {
+        return this.prisma.poster.create({
+            data: {
+                title: data.title,
+                file_path: data.file_path,
+                mime_type: data.mime_type ?? null,
+                original_filename: data.original_filename ?? null,
+                file_size_bytes: data.file_size_bytes ?? null,
+                production_id: data.production_id,
+            },
+            include: {
+                production: {
+                    select: {
+                        id: true,
+                        title: true,
+                    },
+                },
+            },
+        })
     }
 
     async update(id: string, data: UpdatePosterInput) {
-        const updates: Prisma.Sql[] = []
-
-        if (data.title !== undefined) {
-            updates.push(Prisma.sql`title = ${data.title}`)
-        }
-
-        if (data.production_id !== undefined) {
-            updates.push(Prisma.sql`production_id = ${data.production_id}`)
-        }
-
-        updates.push(Prisma.sql`updated_at = CURRENT_TIMESTAMP`)
-
-        const rows = await this.prisma.$queryRaw<Array<{ id: string }>>(Prisma.sql`
-            UPDATE poster
-            SET ${Prisma.join(updates, ', ')}
-            WHERE id = ${id}
-            RETURNING id
-        `)
-
-        if (rows.length === 0) {
+        const existing = await this.findById(id)
+        if (!existing) {
             throw new Error('Record to update not found')
         }
 
-        return this.findById(rows[0].id)
+        return this.prisma.poster.update({
+            where: { id },
+            data: {
+                ...(data.title !== undefined ? { title: data.title } : {}),
+                ...(data.production_id !== undefined ? { production_id: data.production_id } : {}),
+                updated_at: new Date(),
+            },
+            include: {
+                production: {
+                    select: {
+                        id: true,
+                        title: true,
+                    },
+                },
+            },
+        })
     }
 
     async delete(id: string) {
@@ -162,10 +136,7 @@ export class PostersRepository {
             throw new Error('Record to delete does not exist')
         }
 
-        await this.prisma.$executeRaw(Prisma.sql`
-            DELETE FROM poster
-            WHERE id = ${id}
-        `)
+        await this.prisma.poster.delete({ where: { id } })
 
         return poster
     }

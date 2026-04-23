@@ -5,12 +5,16 @@ import { SearchController } from './search.controller.js'
 import { searchQuerySchema, searchListSchema } from './search.schema.js'
 import { ProductionsRepository } from '../productions/productions.repository.js'
 import { ProductionsService } from '../productions/productions.service.js'
+import { PostersRepository } from '../posters/posters.repository.js'
+import { PostersService } from '../posters/posters.service.js'
 
 const searchRoutes: FastifyPluginAsync = async (fastify) => {
     const searchRepository = new SearchRepository(fastify.prisma)
     const productionsRepository = new ProductionsRepository(fastify.prisma)
     const productionsService = new ProductionsService(productionsRepository)
-    const service = new SearchService(searchRepository, productionsService)
+    const postersRepository = new PostersRepository(fastify.prisma)
+    const postersService = new PostersService(postersRepository)
+    const service = new SearchService(searchRepository, productionsService, postersService)
     const controller = new SearchController(service)
 
     // GET /api/v1/archive/search

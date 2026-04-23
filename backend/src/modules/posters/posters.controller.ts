@@ -15,10 +15,6 @@ function sanitizeFilename(fileName: string): string {
     return fileName.replace(/[^a-zA-Z0-9._-]/g, '_')
 }
 
-function isValidUuid(value: string): boolean {
-    return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
-}
-
 function parseBase64Payload(fileBase64: string): Buffer {
     const normalized = fileBase64.includes(',') ? fileBase64.split(',').pop() ?? '' : fileBase64
     const buffer = Buffer.from(normalized, 'base64')
@@ -40,10 +36,6 @@ export class PostersController {
     private getArchiveBaseUrl(request: FastifyRequest) {
         const host = request.headers.host || request.hostname
         return `${request.protocol}://${host}/api/v1/archive`
-    }
-
-    private getPostersBaseUrl(request: FastifyRequest) {
-        return `${this.getArchiveBaseUrl(request)}/posters`
     }
 
     private mapPosterLinks(poster: any, baseArchiveUrl: string): PosterResponse {
@@ -122,10 +114,6 @@ export class PostersController {
                 return reply.status(400).send({ message: 'Poster title is required' })
             }
 
-            if (!isValidUuid(productionId)) {
-                return reply.status(400).send({ message: 'Valid productionId is required' })
-            }
-
             if (!ALLOWED_IMAGE_TYPES.has(mimeType)) {
                 return reply.status(400).send({ message: 'Poster file must be an image (jpg, png, webp, gif)' })
             }
@@ -169,7 +157,7 @@ export class PostersController {
             if (error instanceof Error) {
                 const knownValidationError = [
                     'Poster title is required',
-                    'Valid productionId is required',
+                    'Poster file must be an image (jpg, png, webp, gif)',
                     'Poster file is too large',
                     'Poster file payload is invalid',
                 ].includes(error.message)

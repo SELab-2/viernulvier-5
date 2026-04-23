@@ -15,7 +15,7 @@ export const searchQuerySchema = z.object({
 
 export const searchResultItemSchema = z.object({
     id: z.string().uuid(),
-    type: z.enum(['production', 'blog']),
+    type: z.enum(['production', 'blog', 'poster']),
     title: z.unknown().nullable().optional(),
     teaser: z.unknown().nullable().optional(),
     description_short: z.unknown().nullable().optional(),
