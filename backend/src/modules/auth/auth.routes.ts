@@ -3,10 +3,19 @@ import { AuthRepository } from './auth.repository.js'
 import { AuthService } from './auth.service.js'
 import { AuthController } from './auth.controller.js'
 import { requirePermission } from '../../hooks/require-permission.js'
-import { loginSchema, type LoginInput } from './auth.schema.js'
+import {
+    loginSchema,
+    updateMeSchema,
+    authResponseSchema,
+    meResponseSchema,
+    errorSchema,
+    type LoginInput,
+    type UpdateMeInput
+} from './auth.schema.js'
 import { env } from '../../config/env.js'
 import { Permission } from '../../domain/permissions.js'
 import { AppError } from '../../errors/app-error.js'
+import { z } from 'zod'
 
 type LoginAttemptState = {
     count: number
@@ -97,6 +106,9 @@ const authRoutes: FastifyPluginAsync = async (fastify) => {
             body: loginSchema,
             tags: ['auth'],
             summary: 'Admin login',
+            response: {
+                200: authResponseSchema
+            }
         },
         handler: async (req: FastifyRequest<{ Body: LoginInput }>, reply) => {
             try {
@@ -116,6 +128,12 @@ const authRoutes: FastifyPluginAsync = async (fastify) => {
         schema: {
             tags: ['auth'],
             summary: 'Logout (clear cookie)',
+            response: {
+                200: z.object({
+                    data: z.object({ success: z.boolean() }),
+                    links: z.object({ self: z.string() })
+                })
+            }
         },
         handler: (req, reply) => controller.logout(req, reply),
     })
@@ -125,8 +143,27 @@ const authRoutes: FastifyPluginAsync = async (fastify) => {
         schema: {
             tags: ['auth'],
             summary: 'Get current user info',
+            response: {
+                200: meResponseSchema
+            }
         },
         handler: (req, reply) => controller.me(req, reply),
+    })
+
+    fastify.patch('/me', {
+        preHandler: [requirePermission(Permission.ARCHIVE_READ)],
+        schema: {
+            tags: ['auth'],
+            summary: 'Update current user info',
+            body: updateMeSchema,
+            response: {
+                200: meResponseSchema,
+                401: errorSchema,
+                404: errorSchema,
+                409: errorSchema,
+            }
+        },
+        handler: (req: FastifyRequest<{ Body: UpdateMeInput }>, reply) => controller.updateMe(req, reply),
     })
 }
 

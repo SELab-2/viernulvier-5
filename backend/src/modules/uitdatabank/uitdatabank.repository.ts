@@ -106,9 +106,6 @@ export class UitdatabankRepository {
     async findTypeById(id: string) {
         return this.prisma.uitdatabank_type.findUnique({
             where: { id },
-            include: {
-                production: true
-            }
         })
     }
 }

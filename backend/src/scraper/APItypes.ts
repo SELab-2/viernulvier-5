@@ -202,26 +202,6 @@ export type APIEventPrice = {
 
 }
 
-export type APITag = {
-    "@context": string;
-    "@id": string;
-    "@type": string;
-    created_at: string;
-    updated_at: string;
-    source: string;
-    sourceType: string;
-    enable: string;
-    code: string;
-    name: LocalizedString;
-    short_description: LocalizedString;
-    url: string;
-    url_title: LocalizedString;
-    gallery: string;
-    expires_after: number;
-    automatically_assigned: boolean;
-    external: boolean;
-}
-
 export type APICrop = {
     "@context": string;
     "@id": string;

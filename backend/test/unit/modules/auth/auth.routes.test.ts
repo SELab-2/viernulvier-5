@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 describe('auth routes', () => {
     let app: Awaited<ReturnType<typeof Fastify>>
     let findUnique: ReturnType<typeof vi.fn>
+    let update: ReturnType<typeof vi.fn>
 
     beforeEach(async () => {
         vi.resetModules()
@@ -20,13 +21,41 @@ describe('auth routes', () => {
         const authRoutes = (await import('../../../../src/modules/auth/auth.routes.js')).default
 
         findUnique = vi.fn()
+        update = vi.fn()
         const passwordHash = await hashPassword('admin12345')
 
-        findUnique.mockImplementation(async ({ where: { username } }) => ({
-            id: `${username}-id`,
-            username,
-            passwordHash,
-            role: username === 'editor' ? 'EDITOR' : 'ADMIN',
+        findUnique.mockImplementation(async ({ where: { username, id } }) => {
+            if (username === 'taken-user') {
+                return {
+                    id: '00000000-0000-0000-0000-000000000099',
+                    username,
+                    passwordHash,
+                    role: 'EDITOR',
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                }
+            }
+
+            const userId = id || (username === 'editor'
+                ? '00000000-0000-0000-0000-000000000002'
+                : '00000000-0000-0000-0000-000000000001')
+
+            return {
+                id: userId,
+                username: username || (userId === '00000000-0000-0000-0000-000000000002' ? 'editor' : 'admin'),
+                passwordHash,
+                role: (username === 'editor' || userId === '00000000-0000-0000-0000-000000000002') ? 'EDITOR' : 'ADMIN',
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            }
+        })
+
+        update.mockImplementation(async ({ where: { id }, data }) => ({
+            id,
+            username: data.username ?? 'admin',
+            role: 'ADMIN',
+            createdAt: new Date(),
+            updatedAt: new Date(),
         }))
 
         app = Fastify({ logger: false })
@@ -36,188 +65,278 @@ describe('auth routes', () => {
         app.decorate('prisma', {
             adminUser: {
                 findUnique,
+                update,
             },
         })
-        await app.register(authRoutes, { prefix: '/api/auth' })
+        await app.register(authRoutes, { prefix: '/api/v1/auth' })
     })
 
     afterEach(async () => {
         await app.close()
     })
 
-    it('logs in with a database user and sets a cookie', async () => {
-        const response = await app.inject({
-            method: 'POST',
-            url: '/api/auth/login',
-            payload: {
-                username: 'admin',
-                password: 'admin12345',
-            },
+    describe('POST /login', () => {
+        it('logs in with a database user and sets a cookie (no token in body)', async () => {
+            const response = await app.inject({
+                method: 'POST',
+                url: '/api/v1/auth/login',
+                payload: {
+                    username: 'admin',
+                    password: 'admin12345',
+                },
+            })
+
+            expect(response.statusCode).toBe(200)
+            expect(findUnique).toHaveBeenCalledWith({ where: { username: 'admin' } })
+            expect(response.cookies.find((cookie) => cookie.name === 'token')).toBeTruthy()
+            
+            const body = response.json()
+            expect(body).toHaveProperty('data')
+            expect(body.data).toHaveProperty('user')
+            expect(body.data).not.toHaveProperty('token') // Verify token is NOT in body
+            expect(body).toHaveProperty('links')
         })
 
-        expect(response.statusCode).toBe(200)
-        expect(findUnique).toHaveBeenCalledWith({ where: { username: 'admin' } })
-        expect(response.cookies.find((cookie) => cookie.name === 'token')).toBeTruthy()
-        expect(response.json()).toEqual({ success: true })
+        it('rate limits repeated failed login attempts', async () => {
+            findUnique.mockResolvedValueOnce(null)
+            findUnique.mockResolvedValueOnce(null)
+            findUnique.mockResolvedValueOnce(null)
+
+            const first = await app.inject({
+                method: 'POST',
+                url: '/api/v1/auth/login',
+                payload: { username: 'admin', password: 'wrongpass' },
+            })
+
+            const second = await app.inject({
+                method: 'POST',
+                url: '/api/v1/auth/login',
+                payload: { username: 'admin', password: 'wrongpass' },
+            })
+
+            const third = await app.inject({
+                method: 'POST',
+                url: '/api/v1/auth/login',
+                payload: { username: 'admin', password: 'wrongpass' },
+            })
+
+            expect(first.statusCode).toBe(401)
+            expect(second.statusCode).toBe(401)
+            expect(third.statusCode).toBe(429)
+        })
+
+        it('does not count successful logins toward the rate limit', async () => {
+            const first = await app.inject({
+                method: 'POST',
+                url: '/api/v1/auth/login',
+                payload: { username: 'admin', password: 'admin12345' },
+            })
+
+            const second = await app.inject({
+                method: 'POST',
+                url: '/api/v1/auth/login',
+                payload: { username: 'admin', password: 'admin12345' },
+            })
+
+            const third = await app.inject({
+                method: 'POST',
+                url: '/api/v1/auth/login',
+                payload: { username: 'admin', password: 'admin12345' },
+            })
+
+            expect(first.statusCode).toBe(200)
+            expect(second.statusCode).toBe(200)
+            expect(third.statusCode).toBe(200)
+        })
+
+        it('clears failed login attempts after a successful login', async () => {
+            findUnique.mockResolvedValueOnce(null)
+
+            const failedBeforeSuccess = await app.inject({
+                method: 'POST',
+                url: '/api/v1/auth/login',
+                payload: { username: 'admin', password: 'wrongpass' },
+            })
+
+            const successfulLogin = await app.inject({
+                method: 'POST',
+                url: '/api/v1/auth/login',
+                payload: { username: 'admin', password: 'admin12345' },
+            })
+
+            findUnique.mockResolvedValueOnce(null)
+            findUnique.mockResolvedValueOnce(null)
+            findUnique.mockResolvedValueOnce(null)
+
+            const failedAfterReset = await app.inject({
+                method: 'POST',
+                url: '/api/v1/auth/login',
+                payload: { username: 'admin', password: 'wrongpass' },
+            })
+
+            const secondFailedAfterReset = await app.inject({
+                method: 'POST',
+                url: '/api/v1/auth/login',
+                payload: { username: 'admin', password: 'wrongpass' },
+            })
+
+            const blockedAttempt = await app.inject({
+                method: 'POST',
+                url: '/api/v1/auth/login',
+                payload: { username: 'admin', password: 'wrongpass' },
+            })
+
+            expect(failedBeforeSuccess.statusCode).toBe(401)
+            expect(successfulLogin.statusCode).toBe(200)
+            expect(failedAfterReset.statusCode).toBe(401)
+            expect(secondFailedAfterReset.statusCode).toBe(401)
+            expect(blockedAttempt.statusCode).toBe(429)
+        })
+
+        it('does not clear another username throttle bucket after a successful login', async () => {
+            const firstAdminFailure = await app.inject({
+                method: 'POST',
+                url: '/api/v1/auth/login',
+                payload: { username: 'admin', password: 'wrongpass' },
+            })
+
+            const secondAdminFailure = await app.inject({
+                method: 'POST',
+                url: '/api/v1/auth/login',
+                payload: { username: 'admin', password: 'wrongpass' },
+            })
+
+            const otherUserSuccess = await app.inject({
+                method: 'POST',
+                url: '/api/v1/auth/login',
+                payload: { username: 'editor', password: 'admin12345' },
+            })
+
+            const blockedAdminAttempt = await app.inject({
+                method: 'POST',
+                url: '/api/v1/auth/login',
+                payload: { username: 'admin', password: 'wrongpass' },
+            })
+
+            expect(firstAdminFailure.statusCode).toBe(401)
+            expect(secondAdminFailure.statusCode).toBe(401)
+            expect(otherUserSuccess.statusCode).toBe(200)
+            expect(blockedAdminAttempt.statusCode).toBe(429)
+        })
     })
 
-    it('returns the current user from the JWT cookie', async () => {
-        const loginResponse = await app.inject({
-            method: 'POST',
-            url: '/api/auth/login',
-            payload: {
-                username: 'admin',
-                password: 'admin12345',
-            },
-        })
+    describe('GET /me', () => {
+        it('returns the current user from the JWT cookie with RESTful structure', async () => {
+            const loginResponse = await app.inject({
+                method: 'POST',
+                url: '/api/v1/auth/login',
+                payload: {
+                    username: 'admin',
+                    password: 'admin12345',
+                },
+            })
 
-        const tokenCookie = loginResponse.cookies.find((cookie) => cookie.name === 'token')
+            const tokenCookie = loginResponse.cookies.find((cookie) => cookie.name === 'token')
 
-        const meResponse = await app.inject({
-            method: 'GET',
-            url: '/api/auth/me',
-            cookies: {
-                token: tokenCookie?.value ?? '',
-            },
-        })
+            const meResponse = await app.inject({
+                method: 'GET',
+                url: '/api/v1/auth/me',
+                cookies: {
+                    token: tokenCookie?.value ?? '',
+                },
+            })
 
-        expect(meResponse.statusCode).toBe(200)
-        expect(meResponse.json()).toEqual({
-            user: {
-                sub: 'admin-id',
-                username: 'admin',
-                role: 'ADMIN',
-                iat: expect.any(Number),
-                exp: expect.any(Number),
-            },
+            expect(meResponse.statusCode).toBe(200)
+            const body = meResponse.json()
+            expect(body.data.username).toBe('admin')
+            expect(body.data).toHaveProperty('links')
+            expect(body.links.self).toContain('/api/v1/auth/me')
         })
     })
 
-    it('rate limits repeated failed login attempts', async () => {
-        findUnique.mockResolvedValueOnce(null)
-        findUnique.mockResolvedValueOnce(null)
-        findUnique.mockResolvedValueOnce(null)
+    describe('PATCH /me', () => {
+        it('updates the authenticated user username and password', async () => {
+            const loginResponse = await app.inject({
+                method: 'POST',
+                url: '/api/v1/auth/login',
+                payload: {
+                    username: 'admin',
+                    password: 'admin12345',
+                },
+            })
 
-        const first = await app.inject({
-            method: 'POST',
-            url: '/api/auth/login',
-            payload: { username: 'admin', password: 'wrongpass' },
+            const tokenCookie = loginResponse.cookies.find((cookie) => cookie.name === 'token')
+
+            const updateResponse = await app.inject({
+                method: 'PATCH',
+                url: '/api/v1/auth/me',
+                cookies: {
+                    token: tokenCookie?.value ?? '',
+                },
+                payload: {
+                    username: 'admin-renamed',
+                    currentPassword: 'admin12345',
+                    newPassword: 'admin54321',
+                },
+            })
+
+            expect(updateResponse.statusCode).toBe(200)
+            const body = updateResponse.json()
+            expect(body.data.username).toBe('admin-renamed')
+            expect(body.links.self).toContain('/api/v1/auth/me')
         })
 
-        const second = await app.inject({
-            method: 'POST',
-            url: '/api/auth/login',
-            payload: { username: 'admin', password: 'wrongpass' },
+        it('rejects a password change when the current password is wrong', async () => {
+            const loginResponse = await app.inject({
+                method: 'POST',
+                url: '/api/v1/auth/login',
+                payload: {
+                    username: 'admin',
+                    password: 'admin12345',
+                },
+            })
+
+            const tokenCookie = loginResponse.cookies.find((cookie) => cookie.name === 'token')
+
+            const updateResponse = await app.inject({
+                method: 'PATCH',
+                url: '/api/v1/auth/me',
+                cookies: {
+                    token: tokenCookie?.value ?? '',
+                },
+                payload: {
+                    currentPassword: 'wrong-password',
+                    newPassword: 'admin54321',
+                },
+            })
+
+            expect(updateResponse.statusCode).toBe(401)
         })
 
-        const third = await app.inject({
-            method: 'POST',
-            url: '/api/auth/login',
-            payload: { username: 'admin', password: 'wrongpass' },
+        it('rejects a username that is already taken', async () => {
+            const loginResponse = await app.inject({
+                method: 'POST',
+                url: '/api/v1/auth/login',
+                payload: {
+                    username: 'admin',
+                    password: 'admin12345',
+                },
+            })
+
+            const tokenCookie = loginResponse.cookies.find((cookie) => cookie.name === 'token')
+
+            const updateResponse = await app.inject({
+                method: 'PATCH',
+                url: '/api/v1/auth/me',
+                cookies: {
+                    token: tokenCookie?.value ?? '',
+                },
+                payload: {
+                    username: 'taken-user',
+                },
+            })
+
+            expect(updateResponse.statusCode).toBe(409)
         })
-
-        expect(first.statusCode).toBe(401)
-        expect(second.statusCode).toBe(401)
-        expect(third.statusCode).toBe(429)
-        expect(third.json()).toEqual({ error: 'Too many login attempts' })
-    })
-
-    it('does not count successful logins toward the rate limit', async () => {
-        const first = await app.inject({
-            method: 'POST',
-            url: '/api/auth/login',
-            payload: { username: 'admin', password: 'admin12345' },
-        })
-
-        const second = await app.inject({
-            method: 'POST',
-            url: '/api/auth/login',
-            payload: { username: 'admin', password: 'admin12345' },
-        })
-
-        const third = await app.inject({
-            method: 'POST',
-            url: '/api/auth/login',
-            payload: { username: 'admin', password: 'admin12345' },
-        })
-
-        expect(first.statusCode).toBe(200)
-        expect(second.statusCode).toBe(200)
-        expect(third.statusCode).toBe(200)
-    })
-
-    it('clears failed login attempts after a successful login', async () => {
-        findUnique.mockResolvedValueOnce(null)
-
-        const failedBeforeSuccess = await app.inject({
-            method: 'POST',
-            url: '/api/auth/login',
-            payload: { username: 'admin', password: 'wrongpass' },
-        })
-
-        const successfulLogin = await app.inject({
-            method: 'POST',
-            url: '/api/auth/login',
-            payload: { username: 'admin', password: 'admin12345' },
-        })
-
-        findUnique.mockResolvedValueOnce(null)
-        findUnique.mockResolvedValueOnce(null)
-        findUnique.mockResolvedValueOnce(null)
-
-        const failedAfterReset = await app.inject({
-            method: 'POST',
-            url: '/api/auth/login',
-            payload: { username: 'admin', password: 'wrongpass' },
-        })
-
-        const secondFailedAfterReset = await app.inject({
-            method: 'POST',
-            url: '/api/auth/login',
-            payload: { username: 'admin', password: 'wrongpass' },
-        })
-
-        const blockedAttempt = await app.inject({
-            method: 'POST',
-            url: '/api/auth/login',
-            payload: { username: 'admin', password: 'wrongpass' },
-        })
-
-        expect(failedBeforeSuccess.statusCode).toBe(401)
-        expect(successfulLogin.statusCode).toBe(200)
-        expect(failedAfterReset.statusCode).toBe(401)
-        expect(secondFailedAfterReset.statusCode).toBe(401)
-        expect(blockedAttempt.statusCode).toBe(429)
-    })
-
-    it('does not clear another username throttle bucket after a successful login', async () => {
-        const firstAdminFailure = await app.inject({
-            method: 'POST',
-            url: '/api/auth/login',
-            payload: { username: 'admin', password: 'wrongpass' },
-        })
-
-        const secondAdminFailure = await app.inject({
-            method: 'POST',
-            url: '/api/auth/login',
-            payload: { username: 'admin', password: 'wrongpass' },
-        })
-
-        const otherUserSuccess = await app.inject({
-            method: 'POST',
-            url: '/api/auth/login',
-            payload: { username: 'editor', password: 'admin12345' },
-        })
-
-        const blockedAdminAttempt = await app.inject({
-            method: 'POST',
-            url: '/api/auth/login',
-            payload: { username: 'admin', password: 'wrongpass' },
-        })
-
-        expect(firstAdminFailure.statusCode).toBe(401)
-        expect(secondAdminFailure.statusCode).toBe(401)
-        expect(otherUserSuccess.statusCode).toBe(200)
-        expect(blockedAdminAttempt.statusCode).toBe(429)
     })
 })

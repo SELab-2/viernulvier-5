@@ -3,16 +3,25 @@ import type { PrismaClient } from '@prisma/client'
 export class TaxonomiesRepository {
     constructor(private readonly prisma: PrismaClient) { }
 
-    async findAllGenres(options: { page: number; limit: number; search?: string; lang?: string }) {
-        const { page, limit, search, lang = 'nl' } = options
+    async findAllGenres(options: { page: number; limit: number; search?: string; lang?: string, productionId?: string }) {
+        const { page, limit, search, lang = 'nl', productionId} = options
         const skip = (page - 1) * limit
 
-        const where = search ? {
-            name: {
+        const where: any = {};
+        if (search) {
+            where.name = {
                 path: [lang],
                 string_contains: search,
-            },
-        } : {}
+            };
+        }
+
+        if (productionId) {
+            where.genre_production = {
+                some: {
+                    production_id: productionId,
+                },
+            };
+        }
 
         return this.prisma.genre.findMany({
             where: where as any,
@@ -22,14 +31,23 @@ export class TaxonomiesRepository {
         })
     }
 
-    async countGenres(options: { search?: string; lang?: string }) {
-        const { search, lang = 'nl' } = options
-        const where = search ? {
-            name: {
+    async countGenres(options: { search?: string; lang?: string, productionId?: string }) {
+        const { search, lang = 'nl', productionId} = options
+        const where: any = {};
+        if (search) {
+            where.name = {
                 path: [lang],
                 string_contains: search,
-            },
-        } : {}
+            };
+        }
+
+        if (productionId) {
+            where.genre_production = {
+                some: {
+                    production_id: productionId,
+                },
+            };
+        }
 
         return this.prisma.genre.count({
             where: where as any,
@@ -39,13 +57,6 @@ export class TaxonomiesRepository {
     async findGenreById(id: string) {
         return this.prisma.genre.findUnique({
             where: { id },
-            include: {
-                genre_production: {
-                    include: {
-                        production: true
-                    }
-                }
-            }
         })
     }
 
@@ -71,16 +82,25 @@ export class TaxonomiesRepository {
     /**
      * Get a paginated list of tags from the database.
      */
-    async findAllTags(options: { page: number; limit: number; search?: string; lang?: string }) {
-        const { page, limit, search, lang = 'nl' } = options
+    async findAllTags(options: { page: number; limit: number; search?: string; lang?: string, productionId?: string }) {
+        const { page, limit, search, lang = 'nl', productionId } = options
         const skip = (page - 1) * limit
 
-        const where = search ? {
-            name: {
+        const where: any = {};
+        if (search) {
+            where.name = {
                 path: [lang],
                 string_contains: search,
-            },
-        } : {}
+            };
+        }
+
+        if (productionId) {
+            where.tag_production = {
+                some: {
+                    production_id: productionId,
+                },
+            };
+        }
 
         return this.prisma.tag.findMany({
             where: where as any,
@@ -93,14 +113,23 @@ export class TaxonomiesRepository {
     /**
      * Count total number of tags for pagination metadata.
      */
-    async countTags(options: { search?: string; lang?: string }) {
-        const { search, lang = 'nl' } = options
-        const where = search ? {
-            name: {
+    async countTags(options: { search?: string; lang?: string, productionId?: string}) {
+        const { search, lang = 'nl', productionId } = options
+        const where: any = {};
+        if (search) {
+            where.name = {
                 path: [lang],
                 string_contains: search,
-            },
-        } : {}
+            };
+        }
+
+        if (productionId) {
+            where.tag_production = {
+                some: {
+                    production_id: productionId,
+                },
+            };
+        }
 
         return this.prisma.tag.count({
             where: where as any,
@@ -110,9 +139,6 @@ export class TaxonomiesRepository {
     async findTagById(id: string) {
         return this.prisma.tag.findUnique({
             where: { id },
-            include: {
-                gallery: true
-            }
         })
     }
 
@@ -135,4 +161,3 @@ export class TaxonomiesRepository {
         })
     }
 }
-

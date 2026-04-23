@@ -23,6 +23,8 @@ import authRoutes from './modules/auth/auth.routes.js'
 import editorsRoutes from './modules/editors/editors.routes.js'
 import uitdatabankRoutes from './modules/uitdatabank/uitdatabank.routes.js'
 import blogsRoutes from './modules/blogs/blogs.routes.js'
+import dashboardRoutes from './modules/dashboard/dashboard.routes.js'
+import searchRoutes from './modules/search/search.routes.js'
 
 /**
  * Build the Fastify application.
@@ -53,20 +55,22 @@ export async function buildApp(opts = {}): Promise<FastifyInstance> {
 
     // --- Feature modules ---
     // Register specific modules at their respective prefixes to preserve sub-routes
-    await app.register(productionsRoutes, { prefix: '/api/archive/productions' })
-    await app.register(eventsRoutes, { prefix: '/api/archive/events' })
-    await app.register(locationsRoutes, { prefix: '/api/archive/locations' })
+    await app.register(productionsRoutes, { prefix: '/api/v1/archive/productions' })
+    await app.register(eventsRoutes, { prefix: '/api/v1/archive/events' })
+    await app.register(locationsRoutes, { prefix: '/api/v1/archive/locations' })
 
     // Taxonomies handles both /genres and /tags under /api/archive
-    await app.register(taxonomiesRoutes, { prefix: '/api/archive' })
+    await app.register(taxonomiesRoutes, { prefix: '/api/v1/archive' })
 
-    await app.register(hallsRoutes, { prefix: '/api/archive/halls' })
-    await app.register(spacesRoutes, { prefix: '/api/archive/spaces' })
-    await app.register(mediaRoutes, { prefix: '/api/archive/media' })
-    await app.register(uitdatabankRoutes, { prefix: '/api/archive/uitdatabank' })
-    await app.register(blogsRoutes, { prefix: '/api/archive/blogs' })
-    await app.register(authRoutes, { prefix: '/api/auth' })
-    await app.register(editorsRoutes, { prefix: '/api/editors' })
+    await app.register(hallsRoutes, { prefix: '/api/v1/archive/halls' })
+    await app.register(spacesRoutes, { prefix: '/api/v1/archive/spaces' })
+    await app.register(mediaRoutes, { prefix: '/api/v1/archive/media' })
+    await app.register(uitdatabankRoutes, { prefix: '/api/v1/archive/uitdatabank' })
+    await app.register(blogsRoutes, { prefix: '/api/v1/archive/blogs' })
+    await app.register(searchRoutes, { prefix: '/api/v1/archive/search' })
+    await app.register(dashboardRoutes, { prefix: '/api/v1/dashboard' })
+    await app.register(authRoutes, { prefix: '/api/v1/auth' })
+    await app.register(editorsRoutes, { prefix: '/api/v1/editors' })
 
     return app
 }
