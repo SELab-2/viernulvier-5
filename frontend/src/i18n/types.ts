@@ -263,6 +263,29 @@ export type Messages = {
       pageTitle: string
       itemIdLabel: string
     }
+    blogs: {
+      pageTitle: string
+      pageSubtitle: string
+      searchPlaceholder: string
+      newButton: string
+      deleteError: string
+      paginationShowing: (from: number, to: number, total: number) => string
+      paginationPageLabel: (page: number) => string
+    }
+    productions: {
+      pageTitle: string
+      pageSubtitle: string
+      searchPlaceholder: string
+      newButton: string
+      deleteConfirm: string
+      deleteError: string
+      tabAll: string
+      tabPublished: string
+      tabConcepts: string
+      tabAriaLabel: string
+      paginationShowing: (from: number, to: number, total: number) => string
+      paginationPageLabel: (page: number) => string
+    }
   }
 
   editHeader: {

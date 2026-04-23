@@ -5,6 +5,7 @@ import AdminLayout from '../../components/admin/AdminLayout'
 import { usePagination } from '../../components/admin/hooks/usePagination'
 import { BlogsTable, type BlogRow } from '../../components/admin/BlogsTable.tsx'
 import { getAdminRouteConfig } from '../../admin/paths'
+import { useAdminMessages } from '../../components/admin/AdminMessagesContext'
 
 type LocalizedText = {
     nl?: string
@@ -50,6 +51,7 @@ function mapBlogApiItem(item: BlogApiItem): BlogRow {
 function BlogsPageContent() {
     const navigate = useNavigate()
     const { blogCreatePath, blogEditPath } = getAdminRouteConfig(window.location.hostname)
+    const t = useAdminMessages()
 
     const [query, setQuery] = useState('')
     const [debouncedQuery, setDebouncedQuery] = useState('')
@@ -112,13 +114,13 @@ function BlogsPageContent() {
     }, [page, debouncedQuery, reloadToken])
 
     const handleDelete = async (id: string) => {
-        if (!window.confirm('Weet je zeker dat je deze blog wilt verwijderen?')) return
+        if (!window.confirm(t.blogs.deleteConfirm)) return
         setDeletingId(id)
         try {
             await apiFetch(`/archive/blogs/${id}`, { method: 'DELETE' })
             setReloadToken((t) => t + 1)
         } catch {
-            setError('Verwijderen mislukt. Probeer opnieuw.')
+            setError(t.admin.blogs.deleteError)
         } finally {
             setDeletingId(null)
         }
@@ -136,10 +138,10 @@ function BlogsPageContent() {
         <section className="mx-auto flex w-full max-w-[960px] flex-col gap-6 xl:max-w-[1280px] 2xl:max-w-[1536px]">
             <header className="space-y-1">
                 <h1 className="text-[2rem] leading-9 font-normal tracking-[-0.05em] text-[#0f172a] dark:text-white">
-                    Blogs
+                    {t.admin.blogs.pageTitle}
                 </h1>
                 <p className="text-base leading-6 text-[#475569] dark:text-slate-300">
-                    Overzicht van alle blogberichten.
+                    {t.admin.blogs.pageSubtitle}
                 </p>
             </header>
 
@@ -168,7 +170,7 @@ function BlogsPageContent() {
                     </svg>
                     <input
                         type="search"
-                        placeholder="Zoek op titel..."
+                        placeholder={t.admin.blogs.searchPlaceholder}
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         className="w-full rounded-lg border border-[var(--color-admin-card-border)] bg-white py-2 pl-9 pr-4 text-sm text-[#0f172a] placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-accent/40 dark:bg-[#111318] dark:text-white dark:placeholder:text-slate-500"
@@ -190,7 +192,7 @@ function BlogsPageContent() {
                     >
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                     </svg>
-                    Nieuwe Blog
+                    {t.admin.blogs.newButton}
                 </button>
             </div>
 
@@ -208,7 +210,7 @@ function BlogsPageContent() {
             <div className="flex flex-wrap items-center justify-between gap-3">
                 {!isLoading && total > 0 ? (
                     <p className="text-xs text-slate-500">
-                        Toont {from}–{to} van {total} resultaten
+                        {t.admin.blogs.paginationShowing(from, to, total)}
                     </p>
                 ) : (
                     <span />
@@ -216,7 +218,7 @@ function BlogsPageContent() {
 
                 <div className="flex items-center gap-2">
                     <button
-                        aria-label="Vorige pagina"
+                        aria-label={t.admin.dashboard.paginationPrev}
                         disabled={page === 1}
                         onClick={() => setPage((p) => Math.max(1, p - 1))}
                         className="flex h-8 w-8 items-center justify-center rounded-md border border-[var(--color-admin-card-border)] bg-white text-sm text-[#475569] transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-[#111318] dark:text-slate-300 dark:hover:bg-slate-800"
@@ -239,7 +241,7 @@ function BlogsPageContent() {
                         return (
                             <button
                                 key={item}
-                                aria-label={`Pagina ${item}`}
+                                aria-label={t.admin.blogs.paginationPageLabel(item)}
                                 aria-current={item === page ? 'page' : undefined}
                                 onClick={() => setPage(item)}
                                 className={`flex h-8 w-8 items-center justify-center rounded-md border text-sm transition ${
@@ -254,7 +256,7 @@ function BlogsPageContent() {
                     })}
 
                     <button
-                        aria-label="Volgende pagina"
+                        aria-label={t.admin.dashboard.paginationNext}
                         disabled={page >= totalPages}
                         onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                         className="flex h-8 w-8 items-center justify-center rounded-md border border-[var(--color-admin-card-border)] bg-white text-sm text-[#475569] transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-[#111318] dark:text-slate-300 dark:hover:bg-slate-800"
