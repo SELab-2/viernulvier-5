@@ -2,7 +2,6 @@ import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import FuzzyTagInput from '../../../components/admin/FuzzyTagInput'
 import { api } from '../../../api/client'
-import type { TagResponse } from '../../../../../backend/src/modules/taxonomies/taxonomies.schema'
 import type { LocalizedText } from '../../../types/production'
 
 // Mock the API client
@@ -18,6 +17,25 @@ vi.mock('../../../components/admin/useLocale', () => ({
         locale: 'nl'
     })
 }))
+
+// Define local types to avoid backend imports during build
+interface TagResponse {
+    id: string
+    apiId: string | null
+    type: string | null
+    vendor_id: string | null
+    name: LocalizedText
+    slug: LocalizedText
+    description: LocalizedText | null
+    created_at: Date
+    updated_at: Date
+}
+
+interface TagListResponse {
+    data: TagResponse[]
+    meta: any
+    links: any
+}
 
 const createMockTag = (name: string): TagResponse => ({
     id: 'mock-uuid',
@@ -37,6 +55,7 @@ describe('FuzzyTagInput', () => {
     const defaultProps = {
         tags: [existingTag],
         tag: '',
+        locale: 'nl' as const,
         endpoint: '/archive/tags' as const,
         addTag: vi.fn(),
         onRemove: vi.fn(),
@@ -62,7 +81,7 @@ describe('FuzzyTagInput', () => {
     })
 
     it('fetches and displays suggestions when typing', async () => {
-        const mockSuggestions = {
+        const mockSuggestions: TagListResponse = {
             data: [
                 createMockTag('Suggestion 1'),
                 createMockTag('Suggestion 2')
@@ -87,7 +106,7 @@ describe('FuzzyTagInput', () => {
     })
 
     it('filters out existing tags from suggestions case-insensitively', async () => {
-        const mockSuggestions = {
+        const mockSuggestions: TagListResponse = {
             data: [
                 createMockTag('ExistingTag'),
                 createMockTag('NewTag')
@@ -111,7 +130,7 @@ describe('FuzzyTagInput', () => {
 
     it('calls addTag when clicking a suggestion', async () => {
         const mockTag = createMockTag('Suggestion 1')
-        const mockSuggestions = {
+        const mockSuggestions: TagListResponse = {
             data: [mockTag],
             meta: { total: 1, page: 1, limit: 5, totalPages: 1 },
             links: { self: '', next: null, prev: null, first: '', last: '' }
