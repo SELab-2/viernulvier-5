@@ -266,7 +266,7 @@ describe('CreateBlogPage', () => {
       expect(apiMock.post).toHaveBeenCalledWith(
         '/archive/blogs',
         expect.objectContaining({
-          title: JSON.stringify({ nl: 'Nieuwe blogtitel', en: null }),
+          title: { nl: 'Nieuwe blogtitel', en: null },
           content: {
             nl: '<p>Nieuwe inhoud</p>',
             en: null,
@@ -342,7 +342,7 @@ describe('CreateBlogPage', () => {
     expect(patchCall).toBeDefined()
 
     const body = JSON.parse(String(patchCall?.[1]?.body))
-    expect(body.title).toBe(JSON.stringify({ nl: 'Aangepaste titel', en: 'Existing title' }))
+    expect(body.title).toEqual({ nl: 'Aangepaste titel', en: 'Existing title' })
   })
 
   it('deletes a blog after confirmation', async () => {
