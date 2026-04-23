@@ -6,7 +6,7 @@ import { buildStatCards, pillClasses } from '../../components/admin/hooks/dashbo
 import { useDashboardFormatters } from '../../components/admin/hooks/useDashboardFormatters'
 import { useDashboardSummary } from '../../components/admin/hooks/useDashboardSummary'
 import { usePagination } from '../../components/admin/hooks/usePagination'
-import { ProductionsTable } from '../../components/admin/AdminProductionsTable'
+import { ProductionsTable } from '../../components/admin/ProductionsTable.tsx'
 import {getAdminRouteConfig} from "../../admin/paths.ts";
 
 const PAGE_SIZE_OPTIONS = [3, 6, 9, 12, 15, 18] as const

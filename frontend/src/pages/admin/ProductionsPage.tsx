@@ -6,7 +6,7 @@ import {
     ProductionsTable,
     type ProductionRow as Production,
     type LanguageState
-} from '../../components/admin/AdminProductionsTable'
+} from '../../components/admin/ProductionsTable.tsx'
 import {useNavigate} from "react-router-dom";
 import { getAdminRouteConfig } from '../../admin/paths'
 

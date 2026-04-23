@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../../api/client'
 import AdminLayout from '../../components/admin/AdminLayout'
 import { usePagination } from '../../components/admin/hooks/usePagination'
-import { BlogsTable, type BlogRow } from '../../components/admin/AdminBlogsTable'
+import { BlogsTable, type BlogRow } from '../../components/admin/BlogsTable.tsx'
 import { getAdminRouteConfig } from '../../admin/paths'
 
 type LocalizedText = {
