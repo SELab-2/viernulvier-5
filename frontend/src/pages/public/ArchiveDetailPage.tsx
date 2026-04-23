@@ -205,7 +205,7 @@ function ArchiveDetailPageContent() {
 
             <div className="site-container space-y-12 py-8">
                 {teaser && (
-                    <div className="max-w-5xl text-xl font-medium leading-relaxed text-text-accent md:text-2xl">
+                    <div className="text-xl font-medium leading-relaxed text-text-accent md:text-2xl">
                         <div dangerouslySetInnerHTML={
                                 { __html: formatHtml(teaser) }
                             } />
