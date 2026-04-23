@@ -1706,12 +1706,11 @@ function SearchPage() {
                                 {pageItems.map((item) => (
                                     <SearchResultCard
                                         key={item.id}
-                                        item={{
-                                            ...item,
-                                            detailHref: item.type === 'blog'
-                                                ? withLocalePath('/blogs/' + item.id, locale)
-                                                : withLocalePath('/productions/' + item.id, locale),
-                                        }}
+                                        item={item}
+                                        detailHref={ item.type === 'blog'
+                                            ? withLocalePath('/blogs/' + item.id, locale)
+                                            : withLocalePath('/archive/' + item.id, locale)
+                                        }
                                     />
                                 ))}
                             </div>

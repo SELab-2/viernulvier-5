@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { api, apiFetch } from '../../api/client'
-import { getActiveLocale, getMessages } from '../../i18n'
+import { getActiveLocale, getMessages, setActiveLocale } from '../../i18n'
 
 import { useNavigate, useParams } from 'react-router-dom'
 import SectionHeading from '../../components/admin/SectionHeading'
@@ -475,7 +475,14 @@ function CreateBlogPage() {
     if (isEditMode && isBlogNotFound) {
         return (
             <>
-                <PublicNavbar />
+                <PublicNavbar 
+                    locale={locale}
+                    onToggleLocale={() => {
+                        // usually just update your locale state / storage
+                        const next = locale === 'nl' ? 'en' : 'nl'
+                        setActiveLocale(next) // or however you handle it
+                    }} 
+                />
                 <section className="px-8 py-8">
                     <p className="text-base text-foreground">{messages.blogs.blogNotFound}</p>
                 </section>
@@ -485,7 +492,14 @@ function CreateBlogPage() {
 
     return (
         <>
-            <PublicNavbar />
+            <PublicNavbar
+                locale={locale}
+                onToggleLocale={() => {
+                    // usually just update your locale state / storage
+                    const next = locale === 'nl' ? 'en' : 'nl'
+                    setActiveLocale(next) // or however you handle it
+                }} 
+            />
             <EditHeader
                 backLabel={messages.editHeader.back}
                 saveAsDraftLabel={messages.editHeader.saveOnDraft}
