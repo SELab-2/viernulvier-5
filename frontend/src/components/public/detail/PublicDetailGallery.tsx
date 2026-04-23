@@ -1,10 +1,13 @@
 import { useState } from 'react'
+import { usePublicMessages } from '../PublicMessagesContext'
 
 type ArchiveDetailGalleryProps = {
     images: (string | null)[]
 }
 
 function ArchiveDetailGallery({ images }: ArchiveDetailGalleryProps) {
+    const messages = usePublicMessages()
+
     const [current, setCurrent] = useState(0)
 
     const prev = () => setCurrent((c) => (c === 0 ? images.length - 1 : c - 1))
@@ -31,6 +34,7 @@ function ArchiveDetailGallery({ images }: ArchiveDetailGalleryProps) {
                                     w-10 h-10 flex items-center justify-center 
                                     rounded-full text-xl font-bold 
                                     hover:bg-black transition"
+                        aria-label={messages.detail.previousImage}
                     >
                         ‹
                     </button>
@@ -40,6 +44,7 @@ function ArchiveDetailGallery({ images }: ArchiveDetailGalleryProps) {
                                     w-10 h-10 flex items-center justify-center 
                                     rounded-full text-xl font-bold 
                                     hover:bg-black transition"
+                        aria-label={messages.detail.nextImage}
                     >
                         ›
                     </button>

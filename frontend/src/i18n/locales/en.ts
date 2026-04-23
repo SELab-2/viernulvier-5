@@ -160,6 +160,8 @@ const en: Messages = {
     showMore: 'Show more',
     credits: 'Credits',
     genresAndTags: 'Genres & tags',
+    previousImage: 'Previous image',
+    nextImage: 'Next image',
   },
   settings: {
     title: 'Settings',

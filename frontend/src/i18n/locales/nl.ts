@@ -160,6 +160,8 @@ const nl: Messages = {
     showMore: 'Toon meer',
     credits: 'Credits',
     genresAndTags: 'Genres & labels',
+    previousImage: 'Vorige afbeelding',
+    nextImage: 'Volgende afbeelding',
   },
   settings: {
     title: 'Instellingen',
