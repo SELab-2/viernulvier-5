@@ -50,7 +50,18 @@ export class BlogsRepository {
         if (trimmedSearch) {
             const dateRange = this.parseSearchDate(trimmedSearch)
             const searchConditions: Prisma.blogWhereInput[] = [
-                { title: { contains: trimmedSearch, mode: 'insensitive' } },
+                {
+                    title: {
+                        path: ['nl'],
+                        string_contains: trimmedSearch,
+                    },
+                },
+                {
+                    title: {
+                        path: ['en'],
+                        string_contains: trimmedSearch,
+                    },
+                },
                 {
                     content: {
                         path: ['nl'],
@@ -111,14 +122,20 @@ export class BlogsRepository {
         return title as LocalizedBlogTitle | string | null
     }
 
-    private toDatabaseBlogTitle(title: CreateBlogInput['title'] | UpdateBlogInput['title'] | unknown): string | null {
+    private toDatabaseBlogTitle(
+        title: CreateBlogInput['title'] | UpdateBlogInput['title'] | unknown,
+    ): Prisma.InputJsonValue | Prisma.NullableJsonNullValueInput {
         const normalized = this.normalizeBlogTitle(title)
 
         if (normalized == null) {
-            return null
+            return Prisma.JsonNull
         }
 
-        return typeof normalized === 'string' ? normalized : JSON.stringify(normalized)
+        if (typeof normalized === 'string') {
+            return { nl: normalized, en: normalized }
+        }
+
+        return normalized as Prisma.InputJsonValue
     }
 
     private isLocalizedBlogTitle(value: unknown): value is LocalizedBlogTitle {

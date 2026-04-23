@@ -1,5 +1,6 @@
 import { Prisma, type PrismaClient } from '@prisma/client'
 import type { BlogResponse } from '../blogs/blogs.schema.js'
+import type { LocalizedBlogTitle } from '../blogs/blogs.schema.js'
 
 type BlogSearchOptions = {
     search?: string
@@ -9,6 +10,40 @@ type BlogSearchOptions = {
 
 export class SearchRepository {
     constructor(private readonly prisma: PrismaClient) {}
+
+    private normalizeBlogTitle(title: unknown): LocalizedBlogTitle | string | null {
+        if (title == null) {
+            return null
+        }
+
+        if (typeof title === 'string') {
+            try {
+                const parsed = JSON.parse(title) as unknown
+                if (this.isLocalizedBlogTitle(parsed)) {
+                    return parsed
+                }
+            } catch {
+                return { nl: title, en: title }
+            }
+
+            return { nl: title, en: title }
+        }
+
+        if (this.isLocalizedBlogTitle(title)) {
+            return title
+        }
+
+        return title as LocalizedBlogTitle | string | null
+    }
+
+    private isLocalizedBlogTitle(value: unknown): value is LocalizedBlogTitle {
+        if (typeof value !== 'object' || value === null) {
+            return false
+        }
+
+        const record = value as Record<string, unknown>
+        return 'nl' in record || 'en' in record
+    }
 
     private parseSearchDate(search: string): { from: Date; to: Date } | null {
         const trimmed = search.trim()
@@ -42,7 +77,8 @@ export class SearchRepository {
         if (trimmedSearch) {
             const dateRange = this.parseSearchDate(trimmedSearch)
             const searchConditions: Prisma.blogWhereInput[] = [
-                { title: { contains: trimmedSearch, mode: 'insensitive' } },
+                { title: { path: ['nl'], string_contains: trimmedSearch } },
+                { title: { path: ['en'], string_contains: trimmedSearch } },
                 { content: { path: ['nl'], string_contains: trimmedSearch } },
                 { content: { path: ['en'], string_contains: trimmedSearch } },
             ]
@@ -81,7 +117,7 @@ export class SearchRepository {
 
         return blogs.map((blog) => ({
             id: blog.id,
-            title: blog.title,
+            title: this.normalizeBlogTitle(blog.title),
             content: blog.content,
             productions: blog.blog_production.map((r) => r.production_id),
             createdAt: blog.createdAt,
