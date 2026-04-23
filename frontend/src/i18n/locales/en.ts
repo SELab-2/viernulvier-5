@@ -286,6 +286,54 @@ const en: Messages = {
       itemIdLabel: 'Item ID:',
     },
   },
+
+  editHeader: {
+    back: '← Back',
+    publish: 'Publish',
+    saveOnDraft: 'Save as draft'
+  },
+
+  blogs: {
+      languageError:'Blog does not exist in this language',
+      detailPageBack:'← Back to Homepage',
+      loadingBlog: 'Loading blog...',
+      loadingProductions: 'Loading productions...',
+      relatedProductions: 'Related productions',
+      untitledBlog: 'Untitled blog',
+      dutchOption:'Dutch',
+      englishOption:'English',
+      title: 'title',
+      content: 'content',
+      editBlogTitle: 'Edit blog',
+      editBlogDescription: 'Edit an existing blog',
+      createBlogTitle: 'Create blog',
+      createBlogDescription: 'Create a new blog',
+      manageProduction: 'Manage productions',
+      manageProductionButton: 'Add new production',
+      removeProductionAriaLabel: 'Remove production',
+      savingButton: 'Publishing...',
+      deletingButton: 'Deleting...',
+      deleteButton: 'Delete blog',
+      deleteConfirm: 'Are you sure you want to delete this blog?',
+      deleteError: 'Failed to delete blog.',
+      blogNotFound: 'This blog does not exist.',
+      noTitleError: "Please fill in at least one language before publishing.",
+        filledLanguageNeedsTitleError: 'If a language is filled in, it must include a title.',
+      filledLanguageNeedsContentError: 'If a language has a title, it must include content.',
+      publishConfirmTitle: 'Publish anyway?',
+      publishConfirmWithoutEnglish: 'Are you sure you want to publish without an English version?',
+      publishConfirmWithoutDutch: 'Are you sure you want to publish without a Dutch version?',
+      publishConfirmCancel: 'Cancel',
+      publishConfirmProceed: 'Publish anyway',
+      productionPopUp: {
+          title: 'Choose a production',
+          cancelButton: 'Cancel',
+          addButton: 'Add',
+          close: 'Close',
+          queryHint: 'Search production',
+          noProductionFound: 'No production found'
+      },
+  },
 }
 
 export default en

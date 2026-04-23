@@ -286,6 +286,54 @@ const nl: Messages = {
       itemIdLabel: 'Item-ID:',
     },
   },
+
+  editHeader: {
+    back: '← Terug',
+    publish: 'Publiceren',
+    saveOnDraft: 'Opslaan als draft'
+  },
+
+  blogs: {
+      languageError:'Blog bestaat niet in deze taal',
+      detailPageBack:'← terug naar hoofdpagina',
+      loadingBlog: 'Blog wordt geladen...',
+      loadingProductions: 'Producties laden...',
+      relatedProductions: 'Gerelateerde producties',
+      untitledBlog: 'Zonder titel',
+      dutchOption:'Nederlands',
+      englishOption:'Engels',
+      title: 'titel',
+      content: 'content',
+      editBlogTitle: "Bewerk blog",
+      editBlogDescription: "Bewerk een bestaande blog",
+      createBlogTitle: "Creëer blog",
+      createBlogDescription: "Creëer een nieuwe blog",
+      manageProduction: "Producties beheren",
+      manageProductionButton: "Nieuwe productie toevoegen",
+      removeProductionAriaLabel: "Verwijder productie",
+      savingButton: "Publiceren...",
+      deletingButton: "Verwijderen...",
+      deleteButton: "Verwijder blog",
+      deleteConfirm: "Weet je zeker dat je deze blog wilt verwijderen?",
+      deleteError: "Blog verwijderen mislukt.",
+      blogNotFound: "Deze blog bestaat niet.",
+      noTitleError: "Vul minstens één taal in voordat je publiceert.",
+        filledLanguageNeedsTitleError: "Als een taal is ingevuld, moet die ook een titel hebben.",
+      filledLanguageNeedsContentError: "Als een taal een titel heeft, moet die ook content hebben.",
+      publishConfirmTitle: "Blog toch publiceren?",
+      publishConfirmWithoutEnglish: "Weet je zeker dat je wilt publiceren zonder Engelse versie?",
+      publishConfirmWithoutDutch: "Weet je zeker dat je wilt publiceren zonder Nederlandse versie?",
+      publishConfirmCancel: "Annuleren",
+      publishConfirmProceed: "Toch publiceren",
+      productionPopUp : {
+          title:"Kies een productie",
+          cancelButton: "Annuleren",
+          addButton: "Toevoegen",
+          close: "Sluiten",
+          queryHint: "Zoek productie",
+          noProductionFound: "Geen producties beschikbaar"
+      }
+  }
 }
 
 export default nl

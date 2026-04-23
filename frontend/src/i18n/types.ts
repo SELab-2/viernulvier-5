@@ -260,4 +260,54 @@ export type Messages = {
       itemIdLabel: string
     }
   }
+
+  editHeader: {
+    back: string
+    publish: string
+    saveOnDraft: string
+  }
+
+  blogs: {
+    languageError:string
+    detailPageBack:string
+    loadingBlog: string
+    loadingProductions: string
+    relatedProductions: string
+    untitledBlog: string
+
+    dutchOption:string
+    englishOption:string
+    title: string
+    content: string
+    editBlogTitle: string
+    editBlogDescription: string
+    createBlogTitle: string
+    createBlogDescription: string
+    manageProduction: string
+    manageProductionButton: string
+    removeProductionAriaLabel: string
+    savingButton: string
+    deletingButton: string
+    deleteButton: string
+    deleteConfirm: string
+    deleteError: string
+    blogNotFound: string
+    noTitleError:string
+    filledLanguageNeedsTitleError: string
+    filledLanguageNeedsContentError: string
+    publishConfirmTitle: string
+    publishConfirmWithoutEnglish: string
+    publishConfirmWithoutDutch: string
+    publishConfirmCancel: string
+    publishConfirmProceed: string
+
+    productionPopUp : {
+      title:string
+      cancelButton: string
+      addButton: string
+      close: string
+      queryHint: string
+      noProductionFound:string
+    }
+  }
 }
