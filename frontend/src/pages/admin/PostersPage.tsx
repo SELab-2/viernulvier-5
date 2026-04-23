@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import AdminLayout from '../../components/admin/AdminLayout'
-import { useAdminMessages } from '../../components/admin/AdminMessagesContext'
 import { apiFetch, normalizeApiAssetUrl } from '../../api/client'
 import { getMessages } from '../../i18n'
 
@@ -55,7 +54,6 @@ function getLocalizedTitle(value: LocalizedText): string {
 }
 
 function PostersPageContent() {
-  const messages = useAdminMessages()
   const i18n = getMessages()
   const [posters, setPosters] = useState<PosterItem[]>([])
   const [productions, setProductions] = useState<ProductionItem[]>([])
@@ -72,6 +70,8 @@ function PostersPageContent() {
   const [productionError, setProductionError] = useState<string | null>(null)
 
   const pageTitle = i18n.admin.posters.pageTitle
+  const loadPostersErrorMessage = i18n.admin.posters.loadPostersError
+  const loadProductionsErrorMessage = i18n.admin.posters.loadProductionsError
 
   const sortedProductions = useMemo(() => {
     return [...productions].sort((a, b) => {
@@ -142,13 +142,13 @@ function PostersPageContent() {
     const postersError = postersResult.status === 'rejected'
       ? postersResult.reason instanceof Error
         ? postersResult.reason.message
-        : i18n.admin.posters.loadPostersError
+        : loadPostersErrorMessage
       : null
 
     const productionsError = productionsResult.status === 'rejected'
       ? productionsResult.reason instanceof Error
         ? productionsResult.reason.message
-        : i18n.admin.posters.loadProductionsError
+        : loadProductionsErrorMessage
       : null
 
     if (productionsError || postersError) {
@@ -160,7 +160,7 @@ function PostersPageContent() {
     }
 
     setIsLoading(false)
-  }, [fetchProductionsWithFallback])
+  }, [fetchProductionsWithFallback, loadPostersErrorMessage, loadProductionsErrorMessage])
 
   useEffect(() => {
     void loadData()

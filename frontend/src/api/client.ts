@@ -46,7 +46,9 @@ export async function apiFetch<T>(
 
     const hasBody = options.body !== undefined && options.body !== null
     const defaultHeaders: Record<string, string> = hasBody
+        ? !isFormDataBody
         ? { 'Content-Type': 'application/json' }
+        : {}
         : {}
 
     let response: Response
