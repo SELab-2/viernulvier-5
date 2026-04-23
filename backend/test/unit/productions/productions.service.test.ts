@@ -5,8 +5,6 @@ function createRepositoryMock() {
     return {
         findById: vi.fn(),
         findAll: vi.fn(),
-        findFilteredIds: vi.fn(),
-        findManyByIds: vi.fn(),
         count: vi.fn(),
         findSearchIds: vi.fn(),
         create: vi.fn(),
@@ -15,7 +13,7 @@ function createRepositoryMock() {
     }
 }
 
-describe('ProductionsService image selection', () => {
+describe('ProductionsService', () => {
     const productionId = 'f67bb24d-1111-4f49-9f77-d0b6c3d2bd8a'
     let repository: ReturnType<typeof createRepositoryMock>
     let service: ProductionsService
@@ -25,100 +23,32 @@ describe('ProductionsService image selection', () => {
         service = new ProductionsService(repository as any)
     })
 
-    it('prefers position 0 item and FE3_header crop', async () => {
-        repository.findById.mockResolvedValue({
+    it('returns a production by id without derived fields', async () => {
+        const mockProduction = {
             id: productionId,
-            events: [],
-            genre_production: [],
-            poster_gallery: {
-                items: [
-                    {
-                        position: 2,
-                        crops: [{ name: 'FE3_header', url: 'https://cdn.example.com/pos2-header.jpg' }],
-                    },
-                    {
-                        position: 0,
-                        crops: [
-                            { name: 'thumbnail', url: 'https://cdn.example.com/pos0-thumb.jpg' },
-                            { name: 'FE3_header', url: 'https://cdn.example.com/pos0-header.jpg' },
-                        ],
-                    },
-                ],
-            },
-            media_gallery: { items: [] },
-        })
+            title: { nl: 'Test Productie' },
+        }
+        repository.findById.mockResolvedValue(mockProduction)
 
         const result = await service.getProduction(productionId)
 
-        expect(result?.image_url).toBe('https://cdn.example.com/pos0-header.jpg')
+        expect(result).toEqual(mockProduction)
+        expect(result).not.toHaveProperty('image_url')
+        expect(result).not.toHaveProperty('venue_name')
     })
 
-    it('sorts by ascending position when no position 0 and falls back to FE3_grid', async () => {
-        repository.findById.mockResolvedValue({
-            id: productionId,
-            events: [],
-            genre_production: [],
-            poster_gallery: {
-                items: [
-                    {
-                        position: 4,
-                        crops: [{ name: 'FE3_header', url: 'https://cdn.example.com/pos4-header.jpg' }],
-                    },
-                ],
-            },
-            media_gallery: {
-                items: [
-                    {
-                        position: 1,
-                        crops: [{ name: 'FE3_grid', url: 'https://cdn.example.com/pos1-grid.jpg' }],
-                    },
-                ],
-            },
-        })
-
-        const result = await service.getProduction(productionId)
-
-        expect(result?.image_url).toBe('https://cdn.example.com/pos1-grid.jpg')
-    })
-
-    it('orchestrates relevance ordering and sanitizes page in the service layer', async () => {
-        repository.findSearchIds.mockResolvedValue(['third', 'first', 'second'])
+    it('returns paginated productions without derived fields', async () => {
+        const mockProductions = [
+            { id: '1', title: { nl: 'Prod 1' } },
+            { id: '2', title: { nl: 'Prod 2' } },
+        ]
         repository.count.mockResolvedValue(2)
-        repository.findFilteredIds.mockResolvedValue(['first', 'third'])
-        repository.findManyByIds.mockResolvedValue([
-            {
-                id: 'first',
-                events: [],
-                genre_production: [],
-                poster_gallery: { items: [] },
-                media_gallery: { items: [] },
-            },
-        ])
+        repository.findAll.mockResolvedValue(mockProductions)
 
-        const result = await service.getProductions({
-            page: 5,
-            limit: 1,
-            search: 'festival',
-            sort: 'relevance',
-            lang: 'nl',
-            onThisDay: false,
-        } as any)
+        const result = await service.getProductions({ page: 1, limit: 10 })
 
-        expect(repository.findAll).not.toHaveBeenCalled()
-        expect(repository.findFilteredIds).toHaveBeenCalledWith({
-            search: 'festival',
-            searchIds: ['third', 'first', 'second'],
-            lang: 'nl',
-            genres: undefined,
-            locations: undefined,
-            yearFrom: undefined,
-            yearTo: undefined,
-            onThisDayDate: undefined,
-            rankedIds: ['third', 'first', 'second'],
-        })
-        expect(repository.findManyByIds).toHaveBeenCalledWith(['first'])
-        expect(result.page).toBe(2)
-        expect(result.items).toHaveLength(1)
-        expect(result.items[0]?.id).toBe('first')
+        expect(result.items).toEqual(mockProductions)
+        expect(result.total).toBe(2)
+        expect(result.items[0]).not.toHaveProperty('image_url')
     })
 })

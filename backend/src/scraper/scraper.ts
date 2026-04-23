@@ -898,7 +898,8 @@ async function sync_crops(cutoff_timestamp: Date | undefined = undefined){
     const page = filterByCutoff(rawPage, cutoff_timestamp);
 
     await prisma.$transaction(
-        page.map(crop =>
+        page.filter(crop => crop.name?.toLowerCase() === "fe3_header" || crop.name?.toLowerCase() == "fe3_boxed")
+            .map(crop =>
             prisma.crop.upsert({
               where: {apiId: crop["@id"]},
               update: mapCrop(crop),
