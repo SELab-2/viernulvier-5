@@ -56,7 +56,7 @@ type DashboardPageContentProps = {
 
 function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
   const navigate = useNavigate()
-  const { productionEditPath} = getAdminRouteConfig(window.location.hostname)
+  const {archiveEditPath} = getAdminRouteConfig(window.location.hostname)
   const messages = useAdminMessages()
   const d = messages.admin.dashboard
   const [pageSizeSetting, setPageSizeSetting] = useState<PageSizeSetting>(readStoredPageSize)
@@ -173,7 +173,7 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
                 items={recentItems}
                 isLoading={isLoading}
                 pageSize={pageSize}
-                onEdit={(id) => navigate(productionEditPath.replace(':id', id))}
+                onEdit={(id) => navigate(archiveEditPath.replace(':id', id))}
             />
           </div>
 

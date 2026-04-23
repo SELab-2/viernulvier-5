@@ -149,11 +149,13 @@ export type Messages = {
     nav: {
       dashboard: string
       productions: string
+      blogs: string
       gallery: string
       organisation: string
       settings: string
       dashboardIconAlt: string
       productionsIconAlt: string
+      blogsIconAlt: string
       galleryIconAlt: string
       organisationIconAlt: string
       settingsIconAlt: string

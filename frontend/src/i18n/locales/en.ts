@@ -175,11 +175,13 @@ const en: Messages = {
     nav: {
       dashboard: 'Dashboard',
       productions: 'Productions',
+      blogs: 'Blogs',
       gallery: 'Gallery',
       organisation: 'Organisation',
       settings: 'Settings',
       dashboardIconAlt: 'Dashboard icon',
       productionsIconAlt: 'Productions icon',
+      blogsIconAlt: 'Blogs icon',
       galleryIconAlt: 'Gallery icon',
       organisationIconAlt: 'Organisation icon',
       settingsIconAlt: 'Settings icon',

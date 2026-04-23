@@ -1,31 +1,17 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../../api/client'
 import AdminLayout from '../../components/admin/AdminLayout'
 import { usePagination } from '../../components/admin/hooks/usePagination'
-import {
-    ProductionsTable,
-    type ProductionRow as Production,
-    type LanguageState
-} from '../../components/admin/AdminProductionsTable'
-import {useNavigate} from "react-router-dom";
+import { BlogsTable, type BlogRow } from '../../components/admin/AdminBlogsTable'
 import { getAdminRouteConfig } from '../../admin/paths'
 
-
-type LocalizedText = {
-    nl?: string
-    en?: string
-    fr?: string
-} | null
-
-type ProductionApiItem = {
+type BlogApiItem = {
     id: string
-    title: LocalizedText
-    image_url?: string | null
-    production_genres?: string[]
-    performer_type: string | null
-    status?: string | null
-    language_status?: { nl?: string; en?: string } | null
-    updated_at: string
+    title?: string | null
+    productions: string[]
+    createdAt: string
+    updatedAt: string
 }
 
 type PaginatedApiResponse<T> = {
@@ -38,48 +24,27 @@ type PaginatedApiResponse<T> = {
     }
 }
 
-type TabFilter = 'all' | 'published' | 'concept'
-
 const PAGE_SIZE = 10
 
-function getLocalizedTitle(text: LocalizedText): string {
-    if (!text) return ''
-    return (text.nl ?? text.en ?? text.fr ?? '').trim()
-}
-
-function mapLanguageState(value?: string | null): LanguageState {
-    if (value === 'complete') return 'complete'
-    if (value === 'attention') return 'attention'
-    return 'missing'
-}
-
-function mapProductionApiItem(item: ProductionApiItem): Production {
-    const genre = (item.production_genres ?? [])[0] ?? item.performer_type ?? ''
+function mapBlogApiItem(item: BlogApiItem): BlogRow {
     return {
         id: item.id,
-        title: getLocalizedTitle(item.title) || '(Zonder titel)',
-        type: genre,
-        status: item.status === 'published' ? 'published' : 'concept',
-        languageStatus: {
-            nl: mapLanguageState(item.language_status?.nl),
-            en: mapLanguageState(item.language_status?.en),
-        },
-        updatedAt: item.updated_at,
+        title: item.title?.trim() || '(Zonder titel)',
+        productionCount: item.productions?.length ?? 0,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
     }
 }
 
-
-function ProductionsPageContent() {
+function BlogsPageContent() {
     const navigate = useNavigate()
-    const { archiveEditPath, productionCreatePath } = getAdminRouteConfig(window.location.hostname)
+    const { blogCreatePath, blogEditPath } = getAdminRouteConfig(window.location.hostname)
 
-
-    const [tab, setTab] = useState<TabFilter>('all')
     const [query, setQuery] = useState('')
     const [debouncedQuery, setDebouncedQuery] = useState('')
     const [page, setPage] = useState(1)
 
-    const [productions, setProductions] = useState<Production[]>([])
+    const [blogs, setBlogs] = useState<BlogRow[]>([])
     const [total, setTotal] = useState(0)
     const [totalPages, setTotalPages] = useState(1)
     const [isLoading, setIsLoading] = useState(true)
@@ -87,7 +52,7 @@ function ProductionsPageContent() {
     const [deletingId, setDeletingId] = useState<string | null>(null)
     const [reloadToken, setReloadToken] = useState(0)
 
-    // debounce search query
+    // debounce zoekterm
     useEffect(() => {
         const timer = window.setTimeout(() => {
             setDebouncedQuery(query)
@@ -95,12 +60,6 @@ function ProductionsPageContent() {
         }, 250)
         return () => window.clearTimeout(timer)
     }, [query])
-
-    // reset page on tab change
-    const handleTabChange = (next: TabFilter) => {
-        setTab(next)
-        setPage(1)
-    }
 
     // data ophalen
     useEffect(() => {
@@ -117,20 +76,19 @@ function ProductionsPageContent() {
                 })
 
                 if (debouncedQuery) params.set('search', debouncedQuery)
-                if (tab !== 'all') params.set('status', tab)
 
-                const response = await apiFetch<PaginatedApiResponse<ProductionApiItem>>(
-                    `/archive/productions?${params.toString()}`,
+                const response = await apiFetch<PaginatedApiResponse<BlogApiItem>>(
+                    `/archive/blogs?${params.toString()}`,
                     { signal: abortController.signal },
                 )
 
-                setProductions(response.data.map(mapProductionApiItem))
+                setBlogs(response.data.map(mapBlogApiItem))
                 setTotal(response.meta?.total ?? 0)
                 setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
             } catch (err) {
                 if (abortController.signal.aborted) return
                 setError(err instanceof Error ? err.message : 'Onbekende fout')
-                setProductions([])
+                setBlogs([])
                 setTotal(0)
                 setTotalPages(1)
             } finally {
@@ -140,13 +98,13 @@ function ProductionsPageContent() {
 
         void load()
         return () => abortController.abort()
-    }, [page, tab, debouncedQuery, reloadToken])
+    }, [page, debouncedQuery, reloadToken])
 
     const handleDelete = async (id: string) => {
-        if (!window.confirm('Weet je zeker dat je deze productie wilt verwijderen?')) return
+        if (!window.confirm('Weet je zeker dat je deze blog wilt verwijderen?')) return
         setDeletingId(id)
         try {
-            await apiFetch(`/archive/productions/${id}`, { method: 'DELETE' })
+            await apiFetch(`/archive/blogs/${id}`, { method: 'DELETE' })
             setReloadToken((t) => t + 1)
         } catch {
             setError('Verwijderen mislukt. Probeer opnieuw.')
@@ -163,20 +121,14 @@ function ProductionsPageContent() {
         totalItems: total,
     })
 
-    const tabs: { key: TabFilter; label: string }[] = [
-        { key: 'all', label: `Alle${tab === 'all' && total > 0 ? ` (${total})` : ''}` },
-        { key: 'published', label: 'Gepubliceerd' },
-        { key: 'concept', label: 'Concepten' },
-    ]
-
     return (
         <section className="mx-auto flex w-full max-w-[960px] flex-col gap-6 xl:max-w-[1280px] 2xl:max-w-[1536px]">
             <header className="space-y-1">
                 <h1 className="text-[2rem] leading-9 font-normal tracking-[-0.05em] text-[#0f172a] dark:text-white">
-                    Producties
+                    Blogs
                 </h1>
                 <p className="text-base leading-6 text-[#475569] dark:text-slate-300">
-                    Overzicht van alle gearchiveerde en actuele voorstellingen.
+                    Overzicht van alle blogberichten.
                 </p>
             </header>
 
@@ -205,7 +157,7 @@ function ProductionsPageContent() {
                     </svg>
                     <input
                         type="search"
-                        placeholder="Zoek op titel, artiest of genre..."
+                        placeholder="Zoek op titel..."
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         className="w-full rounded-lg border border-[var(--color-admin-card-border)] bg-white py-2 pl-9 pr-4 text-sm text-[#0f172a] placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-accent/40 dark:bg-[#111318] dark:text-white dark:placeholder:text-slate-500"
@@ -213,7 +165,7 @@ function ProductionsPageContent() {
                 </div>
 
                 <button
-                    onClick={() => navigate(productionCreatePath)}
+                    onClick={() => navigate(blogCreatePath)}
                     className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-accent/90 focus:outline-none focus:ring-2 focus:ring-accent/40"
                 >
                     <svg
@@ -227,38 +179,16 @@ function ProductionsPageContent() {
                     >
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                     </svg>
-                    Nieuwe Productie
+                    Nieuwe Blog
                 </button>
             </div>
 
-
             <div className="overflow-hidden rounded-[12px] border border-[var(--color-admin-card-border)] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.05)] dark:bg-[#111318]">
-
-                <div className="border-b border-[var(--color-admin-card-border)] px-6">
-                    <nav className="flex gap-6" role="tablist" aria-label="Producties filter">
-                        {tabs.map(({ key, label }) => (
-                            <button
-                                key={key}
-                                role="tab"
-                                aria-selected={tab === key}
-                                onClick={() => handleTabChange(key)}
-                                className={`py-3 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 ${
-                                    tab === key
-                                        ? 'border-b-2 border-accent text-accent'
-                                        : 'text-[#475569] hover:text-[#0f172a] dark:text-slate-400 dark:hover:text-white'
-                                }`}
-                            >
-                                {label}
-                            </button>
-                        ))}
-                    </nav>
-                </div>
-
-                <ProductionsTable
-                    items={productions}
+                <BlogsTable
+                    items={blogs}
                     isLoading={isLoading}
                     pageSize={PAGE_SIZE}
-                    onEdit={(id) => navigate(archiveEditPath.replace(':id', id))}
+                    onEdit={(id) => navigate(blogEditPath.replace(':id', id))}
                     onDelete={(id) => void handleDelete(id)}
                     deletingId={deletingId}
                 />
@@ -291,8 +221,8 @@ function ProductionsPageContent() {
                                     aria-hidden="true"
                                     className="flex h-8 w-8 items-center justify-center text-sm text-slate-400 dark:text-slate-500"
                                 >
-                  …
-                </span>
+                                    …
+                                </span>
                             )
                         }
                         return (
@@ -326,16 +256,16 @@ function ProductionsPageContent() {
     )
 }
 
-function ProductionsPage() {
+function BlogsPage() {
     return (
         <AdminLayout
             mainClassName="px-4 py-8 lg:px-8 lg:py-8"
             userName="Artevelde stagiair"
             showSidebar
         >
-            <ProductionsPageContent />
+            <BlogsPageContent />
         </AdminLayout>
     )
 }
 
-export default ProductionsPage
+export default BlogsPage
