@@ -122,18 +122,6 @@ export class BlogsRepository {
         return blogs.map((blog) => this.mapBlog(blog))
     }
 
-    async findAllForSearch(options: BlogFilterOptions): Promise<BlogResponse[]> {
-        const where = this.buildWhere(options)
-
-        const blogs = await this.prisma.blog.findMany({
-            where,
-            include: this.blogInclude,
-            orderBy: { createdAt: 'desc' },
-        })
-
-        return blogs.map((blog) => this.mapBlog(blog))
-    }
-
     async count(options: BlogFilterOptions): Promise<number> {
         const where = this.buildWhere(options)
         return this.prisma.blog.count({ where })

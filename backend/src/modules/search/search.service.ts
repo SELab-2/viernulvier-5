@@ -1,19 +1,14 @@
-import type { ProductionsRepository } from '../productions/productions.repository.js'
-import type { BlogsRepository } from '../blogs/blogs.repository.js'
+import type { SearchRepository } from './search.repository.js'
+import type { ProductionsService } from '../productions/productions.service.js'
 import type { SearchQuery, SearchResultItem } from './search.schema.js'
 import type { PaginatedResult } from '../../utils/pagination.js'
 import { calculateTotalPages, sanitizePage } from '../../utils/pagination.js'
-import { ProductionsService } from '../productions/productions.service.js'
 
 export class SearchService {
-    private readonly productionsService: ProductionsService
-
     constructor(
-        private readonly productionsRepo: ProductionsRepository,
-        private readonly blogsRepo: BlogsRepository,
-    ) {
-        this.productionsService = new ProductionsService(productionsRepo)
-    }
+        private readonly searchRepository: SearchRepository,
+        private readonly productionsService: ProductionsService,
+    ) {}
 
     async search(options: SearchQuery): Promise<PaginatedResult<SearchResultItem>> {
         const { page, limit, search, yearFrom, yearTo, genres, locations, sort, lang } = options
@@ -33,7 +28,7 @@ export class SearchService {
         const prodsPreview = await this.productionsService.getProductions({ ...commonProductionOptions, page: 1, limit: 1 })
 
         const [blogResults, prodResults] = await Promise.all([
-            this.blogsRepo.findAllForSearch({ search, yearFrom, yearTo }),
+            this.searchRepository.findAllBlogs({ search, yearFrom, yearTo }),
             prodsPreview.total > 0
                 ? this.productionsService.getProductions({ ...commonProductionOptions, page: 1, limit: prodsPreview.total })
                 : Promise.resolve({ items: [], total: 0, page: 1, limit: 1, totalPages: 0 }),
