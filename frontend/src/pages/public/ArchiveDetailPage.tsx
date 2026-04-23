@@ -144,7 +144,7 @@ function ArchiveDetailPageContent() {
                 })
                 setLocationsByEvent(locationMap)
 
-            } catch (_) {
+            } catch {
                 setLoadError(true)
             }
         }
