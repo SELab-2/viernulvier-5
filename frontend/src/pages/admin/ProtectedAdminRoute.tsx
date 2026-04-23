@@ -1,5 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAdminSession } from '../../auth/useAdminSession'
+import { AdminSessionProvider } from '../../auth/AdminSessionContext'
 
 import type { ReactElement } from 'react'
 
@@ -25,19 +26,19 @@ export function AdminEntryRoute({ loginPath, dashboardPath }: AdminEntryRoutePro
 
 function ProtectedAdminRoute({ children, loginPath }: ProtectedAdminRouteProps) {
   const location = useLocation()
-  const { isLoading, isAuthenticated } = useAdminSession()
+  const session = useAdminSession()
 
-  if (isLoading) {
+  if (session.isLoading) {
     return null
   }
 
-  if (!isAuthenticated) {
+  if (!session.isAuthenticated) {
     const from = `${location.pathname}${location.search}${location.hash}`
 
     return <Navigate to={loginPath} replace state={{ from }} />
   }
 
-  return children
+  return <AdminSessionProvider value={session}>{children}</AdminSessionProvider>
 }
 
 export default ProtectedAdminRoute

@@ -1,20 +1,27 @@
 import { api } from './client'
 
 export type SessionUser = {
-  sub: string
+  id: string
   username: string
   role: string
 }
 
 export type SessionResponse = {
-  user: SessionUser
+  data: SessionUser
 }
 
-export function loginAdmin(username: string, password: string): Promise<unknown> {
-  return api.post('/auth/login', {
+type LoginResponse = {
+  data: {
+    user: SessionUser
+  }
+}
+
+export async function loginAdmin(username: string, password: string): Promise<SessionResponse> {
+  const response = await api.post<LoginResponse>('/auth/login', {
     username: username.trim(),
     password,
   })
+  return { data: response.data.user }
 }
 
 export function getAdminSession(): Promise<SessionResponse> {

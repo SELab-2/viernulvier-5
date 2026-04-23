@@ -30,13 +30,13 @@ export const editorListSchema = createPaginatedResponseSchema(editorSchema)
 export const singleEditorSchema = createSingleResponseSchema(editorSchema)
 
 export const createEditorSchema = z.object({
-    username: z.string().min(1),
+    username: z.string().min(1).transform((value) => value.trim().toLowerCase()),
     password: z.string().min(6),
     role: z.enum(['ADMIN', 'EDITOR']).default('EDITOR'),
 })
 
 export const updateEditorSchema = z.object({
-    username: z.string().min(1).optional(),
+    username: z.string().min(1).transform((value) => value.trim().toLowerCase()).optional(),
     password: z.string().min(6).optional(),
     role: z.enum(['ADMIN', 'EDITOR']).optional(),
 })
