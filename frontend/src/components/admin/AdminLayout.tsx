@@ -11,8 +11,6 @@ import { useTheme } from './useTheme'
 
 type AdminLayoutProps = {
   children: React.ReactNode
-  sidebar?: React.ReactNode
-  header?: React.ReactNode
   showFooter?: boolean
   mainClassName?: string
   showLogout?: boolean
@@ -27,8 +25,6 @@ function getMainClassName(mainClassName = ''): string {
 
 function AdminLayout({
   children,
-  sidebar,
-  header,
   showFooter = true,
   mainClassName = '',
   showLogout = true,
@@ -103,25 +99,7 @@ function AdminLayout({
             </>
           ) : null}
 
-          <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-            {header && (
-              <div className="shrink-0">
-                {header}
-              </div>
-            )}
-
-            <div className="flex-1 flex overflow-visible">
-              <main className={`${getMainClassName(mainClassName)}`}>
-                {children}
-              </main>
-
-              {sidebar && (
-                <aside className="w-80 shrink-0 border-l border-border bg-surface hidden xl:block">
-                  {sidebar}
-                </aside>
-              )}
-            </div>
-          </div>
+          <main className={`${getMainClassName(mainClassName)}`}>{children}</main>
         </div>
         {showFooter ? <AdminFooter /> : null}
       </div>

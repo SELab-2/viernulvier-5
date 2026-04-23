@@ -9,13 +9,12 @@ import type { Locale } from '../../i18n/types'
 import type { Event, EventForm } from '../../types/event'
 
 import { useNavigate, useParams } from 'react-router-dom'
-import { getMessages } from '../../i18n'
+import { getActiveLocale, getMessages } from '../../i18n'
 import { useEffect, useState } from 'react'
 import { api } from '../../api/client'
 import EventPopup from '../../components/admin/EventPopup'
 import ArchiveSidebar from '../../components/admin/ArchiveSidebar'
 import ArchiveEditHeader from '../../components/admin/ArchiveEditHeader'
-import { useLocale } from '../../components/admin/useLocale'
 
 const defaultContentForm : ProductionContent = {
     nl: {title: '', slug: '', content: ''},
@@ -62,10 +61,11 @@ type ProductionEditPageProps = {
  * draft or publish it.
  */
 function ArchiveEditPage({ create } : ProductionEditPageProps) {
-    const { locale } = useLocale()
-    const messages = getMessages()
+    const locale = getActiveLocale(window.location.pathname)
+    const messages = getMessages(locale)
     const navigate = useNavigate()
     const { id } = useParams()          // current production id
+
     const [form, setForm] = useState<ProductionForm>(defaultForm)
     const [languageTab, setLanguageTab] = useState<Locale>('nl')
     const [tagInput, setTagInput] = useState('')
@@ -84,6 +84,9 @@ function ArchiveEditPage({ create } : ProductionEditPageProps) {
 
     // Load all data of an existing production or create a new one
     useEffect(() => {
+        api.get(`/archive/locations`)
+            .then(e => console.log(e))
+            .catch(err => console.error(err))
         if (create) return 
     }, [id, create])
 
@@ -98,7 +101,7 @@ function ArchiveEditPage({ create } : ProductionEditPageProps) {
     const saveProduction = async () => {
         try {
             if (create){
-                const res = await api.post<ProductionResponse>('/archive/productions', {
+                const res: ProductionResponse = await api.post('/archive/productions', {
                     title: {
                         nl: form.content?.nl.title,
                         en: form.content?.en.title,
@@ -113,6 +116,9 @@ function ArchiveEditPage({ create } : ProductionEditPageProps) {
                     },
                 })
 
+                await saveEvents(res.id)
+
+                // TODO: Use a slug
                 navigate(`/admin/productions/${res.id}/edit`, { replace: true })
             } else {
                 await api.put(`/archive/productions/${id}`, {
@@ -129,6 +135,17 @@ function ArchiveEditPage({ create } : ProductionEditPageProps) {
         } catch (err) {
             console.error('Failed to save', err)
         }
+    }
+
+    const saveEvents = async (productionId: string) => {
+        Promise.all(form.events.map(e =>
+            api.post('/archive/events', {
+                production_id: productionId,
+                starts_at: e.startDateTime,
+                ends_at: e.endDateTime,
+                hall_id: e.location
+            })
+        ))
     }
 
     const setTab = (key: Locale) => {
@@ -271,16 +288,57 @@ function ArchiveEditPage({ create } : ProductionEditPageProps) {
     }
 
     return (
-        <AdminLayout
-            header={
-                <ArchiveEditHeader
-                    backLabel={messages.production.back}
-                    publishLabel={messages.production.publish}
-                    back={back}
-                    publish={publish}   
-                />
-            }
-            sidebar={
+        <AdminLayout>   
+            <ArchiveEditHeader
+                backLabel={messages.production.back}
+                publishLabel={messages.production.publish}
+                back={back}
+                publish={publish}   
+            />
+
+            <div className='bg-background flex'>
+                <div className='flex-1 overflow-hidden'>
+                    <SectionHeading
+                        title={messages.production.productionEditTitle}
+                        subTitle={messages.production.productionEditSubTitle}
+                    />
+
+                    {/* Tabs for english and dutch contents of a production */}
+                    <ArchiveTab
+                        language={languageTab}
+                        options={languageOptions}
+                        setTab={setTab}
+                    />
+
+                    <ArchiveTabContent
+                        fields={form.content[languageTab]}
+                        onChange={onChangeContent}
+
+                        titleLabel={messages.production.title}
+                        slugLabel={messages.production.slug}
+                        contentLabel={messages.production.content}
+                    />
+
+                    <SectionHeading
+                        title={messages.production.eventsEditTitle}
+                        subTitle={messages.production.eventsEditSubTitle}
+                    />
+
+                    <EventsEdit
+                        events={form.events}
+                        makeEvent={makeEvent}
+                        editEvent={editEvent}
+                        deleteEvent={deleteEvent}
+
+                        makeLabel={messages.production.makeEventsLabel}
+                        dateLabel={messages.production.eventsDateLabel}
+                        timeLabel={messages.production.eventsTimeLabel}
+                        locationLabel={messages.production.eventsLocationLabel}
+                        commentLabel={messages.production.eventsCommentLabel}
+                        actionsLabel={messages.production.eventsActionsLabel}
+                    />
+                </div>
+
                 <ArchiveSidebar
                     fields={form.settings}
                     tag={tagInput}
@@ -301,47 +359,7 @@ function ArchiveEditPage({ create } : ProductionEditPageProps) {
                     extraPicturesLabel={messages.production.extraPicturesLabel}
                     artistLabel={messages.production.artistLabel}
                 />
-            }
-        >   
-            <SectionHeading
-                title={messages.admin.archiveEdit.pageTitle}
-                subTitle={`${messages.admin.archiveEdit.itemIdLabel} ${id}`}
-            />
-
-            {/* Tabs for english and dutch contents of a production */}
-            <ArchiveTab
-                language={languageTab}
-                options={languageOptions}
-                setTab={setTab}
-            />
-
-            <ArchiveTabContent
-                fields={form.content[languageTab]}
-                onChange={onChangeContent}
-
-                titleLabel={messages.production.title}
-                slugLabel={messages.production.slug}
-                contentLabel={messages.production.content}
-            />
-
-            <SectionHeading
-                title={messages.production.eventsEditTitle}
-                subTitle={messages.production.eventsEditSubTitle}
-            />
-
-            <EventsEdit
-                events={form.events}
-                makeEvent={makeEvent}
-                editEvent={editEvent}
-                deleteEvent={deleteEvent}
-
-                makeLabel={messages.production.makeEventsLabel}
-                dateLabel={messages.production.eventsDateLabel}
-                timeLabel={messages.production.eventsTimeLabel}
-                locationLabel={messages.production.eventsLocationLabel}
-                commentLabel={messages.production.eventsCommentLabel}
-                actionsLabel={messages.production.eventsActionsLabel}
-            />
+            </div>
 
             {popupOpen && (
                 <EventPopup
