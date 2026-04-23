@@ -7,11 +7,10 @@ import EventsEdit from '../../components/admin/ManageEvents'
 import type { Language, ProductionContent, ProductionContentFields, ProductionForm, ProductionSettingsFields } from '../../types/production'
 import type { Locale } from '../../i18n/types'
 import type { Event, EventForm } from '../../types/event'
-import type { ProductionResponse } from '../../../../backend/src/modules/productions/productions.schema'
-import type { LocationResponse } from '../../../../backend/src/modules/locations/locations.schema'
+import type { ProductionResponse, UpdateProductionInput } from '../../../../backend/src/modules/productions/productions.schema'
 
 import { useNavigate, useParams } from 'react-router-dom'
-import { getMessages } from '../../i18n'
+import { getActiveLocale, getMessages } from '../../i18n'
 import { useEffect, useState } from 'react'
 import { api } from '../../api/client'
 import EventPopup from '../../components/admin/EventPopup'
@@ -44,8 +43,6 @@ const defaultEventForm : EventForm = {
     tags: []
 }
 
-const defaultEvents: Event[] = []
-
 type ProductionEditPageProps = {
     /**
      * If true this will create a new production else it will try
@@ -65,7 +62,8 @@ type ProductionEditPageProps = {
  * draft or publish it.
  */
 function ArchiveEditPage({ create } : ProductionEditPageProps) {
-    const messages = getMessages()
+    const locale = getActiveLocale(window.location.pathname)
+    const messages = getMessages(locale)
     const navigate = useNavigate()
     const { id } = useParams()          // current production id
 
@@ -90,9 +88,9 @@ function ArchiveEditPage({ create } : ProductionEditPageProps) {
 
     // Load all data of an existing production or create a new one
     useEffect(() => {
-        // api.get<LocationResponse>(`/archive/locations`)
-        //     .then()
-        //     .catch()
+        api.get(`/archive/locations`)
+            .then(e => console.log(e))
+            .catch(err => console.error(err))
         if (create) return 
 
         // TODO: make use of the slug
@@ -138,12 +136,10 @@ function ArchiveEditPage({ create } : ProductionEditPageProps) {
     // }
 
     // Prodcution functions
-
     const saveProduction = async ( /* asDraft: boolean = false // Extra draft feature */ ) => {
-        // TODO: an extra field is required in the schema for drafts
         try {
             if (create){
-                const res = await api.post<ProductionResponse>('/archive/productions', {
+                const res: ProductionResponse = await api.post('/archive/productions', {
                     title: {
                         nl: form.content?.nl.title,
                         en: form.content?.en.title,
@@ -158,6 +154,8 @@ function ArchiveEditPage({ create } : ProductionEditPageProps) {
                     },
                     // isDraft: asDraft
                 })
+
+                await saveEvents(res.id)
 
                 // TODO: Use a slug
                 navigate(`/admin/productions/${res.id}/edit`, { replace: true })
@@ -177,6 +175,17 @@ function ArchiveEditPage({ create } : ProductionEditPageProps) {
         } catch (err) {
             console.error('Failed to save', err)
         }
+    }
+
+    const saveEvents = async (productionId: string) => {
+        Promise.all(form.events.map(e =>
+            api.post('/archive/events', {
+                production_id: productionId,
+                starts_at: e.startDateTime,
+                ends_at: e.endDateTime,
+                hall_id: e.location
+            })
+        ))
     }
 
     const setTab = (key: Locale) => {
@@ -224,13 +233,6 @@ function ArchiveEditPage({ create } : ProductionEditPageProps) {
         changeSettings('genres', [...form.settings.genres, trimmed])
         setGenreInput('')
     }
-    
-    // const onAddProductionGenre = () => {
-    //     const trimmed = genreInput.trim()
-    //     if (!trimmed || form.settings.genres.includes(trimmed)) return
-    //     changeSettings('genres', [...form.settings.tags, trimmed])
-    //     setGenreInput('')
-    // }
 
     // Adding a tag to a new or existing event
     const onAddEventTag = () => {
@@ -320,40 +322,7 @@ function ArchiveEditPage({ create } : ProductionEditPageProps) {
     }
 
     return (
-        <AdminLayout
-            header={
-                <ArchiveEditHeader
-                    backLabel={messages.production.back}
-                    publishLabel={messages.production.publish}
-                    back={back}
-                    publish={publish}   
-                    // saveAsDraftLabel={messages.production.saveOnDraft}
-                    // saveAsDraft={saveAsDraft}
-                />
-            }
-            sidebar={
-                <ArchiveSidebar
-                    fields={form.settings}
-                    tag={tagInput}
-                    genre={genreInput}
-                    onAddTag={onAddProductionTag}
-                    onChangeTag={onChangeProductionTagInput}
-                    onRemoveTag={onRemoveProductionTag}
-                    onAddGenre={onAddProductionGenre}
-                    onChangeGenre={onChangeProductionGenreInput}
-                    onRemoveGenre={onRemoveProductionGenre}
-                    onChange={changeSettings}
-
-                    productionSettingsLabel={messages.production.productionSettingsLabel}
-                    statusLabel={messages.production.statusLabel}
-                    genreLabel={messages.production.genreLabel}
-                    tagLabel={messages.production.tagLabel}
-                    bannerLabel={messages.production.bannerLabel}
-                    extraPicturesLabel={messages.production.extraPicturesLabel}
-                    artistLabel={messages.production.artistLabel}
-                />
-            }
-        >   
+        <AdminLayout>   
             <ArchiveEditHeader
                 backLabel={messages.production.back}
                 publishLabel={messages.production.publish}

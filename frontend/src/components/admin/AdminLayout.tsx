@@ -11,8 +11,6 @@ import { useTheme } from './useTheme'
 
 type AdminLayoutProps = {
   children: React.ReactNode
-  sidebar?: React.ReactNode
-  header?: React.ReactNode
   showFooter?: boolean
   mainClassName?: string
   showLogout?: boolean
@@ -27,8 +25,6 @@ function getMainClassName(mainClassName = ''): string {
 
 function AdminLayout({
   children,
-  sidebar,
-  header,
   showFooter = true,
   mainClassName = '',
   showLogout = true,
