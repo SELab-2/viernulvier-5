@@ -1,7 +1,6 @@
 import { prisma } from "./prisma";
 import axios from "axios";
 import path from 'path';
-import { mkdir } from 'node:fs/promises';
 import * as fs from "node:fs";
 import { crop } from "@prisma/client";
 
