@@ -40,8 +40,6 @@ function App() {
                         <Route path="/archive/:id" element={<ArchiveDetailPage />} />
                         <Route path="/nl/archive/:id" element={<ArchiveDetailPage />} />
                         <Route path="/en/archive/:id" element={<ArchiveDetailPage />} />
-                        <Route path="/admin/archive/:id/edit" element={<ArchiveEditPage />} />
-                        <Route path="/admin/productions/new" element={<ArchiveEditPage create />} />
                     </>
                 ) : null}
 
