@@ -120,27 +120,22 @@ vi.mock('../../../components/admin/AdminLayout', () => ({
 }))
 
 describe('ArchiveEditPage', () => {
-  it('shows the archive id', () => {
+  it('Shows create page', () => {
     render(
-      <MemoryRouter initialEntries={['/admin/archive/42/edit']}>
+      <MemoryRouter initialEntries={['/admin/productions/new']}>
         <Routes>
-          <Route path="/admin/archive/:id/edit" element={<ArchiveEditPage />} />
+          <Route path="/admin/productions/new" element={<ArchiveEditPage />} />
         </Routes>
       </MemoryRouter>,
     )
 
-    // TODO: write tests
-  })
-
-  it('renders the page title via i18n', () => {
-    render(
-      <MemoryRouter initialEntries={['/admin/archive/99/edit']}>
-        <Routes>
-          <Route path="/admin/archive/:id/edit" element={<ArchiveEditPage />} />
-        </Routes>
-      </MemoryRouter>,
-    )
-
-    // TODO: write tests
+    expect(screen.getByText(mockMessages.production.title)).toBeInTheDocument()
+    expect(screen.getByText(mockMessages.production.slug)).toBeInTheDocument()
+    expect(screen.getByText(mockMessages.production.content)).toBeInTheDocument()
+    expect(screen.getByText(mockMessages.production.genreLabel)).toBeInTheDocument()
+    expect(screen.getByText(mockMessages.production.tagLabel)).toBeInTheDocument()
+    expect(screen.getByText(mockMessages.production.artistLabel)).toBeInTheDocument()
+    expect(screen.getByText(mockMessages.production.bannerLabel)).toBeInTheDocument()
+    expect(screen.getByText(mockMessages.production.extraPicturesLabel)).toBeInTheDocument()
   })
 })
