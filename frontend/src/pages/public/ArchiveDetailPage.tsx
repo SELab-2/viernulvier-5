@@ -298,7 +298,7 @@ function ArchiveDetailPageContent() {
                                 {(genres.length > 0 || tags.length > 0) ? (
                                     <div className="mt-6 border-t border-border pt-4">
                                         <p className="mb-3 text-xs font-semibold uppercase tracking-[0.15em] text-text-accent">
-                                            Tags & genres
+                                            {messages.detail.genresAndTags}
                                         </p>
                                         <div className="flex flex-wrap gap-2">
                                             {genres.map((genre) => {

@@ -133,6 +133,7 @@ export type Messages = {
     showLess: string
     showMore: string
     credits: string
+    genresAndTags: string
   }
   footer: {
     brandLogoAlt: string
