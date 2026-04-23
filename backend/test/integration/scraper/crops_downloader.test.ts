@@ -40,7 +40,7 @@ describe("download_crops", () => {
             { url: "https://img/1.jpg", name: "FE3_header" },
             {  url: "https://img/2.jpg", name: "FE3_boxed" },
         ];
-        await prisma.$transaction(
+        const prisma_crops = await prisma.$transaction(
             crops.map(crop => prisma.crop.create({ data: crop }))
         );
 
@@ -48,7 +48,7 @@ describe("download_crops", () => {
             data: Buffer.from("file"),
         });
 
-        await download_crops();
+        await download_crops(prisma_crops);
 
         expect(mockedAxios).toHaveBeenCalledTimes(2);
 
@@ -69,7 +69,7 @@ describe("download_crops", () => {
         const crops = [
             {url: "https://bad-url", name: "FE3_header" },
         ];
-        await prisma.$transaction(
+        const prisma_crops = await prisma.$transaction(
             crops.map(crop => prisma.crop.create({ data: crop }))
         );
 
@@ -77,7 +77,7 @@ describe("download_crops", () => {
 
         mockedAxios.mockRejectedValue(new Error("fail"));
 
-        await download_crops();
+        await download_crops(prisma_crops);
 
         const updatedCrops = await prisma.crop.findMany({
             where: {
@@ -92,7 +92,7 @@ describe("download_crops", () => {
     it("handles empty crop list", async () => {
 
 
-        await download_crops();
+        await download_crops([]);
 
         expect(mockedAxios).not.toHaveBeenCalled();
         const updatedCrops = await prisma.crop.findMany({
@@ -110,7 +110,7 @@ describe("download_crops", () => {
             url: `https://img/${i}.jpg`,
             name: "FE3_header",
         }));
-        await prisma.$transaction(
+        const prisma_crops = await prisma.$transaction(
             crops.map(crop => prisma.crop.create({ data: crop }))
         );
 
@@ -118,7 +118,7 @@ describe("download_crops", () => {
             data: Buffer.from("file"),
         });
 
-        await download_crops();
+        await download_crops(prisma_crops);
 
         expect(mockedAxios).toHaveBeenCalledTimes(25);
         const updatedCrops = await prisma.crop.findMany({
@@ -135,11 +135,11 @@ describe("download_crops", () => {
         const crops = [
             {url: null, name: "FE3_header" },
         ];
-        await prisma.$transaction(
+        const prisma_crops =await prisma.$transaction(
             crops.map(crop => prisma.crop.create({ data: crop }))
         );
 
-        await download_crops();
+        await download_crops(prisma_crops);
 
         const updatedCrops = await prisma.crop.findMany({
             where: {
@@ -155,10 +155,10 @@ describe("download_crops", () => {
         const crops = [
             { url: "https://idk", name: "FE3_cropped" },
         ];
-        await prisma.$transaction(
+        const prisma_crops = await prisma.$transaction(
             crops.map(crop => prisma.crop.create({ data: crop }))
         );
-        await download_crops();
+        await download_crops(prisma_crops);
 
         const updatedCrops = await prisma.crop.findMany({
             where: {
