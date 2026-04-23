@@ -336,6 +336,7 @@ beforeAll(async () => {
   }
 
   // clear DB
+  await prisma.blog_production.deleteMany();
   await prisma.event_price.deleteMany();
   await prisma.event.deleteMany();
   await prisma.uit_keywords_production.deleteMany();
