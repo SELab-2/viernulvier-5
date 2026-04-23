@@ -13,6 +13,14 @@ type FuzzyTagInputProps = {
     placeholder?: string
 }
 
+interface TaxonomyItem {
+    name: LocalizedText
+}
+
+interface TaxonomyResponse {
+    data: TaxonomyItem[]
+}
+
 function FuzzyTagInput({
     tags,
     tag,
@@ -39,21 +47,21 @@ function FuzzyTagInput({
 
             try {
                 // Search across all languages in backend now, but we still pass lang for potential prioritization
-                const response = await api.get<any>(`${endpoint}?search=${tag}&lang=${locale}&limit=5`)
+                const response = await api.get<TaxonomyResponse>(`${endpoint}?search=${tag}&lang=${locale}&limit=5`)
                 if (response && response.data) {
                     // Extract all possible names from existing tags for duplicate checking
                     const existingNamesLower = tags.flatMap(t => [
                         t.nl?.toLowerCase(),
                         t.en?.toLowerCase(),
                         t.fr?.toLowerCase()
-                    ].filter(Boolean))
+                    ].filter((v): v is string => !!v))
 
                     const newSuggestions = response.data
-                        .map((item: any) => item.name as LocalizedText)
+                        .map((item: TaxonomyItem) => item.name)
                         .filter((nameObj: LocalizedText) => {
                             const currentName = (nameObj[locale] || nameObj.nl || nameObj.en || '').toLowerCase()
                             // Also check if any of the localized names of this suggestion already exist
-                            const suggestionNames = [nameObj.nl?.toLowerCase(), nameObj.en?.toLowerCase(), nameObj.fr?.toLowerCase()].filter(Boolean)
+                            const suggestionNames = [nameObj.nl?.toLowerCase(), nameObj.en?.toLowerCase(), nameObj.fr?.toLowerCase()].filter((v): v is string => !!v)
                             const alreadyExists = suggestionNames.some(name => existingNamesLower.includes(name))
                             
                             return currentName !== '' && !alreadyExists

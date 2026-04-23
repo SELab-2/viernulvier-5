@@ -286,7 +286,6 @@ function ArchiveEditPage({ create } : ProductionEditPageProps) {
                     fields={form.settings}
                     tag={tagInput}
                     genre={genreInput}
-                    locale={languageTab}
                     onAddTag={onAddProductionTag}
                     onChangeTag={onChangeProductionTagInput}
                     onRemoveTag={onRemoveProductionTag}
