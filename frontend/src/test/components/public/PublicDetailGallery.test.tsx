@@ -1,14 +1,15 @@
 import { fireEvent, render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import ArchiveDetailGallery from '../../../components/public/detail/PublicDetailGallery'
-import { PublicMessagesContext } from '../../../components/public/PublicMessagesContext'
 
-const mockMessages = {
-    detail: {
-        previousImage: 'Previous image',
+vi.mock('../../../components/public/PublicMessagesContext', () => ({
+    usePublicMessages: () => ({
+        detail: {
+            previousImage: 'Previous image',
         nextImage: 'Next image',
-    },
-} as any
+        },
+    }),
+}))
 
 describe('ArchiveDetailGallery', () => {
     const images = [
@@ -19,9 +20,7 @@ describe('ArchiveDetailGallery', () => {
 
     it('renders the first image on mount', () => {
         render(
-            <PublicMessagesContext.Provider value={mockMessages}>
-                <ArchiveDetailGallery images={images} />
-            </PublicMessagesContext.Provider>
+            <ArchiveDetailGallery images={images} />
         )
 
         expect(screen.getByRole('img')).toHaveAttribute('src', 'https://example.com/1.jpg')
@@ -30,9 +29,7 @@ describe('ArchiveDetailGallery', () => {
 
     it('does not render navigation buttons for a single image', () => {
         render(
-            <PublicMessagesContext.Provider value={mockMessages}>
-                <ArchiveDetailGallery images={['https://example.com/1.jpg']} />
-            </PublicMessagesContext.Provider>
+            <ArchiveDetailGallery images={['https://example.com/1.jpg']} />
         )
 
         expect(screen.queryByText('›')).not.toBeInTheDocument()
@@ -41,9 +38,7 @@ describe('ArchiveDetailGallery', () => {
 
     it('renders navigation buttons when there are multiple images', () => {
         render(
-            <PublicMessagesContext.Provider value={mockMessages}>
-                <ArchiveDetailGallery images={images} />
-            </PublicMessagesContext.Provider>
+            <ArchiveDetailGallery images={images} />
         )
 
         expect(screen.getByText('›')).toBeInTheDocument()
@@ -52,9 +47,7 @@ describe('ArchiveDetailGallery', () => {
 
     it('shows the counter when there are multiple images', () => {
         render(
-            <PublicMessagesContext.Provider value={mockMessages}>
-                <ArchiveDetailGallery images={images} />
-            </PublicMessagesContext.Provider>
+            <ArchiveDetailGallery images={images} />
         )
 
         expect(screen.getByText('1 / 3')).toBeInTheDocument()
@@ -62,9 +55,7 @@ describe('ArchiveDetailGallery', () => {
 
     it('advances to the next image when the next button is clicked', () => {
         render(
-            <PublicMessagesContext.Provider value={mockMessages}>
-                <ArchiveDetailGallery images={images} />
-            </PublicMessagesContext.Provider>
+            <ArchiveDetailGallery images={images} />
         )
 
         fireEvent.click(screen.getByText('›'))
@@ -75,9 +66,7 @@ describe('ArchiveDetailGallery', () => {
 
     it('goes back to the previous image when the previous button is clicked', () => {
         render(
-            <PublicMessagesContext.Provider value={mockMessages}>
-                <ArchiveDetailGallery images={images} />
-            </PublicMessagesContext.Provider>
+            <ArchiveDetailGallery images={images} />
         )
 
         fireEvent.click(screen.getByText('›'))
@@ -89,9 +78,7 @@ describe('ArchiveDetailGallery', () => {
 
     it('wraps around to the last image when previous is clicked on the first image', () => {
         render(
-            <PublicMessagesContext.Provider value={mockMessages}>
-                <ArchiveDetailGallery images={images} />
-            </PublicMessagesContext.Provider>
+            <ArchiveDetailGallery images={images} />
         )
 
         fireEvent.click(screen.getByText('‹'))
@@ -102,9 +89,7 @@ describe('ArchiveDetailGallery', () => {
 
     it('wraps around to the first image when next is clicked on the last image', () => {
         render(
-            <PublicMessagesContext.Provider value={mockMessages}>
-                <ArchiveDetailGallery images={images} />
-            </PublicMessagesContext.Provider>
+            <ArchiveDetailGallery images={images} />
         )
 
         fireEvent.click(screen.getByText('›'))
@@ -117,9 +102,7 @@ describe('ArchiveDetailGallery', () => {
 
     it('does not render an image when the current image is null', () => {
         render(
-            <PublicMessagesContext.Provider value={mockMessages}>
-                <ArchiveDetailGallery images={[null, 'https://example.com/2.jpg']} />
-            </PublicMessagesContext.Provider>
+            <ArchiveDetailGallery images={[null, 'https://example.com/2.jpg']} />
         )
 
         expect(screen.queryByRole('img')).not.toBeInTheDocument()
