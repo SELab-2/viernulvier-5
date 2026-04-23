@@ -117,6 +117,7 @@ function ArchiveDetailPageContent() {
                         setGalleryImages(allCrops.map((res) => getPreferredMediaCropUrl(res.data)).filter(Boolean) as string[])
                     }
                 }
+                
 
                 const locationResults = await Promise.all(
                     pastEvents.map(async (event) => {
@@ -164,6 +165,9 @@ function ArchiveDetailPageContent() {
     const shareLabel = messages.search.shareLabel
     const shareCopiedLabel = messages.search.shareCopiedLabel
 
+    const FALLBACK_IMAGE = '/fallback-hero.svg'
+    const heroImage = imageUrl ?? FALLBACK_IMAGE
+
     const videos = [video1, video2]
         .filter(Boolean)
         .map((url) => getYouTubeEmbedUrl(url as string))
@@ -187,20 +191,18 @@ function ArchiveDetailPageContent() {
             </div>
 
             <div className="site-container mt-6">
-                {imageUrl && (
-                    <ArchiveDetailHero
-                        imageUrl={imageUrl}
-                        title={title}
-                        superTitle={superTitle}
-                        artist={artist}
-                        genres={genres}
-                        locale={locale}
-                        shareLabel={shareCopied ? shareCopiedLabel : shareLabel}
-                        onShare={() => {
-                            void handleShare()
-                        }}
-                    />
-                )}
+                <ArchiveDetailHero
+                    imageUrl={heroImage}
+                    title={title}
+                    superTitle={superTitle}
+                    artist={artist}
+                    genres={genres}
+                    locale={locale}
+                    shareLabel={shareCopied ? shareCopiedLabel : shareLabel}
+                    onShare={() => {
+                        void handleShare()
+                    }}
+                />
             </div>
 
             <div className="site-container space-y-12 py-8">
