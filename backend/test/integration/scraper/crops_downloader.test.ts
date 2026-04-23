@@ -1,174 +1,132 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import * as fs from "node:fs";
-import axios from "axios";
+    import { describe, it, expect, vi, beforeEach } from "vitest";
+    import * as fs from "node:fs";
+    import axios from "axios";
 
-import { prisma } from "../../../src/scraper/prisma";
-import { download_crops } from "../../../src/scraper/crops_downloader";
+    import { prisma } from "../../../src/scraper/prisma";
+    import { download_crops } from "../../../src/scraper/crops_downloader";
 
-// --------------------------------------------------
-// mocks
-// --------------------------------------------------
-vi.mock("axios");
-vi.mock("node:fs", () => ({
-    writeFileSync: vi.fn(),
-}));
+    // --------------------------------------------------
+    // mocks
+    // --------------------------------------------------
+    vi.mock("axios");
+    vi.mock("node:fs", () => ({
+        writeFileSync: vi.fn(),
+    }));
 
-const mockedAxios = axios as any;
-const mockedFs = fs as any;
+    const mockedAxios = axios as any;
+    const mockedFs = fs as any;
 
-// --------------------------------------------------
-// tests
-// --------------------------------------------------
-describe("download_crops", () => {
-    beforeAll(async () => {
-        await prisma.$connect();
-    });
-    beforeEach(async () => {
-        vi.clearAllMocks();
-        process.env.FILE_LOCATION = "/tmp";
+    // --------------------------------------------------
+    // tests
+    // --------------------------------------------------
+    describe("download_crops", () => {
+        beforeAll(async () => {
+            await prisma.$connect();
+        });
+        beforeEach(async () => {
+            vi.clearAllMocks();
+            process.env.CROP_LOCATION = "/crops/";
 
-        // Clean up database before each test
-        await prisma.crop.deleteMany();
-    });
-
-    afterAll(async () => {
-        await prisma.$disconnect();
-    });
-
-    it("downloads crops and stores file_location", async () => {
-        const crops = [
-            { url: "https://img/1.jpg", name: "FE3_header" },
-            {  url: "https://img/2.jpg", name: "FE3_boxed" },
-        ];
-        const prisma_crops = await prisma.$transaction(
-            crops.map(crop => prisma.crop.create({ data: crop }))
-        );
-
-        mockedAxios.mockResolvedValue({
-            data: Buffer.from("file"),
+            // Clean up database before each test
+            await prisma.crop.deleteMany();
         });
 
-        await download_crops(prisma_crops);
+        afterAll(async () => {
+            await prisma.$disconnect();
+        });
 
-        expect(mockedAxios).toHaveBeenCalledTimes(2);
+        it("downloads crops and stores file_location", async () => {
+            const crops = [
+                {url: "https://img/1.jpg", name: "FE3_header"},
+                {url: "https://img/2.jpg", name: "FE3_boxed"},
+            ];
+            const prisma_crops = await prisma.$transaction(
+                crops.map(crop => prisma.crop.create({data: crop}))
+            );
 
-        expect(mockedFs.writeFileSync).toHaveBeenCalledTimes(2);
-        
-        const updatedCrops = await prisma.crop.findMany({
-            where: {
-                file_location: {
-                    contains: "tmp"
+            mockedAxios.mockResolvedValue({
+                data: Buffer.from("file"),
+            });
+
+            await download_crops(prisma_crops);
+
+            expect(mockedAxios).toHaveBeenCalledTimes(2);
+
+            expect(mockedFs.writeFileSync).toHaveBeenCalledTimes(2);
+
+            const updatedCrops = await prisma.crop.findMany({
+                where: {
+                    file_location: {
+                        contains: "crops"
+                    }
                 }
-            }
+            });
+            expect(updatedCrops.length).toBe(2);
+            expect(updatedCrops[0].file_location).toContain("crops");
         });
-        expect(updatedCrops.length).toBe(2);
-        expect(updatedCrops[0].file_location).toContain("tmp");
-    });
 
-    it("handles failed downloads without crashing", async () => {
-        const crops = [
-            {url: "https://bad-url", name: "FE3_header" },
-        ];
-        const prisma_crops = await prisma.$transaction(
-            crops.map(crop => prisma.crop.create({ data: crop }))
-        );
+        it("handles failed downloads without crashing", async () => {
+            const crops = [
+                {url: "https://bad-url", name: "FE3_header"},
+            ];
+            const prisma_crops = await prisma.$transaction(
+                crops.map(crop => prisma.crop.create({data: crop}))
+            );
 
 
+            mockedAxios.mockRejectedValue(new Error("fail"));
 
-        mockedAxios.mockRejectedValue(new Error("fail"));
+            await download_crops(prisma_crops);
 
-        await download_crops(prisma_crops);
-
-        const updatedCrops = await prisma.crop.findMany({
-            where: {
-                file_location: {
-                    contains: "tmp"
+            const updatedCrops = await prisma.crop.findMany({
+                where: {
+                    file_location: {
+                        contains: "crops"
+                    }
                 }
-            }
+            });
+            expect(updatedCrops.length).toBe(0);
         });
-        expect(updatedCrops.length).toBe(0);
-    });
 
-    it("handles empty crop list", async () => {
+        it("handles empty crop list", async () => {
 
 
-        await download_crops([]);
+            await download_crops([]);
 
-        expect(mockedAxios).not.toHaveBeenCalled();
-        const updatedCrops = await prisma.crop.findMany({
-            where: {
-                file_location: {
-                    contains: "tmp"
+            expect(mockedAxios).not.toHaveBeenCalled();
+            const updatedCrops = await prisma.crop.findMany({
+                where: {
+                    file_location: {
+                        contains: "crops"
+                    }
                 }
-            }
-        });
-        expect(updatedCrops.length).toBe(0);
-    });
-
-    it("processes crops in chunks", async () => {
-        const crops = Array.from({ length: 25 }).map((_, i) => ({
-            url: `https://img/${i}.jpg`,
-            name: "FE3_header",
-        }));
-        const prisma_crops = await prisma.$transaction(
-            crops.map(crop => prisma.crop.create({ data: crop }))
-        );
-
-        mockedAxios.mockResolvedValue({
-            data: Buffer.from("file"),
+            });
+            expect(updatedCrops.length).toBe(0);
         });
 
-        await download_crops(prisma_crops);
+        it("processes crops in chunks", async () => {
+            const crops = Array.from({length: 25}).map((_, i) => ({
+                url: `https://img/${i}.jpg`,
+                name: "FE3_header",
+            }));
+            const prisma_crops = await prisma.$transaction(
+                crops.map(crop => prisma.crop.create({data: crop}))
+            );
 
-        expect(mockedAxios).toHaveBeenCalledTimes(25);
-        const updatedCrops = await prisma.crop.findMany({
-            where: {
-                file_location: {
-                    contains: "tmp"
+            mockedAxios.mockResolvedValue({
+                data: Buffer.from("file"),
+            });
+
+            await download_crops(prisma_crops);
+
+            expect(mockedAxios).toHaveBeenCalledTimes(25);
+            const updatedCrops = await prisma.crop.findMany({
+                where: {
+                    file_location: {
+                        contains: "crops"
+                    }
                 }
-            }
+            });
+            expect(updatedCrops.length).toBe(25);
         });
-        expect(updatedCrops.length).toBe(25);
     });
-
-    it("does not attempt download when url is null", async () => {
-        const crops = [
-            {url: null, name: "FE3_header" },
-        ];
-        const prisma_crops =await prisma.$transaction(
-            crops.map(crop => prisma.crop.create({ data: crop }))
-        );
-
-        await download_crops(prisma_crops);
-
-        const updatedCrops = await prisma.crop.findMany({
-            where: {
-                file_location: {
-                    contains: "tmp"
-                }
-            }
-        });
-        expect(updatedCrops.length).toBe(0);
-    });
-
-    it("does not attempt download when name isnt FE3_header or FE3_boxed is null", async () => {
-        const crops = [
-            { url: "https://idk", name: "FE3_cropped" },
-        ];
-        const prisma_crops = await prisma.$transaction(
-            crops.map(crop => prisma.crop.create({ data: crop }))
-        );
-        await download_crops(prisma_crops);
-
-        const updatedCrops = await prisma.crop.findMany({
-            where: {
-                file_location: {
-                    contains: "tmp"
-                }
-            }
-        });
-        expect(updatedCrops.length).toBe(0);
-    });
-
-
-});

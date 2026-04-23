@@ -891,6 +891,8 @@ async function sync_crops(cutoff_timestamp: Date | undefined = undefined){
   let pageCount = 0;
   let actualDownloaded = 0;
 
+
+
   for await (const { members: rawPage, totalItems } of Fetcher.fetchCropPages(cutoff_timestamp)) {
     pageCount++;
     totalProcessed += rawPage.length;
@@ -900,7 +902,7 @@ async function sync_crops(cutoff_timestamp: Date | undefined = undefined){
     const page = filterByCutoff(rawPage, cutoff_timestamp);
 
     const prisma_crops = await prisma.$transaction(
-        page.filter(crop => crop.name?.toLowerCase() === "fe3_header" || crop.name?.toLowerCase() == "fe3_boxed")
+        page.filter(crop => (crop.name?.toLowerCase() === "fe3_header" || crop.name?.toLowerCase() == "fe3_boxed") && crop.url !== undefined)
             .map(crop =>
             prisma.crop.upsert({
               where: {apiId: crop["@id"]},

@@ -57,18 +57,7 @@ async function download_crop(crop: crop) {
 
 
 export async function download_crops(crops: crop[]){
-    if (crops === undefined){
-        return;
-    }
-    if (process.env.CROP_LOCATION === undefined){
-        console.log("no crop_location given in the .env");
-        return;
-    }
-    try{
-        await mkdir(process.env.CROP_LOCATION, { recursive: true });
-        console.log(`Directory ready: ${process.env.CROP_LOCATION}`);
-    } catch (error) {
-        console.error(`Failed to create directory ${process.env.CROP_LOCATION}:`, error);
+    if (crops === undefined || crops.length === 0){
         return;
     }
 

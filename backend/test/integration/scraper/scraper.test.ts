@@ -31,7 +31,7 @@ async function* singlePage<T>(data: T[]): AsyncGenerator<{ members: T[], totalIt
 // ------------------------------------------------------------------
 // 1. mock fetcher with mock data
 // ------------------------------------------------------------------
-vi.mock('../../../src/scraper/CropsDownloader', () => ({
+vi.mock('../../../src/scraper/crops_downloader', () => ({
   CropsDownloader: {
     download_crops: vi.fn().mockResolvedValue(undefined),
   },
