@@ -30,8 +30,8 @@ function PublicLayout({ children }: PublicLayoutProps) {
     const location = useLocation()
 
     useEffect(() => {
-        trackNavigation(location.pathname)
-    }, [location.pathname])
+        trackNavigation(location.pathname + location.search + location.hash)
+    }, [location.pathname, location.search, location.hash])
 
 
     return (
