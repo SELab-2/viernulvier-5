@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { getGalleryItems, getItemCrops, getPreferredCropUrl, type Crop } from '../../api/media'
+import { getGalleryItems, getItemCrops, getPreferredHeroCropUrl, getPreferredMediaCropUrl, type Crop } from '../../api/media'
 
 const fetchMock = vi.fn()
 vi.stubGlobal('fetch', fetchMock)
@@ -17,34 +17,30 @@ function makeCrop(name: string): Crop {
 }
 
 describe('getGalleryItems', () => {
-    beforeEach(() => {
-        fetchMock.mockReset()
-    })
+    beforeEach(() => { fetchMock.mockReset() })
 
     it('fetches gallery items for a given gallery id', async () => {
         fetchMock.mockResolvedValueOnce({
             ok: true,
             status: 200,
             json: vi.fn().mockResolvedValueOnce({
-                data: [
-                    {
-                        id: '9e110000-0000-0000-0000-000000000001',
-                        apiId: null,
-                        type: 'foto',
-                        original_filename: 'photo.jpg',
-                        position: 0,
-                        width: 1920,
-                        height: 1080,
-                        format: 'image/jpeg',
-                        gallery_id: 'e9e00000-0000-0000-0000-000000000001',
-                        title: null,
-                        description: null,
-                        credits: null,
-                        link: null,
-                        created_at: '2026-01-01T00:00:00.000Z',
-                        updated_at: '2026-01-01T00:00:00.000Z',
-                    },
-                ],
+                data: [{
+                    id: '9e110000-0000-0000-0000-000000000001',
+                    apiId: null,
+                    type: 'foto',
+                    original_filename: 'photo.jpg',
+                    position: 0,
+                    width: 1920,
+                    height: 1080,
+                    format: 'image/jpeg',
+                    gallery_id: 'e9e00000-0000-0000-0000-000000000001',
+                    title: null,
+                    description: null,
+                    credits: null,
+                    link: null,
+                    created_at: '2026-01-01T00:00:00.000Z',
+                    updated_at: '2026-01-01T00:00:00.000Z',
+                }],
             }),
         } as unknown as Response)
 
@@ -70,26 +66,22 @@ describe('getGalleryItems', () => {
 })
 
 describe('getItemCrops', () => {
-    beforeEach(() => {
-        fetchMock.mockReset()
-    })
+    beforeEach(() => { fetchMock.mockReset() })
 
     it('fetches crops for a given item id', async () => {
         fetchMock.mockResolvedValueOnce({
             ok: true,
             status: 200,
             json: vi.fn().mockResolvedValueOnce({
-                data: [
-                    {
-                        id: '8f360000-0000-0000-0000-000000000001',
-                        apiId: null,
-                        name: 'banner',
-                        url: 'https://example.com/banner.jpg',
-                        item_id: '9e110000-0000-0000-0000-000000000001',
-                        created_at: '2026-01-01T00:00:00.000Z',
-                        updated_at: '2026-01-01T00:00:00.000Z',
-                    },
-                ],
+                data: [{
+                    id: '8f360000-0000-0000-0000-000000000001',
+                    apiId: null,
+                    name: 'banner',
+                    url: 'https://example.com/banner.jpg',
+                    item_id: '9e110000-0000-0000-0000-000000000001',
+                    created_at: '2026-01-01T00:00:00.000Z',
+                    updated_at: '2026-01-01T00:00:00.000Z',
+                }],
             }),
         } as unknown as Response)
 
@@ -114,33 +106,54 @@ describe('getItemCrops', () => {
     })
 })
 
-describe('getPreferredCropUrl', () => {
+describe('getPreferredHeroCropUrl', () => {
     it('returns null for an empty crop list', () => {
-        expect(getPreferredCropUrl([])).toBeNull()
+        expect(getPreferredHeroCropUrl([])).toBeNull()
     })
 
     it('returns the FE3_header url when present', () => {
-        const crops = [makeCrop('cms'), makeCrop('FE3_header'), makeCrop('banner')]
-        expect(getPreferredCropUrl(crops)).toBe('https://example.com/FE3_header.jpg')
+        const crops = [makeCrop('FE3_boxed'), makeCrop('FE3_header')]
+        expect(getPreferredHeroCropUrl(crops)).toBe('https://example.com/FE3_header.jpg')
     })
 
     it('falls back to FE3_boxed when FE3_header is missing', () => {
-        const crops = [makeCrop('cms'), makeCrop('FE3_boxed'), makeCrop('banner')]
-        expect(getPreferredCropUrl(crops)).toBe('https://example.com/FE3_boxed.jpg')
+        const crops = [makeCrop('FE3_boxed'), makeCrop('banner')]
+        expect(getPreferredHeroCropUrl(crops)).toBe('https://example.com/FE3_boxed.jpg')
     })
 
-    it('doesn\'t fall back to anything else when FE3_header and FE3_boxed are missing', () => {
-        const crops = [makeCrop('cms'), makeCrop('banner')]
-        expect(getPreferredCropUrl(crops)).toBe(null)
-    })
-
-    it('returns null when no crop matches the fallback order', () => {
-        const crops = [makeCrop('thumbnail'), makeCrop('square')]
-        expect(getPreferredCropUrl(crops)).toBeNull()
+    it('returns null when neither FE3_header nor FE3_boxed are present', () => {
+        const crops = [makeCrop('banner'), makeCrop('cms')]
+        expect(getPreferredHeroCropUrl(crops)).toBeNull()
     })
 
     it('respects priority order regardless of array order', () => {
-        const crops = [makeCrop('banner'),makeCrop('FE3_boxed'), makeCrop('FE3_header'), makeCrop('cms')]
-        expect(getPreferredCropUrl(crops)).toBe('https://example.com/FE3_header.jpg')
+        const crops = [makeCrop('FE3_boxed'), makeCrop('banner'), makeCrop('FE3_header')]
+        expect(getPreferredHeroCropUrl(crops)).toBe('https://example.com/FE3_header.jpg')
+    })
+})
+
+describe('getPreferredMediaCropUrl', () => {
+    it('returns null for an empty crop list', () => {
+        expect(getPreferredMediaCropUrl([])).toBeNull()
+    })
+
+    it('returns the FE3_boxed url when present', () => {
+        const crops = [makeCrop('FE3_header'), makeCrop('FE3_boxed')]
+        expect(getPreferredMediaCropUrl(crops)).toBe('https://example.com/FE3_boxed.jpg')
+    })
+
+    it('falls back to FE3_header when FE3_boxed is missing', () => {
+        const crops = [makeCrop('FE3_header'), makeCrop('banner')]
+        expect(getPreferredMediaCropUrl(crops)).toBe('https://example.com/FE3_header.jpg')
+    })
+
+    it('returns null when neither FE3_boxed nor FE3_header are present', () => {
+        const crops = [makeCrop('banner'), makeCrop('cms')]
+        expect(getPreferredMediaCropUrl(crops)).toBeNull()
+    })
+
+    it('respects priority order regardless of array order', () => {
+        const crops = [makeCrop('FE3_header'), makeCrop('banner'), makeCrop('FE3_boxed')]
+        expect(getPreferredMediaCropUrl(crops)).toBe('https://example.com/FE3_boxed.jpg')
     })
 })

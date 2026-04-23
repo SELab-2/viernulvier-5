@@ -77,7 +77,9 @@ vi.mock('../../../api/tags', () => ({ getTagsByProductionId: getTagsByProduction
 vi.mock('../../../api/media', () => ({
     getGalleryItems: getGalleryItemsMock,
     getItemCrops: getItemCropsMock,
-    getPreferredCropUrl: (crops: { name: string; url: string }[]) =>
+    getPreferredHeroCropUrl: (crops: { name: string; url: string }[]) =>
+        crops.find((c) => c.name === 'banner')?.url ?? null,
+    getPreferredMediaCropUrl: (crops: { name: string; url: string }[]) =>
         crops.find((c) => c.name === 'banner')?.url ?? null,
 }))
 vi.mock('../../../api/halls', () => ({ getHallById: getHallByIdMock }))
@@ -210,7 +212,7 @@ describe('ArchiveDetailPage', () => {
         })
     })
 
-    it('does not render the hero image when there is no gallery', async () => {
+    it('shows the fallback image when there is no gallery', async () => {
         getProductionByIdMock.mockResolvedValue({
             data: { ...baseProduction, media_gallery_id: null },
         })
@@ -218,7 +220,7 @@ describe('ArchiveDetailPage', () => {
         renderPage()
 
         await waitFor(() => {
-            expect(screen.queryByRole('img')).not.toBeInTheDocument()
+            expect(screen.getByRole('img', { name: 'Kapiteinsavond' })).toHaveAttribute('src', '/fallback-hero.svg')
         })
     })
 
