@@ -5,6 +5,7 @@ import { Role } from '../../../src/domain/role.js'
 
 describe('Blogs Routes', () => {
     let app: FastifyInstance
+    const title = { nl: 'Test Blog', en: 'Test Blog' }
 
     beforeEach(async () => {
         app = await buildTestApp()
@@ -36,7 +37,7 @@ describe('Blogs Routes', () => {
             const token = app.jwt.sign({ sub: 'admin', username: 'admin', role: Role.ADMIN })
             const production = await app.prisma.production.create({ data: {} })
             const payload = {
-                title: 'Test Blog',
+                title,
                 content: { text: 'This is a test blog content.' },
                 productionIds: [production.id]
             }
@@ -51,7 +52,7 @@ describe('Blogs Routes', () => {
 
                 expect(response.statusCode).toBe(201)
                 const body = JSON.parse(response.payload)
-                expect(body.data.title).toBe(payload.title)
+                expect(body.data.title).toEqual(payload.title)
                 expect(body.data.content).toEqual(payload.content)
                 expect(body.data.productions).toEqual(payload.productionIds)
                 expect(body.data).toHaveProperty('id')
@@ -66,7 +67,7 @@ describe('Blogs Routes', () => {
             const response = await app.inject({
                 method: 'POST',
                 url: '/api/v1/archive/blogs',
-                payload: { title: 'Test', content: { text: 'Test' }, productionIds: ['00000000-0000-0000-0000-000000000001'] }
+                payload: { title, content: { text: 'Test' }, productionIds: ['00000000-0000-0000-0000-000000000001'] }
             })
 
             expect(response.statusCode).toBe(401)
@@ -84,7 +85,7 @@ describe('Blogs Routes', () => {
                     method: 'POST',
                     url: '/api/v1/archive/blogs',
                     headers: { authorization: `Bearer ${token}` },
-                    payload: { title: 'Find Me', content: { text: 'Content' }, productionIds: [production.id] }
+                    payload: { title, content: { text: 'Content' }, productionIds: [production.id] }
                 })
                 const created = JSON.parse(postResponse.payload)
 
@@ -96,7 +97,7 @@ describe('Blogs Routes', () => {
                 expect(response.statusCode).toBe(200)
                 const body = JSON.parse(response.payload)
                 expect(body.data.id).toBe(created.data.id)
-                expect(body.data.title).toBe('Find Me')
+                expect(body.data.title).toEqual(title)
                 expect(body.data.productions).toEqual([production.id])
                 expect(body.data).toHaveProperty('links')
                 expect(body.data.links).toHaveProperty('self')
@@ -129,7 +130,7 @@ describe('Blogs Routes', () => {
                     method: 'POST',
                     url: '/api/v1/archive/blogs',
                     headers: { authorization: `Bearer ${token}` },
-                    payload: { title: 'Old Title', content: { text: 'Old Content' }, productionIds: [productionA.id] }
+                    payload: { title: { nl: 'Old Title', en: 'Old Title' }, content: { text: 'Old Content' }, productionIds: [productionA.id] }
                 })
                 const created = JSON.parse(postResponse.payload)
 
@@ -138,12 +139,12 @@ describe('Blogs Routes', () => {
                     method: 'PATCH',
                     url: `/api/v1/archive/blogs/${created.data.id}`,
                     headers: { authorization: `Bearer ${token}` },
-                    payload: { title: 'New Title', productionIds: [productionB.id] }
+                    payload: { title: { nl: 'New Title', en: 'New Title' }, productionIds: [productionB.id] }
                 })
 
                 expect(response.statusCode).toBe(200)
                 const body = JSON.parse(response.payload)
-                expect(body.data.title).toBe('New Title')
+                expect(body.data.title).toEqual({ nl: 'New Title', en: 'New Title' })
                 expect(body.data.content).toEqual({ text: 'Old Content' })
                 expect(body.data.productions).toEqual([productionB.id])
                 expect(body.data).toHaveProperty('links')
@@ -161,7 +162,7 @@ describe('Blogs Routes', () => {
                 method: 'PATCH',
                 url: `/api/v1/archive/blogs/${uuid}`,
                 headers: { authorization: `Bearer ${token}` },
-                payload: { title: 'New Title' }
+                    payload: { title: { nl: 'New Title', en: 'New Title' } }
             })
             expect(response.statusCode).toBe(404)
         })
@@ -178,7 +179,7 @@ describe('Blogs Routes', () => {
                     method: 'POST',
                     url: '/api/v1/archive/blogs',
                     headers: { authorization: `Bearer ${token}` },
-                    payload: { title: 'To Delete', content: { text: 'Content' }, productionIds: [production.id] }
+                    payload: { title: { nl: 'To Delete', en: 'To Delete' }, content: { text: 'Content' }, productionIds: [production.id] }
                 })
                 const created = JSON.parse(postResponse.payload)
 
