@@ -145,7 +145,6 @@ function ArchiveDetailPageContent() {
                 setLocationsByEvent(locationMap)
 
             } catch (error) {
-                console.error('Error loading data:', error)
                 setLoadError(true)
             }
         }
