@@ -175,6 +175,7 @@ export type Messages = {
     editorUsernameLabel: string
     temporaryPasswordLabel: string
     temporaryPasswordHint: string
+    passwordMinLengthHint: string
     createEditorButton: string
     creatingEditor: string
     editorCreatedSuccess: string

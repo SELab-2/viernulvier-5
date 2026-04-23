@@ -597,35 +597,34 @@ function EditorsTab({ isVisible }: EditorsTabProps) {
                         })}
                     </ul>
                 )}
+
+                {selectedEditor ? (
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setEditingId(null)
+                            resetEditState(null)
+                        }}
+                        className="w-full rounded-lg border border-[var(--color-admin-card-border)] bg-white px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 dark:bg-[#1e2128] dark:text-slate-300 dark:hover:bg-slate-800/60"
+                    >
+                        {s.addNewEditorButton}
+                    </button>
+                ) : null}
             </section>
 
             <section className="flex flex-col gap-5 rounded-2xl border border-[var(--color-admin-card-border)] bg-slate-50 p-5 dark:bg-[#16191f]">
                 {/* Panel header */}
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
-                    <div className="flex items-center gap-2">
-                        {!selectedEditor ? (
-                            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent/10">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5 text-accent" aria-hidden="true">
-                                    <path d="M12 5v14M5 12h14" strokeLinecap="round" strokeLinejoin="round" />
-                                </svg>
-                            </div>
-                        ) : null}
-                        <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-slate-400 dark:text-slate-400">
-                            {selectedEditor ? s.editEditorTitle : s.newEditorTitle}
-                        </h3>
-                    </div>
-                    {selectedEditor ? (
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setEditingId(null)
-                                resetEditState(null)
-                            }}
-                            className="w-full rounded-lg border border-[var(--color-admin-card-border)] bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-100 sm:w-auto sm:shrink-0 dark:bg-[#1e2128] dark:text-slate-300 dark:hover:bg-slate-800/60"
-                        >
-                            {s.addNewEditorButton}
-                        </button>
+                <div className="flex items-center gap-2">
+                    {!selectedEditor ? (
+                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent/10">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5 text-accent" aria-hidden="true">
+                                <path d="M12 5v14M5 12h14" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                        </div>
                     ) : null}
+                    <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-slate-400 dark:text-slate-400">
+                        {selectedEditor ? s.editEditorTitle : s.newEditorTitle}
+                    </h3>
                 </div>
 
                 {!selectedEditor ? (
@@ -666,7 +665,9 @@ function EditorsTab({ isVisible }: EditorsTabProps) {
                                 onChange={(event) => setCreateState((current) => ({ ...current, password: event.target.value, success: null, error: null }))}
                                 className="w-full rounded-lg border border-[var(--color-admin-input-border)] bg-white px-3 py-2 text-sm text-slate-900 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent dark:bg-[#1e2128] dark:text-white"
                             />
-                            <p className="text-xs text-slate-500 dark:text-slate-400">{s.temporaryPasswordHint}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                                {s.temporaryPasswordHint} {s.passwordMinLengthHint}
+                            </p>
                         </div>
 
                         <button
@@ -720,7 +721,9 @@ function EditorsTab({ isVisible }: EditorsTabProps) {
                         <div className="space-y-2">
                             <div>
                                 <p className="text-xs font-semibold uppercase tracking-[0.08em] text-slate-400 dark:text-slate-400">{s.resetPasswordTitle}</p>
-                                <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{s.resetPasswordHint}</p>
+                                <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                                    {s.resetPasswordHint} {s.passwordMinLengthHint}
+                                </p>
                             </div>
                             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                                 <input

@@ -182,6 +182,7 @@ const en: Messages = {
     editorUsernameLabel: 'Username',
     temporaryPasswordLabel: 'Temporary password',
     temporaryPasswordHint: 'The editor should change this on first login.',
+    passwordMinLengthHint: 'Minimum 6 characters.',
     createEditorButton: 'Create editor',
     creatingEditor: 'Creating...',
     editorCreatedSuccess: 'Editor created.',
