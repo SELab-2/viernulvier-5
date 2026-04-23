@@ -8,7 +8,6 @@ describe('SearchResultCard', () => {
         render(
             <MemoryRouter>
                 <SearchResultCard
-                    detailHref="/nl/archive/dab70000-0000-0000-0000-000000000001"
                     item={{
                         id: 'dab70000-0000-0000-0000-000000000001',
                         tag: 'theater',
@@ -17,6 +16,7 @@ describe('SearchResultCard', () => {
                         excerpt: 'Kort stukje teaser',
                         venue: 'VIERNULVIER',
                         imageUrl: 'https://example.com/image.jpg',
+                        detailHref: '/nl/archive/dab70000-0000-0000-0000-000000000001',
                     }}
                 />
             </MemoryRouter>

@@ -16,7 +16,6 @@ export type SearchResultItem = {
 
 type SearchResultCardProps = {
     item: SearchResultItem
-    detailHref: string
 }
 
 function capitalizeFirst(value: string): string {
@@ -24,28 +23,22 @@ function capitalizeFirst(value: string): string {
     return value.charAt(0).toUpperCase() + value.slice(1)
 }
 
-function capitalizeFirst(value: string): string {
-    if (!value) return value
-    return value.charAt(0).toUpperCase() + value.slice(1)
-}
-
 function SearchResultCard({ item }: SearchResultCardProps) {
     const normalizedTitle = capitalizeFirst(item.title.trim())
     const displayTitle = normalizedTitle.length > 110 ? `${normalizedTitle.slice(0, 107)}...` : normalizedTitle
     const showExcerpt = Boolean(item.excerpt) && !item.isProductionReference
+    const imageUrl = item.imageUrl ?? FALLBACK_IMAGE
 
     const card = (
         <article className="flex h-full w-full flex-col border-b border-border pb-5">
             <div className="relative h-32 overflow-hidden rounded-md sm:h-36 bg-gradient-to-br from-accent to-accent/50">
-                {item.imageUrl ? (
-                    <img
-                        src={imageUrl}
-                        alt={item.title}
-                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-                        loading="lazy"
-                        referrerPolicy="no-referrer"
-                    />
-                ) : null}
+                <img
+                    src={imageUrl}
+                    alt={item.title}
+                    className="absolute inset-0 h-full w-full object-cover"
+                    loading="lazy"
+                    referrerPolicy="no-referrer"
+                />
                 <div className="absolute inset-0 bg-black/20" />
                 <span className="absolute left-3 top-3 rounded-full border border-white/50 bg-white/25 px-3 py-1 text-xs font-semibold lowercase text-white backdrop-blur-sm">
                     {item.tag}

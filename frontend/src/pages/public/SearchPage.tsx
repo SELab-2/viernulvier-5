@@ -1804,7 +1804,7 @@ function SearchPage() {
                                                 ? withLocalePath('/blogs/' + item.id, locale)
                                                 : item.type === 'poster'
                                                     ? withLocalePath('/posters/' + item.id, locale)
-                                                : withLocalePath('/productions/' + item.id, locale),
+                                                : withLocalePath('/archive/' + item.id, locale),
                                         }}
                                     />
                                 ))}
