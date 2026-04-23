@@ -1,13 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { api, apiFetch } from '../../api/client'
-import { getActiveLocale, getMessages, setActiveLocale } from '../../i18n'
+import { getActiveLocale, getMessages} from '../../i18n'
 
 import { useNavigate, useParams } from 'react-router-dom'
 import SectionHeading from '../../components/admin/SectionHeading'
 import BlogsTab from '../../components/admin/BlogsTab'
 import BlogsTabContent from '../../components/admin/BlogsTabContent'
-import PublicNavbar from '../../components/public/PublicNavbar'
-
 import EditHeader from '../../components/admin/EditHeader'
 import ProductionManagementSection, { type ProductionItem } from '../../components/admin/blogs/ProductionManagementSection'
 import {
@@ -20,6 +18,7 @@ import {
 
 import type { Language, BlogContent } from '../../types/blog'
 import type { Locale } from '../../i18n/types'
+import PublicLayout from '../../components/public/PublicLayout'
 
 
 /*
@@ -475,38 +474,24 @@ function CreateBlogPage() {
     if (isEditMode && isBlogNotFound) {
         return (
             <>
-                <PublicNavbar 
-                    locale={locale}
-                    onToggleLocale={() => {
-                        // usually just update your locale state / storage
-                        const next = locale === 'nl' ? 'en' : 'nl'
-                        setActiveLocale(next) // or however you handle it
-                    }} 
-                />
+                <PublicLayout>
                 <section className="px-8 py-8">
                     <p className="text-base text-foreground">{messages.blogs.blogNotFound}</p>
                 </section>
+                </PublicLayout>
             </>
         )
     }
 
     return (
-        <>
-            <PublicNavbar
-                locale={locale}
-                onToggleLocale={() => {
-                    // usually just update your locale state / storage
-                    const next = locale === 'nl' ? 'en' : 'nl'
-                    setActiveLocale(next) // or however you handle it
-                }} 
-            />
+        <PublicLayout>
             <EditHeader
                 backLabel={messages.editHeader.back}
                 saveAsDraftLabel={messages.editHeader.saveOnDraft}
                 publishLabel={messages.editHeader.publish}
                 back={back}
                 saveAsDraft={saveAsDraft}
-                publish={publish}   
+                publish={publish}
             />
 
             <SectionHeading
@@ -616,7 +601,7 @@ function CreateBlogPage() {
                     </div>
                 </div>
             ) : null}
-        </>
+        </PublicLayout>
     )
 }
 
