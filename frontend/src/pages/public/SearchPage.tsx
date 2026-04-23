@@ -1563,7 +1563,7 @@ function SearchPage() {
         const normalizedLocale = locale === 'en' ? 'en' : 'nl'
         const uniqueValues = new Set<string>()
 
-        if (activeTab !== 'productions') {
+        if (activeTab === 'blogs' || activeTab === 'posters') {
             return []
         }
 

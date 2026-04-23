@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { apiFetch } from '../../api/client'
+import { apiFetch, normalizeApiAssetUrl } from '../../api/client'
 import { getActiveLocale, getMessages, withLocalePath } from '../../i18n'
 import type { Locale } from '../../i18n/types'
 import SearchResultCard, { type SearchResultItem } from './search/SearchResultCard'
@@ -116,7 +116,7 @@ function mapProductionToCarouselItem(item: ProductionApiItem, locale: Locale): S
         title,
         excerpt,
         venue,
-        imageUrl: undefined,
+        imageUrl: normalizeApiAssetUrl(item.image_url),
     }
 }
 

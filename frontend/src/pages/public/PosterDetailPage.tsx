@@ -178,7 +178,7 @@ function PosterDetailPage() {
                                             <Link
                                                 key={item.id}
                                                 to={withLocalePath(`/archive/${item.id}`, locale)}
-                                                className="group flex h-full items-center gap-4 rounded-xl border border-border/80 bg-surface p-3 transition hover:border-[var(--color-accent)]/45 hover:bg-accent/5"
+                                                className="group flex h-full min-h-[7.5rem] items-center gap-4 rounded-xl border border-border/80 bg-surface p-3 transition hover:border-[var(--color-accent)]/45 hover:bg-accent/5"
                                             >
                                                 <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-md bg-accent/10">
                                                     {item.imageUrl ? (
@@ -196,8 +196,8 @@ function PosterDetailPage() {
                                                     )}
                                                 </div>
 
-                                                <div className="min-w-0 flex-1">
-                                                    <p className="line-clamp-2 text-2xl font-semibold leading-tight text-foreground [overflow-wrap:anywhere] group-hover:text-[var(--color-accent)]">
+                                                <div className="min-w-0 flex flex-1 flex-col justify-center">
+                                                    <p className="line-clamp-2 min-h-[3.25rem] text-2xl font-semibold leading-tight text-foreground [overflow-wrap:anywhere] group-hover:text-[var(--color-accent)]">
                                                         {item.title}
                                                     </p>
                                                     {item.year || item.genre ? (
