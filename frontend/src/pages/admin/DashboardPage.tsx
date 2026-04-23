@@ -121,7 +121,7 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
         <p className="text-base leading-6 text-[#475569] dark:text-slate-300">
           {d.pageSubtitle}
         </p>
-        <p className="text-sm leading-5 text-[#94a3b8] dark:text-slate-500">
+        <p className="text-sm leading-5 text-[#94a3b8] dark:text-slate-400">
           {d.pageNote}
         </p>
       </header>
@@ -145,9 +145,9 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
             className="rounded-[12px] border border-[var(--color-admin-card-border)] bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.05)] dark:bg-[#111318]"
           >
             <div className="flex items-start justify-between gap-4">
-              <div className="space-y-1">
+              <div className="min-w-0 flex-1 space-y-1">
                 <p className="text-sm font-medium text-[#475569] dark:text-slate-400">{card.label}</p>
-                <p className="text-2xl leading-8 font-bold text-[#0f172a] dark:text-white">{isLoading ? '...' : card.value}</p>
+                <p className="truncate text-xl leading-7 font-bold text-[#0f172a] tabular-nums sm:text-2xl sm:leading-8 dark:text-white">{isLoading ? '...' : card.value}</p>
               </div>
               <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${card.accent}`}>
                 <img src={card.iconSrc} alt={card.iconAlt} className="h-5 w-5 shrink-0" />
@@ -156,7 +156,7 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
             <div className="mt-4 flex items-center gap-2">
               <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${card.pill}`}>{card.change}</span>
               {card.note ? (
-                <span className="text-xs text-[#94a3b8] dark:text-slate-500">{card.note}</span>
+                <span className="text-xs text-[#94a3b8] dark:text-slate-400">{card.note}</span>
               ) : null}
             </div>
           </article>
@@ -177,13 +177,14 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
             />
           </div>
 
+
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-4">
             {!isLoading && total > 0 ? (
-              <p className="text-xs text-slate-500">{d.paginationShowing(from, to, total)}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">{d.paginationShowing(from, to, total)}</p>
             ) : null}
 
-            <label className="flex items-center gap-2 text-xs text-slate-500">
+            <label className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
               <span>{d.pageSizeLabel}</span>
               <select
                 value={pageSizeSetting}
@@ -234,7 +235,7 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
                   aria-label={String(item)}
                   aria-current={item === page ? 'page' : undefined}
                   onClick={() => setPage(item)}
-                  className={`flex h-8 w-8 items-center justify-center rounded-md border text-sm transition ${
+                  className={`flex h-8 min-w-8 items-center justify-center rounded-md border px-2 text-sm tabular-nums transition ${
                     item === page
                       ? 'border-accent bg-accent font-semibold text-white'
                       : 'border-[var(--color-admin-card-border)] bg-white text-[#0f172a] hover:bg-slate-50 dark:bg-[#111318] dark:text-white dark:hover:bg-slate-800'

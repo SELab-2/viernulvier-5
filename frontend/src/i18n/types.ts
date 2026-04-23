@@ -139,6 +139,64 @@ export type Messages = {
     disclaimer: string
     rights: string
   }
+  settings: {
+    title: string
+    subtitle: string
+    closeAriaLabel: string
+    tabAccount: string
+    tabEditors: string
+    accountSectionTitle: string
+    usernameLabel: string
+    usernameHint: string
+    saveButton: string
+    saving: string
+    securitySectionTitle: string
+    securityHint: string
+    changePasswordButton: string
+    currentPasswordLabel: string
+    newPasswordLabel: string
+    confirmPasswordLabel: string
+    savePasswordButton: string
+    savingPassword: string
+    cancelButton: string
+    passwordMismatchError: string
+    accountSavedSuccess: string
+    accountSaveError: string
+    passwordChangedSuccess: string
+    passwordChangeError: string
+    editorsSectionTitle: string
+    editorsLoadError: string
+    noEditorsTitle: string
+    noEditorsHint: string
+    clickToManageHint: string
+    newEditorTitle: string
+    editEditorTitle: string
+    addNewEditorButton: string
+    editorUsernameLabel: string
+    temporaryPasswordLabel: string
+    temporaryPasswordHint: string
+    passwordMinLengthHint: string
+    createEditorButton: string
+    creatingEditor: string
+    editorCreatedSuccess: string
+    editorCreateError: string
+    saveUsernameButton: string
+    resetPasswordTitle: string
+    resetPasswordHint: string
+    resetPasswordPlaceholder: string
+    resetPasswordButton: string
+    resettingPassword: string
+    editorPasswordResetSuccess: string
+    editorPasswordResetError: string
+    dangerZoneTitle: string
+    dangerZoneHint: string
+    deleteEditorButton: string
+    deletingEditor: string
+    deleteEditorConfirm: string
+    editorSavedSuccess: string
+    editorSaveError: string
+    editorDeleteError: string
+  }
   admin: {
     themeToggleDark: string
     themeToggleLight: string
@@ -203,6 +261,56 @@ export type Messages = {
     archiveEdit: {
       pageTitle: string
       itemIdLabel: string
+    }
+  }
+
+  editHeader: {
+    back: string
+    publish: string
+    saveOnDraft: string
+  }
+
+  blogs: {
+    languageError:string
+    detailPageBack:string
+    loadingBlog: string
+    loadingProductions: string
+    relatedProductions: string
+    untitledBlog: string
+
+    dutchOption:string
+    englishOption:string
+    title: string
+    content: string
+    editBlogTitle: string
+    editBlogDescription: string
+    createBlogTitle: string
+    createBlogDescription: string
+    manageProduction: string
+    manageProductionButton: string
+    removeProductionAriaLabel: string
+    savingButton: string
+    deletingButton: string
+    deleteButton: string
+    deleteConfirm: string
+    deleteError: string
+    blogNotFound: string
+    noTitleError:string
+    filledLanguageNeedsTitleError: string
+    filledLanguageNeedsContentError: string
+    publishConfirmTitle: string
+    publishConfirmWithoutEnglish: string
+    publishConfirmWithoutDutch: string
+    publishConfirmCancel: string
+    publishConfirmProceed: string
+
+    productionPopUp : {
+      title:string
+      cancelButton: string
+      addButton: string
+      close: string
+      queryHint: string
+      noProductionFound:string
     }
   }
 }
