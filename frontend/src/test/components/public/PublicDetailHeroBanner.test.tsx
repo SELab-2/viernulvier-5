@@ -118,7 +118,15 @@ describe('ArchiveDetailHero', () => {
                 title="Kapiteinsavond"
                 locale="nl"
                 genres={[
-                    { id: '35dbb2ad-e32a-4779-b7eb-93085531dbc4', type: 'theater', name: { nl: 'Concert', en: 'Concert' }, slug: { nl: 'muziek', en: 'music' } },
+                    {
+                        id: '35dbb2ad-e32a-4779-b7eb-93085531dbc4',
+                        apiId: null,
+                        vendor_id: null,
+                        type: 'theater',
+                        name: { nl: 'Concert', en: 'Concert' },
+                        slug: { nl: 'muziek', en: 'music' },
+                        description: null,
+                    },
                 ]}
             />
         )
@@ -133,7 +141,15 @@ describe('ArchiveDetailHero', () => {
                 title="Kapiteinsavond"
                 locale="nl"
                 genres={[
-                    { id: '35dbb2ad-e32a-4779-b7eb-93085531dbc4', type: 'theater', name: { nl: 'Concert', en: 'Concert' }, slug: { nl: 'muziek', en: 'music' } },
+                    {
+                        id: '35dbb2ad-e32a-4779-b7eb-93085531dbc4',
+                        apiId: null,
+                        vendor_id: null,
+                        type: 'theater',
+                        name: { nl: 'Concert', en: 'Concert' },
+                        slug: { nl: 'muziek', en: 'music' },
+                        description: null,
+                    },
                 ]}
             />
         )
@@ -149,8 +165,24 @@ describe('ArchiveDetailHero', () => {
                 title="Kapiteinsavond"
                 locale="nl"
                 genres={[
-                    { id: '35dbb2ad-e32a-4779-b7eb-93085531dbc4', type: 'theater', name: { nl: 'Concert', en: 'Concert' }, slug: { nl: 'muziek', en: 'music' } },
-                    { id: '8edda54e-a1c4-486d-9fd4-c2e43cb2fe2f', type: 'theater', name: { nl: 'Performance', en: 'Performance' }, slug: { nl: 'performance', en: 'performance' } },
+                    {
+                        id: '35dbb2ad-e32a-4779-b7eb-93085531dbc4',
+                        apiId: null,
+                        vendor_id: null,
+                        type: 'theater',
+                        name: { nl: 'Concert', en: 'Concert' },
+                        slug: { nl: 'muziek', en: 'music' },
+                        description: null,
+                    },
+                    {
+                        id: '8edda54e-a1c4-486d-9fd4-c2e43cb2fe2f',
+                        apiId: null,
+                        vendor_id: null,
+                        type: 'theater',
+                        name: { nl: 'Performance', en: 'Performance' },
+                        slug: { nl: 'performance', en: 'performance' },
+                        description: null,
+                    },
                 ]}
             />
         )
@@ -181,7 +213,15 @@ describe('ArchiveDetailHero', () => {
                 title="Kapiteinsavond"
                 locale="nl"
                 genres={[
-                    { id: '35dbb2ad-e32a-4779-b7eb-93085531dbc4', type: 'theater', name: null, slug: null },
+                    {
+                        id: '35dbb2ad-e32a-4779-b7eb-93085531dbc4',
+                        apiId: null,
+                        vendor_id: null,
+                        type: 'theater',
+                        name: null,
+                        slug: null,
+                        description: null,
+                    },
                 ]}
             />
         )
@@ -196,7 +236,15 @@ describe('ArchiveDetailHero', () => {
                 title="Kapiteinsavond"
                 locale="en"
                 genres={[
-                    { id: '35dbb2ad-e32a-4779-b7eb-93085531dbc4', type: 'theater', name: { nl: 'Concert', en: 'Concert EN' }, slug: null },
+                    {
+                        id: '35dbb2ad-e32a-4779-b7eb-93085531dbc4',
+                        apiId: null,
+                        vendor_id: null,
+                        type: 'theater',
+                        name: { nl: 'Concert', en: 'Concert EN' },
+                        slug: null,
+                        description: null,
+                    },
                 ]}
             />
         )
