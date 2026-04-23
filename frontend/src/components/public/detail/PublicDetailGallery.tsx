@@ -12,12 +12,12 @@ function ArchiveDetailGallery({ images }: ArchiveDetailGalleryProps) {
 
     return (
         <div className="relative w-full">
-            <div className="w-full h-[300px] md:h-[400px] rounded-xl overflow-hidden">
+            <div className="w-full rounded-xl overflow-hidden">
                 {images[current] && (
                     <img
                         src={images[current]!}
                         alt={`Gallery image ${current + 1}`}
-                        className="w-full h-full object-cover"
+                        className="w-full h-auto"
                     />
                 )}
             </div>
@@ -26,13 +26,20 @@ function ArchiveDetailGallery({ images }: ArchiveDetailGalleryProps) {
                 <>
                     <button
                         onClick={prev}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/40 text-white px-3 py-2 rounded-full hover:bg-black/60"
+                        className="absolute left-4 top-1/2 -translate-y-1/2 
+                                    bg-black/70 text-white 
+                                    w-10 h-10 flex items-center justify-center 
+                                    rounded-full text-xl font-bold 
+                                    hover:bg-black transition"
                     >
                         ‹
                     </button>
                     <button
                         onClick={next}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/40 text-white px-3 py-2 rounded-full hover:bg-black/60"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/70 text-white 
+                                    w-10 h-10 flex items-center justify-center 
+                                    rounded-full text-xl font-bold 
+                                    hover:bg-black transition"
                     >
                         ›
                     </button>

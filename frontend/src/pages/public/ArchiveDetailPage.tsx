@@ -10,7 +10,7 @@ import ArchiveDetailHero from '../../components/public/detail/PublicDetailHeroBa
 import ArchiveDetailEventsList from '../../components/public/detail/PublicDetailEventsList'
 import ArchiveDetailGallery from '../../components/public/detail/PublicDetailGallery'
 import { getProductionById, type Production } from '../../api/productions'
-import { getGalleryItems, getItemCrops, getPreferredCropUrl } from '../../api/media'
+import { getGalleryItems, getItemCrops, getPreferredHeroCropUrl, getPreferredMediaCropUrl } from '../../api/media'
 import { getEventsByProductionId, type Event } from '../../api/events'
 import { getGenresByProductionId, type Genre } from '../../api/genres'
 import { getTagsByProductionId, type Tag } from '../../api/tags'
@@ -108,13 +108,13 @@ function ArchiveDetailPageContent() {
 
                     if (items.length > 0) {
                         const firstCrops = await getItemCrops(items[0].id)
-                        const heroUrl = getPreferredCropUrl(firstCrops.data)
+                        const heroUrl = getPreferredHeroCropUrl(firstCrops.data)
                         setImageUrl(heroUrl)
 
                         // First item is used as the hero banner above; remaining items go in the gallery
                         const remainingItems = items.slice(1)
                         const allCrops = await Promise.all(remainingItems.map((item) => getItemCrops(item.id)))
-                        setGalleryImages(allCrops.map((res) => getPreferredCropUrl(res.data)).filter(Boolean) as string[])
+                        setGalleryImages(allCrops.map((res) => getPreferredMediaCropUrl(res.data)).filter(Boolean) as string[])
                     }
                 }
 

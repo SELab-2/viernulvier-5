@@ -50,10 +50,19 @@ export const getItemCrops = (itemId: string) => {
     return api.get<CropsResponse>(`/archive/media/items/crops?itemId=${itemId}`)
 }
 
-const CROP_FALLBACK_ORDER = ['FE3_header', 'FE3_boxed']
+const HERO_CROP_FALLBACK_ORDER = ['FE3_header', 'FE3_boxed']
+const MEDIA_CROP_FALLBACK_ORDER = ['FE3_boxed', 'FE3_header']
 
-export const getPreferredCropUrl = (crops: Crop[]): string | null => {
-    for (const name of CROP_FALLBACK_ORDER) {
+export const getPreferredHeroCropUrl = (crops: Crop[]): string | null => {
+    for (const name of HERO_CROP_FALLBACK_ORDER) {
+        const crop = crops.find((c) => c.name === name)
+        if (crop) return crop.url
+    }
+    return null
+}
+
+export const getPreferredMediaCropUrl = (crops: Crop[]): string | null => {
+    for (const name of MEDIA_CROP_FALLBACK_ORDER) {
         const crop = crops.find((c) => c.name === name)
         if (crop) return crop.url
     }
