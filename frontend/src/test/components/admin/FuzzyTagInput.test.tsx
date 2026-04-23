@@ -33,8 +33,8 @@ interface TagResponse {
 
 interface TagListResponse {
     data: TagResponse[]
-    meta: any
-    links: any
+    meta: unknown
+    links: unknown
 }
 
 const createMockTag = (name: string): TagResponse => ({
