@@ -22,7 +22,7 @@ describe('SearchResultCard', () => {
             </MemoryRouter>
         )
 
-        const link = screen.getByRole('link', { name: 'The Tender Ears' })
+        const link = screen.getByRole('link', { name: /The Tender Ears/i })
         expect(link).toHaveAttribute('href', '/nl/archive/dab70000-0000-0000-0000-000000000001')
     })
 })
