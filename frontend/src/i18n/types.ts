@@ -58,6 +58,7 @@ export type Messages = {
     subtitle: string
     productionsTab: string
     blogTab: string
+    allTab: string
     resultsCount: string
     resultsSuffix: string
     sortLabel: string
@@ -151,6 +152,64 @@ export type Messages = {
     cookies: string
     disclaimer: string
     rights: string
+  }
+  settings: {
+    title: string
+    subtitle: string
+    closeAriaLabel: string
+    tabAccount: string
+    tabEditors: string
+    accountSectionTitle: string
+    usernameLabel: string
+    usernameHint: string
+    saveButton: string
+    saving: string
+    securitySectionTitle: string
+    securityHint: string
+    changePasswordButton: string
+    currentPasswordLabel: string
+    newPasswordLabel: string
+    confirmPasswordLabel: string
+    savePasswordButton: string
+    savingPassword: string
+    cancelButton: string
+    passwordMismatchError: string
+    accountSavedSuccess: string
+    accountSaveError: string
+    passwordChangedSuccess: string
+    passwordChangeError: string
+    editorsSectionTitle: string
+    editorsLoadError: string
+    noEditorsTitle: string
+    noEditorsHint: string
+    clickToManageHint: string
+    newEditorTitle: string
+    editEditorTitle: string
+    addNewEditorButton: string
+    editorUsernameLabel: string
+    temporaryPasswordLabel: string
+    temporaryPasswordHint: string
+    passwordMinLengthHint: string
+    createEditorButton: string
+    creatingEditor: string
+    editorCreatedSuccess: string
+    editorCreateError: string
+    saveUsernameButton: string
+    resetPasswordTitle: string
+    resetPasswordHint: string
+    resetPasswordPlaceholder: string
+    resetPasswordButton: string
+    resettingPassword: string
+    editorPasswordResetSuccess: string
+    editorPasswordResetError: string
+    dangerZoneTitle: string
+    dangerZoneHint: string
+    deleteEditorButton: string
+    deletingEditor: string
+    deleteEditorConfirm: string
+    editorSavedSuccess: string
+    editorSaveError: string
+    editorDeleteError: string
   }
   admin: {
     themeToggleDark: string

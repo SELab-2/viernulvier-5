@@ -10,6 +10,7 @@ export type SearchResultItem = {
     excerpt: string
     venue: string
     imageUrl?: string
+    detailHref?: string
 }
 
 type SearchResultCardProps = {
@@ -27,14 +28,10 @@ function SearchResultCard({ item, detailHref }: SearchResultCardProps) {
     const displayTitle = normalizedTitle.length > 110 ? `${normalizedTitle.slice(0, 107)}...` : normalizedTitle
     const imageUrl = item.imageUrl ?? FALLBACK_IMAGE
 
-    return (
-        <Link
-            to={detailHref}
-            className="group block h-full rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2"
-            aria-label={item.title}
-        >
-            <article className="flex h-full w-full flex-col border-b border-border pb-5 transition-transform duration-200 group-hover:-translate-y-0.5">
-                <div className="relative h-32 overflow-hidden rounded-md bg-gradient-to-br from-accent to-accent/50 sm:h-36">
+    const card = (
+        <article className="flex w-full flex-col border-b border-border pb-5">
+            <div className="relative h-32 overflow-hidden rounded-md sm:h-36 bg-gradient-to-br from-accent to-accent/50">
+                {item.imageUrl ? (
                     <img
                         src={imageUrl}
                         alt={item.title}
@@ -58,6 +55,15 @@ function SearchResultCard({ item, detailHref }: SearchResultCardProps) {
             </article>
         </Link>
     )
-}
 
+    if (item.detailHref) {
+        return (
+            <Link to={item.detailHref} className="block">
+                {card}
+            </Link>
+        )
+    }
+
+    return card
+}
 export default SearchResultCard

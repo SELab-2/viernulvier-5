@@ -141,6 +141,22 @@ button:disabled {
 		var(--color-admin-bg);
 }
 
+[data-theme='dark'] .admin-shell {
+	background:
+		radial-gradient(circle at top, rgba(130, 36, 227, 0.05), transparent 40%),
+		linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 20%),
+		var(--color-admin-bg);
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme='light']) .admin-shell {
+		background:
+			radial-gradient(circle at top, rgba(130, 36, 227, 0.05), transparent 40%),
+			linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 20%),
+			var(--color-admin-bg);
+	}
+}
+
 .admin-auth-card {
 	border: 1px solid var(--color-admin-card-border);
 	box-shadow: var(--color-admin-shadow);
@@ -226,6 +242,22 @@ button:disabled {
 	color: #ffffff;
 	box-shadow: 0 10px 18px -12px rgba(15, 23, 42, 0.65);
 	transition: transform 180ms ease, opacity 180ms ease;
+}
+
+[data-theme='dark'] .admin-auth-submit {
+	background-color: var(--color-surface);
+	color: var(--color-text);
+	box-shadow: 0 10px 18px -12px rgba(0, 0, 0, 0.5);
+	border: 1px solid var(--color-admin-card-border);
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme='light']) .admin-auth-submit {
+		background-color: var(--color-surface);
+		color: var(--color-text);
+		box-shadow: 0 10px 18px -12px rgba(0, 0, 0, 0.5);
+		border: 1px solid var(--color-admin-card-border);
+	}
 }
 
 .admin-auth-submit:hover:not(:disabled) {
@@ -399,5 +431,19 @@ button:disabled {
 		margin-inline: 0;
 		padding-left: 2rem;
 		padding-right: max(1.5rem, calc((100vw - var(--layout-content-max-width)) / 2));
+	}
+
+	[data-theme='dark'] .admin-shell {
+		background:
+			radial-gradient(circle at top, rgba(130, 36, 227, 0.04), transparent 30%),
+			var(--color-admin-bg);
+	}
+}
+
+@media (max-width: 1279px) and (prefers-color-scheme: dark) {
+	:root:not([data-theme='light']) .admin-shell {
+		background:
+			radial-gradient(circle at top, rgba(130, 36, 227, 0.04), transparent 30%),
+			var(--color-admin-bg);
 	}
 }
