@@ -35,6 +35,16 @@ const mockMessages = {
             actionDelete: 'Verwijder',
             emptyRecent: 'Geen blogs gevonden.',
         },
+        blogs: {
+            pageTitle: 'Blogs',
+            pageSubtitle: 'Overzicht van alle blogberichten.',
+            searchPlaceholder: 'Zoek op titel...',
+            newButton: 'Nieuwe Blog',
+            deleteError: 'Verwijderen mislukt. Probeer opnieuw.',
+            paginationShowing: (from: number, to: number, total: number) => `Toont ${from}–${to} van ${total} resultaten`,
+            paginationPageLabel: (page: number) => `Pagina ${page}`,
+            tableColLinkedProductions: 'Gekoppelde producties'
+        },
     },
 } as unknown as Messages
 

@@ -42,6 +42,20 @@ const mockMessages = {
             languageStatusAttention: 'Aandacht vereist',
             languageStatusMissing: 'Ontbreekt',
         },
+        productions: {
+            pageTitle: 'Producties',
+            pageSubtitle: 'Overzicht van alle gearchiveerde en actuele voorstellingen.',
+            searchPlaceholder: 'Zoek op titel, artiest of genre...',
+            newButton: 'Nieuwe Productie',
+            deleteConfirm: 'Weet je zeker dat je deze productie wilt verwijderen?',
+            deleteError: 'Verwijderen mislukt. Probeer opnieuw.',
+            tabAll: 'Alle',
+            tabPublished: 'Gepubliceerd',
+            tabConcepts: 'Concepten',
+            tabAriaLabel: 'Producties filter',
+            paginationShowing: (from: number, to: number, total: number) => `Toont ${from}–${to} van ${total} resultaten`,
+            paginationPageLabel: (page: number) => `Pagina ${page}`,
+        },
     },
 } as unknown as Messages
 
