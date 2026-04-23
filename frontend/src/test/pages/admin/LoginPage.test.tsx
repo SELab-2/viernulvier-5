@@ -68,11 +68,10 @@ describe('LoginPage', () => {
     expect(submitButton).toBeEnabled()
   })
 
-  it('logs in, validates the session, and navigates to the requested admin route when present', async () => {
+  it('logs in and navigates to the requested admin route without a second /auth/me roundtrip', async () => {
     const fetchMock = vi.fn()
-      .mockResolvedValueOnce(createJsonResponse(200, { success: true }))
       .mockResolvedValueOnce(createJsonResponse(200, {
-        data: { id: '1', username: 'admin', role: 'ADMIN' },
+        data: { user: { id: '1', username: 'admin', role: 'ADMIN' } },
       }))
 
     vi.stubGlobal('fetch', fetchMock)
@@ -92,9 +91,8 @@ describe('LoginPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Inloggen' }))
 
     await waitFor(() => {
-      expect(fetchMock).toHaveBeenCalledTimes(2)
+      expect(fetchMock).toHaveBeenCalledTimes(1)
       expect(fetchMock.mock.calls[0]?.[0]).toBe('/api/v1/auth/login')
-      expect(fetchMock.mock.calls[1]?.[0]).toBe('/api/v1/auth/me')
       expect(navigate).toHaveBeenCalledWith('/admin/archive/42/edit?tab=metadata#notes', { replace: true })
     })
   })
@@ -103,9 +101,8 @@ describe('LoginPage', () => {
     getAdminRouteConfigMock.mockReturnValue({ dashboardPath: '/dashboard', legacyDashboardPaths: ['/'] })
 
     const fetchMock = vi.fn()
-      .mockResolvedValueOnce(createJsonResponse(200, { success: true }))
       .mockResolvedValueOnce(createJsonResponse(200, {
-        data: { id: '1', username: 'admin', role: 'ADMIN' },
+        data: { user: { id: '1', username: 'admin', role: 'ADMIN' } },
       }))
 
     vi.stubGlobal('fetch', fetchMock)
