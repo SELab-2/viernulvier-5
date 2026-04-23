@@ -86,7 +86,7 @@ function AdminLayout({
 
         <div className={['flex w-full items-stretch flex-1', showSidebar ? 'lg:min-h-[calc(100vh-4.5rem)]' : ''].filter(Boolean).join(' ')}>
           {showSidebar ? (
-            <div className="hidden lg:flex lg:shrink-0">
+            <div className="hidden lg:sticky lg:top-0 lg:flex lg:h-screen lg:shrink-0 lg:self-start">
               <AdminSidebar
                 userName={sidebarUserName}
                 userRole={sidebarUserRole}

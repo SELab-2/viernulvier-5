@@ -29,7 +29,7 @@ function AdminSidebar({ userName, userRole, onOpenSettings, onClose }: AdminSide
   }
 
   return (
-    <aside className="flex w-[252px] shrink-0 flex-col justify-between border-r border-[var(--color-admin-card-border)] bg-white dark:bg-[#111318]">
+    <aside className="flex h-full w-[252px] shrink-0 flex-col justify-between overflow-y-auto border-r border-[var(--color-admin-card-border)] bg-white dark:bg-[#111318]">
       <div className="px-6 py-6">
         <nav className="space-y-1">
           {navigation.primary.map((item) => {
