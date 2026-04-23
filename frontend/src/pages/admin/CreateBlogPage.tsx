@@ -541,7 +541,7 @@ function CreateBlogPage() {
                             type="button"
                             onClick={publish}
                             disabled={isSaving || isLoadingBlog || isDeleting}
-                            className="text-sm text-white font-regular tracking-wide text-accent bg-accent py-2 px-4 rounded-full"
+                            className="text-sm text-white font-regular tracking-wide text-accent bg-accent py-3 px-6 rounded-full"
                         >
                             {isSaving ? (messages.blogs.savingButton) : (messages.editHeader.publish)}
                         </button>
