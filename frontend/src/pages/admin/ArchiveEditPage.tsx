@@ -114,12 +114,16 @@ function ArchiveEditPage({ create } : ProductionEditPageProps) {
                         nl: form.settings.artist,
                         en: form.settings.artist,
                     },
-                })
 
-                await saveEvents(res.id)
+                });
+
+                const production = res.data;
+
+
+                await saveEvents(production.id)
 
                 // TODO: Use a slug
-                navigate(`/admin/productions/${res.id}/edit`, { replace: true })
+                navigate(`/admin/productions/${production.id}/edit`, { replace: true })
             } else {
                 await api.put(`/archive/productions/${id}`, {
                     title: {
