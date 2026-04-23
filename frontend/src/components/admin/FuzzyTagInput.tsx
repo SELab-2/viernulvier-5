@@ -1,14 +1,14 @@
 import { useEffect, useState, useRef } from 'react'
 import { api } from '../../api/client'
-import type { TagListResponse } from '../../../../backend/src/modules/taxonomies/taxonomies.schema'
+import type { LocalizedText } from '../../types/production'
 import { useLocale } from './useLocale'
 
 type FuzzyTagInputProps = {
-    tags: string[]
+    tags: LocalizedText[]
     tag: string
     endpoint: '/archive/genres' | '/archive/tags'
-    addTag: (tagName: string) => void
-    onRemove: (tag: string) => void
+    addTag: (tag: LocalizedText) => void
+    onRemove: (tag: LocalizedText) => void
     onChange: (value: string) => void
     placeholder?: string
 }
@@ -23,7 +23,7 @@ function FuzzyTagInput({
     placeholder
 }: FuzzyTagInputProps) {
     const { locale } = useLocale()
-    const [suggestions, setSuggestions] = useState<string[]>([])
+    const [suggestions, setSuggestions] = useState<LocalizedText[]>([])
     const [isOpen, setIsOpen] = useState(false)
     const containerRef = useRef<HTMLDivElement>(null)
 
@@ -38,14 +38,27 @@ function FuzzyTagInput({
             }
 
             try {
-                const response = await api.get<TagListResponse>(`${endpoint}?search=${tag}&lang=${locale}&limit=5`)
+                // Search across all languages in backend now, but we still pass lang for potential prioritization
+                const response = await api.get<any>(`${endpoint}?search=${tag}&lang=${locale}&limit=5`)
                 if (response && response.data) {
-                    // Extract names and filter out already added tags (case-insensitive check)
-                    const lowerTags = tags.map(t => t.toLowerCase())
-                    const names = response.data
-                        .map(item => item.name?.[locale] || item.name?.nl || item.name?.en || '')
-                        .filter(name => name !== '' && !lowerTags.includes(name.toLowerCase()))
-                    setSuggestions(names)
+                    // Extract all possible names from existing tags for duplicate checking
+                    const existingNamesLower = tags.flatMap(t => [
+                        t.nl?.toLowerCase(),
+                        t.en?.toLowerCase(),
+                        t.fr?.toLowerCase()
+                    ].filter(Boolean))
+
+                    const newSuggestions = response.data
+                        .map((item: any) => item.name as LocalizedText)
+                        .filter((nameObj: LocalizedText) => {
+                            const currentName = (nameObj[locale] || nameObj.nl || nameObj.en || '').toLowerCase()
+                            // Also check if any of the localized names of this suggestion already exist
+                            const suggestionNames = [nameObj.nl?.toLowerCase(), nameObj.en?.toLowerCase(), nameObj.fr?.toLowerCase()].filter(Boolean)
+                            const alreadyExists = suggestionNames.some(name => existingNamesLower.includes(name))
+                            
+                            return currentName !== '' && !alreadyExists
+                        })
+                    setSuggestions(newSuggestions)
                 }
             } catch (error) {
                 console.error('Failed to fetch suggestions:', error)
@@ -66,7 +79,7 @@ function FuzzyTagInput({
         return () => document.removeEventListener('mousedown', handleClickOutside)
     }, [])
 
-    const handleSelectSuggestion = (suggestion: string) => {
+    const handleSelectSuggestion = (suggestion: LocalizedText) => {
         addTag(suggestion)
         setIsOpen(false)
     }
@@ -74,17 +87,20 @@ function FuzzyTagInput({
     return (
         <div className="flex flex-col gap-2 relative" ref={containerRef}>
             <div className="flex flex-wrap gap-2 mb-2">
-                {tags.map(t => (
-                    <span
-                        key={t}
-                        className="flex items-center gap-1 rounded-full bg-accent/25 border-accent border px-3 py-1 text-xs font-bold text-foreground"
-                    >
-                        {t}
-                        <button type='button' onClick={() => onRemove(t)} className="hover:opacity-70">
-                            ×
-                        </button>
-                    </span>
-                ))}
+                {tags.map((t, idx) => {
+                    const displayName = t[locale] || t.nl || t.en || '???'
+                    return (
+                        <span
+                            key={`${displayName}-${idx}`}
+                            className="flex items-center gap-1 rounded-full bg-accent/25 border-accent border px-3 py-1 text-xs font-bold text-foreground"
+                        >
+                            {displayName}
+                            <button type='button' onClick={() => onRemove(t)} className="hover:opacity-70">
+                                ×
+                            </button>
+                        </span>
+                    )
+                })}
             </div>
             <div className="border border-border mb-8 gap-2 w-9/10 flex h-12 items-center rounded-md bg-background px-4 text-muted">
                 <input
@@ -99,7 +115,8 @@ function FuzzyTagInput({
                         if (e.key === 'Enter') {
                             e.preventDefault()
                             if (tag.trim()) {
-                                addTag(tag.trim())
+                                // Manual add stores it in the current locale
+                                addTag({ [locale]: tag.trim() })
                                 setIsOpen(false)
                             }
                         }
@@ -111,15 +128,18 @@ function FuzzyTagInput({
 
             {isOpen && suggestions.length > 0 && (
                 <ul className="absolute z-10 w-9/10 bg-surface border border-border rounded-md shadow-lg top-full -mt-7 max-h-40 overflow-auto">
-                    {suggestions.map((suggestion, index) => (
-                        <li
-                            key={index}
-                            onClick={() => handleSelectSuggestion(suggestion)}
-                            className="px-4 py-2 text-sm hover:bg-accent hover:text-white cursor-pointer"
-                        >
-                            {suggestion}
-                        </li>
-                    ))}
+                    {suggestions.map((suggestion, index) => {
+                        const suggestionName = suggestion[locale] || suggestion.nl || suggestion.en || ''
+                        return (
+                            <li
+                                key={index}
+                                onClick={() => handleSelectSuggestion(suggestion)}
+                                className="px-4 py-2 text-sm hover:bg-accent hover:text-white cursor-pointer"
+                            >
+                                {suggestionName}
+                            </li>
+                        )
+                    })}
                 </ul>
             )}
         </div>

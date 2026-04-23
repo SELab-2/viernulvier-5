@@ -1,16 +1,16 @@
-import type { ProductionSettingsFields } from "../../types/production"
+import type { ProductionSettingsFields, LocalizedText } from "../../types/production"
 import FuzzyTagInput from "./FuzzyTagInput"
 
 type ProductionSidebarProps = {
     fields: ProductionSettingsFields
     tag: string
     genre: string
-    onAddTag: (tagName?: string) => void
+    onAddTag: (tag: LocalizedText) => void
     onChangeTag: (tag: string) => void
-    onRemoveTag: (tag: string) => void
-    onAddGenre: (genreName?: string) => void
+    onRemoveTag: (tag: LocalizedText) => void
+    onAddGenre: (genre: LocalizedText) => void
     onChangeGenre: (tag: string) => void
-    onRemoveGenre: (tag: string) => void
+    onRemoveGenre: (tag: LocalizedText) => void
     onChange: (field: keyof ProductionSettingsFields, value: string) => void
     productionSettingsLabel: string,
     statusLabel: string,

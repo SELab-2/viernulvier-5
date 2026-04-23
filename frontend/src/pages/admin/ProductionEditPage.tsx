@@ -4,11 +4,10 @@ import AdminLayout from '../../components/admin/AdminLayout'
 import SectionHeading from '../../components/admin/SectionHeading'
 import EventsEdit from '../../components/admin/ManageEvents'
 
-import type { Language, ProductionContent, ProductionContentFields, ProductionForm, ProductionSettingsFields } from '../../types/production'
+import type { Language, ProductionContent, ProductionContentFields, ProductionForm, ProductionSettingsFields, LocalizedText } from '../../types/production'
 import type { Locale } from '../../i18n/types'
 import type { Event, EventForm } from '../../types/event'
 import type { ProductionResponse } from '../../../../backend/src/modules/productions/productions.schema'
-// import type { LocationResponse } from '../../../../backend/src/modules/locations/locations.schema'
 
 import { useNavigate, useParams } from 'react-router-dom'
 import { getMessages } from '../../i18n'
@@ -17,6 +16,7 @@ import { api } from '../../api/client'
 import EventPopup from '../../components/admin/EventPopup'
 import ProductionSidebar from '../../components/admin/ProductionSidebar'
 import ProductionEditHeader from '../../components/admin/ProductionEditHeader'
+import { useLocale } from '../../components/admin/useLocale'
 
 const defaultContentForm : ProductionContent = {
     nl: {title: '', slug: '', content: ''},
@@ -44,8 +44,6 @@ const defaultEventForm : EventForm = {
     tags: []
 }
 
-// const defaultEvents: Event[] = []
-
 type ProductionEditPageProps = {
     /**
      * If true this will create a new production else it will try
@@ -65,13 +63,11 @@ type ProductionEditPageProps = {
  * draft or publish it.
  */
 function ProductionEditPage({ create } : ProductionEditPageProps) {
+    const { locale } = useLocale()
     const messages = getMessages()
     const navigate = useNavigate()
     const { id } = useParams()          // current production id
-
-    // Production state
     const [form, setForm] = useState<ProductionForm>(defaultForm)
-    // const [prod, setProd] = useState<ProductionResponse>()
     const [languageTab, setLanguageTab] = useState<Locale>('nl')
     const [tagInput, setTagInput] = useState('')
     const [genreInput, setGenreInput] = useState('')
@@ -117,6 +113,10 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
                         nl: form.settings.artist,
                         en: form.settings.artist,
                     },
+                    // Mapping LocalizedText[] back to what backend expects
+                    // Backend schema says tags: z.array(tagSchema).optional()
+                    // where tagSchema is z.object({ id: string.uuid().optional() }).passthrough()
+                    // For now we might just send names or wait for full implementation
                 })
 
                 navigate(`/admin/productions/${res.id}/edit`, { replace: true })
@@ -162,27 +162,33 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
     }
 
     // Adding a tag to a new or existing production
-    const onAddProductionTag = (tagName?: string) => {
-        const trimmed = (tagName || tagInput).trim()
+    const onAddProductionTag = (tag: LocalizedText) => {
+        const trimmed = (tag[locale] || tag.nl || tag.en || '').trim()
         if (!trimmed) return
 
         // Case-insensitive check
-        const exists = form.settings.tags.some(t => t.toLowerCase() === trimmed.toLowerCase())
+        const exists = form.settings.tags.some(t => {
+            const existingName = (t[locale] || t.nl || t.en || '').trim().toLowerCase()
+            return existingName === trimmed.toLowerCase()
+        })
         if (exists) return
 
-        changeSettings('tags', [...form.settings.tags, trimmed])
+        changeSettings('tags', [...form.settings.tags, tag])
         setTagInput('')
     }
 
-    const onAddProductionGenre = (genreName?: string) => {
-        const trimmed = (genreName || genreInput).trim()
+    const onAddProductionGenre = (genre: LocalizedText) => {
+        const trimmed = (genre[locale] || genre.nl || genre.en || '').trim()
         if (!trimmed) return
 
         // Case-insensitive check
-        const exists = form.settings.genres.some(g => g.toLowerCase() === trimmed.toLowerCase())
+        const exists = form.settings.genres.some(g => {
+            const existingName = (g[locale] || g.nl || g.en || '').trim().toLowerCase()
+            return existingName === trimmed.toLowerCase()
+        })
         if (exists) return
 
-        changeSettings('genres', [...form.settings.genres, trimmed])
+        changeSettings('genres', [...form.settings.genres, genre])
         setGenreInput('')
     }
     
@@ -202,11 +208,11 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
         setGenreInput(genre)
     }
 
-    const onRemoveProductionTag = (tag: string) => {
+    const onRemoveProductionTag = (tag: LocalizedText) => {
         changeSettings('tags', form.settings.tags.filter(t => t !== tag))
     }
 
-    const onRemoveProductionGenre = (genre: string) => {
+    const onRemoveProductionGenre = (genre: LocalizedText) => {
         changeSettings('genres', form.settings.genres.filter(g => g !== genre))
     }
 
@@ -286,6 +292,7 @@ function ProductionEditPage({ create } : ProductionEditPageProps) {
                     fields={form.settings}
                     tag={tagInput}
                     genre={genreInput}
+                    locale={languageTab}
                     onAddTag={onAddProductionTag}
                     onChangeTag={onChangeProductionTagInput}
                     onRemoveTag={onRemoveProductionTag}

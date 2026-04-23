@@ -2,7 +2,8 @@ import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import FuzzyTagInput from '../../../components/admin/FuzzyTagInput'
 import { api } from '../../../api/client'
-import type { TagListResponse, TagResponse } from '../../../../../backend/src/modules/taxonomies/taxonomies.schema'
+import type { TagResponse } from '../../../../../backend/src/modules/taxonomies/taxonomies.schema'
+import type { LocalizedText } from '../../../types/production'
 
 // Mock the API client
 vi.mock('../../../api/client', () => ({
@@ -31,8 +32,10 @@ const createMockTag = (name: string): TagResponse => ({
 })
 
 describe('FuzzyTagInput', () => {
+    const existingTag: LocalizedText = { nl: 'ExistingTag', en: 'ExistingTag' }
+    
     const defaultProps = {
-        tags: ['ExistingTag'],
+        tags: [existingTag],
         tag: '',
         endpoint: '/archive/tags' as const,
         addTag: vi.fn(),
@@ -59,7 +62,7 @@ describe('FuzzyTagInput', () => {
     })
 
     it('fetches and displays suggestions when typing', async () => {
-        const mockSuggestions: TagListResponse = {
+        const mockSuggestions = {
             data: [
                 createMockTag('Suggestion 1'),
                 createMockTag('Suggestion 2')
@@ -84,7 +87,7 @@ describe('FuzzyTagInput', () => {
     })
 
     it('filters out existing tags from suggestions case-insensitively', async () => {
-        const mockSuggestions: TagListResponse = {
+        const mockSuggestions = {
             data: [
                 createMockTag('ExistingTag'),
                 createMockTag('NewTag')
@@ -107,10 +110,9 @@ describe('FuzzyTagInput', () => {
     })
 
     it('calls addTag when clicking a suggestion', async () => {
-        const mockSuggestions: TagListResponse = {
-            data: [
-                createMockTag('Suggestion 1')
-            ],
+        const mockTag = createMockTag('Suggestion 1')
+        const mockSuggestions = {
+            data: [mockTag],
             meta: { total: 1, page: 1, limit: 5, totalPages: 1 },
             links: { self: '', next: null, prev: null, first: '', last: '' }
         };
@@ -125,20 +127,20 @@ describe('FuzzyTagInput', () => {
             fireEvent.click(suggestion)
         })
 
-        expect(defaultProps.addTag).toHaveBeenCalledWith('Suggestion 1')
+        expect(defaultProps.addTag).toHaveBeenCalledWith(mockTag.name)
     })
 
     it('calls addTag when pressing Enter', () => {
         render(<FuzzyTagInput {...defaultProps} tag="New Manual Tag" />)
         const input = screen.getByPlaceholderText('Add tag...')
         fireEvent.keyDown(input, { key: 'Enter' })
-        expect(defaultProps.addTag).toHaveBeenCalledWith('New Manual Tag')
+        expect(defaultProps.addTag).toHaveBeenCalledWith({ nl: 'New Manual Tag' })
     })
 
     it('calls onRemove when clicking the remove button on a tag', () => {
         render(<FuzzyTagInput {...defaultProps} />)
         const removeButton = screen.getByText('×')
         fireEvent.click(removeButton)
-        expect(defaultProps.onRemove).toHaveBeenCalledWith('ExistingTag')
+        expect(defaultProps.onRemove).toHaveBeenCalledWith(existingTag)
     })
 })

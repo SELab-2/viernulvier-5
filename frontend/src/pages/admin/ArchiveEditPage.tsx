@@ -4,7 +4,7 @@ import AdminLayout from '../../components/admin/AdminLayout'
 import SectionHeading from '../../components/admin/SectionHeading'
 import EventsEdit from '../../components/admin/ManageEvents'
 
-import type { Language, ProductionContent, ProductionContentFields, ProductionForm, ProductionSettingsFields } from '../../types/production'
+import type { Language, ProductionContent, ProductionContentFields, ProductionForm, ProductionSettingsFields, LocalizedText } from '../../types/production'
 import type { Locale } from '../../i18n/types'
 import type { Event, EventForm } from '../../types/event'
 import type { ProductionResponse } from '../../../../backend/src/modules/productions/productions.schema'
@@ -16,6 +16,7 @@ import { api } from '../../api/client'
 import EventPopup from '../../components/admin/EventPopup'
 import ArchiveSidebar from '../../components/admin/ArchiveSidebar'
 import ArchiveEditHeader from '../../components/admin/ArchiveEditHeader'
+import { useLocale } from '../../components/admin/useLocale'
 
 const defaultContentForm : ProductionContent = {
     nl: {title: '', slug: '', content: ''},
@@ -62,15 +63,12 @@ type ProductionEditPageProps = {
  * draft or publish it.
  */
 function ArchiveEditPage({ create } : ProductionEditPageProps) {
+    const { locale } = useLocale()
     const messages = getMessages()
     const navigate = useNavigate()
     const { id } = useParams()          // current production id
-
-    // Production state
     const [form, setForm] = useState<ProductionForm>(defaultForm)
-    // const [prod, setProd] = useState<ProductionResponse>()
     const [languageTab, setLanguageTab] = useState<Locale>('nl')
-    // const [form, setForm] = useState<ProductionContent>(defaultForm)
     const [tagInput, setTagInput] = useState('')
     const [genreInput, setGenreInput] = useState('')
     
@@ -87,37 +85,7 @@ function ArchiveEditPage({ create } : ProductionEditPageProps) {
 
     // Load all data of an existing production or create a new one
     useEffect(() => {
-        // api.get<LocationResponse>(`/archive/locations`)
-        //     .then()
-        //     .catch()
         if (create) return 
-
-        // TODO: make use of the slug
-        // const fetch = async () => {
-        //     const production = await api.get<ProductionResponse>(`/archinve/productions/${id}`)
-
-
-        // }
-        // const production = await api.get<ProductionResponse>(`/archive/productions/${id}`)
-
-        // api.get<ProductionResponse>(`/archive/productions/${id}`)
-        //     .then( data => {
-        //         setForm({
-        //             content: {
-        //                 nl: {title: data?.title?.nl, slug: '', content: data?.description?.nl},
-        //                 en: {title: data?.title?.en, slug: '', content: data?.description?.en},
-        //             },
-        //             genres: [],
-        //             artist: '',
-        //             events: [],
-        //             banner: '',
-        //             extraPictures: []
-        //         })
-        //         setProd(data)
-        //     })
-        //     .catch( err => {
-        //         console.error(err)
-        //     })
     }, [id, create])
 
     const back = () => {
@@ -125,19 +93,10 @@ function ArchiveEditPage({ create } : ProductionEditPageProps) {
     }
 
     const publish = async () => {
-        saveProduction(
-            // false
-        )
+        saveProduction()
     }
 
-    // const saveAsDraft = async () => {
-    //     saveProduction(true)
-    // }
-
-    // Prodcution functions
-
-    const saveProduction = async ( /* asDraft: boolean = false // Extra draft feature */ ) => {
-        // TODO: an extra field is required in the schema for drafts
+    const saveProduction = async () => {
         try {
             if (create){
                 const res = await api.post<ProductionResponse>('/archive/productions', {
@@ -153,10 +112,8 @@ function ArchiveEditPage({ create } : ProductionEditPageProps) {
                         nl: form.settings.artist,
                         en: form.settings.artist,
                     },
-                    // isDraft: asDraft
                 })
 
-                // TODO: Use a slug
                 navigate(`/admin/productions/${res.id}/edit`, { replace: true })
             } else {
                 await api.put(`/archive/productions/${id}`, {
@@ -168,7 +125,6 @@ function ArchiveEditPage({ create } : ProductionEditPageProps) {
                         nl: form.content?.nl.content,
                         en: form.content?.en.content,
                     }
-                    // isDraft: asDraft
                 })
             } 
         } catch (err) {
@@ -200,51 +156,43 @@ function ArchiveEditPage({ create } : ProductionEditPageProps) {
         }))
     }
 
-    // const onChangeForm = (field: keyof ProductionContentFields, value: string) => {
-    //     setForm(prev => ({
-    //         ...prev,
-    //         [languageTab]: { ...prev[languageTab] , [field]: value }
-    //     }))
-    // }
-
     // Adding a tag to a new or existing production
-    const onAddProductionTag = (tagName?: string) => {
-        const trimmed = (tagName || tagInput).trim()
+    const onAddProductionTag = (tag: LocalizedText) => {
+        const trimmed = (tag[locale] || tag.nl || tag.en || '').trim()
         if (!trimmed) return
         
         // Case-insensitive check
-        const exists = form.settings.tags.some(t => t.toLowerCase() === trimmed.toLowerCase())
+        const exists = form.settings.tags.some(t => {
+            const existingName = (t[locale] || t.nl || t.en || '').trim().toLowerCase()
+            return existingName === trimmed.toLowerCase()
+        })
         if (exists) return
 
-        changeSettings('tags', [...form.settings.tags, trimmed])
+        changeSettings('tags', [...form.settings.tags, tag])
         setTagInput('')
     }
 
-    const onAddProductionGenre = (genreName?: string) => {
-        const trimmed = (genreName || genreInput).trim()
+    const onAddProductionGenre = (genre: LocalizedText) => {
+        const trimmed = (genre[locale] || genre.nl || genre.en || '').trim()
         if (!trimmed) return
 
         // Case-insensitive check
-        const exists = form.settings.genres.some(g => g.toLowerCase() === trimmed.toLowerCase())
+        const exists = form.settings.genres.some(g => {
+            const existingName = (g[locale] || g.nl || g.en || '').trim().toLowerCase()
+            return existingName === trimmed.toLowerCase()
+        })
         if (exists) return
 
-        changeSettings('genres', [...form.settings.genres, trimmed])
+        changeSettings('genres', [...form.settings.genres, genre])
         setGenreInput('')
     }
-    
-    // const onAddProductionGenre = () => {
-    //     const trimmed = genreInput.trim()
-    //     if (!trimmed || form.settings.genres.includes(trimmed)) return
-    //     changeSettings('genres', [...form.settings.tags, trimmed])
-    //     setGenreInput('')
-    // }
 
-    // Adding a tag to a new or existing event
-    const onAddEventTag = () => {
-        const trimmed = eventTagInput.trim()
-        if(!trimmed ||  eventForm.tags.includes(trimmed)) return
-        setEventForm(prev => ({...prev, tags: [...prev.tags, trimmed]}))
-        setEventTagInput('')
+    const onRemoveProductionTag = (tag: LocalizedText) => {
+        changeSettings('tags', form.settings.tags.filter(t => t !== tag))
+    }
+
+    const onRemoveProductionGenre = (genre: LocalizedText) => {
+        changeSettings('genres', form.settings.genres.filter(g => g !== genre))
     }
 
     const onChangeProductionTagInput = (tag: string) => {
@@ -253,14 +201,6 @@ function ArchiveEditPage({ create } : ProductionEditPageProps) {
 
     const onChangeProductionGenreInput = (genre: string) => {
         setGenreInput(genre)
-    }
-
-    const onRemoveProductionTag = (tag: string) => {
-        changeSettings('tags', form.settings.tags.filter(t => t !== tag))
-    }
-
-    const onRemoveProductionGenre = (genre: string) => {
-        changeSettings('genres', form.settings.genres.filter(g => g !== genre))
     }
 
     // Event functions
@@ -273,7 +213,7 @@ function ArchiveEditPage({ create } : ProductionEditPageProps) {
 
     const makeEvent = () => {
         setEventForm(defaultEventForm)
-        setEditingEvent(undefined) // creating a new event, so set to undefined
+        setEditingEvent(undefined)
         setEventTagInput('')
         setPopupOpen(true)
     }
@@ -301,7 +241,6 @@ function ArchiveEditPage({ create } : ProductionEditPageProps) {
 
     const saveEvent = () => {
         if (editingEvent) {
-            // left here
             setForm(prev => ({
                 ...prev,
                 events: (prev.events.map(e => e.key === editingEvent.key 
@@ -312,7 +251,6 @@ function ArchiveEditPage({ create } : ProductionEditPageProps) {
             setForm(prev => ({
                 ...prev,
                 events: [...prev.events, {...eventForm, key: crypto.randomUUID()}]
-
             }))
         }
         setPopupOpen(false)
@@ -326,6 +264,13 @@ function ArchiveEditPage({ create } : ProductionEditPageProps) {
         setEventForm(prev => ({...prev, tags: prev.tags.filter(t => t !== tag)}))
     }
 
+    const onAddEventTag = () => {
+        const trimmed = eventTagInput.trim()
+        if(!trimmed ||  eventForm.tags.includes(trimmed)) return
+        setEventForm(prev => ({...prev, tags: [...prev.tags, trimmed]}))
+        setEventTagInput('')
+    }
+
     return (
         <AdminLayout
             header={
@@ -334,8 +279,6 @@ function ArchiveEditPage({ create } : ProductionEditPageProps) {
                     publishLabel={messages.production.publish}
                     back={back}
                     publish={publish}   
-                    // saveAsDraftLabel={messages.production.saveOnDraft}
-                    // saveAsDraft={saveAsDraft}
                 />
             }
             sidebar={
@@ -343,6 +286,7 @@ function ArchiveEditPage({ create } : ProductionEditPageProps) {
                     fields={form.settings}
                     tag={tagInput}
                     genre={genreInput}
+                    locale={languageTab}
                     onAddTag={onAddProductionTag}
                     onChangeTag={onChangeProductionTagInput}
                     onRemoveTag={onRemoveProductionTag}
