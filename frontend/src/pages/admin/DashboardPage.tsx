@@ -343,7 +343,7 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
                   aria-label={String(item)}
                   aria-current={item === page ? 'page' : undefined}
                   onClick={() => setPage(item)}
-                  className={`flex h-8 w-8 items-center justify-center rounded-md border text-sm transition ${
+                  className={`flex h-8 min-w-8 items-center justify-center rounded-md border px-2 text-sm tabular-nums transition ${
                     item === page
                       ? 'border-accent bg-accent font-semibold text-white'
                       : 'border-[var(--color-admin-card-border)] bg-white text-[#0f172a] hover:bg-slate-50 dark:bg-[#111318] dark:text-white dark:hover:bg-slate-800'
