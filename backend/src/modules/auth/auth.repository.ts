@@ -21,6 +21,20 @@ export class AuthRepository {
         })
     }
 
+    async findByIdWithPassword(id: string) {
+        return this.prisma.adminUser.findUnique({
+            where: { id },
+        })
+    }
+
+    async updateById(id: string, data: { username?: string, passwordHash?: string }) {
+        return this.prisma.adminUser.update({
+            where: { id },
+            data,
+            select: userSelect,
+        })
+    }
+
     /**
      * Specifically for authentication flows, returns the user including passwordHash.
      */

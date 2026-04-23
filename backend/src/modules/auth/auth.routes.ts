@@ -3,11 +3,14 @@ import { AuthRepository } from './auth.repository.js'
 import { AuthService } from './auth.service.js'
 import { AuthController } from './auth.controller.js'
 import { requirePermission } from '../../hooks/require-permission.js'
-import { 
-    loginSchema, 
-    authResponseSchema, 
-    meResponseSchema, 
-    type LoginInput 
+import {
+    loginSchema,
+    updateMeSchema,
+    authResponseSchema,
+    meResponseSchema,
+    errorSchema,
+    type LoginInput,
+    type UpdateMeInput
 } from './auth.schema.js'
 import { env } from '../../config/env.js'
 import { Permission } from '../../domain/permissions.js'
@@ -145,6 +148,22 @@ const authRoutes: FastifyPluginAsync = async (fastify) => {
             }
         },
         handler: (req, reply) => controller.me(req, reply),
+    })
+
+    fastify.patch('/me', {
+        preHandler: [requirePermission(Permission.ARCHIVE_READ)],
+        schema: {
+            tags: ['auth'],
+            summary: 'Update current user info',
+            body: updateMeSchema,
+            response: {
+                200: meResponseSchema,
+                401: errorSchema,
+                404: errorSchema,
+                409: errorSchema,
+            }
+        },
+        handler: (req: FastifyRequest<{ Body: UpdateMeInput }>, reply) => controller.updateMe(req, reply),
     })
 }
 

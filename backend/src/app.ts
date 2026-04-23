@@ -25,6 +25,7 @@ import uitdatabankRoutes from './modules/uitdatabank/uitdatabank.routes.js'
 import blogsRoutes from './modules/blogs/blogs.routes.js'
 import postersRoutes from './modules/posters/posters.routes.js'
 import dashboardRoutes from './modules/dashboard/dashboard.routes.js'
+import searchRoutes from './modules/search/search.routes.js'
 
 /**
  * Build the Fastify application.
@@ -68,6 +69,7 @@ export async function buildApp(opts = {}): Promise<FastifyInstance> {
     await app.register(uitdatabankRoutes, { prefix: '/api/v1/archive/uitdatabank' })
     await app.register(blogsRoutes, { prefix: '/api/v1/archive/blogs' })
     await app.register(postersRoutes, { prefix: '/api/v1/archive/posters' })
+    await app.register(searchRoutes, { prefix: '/api/v1/archive/search' })
     await app.register(dashboardRoutes, { prefix: '/api/v1/dashboard' })
     await app.register(authRoutes, { prefix: '/api/v1/auth' })
     await app.register(editorsRoutes, { prefix: '/api/v1/editors' })
