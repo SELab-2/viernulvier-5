@@ -43,11 +43,27 @@ export class BlogsRepository {
 
         if (trimmedSearch) {
             const dateRange = this.parseSearchDate(trimmedSearch)
+            const searchConditions: Prisma.blogWhereInput[] = [
+                { title: { contains: trimmedSearch, mode: 'insensitive' } },
+                {
+                    content: {
+                        path: ['nl'],
+                        string_contains: trimmedSearch,
+                    },
+                },
+                {
+                    content: {
+                        path: ['en'],
+                        string_contains: trimmedSearch,
+                    },
+                },
+            ]
+
             if (dateRange) {
-                conditions.push({ createdAt: { gte: dateRange.from, lt: dateRange.to } })
-            } else {
-                conditions.push({ title: { contains: trimmedSearch, mode: 'insensitive' } })
+                searchConditions.push({ createdAt: { gte: dateRange.from, lt: dateRange.to } })
             }
+
+            conditions.push({ OR: searchConditions })
         }
 
         if (options.yearFrom || options.yearTo) {
