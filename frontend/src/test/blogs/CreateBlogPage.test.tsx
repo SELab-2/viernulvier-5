@@ -224,6 +224,19 @@ describe('CreateBlogPage', () => {
     expect(apiMock.post).not.toHaveBeenCalled()
   })
 
+  it('shows an error when a language has title but no content', async () => {
+    renderCreatePage()
+
+    fireEvent.change(screen.getByLabelText('blog title'), {
+      target: { value: 'Alleen titel' },
+    })
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'Publiceren' })[0])
+
+    expect(await screen.findByText('Als een taal een titel heeft, moet die ook content hebben.')).toBeInTheDocument()
+    expect(apiMock.post).not.toHaveBeenCalled()
+  })
+
   it('creates a blog when publish succeeds', async () => {
     mockCreateSuccess()
     renderCreatePage()
@@ -243,12 +256,17 @@ describe('CreateBlogPage', () => {
     })
     fireEvent.click(screen.getAllByRole('button', { name: 'Publiceren' })[0])
 
+    expect(await screen.findByRole('dialog')).toHaveAttribute('aria-label', messages.blogs.publishConfirmTitle)
+    expect(screen.getByText(messages.blogs.publishConfirmWithoutEnglish)).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: messages.blogs.publishConfirmProceed }))
+
     await waitFor(() => {
       expect(apiMock.post).toHaveBeenCalledTimes(1)
       expect(apiMock.post).toHaveBeenCalledWith(
         '/archive/blogs',
         expect.objectContaining({
-          title: JSON.stringify({ nl: 'Nieuwe blogtitel', en: null }),
+          title: { nl: 'Nieuwe blogtitel', en: null },
           content: {
             nl: '<p>Nieuwe inhoud</p>',
             en: null,
@@ -258,6 +276,29 @@ describe('CreateBlogPage', () => {
       )
       expect(navigate).toHaveBeenCalledWith('/blogs/blog-created')
     })
+  })
+
+  it('shows the Dutch warning when publishing without a Dutch version', async () => {
+    mockCreateSuccess()
+    renderCreatePage()
+
+    await waitFor(() => {
+      expect(apiFetchMock).toHaveBeenCalledWith(
+        '/archive/productions?page=1&limit=100&sort=relevance&lang=nl',
+        expect.any(Object),
+      )
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: messages.blogs.englishOption }))
+    fireEvent.change(screen.getByLabelText('blog title'), {
+      target: { value: 'English title' },
+    })
+    fireEvent.change(screen.getByLabelText('blog content'), {
+      target: { value: '<p>English content</p>' },
+    })
+    fireEvent.click(screen.getAllByRole('button', { name: 'Publiceren' })[0])
+
+    expect(await screen.findByRole('dialog')).toHaveTextContent(messages.blogs.publishConfirmWithoutDutch)
   })
 
   it('edits an existing blog and submits a PATCH request', async () => {
@@ -301,7 +342,7 @@ describe('CreateBlogPage', () => {
     expect(patchCall).toBeDefined()
 
     const body = JSON.parse(String(patchCall?.[1]?.body))
-    expect(body.title).toBe(JSON.stringify({ nl: 'Aangepaste titel', en: 'Existing title' }))
+    expect(body.title).toEqual({ nl: 'Aangepaste titel', en: 'Existing title' })
   })
 
   it('deletes a blog after confirmation', async () => {
@@ -384,6 +425,7 @@ describe('CreateBlogPage', () => {
       target: { value: '<p>Nieuwe inhoud</p>' },
     })
     fireEvent.click(screen.getAllByRole('button', { name: 'Publiceren' })[0])
+    fireEvent.click(await screen.findByRole('button', { name: messages.blogs.publishConfirmProceed }))
 
     expect(await screen.findByText('Failed to save blog.')).toBeInTheDocument()
   })
@@ -442,7 +484,7 @@ describe('CreateBlogPage', () => {
     })
 
     fireEvent.click(screen.getByRole('button', { name: 'Producties beheren' }))
-    expect(screen.getByText('Kies een production')).toBeInTheDocument()
+    expect(screen.getByText('Kies een productie')).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: /Eerste productie/i }))
     fireEvent.click(screen.getByRole('button', { name: 'Toevoegen' }))

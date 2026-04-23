@@ -82,6 +82,17 @@ type ProductionApiItem = {
     performer_type: string | null
     attendance_mode: string | null
     created_at: string
+    links?: {
+        self: string
+        events: string
+        genres: string
+        tags: string
+        media_gallery: string | null
+        review_gallery: string | null
+        poster_gallery: string | null
+        uitdatabank_theme: string | null
+        uitdatabank_type: string | null
+    }
 }
 
 type PaginatedApiResponse<T> = {
@@ -308,7 +319,7 @@ function mapProductionToSearchEntry(item: ProductionApiItem, locale: Locale, pre
         venue,
         imageUrl: item.image_url ?? undefined,
         year,
-        genre: normalizedGenre,
+        genre: normalizedGenre || '',
         location: normalizedLocation,
         type: 'production' as const,
     }
@@ -382,6 +393,249 @@ function mapBlogToSearchEntry(item: BlogApiItem, locale: Locale): SearchEntry {
         location: '',
         type: 'blog' as const,
     }
+}
+
+function getRelativePath(url: string | null | undefined): string | null {
+    if (!url) return null
+    const parts = url.split('/api/v1')
+    return parts.length > 1 ? parts[1] : url
+}
+
+interface GalleryItemApi {
+    links?: { crops: string }
+}
+
+interface CropApi {
+    name: string
+    url: string
+}
+
+function useProductionImages(items: ProductionApiItem[]) {
+    const [images, setImages] = useState<Record<string, string>>({})
+
+    useEffect(() => {
+        const fetchImages = async () => {
+            const itemsToFetch = items.filter(item => !item.image_url && item.links?.media_gallery)
+            
+            if (itemsToFetch.length === 0) return
+
+            const results = await Promise.allSettled(
+                itemsToFetch.map(async (item) => {
+                    const galleryPath = getRelativePath(item.links?.media_gallery)
+                    if (!galleryPath) return null
+
+                    try {
+                        // 1. Production -> Gallery
+                        const galleryRes = await apiFetch<{ data: { links: { items: string } } }>(galleryPath)
+                        const itemsPath = getRelativePath(galleryRes.data?.links?.items)
+                        if (!itemsPath) return null
+
+                        // 2. Gallery -> Items
+                        const itemsRes = await apiFetch<{ data: GalleryItemApi[] }>(itemsPath)
+                        const galleryItems = itemsRes.data || []
+                        
+                        // 3. Find first item with crops
+                        for (const galleryItem of galleryItems) {
+                            if (!galleryItem.links?.crops) continue
+                            
+                            // 4. Item -> Crops
+                            const cropsPath = getRelativePath(galleryItem.links.crops)
+                            if (!cropsPath) continue
+                            const cropsRes = await apiFetch<{ data: CropApi[] }>(cropsPath)
+                            const crops = cropsRes.data || []
+                            
+                            // 5. Find target crop
+                            const targetCrop = crops.find((c) => c.name === 'FE3_header') || 
+                                             crops.find((c) => c.name === 'FEA_boxed') || 
+                                             crops[0]
+                            
+                            if (targetCrop?.url) {
+                                return { id: item.id, url: targetCrop.url }
+                            }
+                        }
+                    } catch {
+                        // Silently fail
+                    }
+                    return null
+                })
+            )
+
+            const newImages: Record<string, string> = {}
+            results.forEach(res => {
+                if (res.status === 'fulfilled' && res.value) {
+                    newImages[res.value.id] = res.value.url
+                }
+            })
+            setImages(prev => ({ ...prev, ...newImages }))
+        }
+
+        fetchImages()
+    }, [items])
+
+    return images
+}
+
+function useProductionEventDetails(items: ProductionApiItem[], locale: Locale) {
+    const [details, setDetails] = useState<Record<string, { date: string, venue: string }>>({})
+
+    useEffect(() => {
+        const fetchDetails = async () => {
+            const itemsToFetch = items.filter(item => item.links?.events)
+            if (itemsToFetch.length === 0) return
+
+            const now = new Date()
+            const results = await Promise.allSettled(
+                itemsToFetch.map(async (item) => {
+                    try {
+                        const eventsPath = getRelativePath(item.links?.events)
+                        if (!eventsPath) return null
+
+                        // 1. Fetch events
+                        const res = await apiFetch<{ data: Array<{ starts_at: string, links: { hall: string } }> }>(`${eventsPath}&limit=50`)
+                        const pastEvents = (res.data || [])
+                            .filter(e => new Date(e.starts_at) < now)
+                            .sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime())
+
+                        if (pastEvents.length === 0) return { id: item.id, date: '', venue: '' }
+
+                        // 2. Format Date
+                        const formatDateLocal = (dateStr: string) => {
+                            const date = new Date(dateStr)
+                            return new Intl.DateTimeFormat(locale === 'nl' ? 'nl-BE' : 'en-GB', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric',
+                            }).format(date)
+                        }
+
+                        let displayDate = ''
+                        if (pastEvents.length === 1) {
+                            displayDate = formatDateLocal(pastEvents[0].starts_at)
+                        } else {
+                            const firstYear = new Date(pastEvents[0].starts_at).getFullYear()
+                            const lastYear = new Date(pastEvents[pastEvents.length - 1].starts_at).getFullYear()
+                            displayDate = firstYear === lastYear 
+                                ? `${formatDateLocal(pastEvents[0].starts_at)} - ${formatDateLocal(pastEvents[pastEvents.length - 1].starts_at)}`
+                                : `${firstYear} - ${lastYear}`
+                        }
+
+                        // 3. Fetch Venue Names (Halls)
+                        const venueNames = new Set<string>()
+                        const hallResults = await Promise.allSettled(
+                            pastEvents.slice(0, 5).map(async (event) => {
+                                const hallPath = getRelativePath(event.links?.hall)
+                                if (!hallPath) return null
+                                const hallRes = await apiFetch<{ data: { name: LocalizedText } }>(hallPath)
+                                return getLocalizedText(hallRes.data.name, locale)
+                            })
+                        )
+
+                        hallResults.forEach(hr => {
+                            if (hr.status === 'fulfilled' && hr.value) {
+                                venueNames.add(hr.value)
+                            }
+                        })
+
+                        const displayVenue = Array.from(venueNames).join(' • ')
+
+                        return { id: item.id, date: displayDate, venue: displayVenue }
+                    } catch {
+                        return null
+                    }
+                })
+            )
+
+            const newDetails: Record<string, { date: string, venue: string }> = {}
+            results.forEach(res => {
+                if (res.status === 'fulfilled' && res.value) {
+                    newDetails[res.value.id] = { date: res.value.date, venue: res.value.venue }
+                }
+            })
+            setDetails(prev => ({ ...prev, ...newDetails }))
+        }
+
+        fetchDetails()
+    }, [items, locale])
+
+    return details
+}
+
+function useProductionTaxonomies(items: ProductionApiItem[], locale: Locale) {
+    const [taxonomies, setTaxonomies] = useState<Record<string, string>>({})
+
+    useEffect(() => {
+        const fetchTaxonomies = async () => {
+            const itemsToFetch = items.filter(item => item.links?.genres || item.links?.tags)
+            if (itemsToFetch.length === 0) return
+
+            const results = await Promise.allSettled(
+                itemsToFetch.map(async (item) => {
+                    try {
+                        // 1. Try Genres
+                        const genresPath = getRelativePath(item.links?.genres)
+                        if (genresPath) {
+                            const res = await apiFetch<{ data: Array<{ slug: LocalizedText, name: LocalizedText }> }>(genresPath)
+                            const firstGenre = res.data?.[0]
+                            if (firstGenre) {
+                                const label = getLocalizedText(firstGenre.slug, locale) || getLocalizedText(firstGenre.name, locale)
+                                if (label) return { id: item.id, label }
+                            }
+                        }
+
+                        // 2. Fallback to Tags
+                        const tagsPath = getRelativePath(item.links?.tags)
+                        if (tagsPath) {
+                            const res = await apiFetch<{ data: Array<{ slug: LocalizedText, name: LocalizedText }> }>(tagsPath)
+                            const firstTag = res.data?.[0]
+                            if (firstTag) {
+                                const label = getLocalizedText(firstTag.slug, locale) || getLocalizedText(firstTag.name, locale)
+                                if (label) return { id: item.id, label }
+                            }
+                        }
+
+                        return { id: item.id, label: '' }
+                    } catch {
+                        return null
+                    }
+                })
+            )
+
+            const newTaxonomies: Record<string, string> = {}
+            results.forEach(res => {
+                if (res.status === 'fulfilled' && res.value) {
+                    newTaxonomies[res.value.id] = res.value.label
+                }
+            })
+            setTaxonomies(prev => ({ ...prev, ...newTaxonomies }))
+        }
+
+        fetchTaxonomies()
+    }, [items, locale])
+
+    return taxonomies
+}
+
+function useAllHalls(locale: Locale) {
+    const [halls, setHalls] = useState<string[]>([])
+
+    useEffect(() => {
+        const fetchHalls = async () => {
+            try {
+                // Fetch more halls to be sure
+                const res = await apiFetch<{ data: Array<{ name: LocalizedText }> }>('/archive/halls?limit=500')
+                const names = (res.data || [])
+                    .map(h => getLocalizedText(h.name, locale))
+                    .filter(Boolean)
+                
+                setHalls(Array.from(new Set(names)).sort())
+            } catch {
+                // Silently fail
+            }
+        }
+        fetchHalls()
+    }, [locale])
+
+    return halls
 }
 
 async function copyCurrentUrl() {
@@ -895,10 +1149,16 @@ function SearchPage() {
     const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false)
     const [shareCopied, setShareCopied] = useState(false)
     const [apiEntries, setApiEntries] = useState<SearchEntry[]>([])
+    const [apiRawItems, setApiRawItems] = useState<ProductionApiItem[]>([])
     const [totalResults, setTotalResults] = useState(0)
     const [totalPages, setTotalPages] = useState(1)
     const [isLoading, setIsLoading] = useState(true)
     const [apiError, setApiError] = useState<string | null>(null)
+
+    const fetchedImages = useProductionImages(apiRawItems)
+    const fetchedDetails = useProductionEventDetails(apiRawItems, locale)
+    const fetchedTaxonomies = useProductionTaxonomies(apiRawItems, locale)
+    const allAvailableHalls = useAllHalls(locale)
 
     const filterState = useMemo(() => parseSearchFilterState(searchParams), [searchParams])
     const query = filterState.query
@@ -918,6 +1178,7 @@ function SearchPage() {
         const loadSearchEntries = async () => {
             setIsLoading(true)
             setApiError(null)
+            setApiRawItems([]) // Clear old data
 
             try {
                 const params = new URLSearchParams({
@@ -1032,6 +1293,18 @@ function SearchPage() {
                     setTotalResults(response.meta?.total ?? mappedEntries.length)
                     setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
                 }
+
+                const response = await apiFetch<PaginatedApiResponse<ProductionApiItem>>(
+                    `/archive/productions?${params.toString()}`,
+                    { signal: abortController.signal }
+                )
+
+                const preferredGenre = selectedGenres.length === 1 ? selectedGenres[0] : undefined
+                const mappedEntries = response.data.map((item) => mapProductionToSearchEntry(item, locale, preferredGenre))
+                setApiRawItems(response.data)
+                setApiEntries(mappedEntries)
+                setTotalResults(response.meta?.total ?? mappedEntries.length)
+                setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
             } catch (error) {
                 if (abortController.signal.aborted) {
                     return
@@ -1064,7 +1337,22 @@ function SearchPage() {
     }
 
     const currentPage = Math.min(page, totalPages)
-    const pageItems = apiEntries
+    const pageItems = useMemo(() => {
+        if (!apiEntries) return []
+        return apiEntries
+            .map(item => {
+                const detail = fetchedDetails[item.id]
+                const fetchedTaxonomy = fetchedTaxonomies[item.id]
+                return {
+                    ...item,
+                    imageUrl: fetchedImages[item.id] || item.imageUrl,
+                    date: detail?.date !== undefined && detail.date !== '' ? detail.date : item.date,
+                    venue: detail?.venue !== undefined && detail.venue !== '' ? detail.venue : item.venue,
+                    tag: fetchedTaxonomy !== undefined && fetchedTaxonomy !== '' ? fetchedTaxonomy : item.tag
+                }
+            })
+            .filter(item => fetchedDetails[item.id]?.date !== '')
+    }, [apiEntries, fetchedImages, fetchedDetails, fetchedTaxonomies])
 
     // Compacte paginering: 1,2,3,...,laatste
     function getCompactPageLabels(current: number, total: number): string[] {
@@ -1203,23 +1491,34 @@ function SearchPage() {
 
     const locationSuggestions = useMemo(() => {
         const normalizedLocale = locale === 'en' ? 'en' : 'nl'
-        const values = new Set<string>(Object.values(LOCATION_ALIASES))
+        const uniqueValues = new Set<string>()
 
-        apiEntries.forEach((entry) => {
-            entry.venue
-                .split('•')
-                .map((part) => part.trim())
-                .filter((part) => part.length > 0)
-                .forEach((part) => {
-                    values.add(part)
-                    values.add(part.toLowerCase())
-                })
+        // 1. Add predefined aliases
+        Object.values(LOCATION_ALIASES).forEach(v => uniqueValues.add(v))
+
+        // 2. Add dynamically fetched halls from global DB list
+        allAvailableHalls.forEach(hall => {
+            const exists = Array.from(uniqueValues).some(v => v.toLowerCase() === hall.toLowerCase())
+            if (!exists) uniqueValues.add(hall)
         })
 
-        return Array.from(values).sort((a, b) =>
+        // 3. Add venues currently visible on cards (ensures "De Vooruit - Café" etc. are always there)
+        Object.values(fetchedDetails).forEach(detail => {
+            if (detail.venue) {
+                detail.venue.split(' • ').forEach(v => {
+                    const trimmed = v.trim()
+                    if (trimmed) {
+                        const exists = Array.from(uniqueValues).some(uv => uv.toLowerCase() === trimmed.toLowerCase())
+                        if (!exists) uniqueValues.add(trimmed)
+                    }
+                })
+            }
+        })
+
+        return Array.from(uniqueValues).sort((a, b) =>
             a.localeCompare(b, normalizedLocale === 'nl' ? 'nl-BE' : 'en-GB', { sensitivity: 'base' }),
         )
-    }, [apiEntries, locale])
+    }, [allAvailableHalls, fetchedDetails, locale])
 
     return (
         <PublicLayout>

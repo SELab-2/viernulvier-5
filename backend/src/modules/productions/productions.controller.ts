@@ -22,7 +22,7 @@ export class ProductionsController {
             ...production,
             links: {
                 self: `${baseUrl}/productions/${prodId}`,
-                events: `${baseUrl}/events?production_id=${prodId}`,
+                events: `${baseUrl}/events?productionId=${prodId}`,
                 genres: `${baseUrl}/genres?productionId=${prodId}`,
                 tags: `${baseUrl}/tags?productionId=${prodId}`,
                 media_gallery: production.media_gallery_id ? `${baseUrl}/media/galleries/${production.media_gallery_id}` : null,

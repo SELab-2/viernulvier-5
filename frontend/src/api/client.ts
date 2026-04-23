@@ -11,19 +11,16 @@ export async function apiFetch<T>(
     options: RequestInit = {}
 ): Promise<T> {
     const url = `${API_BASE}${endpoint}`
-    const hasBody = options.body !== undefined && options.body !== null
-    const normalizedHeaders = new Headers(options.headers)
-
-    if (hasBody && !normalizedHeaders.has('Content-Type')) {
-        normalizedHeaders.set('Content-Type', 'application/json')
-    }
 
     let response: Response
 
     try {
         response = await fetch(url, {
             credentials: 'include', // Include cookies for auth
-            headers: normalizedHeaders,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers,
+            },
             ...options,
         })
     } catch (error) {

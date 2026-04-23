@@ -25,15 +25,14 @@ function BlogsTabContent({
             <div className="px-4 py-4 relative flex flex-col">
                 <form className="w-full max-w-xl rounded-xl p-2 md:max-w-none">
                     <p className="mb-4 text-sm font-bold tracking-wide">{titleLabel}</p>
-                    <div className="mb-8 rounded-xl border border-border bg-background">
-                        <div className="bg-surface rounded-xl flex h-12 px-4">
-                            <input
-                                type="text"
-                                value={title}
-                                onChange={(value) => changeTitle(value.target.value)}
-                                className="w-full bg-transparent text-sm text-foreground placeholder:text-muted outline-none"
-                            />
-                        </div>
+                    <div className="admin-detail-input mb-8">
+                        <textarea
+                            value={title}
+                            onChange={(value) => changeTitle(value.target.value)}
+                            aria-label={titleLabel}
+                            rows={2}
+                            className="admin-detail-field min-h-12 resize-y py-3 text-sm leading-6 [overflow-wrap:anywhere]"
+                        />
                     </div>
 
                     <p className="mb-4 text-sm font-bold tracking-wide">{contentLabel}</p>

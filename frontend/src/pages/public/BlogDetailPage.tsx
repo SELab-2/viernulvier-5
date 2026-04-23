@@ -9,7 +9,6 @@ import ProductionCard from '../../components/blogs/ProductionCard'
 import {
     getLocalizedContent,
     getLocalizedTitle,
-    hasLocalizedTitle,
     normalizeContent,
     type BlogDetailResponse,
     type BlogDetails,
@@ -81,15 +80,7 @@ function BlogDetailPage() {
 
                 if (isActive) {
                     setBlog(response.data)
-                    
-                    // check blog in this lanuage exists
-                    const titleExists = hasLocalizedTitle(response.data.title, locale)
 
-                    if (!titleExists){
-                        setError(message.blogs.languageError)
-                        return
-                    }
-                                    
                     // load all productions
                     const linkedProductionIds = response.data.productions ?? []
                     if (linkedProductionIds.length === 0) {
@@ -124,7 +115,7 @@ function BlogDetailPage() {
         return () => {
             isActive = false
         }
-    }, [id, locale, message.blogs.languageError])
+    }, [id, locale])
 
     return (
         <PublicLayout>
@@ -143,7 +134,9 @@ function BlogDetailPage() {
 
                 {!isLoading && !error && blog ? (
                     <article className="mx-auto max-w-4xl">
-                        <h1 className="mb-6 text-4xl font-semibold text-foreground">{getLocalizedTitle(blog.title, locale) || message.blogs.untitledBlog}</h1>
+                        <h1 className="mb-6 text-4xl font-semibold leading-tight text-foreground [overflow-wrap:anywhere]">
+                            {getLocalizedTitle(blog.title, locale) || message.blogs.untitledBlog}
+                        </h1>
                         <QuillReadOnly content={getLocalizedContent(blog.content, locale)} />
 
                         {isLoadingProductions || productions.length > 0 ? (
@@ -161,7 +154,7 @@ function BlogDetailPage() {
                                                 key={production.id}
                                                 production={production}
                                                 locale={locale}
-                                                href={withLocalePath(`/productions/${production.id}`, locale)}
+                                                href={withLocalePath(`/archive/${production.id}`, locale)}
                                             />
                                         ))}
                                     </div>

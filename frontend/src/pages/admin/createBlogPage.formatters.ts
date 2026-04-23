@@ -19,7 +19,7 @@ export type LocalizedBlogTitle = {
 
 export type BlogDetail = {
     id: string
-    title?: string | null
+    title?: unknown
     content?: unknown
     productions?: string[]
 }
@@ -51,8 +51,19 @@ function getEditorHtml(value: unknown): string {
     return ''
 }
 
-function parseLocalizedBlogTitle(value: string | null | undefined): LocalizedBlogTitle {
+function parseLocalizedBlogTitle(value: unknown): LocalizedBlogTitle {
     if (!value) {
+        return { nl: '', en: '' }
+    }
+
+    if (isObject(value) && ('nl' in value || 'en' in value)) {
+        return {
+            nl: typeof value.nl === 'string' ? value.nl : '',
+            en: typeof value.en === 'string' ? value.en : '',
+        }
+    }
+
+    if (typeof value !== 'string') {
         return { nl: '', en: '' }
     }
 
@@ -168,7 +179,12 @@ function hasRichContent(value: unknown): boolean {
     return true
 }
 
-export type BlogPublishValidation = 'ok' | 'atLeastOneLanguageRequired' | 'filledLanguageNeedsTitle'
+export type BlogPublishValidation =
+    | 'allLanguageFilled'
+    | 'notAllLanguageFilled'
+    | 'atLeastOneLanguageRequired'
+    | 'filledLanguageNeedsTitle'
+    | 'filledLanguageNeedsContent'
 
 export function validateBlogPublishInput(
     form: BlogContent,
@@ -185,7 +201,7 @@ export function validateBlogPublishInput(
         const hasContent = hasTextContent(htmlContent) || hasRichContent(jsonContent)
         const isFilled = hasTitle || hasContent
 
-        return { hasTitle, isFilled }
+        return { hasTitle, hasContent, isFilled }
     })
 
     if (!states.some((state) => state.isFilled)) {
@@ -196,5 +212,13 @@ export function validateBlogPublishInput(
         return 'filledLanguageNeedsTitle'
     }
 
-    return 'ok'
+    if (states.some((state) => state.hasTitle && !state.hasContent)) {
+        return 'filledLanguageNeedsContent'
+    }
+
+    if (states.every((state) => state.isFilled)) {
+        return 'allLanguageFilled'
+    }
+
+    return 'notAllLanguageFilled'
 }

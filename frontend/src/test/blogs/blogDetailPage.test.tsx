@@ -54,14 +54,17 @@ describe('BlogDetailPage', () => {
     document.documentElement.lang = 'nl'
   })
 
-  it('shows an error when the blog does not exist in the active language', async () => {
+  it('falls back to the available language when active language is missing', async () => {
     setPath('/nl/blogs/blog-1')
 
     apiGetMock.mockResolvedValueOnce({
       data: {
         id: 'blog-1',
         title: JSON.stringify({ nl: '', en: 'English title' }),
-        content: 'Blog content',
+        content: {
+          nl: '',
+          en: JSON.stringify({ ops: [{ insert: 'English content' }] }),
+        },
         productions: [],
       },
     })
@@ -74,7 +77,9 @@ describe('BlogDetailPage', () => {
       </MemoryRouter>,
     )
 
-    expect(await screen.findByText(messages.blogs.languageError)).toBeInTheDocument()
+    expect(await screen.findByText('English title')).toBeInTheDocument()
+    expect(screen.getByText('English content')).toBeInTheDocument()
+    expect(screen.queryByText(messages.blogs.languageError)).not.toBeInTheDocument()
     expect(screen.queryByText('Gerelateerde producties')).not.toBeInTheDocument()
   })
 
@@ -139,8 +144,8 @@ describe('BlogDetailPage', () => {
     expect(screen.queryByText('Blog content Engels')).not.toBeInTheDocument()
 
     expect(await screen.findByText('Gerelateerde producties')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /Eerste productie/i })).toHaveAttribute('href', '/nl/productions/production-1')
-    expect(screen.getByRole('link', { name: /Tweede productie/i })).toHaveAttribute('href', '/nl/productions/production-2')
+    expect(screen.getByRole('link', { name: /Eerste productie/i })).toHaveAttribute('href', '/nl/archive/production-1')
+    expect(screen.getByRole('link', { name: /Tweede productie/i })).toHaveAttribute('href', '/nl/archive/production-2')
   })
 
   it('renders English content when the active locale is en', async () => {

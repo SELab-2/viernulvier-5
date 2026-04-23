@@ -228,6 +228,7 @@ export type Messages = {
     createBlogDescription: string
     manageProduction: string
     manageProductionButton: string
+    removeProductionAriaLabel: string
     savingButton: string
     deletingButton: string
     deleteButton: string
@@ -236,6 +237,12 @@ export type Messages = {
     blogNotFound: string
     noTitleError:string
     filledLanguageNeedsTitleError: string
+    filledLanguageNeedsContentError: string
+    publishConfirmTitle: string
+    publishConfirmWithoutEnglish: string
+    publishConfirmWithoutDutch: string
+    publishConfirmCancel: string
+    publishConfirmProceed: string
 
     productionPopUp : {
       title:string

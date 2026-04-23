@@ -54,7 +54,6 @@ function ProductionManagementSection({
                             <button
                                 type="button"
                                 onClick={onOpenPopup}
-                                disabled={isLoadingProductions || availableProductions.length === 0}
                                 className="mb-4 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                             >
                                 {messages.blogs.manageProduction}
@@ -81,7 +80,7 @@ function ProductionManagementSection({
                                                         <button
                                                             type="button"
                                                             onClick={() => onRemoveProduction(production.id)}
-                                                            aria-label="Verwijder productie"
+                                                            aria-label={messages.blogs.removeProductionAriaLabel}
                                                             className="rounded-full border border-border bg-background/90 p-2 text-muted transition hover:border-red-500 hover:text-red-600"
                                                         >
                                                             <svg
