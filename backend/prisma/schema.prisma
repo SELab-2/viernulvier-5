@@ -191,8 +191,8 @@ model location {
 }
 
 model blog {
-  id              String            @id @default(uuid()) @db.Uuid
-  title           String?           @db.Text
+  id              String            @id @db.Uuid @default(uuid())
+  title           Json?
   content         Json?
   blog_production blog_production[]
 

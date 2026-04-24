@@ -1,191 +1,340 @@
 import { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import { apiFetch } from '../../api/client'
+import { useNavigate, useParams } from 'react-router-dom'
+import { getActiveLocale, withLocalePath } from '../../i18n'
+import { localize } from '../../utils/localize'
+import { getYouTubeEmbedUrl } from '../../utils/youtube'
 import PublicLayout from '../../components/public/PublicLayout'
-import { getActiveLocale } from '../../i18n'
-import type { Locale } from '../../i18n/types'
+import PublicPillButton from '../../components/public/PublicPillButton'
+import { usePublicMessages } from '../../components/public/PublicMessagesContext'
+import ArchiveDetailHero from '../../components/public/detail/PublicDetailHeroBanner'
+import ArchiveDetailEventsList from '../../components/public/detail/PublicDetailEventsList'
+import ArchiveDetailGallery from '../../components/public/detail/PublicDetailGallery'
+import { getProductionById, type Production } from '../../api/productions'
+import { getGalleryItems, getItemCrops, getPreferredHeroCropUrl, getPreferredMediaCropUrl } from '../../api/media'
+import { getEventsByProductionId, type Event } from '../../api/events'
+import { getGenresByProductionId, type Genre } from '../../api/genres'
+import { getTagsByProductionId, type Tag } from '../../api/tags'
+import { getHallById } from '../../api/halls'
+import { getSpaceById } from '../../api/spaces'
+import { getLocationById, type Location } from '../../api/locations'
+import { getPreviousStrippedPath } from '../../utils/navigationHistory'
 
-type LocalizedText = {
-    nl?: string
-    en?: string
-    fr?: string
-} | null
-
-type Production = {
-    id: string
-    title: LocalizedText
-    teaser: LocalizedText
-    description: LocalizedText
-    description_short: LocalizedText
-    artist: LocalizedText
-    created_at: string
-    links: {
-        self: string
-        events: string
-        genres: string
-        tags: string
-        media_gallery: string | null
-        poster_gallery: string | null
-    }
-}
-
-type Genre = {
-    id: string
-    name: LocalizedText
-}
-
-type Tag = {
-    id: string
-    name: LocalizedText
-}
-
-type GalleryItem = {
-    id: string
-    link: string | null
-    crops?: Array<{ name: string, url: string }>
-    links?: {
-        crops: string
-    }
-}
-
-type Gallery = {
-    id: string
-    items: GalleryItem[]
-}
-
-function getLocalizedText(text: LocalizedText, locale: Locale): string {
-    if (!text) return ''
-    const values = locale === 'en' ? [text.en, text.nl, text.fr] : [text.nl, text.en, text.fr]
-    return values.find(v => typeof v === 'string' && v.trim().length > 0) ?? ''
-}
-
-function getRelativePath(url: string | null | undefined): string | null {
-    if (!url) return null
-    const parts = url.split('/api/v1')
-    return parts.length > 1 ? parts[1] : url
-}
-
-/**
- * Public archive detail page — shows a single archive item using RESTful links.
- */
-function ArchiveDetailPage() {
-    const { id } = useParams<{ id: string }>()
+function ArchiveDetailPageContent() {
+    const navigate = useNavigate()
+    const messages = usePublicMessages()
     const locale = getActiveLocale(window.location.pathname)
-    
+    const { id } = useParams<{ id: string }>()
+
     const [production, setProduction] = useState<Production | null>(null)
+    const [imageUrl, setImageUrl] = useState<string | null>(null)
+    const [galleryImages, setGalleryImages] = useState<(string | null)[]>([])
+    const [events, setEvents] = useState<Event[]>([])
     const [genres, setGenres] = useState<Genre[]>([])
     const [tags, setTags] = useState<Tag[]>([])
-    const [gallery, setGallery] = useState<Gallery | null>(null)
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
+    const [locationsByEvent, setLocationsByEvent] = useState<Record<string, Location>>({})
+    const [shareCopied, setShareCopied] = useState(false)
+    const [loadError, setLoadError] = useState(false)
+
+    const handleGoBack = () => {
+        const prev = getPreviousStrippedPath()
+        if (prev) {
+            // navigate directly to the previous page in the current locale
+            // this bypasses any locale-switch history entries entirely
+            navigate(withLocalePath(prev, locale))
+            return
+        }
+        navigate(withLocalePath('/', locale))
+    }
+
+    const formatHtml = (html: string) => {
+        return html
+            // 1. remove empty <p> first (before adding <br /> chaos)
+            .replace(/<p>(\s|&nbsp;|<br\s*\/?>)*<\/p>/g, '')
+
+            // 2. normalize newlines
+            .replace(/\r?\n/g, '<br />')
+
+            // 3. remove trailing <br />
+            .replace(/(<br\s*\/?>\s*)+$/g, '')
+
+            .trim()
+    }
+
+    const handleShare = async () => {
+        const currentUrl = window.location.href
+
+        if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(currentUrl)
+        } else {
+            const textArea = document.createElement('textarea')
+            textArea.value = currentUrl
+            textArea.setAttribute('readonly', '')
+            textArea.style.position = 'absolute'
+            textArea.style.left = '-9999px'
+            document.body.appendChild(textArea)
+            textArea.select()
+            document.execCommand('copy')
+            document.body.removeChild(textArea)
+        }
+
+        setShareCopied(true)
+        window.setTimeout(() => setShareCopied(false), 1800)
+    }
 
     useEffect(() => {
-        async function fetchAllData() {
-            setLoading(true)
+        if (!id) return
+
+        const fetchData = async () => {
             try {
-                // 1. Fetch core production
-                const prodResponse = await apiFetch<{ data: Production }>(`/archive/productions/${id}`)
-                const prod = prodResponse.data
-                setProduction(prod)
-
-                // 2. Follow links for related data
-                const genresPath = getRelativePath(prod.links.genres)
-                const tagsPath = getRelativePath(prod.links.tags)
-                const galleryPath = getRelativePath(prod.links.media_gallery)
-
-                const [genresRes, tagsRes] = await Promise.allSettled([
-                    genresPath ? apiFetch<{ data: Genre[] }>(genresPath) : Promise.reject('No genres link'),
-                    tagsPath ? apiFetch<{ data: Tag[] }>(tagsPath) : Promise.reject('No tags link'),
+                const [prodRes, eventsRes, genresRes, tagsRes] = await Promise.all([
+                    getProductionById(id),
+                    getEventsByProductionId(id),
+                    getGenresByProductionId(id),
+                    getTagsByProductionId(id),
                 ])
 
-                if (genresRes.status === 'fulfilled') setGenres(genresRes.value.data)
-                if (tagsRes.status === 'fulfilled') setTags(tagsRes.value.data)
+                const prod = prodRes.data
+                const now = Date.now()
+                const pastEvents = eventsRes.data.filter((event) => {
+                    if (!event.starts_at) return false
+                    return new Date(event.starts_at).getTime() <= now
+                })
 
-                if (galleryPath) {
-                    try {
-                        // 1. Production -> Gallery
-                        const galRes = await apiFetch<{ data: { id: string, links: { items: string } } }>(galleryPath)
-                        const itemsPath = getRelativePath(galRes.data?.links?.items)
+                setProduction(prod)
+                setEvents(pastEvents)
+                setGenres(genresRes.data)
+                setTags(tagsRes.data)
 
-                        if (itemsPath) {
-                            // 2. Gallery -> Items
-                            const itemsRes = await apiFetch<{ data: GalleryItem[] }>(itemsPath)
-                            const firstItem = itemsRes.data?.[0]
+                if (prod.media_gallery_id) {
+                    const galleryRes = await getGalleryItems(prod.media_gallery_id)
+                    const items = galleryRes.data
 
-                            if (firstItem && firstItem.links?.crops) {
-                                // 3. Item -> Crops
-                                const cropsPath = getRelativePath(firstItem.links.crops)
-                                if (cropsPath) {
-                                    const cropsRes = await apiFetch<{ data: Array<{ name: string, url: string }> }>(cropsPath)
-                                    firstItem.crops = cropsRes.data
-                                }
-                            }
-                            setGallery({ id: galRes.data.id, items: itemsRes.data })
-                        }
-                    } catch {
-                        // Silently fail gallery fetch
+                    if (items.length > 0) {
+                        const firstCrops = await getItemCrops(items[0].id)
+                        const heroUrl = getPreferredHeroCropUrl(firstCrops.data)
+                        setImageUrl(heroUrl)
+
+                        // First item is used as the hero banner above; remaining items go in the gallery
+                        const remainingItems = items.slice(1)
+                        const allCrops = await Promise.all(remainingItems.map((item) => getItemCrops(item.id)))
+                        setGalleryImages(allCrops.map((res) => getPreferredMediaCropUrl(res.data)).filter(Boolean) as string[])
                     }
                 }
+                
 
-            } catch (err) {
-                setError(err instanceof Error ? err.message : 'Failed to fetch data')
-            } finally {
-                setLoading(false)
+                const locationResults = await Promise.all(
+                    pastEvents.map(async (event) => {
+                        if (!event.hall_id) return null
+                        try {
+                            const hall = (await getHallById(event.hall_id)).data
+                            if (!hall.space_id) return null
+                            const space = (await getSpaceById(hall.space_id)).data
+                            if (!space.location_id) return null
+                            const location = (await getLocationById(space.location_id)).data
+                            return { eventId: event.id, location }
+                        } catch {
+                            return null
+                        }
+                    })
+                )
+
+                const locationMap: Record<string, Location> = {}
+                locationResults.forEach((res) => {
+                    if (res) locationMap[res.eventId] = res.location
+                })
+                setLocationsByEvent(locationMap)
+
+            } catch {
+                setLoadError(true)
             }
         }
 
-        if (id) fetchAllData()
+        fetchData()
     }, [id])
 
-    if (loading) return <PublicLayout><div className="p-8 text-center">Laden...</div></PublicLayout>
-    if (error || !production) return <PublicLayout><div className="p-8 text-center text-red-500">Error: {error || 'Niet gevonden'}</div></PublicLayout>
+    const title = localize(production?.title, locale)
+    const superTitle = localize(production?.super_title, locale)
+    const artist = localize(production?.artist, locale)
+    const teaser = localize(production?.teaser, locale)
+    const description = localize(production?.description, locale)
+    const description2 = localize(production?.description_2, locale)
+    const quote = localize(production?.quote, locale)
+    const quoteSource = localize(production?.quote_source, locale)
+    const info = localize(production?.info, locale)
+    const video1 = localize(production?.video_1, locale)
+    const video2 = localize(production?.video_2, locale)
+    const hasSidebar = Boolean(info) || genres.length > 0 || tags.length > 0
+    const shareLabel = messages.search.shareLabel
+    const shareCopiedLabel = messages.search.shareCopiedLabel
 
-    const title = getLocalizedText(production.title, locale)
-    const description = getLocalizedText(production.description, locale) || getLocalizedText(production.description_short, locale)
-    const artist = getLocalizedText(production.artist, locale)
+    const FALLBACK_IMAGE = '/fallback-hero.svg'
+    const heroImage = imageUrl ?? FALLBACK_IMAGE
 
-    const firstItemCrops = gallery?.items[0]?.crops
-    const mainImage = firstItemCrops?.find(c => c.name === 'FE3_header')?.url 
-        || firstItemCrops?.[0]?.url
+    const videos = [video1, video2]
+        .filter(Boolean)
+        .map((url) => getYouTubeEmbedUrl(url as string))
+        .filter(Boolean)
+
+    if (loadError) {
+        return (
+            <div className="site-container mt-8">
+                <p className="text-sm text-text-accent">{messages.detail.loadError}</p>
+            </div>
+        )
+    }
 
     return (
-        <PublicLayout>
-            <main className="min-h-screen bg-white">
-                {mainImage && (
-                    <div className="w-full h-96 overflow-hidden relative">
-                        <img src={mainImage} alt={title} className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-black/30" />
+        <>
+            <div className="site-container mt-8">
+                <PublicPillButton
+                    label={messages.detail.navBack}
+                    onClick={handleGoBack}
+                />
+            </div>
+
+            <div className="site-container mt-6">
+                <ArchiveDetailHero
+                    imageUrl={heroImage}
+                    title={title}
+                    superTitle={superTitle}
+                    artist={artist}
+                    genres={genres}
+                    locale={locale}
+                    shareLabel={shareCopied ? shareCopiedLabel : shareLabel}
+                    onShare={() => {
+                        void handleShare()
+                    }}
+                />
+            </div>
+
+            <div className="site-container space-y-12 py-8">
+                {teaser && (
+                    <div className="text-xl font-medium leading-relaxed text-text-accent md:text-2xl">
+                        <div dangerouslySetInnerHTML={
+                                { __html: formatHtml(teaser) }
+                            } />
                     </div>
                 )}
-                
-                <div className="max-w-4xl mx-auto px-4 py-12">
-                    <div className="mb-8">
-                        <Link to={locale === 'nl' ? '/nl/zoeken' : '/en/search'} className="text-accent hover:underline mb-4 inline-block">
-                            &larr; Terug naar zoeken
-                        </Link>
-                        <h1 className="text-5xl font-bold text-foreground mb-2">{title}</h1>
-                        {artist && <p className="text-2xl text-muted">{artist}</p>}
+
+                {description && (
+                    <div className="prose max-w-none prose-neutral text-base leading-relaxed">
+                        <div dangerouslySetInnerHTML={{ __html: formatHtml(description) }} />
+                    </div>
+                )}
+
+                <div className="grid grid-cols-1 gap-9 xl:grid-cols-[minmax(0,1fr)_20rem] xl:items-start">
+                    <div className="space-y-9">
+                        <section>
+                            <h2 className="mb-6 text-3xl font-semibold tracking-tight md:text-4xl">
+                                {messages.detail.events}
+                            </h2>
+
+                            <ArchiveDetailEventsList
+                                events={events}
+                                locationsByEvent={locationsByEvent}
+                                locale={locale}
+                            />
+                        </section>
+
+                        {videos.length > 0 && (
+                            <section
+                                className={`mx-auto gap-6 ${
+                                    videos.length === 1
+                                        ? 'max-w-3xl'
+                                        : 'grid max-w-5xl grid-cols-1 md:grid-cols-2'
+                                }`}
+                            >
+                                {videos.map((videoUrl, index) => (
+                                    <div key={index} className="aspect-video w-full overflow-hidden rounded-xl">
+                                        <iframe
+                                            src={videoUrl!}
+                                            title={`Video ${index + 1}`}
+                                            className="h-full w-full"
+                                            loading="lazy"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowFullScreen
+                                        />
+                                    </div>
+                                ))}
+                            </section>
+                        )}
+
+                        {quote && (
+                            <blockquote className="rounded-xl border-l-4 border-accent bg-surface px-5 py-4 text-text-accent">
+                                <div dangerouslySetInnerHTML={{ __html: quote.replace(/\r?\n/g, '<br />') }} />
+                                {quoteSource && (
+                                    <p className="mt-2 text-sm text-left">— {quoteSource}</p>
+                                )}
+                            </blockquote>
+                        )}
+
+                        {galleryImages.length > 0 && (
+                            <ArchiveDetailGallery images={galleryImages} />
+                        )}
+
+                        {description2 && (
+                            <div className="prose max-w-none">
+                                <div dangerouslySetInnerHTML={{ __html: description2.replace(/\r?\n/g, '<br />') }} />
+                            </div>
+                        )}
                     </div>
 
-                    <div className="flex flex-wrap gap-2 mb-8">
-                        {genres.map(g => (
-                            <span key={g.id} className="px-3 py-1 bg-accent/10 text-accent rounded-full text-sm">
-                                {getLocalizedText(g.name, locale)}
-                            </span>
-                        ))}
-                        {tags.map(t => (
-                            <span key={t.id} className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">
-                                #{getLocalizedText(t.name, locale)}
-                            </span>
-                        ))}
-                    </div>
+                    {hasSidebar ? (
+                        <aside className="xl:sticky xl:top-22">
+                            <div className="rounded-2xl border border-border bg-surface px-5 py-6">
+                                <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-text-accent">
+                                    {messages.detail.credits}
+                                </h3>
 
-                    <div 
-                        className="prose prose-lg max-w-none text-foreground leading-relaxed"
-                        dangerouslySetInnerHTML={{ __html: description }}
-                    />
+                                {info ? (
+                                    <div className="prose prose-sm mt-4 max-w-none text-text-accent">
+                                        <div dangerouslySetInnerHTML={{ __html: info.replace(/\r?\n/g, '<br />') }} />
+                                    </div>
+                                ) : (
+                                    <p className="mt-4 text-sm text-text-accent">-</p>
+                                )}
+
+                                {(genres.length > 0 || tags.length > 0) ? (
+                                    <div className="mt-6 border-t border-border pt-4">
+                                        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.15em] text-text-accent">
+                                            {messages.detail.genresAndTags}
+                                        </p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {genres.map((genre) => {
+                                                const name = localize(genre.name, locale)
+                                                if (!name) return null
+                                                return (
+                                                    <span key={genre.id} className="rounded-full bg-accent px-2.5 py-1 text-xs font-semibold text-white">
+                                                        {name}
+                                                    </span>
+                                                )
+                                            })}
+                                            {tags.map((tag) => {
+                                                const name = localize(tag.name, locale)
+                                                if (!name) return null
+                                                return (
+                                                    <span key={tag.id} className="rounded-full border border-border bg-surface-sunken px-2.5 py-1 text-xs font-semibold text-foreground">
+                                                        {name}
+                                                    </span>
+                                                )
+                                            })}
+                                        </div>
+                                    </div>
+                                ) : null}
+                            </div>
+                        </aside>
+                    ) : null}
                 </div>
-            </main>
+
+            </div>
+        </>
+    )
+}
+
+function ArchiveDetailPage() {
+    return (
+        <PublicLayout>
+            <ArchiveDetailPageContent />
         </PublicLayout>
     )
 }
