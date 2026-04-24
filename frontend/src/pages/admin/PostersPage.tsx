@@ -34,6 +34,20 @@ type PaginatedApiResponse<T> = {
   }
 }
 
+type ProductionDetailResponse = {
+  data: ProductionItem
+}
+
+function mergeUniqueProductions(productionList: ProductionItem[]): ProductionItem[] {
+  const byId = new Map<string, ProductionItem>()
+
+  for (const production of productionList) {
+    byId.set(production.id, production)
+  }
+
+  return Array.from(byId.values())
+}
+
 function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
@@ -67,7 +81,7 @@ function PostersPageContent() {
   const [productionToAdd, setProductionToAdd] = useState('')
   const [productionSearchQuery, setProductionSearchQuery] = useState('')
   const [isProductionPopupOpen, setIsProductionPopupOpen] = useState(false)
-  const [isLoadingProductions] = useState(false)
+  const [isLoadingProductions, setIsLoadingProductions] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [search, setSearch] = useState('')
   const [isLoading, setIsLoading] = useState(true)
@@ -98,11 +112,13 @@ function PostersPageContent() {
     [sortedProductions, selectedProductionIds],
   )
 
-  const fetchProductionsWithFallback = useCallback(async () => {
+  const fetchProductionsWithFallback = useCallback(async (searchQuery: string = '') => {
+    const trimmedSearchQuery = searchQuery.trim()
+    const searchParam = trimmedSearchQuery ? `&search=${encodeURIComponent(trimmedSearchQuery)}` : ''
     const urls = [
-      '/archive/productions?page=1&limit=100&sort=recent',
-      '/archive/productions?page=1&limit=100',
-      '/archive/productions?page=1&limit=100&lang=nl',
+      `/archive/productions?page=1&limit=100&sort=${trimmedSearchQuery ? 'relevance' : 'recent'}${searchParam}`,
+      `/archive/productions?page=1&limit=100${searchParam}`,
+      `/archive/productions?page=1&limit=100&lang=nl${searchParam}`,
     ]
 
     let lastError: unknown = null
@@ -122,51 +138,115 @@ function PostersPageContent() {
   const loadData = useCallback(async (searchQuery: string = '') => {
     setIsLoading(true)
     setError(null)
-    setProductionError(null)
 
-    const [postersResult, productionsResult] = await Promise.allSettled([
+    const postersResult = await Promise.allSettled([
       apiFetch<PaginatedApiResponse<PosterItem>>(`/archive/posters?page=1&limit=80${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''}`),
-      fetchProductionsWithFallback(),
     ])
 
-    if (postersResult.status === 'fulfilled') {
-      setPosters(postersResult.value.data)
+    const [resolvedPosters] = postersResult
+
+    if (resolvedPosters.status === 'fulfilled') {
+      setPosters(resolvedPosters.value.data)
     } else {
       setPosters([])
     }
 
-    if (productionsResult.status === 'fulfilled') {
-      setProductions(productionsResult.value)
-    } else {
-      setProductions([])
-    }
-
-    const postersError = postersResult.status === 'rejected'
-      ? postersResult.reason instanceof Error
-        ? postersResult.reason.message
+    const postersError = resolvedPosters.status === 'rejected'
+      ? resolvedPosters.reason instanceof Error
+        ? resolvedPosters.reason.message
         : loadPostersErrorMessage
       : null
 
-    const productionsError = productionsResult.status === 'rejected'
-      ? productionsResult.reason instanceof Error
-        ? productionsResult.reason.message
-        : loadProductionsErrorMessage
-      : null
-
-    if (productionsError || postersError) {
-      setError(productionsError ?? postersError)
-    }
-
-    if (productionsError) {
-      setProductionError(productionsError)
+    if (postersError) {
+      setError(postersError)
     }
 
     setIsLoading(false)
-  }, [fetchProductionsWithFallback, loadPostersErrorMessage, loadProductionsErrorMessage])
+  }, [loadPostersErrorMessage])
 
   useEffect(() => {
     void loadData()
   }, [loadData])
+
+  useEffect(() => {
+    const abortController = new AbortController()
+
+    const loadProductions = async () => {
+      setIsLoadingProductions(true)
+      setProductionError(null)
+
+      try {
+        const results = await fetchProductionsWithFallback(productionSearchQuery)
+
+        if (abortController.signal.aborted) {
+          return
+        }
+
+        // Keep the list scoped to the active query, like CreateBlogPage.
+        setProductions(mergeUniqueProductions(results))
+
+        setProductionToAdd((current) => {
+          if (results.length === 0) {
+            return ''
+          }
+
+          if (results.some((production) => production.id === current)) {
+            return current
+          }
+
+          return results[0].id
+        })
+      } catch (requestError) {
+        if (!abortController.signal.aborted) {
+          setProductionError(requestError instanceof Error ? requestError.message : loadProductionsErrorMessage)
+        }
+      } finally {
+        if (!abortController.signal.aborted) {
+          setIsLoadingProductions(false)
+        }
+      }
+    }
+
+    void loadProductions()
+
+    return () => {
+      abortController.abort()
+    }
+  }, [fetchProductionsWithFallback, loadProductionsErrorMessage, productionSearchQuery])
+
+  useEffect(() => {
+    const missingIds = selectedProductionIds.filter((id) => !productions.some((production) => production.id === id))
+    if (missingIds.length === 0) {
+      return
+    }
+
+    let isActive = true
+
+    const fetchMissingProductions = async () => {
+      try {
+        const responses = await Promise.all(
+          missingIds.map((id) => apiFetch<ProductionDetailResponse>(`/archive/productions/${id}`)),
+        )
+
+        if (!isActive) {
+          return
+        }
+
+        const fetched = responses.map((response) => response.data)
+        setProductions((current) => mergeUniqueProductions([...current, ...fetched]))
+      } catch (requestError) {
+        if (isActive) {
+          setProductionError(requestError instanceof Error ? requestError.message : loadProductionsErrorMessage)
+        }
+      }
+    }
+
+    void fetchMissingProductions()
+
+    return () => {
+      isActive = false
+    }
+  }, [loadProductionsErrorMessage, productions, selectedProductionIds])
 
   const openProductionPopup = () => {
     if (!productionToAdd && availableProductions.length > 0) {
