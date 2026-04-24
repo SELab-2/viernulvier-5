@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { getActiveLocale, getMessages, withLocalePath } from '../../i18n'
 import type { Locale } from '../../i18n/types'
-import { apiFetch } from '../../api/client'
+import { apiFetch, normalizeApiAssetUrl } from '../../api/client'
 import { getLocalizedContent, getLocalizedTitle, normalizeContent } from './blogDetailPage.formatters'
 import PublicLayout from '../../components/public/PublicLayout'
 import SearchPagination from '../../components/public/search/SearchPagination'
@@ -12,7 +12,7 @@ type SearchEntry = SearchResultItem & {
     year: number
     genre: string
     location: string
-    type: 'production' | 'blog'
+    type: 'production' | 'blog' | 'poster'
 }
 
 const DEFAULT_PAGE_SIZE = 12
@@ -105,9 +105,22 @@ type PaginatedApiResponse<T> = {
     }
 }
 
+type PosterApiItem = {
+    id: string
+    title: string
+    file_url: string
+    created_at: string
+    production: {
+        id: string
+        title: string
+    } | null
+}
+
 type SearchSort = 'relevance' | 'recent' | 'oldest'
+type SearchTab = 'productions' | 'blogs' | 'all' | 'posters'
 
 type SearchFilterState = {
+    tab: SearchTab
     query: string
     yearFrom: number
     yearTo: number
@@ -116,10 +129,10 @@ type SearchFilterState = {
     sort: SearchSort
     page: number
     limit: number
-    tab: 'productions' | 'blogs' | 'all'
 }
 
 type SearchFilterOverrides = {
+    tab?: SearchTab
     query?: string
     yearFrom?: number
     yearTo?: number
@@ -128,7 +141,13 @@ type SearchFilterOverrides = {
     sort?: SearchSort
     page?: number
     limit?: number
-    tab?: 'productions' | 'blogs' | 'all'
+}
+
+function normalizeTab(value: string | null): SearchTab {
+    if (value === 'blogs') return 'blogs'
+    if (value === 'all') return 'all'
+    if (value === 'posters') return 'posters'
+    return 'productions'
 }
 
 function getLocalizedText(text: LocalizedText, locale: Locale): string {
@@ -165,6 +184,7 @@ function normalizePageSize(value: number): number {
 }
 
 function parseSearchFilterState(searchParams: URLSearchParams): SearchFilterState {
+    const tab = normalizeTab(searchParams.get('tab'))
     const query = (searchParams.get('q') ?? '').trim()
     const legacyYear = Number(searchParams.get('year') ?? String(MAX_PERIOD_YEAR))
     const yearFromParam = Number(searchParams.get('yearFrom') ?? String(MIN_PERIOD_YEAR))
@@ -180,10 +200,8 @@ function parseSearchFilterState(searchParams: URLSearchParams): SearchFilterStat
     const limitParam = Number(searchParams.get('limit') ?? String(DEFAULT_PAGE_SIZE))
     const limit = normalizePageSize(limitParam)
 
-    const tabParam = searchParams.get('tab')
-    const tab: 'productions' | 'blogs' | 'all' = tabParam === 'blogs' ? 'blogs' : tabParam === 'all' ? 'all' : 'productions'
-
     return {
+        tab,
         query,
         yearFrom,
         yearTo,
@@ -192,7 +210,6 @@ function parseSearchFilterState(searchParams: URLSearchParams): SearchFilterStat
         sort,
         page,
         limit,
-        tab,
     }
 }
 
@@ -200,6 +217,7 @@ function buildSearchParams(filters: SearchFilterOverrides): URLSearchParams {
     const params = new URLSearchParams()
     const trimmedQuery = filters.query?.trim() ?? ''
 
+    if (filters.tab && filters.tab !== 'productions') params.set('tab', filters.tab)
     if (trimmedQuery) params.set('q', trimmedQuery)
     if (filters.yearFrom && filters.yearFrom > MIN_PERIOD_YEAR) params.set('yearFrom', String(filters.yearFrom))
     if (filters.yearTo && filters.yearTo < MAX_PERIOD_YEAR) params.set('yearTo', String(filters.yearTo))
@@ -208,8 +226,6 @@ function buildSearchParams(filters: SearchFilterOverrides): URLSearchParams {
     if (filters.sort && filters.sort !== 'relevance') params.set('sort', filters.sort)
     if (filters.page && filters.page > 1) params.set('page', String(filters.page))
     if (filters.limit && filters.limit !== DEFAULT_PAGE_SIZE) params.set('limit', String(filters.limit))
-    if (filters.tab === 'blogs') params.set('tab', 'blogs')
-    if (filters.tab === 'all') params.set('tab', 'all')
 
     return params
 }
@@ -261,6 +277,27 @@ function normalizeGenreValue(value: string): string {
     }
 
     return GENRE_ALIASES[normalized] ?? normalized
+}
+
+function mapPosterToSearchEntry(item: PosterApiItem, locale: Locale): SearchEntry {
+    const searchMessages = getMessages(locale).search
+    const date = formatDate(item.created_at, locale)
+    const productionTitle = item.production?.title?.trim() || searchMessages.fallbackVenue
+
+    return {
+        id: item.id,
+        tag: searchMessages.postersTab,
+        date,
+        title: item.title,
+        excerpt: '',
+        venue: productionTitle,
+        imageUrl: normalizeApiAssetUrl(item.file_url),
+        year: new Date(item.created_at).getFullYear() || MIN_PERIOD_YEAR,
+        genre: '',
+        location: '',
+        isProductionReference: true,
+        type: 'poster' as const,
+    }
 }
 
 function mapProductionToSearchEntry(item: ProductionApiItem, locale: Locale, preferredGenre?: string): SearchEntry {
@@ -337,7 +374,7 @@ type BlogApiItem = {
 
 type SearchApiItem = {
     id: string
-    type: 'production' | 'blog'
+    type: 'production' | 'blog' | 'poster'
     title?: unknown
     teaser?: unknown
     description_short?: unknown
@@ -351,6 +388,7 @@ type SearchApiItem = {
     attendance_mode?: string | null
     created_at?: string
     productions?: string[]
+    links?: ProductionApiItem['links']
 }
 
 function getBlogExcerpt(content: unknown, locale: Locale, fallback: string): string {
@@ -622,7 +660,7 @@ function useAllHalls(locale: Locale) {
         const fetchHalls = async () => {
             try {
                 // Fetch more halls to be sure
-                const res = await apiFetch<{ data: Array<{ name: LocalizedText }> }>('/archive/halls?limit=500')
+                const res = await apiFetch<{ data: Array<{ name: LocalizedText }> }>('/archive/halls?limit=100')
                 const names = (res.data || [])
                     .map(h => getLocalizedText(h.name, locale))
                     .filter(Boolean)
@@ -899,6 +937,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
         label,
         value: CANONICAL_GENRE_VALUES[index] ?? label.toLowerCase(),
     }))
+
     return (
         <aside className={`flex h-full flex-col ${className}`}>
             <h2 className="text-3xl text-foreground">{s.heading}</h2>
@@ -927,7 +966,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
                 </form>
             ) : null}
 
-            {tab !== 'blogs' ? (
+            {tab !== 'blogs' && tab !== 'posters' ? (
             <div className="mt-8 border-t border-border pt-5">
                 <div className="mb-4 flex items-center justify-between">
                     <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground">{s.genreLabel}</h3>
@@ -984,7 +1023,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
                 </div>
             </div>
 
-            {tab !== 'blogs' ? (
+            {tab !== 'blogs' && tab !== 'posters' ? (
             <div className="mt-6 border-t border-border pt-5 pb-5">
                 <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground">{s.locationLabel}</h3>
                 <div className="mt-4 space-y-3 text-sm text-text-accent">
@@ -1054,7 +1093,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
             <div className="mt-auto space-y-3">
                 <button
                     type="button"
-                    className="h-10 w-full rounded-full border border-border bg-surface text-sm font-semibold text-foreground md:hidden transition-colors duration-200"
+                    className="h-10 w-full rounded-full border border-border bg-surface text-sm font-semibold text-foreground transition-colors duration-200 md:hidden"
                     onClick={() => {
                         onShare?.()
                     }}
@@ -1161,6 +1200,7 @@ function SearchPage() {
     const allAvailableHalls = useAllHalls(locale)
 
     const filterState = useMemo(() => parseSearchFilterState(searchParams), [searchParams])
+    const activeTab = filterState.tab
     const query = filterState.query
     const safeFromYear = filterState.yearFrom
     const safeToYear = filterState.yearTo
@@ -1222,6 +1262,7 @@ function SearchPage() {
                     )
 
                     const preferredGenre = selectedGenres.length === 1 ? selectedGenres[0] : undefined
+                    const productionItemsForHydration: ProductionApiItem[] = []
                     const mappedEntries = response.data.map((item): SearchEntry => {
                         if (item.type === 'blog') {
                             return mapBlogToSearchEntry(
@@ -1236,26 +1277,64 @@ function SearchPage() {
                                 locale,
                             )
                         }
-                        return mapProductionToSearchEntry(
-                            {
-                                id: item.id,
-                                title: toLocalizedText(item.title),
-                                teaser: toLocalizedText(item.teaser),
-                                description_short: toLocalizedText(item.description_short),
-                                description: toLocalizedText(item.description),
-                                image_url: item.image_url,
-                                venue_name: item.venue_name,
-                                venue_names: item.venue_names,
-                                production_genres: item.production_genres,
-                                performer_type: item.performer_type ?? null,
-                                attendance_mode: item.attendance_mode ?? null,
-                                created_at: item.created_at ?? '',
-                            },
-                            locale,
-                            preferredGenre,
-                        )
+                        if (item.type === 'poster') {
+                            return mapPosterToSearchEntry(
+                                {
+                                    id: item.id,
+                                    title: (item.title as string) || '',
+                                    file_url: item.image_url || '',
+                                    created_at: item.created_at ?? '',
+                                    production: item.venue_name ? { id: '', title: item.venue_name } : null,
+                                },
+                                locale,
+                            )
+                        }
+                        const productionItem: ProductionApiItem = {
+                            id: item.id,
+                            title: toLocalizedText(item.title),
+                            teaser: toLocalizedText(item.teaser),
+                            description_short: toLocalizedText(item.description_short),
+                            description: toLocalizedText(item.description),
+                            image_url: item.image_url,
+                            venue_name: item.venue_name,
+                            venue_names: item.venue_names,
+                            production_genres: item.production_genres,
+                            performer_type: item.performer_type ?? null,
+                            attendance_mode: item.attendance_mode ?? null,
+                            created_at: item.created_at ?? '',
+                            links: item.links,
+                        }
+
+                        productionItemsForHydration.push(productionItem)
+
+                        return mapProductionToSearchEntry(productionItem, locale, preferredGenre)
                     })
 
+                    setApiRawItems(productionItemsForHydration)
+                    setApiEntries(mappedEntries)
+                    setTotalResults(response.meta?.total ?? mappedEntries.length)
+                    setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
+                } else if (tab === 'posters') {
+                    params.set('lang', locale)
+
+                    if (safeFromYear > MIN_PERIOD_YEAR) {
+                        params.set('yearFrom', String(safeFromYear))
+                    }
+
+                    if (safeToYear < MAX_PERIOD_YEAR) {
+                        params.set('yearTo', String(safeToYear))
+                    }
+
+                    if (sort === 'recent' || sort === 'oldest') {
+                        params.set('sort', sort)
+                    }
+
+                    const response = await apiFetch<PaginatedApiResponse<PosterApiItem>>(
+                        `/archive/posters?${params.toString()}`,
+                        { signal: abortController.signal }
+                    )
+
+                    const mappedEntries = response.data.map((item) => mapPosterToSearchEntry(item, locale))
                     setApiEntries(mappedEntries)
                     setTotalResults(response.meta?.total ?? mappedEntries.length)
                     setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
@@ -1456,7 +1535,9 @@ function SearchPage() {
         }, 1800)
     }
 
-    const filterChips: Array<{ key: string; label: string; onRemove: () => void }> = [
+    const filterChips: Array<{ key: string; label: string; onRemove: () => void }> = activeTab === 'posters'
+        ? []
+        : [
         ...selectedGenres.map((value) => ({
             key: `genre-${value}`,
             label: getGenreLabel(value, locale),
@@ -1481,6 +1562,10 @@ function SearchPage() {
     const locationSuggestions = useMemo(() => {
         const normalizedLocale = locale === 'en' ? 'en' : 'nl'
         const uniqueValues = new Set<string>()
+
+        if (activeTab === 'blogs' || activeTab === 'posters') {
+            return []
+        }
 
         // 1. Add predefined aliases
         Object.values(LOCATION_ALIASES).forEach(v => uniqueValues.add(v))
@@ -1507,7 +1592,7 @@ function SearchPage() {
         return Array.from(uniqueValues).sort((a, b) =>
             a.localeCompare(b, normalizedLocale === 'nl' ? 'nl-BE' : 'en-GB', { sensitivity: 'base' }),
         )
-    }, [allAvailableHalls, fetchedDetails, locale])
+    }, [activeTab, allAvailableHalls, fetchedDetails, locale])
 
     return (
         <PublicLayout>
@@ -1575,7 +1660,7 @@ function SearchPage() {
 
                             <div className="flex flex-wrap items-center justify-between gap-4">
                                 <div>
-                                    <h1 className="flex items-center gap-3 text-3xl leading-none text-foreground">
+                                    <h1 className="flex items-center gap-3 text-2xl leading-none text-foreground">
                                         <button
                                             type="button"
                                             onClick={() => navigateWithFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: pageSize, page: 1, tab: 'all' })}
@@ -1596,6 +1681,13 @@ function SearchPage() {
                                             className={tab === 'blogs' ? 'underline decoration-accent decoration-2 underline-offset-4' : 'text-muted transition-colors hover:text-foreground'}
                                         >
                                             {m.search.blogTab}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => navigateWithFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: pageSize, page: 1, tab: 'posters' })}
+                                            className={tab === 'posters' ? 'underline decoration-accent decoration-2 underline-offset-4' : 'text-muted transition-colors hover:text-foreground'}
+                                        >
+                                            {m.search.postersTab}
                                         </button>
                                     </h1>
                                     <p className="mt-2 text-sm text-muted">
@@ -1706,11 +1798,14 @@ function SearchPage() {
                                 {pageItems.map((item) => (
                                     <SearchResultCard
                                         key={item.id}
-                                        item={item}
-                                        detailHref={ item.type === 'blog'
-                                            ? withLocalePath('/blogs/' + item.id, locale)
-                                            : withLocalePath('/archive/' + item.id, locale)
-                                        }
+                                        item={{
+                                            ...item,
+                                            detailHref: item.type === 'blog'
+                                                ? withLocalePath('/blogs/' + item.id, locale)
+                                                : item.type === 'poster'
+                                                    ? withLocalePath('/posters/' + item.id, locale)
+                                                : withLocalePath('/archive/' + item.id, locale),
+                                        }}
                                     />
                                 ))}
                             </div>

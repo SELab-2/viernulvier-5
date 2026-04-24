@@ -1,5 +1,6 @@
 import type { SearchRepository } from './search.repository.js'
 import type { ProductionsService } from '../productions/productions.service.js'
+import type { PostersService } from '../posters/posters.service.js'
 import type { SearchQuery, SearchResultItem } from './search.schema.js'
 import type { PaginatedResult } from '../../utils/pagination.js'
 import { calculateTotalPages, sanitizePage } from '../../utils/pagination.js'
@@ -8,6 +9,7 @@ export class SearchService {
     constructor(
         private readonly searchRepository: SearchRepository,
         private readonly productionsService: ProductionsService,
+        private readonly postersService: PostersService,
     ) {}
 
     async search(options: SearchQuery): Promise<PaginatedResult<SearchResultItem>> {
@@ -27,11 +29,19 @@ export class SearchService {
         // Get total count of matching productions first, then fetch all without an artificial ceiling
         const prodsPreview = await this.productionsService.getProductions({ ...commonProductionOptions, page: 1, limit: 1 })
 
-        const [blogResults, prodResults] = await Promise.all([
-            this.searchRepository.findAllBlogs({ search, yearFrom, yearTo }),
+        // Blogs and posters don't have genres/locations, so exclude them when these filters are active
+        const hasGenreOrLocationFilter = (genres && genres.length > 0) || (locations && locations.length > 0)
+
+        const [blogResults, prodResults, posterResults] = await Promise.all([
+            !hasGenreOrLocationFilter
+                ? this.searchRepository.findAllBlogs({ search, yearFrom, yearTo })
+                : Promise.resolve([]),
             prodsPreview.total > 0
                 ? this.productionsService.getProductions({ ...commonProductionOptions, page: 1, limit: prodsPreview.total })
                 : Promise.resolve({ items: [], total: 0, page: 1, limit: 1, totalPages: 0 }),
+            !hasGenreOrLocationFilter
+                ? this.postersService.getPosters({ search, yearFrom, yearTo, page: 1, limit: 1000, sort: 'recent', lang: lang ?? 'nl' })
+                : Promise.resolve({ items: [], total: 0, page: 1, limit: 100, totalPages: 0 }),
         ])
 
         // --- map to a common shape ---
@@ -51,20 +61,43 @@ export class SearchService {
             teaser: prod.teaser ?? null,
             description_short: prod.description_short ?? null,
             description: prod.description ?? null,
-            image_url: null,
-            venue_name: null,
-            venue_names: [],
-            production_genres: [],
+            image_url: prod.image_url ?? null,
+            venue_name: prod.venue_name ?? null,
+            venue_names: prod.venue_names ?? [],
+            production_genres: prod.production_genres ?? [],
             performer_type: prod.performer_type ?? null,
             attendance_mode: prod.attendance_mode ?? null,
             created_at: prod.created_at ? new Date(prod.created_at).toISOString() : undefined,
         }))
 
+        const posterItems: SearchResultItem[] = posterResults.items.map((poster) => {
+            // Extract production title (JSONB) for venue name
+            let venueName: string | null = null
+            if (poster.production?.title) {
+                const title = poster.production.title as Record<string, string> | string | null
+                if (typeof title === 'object' && title !== null) {
+                    // JSONB object, try to extract localized value
+                    venueName = (title.nl || title.en || title.fr || Object.values(title)[0] as string | undefined) ?? null
+                } else if (typeof title === 'string') {
+                    venueName = title
+                }
+            }
+
+            return {
+                id: poster.id,
+                type: 'poster' as const,
+                title: poster.title ?? null,
+                image_url: `/api/v1/archive/posters/${poster.id}/file`,
+                venue_name: venueName,
+                created_at: poster.created_at ? new Date(poster.created_at).toISOString() : undefined,
+            }
+        })
+
         // --- merge sorted by date descending ---
         const getDate = (item: SearchResultItem) =>
             item.created_at ? new Date(item.created_at).getTime() : 0
 
-        const merged = [...blogItems, ...prodItems].sort((a, b) => {
+        const merged = [...blogItems, ...prodItems, ...posterItems].sort((a, b) => {
             if (sort === 'oldest') return getDate(a) - getDate(b)
             return getDate(b) - getDate(a)
         })

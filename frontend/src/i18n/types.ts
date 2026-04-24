@@ -57,6 +57,7 @@ export type Messages = {
     heading: string
     subtitle: string
     productionsTab: string
+    postersTab: string
     blogTab: string
     allTab: string
     resultsCount: string
@@ -224,11 +225,13 @@ export type Messages = {
     nav: {
       dashboard: string
       productions: string
+      posters: string
       gallery: string
       organisation: string
       settings: string
       dashboardIconAlt: string
       productionsIconAlt: string
+      postersIconAlt: string
       galleryIconAlt: string
       organisationIconAlt: string
       settingsIconAlt: string
@@ -275,6 +278,33 @@ export type Messages = {
     archiveEdit: {
       pageTitle: string
       itemIdLabel: string
+    }
+    posters: {
+      pageTitle: string
+      pageSubtitle: string
+      formTitleLabel: string
+      formProductionLabel: string
+      formFileLabel: string
+      submitButton: string
+      submittingButton: string
+      overviewHeading: string
+      searchPlaceholder: string
+      searchButton: string
+      loadingMessage: string
+      emptyMessage: string
+      noProductionsAvailable: string
+      searchProductionPlaceholder: string
+      noProductionsFound: string
+      deleteButton: string
+      deletingButton: string
+      deleteConfirm: string
+      deleteError: string
+      validationTitleRequired: string
+      validationProductionRequired: string
+      validationFileRequired: string
+      loadPostersError: string
+      loadProductionsError: string
+      noProductionAssigned: string
     }
   }
 
