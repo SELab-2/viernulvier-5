@@ -4,8 +4,7 @@ import AdminLayout from '../../components/admin/AdminLayout'
 import { usePagination } from '../../components/admin/hooks/usePagination'
 import {
     ProductionsTable,
-    type ProductionRow as Production,
-    type LanguageState
+    type ProductionRow as Production
 } from '../../components/admin/ProductionsTable.tsx'
 import {useNavigate} from "react-router-dom";
 import { getAdminRouteConfig } from '../../admin/paths'
@@ -48,10 +47,9 @@ function getLocalizedTitle(text: LocalizedText): string {
     return (text.nl ?? text.en ?? text.fr ?? '').trim()
 }
 
-function mapLanguageState(value?: string | null): LanguageState {
-    if (value === 'complete') return 'complete'
-    if (value === 'attention') return 'attention'
-    return 'missing'
+function hasLocalizedText(text: LocalizedText, locale: 'nl' | 'en'): boolean {
+    const value = text?.[locale]
+    return typeof value === 'string' && value.trim().length > 0
 }
 
 function mapProductionApiItem(item: ProductionApiItem): Production {
@@ -62,10 +60,11 @@ function mapProductionApiItem(item: ProductionApiItem): Production {
         type: genre,
         status: item.status === 'published' ? 'published' : 'concept',
         languageStatus: {
-            nl: mapLanguageState(item.language_status?.nl),
-            en: mapLanguageState(item.language_status?.en),
+            nl: hasLocalizedText(item.title, 'nl') ? 'complete' : 'missing',
+            en: hasLocalizedText(item.title, 'en') ? 'complete' : 'missing',
         },
         updatedAt: item.updated_at,
+        detailHref: `/archive/${item.id}`,
     }
 }
 

@@ -11,6 +11,7 @@ export type ProductionRow = {
     status: ProductionStatus
     languageStatus: { nl: LanguageState; en: LanguageState }
     updatedAt: string
+    detailHref: string
 }
 
 type ProductionsTableProps = {
@@ -127,6 +128,14 @@ export function ProductionsTable({
                         <td className="px-4 py-4 text-sm text-[#475569] dark:text-slate-300">{formatDate(item.updatedAt)}</td>
                         <td className="px-4 py-4">
                             <div className="flex gap-1">
+                                <a
+                                    href={item.detailHref}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
+                                >
+                                    {d.actionView}
+                                </a>
                                 {onEdit ? (
                                     <button
                                         className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"

@@ -1,12 +1,15 @@
 import { useAdminMessages } from './AdminMessagesContext'
 import { useDashboardFormatters } from './hooks/useDashboardFormatters.ts'
+import type { LanguageState } from './ProductionsTable.tsx'
 
 export type BlogRow = {
     id: string
     title: string
     productionCount: number
+    languageStatus: { nl: LanguageState; en: LanguageState }
     createdAt: string
     updatedAt: string
+    detailHref: string
 }
 
 type BlogsTableProps = {
@@ -34,6 +37,7 @@ export function BlogsTable({
     const headings = [
         d.tableColTitle,
         b.tableColLinkedProductions,
+        d.tableColLanguage,
         d.tableColDate,
         d.tableColActions,
     ]
@@ -83,6 +87,36 @@ export function BlogsTable({
                                 </span>
                         </td>
 
+                        <td className="px-4 py-4">
+                            <div className="flex gap-3 text-[9px] uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
+                                {(['nl', 'en'] as const).map((loc) => {
+                                    const state = item.languageStatus[loc]
+                                    const dotClass = state === 'complete' ? 'bg-[#10b981]' : state === 'attention' ? 'bg-[#f59e0b]' : 'bg-[#cbd5e1]'
+                                    const tooltip = state === 'complete'
+                                        ? d.languageStatusComplete
+                                        : state === 'attention'
+                                            ? d.languageStatusAttention
+                                            : d.languageStatusMissing
+
+                                    return (
+                                        <span
+                                            key={loc}
+                                            className={`inline-block cursor-help rounded-sm focus:outline-none focus:ring-2 focus:ring-accent/40 ${state === 'missing' ? 'opacity-40' : ''}`}
+                                            title={tooltip}
+                                            aria-label={`${loc.toUpperCase()}: ${tooltip}`}
+                                            tabIndex={0}
+                                        >
+                                            <span className="block">{loc}</span>
+                                            <span
+                                                aria-hidden="true"
+                                                className={`mt-1 block h-2 w-2 rounded-full ${dotClass}`}
+                                            />
+                                        </span>
+                                    )
+                                })}
+                            </div>
+                        </td>
+
                         {/* Datum */}
                         <td className="px-6 py-4 text-sm text-[#475569] dark:text-slate-300">
                             {formatDate(item.updatedAt)}
@@ -91,6 +125,14 @@ export function BlogsTable({
                         {/* Acties */}
                         <td className="px-6 py-4">
                             <div className="flex gap-1">
+                                <a
+                                    href={item.detailHref}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white"
+                                >
+                                    {d.actionView}
+                                </a>
                                 {onEdit ? (
                                     <button
                                         className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white"
@@ -116,7 +158,7 @@ export function BlogsTable({
                 {!isLoading && items.length === 0 ? (
                     <tr className="h-[72px]">
                         <td
-                            colSpan={4}
+                            colSpan={5}
                             className="px-6 py-10 text-center text-sm text-slate-500"
                         >
                             {d.emptyRecent}
@@ -131,7 +173,7 @@ export function BlogsTable({
                             className="h-[72px] border-t border-slate-100 dark:border-slate-800"
                             aria-hidden
                         >
-                            <td colSpan={4} />
+                            <td colSpan={5} />
                         </tr>
                     ))
                     : null}

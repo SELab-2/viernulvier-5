@@ -6,6 +6,7 @@ import { usePagination } from '../../components/admin/hooks/usePagination'
 import { BlogsTable, type BlogRow } from '../../components/admin/BlogsTable.tsx'
 import { getAdminRouteConfig } from '../../admin/paths'
 import { useAdminMessages } from '../../components/admin/AdminMessagesContext'
+import type { LanguageState } from '../../components/admin/ProductionsTable.tsx'
 
 type LocalizedText = {
     nl?: string
@@ -26,6 +27,12 @@ function getLocalizedTitle(text: LocalizedText | undefined): string {
     return (text.nl ?? text.en ?? text.fr ?? '').trim()
 }
 
+function getLanguageState(text: LocalizedText | undefined, locale: 'nl' | 'en'): LanguageState {
+    const value = text?.[locale]
+    if (typeof value === 'string' && value.trim().length > 0) return 'complete'
+    return 'missing'
+}
+
 type PaginatedApiResponse<T> = {
     data: T[]
     meta: {
@@ -43,8 +50,13 @@ function mapBlogApiItem(item: BlogApiItem): BlogRow {
         id: item.id,
         title: getLocalizedTitle(item.title) || '(Zonder titel)',
         productionCount: item.productions?.length ?? 0,
+        languageStatus: {
+            nl: getLanguageState(item.title, 'nl'),
+            en: getLanguageState(item.title, 'en'),
+        },
         createdAt: item.createdAt,
         updatedAt: item.updatedAt,
+        detailHref: `/archive/blogs/${item.id}`,
     }
 }
 
