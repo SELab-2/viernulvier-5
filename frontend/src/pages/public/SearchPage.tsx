@@ -1710,7 +1710,7 @@ function SearchPage() {
 
                             <div className="flex flex-wrap items-center justify-between gap-4">
                                 <div>
-                                    <h1 className="flex items-center gap-3 text-2xl leading-none text-foreground">
+                                    <h1 className="flex items-center gap-3 text-xl md:text-2xl leading-none text-foreground">
                                         <button
                                             type="button"
                                             onClick={() => navigateWithFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: pageSize, page: 1, tab: 'all' })}
@@ -1795,7 +1795,7 @@ function SearchPage() {
                                                 <circle cx="18" cy="19" r="3" />
                                                 <path d="M8.59 13.51 15.42 17.49M15.41 6.51 8.59 10.49" strokeLinecap="round" />
                                             </svg>
-                                            <span>{shareCopied ? m.search.shareCopiedLabel : m.search.shareLabel}</span>
+                                            <span className="hidden lg:inline">{shareCopied ? m.search.shareCopiedLabel : m.search.shareLabel}</span>
                                         </button>
                                     </div>
                                 ) : null}
