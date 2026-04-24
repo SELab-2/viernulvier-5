@@ -20,9 +20,9 @@ import BlogDetailPage from './pages/public/BlogDetailPage'
 /**
  * Root App component.
  *
- * Detects subdomain to switch between public and admin views.
+ * Detects host capabilities and mounts admin routes under /admin.
  * - archief.viernulvier.be → public archive browser
- * - admin.archief.viernulvier.be → admin management panel
+ * - admin.archief.viernulvier.be → admin management panel via /admin
  * - localhost/127.0.0.1 → both available via /admin prefix
  */
 function App() {
@@ -83,13 +83,64 @@ function App() {
                             }
                         />
 
-                        <Route path="/admin/blogs/create" element={<CreateBlogPage/>} />
-                        <Route path="/en/admin/blogs/create" element={<CreateBlogPage/>} />
-                        <Route path="/nl/admin/blogs/create" element={<CreateBlogPage/>} />
+                        <Route
+                            path="/admin/blogs/create"
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <CreateBlogPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+                        <Route
+                            path="/en/admin/blogs/create"
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <CreateBlogPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+                        <Route
+                            path="/nl/admin/blogs/create"
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <CreateBlogPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
 
-                        <Route path="/admin/blogs/:id/edit" element={<CreateBlogPage/>} />
-                        <Route path="/en/admin/blogs/:id/edit" element={<CreateBlogPage/>} />
-                        <Route path="/nl/admin/blogs/:id/edit" element={<CreateBlogPage/>} />
+                        <Route
+                            path="/admin/blogs/:id/edit"
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <CreateBlogPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+                        <Route
+                            path="/en/admin/blogs/:id/edit"
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <CreateBlogPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+                        <Route
+                            path="/nl/admin/blogs/:id/edit"
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <CreateBlogPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+                        <Route
+                            path="/admin/*"
+                            element={
+                                <AdminEntryRoute
+                                    loginPath={adminRoutes.loginPath}
+                                    dashboardPath={adminRoutes.dashboardPath}
+                                />
+                            }
+                        />
                     </>
                 ) : null}
             </Routes>
