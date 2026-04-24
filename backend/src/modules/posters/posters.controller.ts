@@ -9,7 +9,7 @@ import { buildPaginationLinks } from '../../utils/pagination.js'
 import { env } from '../../config/env.js'
 
 const MAX_FILE_SIZE_BYTES = 15 * 1024 * 1024
-const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
+const ALLOWED_UPLOAD_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf'])
 
 function sanitizeFilename(fileName: string): string {
     return fileName.replace(/[^a-zA-Z0-9._-]/g, '_')
@@ -114,8 +114,8 @@ export class PostersController {
                 return reply.status(400).send({ message: 'Poster title is required' })
             }
 
-            if (!ALLOWED_IMAGE_TYPES.has(mimeType)) {
-                return reply.status(400).send({ message: 'Poster file must be an image (jpg, png, webp, gif)' })
+            if (!ALLOWED_UPLOAD_TYPES.has(mimeType)) {
+                return reply.status(400).send({ message: 'Poster file must be an image (jpg, png, webp, gif) or a PDF' })
             }
 
             const fileBuffer = parseBase64Payload(body.file_base64)
@@ -157,7 +157,7 @@ export class PostersController {
             if (error instanceof Error) {
                 const knownValidationError = [
                     'Poster title is required',
-                    'Poster file must be an image (jpg, png, webp, gif)',
+                    'Poster file must be an image (jpg, png, webp, gif) or a PDF',
                     'Poster file is too large',
                     'Poster file payload is invalid',
                 ].includes(error.message)

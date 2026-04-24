@@ -121,6 +121,7 @@ const en: Messages = {
     resetFiltersLabel: 'reset filters',
     paginationPrevious: '<',
     paginationNext: '>',
+    relatedFilesCount: (count: number) => `${count} ${count === 1 ? 'file' : 'files'}`,
   },
   auth: {
     localeToggleLabel: 'Switch language',
@@ -307,7 +308,7 @@ const en: Messages = {
     },
     posters: {
       pageTitle: 'Posters',
-      pageSubtitle: 'Add posters with title, file and linked production.',
+      pageSubtitle: 'Add multiple poster images or PDF files with title and linked production.',
       formTitleLabel: 'Title',
       formProductionLabel: 'Production',
       formFileLabel: 'File',
@@ -327,7 +328,7 @@ const en: Messages = {
       deleteError: 'Failed to delete poster',
       validationTitleRequired: 'Title is required',
       validationProductionRequired: 'Select a production',
-      validationFileRequired: 'Select an image file',
+      validationFileRequired: 'Select an image or PDF file',
       loadPostersError: 'Could not load posters.',
       loadProductionsError: 'Could not load productions.',
       noProductionAssigned: 'No production assigned',

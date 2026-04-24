@@ -95,6 +95,7 @@ export type Messages = {
     resetFiltersLabel: string
     paginationPrevious: string
     paginationNext: string
+    relatedFilesCount: (count: number) => string
   }
   auth: {
     localeToggleLabel: string

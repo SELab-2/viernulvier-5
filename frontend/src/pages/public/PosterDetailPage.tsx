@@ -1,4 +1,4 @@
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { apiFetch, normalizeApiAssetUrl } from '../../api/client'
 import PublicLayout from '../../components/public/PublicLayout'
@@ -14,6 +14,7 @@ type PosterDetail = {
     id: string
     title: string
     file_url: string
+    mime_type: string | null
     production: {
         id: string
         title: string
@@ -22,6 +23,10 @@ type PosterDetail = {
 
 type PosterDetailResponse = {
     data: PosterDetail
+}
+
+type PosterListResponse = {
+    data: PosterDetail[]
 }
 
 type ProductionPreview = {
@@ -47,11 +52,14 @@ function getLocalizedText(text: LocalizedText, locale: 'nl' | 'en'): string {
 
 function PosterDetailPage() {
     const { id } = useParams<{ id: string }>()
+    const [searchParams] = useSearchParams()
     const locale = getActiveLocale(window.location.pathname)
     const [poster, setPoster] = useState<PosterDetail | null>(null)
+    const [relatedPosters, setRelatedPosters] = useState<PosterDetail[]>([])
     const [relatedProduction, setRelatedProduction] = useState<ProductionPreview | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState('')
+    const productionId = searchParams.get('productionId')?.trim() || ''
 
     useEffect(() => {
         let isActive = true
@@ -74,6 +82,24 @@ function PosterDetailPage() {
                 }
 
                 setPoster(response.data)
+
+                if (productionId) {
+                    try {
+                        const groupedResponse = await apiFetch<PosterListResponse>(
+                            `/archive/posters?page=1&limit=100&productionId=${encodeURIComponent(productionId)}`,
+                        )
+
+                        if (isActive) {
+                            setRelatedPosters(groupedResponse.data)
+                        }
+                    } catch {
+                        if (isActive) {
+                            setRelatedPosters([])
+                        }
+                    }
+                } else if (isActive) {
+                    setRelatedPosters([])
+                }
 
                 if (response.data.production?.id) {
                     try {
@@ -110,7 +136,7 @@ function PosterDetailPage() {
         return () => {
             isActive = false
         }
-    }, [id, locale])
+    }, [id, locale, productionId])
 
     const backLabel = locale === 'en' ? 'Back to search' : 'Terug naar zoeken'
     const relatedProductionLabel = locale === 'en' ? 'Related' : 'Gerelateerd'
@@ -138,6 +164,8 @@ function PosterDetailPage() {
           ]
         : []
 
+    const displayPosters = relatedPosters.length > 0 ? relatedPosters : poster ? [poster] : []
+
     return (
         <PublicLayout>
             <section className="site-container py-12">
@@ -158,14 +186,26 @@ function PosterDetailPage() {
                                 <h1 className="text-4xl font-semibold leading-tight text-foreground [overflow-wrap:anywhere]">{poster.title}</h1>
                             </header>
 
-                            <div className="overflow-hidden rounded-2xl border border-border bg-surface">
-                                <div className="flex min-h-[360px] items-center justify-center bg-black/5 p-4 md:min-h-[540px] md:p-6">
-                                    <img
-                                        src={normalizeApiAssetUrl(poster.file_url)}
-                                        alt={poster.title}
-                                        className="max-h-[70vh] w-auto max-w-full object-contain"
-                                    />
-                                </div>
+                            <div className="grid gap-4">
+                                {displayPosters.map((asset) => (
+                                    <div key={asset.id} className="overflow-hidden rounded-2xl border border-border bg-surface">
+                                        <div className="flex min-h-[360px] items-center justify-center bg-black/5 p-4 md:min-h-[540px] md:p-6">
+                                            {asset.mime_type === 'application/pdf' ? (
+                                                <iframe
+                                                    src={normalizeApiAssetUrl(asset.file_url)}
+                                                    title={asset.title}
+                                                    className="h-[70vh] w-full rounded-md border border-border"
+                                                />
+                                            ) : (
+                                                <img
+                                                    src={normalizeApiAssetUrl(asset.file_url)}
+                                                    alt={asset.title}
+                                                    className="max-h-[70vh] w-auto max-w-full object-contain"
+                                                />
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
 
                             <footer className="border-t border-border pt-5">

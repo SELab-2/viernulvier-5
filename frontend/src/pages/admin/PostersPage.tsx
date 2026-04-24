@@ -18,6 +18,7 @@ type PosterItem = {
   id: string
   title: string
   file_url: string
+  mime_type: string | null
   created_at: string
   production: {
     id: string
@@ -51,6 +52,12 @@ function getLocalizedTitle(value: LocalizedText): string {
 
   const candidates = [value.nl, value.en, value.fr]
   return candidates.find((candidate) => typeof candidate === 'string' && candidate.trim().length > 0)?.trim() ?? ''
+}
+
+function getPdfPreviewUrl(fileUrl: string): string {
+  const normalized = normalizeApiAssetUrl(fileUrl) ?? fileUrl
+  const hash = '#page=1&view=FitH&toolbar=0&navpanes=0&scrollbar=0'
+  return normalized.includes('#') ? normalized : `${normalized}${hash}`
 }
 
 function PostersPageContent() {
@@ -332,7 +339,7 @@ function PostersPageContent() {
             <span>{i18n.admin.posters.formFileLabel}</span>
             <input
               type="file"
-              accept="image/*"
+              accept="image/*,application/pdf"
               onChange={(event) => {
                 const nextFile = event.target.files?.[0] ?? null
                 setSelectedFile(nextFile)
@@ -387,13 +394,22 @@ function PostersPageContent() {
             {posters.map((poster) => (
               <article key={poster.id} className="flex flex-col overflow-hidden rounded-xl border border-[var(--color-admin-card-border)]">
                 <div className="aspect-[4/3] bg-slate-100">
-                  <img
-                    src={normalizeApiAssetUrl(poster.file_url)}
-                    alt={poster.title}
-                    className="h-full w-full object-cover"
-                    loading="lazy"
-                    referrerPolicy="no-referrer"
-                  />
+                  {poster.mime_type === 'application/pdf' ? (
+                    <iframe
+                      src={getPdfPreviewUrl(poster.file_url)}
+                      title={`${poster.title} PDF preview`}
+                      className="h-full w-full border-0"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <img
+                      src={normalizeApiAssetUrl(poster.file_url)}
+                      alt={poster.title}
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                      referrerPolicy="no-referrer"
+                    />
+                  )}
                 </div>
                 <div className="flex flex-col grow p-3">
                   <div className="space-y-1">

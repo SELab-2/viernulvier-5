@@ -15,13 +15,20 @@ export class ProductionsService {
             ? production.poster_gallery.other_files
             : []
 
-        const imageFiles = files.filter((file: any) => file?.type === 'image' && typeof file?.file_location === 'string')
+        const mappedFiles = files
+            .filter((file: any) => (file?.type === 'image' || file?.type === 'pdf') && typeof file?.file_location === 'string')
+            .sort((a: any, b: any) => {
+                const first = new Date(a?.created_at ?? 0).getTime()
+                const second = new Date(b?.created_at ?? 0).getTime()
+                return second - first
+            })
 
-        return imageFiles.sort((a: any, b: any) => {
-            const first = new Date(a?.created_at ?? 0).getTime()
-            const second = new Date(b?.created_at ?? 0).getTime()
-            return second - first
-        })[0] ?? null
+        const preferredImage = mappedFiles.find((file: any) => file?.type === 'image')
+        if (preferredImage) {
+            return preferredImage
+        }
+
+        return mappedFiles[0] ?? null
     }
 
     private getItemPosition(item: any): number {
@@ -188,7 +195,7 @@ export class ProductionsService {
             ? {
                 id: posterFile.id,
                 title: String(posterFile.name ?? ''),
-                mime_type: null,
+                mime_type: posterFile.type === 'pdf' ? 'application/pdf' : 'image/*',
                 original_filename: posterFile.description ?? null,
                 file_size_bytes: null,
                 created_at: posterFile.created_at,

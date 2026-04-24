@@ -40,7 +40,12 @@ export class PostersService {
                 ? Math.max(normalizedYearFrom, normalizedYearTo)
                 : normalizedYearTo
 
-        const total = await this.repository.count({ search: normalizedSearch, yearFrom: safeYearFrom, yearTo: safeYearTo })
+        const total = await this.repository.count({
+            search: normalizedSearch,
+            productionId: options.productionId,
+            yearFrom: safeYearFrom,
+            yearTo: safeYearTo,
+        })
         const totalPages = calculateTotalPages(total, options.limit)
         const page = sanitizePage(options.page, totalPages)
 
@@ -48,6 +53,7 @@ export class PostersService {
             page,
             limit: options.limit,
             search: normalizedSearch,
+            productionId: options.productionId,
             yearFrom: safeYearFrom,
             yearTo: safeYearTo,
             sort: options.sort,

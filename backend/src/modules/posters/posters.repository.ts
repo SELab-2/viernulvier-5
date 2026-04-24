@@ -5,6 +5,7 @@ type FindAllOptions = {
     page: number
     limit: number
     search?: string
+    productionId?: string
     yearFrom?: number
     yearTo?: number
     sort?: 'recent' | 'oldest'
@@ -42,6 +43,22 @@ type PosterFileRecord = {
     } | null
 }
 
+function mapFileTypeToMime(type: PosterFileRecord['type']): string | null {
+    if (type === 'pdf') {
+        return 'application/pdf'
+    }
+
+    if (type === 'image') {
+        return 'image/*'
+    }
+
+    return null
+}
+
+function mapMimeToFileType(mimeType: string): 'image' | 'pdf' {
+    return mimeType === 'application/pdf' ? 'pdf' : 'image'
+}
+
 export class PostersRepository {
     constructor(private readonly prisma: PrismaClient) {}
 
@@ -70,7 +87,7 @@ export class PostersRepository {
             id: record.id,
             title: record.name?.trim() || 'Untitled poster',
             file_path: record.file_location ?? '',
-            mime_type: null,
+            mime_type: mapFileTypeToMime(record.type),
             original_filename: record.description ?? null,
             file_size_bytes: null,
             production_id: production?.id ?? '',
@@ -83,10 +100,12 @@ export class PostersRepository {
         }
     }
 
-    private buildWhere(options: Pick<FindAllOptions, 'search' | 'yearFrom' | 'yearTo'>): Prisma.fileWhereInput | undefined {
-        const { search, yearFrom, yearTo } = options
+    private buildWhere(options: Pick<FindAllOptions, 'search' | 'productionId' | 'yearFrom' | 'yearTo'>): Prisma.fileWhereInput | undefined {
+        const { search, productionId, yearFrom, yearTo } = options
         const where: Prisma.fileWhereInput = {
-            type: 'image',
+            type: {
+                in: ['image', 'pdf'],
+            },
             gallery: {
                 is: {
                     poster_gallery_productions: {
@@ -100,6 +119,18 @@ export class PostersRepository {
             where.name = {
                 contains: search,
                 mode: 'insensitive',
+            }
+        }
+
+        if (productionId) {
+            where.gallery = {
+                is: {
+                    poster_gallery_productions: {
+                        some: {
+                            id: productionId,
+                        },
+                    },
+                },
             }
         }
 
@@ -137,7 +168,7 @@ export class PostersRepository {
         })
     }
 
-    async count(options: Pick<FindAllOptions, 'search' | 'yearFrom' | 'yearTo'>) {
+    async count(options: Pick<FindAllOptions, 'search' | 'productionId' | 'yearFrom' | 'yearTo'>) {
         return this.prisma.file.count({
             where: this.buildWhere(options),
         })
@@ -202,7 +233,7 @@ export class PostersRepository {
                     description: data.original_filename ?? null,
                     gallery_id: galleryId,
                     file_location: data.file_path,
-                    type: 'image',
+                    type: mapMimeToFileType((data.mime_type ?? '').toLowerCase()),
                 },
                 include: this.productionInclude,
             })

@@ -121,6 +121,7 @@ const nl: Messages = {
     resetFiltersLabel: 'reset filters',
     paginationPrevious: '<',
     paginationNext: '>',
+    relatedFilesCount: (count: number) => `${count} ${count === 1 ? 'bestand' : 'bestanden'}`,
   },
   auth: {
     localeToggleLabel: 'Wissel taal',
@@ -307,7 +308,7 @@ const nl: Messages = {
     },
     posters: {
       pageTitle: 'Affiches',
-      pageSubtitle: 'Voeg affiches toe met titel, bestand en gekoppelde productie.',
+      pageSubtitle: 'Voeg meerdere affiches of PDF-bestanden toe met titel en gekoppelde productie.',
       formTitleLabel: 'Titel',
       formProductionLabel: 'Productie',
       formFileLabel: 'Bestand',
@@ -327,7 +328,7 @@ const nl: Messages = {
       deleteError: 'Affiche verwijderen mislukt',
       validationTitleRequired: 'Titel is verplicht',
       validationProductionRequired: 'Selecteer een productie',
-      validationFileRequired: 'Selecteer een afbeeldingsbestand',
+      validationFileRequired: 'Selecteer een afbeeldings- of PDF-bestand',
       loadPostersError: 'Affiches konden niet geladen worden.',
       loadProductionsError: 'Producties konden niet geladen worden.',
       noProductionAssigned: 'Geen productie gekoppeld',
