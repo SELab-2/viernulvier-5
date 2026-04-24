@@ -41,6 +41,7 @@ function renderTable(ui: React.ReactElement) {
 const baseItem: ProductionRow = {
     id: 'prod-1',
     title: 'De Grote Voorstelling',
+    detailHref: '/archive/prod-1',
     type: 'Theater',
     status: 'published',
     languageStatus: { nl: 'complete', en: 'attention' },
@@ -50,6 +51,7 @@ const baseItem: ProductionRow = {
 const secondItem: ProductionRow = {
     id: 'prod-2',
     title: 'Kleine Voorstelling',
+    detailHref: '/archive/prod-2',
     type: 'Dans',
     status: 'concept',
     languageStatus: { nl: 'missing', en: 'complete' },

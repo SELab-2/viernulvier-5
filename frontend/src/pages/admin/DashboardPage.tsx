@@ -102,6 +102,10 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
   })
 
   const recentItems = summary?.recentItems ?? []
+  const recentItemsWithDetail = recentItems.map((item) => ({
+    ...item,
+    detailHref: `/archive/${item.id}`,
+  }))
   const total = summary?.totalRecentItems ?? 0
   const totalPages = Math.max(1, Math.ceil(total / pageSize))
   const { items: paginationItems, from, to } = usePagination({
@@ -170,7 +174,7 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
 
           <div className="overflow-hidden rounded-[12px] border border-[var(--color-admin-card-border)] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.05)] dark:bg-[#111318]">
             <ProductionsTable
-                items={recentItems}
+              items={recentItemsWithDetail}
                 isLoading={isLoading}
                 pageSize={pageSize}
                 onEdit={(id) => navigate(archiveEditPath.replace(':id', id))}
