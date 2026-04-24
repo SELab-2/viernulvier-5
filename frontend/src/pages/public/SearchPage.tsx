@@ -116,6 +116,10 @@ type PosterApiItem = {
         id: string
         title: string
     } | null
+    productions?: Array<{
+        id: string
+        title: string
+    }>
 }
 
 type SearchSort = 'relevance' | 'recent' | 'oldest'
@@ -284,7 +288,17 @@ function normalizeGenreValue(value: string): string {
 function mapPosterToSearchEntry(item: PosterApiItem, locale: Locale): SearchEntry {
     const searchMessages = getMessages(locale).search
     const date = formatDate(item.created_at, locale)
-    const productionTitle = item.production?.title?.trim() || searchMessages.fallbackVenue
+    const productionEntries = item.productions?.length
+        ? item.productions
+        : item.production
+            ? [item.production]
+            : []
+    const productionTitles = productionEntries
+        .map((production) => production.title.trim())
+        .filter((title) => title.length > 0)
+    const productionTitle = productionTitles.length > 0
+        ? productionTitles.join(' • ')
+        : searchMessages.fallbackVenue
 
     return {
         id: item.id,
@@ -295,7 +309,7 @@ function mapPosterToSearchEntry(item: PosterApiItem, locale: Locale): SearchEntr
         venue: productionTitle,
         imageUrl: normalizeApiAssetUrl(item.file_url),
         mimeType: item.mime_type,
-        posterProductionId: item.production?.id,
+        posterProductionId: productionEntries[0]?.id,
         year: new Date(item.created_at).getFullYear() || MIN_PERIOD_YEAR,
         genre: '',
         location: '',

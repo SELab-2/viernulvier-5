@@ -25,6 +25,10 @@ export type PosterRecord = {
         id: string
         title: unknown
     } | null
+    productions: Array<{
+        id: string
+        title: unknown
+    }>
 }
 
 type PosterFileRecord = {
@@ -71,7 +75,6 @@ export class PostersRepository {
                             id: true,
                             title: true,
                         },
-                        take: 1,
                     },
                 },
             },
@@ -79,7 +82,12 @@ export class PostersRepository {
     }
 
     private mapPosterRecord(record: PosterFileRecord): PosterRecord {
-        const production = record.gallery?.poster_gallery_productions[0] ?? null
+        const productions = (record.gallery?.poster_gallery_productions ?? []).map((production) => ({
+            id: production.id,
+            title: production.title,
+        }))
+
+        const production = productions[0] ?? null
 
         return {
             created_at: record.created_at,
@@ -97,6 +105,7 @@ export class PostersRepository {
                       title: production.title,
                   }
                 : null,
+            productions,
         }
     }
 
@@ -190,42 +199,55 @@ export class PostersRepository {
         return this.mapPosterRecord(record as PosterFileRecord)
     }
 
-    private async ensurePosterGalleryForProduction(tx: Prisma.TransactionClient, productionId: string) {
-        const production = await tx.production.findUnique({
-            where: { id: productionId },
-            select: {
-                id: true,
-                poster_gallery_id: true,
-            },
+    private async ensurePosterGalleryForProductions(tx: Prisma.TransactionClient, productionIds: string[]) {
+        const [primaryId, ...otherIds] = productionIds
+
+        const primary = await tx.production.findUnique({
+            where: { id: primaryId },
+            select: { id: true, poster_gallery_id: true },
         })
 
-        if (!production) {
+        if (!primary) {
             throw new Error('Production not found')
         }
 
-        if (production.poster_gallery_id) {
-            return production.poster_gallery_id
+        let galleryId = primary.poster_gallery_id
+
+        if (!galleryId) {
+            const gallery = await tx.gallery.create({
+                data: { name: `Posters for ${primary.id}` },
+            })
+            galleryId = gallery.id
+            await tx.production.update({
+                where: { id: primary.id },
+                data: { poster_gallery_id: galleryId },
+            })
         }
 
-        const gallery = await tx.gallery.create({
-            data: {
-                name: `Posters for ${production.id}`,
-            },
-        })
+        for (const otherId of otherIds) {
+            const other = await tx.production.findUnique({
+                where: { id: otherId },
+                select: { id: true, poster_gallery_id: true },
+            })
 
-        await tx.production.update({
-            where: { id: production.id },
-            data: {
-                poster_gallery_id: gallery.id,
-            },
-        })
+            if (!other) {
+                continue
+            }
 
-        return gallery.id
+            if (other.poster_gallery_id !== galleryId) {
+                await tx.production.update({
+                    where: { id: otherId },
+                    data: { poster_gallery_id: galleryId },
+                })
+            }
+        }
+
+        return galleryId
     }
 
     async create(data: CreatePosterPersistenceInput) {
         const record = await this.prisma.$transaction(async (tx) => {
-            const galleryId = await this.ensurePosterGalleryForProduction(tx, data.production_id)
+            const galleryId = await this.ensurePosterGalleryForProductions(tx, data.production_ids)
 
             return tx.file.create({
                 data: {
@@ -249,8 +271,8 @@ export class PostersRepository {
         }
 
         const record = await this.prisma.$transaction(async (tx) => {
-            const nextGalleryId = data.production_id
-                ? await this.ensurePosterGalleryForProduction(tx, data.production_id)
+            const nextGalleryId = data.production_ids && data.production_ids.length > 0
+                ? await this.ensurePosterGalleryForProductions(tx, data.production_ids)
                 : undefined
 
             return tx.file.update({

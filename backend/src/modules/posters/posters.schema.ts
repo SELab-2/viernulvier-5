@@ -31,6 +31,7 @@ export const posterSchema = z.object({
     original_filename: z.string().nullable(),
     file_size_bytes: z.number().int().nullable(),
     production: posterProductionSchema.nullable(),
+    productions: z.array(posterProductionSchema),
     created_at: z.coerce.date(),
     updated_at: z.coerce.date(),
     links: posterLinksSchema.optional(),
@@ -45,12 +46,12 @@ export const posterIdParamSchema = z.object({
 
 export const updatePosterSchema = z.object({
     title: z.string().min(1).optional(),
-    production_id: z.string().uuid().optional(),
+    production_ids: z.array(z.string().uuid()).optional(),
 })
 
 export const createPosterSchema = z.object({
     title: z.string().min(1),
-    production_id: z.string().uuid(),
+    production_ids: z.array(z.string().uuid()).min(1),
     file_name: z.string().min(1),
     mime_type: z.string().min(1),
     file_base64: z.string().min(1),
@@ -70,5 +71,5 @@ export type CreatePosterPersistenceInput = {
     mime_type?: string | null
     original_filename?: string | null
     file_size_bytes?: number | null
-    production_id: string
+    production_ids: string[]
 }

@@ -42,6 +42,15 @@ export class PostersController {
         const productionTitle = poster.production
             ? this.service.mapProductionTitle(poster.production.title, 'nl')
             : ''
+        const productions = Array.isArray(poster.productions)
+            ? poster.productions.map((production: { id: string; title: unknown }) => {
+                  const localizedTitle = this.service.mapProductionTitle(production.title, 'nl')
+                  return {
+                      id: production.id,
+                      title: localizedTitle || production.id,
+                  }
+              })
+            : []
 
         return {
             id: poster.id,
@@ -56,6 +65,7 @@ export class PostersController {
                       title: productionTitle || poster.production.id,
                   }
                 : null,
+            productions,
             created_at: poster.created_at,
             updated_at: poster.updated_at,
             links: {
@@ -106,12 +116,16 @@ export class PostersController {
         try {
             const body = request.body
             const title = body.title.trim()
-            const productionId = body.production_id.trim()
+            const productionIds = body.production_ids.map((id: string) => id.trim()).filter(Boolean)
             const mimeType = body.mime_type.trim().toLowerCase()
             const fileName = body.file_name.trim()
 
             if (!title) {
                 return reply.status(400).send({ message: 'Poster title is required' })
+            }
+
+            if (productionIds.length === 0) {
+                return reply.status(400).send({ message: 'At least one production is required' })
             }
 
             if (!ALLOWED_UPLOAD_TYPES.has(mimeType)) {
@@ -130,7 +144,7 @@ export class PostersController {
 
             const poster = await this.service.createPoster({
                 title,
-                production_id: productionId,
+                production_ids: productionIds,
                 file_path: filePath,
                 mime_type: mimeType,
                 original_filename: originalName,

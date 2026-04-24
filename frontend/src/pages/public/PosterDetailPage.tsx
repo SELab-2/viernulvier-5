@@ -19,6 +19,10 @@ type PosterDetail = {
         id: string
         title: string
     } | null
+    productions?: Array<{
+        id: string
+        title: string
+    }>
 }
 
 type PosterDetailResponse = {
@@ -56,7 +60,7 @@ function PosterDetailPage() {
     const locale = getActiveLocale(window.location.pathname)
     const [poster, setPoster] = useState<PosterDetail | null>(null)
     const [relatedPosters, setRelatedPosters] = useState<PosterDetail[]>([])
-    const [relatedProduction, setRelatedProduction] = useState<ProductionPreview | null>(null)
+    const [relatedProductions, setRelatedProductions] = useState<ProductionPreview[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState('')
     const productionId = searchParams.get('productionId')?.trim() || ''
@@ -101,22 +105,31 @@ function PosterDetailPage() {
                     setRelatedPosters([])
                 }
 
-                if (response.data.production?.id) {
+                const productionRefs = response.data.productions?.length
+                    ? response.data.productions
+                    : response.data.production
+                        ? [response.data.production]
+                        : []
+
+                if (productionRefs.length > 0) {
                     try {
-                        const productionResponse = await apiFetch<ProductionPreviewResponse>(
-                            `/archive/productions/${response.data.production.id}`,
+                        const results = await Promise.allSettled(
+                            productionRefs.map((ref) => apiFetch<ProductionPreviewResponse>(`/archive/productions/${ref.id}`)),
                         )
 
                         if (isActive) {
-                            setRelatedProduction(productionResponse.data)
+                            const previews = results.flatMap((result) =>
+                                result.status === 'fulfilled' ? [result.value.data] : [],
+                            )
+                            setRelatedProductions(previews)
                         }
                     } catch {
                         if (isActive) {
-                            setRelatedProduction(null)
+                            setRelatedProductions([])
                         }
                     }
-                } else {
-                    setRelatedProduction(null)
+                } else if (isActive) {
+                    setRelatedProductions([])
                 }
             } catch (loadError) {
                 if (!isActive) {
@@ -142,27 +155,32 @@ function PosterDetailPage() {
     const relatedProductionLabel = locale === 'en' ? 'Related' : 'Gerelateerd'
     const noLinkedProductionLabel = locale === 'en' ? 'No linked production' : 'Geen gekoppelde productie'
 
-    const relatedTitle = relatedProduction
-        ? getLocalizedText(relatedProduction.title, locale)
-        : poster?.production?.title ?? ''
+    const relatedItems = (() => {
+        if (!poster) {
+            return []
+        }
 
-    const relatedYear = relatedProduction?.created_at
-        ? new Date(relatedProduction.created_at).getFullYear()
-        : undefined
+        const refs = poster.productions?.length
+            ? poster.productions
+            : poster.production
+                ? [poster.production]
+                : []
 
-    const relatedGenre = relatedProduction?.production_genres?.find((value) => value.trim().length > 0)
+        return refs.map((ref) => {
+            const preview = relatedProductions.find((item) => item.id === ref.id)
+            const title = preview ? getLocalizedText(preview.title, locale) : ''
+            const year = preview?.created_at ? new Date(preview.created_at).getFullYear() : undefined
+            const genre = preview?.production_genres?.find((value) => value.trim().length > 0)
 
-    const relatedItems = poster?.production
-        ? [
-              {
-                  id: poster.production.id,
-                  title: relatedTitle || poster.production.title,
-                  imageUrl: relatedProduction?.image_url,
-                  year: relatedYear,
-                  genre: relatedGenre,
-              },
-          ]
-        : []
+            return {
+                id: ref.id,
+                title: title || ref.title,
+                imageUrl: preview?.image_url,
+                year,
+                genre,
+            }
+        })
+    })()
 
     const displayPosters = relatedPosters.length > 0 ? relatedPosters : poster ? [poster] : []
 
@@ -213,7 +231,7 @@ function PosterDetailPage() {
                                     {relatedProductionLabel}
                                 </p>
                                 {relatedItems.length > 0 ? (
-                                    <div className="grid max-w-4xl gap-4 md:grid-cols-2">
+                                    <div className="grid w-full gap-4 md:grid-cols-2">
                                         {relatedItems.map((item) => (
                                             <Link
                                                 key={item.id}

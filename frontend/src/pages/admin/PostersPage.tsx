@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import AdminLayout from '../../components/admin/AdminLayout'
 import { apiFetch, normalizeApiAssetUrl } from '../../api/client'
-import { getMessages } from '../../i18n'
+import ProductionManagementSection, { type ProductionItem as ManagedProductionItem } from '../../components/admin/blogs/ProductionManagementSection'
+import { useAdminMessages } from '../../components/admin/AdminMessagesContext'
 
 type LocalizedText = {
   nl?: string
@@ -9,10 +10,7 @@ type LocalizedText = {
   fr?: string
 } | null
 
-type ProductionItem = {
-  id: string
-  title: LocalizedText
-}
+type ProductionItem = ManagedProductionItem
 
 type PosterItem = {
   id: string
@@ -61,13 +59,15 @@ function getPdfPreviewUrl(fileUrl: string): string {
 }
 
 function PostersPageContent() {
-  const i18n = getMessages()
+  const i18n = useAdminMessages()
   const [posters, setPosters] = useState<PosterItem[]>([])
   const [productions, setProductions] = useState<ProductionItem[]>([])
   const [title, setTitle] = useState('')
-  const [productionId, setProductionId] = useState('')
-  const [productionSearchInput, setProductionSearchInput] = useState('')
-  const [isProductionDropdownOpen, setIsProductionDropdownOpen] = useState(false)
+  const [selectedProductionIds, setSelectedProductionIds] = useState<string[]>([])
+  const [productionToAdd, setProductionToAdd] = useState('')
+  const [productionSearchQuery, setProductionSearchQuery] = useState('')
+  const [isProductionPopupOpen, setIsProductionPopupOpen] = useState(false)
+  const [isLoadingProductions] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [search, setSearch] = useState('')
   const [isLoading, setIsLoading] = useState(true)
@@ -88,19 +88,15 @@ function PostersPageContent() {
     })
   }, [productions])
 
-  const filteredProductions = useMemo(() => {
-    const needle = productionSearchInput.trim().toLowerCase()
-    if (!needle) {
-      return sortedProductions.slice(0, 12)
-    }
+  const selectedProductions = useMemo(
+    () => sortedProductions.filter((p) => selectedProductionIds.includes(p.id)),
+    [sortedProductions, selectedProductionIds],
+  )
 
-    return sortedProductions
-      .filter((production) => {
-        const label = getLocalizedTitle(production.title) || production.id
-        return label.toLowerCase().includes(needle)
-      })
-      .slice(0, 12)
-  }, [productionSearchInput, sortedProductions])
+  const availableProductions = useMemo(
+    () => sortedProductions.filter((p) => !selectedProductionIds.includes(p.id)),
+    [sortedProductions, selectedProductionIds],
+  )
 
   const fetchProductionsWithFallback = useCallback(async () => {
     const urls = [
@@ -141,7 +137,6 @@ function PostersPageContent() {
 
     if (productionsResult.status === 'fulfilled') {
       setProductions(productionsResult.value)
-      setProductionId((currentProductionId) => currentProductionId || productionsResult.value[0]?.id || '')
     } else {
       setProductions([])
     }
@@ -173,24 +168,25 @@ function PostersPageContent() {
     void loadData()
   }, [loadData])
 
-  useEffect(() => {
-    if (!productionId) {
+  const openProductionPopup = () => {
+    if (!productionToAdd && availableProductions.length > 0) {
+      setProductionToAdd(availableProductions[0].id)
+    }
+    setIsProductionPopupOpen(true)
+  }
+
+  const addProduction = () => {
+    if (!productionToAdd || selectedProductionIds.includes(productionToAdd)) {
       return
     }
+    setSelectedProductionIds((current) => [...current, productionToAdd])
+    const nextAvailable = availableProductions.find((p) => p.id !== productionToAdd)
+    setProductionToAdd(nextAvailable?.id ?? '')
+    setIsProductionPopupOpen(false)
+  }
 
-    const selectedProduction = sortedProductions.find((production) => production.id === productionId)
-    if (!selectedProduction) {
-      return
-    }
-
-    const label = getLocalizedTitle(selectedProduction.title) || selectedProduction.id
-    setProductionSearchInput(label)
-  }, [productionId, sortedProductions])
-
-  const handleSelectProduction = (production: ProductionItem) => {
-    setProductionId(production.id)
-    setProductionSearchInput(getLocalizedTitle(production.title) || production.id)
-    setIsProductionDropdownOpen(false)
+  const removeProduction = (id: string) => {
+    setSelectedProductionIds((current) => current.filter((pid) => pid !== id))
   }
 
   const handleCreatePoster = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -201,7 +197,7 @@ function PostersPageContent() {
       return
     }
 
-    if (!productionId) {
+    if (selectedProductionIds.length === 0) {
       setError(i18n.admin.posters.validationProductionRequired)
       return
     }
@@ -221,7 +217,7 @@ function PostersPageContent() {
         method: 'POST',
         body: JSON.stringify({
           title: title.trim(),
-          production_id: productionId,
+          production_ids: selectedProductionIds,
           file_name: selectedFile.name,
           mime_type: selectedFile.type || 'image/jpeg',
           file_base64: fileBase64,
@@ -273,7 +269,7 @@ function PostersPageContent() {
         className="rounded-[1rem] border border-[var(--color-admin-card-border)] bg-white p-6 dark:bg-[#111318]"
         onSubmit={handleCreatePoster}
       >
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4">
           <label className="flex flex-col gap-2 text-sm text-foreground">
             <span>{i18n.admin.posters.formTitleLabel}</span>
             <input
@@ -286,56 +282,6 @@ function PostersPageContent() {
           </label>
 
           <label className="flex flex-col gap-2 text-sm text-foreground">
-            <span>{i18n.admin.posters.formProductionLabel}</span>
-            <div className="relative">
-              <input
-                type="text"
-                value={productionSearchInput}
-                onChange={(event) => {
-                  setProductionSearchInput(event.target.value)
-                  setProductionId('')
-                }}
-                onFocus={() => setIsProductionDropdownOpen(true)}
-                onBlur={() => {
-                  window.setTimeout(() => {
-                    setIsProductionDropdownOpen(false)
-                  }, 120)
-                }}
-                placeholder={i18n.admin.posters.searchProductionPlaceholder}
-                className="h-10 w-full rounded-md border border-[var(--color-admin-card-border)] px-3"
-              />
-
-              {isProductionDropdownOpen ? (
-                <div className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-md border border-[var(--color-admin-card-border)] bg-white shadow-sm dark:bg-[#111318]">
-                  {filteredProductions.length === 0 ? (
-                    <p className="px-3 py-2 text-xs text-muted">{i18n.admin.posters.noProductionsFound}</p>
-                  ) : (
-                    filteredProductions.map((production) => {
-                      const label = getLocalizedTitle(production.title) || production.id
-
-                      return (
-                        <button
-                          key={production.id}
-                          type="button"
-                          className="block w-full px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-[var(--color-admin-card-bg)]"
-                          onMouseDown={(event) => {
-                            event.preventDefault()
-                            handleSelectProduction(production)
-                          }}
-                        >
-                          {label}
-                        </button>
-                      )
-                    })
-                  )}
-                </div>
-              ) : null}
-            </div>
-            {sortedProductions.length === 0 ? <span className="text-xs text-muted">{i18n.admin.posters.noProductionsAvailable}</span> : null}
-            {productionError ? <span className="text-xs text-red-600">{productionError}</span> : null}
-          </label>
-
-          <label className="flex flex-col gap-2 text-sm text-foreground md:col-span-2">
             <span>{i18n.admin.posters.formFileLabel}</span>
             <input
               type="file"
@@ -347,6 +293,23 @@ function PostersPageContent() {
               className="block w-full rounded-md border border-[var(--color-admin-card-border)] p-2"
             />
           </label>
+
+          <ProductionManagementSection
+            compact
+            selectedProductions={selectedProductions}
+            availableProductions={availableProductions}
+            productionToAdd={productionToAdd}
+            productionSearchQuery={productionSearchQuery}
+            isProductionPopupOpen={isProductionPopupOpen}
+            isLoadingProductions={isLoadingProductions}
+            productionsError={productionError ?? ''}
+            onOpenPopup={openProductionPopup}
+            onClosePopup={() => setIsProductionPopupOpen(false)}
+            onSelectProductionToAdd={setProductionToAdd}
+            onProductionSearchQueryChange={setProductionSearchQuery}
+            onAddProduction={addProduction}
+            onRemoveProduction={removeProduction}
+          />
         </div>
 
         <div className="mt-5 flex items-center gap-3">
@@ -393,19 +356,19 @@ function PostersPageContent() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {posters.map((poster) => (
               <article key={poster.id} className="flex flex-col overflow-hidden rounded-xl border border-[var(--color-admin-card-border)]">
-                <div className="aspect-[4/3] bg-slate-100">
+                <div className="relative h-52 overflow-hidden bg-slate-100">
                   {poster.mime_type === 'application/pdf' ? (
                     <iframe
                       src={getPdfPreviewUrl(poster.file_url)}
                       title={`${poster.title} PDF preview`}
-                      className="h-full w-full border-0"
+                      className="absolute inset-0 h-full w-full border-0"
                       loading="lazy"
                     />
                   ) : (
                     <img
                       src={normalizeApiAssetUrl(poster.file_url)}
                       alt={poster.title}
-                      className="h-full w-full object-cover"
+                      className="absolute inset-0 h-full w-full object-cover object-top"
                       loading="lazy"
                       referrerPolicy="no-referrer"
                     />
