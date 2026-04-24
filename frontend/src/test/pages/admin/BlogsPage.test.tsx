@@ -117,6 +117,7 @@ beforeEach(() => {
 })
 
 afterEach(() => {
+    vi.useRealTimers()
     vi.unstubAllGlobals()
 })
 
@@ -242,7 +243,6 @@ describe('BlogsPage', () => {
     })
 
     it('includes search param after debounce when user types a query', async () => {
-        vi.useFakeTimers()
         apiFetchMock.mockResolvedValue(makePaginatedResponse([]))
 
         renderPage()
@@ -255,7 +255,7 @@ describe('BlogsPage', () => {
             target: { value: 'festival' },
         })
 
-        vi.advanceTimersByTime(300)
+        await new Promise((resolve) => setTimeout(resolve, 320))
 
         await waitFor(() => {
             expect(apiFetchMock).toHaveBeenCalledWith(
@@ -263,12 +263,9 @@ describe('BlogsPage', () => {
                 expect.any(Object),
             )
         })
-
-        vi.useRealTimers()
     })
 
     it('resets to page 1 when the search query changes', async () => {
-        vi.useFakeTimers()
         apiFetchMock.mockResolvedValue(makePaginatedResponse([], 25, 3))
 
         renderPage()
@@ -289,7 +286,7 @@ describe('BlogsPage', () => {
         fireEvent.change(screen.getByPlaceholderText('Zoek op titel...'), {
             target: { value: 'nieuw' },
         })
-        vi.advanceTimersByTime(300)
+        await new Promise((resolve) => setTimeout(resolve, 320))
 
         await waitFor(() => {
             expect(apiFetchMock).toHaveBeenCalledWith(
@@ -297,8 +294,6 @@ describe('BlogsPage', () => {
                 expect.any(Object),
             )
         })
-
-        vi.useRealTimers()
     })
 
     // Paginering

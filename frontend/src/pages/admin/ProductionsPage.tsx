@@ -9,6 +9,8 @@ import {
 import {useNavigate} from "react-router-dom";
 import { getAdminRouteConfig } from '../../admin/paths'
 import { useAdminMessages } from '../../components/admin/AdminMessagesContext'
+import { getActiveLocale, withLocalePath } from '../../i18n'
+import { localize } from '../../utils/localize'
 
 
 type LocalizedText = {
@@ -42,9 +44,8 @@ type TabFilter = 'all' | 'published' | 'concept'
 
 const PAGE_SIZE = 10
 
-function getLocalizedTitle(text: LocalizedText): string {
-    if (!text) return ''
-    return (text.nl ?? text.en ?? text.fr ?? '').trim()
+function getLocalizedTitle(text: LocalizedText, locale: 'nl' | 'en'): string {
+    return (localize(text, locale) ?? '').trim()
 }
 
 function hasLocalizedText(text: LocalizedText, locale: 'nl' | 'en'): boolean {
@@ -52,11 +53,15 @@ function hasLocalizedText(text: LocalizedText, locale: 'nl' | 'en'): boolean {
     return typeof value === 'string' && value.trim().length > 0
 }
 
-function mapProductionApiItem(item: ProductionApiItem): Production {
+function getUntitledLabel(locale: 'nl' | 'en'): string {
+    return locale === 'en' ? '(Untitled)' : '(Zonder titel)'
+}
+
+function mapProductionApiItem(item: ProductionApiItem, locale: 'nl' | 'en'): Production {
     const genre = (item.production_genres ?? [])[0] ?? item.performer_type ?? ''
     return {
         id: item.id,
-        title: getLocalizedTitle(item.title) || '(Zonder titel)',
+        title: getLocalizedTitle(item.title, locale) || getUntitledLabel(locale),
         type: genre,
         status: item.status === 'published' ? 'published' : 'concept',
         languageStatus: {
@@ -64,7 +69,7 @@ function mapProductionApiItem(item: ProductionApiItem): Production {
             en: hasLocalizedText(item.title, 'en') ? 'complete' : 'missing',
         },
         updatedAt: item.updated_at,
-        detailHref: `/archive/${item.id}`,
+        detailHref: withLocalePath(`/archive/${item.id}`, locale),
     }
 }
 
@@ -73,6 +78,9 @@ function ProductionsPageContent() {
     const navigate = useNavigate()
     const { archiveEditPath, productionCreatePath } = getAdminRouteConfig(window.location.hostname)
     const t = useAdminMessages()
+    const locale = getActiveLocale(window.location.pathname)
+    const paginationPrevLabel = t.admin.dashboard.paginationPrev ?? 'Vorige pagina'
+    const paginationNextLabel = t.admin.dashboard.paginationNext ?? 'Volgende pagina'
 
 
     const [tab, setTab] = useState<TabFilter>('all')
@@ -125,7 +133,7 @@ function ProductionsPageContent() {
                     { signal: abortController.signal },
                 )
 
-                setProductions(response.data.map(mapProductionApiItem))
+                setProductions(response.data.map((item) => mapProductionApiItem(item, locale)))
                 setTotal(response.meta?.total ?? 0)
                 setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
             } catch (err) {
@@ -141,7 +149,7 @@ function ProductionsPageContent() {
 
         void load()
         return () => abortController.abort()
-    }, [page, tab, debouncedQuery, reloadToken])
+    }, [page, tab, debouncedQuery, reloadToken, locale])
 
     const handleDelete = async (id: string) => {
         if (!window.confirm(t.admin.productions.deleteConfirm)) return
@@ -166,8 +174,8 @@ function ProductionsPageContent() {
 
     const tabs: { key: TabFilter; label: string; disabled?: boolean }[] = [
         { key: 'all', label: `${t.admin.productions.tabAll}${tab === 'all' && total > 0 ? ` (${total})` : ''}` },
-        { key: 'published', label: t.admin.productions.tabPublished, disabled: true },
-        { key: 'concept', label: t.admin.productions.tabConcepts, disabled: true },
+        { key: 'published', label: t.admin.productions.tabPublished },
+        { key: 'concept', label: t.admin.productions.tabConcepts },
     ]
 
     return (
@@ -280,7 +288,7 @@ function ProductionsPageContent() {
 
                 <div className="flex items-center gap-2">
                     <button
-                        aria-label={t.admin.dashboard.paginationPrev}
+                        aria-label={paginationPrevLabel}
                         disabled={page === 1}
                         onClick={() => setPage((p) => Math.max(1, p - 1))}
                         className="flex h-8 w-8 items-center justify-center rounded-md border border-[var(--color-admin-card-border)] bg-white text-sm text-[#475569] transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-[#111318] dark:text-slate-300 dark:hover:bg-slate-800"
@@ -318,7 +326,7 @@ function ProductionsPageContent() {
                     })}
 
                     <button
-                        aria-label={t.admin.dashboard.paginationNext}
+                        aria-label={paginationNextLabel}
                         disabled={page >= totalPages}
                         onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                         className="flex h-8 w-8 items-center justify-center rounded-md border border-[var(--color-admin-card-border)] bg-white text-sm text-[#475569] transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-[#111318] dark:text-slate-300 dark:hover:bg-slate-800"

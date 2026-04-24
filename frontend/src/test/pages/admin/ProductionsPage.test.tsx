@@ -124,6 +124,7 @@ beforeEach(() => {
 })
 
 afterEach(() => {
+    vi.useRealTimers()
     vi.unstubAllGlobals()
 })
 
@@ -307,7 +308,6 @@ describe('ProductionsPage', () => {
     })
 
     it('includes search param after debounce when user types a query', async () => {
-        vi.useFakeTimers()
         apiFetchMock.mockResolvedValue(makePaginatedResponse([]))
 
         renderPage()
@@ -320,7 +320,7 @@ describe('ProductionsPage', () => {
             target: { value: 'snobs' },
         })
 
-        vi.advanceTimersByTime(300)
+        await new Promise((resolve) => setTimeout(resolve, 320))
 
         await waitFor(() => {
             expect(apiFetchMock).toHaveBeenCalledWith(
@@ -328,8 +328,6 @@ describe('ProductionsPage', () => {
                 expect.any(Object),
             )
         })
-
-        vi.useRealTimers()
     })
 
     // Totaalteller in tab-label

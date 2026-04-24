@@ -33,11 +33,13 @@ export function BlogsTable({
     const d = messages.admin.dashboard
     const b = messages.admin.blogs
     const { formatDate } = useDashboardFormatters()
+    const hasLanguageColumn = typeof d.tableColLanguage === 'string' && d.tableColLanguage.length > 0
+    const hasViewAction = typeof d.actionView === 'string' && d.actionView.length > 0
 
     const headings = [
         d.tableColTitle,
-        b.tableColLinkedProductions,
-        d.tableColLanguage,
+        b?.tableColLinkedProductions ?? 'Gekoppelde producties',
+        ...(hasLanguageColumn ? [d.tableColLanguage] : []),
         d.tableColDate,
         d.tableColActions,
     ]
@@ -87,35 +89,37 @@ export function BlogsTable({
                                 </span>
                         </td>
 
-                        <td className="px-4 py-4">
-                            <div className="flex gap-3 text-[9px] uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
-                                {(['nl', 'en'] as const).map((loc) => {
-                                    const state = item.languageStatus[loc]
-                                    const dotClass = state === 'complete' ? 'bg-[#10b981]' : state === 'attention' ? 'bg-[#f59e0b]' : 'bg-[#cbd5e1]'
-                                    const tooltip = state === 'complete'
-                                        ? d.languageStatusComplete
-                                        : state === 'attention'
-                                            ? d.languageStatusAttention
-                                            : d.languageStatusMissing
+                        {hasLanguageColumn ? (
+                            <td className="px-4 py-4">
+                                <div className="flex gap-3 text-[9px] uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
+                                    {(['nl', 'en'] as const).map((loc) => {
+                                        const state = item.languageStatus?.[loc] ?? 'missing'
+                                        const dotClass = state === 'complete' ? 'bg-[#10b981]' : state === 'attention' ? 'bg-[#f59e0b]' : 'bg-[#cbd5e1]'
+                                        const tooltip = state === 'complete'
+                                            ? d.languageStatusComplete
+                                            : state === 'attention'
+                                                ? d.languageStatusAttention
+                                                : d.languageStatusMissing
 
-                                    return (
-                                        <span
-                                            key={loc}
-                                            className={`inline-block cursor-help rounded-sm focus:outline-none focus:ring-2 focus:ring-accent/40 ${state === 'missing' ? 'opacity-40' : ''}`}
-                                            title={tooltip}
-                                            aria-label={`${loc.toUpperCase()}: ${tooltip}`}
-                                            tabIndex={0}
-                                        >
-                                            <span className="block">{loc}</span>
+                                        return (
                                             <span
-                                                aria-hidden="true"
-                                                className={`mt-1 block h-2 w-2 rounded-full ${dotClass}`}
-                                            />
-                                        </span>
-                                    )
-                                })}
-                            </div>
-                        </td>
+                                                key={loc}
+                                                className={`inline-block cursor-help rounded-sm focus:outline-none focus:ring-2 focus:ring-accent/40 ${state === 'missing' ? 'opacity-40' : ''}`}
+                                                title={tooltip}
+                                                aria-label={`${loc.toUpperCase()}: ${tooltip}`}
+                                                tabIndex={0}
+                                            >
+                                                <span className="block">{loc}</span>
+                                                <span
+                                                    aria-hidden="true"
+                                                    className={`mt-1 block h-2 w-2 rounded-full ${dotClass}`}
+                                                />
+                                            </span>
+                                        )
+                                    })}
+                                </div>
+                            </td>
+                        ) : null}
 
                         {/* Datum */}
                         <td className="px-6 py-4 text-sm text-[#475569] dark:text-slate-300">
@@ -125,14 +129,16 @@ export function BlogsTable({
                         {/* Acties */}
                         <td className="px-6 py-4">
                             <div className="flex gap-1">
-                                <a
-                                    href={item.detailHref}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white"
-                                >
-                                    {d.actionView}
-                                </a>
+                                {hasViewAction && item.detailHref ? (
+                                    <a
+                                        href={item.detailHref}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white"
+                                    >
+                                        {d.actionView}
+                                    </a>
+                                ) : null}
                                 {onEdit ? (
                                     <button
                                         className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white"
@@ -158,7 +164,7 @@ export function BlogsTable({
                 {!isLoading && items.length === 0 ? (
                     <tr className="h-[72px]">
                         <td
-                            colSpan={5}
+                            colSpan={headings.length}
                             className="px-6 py-10 text-center text-sm text-slate-500"
                         >
                             {d.emptyRecent}
@@ -173,7 +179,7 @@ export function BlogsTable({
                             className="h-[72px] border-t border-slate-100 dark:border-slate-800"
                             aria-hidden
                         >
-                            <td colSpan={5} />
+                            <td colSpan={headings.length} />
                         </tr>
                     ))
                     : null}

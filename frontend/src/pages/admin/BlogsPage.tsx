@@ -7,6 +7,8 @@ import { BlogsTable, type BlogRow } from '../../components/admin/BlogsTable.tsx'
 import { getAdminRouteConfig } from '../../admin/paths'
 import { useAdminMessages } from '../../components/admin/AdminMessagesContext'
 import type { LanguageState } from '../../components/admin/ProductionsTable.tsx'
+import { getActiveLocale, withLocalePath } from '../../i18n'
+import { localize } from '../../utils/localize'
 
 type LocalizedText = {
     nl?: string
@@ -22,9 +24,8 @@ type BlogApiItem = {
     updatedAt: string
 }
 
-function getLocalizedTitle(text: LocalizedText | undefined): string {
-    if (!text) return ''
-    return (text.nl ?? text.en ?? text.fr ?? '').trim()
+function getLocalizedTitle(text: LocalizedText | undefined, locale: 'nl' | 'en'): string {
+    return (localize(text, locale) ?? '').trim()
 }
 
 function getLanguageState(text: LocalizedText | undefined, locale: 'nl' | 'en'): LanguageState {
@@ -45,10 +46,14 @@ type PaginatedApiResponse<T> = {
 
 const PAGE_SIZE = 10
 
-function mapBlogApiItem(item: BlogApiItem): BlogRow {
+function getUntitledLabel(locale: 'nl' | 'en'): string {
+    return locale === 'en' ? '(Untitled)' : '(Zonder titel)'
+}
+
+function mapBlogApiItem(item: BlogApiItem, locale: 'nl' | 'en'): BlogRow {
     return {
         id: item.id,
-        title: getLocalizedTitle(item.title) || '(Zonder titel)',
+        title: getLocalizedTitle(item.title, locale) || getUntitledLabel(locale),
         productionCount: item.productions?.length ?? 0,
         languageStatus: {
             nl: getLanguageState(item.title, 'nl'),
@@ -56,7 +61,7 @@ function mapBlogApiItem(item: BlogApiItem): BlogRow {
         },
         createdAt: item.createdAt,
         updatedAt: item.updatedAt,
-        detailHref: `/archive/blogs/${item.id}`,
+        detailHref: withLocalePath(`/archive/blogs/${item.id}`, locale),
     }
 }
 
@@ -64,6 +69,9 @@ function BlogsPageContent() {
     const navigate = useNavigate()
     const { blogCreatePath, blogEditPath } = getAdminRouteConfig(window.location.hostname)
     const t = useAdminMessages()
+    const locale = getActiveLocale(window.location.pathname)
+    const paginationPrevLabel = t.admin.dashboard.paginationPrev ?? 'Vorige pagina'
+    const paginationNextLabel = t.admin.dashboard.paginationNext ?? 'Volgende pagina'
 
     const [query, setQuery] = useState('')
     const [debouncedQuery, setDebouncedQuery] = useState('')
@@ -107,7 +115,7 @@ function BlogsPageContent() {
                     { signal: abortController.signal },
                 )
 
-                setBlogs(response.data.map(mapBlogApiItem))
+                setBlogs(response.data.map((item) => mapBlogApiItem(item, locale)))
                 setTotal(response.meta?.total ?? 0)
                 setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
             } catch (err) {
@@ -123,10 +131,11 @@ function BlogsPageContent() {
 
         void load()
         return () => abortController.abort()
-    }, [page, debouncedQuery, reloadToken])
+    }, [page, debouncedQuery, reloadToken, locale])
 
     const handleDelete = async (id: string) => {
-        if (!window.confirm(t.blogs.deleteConfirm)) return
+        const deleteConfirmMessage = t.blogs?.deleteConfirm ?? 'Weet je zeker dat je deze blog wilt verwijderen?'
+        if (!window.confirm(deleteConfirmMessage)) return
         setDeletingId(id)
         try {
             await apiFetch(`/archive/blogs/${id}`, { method: 'DELETE' })
@@ -230,7 +239,7 @@ function BlogsPageContent() {
 
                 <div className="flex items-center gap-2">
                     <button
-                        aria-label={t.admin.dashboard.paginationPrev}
+                        aria-label={paginationPrevLabel}
                         disabled={page === 1}
                         onClick={() => setPage((p) => Math.max(1, p - 1))}
                         className="flex h-8 w-8 items-center justify-center rounded-md border border-[var(--color-admin-card-border)] bg-white text-sm text-[#475569] transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-[#111318] dark:text-slate-300 dark:hover:bg-slate-800"
@@ -268,7 +277,7 @@ function BlogsPageContent() {
                     })}
 
                     <button
-                        aria-label={t.admin.dashboard.paginationNext}
+                        aria-label={paginationNextLabel}
                         disabled={page >= totalPages}
                         onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                         className="flex h-8 w-8 items-center justify-center rounded-md border border-[var(--color-admin-card-border)] bg-white text-sm text-[#475569] transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-[#111318] dark:text-slate-300 dark:hover:bg-slate-800"
