@@ -13,7 +13,7 @@ concurrency:
 jobs:
   backend-coverage:
     name: Backend Coverage
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     services:
       postgres:
@@ -67,7 +67,7 @@ jobs:
 
   frontend-coverage:
     name: Frontend Coverage
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     permissions:
       contents: read
