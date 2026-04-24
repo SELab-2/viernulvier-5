@@ -17,32 +17,16 @@ export function getAdminRouteConfig(hostname: string): AdminRouteConfig {
   const normalizedHostname = hostname.trim().toLowerCase()
   const isAdminHost = normalizedHostname.startsWith('admin.')
   const isLocalDevHost = normalizedHostname === 'localhost' || normalizedHostname === '127.0.0.1'
+  const canRenderAdminRoutes = isAdminHost || isLocalDevHost
 
-  if (isAdminHost) {
-    return {
-      isAdminHost,
-      isLocalDevHost,
-      canRenderAdminRoutes: true,
-      loginPath: '/login',
-      dashboardPath: '/dashboard',
-      legacyDashboardPaths: ['/'],
-      productionsPath: '/productions',
-      blogsPath: '/blogs',
-      archiveEditPath: '/archive/:id/edit',
-      productionCreatePath: '/productions/new',
-      blogEditPath: '/blogs/:id/edit',
-      blogCreatePath: '/blogs/create',
-    }
-  }
-
-  if (isLocalDevHost) {
+  if (canRenderAdminRoutes) {
     return {
       isAdminHost,
       isLocalDevHost,
       canRenderAdminRoutes: true,
       loginPath: '/admin/login',
       dashboardPath: '/admin/dashboard',
-      legacyDashboardPaths: ['/admin'],
+      legacyDashboardPaths: ['/admin', '/dashboard', '/'],
       productionsPath: '/admin/productions',
       blogsPath: '/admin/blogs',
       archiveEditPath: '/admin/archive/:id/edit',
