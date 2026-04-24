@@ -337,6 +337,9 @@ export class ProductionsRepository {
         return {
             poster_gallery: {
                 include: {
+                    other_files: {
+                        orderBy: { created_at: 'desc' as const },
+                    },
                     items: {
                         take: 10,
                         orderBy: { created_at: 'asc' as const },
@@ -454,6 +457,9 @@ export class ProductionsRepository {
                 },
                 poster_gallery: {
                     include: {
+                        other_files: {
+                            orderBy: { created_at: 'desc' as const },
+                        },
                         items: {
                             include: {
                                 crops: true,

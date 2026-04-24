@@ -9,6 +9,7 @@ const envSchema = z.object({
     DATABASE_URL: z.string().url(),
     PORT: z.coerce.number().default(3001),
     HOST: z.string().default('0.0.0.0'),
+    REQUEST_BODY_LIMIT_BYTES: z.coerce.number().int().positive().default(30 * 1024 * 1024),
     POSTER_LOCATION: z.string().default('./uploads/posters'),
     JWT_SECRET: z.string().min(8),
     ALLOWED_ORIGINS: z.string().optional(),

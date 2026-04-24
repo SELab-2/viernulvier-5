@@ -10,6 +10,20 @@ import { PaginatedResult, calculateTotalPages, sanitizePage } from '../../utils/
 export class ProductionsService {
     constructor(private readonly repository: ProductionsRepository) { }
 
+    private extractPosterFile(production: any) {
+        const files = Array.isArray(production?.poster_gallery?.other_files)
+            ? production.poster_gallery.other_files
+            : []
+
+        const imageFiles = files.filter((file: any) => file?.type === 'image' && typeof file?.file_location === 'string')
+
+        return imageFiles.sort((a: any, b: any) => {
+            const first = new Date(a?.created_at ?? 0).getTime()
+            const second = new Date(b?.created_at ?? 0).getTime()
+            return second - first
+        })[0] ?? null
+    }
+
     private getItemPosition(item: any): number {
         return typeof item?.position === 'number' && Number.isFinite(item.position)
             ? item.position
@@ -168,15 +182,17 @@ export class ProductionsService {
     }
 
     private mapProductionResponse(production: any, onThisDayDate?: Date): ProductionResponse {
-        const mappedPoster = production?.poster
+        const posterFile = this.extractPosterFile(production)
+
+        const mappedPoster = posterFile
             ? {
-                id: production.poster.id,
-                title: String(production.poster.title ?? ''),
-                mime_type: production.poster.mime_type ?? null,
-                original_filename: production.poster.original_filename ?? null,
-                file_size_bytes: production.poster.file_size_bytes ?? null,
-                created_at: production.poster.created_at,
-                updated_at: production.poster.updated_at,
+                id: posterFile.id,
+                title: String(posterFile.name ?? ''),
+                mime_type: null,
+                original_filename: posterFile.description ?? null,
+                file_size_bytes: null,
+                created_at: posterFile.created_at,
+                updated_at: posterFile.updated_at,
             }
             : null
 
@@ -188,7 +204,7 @@ export class ProductionsService {
             production_genres: this.extractProductionGenres(production),
             on_this_day_event_date: this.getOnThisDayEventDate(production, onThisDayDate),
             poster: mappedPoster,
-            poster_file_url: production?.poster?.id ? `/api/v1/archive/posters/${production.poster.id}/file` : null,
+            poster_file_url: mappedPoster?.id ? `/api/v1/archive/posters/${mappedPoster.id}/file` : null,
         }
     }
 

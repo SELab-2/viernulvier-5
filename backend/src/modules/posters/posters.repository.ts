@@ -26,15 +26,78 @@ export type PosterRecord = {
     } | null
 }
 
+type PosterFileRecord = {
+    created_at: Date
+    updated_at: Date
+    id: string
+    name: string | null
+    description: string | null
+    file_location: string | null
+    type: 'video' | 'image' | 'pdf' | 'other' | null
+    gallery: {
+        poster_gallery_productions: Array<{
+            id: string
+            title: Prisma.JsonValue
+        }>
+    } | null
+}
+
 export class PostersRepository {
     constructor(private readonly prisma: PrismaClient) {}
 
-    private buildWhere(options: Pick<FindAllOptions, 'search' | 'yearFrom' | 'yearTo'>): Prisma.posterWhereInput | undefined {
+    private get productionInclude() {
+        return {
+            gallery: {
+                select: {
+                    poster_gallery_productions: {
+                        select: {
+                            id: true,
+                            title: true,
+                        },
+                        take: 1,
+                    },
+                },
+            },
+        } as const
+    }
+
+    private mapPosterRecord(record: PosterFileRecord): PosterRecord {
+        const production = record.gallery?.poster_gallery_productions[0] ?? null
+
+        return {
+            created_at: record.created_at,
+            updated_at: record.updated_at,
+            id: record.id,
+            title: record.name?.trim() || 'Untitled poster',
+            file_path: record.file_location ?? '',
+            mime_type: null,
+            original_filename: record.description ?? null,
+            file_size_bytes: null,
+            production_id: production?.id ?? '',
+            production: production
+                ? {
+                      id: production.id,
+                      title: production.title,
+                  }
+                : null,
+        }
+    }
+
+    private buildWhere(options: Pick<FindAllOptions, 'search' | 'yearFrom' | 'yearTo'>): Prisma.fileWhereInput | undefined {
         const { search, yearFrom, yearTo } = options
-        const where: Prisma.posterWhereInput = {}
+        const where: Prisma.fileWhereInput = {
+            type: 'image',
+            gallery: {
+                is: {
+                    poster_gallery_productions: {
+                        some: {},
+                    },
+                },
+            },
+        }
 
         if (search) {
-            where.title = {
+            where.name = {
                 contains: search,
                 mode: 'insensitive',
             }
@@ -55,63 +118,97 @@ export class PostersRepository {
         const skip = (page - 1) * limit
         const where = this.buildWhere(options)
 
-        return this.prisma.poster.findMany({
+        const records = await this.prisma.file.findMany({
             where,
             orderBy: {
                 created_at: sort === 'oldest' ? 'asc' : 'desc',
             },
             skip,
             take: limit,
-            include: {
-                production: {
-                    select: {
-                        id: true,
-                        title: true,
-                    },
-                },
-            },
+            include: this.productionInclude,
+        })
+
+        return records.flatMap((record) => {
+            if (!record.file_location) {
+                return []
+            }
+
+            return [this.mapPosterRecord(record as PosterFileRecord)]
         })
     }
 
     async count(options: Pick<FindAllOptions, 'search' | 'yearFrom' | 'yearTo'>) {
-        return this.prisma.poster.count({
+        return this.prisma.file.count({
             where: this.buildWhere(options),
         })
     }
 
     async findById(id: string) {
-        return this.prisma.poster.findUnique({
-            where: { id },
-            include: {
-                production: {
-                    select: {
-                        id: true,
-                        title: true,
-                    },
-                },
+        const record = await this.prisma.file.findFirst({
+            where: {
+                id,
+                ...this.buildWhere({}),
+            },
+            include: this.productionInclude,
+        })
+
+        if (!record || !record.file_location) {
+            return null
+        }
+
+        return this.mapPosterRecord(record as PosterFileRecord)
+    }
+
+    private async ensurePosterGalleryForProduction(tx: Prisma.TransactionClient, productionId: string) {
+        const production = await tx.production.findUnique({
+            where: { id: productionId },
+            select: {
+                id: true,
+                poster_gallery_id: true,
             },
         })
+
+        if (!production) {
+            throw new Error('Production not found')
+        }
+
+        if (production.poster_gallery_id) {
+            return production.poster_gallery_id
+        }
+
+        const gallery = await tx.gallery.create({
+            data: {
+                name: `Posters for ${production.id}`,
+            },
+        })
+
+        await tx.production.update({
+            where: { id: production.id },
+            data: {
+                poster_gallery_id: gallery.id,
+            },
+        })
+
+        return gallery.id
     }
 
     async create(data: CreatePosterPersistenceInput) {
-        return this.prisma.poster.create({
-            data: {
-                title: data.title,
-                file_path: data.file_path,
-                mime_type: data.mime_type ?? null,
-                original_filename: data.original_filename ?? null,
-                file_size_bytes: data.file_size_bytes ?? null,
-                production_id: data.production_id,
-            },
-            include: {
-                production: {
-                    select: {
-                        id: true,
-                        title: true,
-                    },
+        const record = await this.prisma.$transaction(async (tx) => {
+            const galleryId = await this.ensurePosterGalleryForProduction(tx, data.production_id)
+
+            return tx.file.create({
+                data: {
+                    name: data.title,
+                    description: data.original_filename ?? null,
+                    gallery_id: galleryId,
+                    file_location: data.file_path,
+                    type: 'image',
                 },
-            },
+                include: this.productionInclude,
+            })
         })
+
+        return this.mapPosterRecord(record as PosterFileRecord)
     }
 
     async update(id: string, data: UpdatePosterInput) {
@@ -120,22 +217,23 @@ export class PostersRepository {
             throw new Error('Record to update not found')
         }
 
-        return this.prisma.poster.update({
-            where: { id },
-            data: {
-                ...(data.title !== undefined ? { title: data.title } : {}),
-                ...(data.production_id !== undefined ? { production_id: data.production_id } : {}),
-                updated_at: new Date(),
-            },
-            include: {
-                production: {
-                    select: {
-                        id: true,
-                        title: true,
-                    },
+        const record = await this.prisma.$transaction(async (tx) => {
+            const nextGalleryId = data.production_id
+                ? await this.ensurePosterGalleryForProduction(tx, data.production_id)
+                : undefined
+
+            return tx.file.update({
+                where: { id },
+                data: {
+                    ...(data.title !== undefined ? { name: data.title } : {}),
+                    ...(nextGalleryId !== undefined ? { gallery_id: nextGalleryId } : {}),
+                    updated_at: new Date(),
                 },
-            },
+                include: this.productionInclude,
+            })
         })
+
+        return this.mapPosterRecord(record as PosterFileRecord)
     }
 
     async delete(id: string) {
@@ -145,7 +243,7 @@ export class PostersRepository {
             throw new Error('Record to delete does not exist')
         }
 
-        await this.prisma.poster.delete({ where: { id } })
+        await this.prisma.file.delete({ where: { id } })
 
         return poster
     }

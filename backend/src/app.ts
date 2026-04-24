@@ -40,6 +40,7 @@ export async function buildApp(opts = {}): Promise<FastifyInstance> {
                 ? { target: 'pino-pretty', options: { colorize: true } }
                 : undefined,
         },
+        bodyLimit: env.REQUEST_BODY_LIMIT_BYTES,
         ...opts,
     })
 
