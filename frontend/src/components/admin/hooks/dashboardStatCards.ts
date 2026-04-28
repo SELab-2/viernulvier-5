@@ -79,7 +79,7 @@ export function buildStatCards(
     {
       label: messages.statMediaItems,
       value: summary ? formatCount(summary.counts.mediaItems) : '—',
-      change: summary?.lastScrapedAt ? formatDate(summary.lastScrapedAt) : messages.visitorsChange,
+      change: summary?.lastScrapedAt ? formatDate(summary.lastScrapedAt) : messages.notSyncedYet,
       note: summary?.lastScrapedAt ? messages.statLastSync : messages.statSyncPending,
       accent: 'bg-[rgba(168,85,247,0.1)] text-accent',
       pill: 'bg-[#ecfdf5] text-[#10b981]',

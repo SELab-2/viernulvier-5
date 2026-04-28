@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400">
+  <rect width="1200" height="400" fill="#A6A6A6"/>
+  <text
+    x="600"
+    y="210"
+    font-family="Inter, ui-sans-serif, system-ui, sans-serif"
+    font-size="48"
+    font-weight="600"
+    letter-spacing="8"
+    text-anchor="middle"
+    fill="#7A7A7A"
+  >VIERNULVIER</text>
+</svg>

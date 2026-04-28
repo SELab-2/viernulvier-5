@@ -10,14 +10,16 @@ describe('adminAuth', () => {
     fetchMock.mockReset()
   })
 
-  it('posts login requests to the versioned auth endpoint', async () => {
+  it('posts login requests to the versioned auth endpoint and returns the session user', async () => {
     fetchMock.mockResolvedValueOnce({
       ok: true,
       status: 200,
-      json: vi.fn().mockResolvedValueOnce({ success: true }),
+      json: vi.fn().mockResolvedValueOnce({
+        data: { user: { id: '1', username: 'admin', role: 'ADMIN' } },
+      }),
     } as unknown as Response)
 
-    await loginAdmin(' admin ', 'secret')
+    const session = await loginAdmin(' admin ', 'secret')
 
     expect(fetchMock).toHaveBeenCalledWith(
       '/api/v1/auth/login',
@@ -27,13 +29,14 @@ describe('adminAuth', () => {
         body: JSON.stringify({ username: 'admin', password: 'secret' }),
       }),
     )
+    expect(session).toEqual({ data: { id: '1', username: 'admin', role: 'ADMIN' } })
   })
 
   it('reads the current session from the versioned auth endpoint', async () => {
     fetchMock.mockResolvedValueOnce({
       ok: true,
       status: 200,
-      json: vi.fn().mockResolvedValueOnce({ user: { sub: '1', username: 'admin', role: 'admin' } }),
+      json: vi.fn().mockResolvedValueOnce({ data: { id: '1', username: 'admin', role: 'ADMIN' } }),
     } as unknown as Response)
 
     await getAdminSession()

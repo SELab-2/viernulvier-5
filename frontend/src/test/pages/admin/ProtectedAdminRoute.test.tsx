@@ -31,6 +31,10 @@ vi.mock('../../../pages/admin/ArchiveEditPage', () => ({
   default: () => <div>Archive edit page</div>,
 }))
 
+vi.mock('../../../pages/admin/CreateBlogPage', () => ({
+  default: () => <div>Create blog page</div>,
+}))
+
 vi.mock('../../../i18n', async () => {
   const actual = await vi.importActual<typeof import('../../../i18n')>('../../../i18n')
   return {
@@ -148,6 +152,54 @@ describe('ProtectedAdminRoute', () => {
     })
 
     expect(screen.queryByText('Secret')).not.toBeInTheDocument()
+  })
+
+  it('redirects logged-out visits to /admin/blogs/create to /admin/login', async () => {
+    useAdminSessionMock.mockReturnValue({ isLoading: false, isAuthenticated: false })
+    getAdminRouteConfigMock.mockReturnValue({
+      isAdminHost: false,
+      isLocalDevHost: true,
+      canRenderAdminRoutes: true,
+      loginPath: '/admin/login',
+      dashboardPath: '/admin/dashboard',
+      legacyDashboardPaths: ['/admin', '/dashboard', '/'],
+      archiveEditPath: '/admin/archive/:id/edit',
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/admin/blogs/create']}>
+        <App />
+      </MemoryRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Login page from /admin/blogs/create')).toBeInTheDocument()
+    })
+
+    expect(screen.queryByText('Create blog page')).not.toBeInTheDocument()
+  })
+
+  it('redirects logged-out visits to unknown /admin/* paths to /admin/login', async () => {
+    useAdminSessionMock.mockReturnValue({ isLoading: false, isAuthenticated: false })
+    getAdminRouteConfigMock.mockReturnValue({
+      isAdminHost: false,
+      isLocalDevHost: true,
+      canRenderAdminRoutes: true,
+      loginPath: '/admin/login',
+      dashboardPath: '/admin/dashboard',
+      legacyDashboardPaths: ['/admin', '/dashboard', '/'],
+      archiveEditPath: '/admin/archive/:id/edit',
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/admin/willekeurig']}>
+        <App />
+      </MemoryRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Login page from missing')).toBeInTheDocument()
+    })
   })
 
   it('routes authenticated localhost admin entry visits to /admin/dashboard', async () => {
