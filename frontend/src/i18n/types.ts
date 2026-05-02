@@ -137,6 +137,15 @@ export type Messages = {
     previousImage: string
     nextImage: string
   }
+  notFound: {
+    titleTop: string
+    titleAccent: string
+    titleBottom: string
+    joke: string
+    description: string
+    homeButton: string
+    searchButton: string
+  }
   footer: {
     brandLogoAlt: string
     organizationName: string

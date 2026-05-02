@@ -221,6 +221,15 @@ const en: Messages = {
     editorSaveError: 'Failed to save editor.',
     editorDeleteError: 'Failed to delete editor.',
   },
+  notFound: {
+    titleTop: 'Four',
+    titleAccent: 'zero',
+    titleBottom: 'four',
+    joke: 'Coincidence? We think not. Our name is literally a 404 (vier-nul-vier).',
+    description: 'This page is not in the archive. Maybe it has not been digitised yet, maybe it never existed.\nEither way: head back home or dive into the archive.',
+    homeButton: 'back to home',
+    searchButton: 'search the archive',
+  },
   footer: {
     brandLogoAlt: 'VIERNULVIER logo',
     organizationName: 'VIERNULVIER Arts Centre vzw.',
