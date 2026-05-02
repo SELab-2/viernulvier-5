@@ -21,6 +21,8 @@ import { getSpaceById } from '../../api/spaces'
 import { getLocationById, type Location } from '../../api/locations'
 import { getPreviousStrippedPath } from '../../utils/navigationHistory'
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 function ArchiveDetailPageContent() {
     const navigate = useNavigate()
     const messages = usePublicMessages()
@@ -37,6 +39,13 @@ function ArchiveDetailPageContent() {
     const [shareCopied, setShareCopied] = useState(false)
     const [loadError, setLoadError] = useState(false)
     const [notFound, setNotFound] = useState(false)
+    const [previousId, setPreviousId] = useState(id)
+
+    if (id !== previousId) {
+        setPreviousId(id)
+        setLoadError(false)
+        setNotFound(false)
+    }
 
     const handleGoBack = () => {
         const prev = getPreviousStrippedPath()
@@ -84,17 +93,10 @@ function ArchiveDetailPageContent() {
         window.setTimeout(() => setShareCopied(false), 1800)
     }
 
+    const idIsMalformed = typeof id === 'string' && !UUID_REGEX.test(id)
+
     useEffect(() => {
-        if (!id) return
-
-        setNotFound(false)
-        setLoadError(false)
-
-        const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-        if (!UUID_REGEX.test(id)) {
-            setNotFound(true)
-            return
-        }
+        if (!id || idIsMalformed) return
 
         const fetchData = async () => {
             try {
@@ -166,7 +168,7 @@ function ArchiveDetailPageContent() {
         }
 
         fetchData()
-    }, [id])
+    }, [id, idIsMalformed])
 
     const title = localize(production?.title, locale)
     const superTitle = localize(production?.super_title, locale)
@@ -191,7 +193,7 @@ function ArchiveDetailPageContent() {
         .map((url) => getYouTubeEmbedUrl(url as string))
         .filter(Boolean)
 
-    if (notFound) {
+    if (notFound || idIsMalformed) {
         return <NotFoundContent />
     }
 
