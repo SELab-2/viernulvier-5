@@ -6,6 +6,8 @@ import { getYouTubeEmbedUrl } from '../../utils/youtube'
 import PublicLayout from '../../components/public/PublicLayout'
 import PublicPillButton from '../../components/public/PublicPillButton'
 import { usePublicMessages } from '../../components/public/PublicMessagesContext'
+import { NotFoundContent } from './NotFoundPage'
+import { ApiError } from '../../api/client'
 import ArchiveDetailHero from '../../components/public/detail/PublicDetailHeroBanner'
 import ArchiveDetailEventsList from '../../components/public/detail/PublicDetailEventsList'
 import ArchiveDetailGallery from '../../components/public/detail/PublicDetailGallery'
@@ -34,6 +36,7 @@ function ArchiveDetailPageContent() {
     const [locationsByEvent, setLocationsByEvent] = useState<Record<string, Location>>({})
     const [shareCopied, setShareCopied] = useState(false)
     const [loadError, setLoadError] = useState(false)
+    const [notFound, setNotFound] = useState(false)
 
     const handleGoBack = () => {
         const prev = getPreviousStrippedPath()
@@ -83,6 +86,15 @@ function ArchiveDetailPageContent() {
 
     useEffect(() => {
         if (!id) return
+
+        setNotFound(false)
+        setLoadError(false)
+
+        const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+        if (!UUID_REGEX.test(id)) {
+            setNotFound(true)
+            return
+        }
 
         const fetchData = async () => {
             try {
@@ -144,8 +156,12 @@ function ArchiveDetailPageContent() {
                 })
                 setLocationsByEvent(locationMap)
 
-            } catch {
-                setLoadError(true)
+            } catch (error) {
+                if (error instanceof ApiError && (error.status === 404 || error.status === 400)) {
+                    setNotFound(true)
+                } else {
+                    setLoadError(true)
+                }
             }
         }
 
@@ -174,6 +190,10 @@ function ArchiveDetailPageContent() {
         .filter(Boolean)
         .map((url) => getYouTubeEmbedUrl(url as string))
         .filter(Boolean)
+
+    if (notFound) {
+        return <NotFoundContent />
+    }
 
     if (loadError) {
         return (

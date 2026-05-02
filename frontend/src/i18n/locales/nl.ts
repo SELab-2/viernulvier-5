@@ -221,6 +221,15 @@ const nl: Messages = {
     editorSaveError: 'Editor opslaan mislukt.',
     editorDeleteError: 'Editor verwijderen mislukt.',
   },
+  notFound: {
+    titleTop: 'Vier',
+    titleAccent: 'nul',
+    titleBottom: 'vier',
+    joke: 'Toeval? We dachten het niet. Onze naam is letterlijk een 404.',
+    description: 'Deze pagina staat niet in het archief. Misschien is ze nog niet gedigitaliseerd, misschien bestond ze nooit.\nIn de tussentijd: terug naar de start of duik het archief in.',
+    homeButton: 'naar home',
+    searchButton: 'doorzoek archief',
+  },
   footer: {
     brandLogoAlt: 'VIERNULVIER logo',
     organizationName: 'Kunstencentrum VIERNULVIER vzw.',

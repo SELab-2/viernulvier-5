@@ -36,8 +36,7 @@ vi.mock('../../../pages/admin/CreateBlogPage', () => ({
 }))
 
 vi.mock('../../../i18n', async () => {
-  const actual = await vi.importActual<typeof import('../../../i18n')>('../../../i18n')
-  return actual
+  return await vi.importActual<typeof import('../../../i18n')>('../../../i18n')
 })
 
 function LoginPageProbe() {
