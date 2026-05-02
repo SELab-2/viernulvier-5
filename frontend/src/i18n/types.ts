@@ -276,6 +276,14 @@ export type Messages = {
       pageTitle: string
       itemIdLabel: string
     }
+    notFound: {
+      titleTop: string
+      titleAccent: string
+      titleBottom: string
+      joke: string
+      description: string
+      dashboardButton: string
+    }
   }
 
   editHeader: {

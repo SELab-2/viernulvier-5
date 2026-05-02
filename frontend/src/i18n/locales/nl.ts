@@ -302,6 +302,14 @@ const nl: Messages = {
       pageTitle: 'Archief item bewerken',
       itemIdLabel: 'Item-ID:',
     },
+    notFound: {
+      titleTop: 'Vier',
+      titleAccent: 'nul',
+      titleBottom: 'vier',
+      joke: 'Toeval? We dachten het niet. Onze naam is letterlijk een 404.',
+      description: 'Deze admin-pagina bestaat niet.\nMisschien is de route verplaatst, of klopt de URL niet helemaal.',
+      dashboardButton: 'naar dashboard',
+    },
   },
 
   editHeader: {

@@ -14,6 +14,7 @@ import SearchPage from './pages/public/SearchPage'
 const LoginPage = lazy(() => import('./pages/admin/LoginPage'))
 const DashboardPage = lazy(() => import('./pages/admin/DashboardPage'))
 const ArchiveEditPage = lazy(() => import('./pages/admin/ArchiveEditPage'))
+const AdminNotFoundPage = lazy(() => import('./pages/admin/NotFoundPage'))
 
 import CreateBlogPage from './pages/admin/CreateBlogPage'
 import BlogDetailPage from './pages/public/BlogDetailPage'
@@ -132,15 +133,8 @@ function App() {
                                 </ProtectedAdminRoute>
                             }
                         />
-                        <Route
-                            path="/admin/*"
-                            element={
-                                <AdminEntryRoute
-                                    loginPath={adminRoutes.loginPath}
-                                    dashboardPath={adminRoutes.dashboardPath}
-                                />
-                            }
-                        />
+                        <Route path="/admin/*" element={<AdminNotFoundPage />} />
+                        <Route path="*" element={<AdminNotFoundPage />} />
                     </>
                 ) : null}
             </Routes>

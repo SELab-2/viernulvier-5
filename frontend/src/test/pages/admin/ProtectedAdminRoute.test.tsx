@@ -37,12 +37,7 @@ vi.mock('../../../pages/admin/CreateBlogPage', () => ({
 
 vi.mock('../../../i18n', async () => {
   const actual = await vi.importActual<typeof import('../../../i18n')>('../../../i18n')
-  return {
-    ...actual,
-    getMessages: () => ({
-      common: { loading: 'Loading' },
-    }),
-  }
+  return actual
 })
 
 function LoginPageProbe() {
@@ -179,7 +174,7 @@ describe('ProtectedAdminRoute', () => {
     expect(screen.queryByText('Create blog page')).not.toBeInTheDocument()
   })
 
-  it('redirects logged-out visits to unknown /admin/* paths to /admin/login', async () => {
+  it('renders the admin 404 page for unknown /admin/* paths', async () => {
     useAdminSessionMock.mockReturnValue({ isLoading: false, isAuthenticated: false })
     getAdminRouteConfigMock.mockReturnValue({
       isAdminHost: false,
@@ -198,8 +193,10 @@ describe('ProtectedAdminRoute', () => {
     )
 
     await waitFor(() => {
-      expect(screen.getByText('Login page from missing')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /(naar dashboard|back to dashboard)/i })).toBeInTheDocument()
     })
+
+    expect(screen.queryByText(/Login page from/i)).not.toBeInTheDocument()
   })
 
   it('routes authenticated localhost admin entry visits to /admin/dashboard', async () => {

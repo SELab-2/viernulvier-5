@@ -302,6 +302,14 @@ const en: Messages = {
       pageTitle: 'Edit archive item',
       itemIdLabel: 'Item ID:',
     },
+    notFound: {
+      titleTop: 'Four',
+      titleAccent: 'zero',
+      titleBottom: 'four',
+      joke: "Coincidence? We don't think so. Our name is literally a 404.",
+      description: "This admin page doesn't exist.\nThe route may have moved, or the URL might be off.",
+      dashboardButton: 'back to dashboard',
+    },
   },
 
   editHeader: {
