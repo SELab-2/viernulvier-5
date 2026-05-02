@@ -134,7 +134,9 @@ function App() {
                             }
                         />
                         <Route path="/admin/*" element={<AdminNotFoundPage />} />
-                        <Route path="*" element={<AdminNotFoundPage />} />
+                        {adminRoutes.isAdminHost ? (
+                            <Route path="*" element={<AdminNotFoundPage />} />
+                        ) : null}
                     </>
                 ) : null}
             </Routes>
