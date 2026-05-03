@@ -16,6 +16,7 @@ type DashboardRecentItem = {
     id: string
     title: string
     type: string
+    status: 'available'
     languageStatus: {
         nl: 'complete' | 'attention'
         en: 'complete' | 'attention' | 'missing'
@@ -112,6 +113,7 @@ function mapProduction(production: RawProduction): DashboardRecentItem {
         id: production.id,
         title: resolveProductionTitle(production.title),
         type: 'Productie',
+        status: 'available',
         languageStatus: resolveLanguageStatus(production.title),
         updatedAt: production.updated_at,
     }
@@ -122,6 +124,7 @@ function mapEvent(event: RawEvent): DashboardRecentItem {
         id: event.id,
         title: resolveEventTitle(event.info, event.production?.title),
         type: 'Event',
+        status: 'available',
         languageStatus: resolveLanguageStatus(event.info),
         updatedAt: event.updated_at,
     }
