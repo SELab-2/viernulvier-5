@@ -16,11 +16,9 @@ const mockMessages = vi.hoisted(() => ({
       recentlyEdited: 'Recently edited',
       tableColTitle: 'Title',
       tableColType: 'Type',
-      tableColStatus: 'Status',
       tableColLanguage: 'Language Status',
       tableColDate: 'Date',
       tableColActions: 'Actions',
-      statusAvailable: 'Available in archive',
       actionView: 'View',
       actionEdit: 'Edit',
       emptyRecent: 'No recent archive items found.',
@@ -96,7 +94,6 @@ describe('DashboardPage', () => {
             id: '1',
             title: 'SNOBS: Editie #11',
             type: 'Productie',
-            status: 'available',
             languageStatus: {
               nl: 'complete',
               en: 'attention',
@@ -111,7 +108,6 @@ describe('DashboardPage', () => {
 
     expect(screen.getByText('1.284')).toBeInTheDocument()
     expect(screen.getByText('SNOBS: Editie #11')).toBeInTheDocument()
-    expect(screen.getByText('Available in archive')).toBeInTheDocument()
     await waitFor(() => {
       expect(adminLayoutMock).toHaveBeenLastCalledWith(
         expect.objectContaining({
@@ -289,7 +285,6 @@ describe('DashboardPage', () => {
             id: '1',
             title: 'Test item',
             type: 'Productie',
-            status: 'available',
             languageStatus: { nl: 'complete', en: 'complete' },
             updatedAt: '2026-01-01T00:00:00.000Z',
           },
@@ -297,7 +292,6 @@ describe('DashboardPage', () => {
             id: '2',
             title: 'Test item 2',
             type: 'Productie',
-            status: 'available',
             languageStatus: { nl: 'complete', en: 'complete' },
             updatedAt: '2026-01-01T00:00:00.000Z',
           },
@@ -305,7 +299,6 @@ describe('DashboardPage', () => {
             id: '3',
             title: 'Test item 3',
             type: 'Productie',
-            status: 'available',
             languageStatus: { nl: 'complete', en: 'complete' },
             updatedAt: '2026-01-01T00:00:00.000Z',
           },

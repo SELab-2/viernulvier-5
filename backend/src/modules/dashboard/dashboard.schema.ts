@@ -14,7 +14,6 @@ const recentItemSchema = z.object({
     id: z.string(),
     title: z.string(),
     type: z.string(),
-    status: z.enum(['available']),
     languageStatus: languageStatusSchema,
     updatedAt: z.date(),
 })
