@@ -305,7 +305,7 @@ const nl: Messages = {
       pageTitle: 'Archief item bewerken',
       itemIdLabel: 'Item-ID:',
     },
-    blogs: {
+    blogsPage: {
       pageTitle: 'Blogs',
       pageSubtitle: 'Overzicht van alle blogberichten.',
       searchPlaceholder: 'Zoek op titel...',
@@ -313,7 +313,8 @@ const nl: Messages = {
       deleteError: 'Verwijderen mislukt. Probeer opnieuw.',
       paginationShowing: (from: number, to: number, total: number) => `Toont ${from}–${to} van ${total} resultaten`,
       paginationPageLabel: (page: number) => `Pagina ${page}`,
-      tableColLinkedProductions: 'Gekoppelde producties'
+      tableColLinkedProductions: 'Gekoppelde producties',
+      untitledLabel: '(Geen titel)'
     },
     productions: {
       pageTitle: 'Producties',

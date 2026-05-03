@@ -46,14 +46,11 @@ type PaginatedApiResponse<T> = {
 
 const PAGE_SIZE = 10
 
-function getUntitledLabel(locale: 'nl' | 'en'): string {
-    return locale === 'en' ? '(Untitled)' : '(Zonder titel)'
-}
-
 function mapBlogApiItem(item: BlogApiItem, locale: 'nl' | 'en'): BlogRow {
+    const d = useAdminMessages().admin.blogsPage
     return {
         id: item.id,
-        title: getLocalizedTitle(item.title, locale) || getUntitledLabel(locale),
+        title: getLocalizedTitle(item.title, locale) || d.untitledLabel,
         productionCount: item.productions?.length ?? 0,
         languageStatus: {
             nl: getLanguageState(item.title, 'nl'),
@@ -68,10 +65,12 @@ function mapBlogApiItem(item: BlogApiItem, locale: 'nl' | 'en'): BlogRow {
 function BlogsPageContent() {
     const navigate = useNavigate()
     const { blogCreatePath, blogEditPath } = getAdminRouteConfig(window.location.hostname)
-    const t = useAdminMessages()
+    const messages = useAdminMessages()
+    const b = messages.admin.blogsPage
+    const d = messages.admin.dashboard
     const locale = getActiveLocale(window.location.pathname)
-    const paginationPrevLabel = t.admin.dashboard.paginationPrev ?? 'Vorige pagina'
-    const paginationNextLabel = t.admin.dashboard.paginationNext ?? 'Volgende pagina'
+    const paginationPrevLabel = d.paginationPrev ?? 'Vorige pagina'
+    const paginationNextLabel = d.paginationNext ?? 'Volgende pagina'
 
     const [query, setQuery] = useState('')
     const [debouncedQuery, setDebouncedQuery] = useState('')
@@ -134,14 +133,14 @@ function BlogsPageContent() {
     }, [page, debouncedQuery, reloadToken, locale])
 
     const handleDelete = async (id: string) => {
-        const deleteConfirmMessage = t.blogs?.deleteConfirm ?? 'Weet je zeker dat je deze blog wilt verwijderen?'
+        const deleteConfirmMessage = messages.blogs.deleteConfirm
         if (!window.confirm(deleteConfirmMessage)) return
         setDeletingId(id)
         try {
             await apiFetch(`/archive/blogs/${id}`, { method: 'DELETE' })
             setReloadToken((t) => t + 1)
         } catch {
-            setError(t.admin.blogs.deleteError)
+            setError(b.deleteError)
         } finally {
             setDeletingId(null)
         }
@@ -159,10 +158,10 @@ function BlogsPageContent() {
         <section className="mx-auto flex w-full max-w-[960px] flex-col gap-6 xl:max-w-[1280px] 2xl:max-w-[1536px]">
             <header className="space-y-1">
                 <h1 className="text-[2rem] leading-9 font-normal tracking-[-0.05em] text-[#0f172a] dark:text-white">
-                    {t.admin.blogs.pageTitle}
+                    {b.pageTitle}
                 </h1>
                 <p className="text-base leading-6 text-[#475569] dark:text-slate-300">
-                    {t.admin.blogs.pageSubtitle}
+                    {b.pageSubtitle}
                 </p>
             </header>
 
@@ -191,7 +190,7 @@ function BlogsPageContent() {
                     </svg>
                     <input
                         type="search"
-                        placeholder={t.admin.blogs.searchPlaceholder}
+                        placeholder={b.searchPlaceholder}
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         className="w-full rounded-lg border border-[var(--color-admin-card-border)] bg-white py-2 pl-9 pr-4 text-sm text-[#0f172a] placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-accent/40 dark:bg-[#111318] dark:text-white dark:placeholder:text-slate-500"
@@ -213,7 +212,7 @@ function BlogsPageContent() {
                     >
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                     </svg>
-                    {t.admin.blogs.newButton}
+                    {b.newButton}
                 </button>
             </div>
 
@@ -231,7 +230,7 @@ function BlogsPageContent() {
             <div className="flex flex-wrap items-center justify-between gap-3">
                 {!isLoading && total > 0 ? (
                     <p className="text-xs text-slate-500">
-                        {t.admin.blogs.paginationShowing(from, to, total)}
+                        {b.paginationShowing(from, to, total)}
                     </p>
                 ) : (
                     <span />
@@ -262,7 +261,7 @@ function BlogsPageContent() {
                         return (
                             <button
                                 key={item}
-                                aria-label={t.admin.blogs.paginationPageLabel(item)}
+                                aria-label={b.paginationPageLabel(item)}
                                 aria-current={item === page ? 'page' : undefined}
                                 onClick={() => setPage(item)}
                                 className={`flex h-8 w-8 items-center justify-center rounded-md border text-sm transition ${

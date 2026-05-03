@@ -305,7 +305,7 @@ const en: Messages = {
       pageTitle: 'Edit archive item',
       itemIdLabel: 'Item ID:',
     },
-    blogs: {
+    blogsPage: {
       pageTitle: 'Blogs',
       pageSubtitle: 'Overview of all blog posts.',
       searchPlaceholder: 'Search by title...',
@@ -314,6 +314,7 @@ const en: Messages = {
       paginationShowing: (from: number, to: number, total: number) => `Showing ${from}–${to} of ${total} results`,
       paginationPageLabel: (page: number) => `Page ${page}`,
       tableColLinkedProductions: 'Linked productions',
+      untitledLabel: '(Untitled)'
     },
     productions: {
       pageTitle: 'Productions',

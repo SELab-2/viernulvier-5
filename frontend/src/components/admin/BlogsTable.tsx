@@ -31,10 +31,10 @@ export function BlogsTable({
                            }: BlogsTableProps) {
     const messages = useAdminMessages()
     const d = messages.admin.dashboard
-    const b = messages.admin.blogs
+    const b = messages.admin.blogsPage
     const { formatDate } = useDashboardFormatters()
-    const hasLanguageColumn = typeof d.tableColLanguage === 'string' && d.tableColLanguage.length > 0
-    const hasViewAction = typeof d.actionView === 'string' && d.actionView.length > 0
+    const hasLanguageColumn = d.tableColLanguage.length > 0
+    const hasViewAction = d.actionView.length > 0
 
     const headings = [
         d.tableColTitle,

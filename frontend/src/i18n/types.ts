@@ -279,7 +279,7 @@ export type Messages = {
       pageTitle: string
       itemIdLabel: string
     }
-    blogs: {
+    blogsPage: {
       pageTitle: string
       pageSubtitle: string
       searchPlaceholder: string
@@ -288,6 +288,7 @@ export type Messages = {
       paginationShowing: (from: number, to: number, total: number) => string
       paginationPageLabel: (page: number) => string
       tableColLinkedProductions: string
+      untitledLabel: string
     }
     productions: {
       pageTitle: string
