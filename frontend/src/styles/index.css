@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 
 /*
  * Global styles for the VIERNULVIER archive website.
@@ -11,6 +12,8 @@
 	color-scheme: light;
 	--color-bg: #fafaf8;
 	--color-surface: #ffffff;
+	--color-surface-sunken: #f2f2f2;
+	--color-surface-inset: #ececec;
 	--color-border: #e5e7eb;
 	--color-text: #1C1917;
 	--color-text-accent: #57534E;
@@ -28,6 +31,8 @@
 	color-scheme: light;
 	--color-bg: #fafaf8;
 	--color-surface: #ffffff;
+	--color-surface-sunken: #f2f2f2;
+	--color-surface-inset: #ececec;
 	--color-border: #e5e7eb;
 	--color-text: #1C1917;
 	--color-text-muted: #475569;
@@ -44,6 +49,8 @@
 	color-scheme: dark;
 	--color-bg: #1C1917;
 	--color-surface: #121214;
+	--color-surface-sunken: #16161a;
+	--color-surface-inset: #1f1f24;
 	--color-border: #27272a;
 	--color-text: #ffffff;
 	--color-text-muted: #D9D9D9;
@@ -61,9 +68,12 @@
 		color-scheme: dark;
 		--color-bg: #1C1917;
 		--color-surface: #121214;
+		--color-surface-sunken: #16161a;
+		--color-surface-inset: #1f1f24;
 		--color-border: #27272a;
 		--color-text: #ffffff;
 		--color-text-muted: #D9D9D9;
+		--color-text-accent: #e2e2e2;
 		--color-accent: #8224e3;
 		--color-admin-bg: #19181a;
 		--color-admin-card-border: #2c3138;
@@ -83,7 +93,7 @@ button,
 input,
 select,
 textarea {
-	font: inherit;
+	font-family: inherit;
 }
 
 button {
@@ -98,6 +108,8 @@ button:disabled {
 	--font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
 	--color-background: var(--color-bg);
 	--color-surface: var(--color-surface);
+	--color-surface-sunken: var(--color-surface-sunken);
+	--color-surface-inset: var(--color-surface-inset);
 	--color-foreground: var(--color-text);
 	--color-muted: var(--color-text-muted);
 	--color-border: var(--color-border);
@@ -127,6 +139,22 @@ button:disabled {
 		radial-gradient(circle at top, rgba(255, 255, 255, 0.6), transparent 36%),
 		linear-gradient(180deg, rgba(255, 255, 255, 0.4), transparent 22%),
 		var(--color-admin-bg);
+}
+
+[data-theme='dark'] .admin-shell {
+	background:
+		radial-gradient(circle at top, rgba(130, 36, 227, 0.05), transparent 40%),
+		linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 20%),
+		var(--color-admin-bg);
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme='light']) .admin-shell {
+		background:
+			radial-gradient(circle at top, rgba(130, 36, 227, 0.05), transparent 40%),
+			linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 20%),
+			var(--color-admin-bg);
+	}
 }
 
 .admin-auth-card {
@@ -172,6 +200,35 @@ button:disabled {
 	color: #6b7280;
 }
 
+.admin-detail-input {
+	position: relative;
+	display: flex;
+	align-items: center;
+	border: 1px solid var(--color-admin-input-border);
+	border-radius: 0.75rem;
+	background-color: var(--color-surface);
+	transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.admin-detail-input:focus-within {
+	border-color: color-mix(in srgb, var(--color-text) 26%, var(--color-admin-input-border));
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-text) 10%, transparent);
+}
+
+.admin-detail-field {
+	width: 100%;
+	height: 3rem;
+	border: 0;
+	background: transparent;
+	padding: 0 1rem;
+	color: var(--color-text);
+	outline: none;
+}
+
+.admin-detail-field::placeholder {
+	color: var(--color-text-muted);
+}
+
 .admin-auth-submit {
 	display: inline-flex;
 	width: 100%;
@@ -187,6 +244,22 @@ button:disabled {
 	transition: transform 180ms ease, opacity 180ms ease;
 }
 
+[data-theme='dark'] .admin-auth-submit {
+	background-color: var(--color-surface);
+	color: var(--color-text);
+	box-shadow: 0 10px 18px -12px rgba(0, 0, 0, 0.5);
+	border: 1px solid var(--color-admin-card-border);
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme='light']) .admin-auth-submit {
+		background-color: var(--color-surface);
+		color: var(--color-text);
+		box-shadow: 0 10px 18px -12px rgba(0, 0, 0, 0.5);
+		border: 1px solid var(--color-admin-card-border);
+	}
+}
+
 .admin-auth-submit:hover:not(:disabled) {
 	transform: translateY(-1px);
 }
@@ -198,5 +271,179 @@ button:disabled {
 @media (min-width: 768px) {
 	.site-container {
 		width: min(100% - 3rem, var(--layout-content-max-width));
+	}
+}
+
+.search-main-rail {
+	width: min(100% - 2rem, var(--layout-content-max-width));
+	margin-inline: auto;
+}
+
+@media (min-width: 768px) {
+	.search-main-rail {
+		width: min(100% - 3rem, var(--layout-content-max-width));
+	}
+}
+
+.filter-radio {
+	appearance: none;
+	width: 0.95rem;
+	height: 0.95rem;
+	border-radius: 9999px;
+	border: 1.5px solid var(--color-border);
+	background: var(--color-surface);
+	display: inline-block;
+	transition: border-color 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
+}
+
+.filter-radio:checked {
+	border-color: var(--color-text);
+	background: radial-gradient(circle at center, var(--color-text) 0 42%, var(--color-surface) 44% 100%);
+	box-shadow: 0 0 0 1px var(--color-text);
+}
+
+.filter-radio:focus-visible {
+	outline: none;
+	box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-text);
+}
+
+.filter-checkbox {
+	appearance: none;
+	width: 0.95rem;
+	height: 0.95rem;
+	border-radius: 9999px;
+	border: 1.5px solid var(--color-border);
+	background: var(--color-surface);
+	display: inline-block;
+	position: relative;
+	transition: border-color 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
+}
+
+.filter-checkbox:checked {
+	border-color: var(--color-text);
+	background: var(--color-text);
+	box-shadow: none;
+}
+
+.filter-checkbox:checked::after {
+	content: '';
+	position: absolute;
+	left: 50%;
+	top: 45%;
+	width: 0.24rem;
+	height: 0.48rem;
+	border: solid var(--color-surface);
+	border-width: 0 2px 2px 0;
+	transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.filter-checkbox:focus-visible {
+	outline: none;
+	box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-text);
+}
+
+.range-slider {
+	position: relative;
+	height: 1.3rem;
+}
+
+.range-track {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 50%;
+	height: 0.28rem;
+	transform: translateY(-50%);
+	border-radius: 9999px;
+	background: var(--color-border);
+}
+
+.range-track-active {
+	position: absolute;
+	top: 50%;
+	height: 0.28rem;
+	transform: translateY(-50%);
+	border-radius: 9999px;
+	background: var(--color-text);
+}
+
+.range-input {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+	appearance: none;
+	background: transparent;
+	margin: 0;
+}
+
+.range-input::-webkit-slider-runnable-track {
+	height: 0;
+	background: transparent;
+}
+
+.range-input::-webkit-slider-thumb {
+	pointer-events: auto;
+	appearance: none;
+	height: 0.95rem;
+	width: 0.95rem;
+	margin-top: -0.46rem;
+	border-radius: 9999px;
+	background: var(--color-text);
+	border: 0;
+	box-shadow: none;
+	cursor: pointer;
+}
+
+.range-input::-moz-range-track {
+	height: 0;
+	background: transparent;
+}
+
+/* Keep CMS/rich-text video embeds fluid across viewport sizes. */
+.prose iframe,
+.prose-sm iframe {
+	display: block;
+	width: 100%;
+	max-width: 100%;
+	aspect-ratio: 16 / 9;
+	height: auto;
+	min-height: 12rem;
+	border: 0;
+	border-radius: 0.75rem;
+}
+
+.range-input::-moz-range-thumb {
+	pointer-events: auto;
+	height: 0.95rem;
+	width: 0.95rem;
+	border-radius: 9999px;
+	background: var(--color-text);
+	border: 0;
+	box-shadow: none;
+	cursor: pointer;
+}
+
+@media (min-width: 1024px) {
+	.search-main-rail {
+		width: auto;
+		margin-inline: 0;
+		padding-left: 2rem;
+		padding-right: max(1.5rem, calc((100vw - var(--layout-content-max-width)) / 2));
+	}
+
+	[data-theme='dark'] .admin-shell {
+		background:
+			radial-gradient(circle at top, rgba(130, 36, 227, 0.04), transparent 30%),
+			var(--color-admin-bg);
+	}
+}
+
+@media (max-width: 1279px) and (prefers-color-scheme: dark) {
+	:root:not([data-theme='light']) .admin-shell {
+		background:
+			radial-gradient(circle at top, rgba(130, 36, 227, 0.04), transparent 30%),
+			var(--color-admin-bg);
 	}
 }

@@ -10,10 +10,25 @@ const localizedTextSchema = z.object({
     en: z.string().optional(),
 }).nullable()
 
+const customDataSchema = z.unknown().nullable()
+
 export const paginationQuerySchema = z.object({
     page: z.coerce.number().int().positive().default(1),
     limit: z.coerce.number().int().positive().max(100).default(20),
     search: z.string().optional(),
+    genres: z.string().optional(),
+    locations: z.string().optional(),
+    yearFrom: z.coerce.number().int().optional(),
+    yearTo: z.coerce.number().int().optional(),
+    onThisDay: z.coerce.boolean().optional().default(false),
+    referenceDate: z
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/)
+        .refine((value) => !Number.isNaN(new Date(`${value}T00:00:00.000Z`).getTime()), {
+            message: 'referenceDate must be a valid YYYY-MM-DD date',
+        })
+        .optional(),
+    sort: z.enum(['relevance', 'recent', 'oldest']).optional().default('relevance'),
     lang: z.string().optional().default('nl'),
 })
 
@@ -33,14 +48,6 @@ export const productionLinksSchema = z.object({
 })
 
 
-
-const genreSchema = z.object({
-    id: z.string().uuid().optional(),
-}).passthrough();
-
-const tagSchema = z.object({
-    id: z.string().uuid().optional(),
-}).passthrough();
 
 export const productionSchema = z.object({
     id: z.string().uuid(),
@@ -68,9 +75,7 @@ export const productionSchema = z.object({
     info: localizedTextSchema,
     description_short: localizedTextSchema,
     eticket_info: localizedTextSchema,
-    custom_data: localizedTextSchema,
-    genres: z.array(genreSchema).optional(),
-    tags: z.array(tagSchema).optional(),
+    custom_data: customDataSchema,
     media_gallery_id: z.string().uuid().nullable(),
     review_gallery_id: z.string().uuid().nullable(),
     poster_gallery_id: z.string().uuid().nullable(),
@@ -110,9 +115,7 @@ export const updateProductionSchema = z.object({
     info: localizedTextSchema.optional(),
     description_short: localizedTextSchema.optional(),
     eticket_info: localizedTextSchema.optional(),
-    custom_data: localizedTextSchema.optional(),
-    genres: z.array(genreSchema).optional(),
-    tags: z.array(tagSchema).optional(),
+    custom_data: customDataSchema.optional(),
     media_gallery_id: z.string().uuid().nullable().optional(),
     review_gallery_id: z.string().uuid().nullable().optional(),
     poster_gallery_id: z.string().uuid().nullable().optional(),

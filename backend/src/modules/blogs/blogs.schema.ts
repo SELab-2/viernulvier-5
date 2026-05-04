@@ -4,10 +4,22 @@ import {
     createSingleResponseSchema 
 } from '../../utils/rest-schemas.js'
 
+export const localizedBlogTitleSchema = z.object({
+    nl: z.string().nullable().optional(),
+    en: z.string().nullable().optional(),
+}).strict()
+
+export const blogTitleSchema = z.union([
+    localizedBlogTitleSchema,
+    z.string().min(1),
+])
+
 export const blogPaginationQuerySchema = z.object({
     page: z.coerce.number().int().positive().default(1),
     limit: z.coerce.number().int().positive().max(100).default(20),
     search: z.string().optional(),
+    yearFrom: z.coerce.number().int().optional(),
+    yearTo: z.coerce.number().int().optional(),
 })
 
 /**
@@ -19,8 +31,9 @@ export const blogLinksSchema = z.object({
 
 export const blogSchema = z.object({
     id: z.string().uuid(),
-    title: z.string().min(1),
-    content: z.string().min(1),
+    title: blogTitleSchema.nullable().optional(),
+    content: z.unknown().nullable().optional(),
+    productions: z.array(z.string().uuid()),
     createdAt: z.coerce.date().optional(),
     updatedAt: z.coerce.date().optional(),
     links: blogLinksSchema.optional(),
@@ -29,8 +42,17 @@ export const blogSchema = z.object({
 export const blogListSchema = createPaginatedResponseSchema(blogSchema)
 export const singleBlogSchema = createSingleResponseSchema(blogSchema)
 
-export const createBlogSchema = blogSchema.omit({ id: true, createdAt: true, updatedAt: true, links: true })
-export const updateBlogSchema = createBlogSchema.partial()
+export const createBlogSchema = z.object({
+    title: blogTitleSchema.optional(),
+    content: z.unknown().optional(),
+    productionIds: z.array(z.string().uuid()),
+})
+
+export const updateBlogSchema = z.object({
+    title: blogTitleSchema.optional(),
+    content: z.unknown().optional(),
+    productionIds: z.array(z.string().uuid()).optional(),
+})
 
 export const blogIdSchema = z.object({
     id: z.string().uuid(),
@@ -45,3 +67,4 @@ export type BlogResponse = z.infer<typeof blogSchema>
 export type BlogListResponse = z.infer<typeof blogListSchema>
 export type CreateBlogInput = z.infer<typeof createBlogSchema>
 export type UpdateBlogInput = z.infer<typeof updateBlogSchema>
+export type LocalizedBlogTitle = z.infer<typeof localizedBlogTitleSchema>

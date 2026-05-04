@@ -2,14 +2,14 @@ import { describe, expect, it } from 'vitest'
 import { getAdminRouteConfig } from '../../admin/paths'
 
 describe('getAdminRouteConfig', () => {
-  it('uses explicit login and dashboard paths on admin subdomains', () => {
+  it('uses /admin-prefixed paths on admin subdomains', () => {
     expect(getAdminRouteConfig('admin.archief.viernulvier.be')).toMatchObject({
       canRenderAdminRoutes: true,
       isAdminHost: true,
       isLocalDevHost: false,
-      loginPath: '/login',
-      dashboardPath: '/dashboard',
-      legacyDashboardPaths: ['/'],
+      loginPath: '/admin/login',
+      dashboardPath: '/admin/dashboard',
+      legacyDashboardPaths: ['/admin', '/dashboard', '/'],
     })
   })
 
@@ -20,7 +20,18 @@ describe('getAdminRouteConfig', () => {
       isLocalDevHost: true,
       loginPath: '/admin/login',
       dashboardPath: '/admin/dashboard',
-      legacyDashboardPaths: ['/admin'],
+      legacyDashboardPaths: ['/admin', '/dashboard', '/'],
+    })
+  })
+
+  it('allows sel2-5.ugent.be to render admin routes without admin-host legacy routes', () => {
+    expect(getAdminRouteConfig('sel2-5.ugent.be')).toMatchObject({
+      canRenderAdminRoutes: true,
+      isAdminHost: false,
+      isLocalDevHost: false,
+      loginPath: '/admin/login',
+      dashboardPath: '/admin',
+      legacyDashboardPaths: [],
     })
   })
 

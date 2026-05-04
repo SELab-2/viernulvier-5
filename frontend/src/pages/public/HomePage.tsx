@@ -4,6 +4,7 @@ import { getActiveLocale, withLocalePath } from '../../i18n'
 import PublicLayout from '../../components/public/PublicLayout'
 import PublicHeroSearch, { type HeroSearchFilters } from '../../components/public/PublicHeroSearch'
 import PublicPopularTags from '../../components/public/PublicPopularTags'
+import PublicCarousel from '../../components/public/PublicCarousel'
 import PublicLatestBlogPreview from '../../components/public/PublicLatestBlogPreview'
 import PublicRecentDigitized from '../../components/public/PublicRecentDigitized'
 
@@ -71,6 +72,7 @@ function HomePage() {
                 onSearch={handleSearch}
             />
             <PublicPopularTags onTagClick={handlePopularTagClick} />
+            <PublicCarousel />
             <PublicLatestBlogPreview />
             <PublicRecentDigitized
                 onViewItem={handleRecentDigitizedItemClick}

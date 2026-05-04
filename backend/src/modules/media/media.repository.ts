@@ -26,12 +26,6 @@ export class MediaRepository {
     async findGalleryById(id: string) {
         return this.prisma.gallery.findUnique({
             where: { id },
-            include: {
-                items: true,
-                media_gallery_productions: true,
-                poster_gallery_productions: true,
-                review_gallery_productions: true
-            }
         })
     }
 
@@ -92,10 +86,6 @@ export class MediaRepository {
     async findItemById(id: string) {
         return this.prisma.item.findUnique({
             where: { id },
-            include: {
-                gallery: true,
-                crops: true
-            }
         })
     }
 
@@ -145,9 +135,6 @@ export class MediaRepository {
     async findCropById(id: string) {
         return this.prisma.crop.findUnique({
             where: { id },
-            include: {
-                item: true
-            }
         })
     }
 

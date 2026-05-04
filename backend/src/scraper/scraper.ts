@@ -1,6 +1,8 @@
 import { prisma } from "./prisma";
 import * as Fetcher from "./fetcher"
-import { log } from "./logger";
+import { updateStatus, finishStatus, createProgressBar } from "./logger";
+import CropsDownloader from "./crops_downloader";
+
 
 import type {
   APIProduction,
@@ -25,7 +27,7 @@ export default {
     sync_hall,
     sync_productions,
     sync_spaces,
-  sync_genres,
+  sync_tags,
   sync_galleries,
   sync_items,
   sync_crops,
@@ -341,12 +343,13 @@ async function sync_locations(cutoff_timestamp: Date | undefined = undefined) {
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (let page of Fetcher.fetchLocationsPages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchLocationsPages(cutoff_timestamp)) {
     pageCount++;
-    log(`Processing page ${pageCount} with ${page.length} locations`);
+    totalProcessed += rawPage.length;
+    updateStatus("Locations", createProgressBar(totalProcessed, totalItems));
 
-    if (page.length === 0) break;
-    page = filterByCutoff(page, cutoff_timestamp);
+    if (rawPage.length === 0) break;
+    const page = filterByCutoff(rawPage, cutoff_timestamp);
 
     await prisma.$transaction(async (tx) => {
       for (const location of page) {
@@ -359,11 +362,9 @@ async function sync_locations(cutoff_timestamp: Date | undefined = undefined) {
         });
       }
     });
-
-    totalProcessed += page.length;
   }
 
-  log(`Completed syncing ${totalProcessed} locations from ${pageCount} pages`);
+  finishStatus(`\u2705 Completed syncing ${totalProcessed} locations from ${pageCount} pages`);
 }
 
 async function sync_hall(cutoff_timestamp: Date | undefined = undefined) {
@@ -371,42 +372,49 @@ async function sync_hall(cutoff_timestamp: Date | undefined = undefined) {
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (let page of Fetcher.fetchHallsPages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchHallsPages(cutoff_timestamp)) {
     pageCount++;
-    log(`Processing page ${pageCount} with ${page.length} halls`);
+    totalProcessed += rawPage.length;
+    updateStatus("Halls", createProgressBar(totalProcessed, totalItems));
 
-    if (page.length === 0) break;
-    page = filterByCutoff(page, cutoff_timestamp);
+    if (rawPage.length === 0) break;
+    const page = filterByCutoff(rawPage, cutoff_timestamp);
 
     await prisma.$transaction(async (tx) => {
+      // Collect all space apiIds for bulk lookup
+      const spaceApiIds = new Set<string>();
       for (const hall of page) {
+        if (hall.space) spaceApiIds.add(hall.space);
+      }
 
-        // link the space
-        let space = null;
-        if (hall.space) {
-          space = await tx.space.findUnique({
-            where: { apiId: hall.space}
-          });
-        }
+      // Fetch all required spaces in bulk
+      const spaces = await tx.space.findMany({
+        where: { apiId: { in: Array.from(spaceApiIds) } },
+        select: { id: true, apiId: true }
+      });
+
+      // Create lookup map
+      const spaceMap = new Map(spaces.map(s => [s.apiId, s.id]));
+
+      for (const hall of page) {
+        const spaceId = hall.space ? spaceMap.get(hall.space) : null;
 
         await tx.hall.upsert({
           where: { apiId: hall["@id"] },
           update: {
             ...mapHall(hall),
-            space_id: space?.id || null
+            space_id: spaceId || null
           },
           create: {
             ...mapHall(hall),
-            space_id: space?.id || null
+            space_id: spaceId || null
           }
         });
       }
     });
-
-    totalProcessed += page.length;
   }
 
-  log(`Completed syncing ${totalProcessed} halls from ${pageCount} pages`);
+  finishStatus(`\u2705 Completed syncing ${totalProcessed} halls from ${pageCount} pages`);
 }
 
 async function sync_spaces(cutoff_timestamp: Date | undefined = undefined) {
@@ -414,40 +422,49 @@ async function sync_spaces(cutoff_timestamp: Date | undefined = undefined) {
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (let page of Fetcher.fetchSpacesPages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchSpacesPages(cutoff_timestamp)) {
     pageCount++;
-    log(`Processing page ${pageCount} with ${page.length} spaces`);
+    totalProcessed += rawPage.length;
+    updateStatus("Spaces", createProgressBar(totalProcessed, totalItems));
 
-    if (page.length === 0) break;
-    page = filterByCutoff(page, cutoff_timestamp);
+    if (rawPage.length === 0) break;
+    const page = filterByCutoff(rawPage, cutoff_timestamp);
 
     await prisma.$transaction(async (tx) => {
+      // Collect all location apiIds for bulk lookup
+      const locationApiIds = new Set<string>();
       for (const space of page) {
+        if (space.location) locationApiIds.add(space.location);
+      }
 
-        // to link the location
-        const location = await tx.location.findUnique({
-          where: { apiId: space.location}
-        });
+      // Fetch all required locations in bulk
+      const locations = await tx.location.findMany({
+        where: { apiId: { in: Array.from(locationApiIds) } },
+        select: { id: true, apiId: true }
+      });
 
+      // Create lookup map
+      const locationMap = new Map(locations.map(l => [l.apiId, l.id]));
+
+      for (const space of page) {
+        const locationId = space.location ? locationMap.get(space.location) : null;
 
         await tx.space.upsert({
           where: { apiId: space["@id"] },
           update: {
             ...mapSpace(space),
-            location_id: location?.id,
+            location_id: locationId || null,
           },
           create: {
             ...mapSpace(space),
-            location_id: location?.id,
+            location_id: locationId || null,
           }
         });
       }
     });
-
-    totalProcessed += page.length;
   }
 
-  log(`Completed syncing ${totalProcessed} spaces from ${pageCount} pages`);
+  finishStatus(`\u2705 Completed syncing ${totalProcessed} spaces from ${pageCount} pages`);
 }
 
 async function sync_events(cutoff_timestamp: Date | undefined = undefined) {
@@ -455,51 +472,68 @@ async function sync_events(cutoff_timestamp: Date | undefined = undefined) {
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (let page of Fetcher.fetchEventsPages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchEventsPages(cutoff_timestamp)) {
     pageCount++;
-    log(`Processing page ${pageCount} with ${page.length} events`);
+    totalProcessed += rawPage.length;
+    updateStatus("Events", createProgressBar(totalProcessed, totalItems));
 
-    if (page.length === 0) break;
-    page = filterByCutoff(page, cutoff_timestamp);
+    if (rawPage.length === 0) break;
+    const page = filterByCutoff(rawPage, cutoff_timestamp);
 
     await prisma.$transaction(async (tx) => {
+      // Collect all production and hall apiIds for bulk lookup
+      const productionApiIds = new Set<string>();
+      const hallApiIds = new Set<string>();
       for (const event of page) {
+        if (event.production?.["@id"]) productionApiIds.add(event.production["@id"]);
+        if (event.hall) hallApiIds.add(event.hall);
+      }
 
-        // to link the production
-        const production = await tx.production.findUnique({
-          where: { apiId: event.production["@id"] }
-        });
+      // Fetch all required productions and halls in bulk
+      const [productions, halls] = await Promise.all([
+        tx.production.findMany({
+          where: { apiId: { in: Array.from(productionApiIds) } },
+          select: { id: true, apiId: true }
+        }),
+        tx.hall.findMany({
+          where: { apiId: { in: Array.from(hallApiIds) } },
+          select: { id: true, apiId: true }
+        })
+      ]);
 
-        // skip the event if there is no production connected to it.
-        if (!production){
+      // Create lookup maps
+      const productionMap = new Map(productions.map(p => [p.apiId, p.id]));
+      const hallMap = new Map(halls.map(h => [h.apiId, h.id]));
+
+      for (const event of page) {
+        const productionId = event.production?.["@id"] ? productionMap.get(event.production["@id"]) : null;
+        
+        // Original logic: skip the event if there is no production connected to it in the DB
+        if (!productionId){
           totalProcessed -= 1;
           continue;
         }
 
-        const hall = await tx.hall.findUnique({
-          where: { apiId: event.hall}
-        });
+        const hallId = event.hall ? hallMap.get(event.hall) : null;
 
         await tx.event.upsert({
           where: { apiId: event["@id"] },
           update: {
             ...mapEvent(event),
-            production_id: production?.id,
-            hall_id: hall?.id,
+            production_id: productionId,
+            hall_id: hallId || null,
           },
           create: {
             ...mapEvent(event),
-            production_id: production?.id,
-            hall_id: hall?.id,
+            production_id: productionId,
+            hall_id: hallId || null,
           }
         });
       }
     });
-
-    totalProcessed += page.length;
   }
 
-  log(`Completed syncing ${totalProcessed} events from ${pageCount} pages`);
+  finishStatus(`\u2705 Completed syncing ${totalProcessed} events from ${pageCount} pages`);
 }
 
 async function sync_productions(cutoff_timestamp: Date | undefined = undefined) {
@@ -507,186 +541,177 @@ async function sync_productions(cutoff_timestamp: Date | undefined = undefined) 
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (let page of Fetcher.fetchProductionsPages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchProductionsPages(cutoff_timestamp)) {
     pageCount++;
-    log(`Processing page ${pageCount} with ${page.length} productions`);
+    totalProcessed += rawPage.length;
+    updateStatus("Productions", createProgressBar(totalProcessed, totalItems));
 
-    if (page.length === 0) break;
-    page = filterByCutoff(page, cutoff_timestamp);
+    if (rawPage.length === 0) break;
+    const page = filterByCutoff(rawPage, cutoff_timestamp);
 
     await prisma.$transaction(async (tx) => {
+      // Collect all apiIds for lookups to avoid N+1 queries
+      const galleryIds = new Set<string>();
+      const themeIds = new Set<string>();
+      const typeIds = new Set<string>();
+      const keywordIds = new Set<string>();
+      const genreIds = new Set<string>();
+
+      for (const prod of page) {
+        if (prod.media_gallery) galleryIds.add(prod.media_gallery);
+        if (prod.poster_gallery) galleryIds.add(prod.poster_gallery);
+        if (prod.review_gallery) galleryIds.add(prod.review_gallery);
+        if (prod.uitdatabank_theme) themeIds.add(prod.uitdatabank_theme);
+        if (prod.uitdatabank_type) typeIds.add(prod.uitdatabank_type);
+        if (prod.uitdatabank_keywords) {
+          prod.uitdatabank_keywords.forEach(k => keywordIds.add(k));
+        }
+        if (prod.genres) {
+          prod.genres.forEach(g => genreIds.add(g));
+        }
+      }
+
+      // Fetch all required relations in bulk
+      const [galleries, themes, types, keywords, genres, tags] = await Promise.all([
+        tx.gallery.findMany({ where: { apiId: { in: Array.from(galleryIds) } } }),
+        tx.uitdatabank_theme.findMany({ where: { apiId: { in: Array.from(themeIds) } } }),
+        tx.uitdatabank_type.findMany({ where: { apiId: { in: Array.from(typeIds) } } }),
+        tx.uitdatabank_keyword.findMany({ where: { apiId: { in: Array.from(keywordIds) } } }),
+        tx.genre.findMany({ where: { apiId: { in: Array.from(genreIds) } } }),
+        tx.tag.findMany({ where: { apiId: { in: Array.from(genreIds) } } }),
+      ]);
+
+      // Create lookup maps
+      const galleryMap = new Map(galleries.map(g => [g.apiId, g.id]));
+      const themeMap = new Map(themes.map(t => [t.apiId, t.id]));
+      const typeMap = new Map(types.map(t => [t.apiId, t.id]));
+      const keywordMap = new Map(keywords.map(k => [k.apiId, k.id]));
+      const genreMap = new Map(genres.map(g => [g.apiId, g.id]));
+      const tagMap = new Map(tags.map(t => [t.apiId, t.id]));
+
       for (const production of page) {
-
-        let media_gallery = null
-        if (production.media_gallery) {
-          media_gallery = await tx.gallery.findUnique({
-            where: {apiId: production.media_gallery}
-          });
-        }
-
-        let poster_gallery = null
-        if (production.poster_gallery) {
-          poster_gallery = await tx.gallery.findUnique({
-            where: {apiId: production.poster_gallery}
-          });
-        }
-
-        let review_gallery = null
-        if (production.review_gallery) {
-          review_gallery = await tx.gallery.findUnique({
-            where: {apiId: production.review_gallery}
-          });
-        }
-
-        let uitdatabank_theme = null
-        if (production.uitdatabank_theme) {
-          uitdatabank_theme = await tx.uitdatabank_theme.findUnique({
-            where: {apiId: production.uitdatabank_theme}
-          });
-        }
-
-        let uitdatabank_type = null
-        if (production.uitdatabank_type) {
-          uitdatabank_type = await tx.uitdatabank_type.findUnique({
-            where: {apiId: production.uitdatabank_type}
-          });
-        }
-
-
         const db_production = await tx.production.upsert({
           where: {apiId: production["@id"]},
           update: {
             ...mapProduction(production),
-            media_gallery_id: media_gallery?.id || null,
-            poster_gallery_id: poster_gallery?.id || null,
-            review_gallery_id: review_gallery?.id || null,
-            uitdatabank_theme: uitdatabank_theme?.id || null,
-            uitdatabank_type: uitdatabank_type?.id || null,
+            media_gallery_id: production.media_gallery ? galleryMap.get(production.media_gallery) : null,
+            poster_gallery_id: production.poster_gallery ? galleryMap.get(production.poster_gallery) : null,
+            review_gallery_id: production.review_gallery ? galleryMap.get(production.review_gallery) : null,
+            uitdatabank_theme: production.uitdatabank_theme ? themeMap.get(production.uitdatabank_theme) : null,
+            uitdatabank_type: production.uitdatabank_type ? typeMap.get(production.uitdatabank_type) : null,
           },
           create: {
             ...mapProduction(production),
-            media_gallery_id: media_gallery?.id || null,
-            poster_gallery_id: poster_gallery?.id || null,
-            review_gallery_id: review_gallery?.id || null,
-            uitdatabank_theme: uitdatabank_theme?.id || null,
-            uitdatabank_type: uitdatabank_type?.id || null,
+            media_gallery_id: production.media_gallery ? galleryMap.get(production.media_gallery) : null,
+            poster_gallery_id: production.poster_gallery ? galleryMap.get(production.poster_gallery) : null,
+            review_gallery_id: production.review_gallery ? galleryMap.get(production.review_gallery) : null,
+            uitdatabank_theme: production.uitdatabank_theme ? themeMap.get(production.uitdatabank_theme) : null,
+            uitdatabank_type: production.uitdatabank_type ? typeMap.get(production.uitdatabank_type) : null,
           },
         })
 
-        //uit_keywords_production table
-        for (const keyword of production.uitdatabank_keywords) {
-          let uitdatabank_keyword = undefined
-          if (production.uitdatabank_type) {
-            uitdatabank_keyword = await tx.uitdatabank_keyword.findUnique({
-              where: {apiId: keyword}
-            });
-          }
-
-          if (uitdatabank_keyword !== undefined) {
-            await tx.uit_keywords_production.upsert({
-              where: {
-                production_id_uitkeywords_id: {
+        // Link keywords
+        if (production.uitdatabank_keywords) {
+          for (const keyword of production.uitdatabank_keywords) {
+            const keywordId = keywordMap.get(keyword);
+            if (keywordId) {
+              await tx.uit_keywords_production.upsert({
+                where: {
+                  production_id_uitkeywords_id: {
+                    production_id: db_production.id,
+                    uitkeywords_id: keywordId
+                  }
+                },
+                update: {}, // exists, no update needed
+                create: {
                   production_id: db_production.id,
-                  uitkeywords_id: uitdatabank_keyword!.id
-                }
-              },
-              update: {}, // if it already exists, you don't need to update it
-              create: {
-                production_id: db_production.id,
-                uitkeywords_id: uitdatabank_keyword!.id
-              },
-            });
+                  uitkeywords_id: keywordId
+                },
+              });
+            }
           }
         }
 
-        for (const genre of production.genres) {
-          const [db_genre, db_tag] = await Promise.all([
-            tx.genre.findUnique({ where: { apiId: genre } }),
-            tx.tag.findUnique({ where: { apiId: genre } })
-          ]);
-          if (db_genre !== null) {
-            await tx.genre_production.upsert({
-              where: {
-                genre_id_production_id: {
-                  genre_id: db_genre!.id,
+        // Link genres
+        if (production.genres) {
+          for (const genreApiId of production.genres) {
+            const genreId = genreMap.get(genreApiId);
+            const tagId = tagMap.get(genreApiId);
+
+            if (genreId) {
+              await tx.genre_production.upsert({
+                where: {
+                  genre_id_production_id: {
+                    genre_id: genreId,
+                    production_id: db_production.id,
+                  }
+                },
+                update: {}, // exists, no update needed
+                create: {
                   production_id: db_production.id,
+                  genre_id: genreId,
                 }
-              },
-              update: {}, // if it already exists, you don't need to update it
-              create: {
-                production_id: db_production.id,
-                genre_id: db_genre!.id,
-              }
-            });
-          }
-          if (db_tag !== null) {
-            await tx.tag_production.upsert({
-              where: {
-                tag_id_production_id: {
-                  tag_id: db_tag!.id,
+              });
+            }
+
+            if (tagId) {
+              await tx.tag_production.upsert({
+                where: {
+                  tag_id_production_id: {
+                    tag_id: tagId,
+                    production_id: db_production.id,
+                  }
+                },
+                update: {}, // exists, no update needed
+                create: {
                   production_id: db_production.id,
+                  tag_id: tagId,
                 }
-              },
-              update: {}, // if it already exists, you don't need to update it
-              create: {
-                production_id: db_production.id,
-                tag_id: db_tag!.id,
-              }
-            });
+              });
+            }
           }
         }
       }
     });
-    totalProcessed += page.length;
     }
 
-  log(`Completed syncing ${totalProcessed} productions from ${pageCount} pages`);
+  finishStatus(`\u2705 Completed syncing ${totalProcessed} productions from ${pageCount} pages`);
 }
 
-async function sync_genres(cutoff_timestamp: Date | undefined = undefined){
+
+
+async function sync_tags(cutoff_timestamp: Date | undefined = undefined){
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (let page of Fetcher.fetchGenrePages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchGenrePages(cutoff_timestamp)) {
     pageCount++;
-    log(`Processing page ${pageCount} with ${page.length} genres`);
+    totalProcessed += rawPage.length;
+    updateStatus("Tags", createProgressBar(totalProcessed, totalItems));
 
-    if (page.length === 0) break;
-    page = filterByCutoff(page, cutoff_timestamp);
+    if (rawPage.length === 0) break;
+    const page = filterByCutoff(rawPage, cutoff_timestamp);
 
     await prisma.$transaction(async (tx) => {
-          for (const genre of page) {
-            if (genre.use_as !== null && genre.use_as.toLowerCase() == "tag") {
-              await tx.tag.upsert({
-                where: {apiId: genre["@id"]},
-                update: mapGenre(genre),
-                create: mapGenre(genre),
-              });
-            } else {
-              await tx.genre.upsert({
-                  where: { apiId: genre["@id"] },
-                  update: mapGenre(genre),
-                  create: mapGenre(genre),
-                })
-            }
-
-          }
+      for (const genre of page) {
+        if (genre.use_as !== null && genre.use_as.toLowerCase() === "tag") {
+          await tx.tag.upsert({
+            where: { apiId: genre["@id"] },
+            update: mapGenre(genre),
+            create: mapGenre(genre),
+          });
+        } else {
+          await tx.genre.upsert({
+            where: { apiId: genre["@id"] },
+            update: mapGenre(genre),
+            create: mapGenre(genre),
+          });
         }
-
-    // await prisma.$transaction(
-    //     page.map(genre =>
-    //         prisma.genre.upsert({
-    //           where: { apiId: genre["@id"] },
-    //           update: mapGenre(genre),
-    //           create: mapGenre(genre),
-    //         })
-    //     )
-    );
-
-    totalProcessed += page.length;
+      }
+    });
   }
 
-  log(`Completed syncing ${totalProcessed} genres from ${pageCount} pages`);
+  finishStatus(`\u2705 Completed syncing ${totalProcessed} tags from ${pageCount} pages`);
 }
 
 
@@ -694,53 +719,60 @@ async function sync_galleries(cutoff_timestamp: Date | undefined = undefined){
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (let page of Fetcher.fetchGalleryPages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchGalleryPages(cutoff_timestamp)) {
     pageCount++;
-    log(`Processing page ${pageCount} with ${page.length} galleries`);
+    totalProcessed += rawPage.length;
+    updateStatus("Galleries", createProgressBar(totalProcessed, totalItems));
 
-    if (page.length === 0) break;
-    page = filterByCutoff(page, cutoff_timestamp);
+    if (rawPage.length === 0) break;
+    const page = filterByCutoff(rawPage, cutoff_timestamp);
 
     await prisma.$transaction(async (tx) => {
+      // Collect all item apiIds from all galleries in the page
+      const itemApiIds = new Set<string>();
       for (const gallery of page) {
-
-
-        let db_items = null;
         if (gallery.items) {
-            db_items = await tx.item.findMany({
-            where: {apiId: {in: gallery.items}},
-          });
+          gallery.items.forEach(itemId => itemApiIds.add(itemId));
         }
+      }
 
+      // Bulk fetch all required items
+      const db_all_items = await tx.item.findMany({
+        where: { apiId: { in: Array.from(itemApiIds) } },
+        select: { id: true, apiId: true }
+      });
 
+      // Create lookup map
+      const itemMap = new Map(db_all_items.map(i => [i.apiId, i.id]));
 
-        await prisma.gallery.upsert({
+      for (const gallery of page) {
+        // Map the apiIds of this specific gallery to their internal database IDs
+        const galleryItemIds = gallery.items 
+          ? gallery.items
+              .map(apiId => itemMap.get(apiId))
+              .filter((id): id is string => typeof id === 'string')
+          : [];
+
+        await tx.gallery.upsert({
           where: {apiId: gallery["@id"]},
           update: {
             ...mapGallery(gallery),
-            items: db_items
-                ? {connect: db_items.map((item) => ({ id: item.id }))}
+            items: galleryItemIds.length > 0
+                ? { connect: galleryItemIds.map(id => ({ id })) }
                 : undefined,
           },
           create: {
             ...mapGallery(gallery),
-            items: db_items
-                ? {connect: db_items.map((item) => ({ id: item.id }))}
+            items: galleryItemIds.length > 0
+                ? { connect: galleryItemIds.map(id => ({ id })) }
                 : undefined,
           }
-        })
-
-
+        });
       }
     });
-
-
-
-
-    totalProcessed += page.length;
   }
 
-  log(`Completed syncing ${totalProcessed} galleries from ${pageCount} pages`);
+  finishStatus(`\u2705 Completed syncing ${totalProcessed} galleries from ${pageCount} pages`);
 }
 
 
@@ -748,114 +780,130 @@ async function sync_items(cutoff_timestamp: Date | undefined = undefined){
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (let page of Fetcher.fetchItemPages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchItemPages(cutoff_timestamp)) {
     pageCount++;
-    log(`Processing page ${pageCount} with ${page.length} items`);
+    totalProcessed += rawPage.length;
+    updateStatus("Items", createProgressBar(totalProcessed, totalItems));
 
-    if (page.length === 0) break;
-    page = filterByCutoff(page, cutoff_timestamp);
-
+    if (rawPage.length === 0) break;
+    const page = filterByCutoff(rawPage, cutoff_timestamp);
 
     await prisma.$transaction(async (tx) => {
+      // Collect all crop apiIds from all items in the page
+      const cropApiIds = new Set<string>();
       for (const item of page) {
-
-
-        const apiIds = item.crops.map(crop => crop["@id"]);
-        let db_crops: any[] = [];
-        if (item.crops && item.crops.length !== 0) {
-           db_crops = await tx.crop.findMany({
-            where: {apiId: {in: apiIds}},
-            select: {id: true},
-          });
-
-
+        if (item.crops) {
+          item.crops.forEach(crop => cropApiIds.add(crop["@id"]));
         }
+      }
 
-        await prisma.item.upsert({
+      // Bulk fetch all required crops
+      const db_all_crops = await tx.crop.findMany({
+        where: { apiId: { in: Array.from(cropApiIds) } },
+        select: { id: true, apiId: true }
+      });
+
+      // Create lookup map
+      const cropMap = new Map(db_all_crops.map(c => [c.apiId, c.id]));
+
+      for (const item of page) {
+        // Map the apiIds of this specific item's crops to their internal database IDs
+        const itemCropIds = item.crops
+          ? item.crops
+              .map(crop => cropMap.get(crop["@id"]))
+              .filter((id): id is string => typeof id === 'string')
+          : [];
+
+        await tx.item.upsert({
           where: {apiId: item["@id"]},
           update: {
             ...mapItem(item),
-            crops: db_crops.length > 0
-                ? {connect: db_crops.map((crop) => ({ id: crop.id }))}
+            crops: itemCropIds.length > 0
+                ? { connect: itemCropIds.map(id => ({ id })) }
                 : undefined
-
           },
           create: {
             ...mapItem(item),
-            crops: db_crops.length > 0
-                ? {connect: db_crops.map((crop) => ({ id: crop.id }))}
+            crops: itemCropIds.length > 0
+                ? { connect: itemCropIds.map(id => ({ id })) }
                 : undefined
           }
         });
-
-
       }
     });
-
-    totalProcessed += page.length;
-
   }
 
-  log(`Completed syncing ${totalProcessed} items from ${pageCount} pages`);
+  finishStatus(`\u2705 Completed syncing ${totalProcessed} items from ${pageCount} pages`);
 }
 
 async function sync_event_prices(cutoff_timestamp: Date | undefined = undefined){
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (let page of Fetcher.fetchEventPricePages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchEventPricePages(cutoff_timestamp)) {
     pageCount++;
-    log(`Processing page ${pageCount} with ${page.length} event_prices`);
+    totalProcessed += rawPage.length;
+    updateStatus("Prices", createProgressBar(totalProcessed, totalItems));
 
-    if (page.length === 0) break;
-    page = filterByCutoff(page, cutoff_timestamp);
-
+    if (rawPage.length === 0) break;
+    const page = filterByCutoff(rawPage, cutoff_timestamp);
 
     await prisma.$transaction(async (tx) => {
+          // Collect all event apiIds for bulk lookup
+          const eventApiIds = new Set<string>();
           for (const price of page) {
+            if (price.event) eventApiIds.add(price.event);
+          }
 
-            let event = null
-            if (price.event) {
-                event = await tx.event.findUnique({
-                where: {apiId: price.event}
-              });
-            }
+          // Fetch all required events in bulk
+          const db_events = await tx.event.findMany({
+            where: { apiId: { in: Array.from(eventApiIds) } },
+            select: { id: true, apiId: true }
+          });
+
+          // Create lookup map
+          const eventMap = new Map(db_events.map(e => [e.apiId, e.id]));
+
+          for (const price of page) {
+            const eventId = price.event ? eventMap.get(price.event) : null;
 
             await tx.event_price.upsert({
               where: {apiId: price["@id"]},
               update: {
                 ...mapEventPrice(price),
-                event_id: event?.id || null,
+                event_id: eventId || null,
               },
               create: {
                 ...mapEventPrice(price),
-                event_id: event?.id || null,
+                event_id: eventId || null,
               },
             });
           }
         }
     );
-
-    totalProcessed += page.length;
   }
 
-  log(`Completed syncing ${totalProcessed} event_prices from ${pageCount} pages`);
+  finishStatus(`\u2705 Completed syncing ${totalProcessed} event_prices from ${pageCount} pages`);
 }
-
 
 async function sync_crops(cutoff_timestamp: Date | undefined = undefined){
   let totalProcessed = 0;
   let pageCount = 0;
+  let actualDownloaded = 0;
 
-  for await (let page of Fetcher.fetchCropPages()) {
+
+
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchCropPages(cutoff_timestamp)) {
     pageCount++;
-    log(`Processing page ${pageCount} with ${page.length} crops`);
+    totalProcessed += rawPage.length;
+    updateStatus("Crops", createProgressBar(totalProcessed, totalItems));
 
-    if (page.length === 0) break;
-    page = filterByCutoff(page, cutoff_timestamp);
+    if (rawPage.length === 0) break;
+    const page = filterByCutoff(rawPage, cutoff_timestamp);
 
-    await prisma.$transaction(
-        page.map(crop =>
+    const prisma_crops = await prisma.$transaction(
+        page.filter(crop => (crop.name?.toLowerCase() === "fe3_header" || crop.name?.toLowerCase() == "fe3_boxed") && crop.url !== undefined)
+            .map(crop =>
             prisma.crop.upsert({
               where: {apiId: crop["@id"]},
               update: mapCrop(crop),
@@ -865,22 +913,24 @@ async function sync_crops(cutoff_timestamp: Date | undefined = undefined){
     );
 
 
-    totalProcessed += page.length;
+    await CropsDownloader.download_crops(prisma_crops);
+    actualDownloaded += prisma_crops.length;
   }
 
-  log(`Completed syncing ${totalProcessed} crops from ${pageCount} pages`);
+  finishStatus(`\u2705 Completed syncing ${totalProcessed} crops from ${pageCount} pages and downloaded ${actualDownloaded} crops`);
 }
 
 async function sync_uit_keywords(cutoff_timestamp: Date | undefined = undefined){
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (let page of Fetcher.fetchUitKeywordPages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchUitKeywordPages(cutoff_timestamp)) {
     pageCount++;
-    log(`Processing page ${pageCount} with ${page.length} keywords`);
+    totalProcessed += rawPage.length;
+    updateStatus("Keywords", createProgressBar(totalProcessed, totalItems));
 
-    if (page.length === 0) break;
-    page = filterByCutoff(page, cutoff_timestamp);
+    if (rawPage.length === 0) break;
+    const page = filterByCutoff(rawPage, cutoff_timestamp);
 
     await prisma.$transaction(
         page.map(keyword =>
@@ -891,12 +941,9 @@ async function sync_uit_keywords(cutoff_timestamp: Date | undefined = undefined)
             })
         )
     );
-
-
-    totalProcessed += page.length;
   }
 
-  log(`Completed syncing ${totalProcessed} keywords from ${pageCount} pages`);
+  finishStatus(`\u2705 Completed syncing ${totalProcessed} keywords from ${pageCount} pages`);
 }
 
 
@@ -904,12 +951,13 @@ async function sync_uit_themes(cutoff_timestamp: Date | undefined = undefined){
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (let page of Fetcher.fetchUitThemePages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchUitThemePages(cutoff_timestamp)) {
     pageCount++;
-    log(`Processing page ${pageCount} with ${page.length} themes`);
+    totalProcessed += rawPage.length;
+    updateStatus("Themes", createProgressBar(totalProcessed, totalItems));
 
-    if (page.length === 0) break;
-    page = filterByCutoff(page, cutoff_timestamp);
+    if (rawPage.length === 0) break;
+    const page = filterByCutoff(rawPage, cutoff_timestamp);
 
     await prisma.$transaction(
         page.map(theme =>
@@ -920,12 +968,9 @@ async function sync_uit_themes(cutoff_timestamp: Date | undefined = undefined){
             })
         )
     );
-
-
-    totalProcessed += page.length;
   }
 
-  log(`Completed syncing ${totalProcessed} themes from ${pageCount} pages`);
+  finishStatus(`\u2705 Completed syncing ${totalProcessed} themes from ${pageCount} pages`);
 }
 
 
@@ -933,12 +978,13 @@ async function sync_uit_types(cutoff_timestamp: Date | undefined = undefined){
   let totalProcessed = 0;
   let pageCount = 0;
 
-  for await (let page of Fetcher.fetchUitTypePages()) {
+  for await (const { members: rawPage, totalItems } of Fetcher.fetchUitTypePages(cutoff_timestamp)) {
     pageCount++;
-    log(`Processing page ${pageCount} with ${page.length} themes`);
+    totalProcessed += rawPage.length;
+    updateStatus("Types", createProgressBar(totalProcessed, totalItems));
 
-    if (page.length === 0) break;
-    page = filterByCutoff(page, cutoff_timestamp);
+    if (rawPage.length === 0) break;
+    const page = filterByCutoff(rawPage, cutoff_timestamp);
 
     await prisma.$transaction(
         page.map(type =>
@@ -949,12 +995,9 @@ async function sync_uit_types(cutoff_timestamp: Date | undefined = undefined){
             })
         )
     );
-
-
-    totalProcessed += page.length;
   }
 
-  log(`Completed syncing ${totalProcessed} themes from ${pageCount} pages`);
+  finishStatus(`\u2705 Completed syncing ${totalProcessed} types from ${pageCount} pages`);
 }
 
 
