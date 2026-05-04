@@ -88,11 +88,12 @@ function ArchiveDetailPageContent() {
 
         const fetchData = async () => {
             try {
-                const [prodRes, eventsRes, genresRes, tagsRes] = await Promise.all([
+                const [prodRes, eventsRes, genresRes, tagsRes, blogsRes] = await Promise.all([
                     getProductionById(id),
                     getEventsByProductionId(id),
                     getGenresByProductionId(id),
                     getTagsByProductionId(id),
+                    getBlogsByProductionId(id).catch(() => ({ data: [] })),
                 ])
 
                 const prod = prodRes.data
@@ -106,6 +107,7 @@ function ArchiveDetailPageContent() {
                 setEvents(pastEvents)
                 setGenres(genresRes.data)
                 setTags(tagsRes.data)
+                setBlogs(blogsRes.data)
 
                 if (prod.media_gallery_id) {
                     const galleryRes = await getGalleryItems(prod.media_gallery_id)
@@ -145,15 +147,6 @@ function ArchiveDetailPageContent() {
                     if (res) locationMap[res.eventId] = res.location
                 })
                 setLocationsByEvent(locationMap)
-
-                if (prod.links?.blogs) {
-                    try {
-                        const blogsRes = await getBlogsByProductionId(id)
-                        setBlogs(blogsRes.data)
-                    } catch {
-                        // If fetching blogs fails, omit them
-                    }
-                }
             } catch {
                 setLoadError(true)
             }
