@@ -295,6 +295,10 @@ describe('ArchiveDetailPage', () => {
         await waitFor(() => {
             expect(getProductionByIdMock).toHaveBeenCalledWith('dab70000-0000-0000-0000-000000000001')
             expect(getEventsByProductionIdMock).toHaveBeenCalledWith('dab70000-0000-0000-0000-000000000001')
+            expect(getGenresByProductionIdMock).toHaveBeenCalledWith('dab70000-0000-0000-0000-000000000001')
+            expect(getTagsByProductionIdMock).toHaveBeenCalledWith('dab70000-0000-0000-0000-000000000001')
+            expect(getBlogsByProductionIdMock).toHaveBeenCalledWith('dab70000-0000-0000-0000-000000000001')
+
         })
     })
 
@@ -561,15 +565,7 @@ describe('ArchiveDetailPage', () => {
     })
 
     it('renders related blogs in the sidebar when present', async () => {
-        getProductionByIdMock.mockResolvedValue({
-            data: {
-                ...baseProduction,
-                links: {
-                    self: 'http://localhost/api/v1/archive/productions/dab70000-0000-0000-0000-000000000001',
-                    blogs: 'http://localhost/api/v1/archive/blogs?productionId=dab70000-0000-0000-0000-000000000001',
-                },
-            },
-        })
+        // no longer need to mock links.blogs on the production
         getBlogsByProductionIdMock.mockResolvedValue({
             data: [
                 { id: 'b1000000-0000-0000-0000-000000000001', title: { nl: 'Blog over de voorstelling', en: 'Blog about the show' } },
@@ -583,20 +579,10 @@ describe('ArchiveDetailPage', () => {
     })
 
     it('does not crash when the blogs fetch fails', async () => {
-        getProductionByIdMock.mockResolvedValue({
-            data: {
-                ...baseProduction,
-                links: {
-                    self: 'http://localhost/api/v1/archive/productions/dab70000-0000-0000-0000-000000000001',
-                    blogs: 'http://localhost/api/v1/archive/blogs?productionId=dab70000-0000-0000-0000-000000000001',
-                },
-            },
-        })
         getBlogsByProductionIdMock.mockRejectedValue(new Error('Network error'))
 
         renderPage()
 
-        // page should still load normally
         expect(await screen.findByText('Terug')).toBeInTheDocument()
         expect(screen.queryByText('Gerelateerde blogs')).not.toBeInTheDocument()
     })
