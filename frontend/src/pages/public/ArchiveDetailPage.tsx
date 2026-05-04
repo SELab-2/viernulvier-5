@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { getActiveLocale, withLocalePath } from '../../i18n'
 import { localize } from '../../utils/localize'
 import { getYouTubeEmbedUrl } from '../../utils/youtube'
@@ -9,6 +9,7 @@ import { usePublicMessages } from '../../components/public/PublicMessagesContext
 import ArchiveDetailHero from '../../components/public/detail/PublicDetailHeroBanner'
 import ArchiveDetailEventsList from '../../components/public/detail/PublicDetailEventsList'
 import ArchiveDetailGallery from '../../components/public/detail/PublicDetailGallery'
+import { getBlogsByProductionId, type Blog } from '../../api/blogs'
 import { getProductionById, type Production } from '../../api/productions'
 import { getGalleryItems, getItemCrops, getPreferredHeroCropUrl, getPreferredMediaCropUrl } from '../../api/media'
 import { getEventsByProductionId, type Event } from '../../api/events'
@@ -31,6 +32,7 @@ function ArchiveDetailPageContent() {
     const [events, setEvents] = useState<Event[]>([])
     const [genres, setGenres] = useState<Genre[]>([])
     const [tags, setTags] = useState<Tag[]>([])
+    const [blogs, setBlogs] = useState<Blog[]>([])
     const [locationsByEvent, setLocationsByEvent] = useState<Record<string, Location>>({})
     const [shareCopied, setShareCopied] = useState(false)
     const [loadError, setLoadError] = useState(false)
@@ -144,6 +146,14 @@ function ArchiveDetailPageContent() {
                 })
                 setLocationsByEvent(locationMap)
 
+                if (prod.links?.blogs) {
+                    try {
+                        const blogsRes = await getBlogsByProductionId(id)
+                        setBlogs(blogsRes.data)
+                    } catch {
+
+                    }
+                }
             } catch {
                 setLoadError(true)
             }
@@ -163,7 +173,7 @@ function ArchiveDetailPageContent() {
     const info = localize(production?.info, locale)
     const video1 = localize(production?.video_1, locale)
     const video2 = localize(production?.video_2, locale)
-    const hasSidebar = Boolean(info) || genres.length > 0 || tags.length > 0
+    const hasSidebar = Boolean(info) || genres.length > 0 || tags.length > 0 || blogs.length > 0
     const shareLabel = messages.search.shareLabel
     const shareCopiedLabel = messages.search.shareCopiedLabel
 
@@ -286,14 +296,6 @@ function ArchiveDetailPageContent() {
                                     {messages.detail.credits}
                                 </h3>
 
-                                {info ? (
-                                    <div className="prose prose-sm mt-4 max-w-none text-text-accent">
-                                        <div dangerouslySetInnerHTML={{ __html: info.replace(/\r?\n/g, '<br />') }} />
-                                    </div>
-                                ) : (
-                                    <p className="mt-4 text-sm text-text-accent">-</p>
-                                )}
-
                                 {(genres.length > 0 || tags.length > 0) ? (
                                     <div className="mt-6 border-t border-border pt-4">
                                         <p className="mb-3 text-xs font-semibold uppercase tracking-[0.15em] text-text-accent">
@@ -321,6 +323,38 @@ function ArchiveDetailPageContent() {
                                         </div>
                                     </div>
                                 ) : null}
+
+                                {blogs.length > 0 && (
+                                    <div className="mt-6 border-t border-border pt-4">
+                                        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.15em] text-text-accent">
+                                            {messages.detail.relatedBlogs}
+                                        </p>
+                                        <ul className="flex flex-col gap-3">
+                                            {blogs.map((blog) => {
+                                                const title = localize(blog.title, locale)
+                                                return (
+                                                    <li key={blog.id}>
+                                                        <Link
+                                                            to={withLocalePath(`/blogs/${blog.id}`, locale)}
+                                                            className="text-sm text-foreground hover:opacity-70 transition-opacity"
+                                                        >
+                                                            {title ?? blog.id}
+                                                        </Link>
+                                                    </li>
+                                                )
+                                            })}
+                                        </ul>
+                                    </div>
+                                )}
+
+                                {info ? (
+                                    <div className="prose prose-sm mt-4 max-w-none text-text-accent">
+                                        <div dangerouslySetInnerHTML={{ __html: info.replace(/\r?\n/g, '<br />') }} />
+                                    </div>
+                                ) : (
+                                    <p className="mt-4 text-sm text-text-accent">-</p>
+                                )}
+
                             </div>
                         </aside>
                     ) : null}
