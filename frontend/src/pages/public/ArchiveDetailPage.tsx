@@ -151,7 +151,7 @@ function ArchiveDetailPageContent() {
                         const blogsRes = await getBlogsByProductionId(id)
                         setBlogs(blogsRes.data)
                     } catch {
-
+                        // If fetching blogs fails, omit them
                     }
                 }
             } catch {
