@@ -10,6 +10,6 @@ export const blogSchema = z.object({
 
 export type Blog = z.infer<typeof blogSchema>
 
-export const getBlogsByUrl = (url: string) => {
-    return api.get<{ data: Blog[] }>(url)
+export const getBlogsByProductionId = (productionId: string) => {
+    return api.get<{ data: Blog[] }>(`/archive/blogs?productionId=${productionId}`)
 }
