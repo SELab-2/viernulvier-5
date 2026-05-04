@@ -291,13 +291,10 @@ function ArchiveDetailPageContent() {
 
                     {hasSidebar ? (
                         <aside className="xl:sticky xl:top-22">
-                            <div className="rounded-2xl border border-border bg-surface px-5 py-6">
-                                <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-text-accent">
-                                    {messages.detail.credits}
-                                </h3>
+                            <div className="rounded-2xl border border-border bg-surface px-5 py-6 flex flex-col gap-6">
 
-                                {(genres.length > 0 || tags.length > 0) ? (
-                                    <div className="mt-6 border-t border-border pt-4">
+                                {(genres.length > 0 || tags.length > 0) && (
+                                    <div>
                                         <p className="mb-3 text-xs font-semibold uppercase tracking-[0.15em] text-text-accent">
                                             {messages.detail.genresAndTags}
                                         </p>
@@ -322,23 +319,24 @@ function ArchiveDetailPageContent() {
                                             })}
                                         </div>
                                     </div>
-                                ) : null}
+                                )}
 
                                 {blogs.length > 0 && (
-                                    <div className="mt-6 border-t border-border pt-4">
+                                    <div>
                                         <p className="mb-3 text-xs font-semibold uppercase tracking-[0.15em] text-text-accent">
                                             {messages.detail.relatedBlogs}
                                         </p>
-                                        <ul className="flex flex-col gap-3">
+                                        <ul className="flex flex-col gap-2">
                                             {blogs.map((blog) => {
                                                 const title = localize(blog.title, locale)
                                                 return (
                                                     <li key={blog.id}>
                                                         <Link
                                                             to={withLocalePath(`/blogs/${blog.id}`, locale)}
-                                                            className="text-sm text-foreground hover:opacity-70 transition-opacity"
+                                                            className="flex items-center justify-between rounded-lg border border-border bg-surface-sunken px-3 py-2.5 text-sm text-foreground transition-opacity hover:opacity-70"
                                                         >
-                                                            {title ?? blog.id}
+                                                            <span>{title ?? blog.id}</span>
+                                                            <span className="ml-2 shrink-0 text-text-accent">→</span>
                                                         </Link>
                                                     </li>
                                                 )
@@ -347,12 +345,15 @@ function ArchiveDetailPageContent() {
                                     </div>
                                 )}
 
-                                {info ? (
-                                    <div className="prose prose-sm mt-4 max-w-none text-text-accent">
-                                        <div dangerouslySetInnerHTML={{ __html: info.replace(/\r?\n/g, '<br />') }} />
+                                {info && (
+                                    <div>
+                                        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.15em] text-text-accent">
+                                            {messages.detail.credits}
+                                        </p>
+                                        <div className="prose prose-sm max-w-none text-text-accent">
+                                            <div dangerouslySetInnerHTML={{ __html: info.replace(/\r?\n/g, '<br />') }} />
+                                        </div>
                                     </div>
-                                ) : (
-                                    <p className="mt-4 text-sm text-text-accent">-</p>
                                 )}
 
                             </div>
