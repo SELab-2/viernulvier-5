@@ -22,6 +22,7 @@ export class ProductionsController {
             ...production,
             links: {
                 self: `${baseUrl}/productions/${prodId}`,
+                blogs: `${baseUrl}/blogs?productionId=${prodId}`,
                 events: `${baseUrl}/events?productionId=${prodId}`,
                 genres: `${baseUrl}/genres?productionId=${prodId}`,
                 tags: `${baseUrl}/tags?productionId=${prodId}`,
