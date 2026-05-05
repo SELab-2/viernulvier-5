@@ -96,18 +96,9 @@ export type Messages = {
     paginationNext: string
     relatedFilesCount: (count: number) => string
     stampSvgPaths: {
-      days: {
-        singular: string
-        plural: string
-      }
-      months: {
-        singular: string
-        plural: string
-      }
-      years: {
-        singular: string
-        plural: string
-      }
+      days: { singular: string; plural: string }
+      months: { singular: string; plural: string }
+      years: { singular: string; plural: string }
     }
   }
   auth: {
