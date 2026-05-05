@@ -18,6 +18,14 @@ export const posterLinksSchema = z.object({
     production: z.string().url().optional().nullable().default('https://example.com/'),
 })
 
+export const posterAssetSchema = z.object({
+    id: z.string().uuid(),
+    file_url: z.string().url(),
+    mime_type: z.string().nullable(),
+    original_filename: z.string().nullable(),
+    file_size_bytes: z.number().int().nullable(),
+})
+
 export const posterProductionSchema = z.object({
     id: z.string().uuid(),
     title: z.string(),
@@ -30,6 +38,7 @@ export const posterSchema = z.object({
     mime_type: z.string().nullable(),
     original_filename: z.string().nullable(),
     file_size_bytes: z.number().int().nullable(),
+    files: z.array(posterAssetSchema),
     production: posterProductionSchema.nullable(),
     productions: z.array(posterProductionSchema),
     created_at: z.coerce.date(),
@@ -49,12 +58,16 @@ export const updatePosterSchema = z.object({
     production_ids: z.array(z.string().uuid()).optional(),
 })
 
-export const createPosterSchema = z.object({
-    title: z.string().min(1),
-    production_ids: z.array(z.string().uuid()).min(1),
+const createPosterFileSchema = z.object({
     file_name: z.string().min(1),
     mime_type: z.string().min(1),
     file_base64: z.string().min(1),
+})
+
+export const createPosterSchema = z.object({
+    title: z.string().min(1),
+    production_ids: z.array(z.string().uuid()).min(1),
+    files: z.array(createPosterFileSchema).min(1),
 })
 
 export const errorSchema = z.object({
@@ -67,9 +80,11 @@ export type UpdatePosterInput = z.infer<typeof updatePosterSchema>
 export type CreatePosterInput = z.infer<typeof createPosterSchema>
 export type CreatePosterPersistenceInput = {
     title: string
-    file_path: string
-    mime_type?: string | null
-    original_filename?: string | null
-    file_size_bytes?: number | null
+    files: Array<{
+        file_path: string
+        mime_type?: string | null
+        original_filename?: string | null
+        file_size_bytes?: number | null
+    }>
     production_ids: string[]
 }

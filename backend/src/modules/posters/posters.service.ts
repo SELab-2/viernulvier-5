@@ -72,6 +72,10 @@ export class PostersService {
         return this.repository.findById(id)
     }
 
+    async getPosterFile(id: string): Promise<{ file_path: string; mime_type: string | null } | null> {
+        return this.repository.findFileById(id)
+    }
+
     async createPoster(data: CreatePosterPersistenceInput): Promise<NonNullable<PosterRaw>> {
         return this.repository.create(data)
     }

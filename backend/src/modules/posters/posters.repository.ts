@@ -21,6 +21,13 @@ export type PosterRecord = {
     original_filename: string | null
     file_size_bytes: number | null
     production_id: string
+    files: Array<{
+        id: string
+        file_path: string
+        mime_type: string | null
+        original_filename: string | null
+        file_size_bytes: number | null
+    }>
     production: {
         id: string
         title: unknown
@@ -31,12 +38,18 @@ export type PosterRecord = {
     }>
 }
 
+export type PosterFileStreamRecord = {
+    file_path: string
+    mime_type: string | null
+}
+
 type PosterFileRecord = {
     created_at: Date
     updated_at: Date
     id: string
     name: string | null
     description: string | null
+    gallery_id: string | null
     file_location: string | null
     type: 'video' | 'image' | 'pdf' | 'other' | null
     gallery: {
@@ -66,6 +79,10 @@ function mapMimeToFileType(mimeType: string): 'image' | 'pdf' {
 export class PostersRepository {
     constructor(private readonly prisma: PrismaClient) {}
 
+    private getPosterGroupKey(record: PosterFileRecord): string {
+        return `${record.gallery_id ?? ''}::${(record.name ?? '').trim().toLowerCase()}`
+    }
+
     private get productionInclude() {
         return {
             gallery: {
@@ -81,23 +98,44 @@ export class PostersRepository {
         } as const
     }
 
-    private mapPosterRecord(record: PosterFileRecord): PosterRecord {
-        const productions = (record.gallery?.poster_gallery_productions ?? []).map((production) => ({
+    private mapPosterRecord(groupRecords: PosterFileRecord[]): PosterRecord {
+        const representative = groupRecords[0]
+        const productions = (representative.gallery?.poster_gallery_productions ?? []).map((production) => ({
             id: production.id,
             title: production.title,
         }))
 
         const production = productions[0] ?? null
 
+        const createdAtMs = groupRecords.map((entry) => entry.created_at.getTime())
+        const updatedAtMs = groupRecords.map((entry) => entry.updated_at.getTime())
+
+        const files = groupRecords.flatMap((entry) => {
+            if (!entry.file_location) {
+                return []
+            }
+
+            return [
+                {
+                    id: entry.id,
+                    file_path: entry.file_location,
+                    mime_type: mapFileTypeToMime(entry.type),
+                    original_filename: entry.description ?? null,
+                    file_size_bytes: null,
+                },
+            ]
+        })
+
         return {
-            created_at: record.created_at,
-            updated_at: record.updated_at,
-            id: record.id,
-            title: record.name?.trim() || 'Untitled poster',
-            file_path: record.file_location ?? '',
-            mime_type: mapFileTypeToMime(record.type),
-            original_filename: record.description ?? null,
+            created_at: new Date(Math.min(...createdAtMs)),
+            updated_at: new Date(Math.max(...updatedAtMs)),
+            id: representative.id,
+            title: representative.name?.trim() || 'Untitled poster',
+            file_path: representative.file_location ?? '',
+            mime_type: mapFileTypeToMime(representative.type),
+            original_filename: representative.description ?? null,
             file_size_bytes: null,
+            files,
             production_id: production?.id ?? '',
             production: production
                 ? {
@@ -107,6 +145,25 @@ export class PostersRepository {
                 : null,
             productions,
         }
+    }
+
+    private groupPosterRecords(records: PosterFileRecord[]): PosterRecord[] {
+        const grouped = new Map<string, PosterFileRecord[]>()
+
+        for (const record of records) {
+            if (!record.file_location) {
+                continue
+            }
+
+            const key = this.getPosterGroupKey(record)
+            const current = grouped.get(key) ?? []
+            current.push(record)
+            grouped.set(key, current)
+        }
+
+        return Array.from(grouped.values()).map((group) =>
+            this.mapPosterRecord([...group].sort((a, b) => a.created_at.getTime() - b.created_at.getTime())),
+        )
     }
 
     private buildWhere(options: Pick<FindAllOptions, 'search' | 'productionId' | 'yearFrom' | 'yearTo'>): Prisma.fileWhereInput | undefined {
@@ -155,7 +212,6 @@ export class PostersRepository {
 
     async findAll(options: FindAllOptions) {
         const { page, limit, sort = 'recent' } = options
-        const skip = (page - 1) * limit
         const where = this.buildWhere(options)
 
         const records = await this.prisma.file.findMany({
@@ -163,24 +219,34 @@ export class PostersRepository {
             orderBy: {
                 created_at: sort === 'oldest' ? 'asc' : 'desc',
             },
-            skip,
-            take: limit,
             include: this.productionInclude,
         })
 
-        return records.flatMap((record) => {
-            if (!record.file_location) {
-                return []
+        const grouped = this.groupPosterRecords(records as PosterFileRecord[])
+        const sorted = grouped.sort((a, b) => {
+            if (sort === 'oldest') {
+                return a.created_at.getTime() - b.created_at.getTime()
             }
 
-            return [this.mapPosterRecord(record as PosterFileRecord)]
+            return b.updated_at.getTime() - a.updated_at.getTime()
         })
+
+        const skip = (page - 1) * limit
+        return sorted.slice(skip, skip + limit)
     }
 
     async count(options: Pick<FindAllOptions, 'search' | 'productionId' | 'yearFrom' | 'yearTo'>) {
-        return this.prisma.file.count({
+        const records = await this.prisma.file.findMany({
             where: this.buildWhere(options),
+            select: {
+                id: true,
+                gallery_id: true,
+                name: true,
+            },
         })
+
+        const groups = new Set(records.map((record) => `${record.gallery_id ?? ''}::${(record.name ?? '').trim().toLowerCase()}`))
+        return groups.size
     }
 
     async findById(id: string) {
@@ -192,11 +258,43 @@ export class PostersRepository {
             include: this.productionInclude,
         })
 
-        if (!record || !record.file_location) {
+        if (!record) {
             return null
         }
 
-        return this.mapPosterRecord(record as PosterFileRecord)
+        const groupRecords = await this.prisma.file.findMany({
+            where: {
+                ...this.buildWhere({}),
+                gallery_id: record.gallery_id,
+                name: record.name,
+            },
+            include: this.productionInclude,
+        })
+
+        const grouped = this.groupPosterRecords(groupRecords as PosterFileRecord[])
+        return grouped[0] ?? null
+    }
+
+    async findFileById(id: string): Promise<PosterFileStreamRecord | null> {
+        const record = await this.prisma.file.findFirst({
+            where: {
+                id,
+                ...this.buildWhere({}),
+            },
+            select: {
+                file_location: true,
+                type: true,
+            },
+        })
+
+        if (!record?.file_location) {
+            return null
+        }
+
+        return {
+            file_path: record.file_location,
+            mime_type: mapFileTypeToMime(record.type),
+        }
     }
 
     private async ensurePosterGalleryForProductions(tx: Prisma.TransactionClient, productionIds: string[]) {
@@ -246,22 +344,38 @@ export class PostersRepository {
     }
 
     async create(data: CreatePosterPersistenceInput) {
-        const record = await this.prisma.$transaction(async (tx) => {
+        const createdId = await this.prisma.$transaction(async (tx) => {
             const galleryId = await this.ensurePosterGalleryForProductions(tx, data.production_ids)
 
-            return tx.file.create({
-                data: {
-                    name: data.title,
-                    description: data.original_filename ?? null,
-                    gallery_id: galleryId,
-                    file_location: data.file_path,
-                    type: mapMimeToFileType((data.mime_type ?? '').toLowerCase()),
-                },
-                include: this.productionInclude,
-            })
+            const createdRecords = await Promise.all(
+                data.files.map((file, index) =>
+                    tx.file.create({
+                        data: {
+                            name: data.title,
+                            description: file.original_filename ?? null,
+                            gallery_id: galleryId,
+                            file_location: file.file_path,
+                            type: mapMimeToFileType((file.mime_type ?? '').toLowerCase()),
+                            created_at: new Date(Date.now() + index),
+                        },
+                        select: { id: true },
+                    }),
+                ),
+            )
+
+            return createdRecords[0]?.id ?? null
         })
 
-        return this.mapPosterRecord(record as PosterFileRecord)
+        if (!createdId) {
+            throw new Error('Poster creation failed')
+        }
+
+        const created = await this.findById(createdId)
+        if (!created) {
+            throw new Error('Poster creation failed')
+        }
+
+        return created
     }
 
     async update(id: string, data: UpdatePosterInput) {
@@ -270,23 +384,29 @@ export class PostersRepository {
             throw new Error('Record to update not found')
         }
 
-        const record = await this.prisma.$transaction(async (tx) => {
+        const existingIds = existing.files.map((file) => file.id)
+
+        await this.prisma.$transaction(async (tx) => {
             const nextGalleryId = data.production_ids && data.production_ids.length > 0
                 ? await this.ensurePosterGalleryForProductions(tx, data.production_ids)
                 : undefined
 
-            return tx.file.update({
-                where: { id },
+            await tx.file.updateMany({
+                where: { id: { in: existingIds } },
                 data: {
                     ...(data.title !== undefined ? { name: data.title } : {}),
                     ...(nextGalleryId !== undefined ? { gallery_id: nextGalleryId } : {}),
                     updated_at: new Date(),
                 },
-                include: this.productionInclude,
             })
         })
 
-        return this.mapPosterRecord(record as PosterFileRecord)
+        const updated = await this.findById(id)
+        if (!updated) {
+            throw new Error('Record to update not found')
+        }
+
+        return updated
     }
 
     async delete(id: string) {
@@ -296,7 +416,13 @@ export class PostersRepository {
             throw new Error('Record to delete does not exist')
         }
 
-        await this.prisma.file.delete({ where: { id } })
+        await this.prisma.file.deleteMany({
+            where: {
+                id: {
+                    in: poster.files.map((file) => file.id),
+                },
+            },
+        })
 
         return poster
     }

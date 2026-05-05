@@ -18,11 +18,20 @@ type PosterItem = {
   title: string
   file_url: string
   mime_type: string | null
+  files?: Array<{
+    id: string
+    file_url: string
+    mime_type: string | null
+  }>
   created_at: string
   production: {
     id: string
     title: string
   } | null
+  productions?: Array<{
+    id: string
+    title: string
+  }>
 }
 
 type PaginatedApiResponse<T> = {
@@ -84,7 +93,7 @@ function PostersPageContent() {
   const [productionSearchQuery, setProductionSearchQuery] = useState('')
   const [isProductionPopupOpen, setIsProductionPopupOpen] = useState(false)
   const [isLoadingProductions, setIsLoadingProductions] = useState(false)
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [search, setSearch] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -284,7 +293,7 @@ function PostersPageContent() {
       return
     }
 
-    if (!selectedFile) {
+    if (selectedFiles.length === 0) {
       setError(i18n.admin.posters.validationFileRequired)
       return
     }
@@ -293,21 +302,25 @@ function PostersPageContent() {
     setError(null)
 
     try {
-      const fileBase64 = await fileToBase64(selectedFile)
+      const filesPayload = await Promise.all(
+        selectedFiles.map(async (file) => ({
+          file_name: file.name,
+          mime_type: file.type || 'image/jpeg',
+          file_base64: await fileToBase64(file),
+        })),
+      )
 
       await apiFetch('/archive/posters', {
         method: 'POST',
         body: JSON.stringify({
           title: title.trim(),
           production_ids: selectedProductionIds,
-          file_name: selectedFile.name,
-          mime_type: selectedFile.type || 'image/jpeg',
-          file_base64: fileBase64,
+          files: filesPayload,
         }),
       })
 
       setTitle('')
-      setSelectedFile(null)
+      setSelectedFiles([])
       await loadData(search)
     } catch (submitError) {
       const message = submitError instanceof Error ? submitError.message : i18n.admin.posters.loadPostersError
@@ -367,13 +380,17 @@ function PostersPageContent() {
             <span>{i18n.admin.posters.formFileLabel}</span>
             <input
               type="file"
+              multiple
               accept="image/*,application/pdf"
               onChange={(event) => {
-                const nextFile = event.target.files?.[0] ?? null
-                setSelectedFile(nextFile)
+                const nextFiles = Array.from(event.target.files ?? [])
+                setSelectedFiles(nextFiles)
               }}
               className="block w-full rounded-md border border-[var(--color-admin-card-border)] p-2"
             />
+            {selectedFiles.length > 0 ? (
+              <p className="text-xs text-muted">{selectedFiles.length} file(s) geselecteerd</p>
+            ) : null}
           </label>
 
           <ProductionManagementSection
@@ -459,7 +476,10 @@ function PostersPageContent() {
                 <div className="flex flex-col grow p-3">
                   <div className="space-y-1">
                     <h3 className="line-clamp-2 text-base font-medium text-foreground">{poster.title}</h3>
-                    <p className="text-xs text-muted">{poster.production?.title ?? i18n.admin.posters.noProductionAssigned}</p>
+                    <p className="text-xs text-muted">
+                      {(poster.productions?.map((production) => production.title).join(' • ') || poster.production?.title) ?? i18n.admin.posters.noProductionAssigned}
+                    </p>
+                    <p className="text-xs text-muted">{poster.files?.length ?? 1} file(s)</p>
                     <p className="text-xs text-muted">{new Date(poster.created_at).toLocaleDateString(locale === 'en' ? 'en-GB' : 'nl-BE')}</p>
                   </div>
                   <div className="mt-auto pt-3">

@@ -124,14 +124,25 @@ export class PostersController {
                   }
               })
             : []
+        const files = Array.isArray(poster.files)
+            ? poster.files.map((file: { id: string; mime_type: string | null; original_filename: string | null; file_size_bytes: number | null }) => ({
+                  id: file.id,
+                  file_url: `${baseArchiveUrl}/posters/${file.id}/file`,
+                  mime_type: file.mime_type,
+                  original_filename: file.original_filename,
+                  file_size_bytes: file.file_size_bytes,
+              }))
+            : []
+        const primaryFile = files[0]
 
         return {
             id: poster.id,
             title: poster.title,
-            file_url: `${baseArchiveUrl}/posters/${poster.id}/file`,
-            mime_type: poster.mime_type,
-            original_filename: poster.original_filename,
-            file_size_bytes: poster.file_size_bytes,
+            file_url: primaryFile?.file_url ?? `${baseArchiveUrl}/posters/${poster.id}/file`,
+            mime_type: primaryFile?.mime_type ?? poster.mime_type,
+            original_filename: primaryFile?.original_filename ?? poster.original_filename,
+            file_size_bytes: primaryFile?.file_size_bytes ?? poster.file_size_bytes,
+            files,
             production: poster.production
                 ? {
                       id: poster.production.id,
@@ -143,7 +154,7 @@ export class PostersController {
             updated_at: poster.updated_at,
             links: {
                 self: `${baseArchiveUrl}/posters/${poster.id}`,
-                file: `${baseArchiveUrl}/posters/${poster.id}/file`,
+                file: primaryFile?.file_url ?? `${baseArchiveUrl}/posters/${poster.id}/file`,
                 production: poster.production ? `${baseArchiveUrl}/productions/${poster.production.id}` : null,
             },
         }
@@ -184,13 +195,13 @@ export class PostersController {
     }
 
     async createPoster(request: FastifyRequest<{ Body: CreatePosterInput }>, reply: FastifyReply) {
-        let storedFileName = ''
+        const storedFileNames: string[] = []
 
         try {
             const body = request.body
             const title = body.title.trim()
             const productionIds = body.production_ids.map((id: string) => id.trim()).filter(Boolean)
-            const fileName = body.file_name.trim()
+            const files = Array.isArray(body.files) ? body.files : []
 
             if (!title) {
                 return reply.status(400).send({ message: 'Poster title is required' })
@@ -200,31 +211,49 @@ export class PostersController {
                 return reply.status(400).send({ message: 'At least one production is required' })
             }
 
-            const fileBuffer = parseBase64Payload(body.file_base64)
-
-            // Derive MIME type from actual file bytes -- client-supplied mime_type is ignored
-            const detectedMimeType = detectMimeType(fileBuffer)
-            if (!detectedMimeType || !ALLOWED_UPLOAD_TYPES.has(detectedMimeType)) {
-                return reply.status(400).send({ message: 'Poster file must be an image (jpg, png, webp, gif) or a PDF' })
+            if (files.length === 0) {
+                return reply.status(400).send({ message: 'At least one poster file is required' })
             }
 
             const uploadDir = path.resolve(process.cwd(), env.POSTER_LOCATION)
             await mkdir(uploadDir, { recursive: true })
 
-            const originalName = fileName || 'poster-file'
-            const safeName = sanitizeFilename(originalName)
-            storedFileName = `${crypto.randomUUID()}-${safeName}`
-            const absoluteFilePath = path.join(uploadDir, storedFileName)
-            await writeFile(absoluteFilePath, fileBuffer)
+            const persistedFiles = [] as Array<{
+                file_path: string
+                mime_type: string
+                original_filename: string
+                file_size_bytes: number
+            }>
+
+            for (const file of files) {
+                const fileName = file.file_name.trim()
+                const fileBuffer = parseBase64Payload(file.file_base64)
+
+                // Derive MIME type from actual file bytes -- client-supplied mime_type is ignored
+                const detectedMimeType = detectMimeType(fileBuffer)
+                if (!detectedMimeType || !ALLOWED_UPLOAD_TYPES.has(detectedMimeType)) {
+                    return reply.status(400).send({ message: 'Poster file must be an image (jpg, png, webp, gif) or a PDF' })
+                }
+
+                const originalName = fileName || 'poster-file'
+                const safeName = sanitizeFilename(originalName)
+                const storedFileName = `${crypto.randomUUID()}-${safeName}`
+                const absoluteFilePath = path.join(uploadDir, storedFileName)
+                await writeFile(absoluteFilePath, fileBuffer)
+                storedFileNames.push(storedFileName)
+
+                persistedFiles.push({
+                    file_path: storedFileName,
+                    mime_type: detectedMimeType,
+                    original_filename: originalName,
+                    file_size_bytes: fileBuffer.length,
+                })
+            }
 
             const poster = await this.service.createPoster({
                 title,
                 production_ids: productionIds,
-                // Store relative filename for portability
-                file_path: storedFileName,
-                mime_type: detectedMimeType,
-                original_filename: originalName,
-                file_size_bytes: fileBuffer.length,
+                files: persistedFiles,
             })
 
             const archiveBaseUrl = this.getArchiveBaseUrl(request)
@@ -240,13 +269,14 @@ export class PostersController {
                     },
                 })
         } catch (error) {
-            if (storedFileName) {
-                await unlink(resolveStoredFilePath(storedFileName)).catch(() => undefined)
+            if (storedFileNames.length > 0) {
+                await Promise.all(storedFileNames.map((storedFileName) => unlink(resolveStoredFilePath(storedFileName)).catch(() => undefined)))
             }
 
             if (error instanceof Error) {
                 const knownValidationError = [
                     'Poster title is required',
+                    'At least one poster file is required',
                     'Poster file must be an image (jpg, png, webp, gif) or a PDF',
                     'Poster file is too large',
                     'Poster file payload is invalid',
@@ -287,7 +317,9 @@ export class PostersController {
     async deletePoster(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
         try {
             const poster = await this.service.deletePoster(request.params.id)
-            await unlink(resolveStoredFilePath(poster.file_path)).catch(() => undefined)
+            await Promise.all(
+                (poster.files ?? []).map((file: { file_path: string }) => unlink(resolveStoredFilePath(file.file_path)).catch(() => undefined)),
+            )
             return reply.status(204).send()
         } catch (error) {
             if (error instanceof Error && error.message.includes('Record to delete does not exist')) {
@@ -299,12 +331,12 @@ export class PostersController {
     }
 
     async getPosterFile(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
-        const poster = await this.service.getPoster(request.params.id)
-        if (!poster) {
+        const posterFile = await this.service.getPosterFile(request.params.id)
+        if (!posterFile) {
             return reply.status(404).send({ message: 'Poster not found' })
         }
 
-        const absolutePath = resolveStoredFilePath(poster.file_path)
+        const absolutePath = resolveStoredFilePath(posterFile.file_path)
 
         try {
             await stat(absolutePath)
@@ -312,8 +344,8 @@ export class PostersController {
             return reply.status(404).send({ message: 'Poster file not found' })
         }
 
-        if (poster.mime_type) {
-            reply.type(poster.mime_type)
+        if (posterFile.mime_type) {
+            reply.type(posterFile.mime_type)
         }
 
         return reply.send(createReadStream(absolutePath))

@@ -13,7 +13,6 @@ type SearchEntry = SearchResultItem & {
     genre: string
     location: string
     type: 'production' | 'blog' | 'poster'
-    posterProductionId?: string
 }
 
 const DEFAULT_PAGE_SIZE = 12
@@ -111,6 +110,11 @@ type PosterApiItem = {
     title: string
     file_url: string
     mime_type: string | null
+    files?: Array<{
+        id: string
+        file_url: string
+        mime_type: string | null
+    }>
     created_at: string
     production: {
         id: string
@@ -299,6 +303,12 @@ function mapPosterToSearchEntry(item: PosterApiItem, locale: Locale): SearchEntr
     const productionTitle = productionTitles.length > 0
         ? productionTitles.join(' • ')
         : searchMessages.fallbackVenue
+    const posterFiles = Array.isArray(item.files) ? item.files : []
+    const previewUrls = posterFiles
+        .filter((file) => file.mime_type !== 'application/pdf')
+        .map((file) => normalizeApiAssetUrl(file.file_url))
+        .filter((url): url is string => Boolean(url))
+        .slice(0, 3)
 
     return {
         id: item.id,
@@ -309,7 +319,8 @@ function mapPosterToSearchEntry(item: PosterApiItem, locale: Locale): SearchEntr
         venue: productionTitle,
         imageUrl: normalizeApiAssetUrl(item.file_url),
         mimeType: item.mime_type,
-        posterProductionId: productionEntries[0]?.id,
+        relatedAssetCount: posterFiles.length > 0 ? posterFiles.length : undefined,
+        relatedAssetPreviewUrls: previewUrls.length > 0 ? previewUrls : undefined,
         year: new Date(item.created_at).getFullYear() || MIN_PERIOD_YEAR,
         genre: '',
         location: '',
@@ -1428,71 +1439,24 @@ function SearchPage() {
     }
 
     const currentPage = Math.min(page, totalPages)
-    const posterGroupMeta = useMemo(() => {
-        const groups = new Map<string, { count: number; previewUrls: string[] }>()
-
-        for (const entry of apiEntries) {
-            if (entry.type !== 'poster' || !entry.posterProductionId) {
-                continue
-            }
-
-            const current = groups.get(entry.posterProductionId) ?? { count: 0, previewUrls: [] }
-            current.count += 1
-
-            if (entry.imageUrl && current.previewUrls.length < 3) {
-                current.previewUrls.push(entry.imageUrl)
-            }
-
-            groups.set(entry.posterProductionId, current)
-        }
-
-        return groups
-    }, [apiEntries])
-
     const pageItems = useMemo(() => {
         if (!apiEntries) return []
-        const isPostersTab = tab === 'posters'
         const mapped = apiEntries
             .map(item => {
                 const detail = fetchedDetails[item.id]
                 const fetchedTaxonomy = fetchedTaxonomies[item.id]
-                // In the dedicated posters tab each poster is shown individually — no grouping metadata
-                const groupMeta = !isPostersTab && item.type === 'poster' && item.posterProductionId
-                    ? posterGroupMeta.get(item.posterProductionId)
-                    : undefined
                 return {
                     ...item,
                     imageUrl: fetchedImages[item.id] || item.imageUrl,
                     date: detail?.date !== undefined && detail.date !== '' ? detail.date : item.date,
                     venue: detail?.venue !== undefined && detail.venue !== '' ? detail.venue : item.venue,
                     tag: fetchedTaxonomy !== undefined && fetchedTaxonomy !== '' ? fetchedTaxonomy : item.tag,
-                    relatedAssetCount: groupMeta?.count,
-                    relatedAssetPreviewUrls: groupMeta?.previewUrls,
                 }
             })
             .filter(item => fetchedDetails[item.id]?.date !== '')
 
-        // In the "all" tab, group posters by production and show only one card per production.
-        // In the dedicated "posters" tab every poster is shown as its own card.
-        if (isPostersTab) {
-            return mapped
-        }
-
-        const seenPosterProductions = new Set<string>()
-
-        return mapped.filter((item) => {
-            if (item.type !== 'poster' || !item.posterProductionId) {
-                return true
-            }
-
-            if (seenPosterProductions.has(item.posterProductionId)) {
-                return false
-            }
-
-            seenPosterProductions.add(item.posterProductionId)
-            return true
-        })
-    }, [apiEntries, fetchedImages, fetchedDetails, fetchedTaxonomies, posterGroupMeta, tab])
+        return mapped
+    }, [apiEntries, fetchedImages, fetchedDetails, fetchedTaxonomies])
 
     // Compacte paginering: 1,2,3,...,laatste
     function getCompactPageLabels(current: number, total: number): string[] {
@@ -1875,10 +1839,7 @@ function SearchPage() {
                                             detailHref: item.type === 'blog'
                                                 ? withLocalePath('/blogs/' + item.id, locale)
                                                 : item.type === 'poster'
-                                                    ? withLocalePath(
-                                                        `/posters/${item.id}${item.posterProductionId ? `?productionId=${encodeURIComponent(item.posterProductionId)}` : ''}`,
-                                                        locale,
-                                                    )
+                                                    ? withLocalePath(`/posters/${item.id}`, locale)
                                                 : withLocalePath('/archive/' + item.id, locale),
                                         }}
                                     />
