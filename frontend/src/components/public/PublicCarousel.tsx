@@ -340,7 +340,7 @@ function PublicCarousel() {
                             {carouselItems.map((item, index) => (
                                 <div
                                     key={item.id}
-                                    className={`flex w-[280px] shrink-0 snap-start border border-border bg-surface p-4 transition-transform duration-300 hover:rotate-0 hover:shadow-lg sm:w-[310px] ${index % 2 === 0 ? '-rotate-3' : 'rotate-3'}`}
+                                    className={`relative flex flex-col w-[280px] shrink-0 snap-start border border-border bg-surface p-4 transition-transform duration-300 hover:rotate-0 hover:shadow-lg sm:w-[310px] ${index % 2 === 0 ? '-rotate-3' : 'rotate-3'}`}
                                 >
                                     <SearchResultCard item={{ ...item, detailHref: withLocalePath(`/archive/${item.id}`, locale) }} />
                                 </div>
