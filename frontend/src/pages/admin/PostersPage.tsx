@@ -3,6 +3,7 @@ import AdminLayout from '../../components/admin/AdminLayout'
 import { apiFetch, normalizeApiAssetUrl } from '../../api/client'
 import ProductionManagementSection, { type ProductionItem as ManagedProductionItem } from '../../components/admin/blogs/ProductionManagementSection'
 import { useAdminMessages } from '../../components/admin/AdminMessagesContext'
+import { getActiveLocale } from '../../i18n'
 
 type LocalizedText = {
   nl?: string
@@ -74,6 +75,7 @@ function getPdfPreviewUrl(fileUrl: string): string {
 
 function PostersPageContent() {
   const i18n = useAdminMessages()
+  const locale = getActiveLocale(window.location.pathname)
   const [posters, setPosters] = useState<PosterItem[]>([])
   const [productions, setProductions] = useState<ProductionItem[]>([])
   const [title, setTitle] = useState('')
@@ -458,7 +460,7 @@ function PostersPageContent() {
                   <div className="space-y-1">
                     <h3 className="line-clamp-2 text-base font-medium text-foreground">{poster.title}</h3>
                     <p className="text-xs text-muted">{poster.production?.title ?? i18n.admin.posters.noProductionAssigned}</p>
-                    <p className="text-xs text-muted">{new Date(poster.created_at).toLocaleDateString('nl-BE')}</p>
+                    <p className="text-xs text-muted">{new Date(poster.created_at).toLocaleDateString(locale === 'en' ? 'en-GB' : 'nl-BE')}</p>
                   </div>
                   <div className="mt-auto pt-3">
                     <button
