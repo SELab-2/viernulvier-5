@@ -32,10 +32,13 @@ function parseBase64Payload(fileBase64: string): Buffer {
 
 /**
  * Detects the MIME type of a file by inspecting its magic bytes.
- * Returns null when the signature does not match any allowed type.
+ * Supported formats: JPEG (FF D8 FF), PNG (89 50 4E 47), GIF (47 49 46 38),
+ * PDF (25 50 44 46), WebP (RIFF....WEBP).
+ * Returns null when the signature does not match any supported type.
  */
 function detectMimeType(buffer: Buffer): string | null {
-    if (buffer.length < 4) return null
+    // WebP detection requires at least 12 bytes; use that as the minimum
+    if (buffer.length < 12) return null
 
     // JPEG: FF D8 FF
     if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
@@ -74,7 +77,6 @@ function detectMimeType(buffer: Buffer): string | null {
 
     // WebP: RIFF????WEBP — bytes 0-3 "RIFF", bytes 8-11 "WEBP"
     if (
-        buffer.length >= 12 &&
         buffer[0] === 0x52 &&
         buffer[1] === 0x49 &&
         buffer[2] === 0x46 &&
@@ -200,7 +202,7 @@ export class PostersController {
 
             const fileBuffer = parseBase64Payload(body.file_base64)
 
-            // Derive MIME type from actual file bytes — reject client-supplied value
+            // Derive MIME type from actual file bytes -- client-supplied mime_type is ignored
             const detectedMimeType = detectMimeType(fileBuffer)
             if (!detectedMimeType || !ALLOWED_UPLOAD_TYPES.has(detectedMimeType)) {
                 return reply.status(400).send({ message: 'Poster file must be an image (jpg, png, webp, gif) or a PDF' })
@@ -218,7 +220,7 @@ export class PostersController {
             const poster = await this.service.createPoster({
                 title,
                 production_ids: productionIds,
-                // Store only the relative filename so the DB is not tied to an absolute path
+                // Store relative filename for portability
                 file_path: storedFileName,
                 mime_type: detectedMimeType,
                 original_filename: originalName,
