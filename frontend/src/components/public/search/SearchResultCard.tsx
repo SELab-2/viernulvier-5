@@ -69,18 +69,22 @@ function getStampInfo(dateStr: string): { kind: 'days' | 'months' | 'years'; cou
     return { kind: 'years', count: Math.max(1, years) }
 }
 
-const STAMP_IMG_SRC = {
-    days: '/dagen%20leeg.svg',
-    months: '/maand%20leeg.svg',
-    years: '/Jaar%20leeg.svg',
+function getStampSrc(kind: 'days' | 'months' | 'years', count: number, stampMessages: Record<string, { singular: string; plural: string }>): string {
+    // Get SVG path from message configuration
+    // This supports language-specific SVG assets for future multi-language support
+    const isSingular = count === 1
+    const paths = stampMessages[kind]
+    return isSingular ? paths.singular : paths.plural
 }
 
-function ProductionStamp({ dateStr }: { dateStr: string }) {
+function ProductionStamp({ dateStr, stampMessages }: { dateStr: string; stampMessages: Record<string, { singular: string; plural: string }> }) {
     const info = getStampInfo(dateStr)
     if (!info) return null
+    const stampSrc = getStampSrc(info.kind, info.count, stampMessages)
+
     return (
         <div className="absolute -top-6 -right-6 z-10 h-22 w-22 select-none rounded-full bg-surface-sunken rotate-12" aria-hidden="true">
-            <img src={STAMP_IMG_SRC[info.kind]} alt="" className="h-full w-full brightness-50" />
+            <img src={stampSrc} alt="" className="h-full w-full brightness-50" />
             <span className="absolute inset-0 flex items-center justify-center text-xl font-bold leading-none text-black">
                 {info.count}
             </span>
@@ -100,7 +104,7 @@ function SearchResultCard({ item }: SearchResultCardProps) {
 
     const card = (
         <article className="relative flex h-full w-full flex-col border-b border-border pb-5">
-            {item.type === 'production' ? <ProductionStamp dateStr={item.date} /> : null}
+            {item.type === 'production' ? <ProductionStamp dateStr={item.date} stampMessages={searchMessages.stampSvgPaths} /> : null}
             <div className="relative h-32 overflow-hidden rounded-md sm:h-36 bg-gradient-to-br from-accent to-accent/50">
                 {isPdf ? (
                     <iframe

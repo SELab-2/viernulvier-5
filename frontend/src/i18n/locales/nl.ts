@@ -122,6 +122,20 @@ const nl: Messages = {
     paginationPrevious: '<',
     paginationNext: '>',
     relatedFilesCount: (count: number) => `${count} ${count === 1 ? 'bestand' : 'bestanden'}`,
+    stampSvgPaths: {
+      days: {
+        singular: '/dag%20leeg.svg',
+        plural: '/dagen%20leeg.svg',
+      },
+      months: {
+        singular: '/maand%20leeg.svg',
+        plural: '/maanden%20leeg.svg',
+      },
+      years: {
+        singular: '/Jaar%20leeg.svg',
+        plural: '/Jaar%20leeg.svg',
+      },
+    },
   },
   auth: {
     localeToggleLabel: 'Wissel taal',
