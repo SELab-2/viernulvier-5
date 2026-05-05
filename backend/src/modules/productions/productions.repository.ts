@@ -340,15 +340,6 @@ export class ProductionsRepository {
                     other_files: {
                         orderBy: { created_at: 'desc' as const },
                     },
-                    items: {
-                        take: 10,
-                        orderBy: { created_at: 'asc' as const },
-                        include: {
-                            crops: {
-                                orderBy: { created_at: 'asc' as const },
-                            },
-                        },
-                    },
                 },
             },
             media_gallery: {
