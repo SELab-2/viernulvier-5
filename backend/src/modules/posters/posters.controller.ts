@@ -30,6 +30,77 @@ function parseBase64Payload(fileBase64: string): Buffer {
     return buffer
 }
 
+/**
+ * Detects the MIME type of a file by inspecting its magic bytes.
+ * Returns null when the signature does not match any allowed type.
+ */
+function detectMimeType(buffer: Buffer): string | null {
+    if (buffer.length < 4) return null
+
+    // JPEG: FF D8 FF
+    if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
+        return 'image/jpeg'
+    }
+
+    // PNG: 89 50 4E 47 0D 0A 1A 0A
+    if (
+        buffer[0] === 0x89 &&
+        buffer[1] === 0x50 &&
+        buffer[2] === 0x4e &&
+        buffer[3] === 0x47
+    ) {
+        return 'image/png'
+    }
+
+    // GIF: 47 49 46 38 ("GIF8")
+    if (
+        buffer[0] === 0x47 &&
+        buffer[1] === 0x49 &&
+        buffer[2] === 0x46 &&
+        buffer[3] === 0x38
+    ) {
+        return 'image/gif'
+    }
+
+    // PDF: 25 50 44 46 ("%PDF")
+    if (
+        buffer[0] === 0x25 &&
+        buffer[1] === 0x50 &&
+        buffer[2] === 0x44 &&
+        buffer[3] === 0x46
+    ) {
+        return 'application/pdf'
+    }
+
+    // WebP: RIFF????WEBP — bytes 0-3 "RIFF", bytes 8-11 "WEBP"
+    if (
+        buffer.length >= 12 &&
+        buffer[0] === 0x52 &&
+        buffer[1] === 0x49 &&
+        buffer[2] === 0x46 &&
+        buffer[3] === 0x46 &&
+        buffer[8] === 0x57 &&
+        buffer[9] === 0x45 &&
+        buffer[10] === 0x42 &&
+        buffer[11] === 0x50
+    ) {
+        return 'image/webp'
+    }
+
+    return null
+}
+
+/**
+ * Returns the absolute path for a poster file given its stored name.
+ * If the stored name is already an absolute path (legacy data), it is returned as-is.
+ */
+function resolveStoredFilePath(storedName: string): string {
+    if (path.isAbsolute(storedName)) {
+        return storedName
+    }
+    return path.join(path.resolve(process.cwd(), env.POSTER_LOCATION), storedName)
+}
+
 export class PostersController {
     constructor(private readonly service: PostersService) {}
 
@@ -111,13 +182,12 @@ export class PostersController {
     }
 
     async createPoster(request: FastifyRequest<{ Body: CreatePosterInput }>, reply: FastifyReply) {
-        let filePath = ''
+        let storedFileName = ''
 
         try {
             const body = request.body
             const title = body.title.trim()
             const productionIds = body.production_ids.map((id: string) => id.trim()).filter(Boolean)
-            const mimeType = body.mime_type.trim().toLowerCase()
             const fileName = body.file_name.trim()
 
             if (!title) {
@@ -128,25 +198,29 @@ export class PostersController {
                 return reply.status(400).send({ message: 'At least one production is required' })
             }
 
-            if (!ALLOWED_UPLOAD_TYPES.has(mimeType)) {
+            const fileBuffer = parseBase64Payload(body.file_base64)
+
+            // Derive MIME type from actual file bytes — reject client-supplied value
+            const detectedMimeType = detectMimeType(fileBuffer)
+            if (!detectedMimeType || !ALLOWED_UPLOAD_TYPES.has(detectedMimeType)) {
                 return reply.status(400).send({ message: 'Poster file must be an image (jpg, png, webp, gif) or a PDF' })
             }
 
-            const fileBuffer = parseBase64Payload(body.file_base64)
             const uploadDir = path.resolve(process.cwd(), env.POSTER_LOCATION)
             await mkdir(uploadDir, { recursive: true })
 
             const originalName = fileName || 'poster-file'
             const safeName = sanitizeFilename(originalName)
-            const generatedName = `${crypto.randomUUID()}-${safeName}`
-            filePath = path.join(uploadDir, generatedName)
-            await writeFile(filePath, fileBuffer)
+            storedFileName = `${crypto.randomUUID()}-${safeName}`
+            const absoluteFilePath = path.join(uploadDir, storedFileName)
+            await writeFile(absoluteFilePath, fileBuffer)
 
             const poster = await this.service.createPoster({
                 title,
                 production_ids: productionIds,
-                file_path: filePath,
-                mime_type: mimeType,
+                // Store only the relative filename so the DB is not tied to an absolute path
+                file_path: storedFileName,
+                mime_type: detectedMimeType,
                 original_filename: originalName,
                 file_size_bytes: fileBuffer.length,
             })
@@ -164,8 +238,8 @@ export class PostersController {
                     },
                 })
         } catch (error) {
-            if (filePath) {
-                await unlink(filePath).catch(() => undefined)
+            if (storedFileName) {
+                await unlink(resolveStoredFilePath(storedFileName)).catch(() => undefined)
             }
 
             if (error instanceof Error) {
@@ -211,7 +285,7 @@ export class PostersController {
     async deletePoster(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
         try {
             const poster = await this.service.deletePoster(request.params.id)
-            await unlink(poster.file_path).catch(() => undefined)
+            await unlink(resolveStoredFilePath(poster.file_path)).catch(() => undefined)
             return reply.status(204).send()
         } catch (error) {
             if (error instanceof Error && error.message.includes('Record to delete does not exist')) {
@@ -228,8 +302,10 @@ export class PostersController {
             return reply.status(404).send({ message: 'Poster not found' })
         }
 
+        const absolutePath = resolveStoredFilePath(poster.file_path)
+
         try {
-            await stat(poster.file_path)
+            await stat(absolutePath)
         } catch {
             return reply.status(404).send({ message: 'Poster file not found' })
         }
@@ -238,6 +314,6 @@ export class PostersController {
             reply.type(poster.mime_type)
         }
 
-        return reply.send(createReadStream(poster.file_path))
+        return reply.send(createReadStream(absolutePath))
     }
 }
