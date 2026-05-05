@@ -49,7 +49,7 @@ function SearchResultCard({ item }: SearchResultCardProps) {
                     <iframe
                         src={getPdfPreviewUrl(imageUrl)}
                         title={`${item.title} PDF preview`}
-                        className="absolute inset-0 h-full w-full border-0"
+                        className="absolute inset-0 h-full w-full border-0 pointer-events-none"
                         loading="lazy"
                     />
                 ) : (

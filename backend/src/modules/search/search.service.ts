@@ -32,6 +32,12 @@ export class SearchService {
         // Blogs and posters don't have genres/locations, so exclude them when these filters are active
         const hasGenreOrLocationFilter = (genres && genres.length > 0) || (locations && locations.length > 0)
 
+        // Get total count of matching posters first, then fetch all of them
+        const postersPreviewOptions = { search, yearFrom, yearTo, page: 1, limit: 1, sort: 'recent' as const, lang: lang ?? 'nl' }
+        const postersPreview = !hasGenreOrLocationFilter
+            ? await this.postersService.getPosters(postersPreviewOptions)
+            : { total: 0 }
+
         const [blogResults, prodResults, posterResults] = await Promise.all([
             !hasGenreOrLocationFilter
                 ? this.searchRepository.findAllBlogs({ search, yearFrom, yearTo })
@@ -39,9 +45,9 @@ export class SearchService {
             prodsPreview.total > 0
                 ? this.productionsService.getProductions({ ...commonProductionOptions, page: 1, limit: prodsPreview.total })
                 : Promise.resolve({ items: [], total: 0, page: 1, limit: 1, totalPages: 0 }),
-            !hasGenreOrLocationFilter
-                ? this.postersService.getPosters({ search, yearFrom, yearTo, page: 1, limit: 1000, sort: 'recent', lang: lang ?? 'nl' })
-                : Promise.resolve({ items: [], total: 0, page: 1, limit: 100, totalPages: 0 }),
+            postersPreview.total > 0
+                ? this.postersService.getPosters({ search, yearFrom, yearTo, page: 1, limit: postersPreview.total, sort: 'recent', lang: lang ?? 'nl' })
+                : Promise.resolve({ items: [], total: 0, page: 1, limit: 1, totalPages: 0 }),
         ])
 
         // --- map to a common shape ---

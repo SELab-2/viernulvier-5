@@ -1451,11 +1451,13 @@ function SearchPage() {
 
     const pageItems = useMemo(() => {
         if (!apiEntries) return []
+        const isPostersTab = tab === 'posters'
         const mapped = apiEntries
             .map(item => {
                 const detail = fetchedDetails[item.id]
                 const fetchedTaxonomy = fetchedTaxonomies[item.id]
-                const groupMeta = item.type === 'poster' && item.posterProductionId
+                // In the dedicated posters tab each poster is shown individually — no grouping metadata
+                const groupMeta = !isPostersTab && item.type === 'poster' && item.posterProductionId
                     ? posterGroupMeta.get(item.posterProductionId)
                     : undefined
                 return {
@@ -1469,6 +1471,12 @@ function SearchPage() {
                 }
             })
             .filter(item => fetchedDetails[item.id]?.date !== '')
+
+        // In the "all" tab, group posters by production and show only one card per production.
+        // In the dedicated "posters" tab every poster is shown as its own card.
+        if (isPostersTab) {
+            return mapped
+        }
 
         const seenPosterProductions = new Set<string>()
 
@@ -1484,7 +1492,7 @@ function SearchPage() {
             seenPosterProductions.add(item.posterProductionId)
             return true
         })
-    }, [apiEntries, fetchedImages, fetchedDetails, fetchedTaxonomies, posterGroupMeta])
+    }, [apiEntries, fetchedImages, fetchedDetails, fetchedTaxonomies, posterGroupMeta, tab])
 
     // Compacte paginering: 1,2,3,...,laatste
     function getCompactPageLabels(current: number, total: number): string[] {
