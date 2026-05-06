@@ -38,7 +38,7 @@ export function BlogsTable({
 
     const headings = [
         d.tableColTitle,
-        b?.tableColLinkedProductions ?? 'Gekoppelde producties',
+        b?.tableColLinkedProductions,
         ...(hasLanguageColumn ? [d.tableColLanguage] : []),
         d.tableColDate,
         d.tableColActions,
