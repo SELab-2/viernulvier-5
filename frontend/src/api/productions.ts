@@ -56,6 +56,36 @@ export const productionSchema = z.object({
  */
 export type Production = z.infer<typeof productionSchema>
 
+export type ProductionListItem = {
+    id: string
+    apiId: string | null
+    title: {
+        nl?: string
+        en?: string
+        fr?: string
+    } | null
+    description_short: {
+        nl?: string
+        en?: string
+        fr?: string
+    } | null
+    teaser: {
+        nl?: string
+        en?: string
+        fr?: string
+    } | null
+    description: {
+        nl?: string
+        en?: string
+        fr?: string
+    } | null
+    created_at: string
+}
+
+type PaginatedResponse<T> = {
+    data: T[]
+}
+
 
 type ProductionResponse = {
     data: Production
@@ -66,4 +96,15 @@ type ProductionResponse = {
 
 export const getProductionById = (id: string) => {
     return api.get<ProductionResponse>(`/archive/productions/${id}`)
+}
+
+export const getRecentProductions = (locale: 'nl' | 'en', limit = 4) => {
+    const params = new URLSearchParams({
+        page: '1',
+        limit: String(limit),
+        sort: 'recent',
+        lang: locale,
+    })
+
+    return api.get<PaginatedResponse<ProductionListItem>>(`/archive/productions?${params.toString()}`)
 }

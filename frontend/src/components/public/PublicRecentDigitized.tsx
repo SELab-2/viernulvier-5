@@ -10,12 +10,22 @@ function RightChevronIcon({ className }: { className: string }) {
     )
 }
 
+type RecentDigitizedItem = {
+    id: string
+    dateLabel: string
+    archiveLabel?: string
+    title: string
+    description: string
+}
+
 type PublicRecentDigitizedProps = {
-    onViewItem: (index: number) => void
+    items: RecentDigitizedItem[]
+    onViewItem: (id: string) => void
     onViewAll: () => void
 }
 
 function PublicRecentDigitized({
+    items,
     onViewItem,
     onViewAll,
 }: PublicRecentDigitizedProps) {
@@ -26,20 +36,20 @@ function PublicRecentDigitized({
             <SectionTitle title={messages.home.recentDigitizedHeading} />
 
             <div className="mt-6">
-                {messages.home.recentDigitizedItems.map((item, index) => (
+                {items.map((item) => (
                     <article
-                        key={`${item.title}-${index}`}
+                        key={item.id}
                         className="grid grid-cols-[1fr_auto] items-center gap-x-4 border-t border-foreground/25 py-7"
                     >
                         <div className="grid gap-4 pr-2 md:grid-cols-[160px_1fr] md:items-center md:gap-6">
                             <div>
                                 <p className="text-sm font-semibold uppercase tracking-wide text-foreground">{item.dateLabel}</p>
-                                <p className="mt-1 text-sm text-text-accent hidden md:block">{item.archiveLabel}</p>
+                                {item.archiveLabel ? <p className="mt-1 text-sm text-text-accent hidden md:block">{item.archiveLabel}</p> : null}
                             </div>
 
                             <div>
                                 <h3 className="text-2xl font-medium leading-tight text-foreground">{item.title}</h3>
-                                <p className="mt-3 text-base leading-relaxed text-text-accent">{item.description}</p>
+                                <p className="mt-3 overflow-hidden text-base leading-relaxed text-text-accent [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">{item.description}</p>
                             </div>
                         </div>
 
@@ -47,7 +57,7 @@ function PublicRecentDigitized({
                             <button
                                 type="button"
                                 aria-label={`${messages.home.recentDigitizedViewItem}: ${item.title}`}
-                                onClick={() => onViewItem(index)}
+                                onClick={() => onViewItem(item.id)}
                                 className="inline-flex h-10 w-10 items-center justify-center text-accent transition hover:text-foreground md:hidden"
                             >
                                 <RightChevronIcon className="h-8 w-8" />
@@ -55,7 +65,7 @@ function PublicRecentDigitized({
                             <div className="hidden md:block">
                                 <PublicPillButton
                                     label={messages.home.recentDigitizedViewItem}
-                                    onClick={() => onViewItem(index)}
+                                    onClick={() => onViewItem(item.id)}
                                     className="min-w-28"
                                 />
                             </div>
