@@ -8,6 +8,8 @@ import PublicCarousel from '../../components/public/PublicCarousel'
 import PublicLatestBlogPreview from '../../components/public/PublicLatestBlogPreview'
 import PublicRecentDigitized from '../../components/public/PublicRecentDigitized'
 import { getRecentProductions } from '../../api/productions'
+import { getLatestBlog } from '../../api/blogs'
+import { getLocalizedTitle, getLocalizedContent, normalizeContent } from './blogDetailPage.formatters'
 
 type LocalizedText = {
     nl?: string
@@ -80,6 +82,7 @@ function HomePage() {
     const navigate = useNavigate()
     const [searchParams] = useSearchParams()
     const locale = getActiveLocale(window.location.pathname)
+    const [latestBlog, setLatestBlog] = useState<{ id: string; title: string; excerpt: string } | null>(null)
     const [recentItems, setRecentItems] = useState<Array<{
         id: string
         dateLabel: string
@@ -121,6 +124,46 @@ function HomePage() {
         const searchPath = withLocalePath('/zoeken', locale)
         navigate(queryString ? `${searchPath}?${queryString}` : searchPath)
     }
+
+    useEffect(() => {
+        let canceled = false
+
+        const loadLatestBlog = async () => {
+            try {
+                const response = await getLatestBlog(locale)
+                const item = response.data[0]
+
+                if (!item || canceled) {
+                    return
+                }
+
+                const title = getLocalizedTitle(item.title, locale)
+                const localizedContent = getLocalizedContent(item.content, locale)
+                const delta = normalizeContent(localizedContent)
+                const excerptRaw = delta
+                    ? delta.ops
+                        .map((op) => (typeof op.insert === 'string' ? op.insert : ''))
+                        .join('')
+                        .replace(/\s+/g, ' ')
+                        .trim()
+                    : toPlainText(typeof localizedContent === 'string' ? localizedContent : '')
+
+                const excerpt = excerptRaw.length > 320 ? `${excerptRaw.slice(0, 317)}...` : excerptRaw
+
+                setLatestBlog({ id: item.id, title: title || (locale === 'nl' ? 'Zonder titel' : 'Untitled'), excerpt })
+            } catch {
+                if (!canceled) {
+                    setLatestBlog(null)
+                }
+            }
+        }
+
+        void loadLatestBlog()
+
+        return () => {
+            canceled = true
+        }
+    }, [locale])
 
     const handlePopularTagClick = (tag: string) => {
         const params = new URLSearchParams()
@@ -186,7 +229,11 @@ function HomePage() {
             />
             <PublicPopularTags onTagClick={handlePopularTagClick} />
             <PublicCarousel />
-            <PublicLatestBlogPreview />
+            <PublicLatestBlogPreview
+                blog={latestBlog}
+                onReadMore={(id) => navigate(withLocalePath(`/blogs/${id}`, locale))}
+                onViewAll={() => navigate(withLocalePath('/zoeken', locale))}
+            />
             <PublicRecentDigitized
                 items={recentItems}
                 onViewItem={handleRecentDigitizedItemClick}
