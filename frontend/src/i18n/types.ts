@@ -37,21 +37,11 @@ export type Messages = {
     popularTags: string[]
     latestBlogHeading: string
     latestBlogSubheading: string
-    latestBlogTitle: string
-    latestBlogParagraphOne: string
-    latestBlogParagraphTwoTitle: string
-    latestBlogParagraphTwo: string
     latestBlogReadMore: string
     latestBlogViewAll: string
     recentDigitizedHeading: string
     recentDigitizedViewItem: string
     recentDigitizedViewAll: string
-    recentDigitizedItems: Array<{
-      dateLabel: string
-      archiveLabel: string
-      title: string
-      description: string
-    }>
   }
   search: {
     heading: string
