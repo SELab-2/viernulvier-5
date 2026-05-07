@@ -78,7 +78,7 @@ describe('BlogDetailPage', () => {
     )
 
     expect(await screen.findByText('English title')).toBeInTheDocument()
-    expect(screen.getByText('English content')).toBeInTheDocument()
+    expect(await screen.findByText('English content')).toBeInTheDocument()
     expect(screen.queryByText(messages.blogs.languageError)).not.toBeInTheDocument()
     expect(screen.queryByText('Gerelateerde producties')).not.toBeInTheDocument()
   })

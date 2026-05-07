@@ -34,6 +34,7 @@ export type Messages = {
     onThisDayFallbackSubheading: string
     popularTagsLabel: string
     popularTagsMore: string
+    popularTagsLess: string
     popularTags: string[]
     latestBlogHeading: string
     latestBlogSubheading: string
