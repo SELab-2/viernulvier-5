@@ -120,6 +120,21 @@ const en: Messages = {
     resetFiltersLabel: 'reset filters',
     paginationPrevious: '<',
     paginationNext: '>',
+    relatedFilesCount: (count: number) => `${count} ${count === 1 ? 'file' : 'files'}`,
+    stampSvgPaths: {
+      days: {
+        singular: '/DAY.svg',
+        plural: '/DAYS.svg',
+      },
+      months: {
+        singular: '/MONTH.svg',
+        plural: '/MONTHS.svg',
+      },
+      years: {
+        singular: '/YEAR.svg',
+        plural: '/YEARS.svg',
+      },
+    },
   },
   auth: {
     localeToggleLabel: 'Switch language',
