@@ -9,40 +9,9 @@ import PublicLatestBlogPreview from '../../components/public/PublicLatestBlogPre
 import PublicRecentDigitized from '../../components/public/PublicRecentDigitized'
 import { getRecentProductions } from '../../api/productions'
 import { getLatestBlog } from '../../api/blogs'
+import { getLocalizedText } from '../../utils/localize'
+import { toPlainText } from '../../utils/text'
 import { getLocalizedTitle, getLocalizedContent, normalizeContent } from './blogDetailPage.formatters'
-
-type LocalizedText = {
-    nl?: string
-    en?: string
-    fr?: string
-} | null
-
-function getLocalizedText(text: LocalizedText, locale: 'nl' | 'en'): string {
-    if (!text) {
-        return ''
-    }
-
-    const values = locale === 'en' ? [text.en, text.nl, text.fr] : [text.nl, text.en, text.fr]
-    return values.find((value) => typeof value === 'string' && value.trim().length > 0)?.trim() ?? ''
-}
-
-function toPlainText(value: string): string {
-    const trimmed = value.trim()
-    if (!trimmed) {
-        return ''
-    }
-
-    return trimmed
-        .replace(/<[^>]*>/g, ' ')
-        .replace(/&nbsp;/gi, ' ')
-        .replace(/&amp;/gi, '&')
-        .replace(/&quot;/gi, '"')
-        .replace(/&#39;|&apos;/gi, "'")
-        .replace(/&lt;/gi, '<')
-        .replace(/&gt;/gi, '>')
-        .replace(/\s+/g, ' ')
-        .trim()
-}
 
 function formatArchiveDate(value: string, locale: 'nl' | 'en'): string {
     const parsedDate = new Date(value)
