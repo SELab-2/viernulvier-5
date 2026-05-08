@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent, within } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import SearchPage from '../../../pages/public/SearchPage'
 
@@ -640,17 +640,20 @@ describe('SearchPage FilterPanel interactions', () => {
 
         await screen.findByText('Geen resultaten gevonden.')
 
-        // Inside FilterPanel, selected locations are shown as chip buttons with the location label
-        const locationChips = await screen.findAllByRole('button', {
-            name: (name) => name.includes('balzaal'),
-        })
-        expect(locationChips.length).toBeGreaterThan(0)
+        const locationInput = screen.getAllByPlaceholderText('Zoek op halnaam en voeg toe...')[0]
+        const filterPanel = locationInput.closest('aside')
+        expect(filterPanel).not.toBeNull()
 
-        const callsBefore = apiFetchMock.mock.calls.length
-        fireEvent.click(locationChips[0])
+        const locationChip = within(filterPanel as HTMLElement).getByRole('button', { name: /balzaal/i })
+        fireEvent.click(locationChip)
 
         await waitFor(() => {
-            expect(apiFetchMock.mock.calls.length).toBeGreaterThan(callsBefore)
+            const productionCalls = apiFetchMock.mock.calls.filter(
+                ([endpoint]) =>
+                    typeof endpoint === 'string' && endpoint.startsWith('/archive/productions?'),
+            )
+            const latestEndpoint = String(productionCalls[productionCalls.length - 1]?.[0] ?? '')
+            expect(latestEndpoint).not.toContain('locations=balzaal')
         })
     })
 })
