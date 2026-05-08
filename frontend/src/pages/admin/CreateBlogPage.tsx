@@ -534,7 +534,7 @@ function CreateBlogPage() {
                             type="button"
                             onClick={publish}
                             disabled={isSaving || isLoadingBlog || isDeleting}
-                            className="text-sm text-white font-regular tracking-wide text-accent bg-accent py-3 px-6 rounded-full"
+                            className="rounded-full bg-accent px-6 py-3 text-sm font-regular tracking-wide text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             {isSaving ? (messages.blogs.savingButton) : (messages.editHeader.publish)}
                         </button>
@@ -543,7 +543,7 @@ function CreateBlogPage() {
                             type="button"
                             onClick={saveAsDraft}
                             disabled={isSaving || isLoadingBlog || isDeleting}
-                            className="text-sm text-white font-regular tracking-wide text-accent bg-accent py-3 px-6 rounded-full"
+                            className="rounded-full bg-accent px-6 py-3 text-sm font-regular tracking-wide text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             {isSaving ? (messages.blogs.savingButton) : (messages.editHeader.saveOnDraft)}
                         </button>
@@ -553,7 +553,7 @@ function CreateBlogPage() {
                                 type="button"
                                 onClick={removeBlog}
                                 disabled={isSaving || isLoadingBlog || isDeleting}
-                                className="text-sm text-white font-regular tracking-wide text-accent bg-accent py-2 px-4 rounded-full"
+                                className="rounded-full bg-accent px-4 py-2 text-sm font-regular tracking-wide text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                             >
                                 {isDeleting ? messages.blogs.deletingButton : messages.blogs.deleteButton}
                             </button>
