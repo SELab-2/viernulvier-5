@@ -1,22 +1,26 @@
-import { render, screen, fireEvent, act } from '@testing-library/react'
+import { render, screen, fireEvent, act, waitFor } from '@testing-library/react'
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
 import PublicPopularTags from '../../../components/public/PublicPopularTags'
 
 // ─── Mocks ───────────────────────────────────────────────────────────────────
 
-const CANONICAL_TAGS = [
+const CANONICAL_TAGS = vi.hoisted(() => [
     'theater', 'dans', 'concert', 'nightlife', 'talks', 'comedy',
     'monument', 'circus', 'performance', 'spoken word', 'listening session',
-]
+])
+
+const homeMessagesState = vi.hoisted(() => ({
+    current: {
+        popularTagsLabel: 'Verken op categorie:',
+        popularTagsMore: '+ meer',
+        popularTagsLess: '- minder',
+        popularTags: CANONICAL_TAGS,
+    },
+}))
 
 vi.mock('../../../i18n', () => ({
     getMessages: () => ({
-        home: {
-            popularTagsLabel: 'Verken op categorie:',
-            popularTagsMore: '+ meer',
-            popularTagsLess: '- minder',
-            popularTags: CANONICAL_TAGS,
-        },
+        home: homeMessagesState.current,
     }),
 }))
 
@@ -49,12 +53,33 @@ function restoreOffsetWidth() {
     })
 }
 
+function mockTextAwareOffsetWidth(rowWidth = 240) {
+    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
+        configurable: true,
+        get() {
+            const element = this as HTMLElement
+            if (element.className.includes('min-w-0 flex-1')) {
+                return rowWidth
+            }
+
+            const text = element.textContent?.trim() ?? ''
+            return text.length * 10 + 20
+        },
+    })
+}
+
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe('PublicPopularTags', () => {
     // ResizeObserver must be available for all tests since the component uses it
     beforeEach(() => {
         vi.stubGlobal('ResizeObserver', MockResizeObserver)
+        homeMessagesState.current = {
+            popularTagsLabel: 'Verken op categorie:',
+            popularTagsMore: '+ meer',
+            popularTagsLess: '- minder',
+            popularTags: CANONICAL_TAGS,
+        }
     })
     afterEach(() => {
         vi.unstubAllGlobals()
@@ -137,6 +162,36 @@ describe('PublicPopularTags', () => {
                 const btns = screen.queryAllByRole('button', { name: tag })
                 expect(btns.length).toBeGreaterThan(0)
             }
+        })
+
+        it('recalculates and collapses when localized tags change without a resize', async () => {
+            mockTextAwareOffsetWidth()
+            homeMessagesState.current = {
+                popularTagsLabel: 'Verken op categorie:',
+                popularTagsMore: '+ meer',
+                popularTagsLess: '- minder',
+                popularTags: ['a', 'b', 'c'],
+            }
+
+            const { rerender } = render(<PublicPopularTags onTagClick={vi.fn()} />)
+
+            expect(screen.queryByRole('button', { name: '+ meer' })).not.toBeInTheDocument()
+
+            homeMessagesState.current = {
+                popularTagsLabel: 'Explore by category:',
+                popularTagsMore: '+ more options',
+                popularTagsLess: '- less options',
+                popularTags: ['long-tag-one', 'long-tag-two', 'long-tag-three'],
+            }
+
+            await act(async () => {
+                rerender(<PublicPopularTags onTagClick={vi.fn()} />)
+            })
+
+            await waitFor(() => {
+                expect(screen.getByRole('button', { name: '+ more options' })).toBeInTheDocument()
+            })
+            expect(screen.queryByRole('button', { name: '- less options' })).not.toBeInTheDocument()
         })
     })
 })

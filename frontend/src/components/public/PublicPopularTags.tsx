@@ -11,6 +11,9 @@ const GAP_PX = 12
 function PublicPopularTags({ onTagClick }: PublicPopularTagsProps) {
     const messages = getMessages()
     const tags = messages.home.popularTags
+    const moreLabel = messages.home.popularTagsMore
+    const lessLabel = messages.home.popularTagsLess
+    const measurementKey = `${tags.join('\u0000')}::${moreLabel}::${lessLabel}`
 
     const [expanded, setExpanded] = useState(false)
     // Start with all visible so SSR/jsdom never flickers to 0
@@ -73,6 +76,18 @@ function PublicPopularTags({ onTagClick }: PublicPopularTagsProps) {
         }
     }, [recalculate])
 
+    useEffect(() => {
+        const frameId = window.requestAnimationFrame(() => {
+            setExpanded(false)
+            setVisibleCount(tags.length)
+            recalculate()
+        })
+
+        return () => {
+            window.cancelAnimationFrame(frameId)
+        }
+    }, [measurementKey, recalculate, tags.length])
+
     const needsMore = visibleCount < tags.length
     const displayTags = expanded ? tags : tags.slice(0, visibleCount)
 
@@ -102,7 +117,7 @@ function PublicPopularTags({ onTagClick }: PublicPopularTagsProps) {
                     tabIndex={-1}
                     className="pointer-events-none invisible fixed left-[-9999px] top-0 shrink-0 rounded-full border border-dashed border-white px-6 py-2 text-base text-white"
                 >
-                    {messages.home.popularTagsMore}
+                    {moreLabel}
                 </button>
 
                 {/* Visible row — takes remaining width */}
@@ -126,7 +141,7 @@ function PublicPopularTags({ onTagClick }: PublicPopularTagsProps) {
                             onClick={() => setExpanded((prev) => !prev)}
                             className="shrink-0 rounded-full border border-dashed border-white px-6 py-2 text-base text-white transition hover:bg-white/10"
                         >
-                            {expanded ? messages.home.popularTagsLess : messages.home.popularTagsMore}
+                            {expanded ? lessLabel : moreLabel}
                         </button>
                     )}
                 </div>
