@@ -12,27 +12,17 @@ export function getAdminRouteConfig(hostname: string): AdminRouteConfig {
   const normalizedHostname = hostname.trim().toLowerCase()
   const isAdminHost = normalizedHostname.startsWith('admin.')
   const isLocalDevHost = normalizedHostname === 'localhost' || normalizedHostname === '127.0.0.1'
+  const isPublicAdminHost = normalizedHostname === 'sel2-5.ugent.be'
+  const canRenderAdminRoutes = isAdminHost || isLocalDevHost || isPublicAdminHost
 
-  if (isAdminHost) {
-    return {
-      isAdminHost,
-      isLocalDevHost,
-      canRenderAdminRoutes: true,
-      loginPath: '/login',
-      dashboardPath: '/dashboard',
-      legacyDashboardPaths: ['/'],
-      archiveEditPath: '/archive/:id/edit',
-    }
-  }
-
-  if (isLocalDevHost) {
+  if (isAdminHost || isLocalDevHost) {
     return {
       isAdminHost,
       isLocalDevHost,
       canRenderAdminRoutes: true,
       loginPath: '/admin/login',
       dashboardPath: '/admin/dashboard',
-      legacyDashboardPaths: ['/admin'],
+      legacyDashboardPaths: ['/admin', '/dashboard', '/'],
       archiveEditPath: '/admin/archive/:id/edit',
     }
   }
@@ -40,7 +30,7 @@ export function getAdminRouteConfig(hostname: string): AdminRouteConfig {
   return {
     isAdminHost,
     isLocalDevHost,
-    canRenderAdminRoutes: false,
+    canRenderAdminRoutes,
     loginPath: '/admin/login',
     dashboardPath: '/admin',
     legacyDashboardPaths: [],
