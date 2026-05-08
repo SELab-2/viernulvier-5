@@ -152,7 +152,7 @@ function PublicHeroSearch({
             <img
                 src="/Achtergrond.svg"
                 aria-hidden="true"
-                className="pointer-events-none absolute inset-0 w-full h-full object-contain object-center max-w-[1280px] mx-auto left-0 right-0 hidden md:block"
+                className="pointer-events-none absolute inset-0 w-full h-full object-contain object-center max-w-[1280px] mx-auto left-0 right-0 hidden sm:block px-8"
             />
             <div className="pointer-events-none absolute -left-32 top-44 h-64 w-64 rounded-full bg-accent/20 blur-3xl" />
             <div className="pointer-events-none absolute -right-24 -top-8 h-72 w-72 rounded-full bg-accent/25 blur-3xl" />
@@ -162,7 +162,7 @@ function PublicHeroSearch({
                     {messages.home.heroTagline}
                 </p>
 
-                <h1 className="text-3xl font-regular leading-tight text-text md:text-6xl">
+                <h1 className="text-4xl sm:text-5xl font-regular leading-tight text-text md:text-6xl">
                     <span>{messages.home.heroTitleTop}</span>
                     <br />
                     <span className="text-accent">{messages.home.heroTitleAccent}</span>
