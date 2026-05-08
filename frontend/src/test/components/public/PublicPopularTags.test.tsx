@@ -167,7 +167,7 @@ describe('PublicPopularTags', () => {
             }
         })
 
-        it('recalculates and collapses when localized tags change without a resize', async () => {
+        it('recalculates visibility and shows the expand button when localized tags change without a resize', async () => {
             mockTextAwareOffsetWidth()
             homeMessagesState.current = {
                 popularTagsLabel: 'Verken op categorie:',
