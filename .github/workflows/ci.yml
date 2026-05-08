@@ -14,7 +14,7 @@ concurrency:
 jobs:
   backend:
     name: Backend (Lint + Test)
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     services:
       postgres:
@@ -60,7 +60,7 @@ jobs:
 
   frontend:
     name: Frontend (Lint + Test + Build)
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     defaults:
       run:
