@@ -4,17 +4,20 @@ import PublicPopularTags from '../../../components/public/PublicPopularTags'
 
 // ─── Mocks ───────────────────────────────────────────────────────────────────
 
-const CANONICAL_TAGS = vi.hoisted(() => [
+const CANONICAL_TAGS = [
     'theater', 'dans', 'concert', 'nightlife', 'talks', 'comedy',
     'monument', 'circus', 'performance', 'spoken word', 'listening session',
-])
+]
 
 const homeMessagesState = vi.hoisted(() => ({
     current: {
         popularTagsLabel: 'Verken op categorie:',
         popularTagsMore: '+ meer',
         popularTagsLess: '- minder',
-        popularTags: CANONICAL_TAGS,
+        popularTags: [
+            'theater', 'dans', 'concert', 'nightlife', 'talks', 'comedy',
+            'monument', 'circus', 'performance', 'spoken word', 'listening session',
+        ],
     },
 }))
 

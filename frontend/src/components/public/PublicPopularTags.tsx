@@ -13,7 +13,7 @@ function PublicPopularTags({ onTagClick }: PublicPopularTagsProps) {
     const tags = messages.home.popularTags
     const moreLabel = messages.home.popularTagsMore
     const lessLabel = messages.home.popularTagsLess
-    const measurementKey = `${tags.join('||')}::${moreLabel}::${lessLabel}`
+    const measurementKey = JSON.stringify([tags, moreLabel, lessLabel])
 
     const [expanded, setExpanded] = useState(false)
     // Start with all visible so SSR/jsdom never flickers to 0
