@@ -10,7 +10,7 @@ on:
 jobs:
   assign-reviewers:
     name: Assign 2 random reviewers and notify on Discord
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     permissions:
       pull-requests: write
