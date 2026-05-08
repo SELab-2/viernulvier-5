@@ -133,7 +133,12 @@ function HomePage() {
                 const response = await getLatestBlog(locale)
                 const item = response.data[0]
 
-                if (!item || canceled) {
+                if (canceled) {
+                    return
+                }
+
+                if (!item) {
+                    setLatestBlog(null)
                     return
                 }
 
