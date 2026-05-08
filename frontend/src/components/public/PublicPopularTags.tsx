@@ -61,10 +61,16 @@ function PublicPopularTags({ onTagClick }: PublicPopularTagsProps) {
     useEffect(() => {
         const row = rowRef.current
         if (!row) return
+
         const observer = new ResizeObserver(recalculate)
         observer.observe(row)
-        recalculate()
-        return () => observer.disconnect()
+
+        const frameId = window.requestAnimationFrame(recalculate)
+
+        return () => {
+            observer.disconnect()
+            window.cancelAnimationFrame(frameId)
+        }
     }, [recalculate])
 
     const needsMore = visibleCount < tags.length
