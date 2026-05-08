@@ -6,7 +6,6 @@ import { useNavigate, useParams } from 'react-router-dom'
 import SectionHeading from '../../components/admin/SectionHeading'
 import BlogsTab from '../../components/admin/BlogsTab'
 import BlogsTabContent from '../../components/admin/BlogsTabContent'
-import EditHeader from '../../components/admin/EditHeader'
 import ProductionManagementSection, { type ProductionItem } from '../../components/admin/blogs/ProductionManagementSection'
 import {
     formatBlogDetailForForm,
@@ -312,10 +311,6 @@ function CreateBlogPage() {
             ...current,
             [languageTab]: value,
         }))
-    }
-
-    const back = () => {
-        navigate('/admin')
     }
 
     const saveAsDraft = () => {
