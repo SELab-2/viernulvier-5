@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { getMessages } from '../../i18n'
 
 type PublicPopularTagsProps = {
@@ -13,7 +13,10 @@ function PublicPopularTags({ onTagClick }: PublicPopularTagsProps) {
     const tags = messages.home.popularTags
     const moreLabel = messages.home.popularTagsMore
     const lessLabel = messages.home.popularTagsLess
-    const measurementKey = JSON.stringify([tags, moreLabel, lessLabel])
+    const measurementKey = useMemo(
+        () => JSON.stringify([tags, moreLabel, lessLabel]),
+        [tags, moreLabel, lessLabel],
+    )
 
     const [expanded, setExpanded] = useState(false)
     // Start with all visible so SSR/jsdom never flickers to 0
@@ -77,6 +80,8 @@ function PublicPopularTags({ onTagClick }: PublicPopularTagsProps) {
     }, [recalculate])
 
     useEffect(() => {
+        // Wait for the rerendered localized labels to be in the DOM before resetting
+        // the collapsed state and measuring the updated tag/button widths.
         const frameId = window.requestAnimationFrame(() => {
             setExpanded(false)
             setVisibleCount(tags.length)
