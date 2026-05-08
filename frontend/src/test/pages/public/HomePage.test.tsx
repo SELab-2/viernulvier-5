@@ -370,7 +370,7 @@ describe('HomePage', () => {
         it('navigates to the search page when view all blogs is clicked', async () => {
             renderPage()
             fireEvent.click(await screen.findByTestId('view-all-blogs-btn'))
-            expect(navigate).toHaveBeenCalledWith('/zoeken')
+            expect(navigate).toHaveBeenCalledWith('/zoeken?tab=blogs')
         })
     })
 

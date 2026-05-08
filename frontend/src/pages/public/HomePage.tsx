@@ -9,7 +9,7 @@ import PublicLatestBlogPreview from '../../components/public/PublicLatestBlogPre
 import PublicRecentDigitized from '../../components/public/PublicRecentDigitized'
 import { getRecentProductions } from '../../api/productions'
 import { getLatestBlog } from '../../api/blogs'
-import { getLocalizedText } from '../../utils/localize'
+import { localize } from '../../utils/localize'
 import { toPlainText } from '../../utils/text'
 import { getLocalizedTitle, getLocalizedContent, normalizeContent } from './blogDetailPage.formatters'
 
@@ -153,11 +153,11 @@ function HomePage() {
                 const response = await getRecentProductions(locale, 4)
 
                 const mapped = response.data.map((item) => {
-                    const title = getLocalizedText(item.title, locale)
+                    const title = localize(item.title, locale)
                     const descriptionRaw =
-                        getLocalizedText(item.description_short, locale) ||
-                        getLocalizedText(item.teaser, locale) ||
-                        getLocalizedText(item.description, locale) ||
+                        localize(item.description_short, locale) ||
+                        localize(item.teaser, locale) ||
+                        localize(item.description, locale) ||
                         title
 
                     return {
