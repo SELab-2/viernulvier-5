@@ -237,7 +237,7 @@ function HomePage() {
             <PublicLatestBlogPreview
                 blog={latestBlog}
                 onReadMore={(id) => navigate(withLocalePath(`/blogs/${id}`, locale))}
-                onViewAll={() => navigate(withLocalePath('/zoeken', locale))}
+                onViewAll={() => navigate(withLocalePath('/zoeken?tab=blogs', locale))}
             />
             <PublicRecentDigitized
                 items={recentItems}
