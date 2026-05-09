@@ -7,7 +7,7 @@ on:
 jobs:
   notify-changes-requested:
     name: Notify when changes are requested
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     permissions:
       pull-requests: read
