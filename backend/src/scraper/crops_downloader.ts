@@ -23,8 +23,8 @@ async function download_crop(crop: crop) {
         let extension = 'webp'
         if (response.headers) {
             const contentType = response.headers['content-type'];
-            if (contentType !== undefined && contentType != null) {
-                const match = contentType!.match(/\/([a-zA-Z0-9]+)/);
+            if (typeof contentType === 'string') {
+                const match = contentType.match(/\/([a-zA-Z0-9]+)/);
                 if (match) {
                     extension = match[1];
                 }
