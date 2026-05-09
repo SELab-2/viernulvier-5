@@ -988,24 +988,24 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
             <div className="mt-6 border-t border-border pt-5 pb-5">
                 <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground">{s.locationLabel}</h3>
                 <div className="mt-4 space-y-3 text-sm text-text-accent">
-                    <div className="flex items-center gap-2">
-                        <input
-                            type="text"
-                            value={locationInput}
-                            onChange={(event) => setLocationInput(event.target.value)}
-                            onFocus={() => setIsLocationSuggestionsOpen(true)}
-                            onBlur={() => {
-                                window.setTimeout(() => {
-                                    setIsLocationSuggestionsOpen(false)
-                                }, 120)
-                            }}
-                            onKeyDown={(event) => {
-                                if (event.key === 'Enter') {
-                                    event.preventDefault()
-                                    handleAddLocation()
-                                }
-                            }}
-                            placeholder={s.locationSearchPlaceholder}
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="text"
+                                value={locationInput}
+                                onChange={(event) => setLocationInput(event.target.value)}
+                                onFocus={() => setIsLocationSuggestionsOpen(true)}
+                                onBlur={() => {
+                                    window.setTimeout(() => {
+                                        setIsLocationSuggestionsOpen(false)
+                                    }, 120)
+                                }}
+                                onKeyDown={(event) => {
+                                    if (event.key === 'Enter') {
+                                        event.preventDefault()
+                                        handleAddLocation()
+                                    }
+                                }}
+                                placeholder={s.locationSearchPlaceholder}
                             className="h-10 w-full rounded-full border border-border bg-surface px-4 text-sm text-foreground"
                         />
                         <button
@@ -1038,7 +1038,10 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
                                 <button
                                     key={value}
                                     type="button"
-                                    onClick={() => handleLocationChange(value)}
+                                    onMouseDown={(e) => {
+                                        e.preventDefault()
+                                        handleLocationChange(value)
+                                    }}
                                     className="inline-flex items-center gap-1.5 rounded-full bg-accent/15 px-3 py-1 text-xs text-accent"
                                 >
                                     <span>{getLocationLabel(value)}</span>
