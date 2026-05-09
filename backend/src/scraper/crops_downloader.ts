@@ -23,7 +23,7 @@ async function download_crop(crop: crop) {
         let extension = 'webp'
         if (response.headers) {
             const contentType = response.headers['content-type'];
-            if (contentType !== undefined && contentType != null) {
+            if (contentType !== undefined && contentType != null && typeof contentType === 'string') {
                 const match = contentType!.match(/\/([a-zA-Z0-9]+)/);
                 if (match) {
                     extension = match[1];
@@ -35,13 +35,12 @@ async function download_crop(crop: crop) {
         const filename = `${crop.id}.${extension}`;
         const filepath = path.join(process.env.CROP_LOCATION!, filename);
         fs.writeFileSync(filepath, response.data);
-        const fullPath = path.resolve(filepath);
         await prisma.crop.update({
                 where: {
                     id: crop.id,
                 },
                 data: {
-                    file_location: fullPath
+                    file_location: filename
                 }
             }
         )

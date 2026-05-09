@@ -2,7 +2,7 @@ import type { Genre } from "../../../api/genres"
 import { localize } from "../../../utils/localize"
 
 type ArchiveDetailHeroProps = {
-    imageUrl: string
+    imageLocation: string
     title?: string | null
     superTitle?: string | null
     artist?: string | null
@@ -12,11 +12,11 @@ type ArchiveDetailHeroProps = {
     onShare?: () => void
 }
 
-function ArchiveDetailHero({ imageUrl, title, superTitle, artist, genres, locale, shareLabel, onShare }: ArchiveDetailHeroProps) {
+function ArchiveDetailHero({ imageLocation, title, superTitle, artist, genres, locale, shareLabel, onShare }: ArchiveDetailHeroProps) {
     return (
         <div className="relative h-[360px] w-full overflow-hidden rounded-xl md:h-[430px]">
             <img
-                src={imageUrl}
+                src={imageLocation}
                 alt={title || 'Production image'}
                 className="h-full w-full object-cover"
             />

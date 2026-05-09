@@ -26,7 +26,8 @@ function capitalizeFirst(value: string): string {
 function SearchResultCard({ item, detailHref }: SearchResultCardProps) {
     const normalizedTitle = capitalizeFirst(item.title.trim())
     const displayTitle = normalizedTitle.length > 110 ? `${normalizedTitle.slice(0, 107)}...` : normalizedTitle
-    const imageUrl = item.imageUrl ?? FALLBACK_IMAGE
+    const imageUrl= item.imageUrl ?? FALLBACK_IMAGE
+
 
     return (
         <Link
