@@ -1,6 +1,7 @@
 import { prisma } from "./prisma";
 import * as Fetcher from "./fetcher"
 import { updateStatus, finishStatus, createProgressBar } from "./logger";
+import CropsDownloader from "./crops_downloader";
 
 
 import type {
@@ -888,6 +889,9 @@ async function sync_event_prices(cutoff_timestamp: Date | undefined = undefined)
 async function sync_crops(cutoff_timestamp: Date | undefined = undefined){
   let totalProcessed = 0;
   let pageCount = 0;
+  let actualDownloaded = 0;
+
+
 
   for await (const { members: rawPage, totalItems } of Fetcher.fetchCropPages(cutoff_timestamp)) {
     pageCount++;
@@ -897,8 +901,8 @@ async function sync_crops(cutoff_timestamp: Date | undefined = undefined){
     if (rawPage.length === 0) break;
     const page = filterByCutoff(rawPage, cutoff_timestamp);
 
-    await prisma.$transaction(
-        page.filter(crop => crop.name?.toLowerCase() === "fe3_header" || crop.name?.toLowerCase() == "fe3_boxed")
+    const prisma_crops = await prisma.$transaction(
+        page.filter(crop => (crop.name?.toLowerCase() === "fe3_header" || crop.name?.toLowerCase() == "fe3_boxed") && crop.url !== undefined)
             .map(crop =>
             prisma.crop.upsert({
               where: {apiId: crop["@id"]},
@@ -907,9 +911,13 @@ async function sync_crops(cutoff_timestamp: Date | undefined = undefined){
             })
         )
     );
+
+
+    await CropsDownloader.download_crops(prisma_crops);
+    actualDownloaded += prisma_crops.length;
   }
 
-  finishStatus(`\u2705 Completed syncing ${totalProcessed} crops from ${pageCount} pages`);
+  finishStatus(`\u2705 Completed syncing ${totalProcessed} crops from ${pageCount} pages and downloaded ${actualDownloaded} crops`);
 }
 
 async function sync_uit_keywords(cutoff_timestamp: Date | undefined = undefined){
