@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 import { getActiveLocale, getMessages, withLocalePath } from '../../i18n'
 import type { Locale } from '../../i18n/types'
 import { apiFetch } from '../../api/client'
+import { getLocalizedContent, getLocalizedTitle, normalizeContent } from './blogDetailPage.formatters'
 import PublicLayout from '../../components/public/PublicLayout'
 import SearchPagination from '../../components/public/search/SearchPagination'
 import SearchResultCard, { type SearchResultItem } from '../../components/public/search/SearchResultCard'
@@ -11,6 +12,7 @@ type SearchEntry = SearchResultItem & {
     year: number
     genre: string
     location: string
+    type: 'production' | 'blog'
 }
 
 const DEFAULT_PAGE_SIZE = 12
@@ -80,6 +82,17 @@ type ProductionApiItem = {
     performer_type: string | null
     attendance_mode: string | null
     created_at: string
+    links?: {
+        self: string
+        events: string
+        genres: string
+        tags: string
+        media_gallery: string | null
+        review_gallery: string | null
+        poster_gallery: string | null
+        uitdatabank_theme: string | null
+        uitdatabank_type: string | null
+    }
 }
 
 type PaginatedApiResponse<T> = {
@@ -103,6 +116,7 @@ type SearchFilterState = {
     sort: SearchSort
     page: number
     limit: number
+    tab: 'productions' | 'blogs' | 'all'
 }
 
 type SearchFilterOverrides = {
@@ -114,6 +128,7 @@ type SearchFilterOverrides = {
     sort?: SearchSort
     page?: number
     limit?: number
+    tab?: 'productions' | 'blogs' | 'all'
 }
 
 function getLocalizedText(text: LocalizedText, locale: Locale): string {
@@ -123,6 +138,21 @@ function getLocalizedText(text: LocalizedText, locale: Locale): string {
 
     const values = locale === 'en' ? [text.en, text.nl, text.fr] : [text.nl, text.en, text.fr]
     return values.find((value) => typeof value === 'string' && value.trim().length > 0)?.trim() ?? ''
+}
+
+function toLocalizedText(value: unknown): LocalizedText {
+    if (!value || typeof value !== 'object') {
+        return null
+    }
+
+    const source = value as Record<string, unknown>
+    const pick = (input: unknown): string | undefined => (typeof input === 'string' ? input : undefined)
+
+    return {
+        nl: pick(source.nl),
+        en: pick(source.en),
+        fr: pick(source.fr),
+    }
 }
 
 function normalizeSort(value: string): SearchSort {
@@ -150,6 +180,9 @@ function parseSearchFilterState(searchParams: URLSearchParams): SearchFilterStat
     const limitParam = Number(searchParams.get('limit') ?? String(DEFAULT_PAGE_SIZE))
     const limit = normalizePageSize(limitParam)
 
+    const tabParam = searchParams.get('tab')
+    const tab: 'productions' | 'blogs' | 'all' = tabParam === 'blogs' ? 'blogs' : tabParam === 'all' ? 'all' : 'productions'
+
     return {
         query,
         yearFrom,
@@ -159,6 +192,7 @@ function parseSearchFilterState(searchParams: URLSearchParams): SearchFilterStat
         sort,
         page,
         limit,
+        tab,
     }
 }
 
@@ -174,6 +208,8 @@ function buildSearchParams(filters: SearchFilterOverrides): URLSearchParams {
     if (filters.sort && filters.sort !== 'relevance') params.set('sort', filters.sort)
     if (filters.page && filters.page > 1) params.set('page', String(filters.page))
     if (filters.limit && filters.limit !== DEFAULT_PAGE_SIZE) params.set('limit', String(filters.limit))
+    if (filters.tab === 'blogs') params.set('tab', 'blogs')
+    if (filters.tab === 'all') params.set('tab', 'all')
 
     return params
 }
@@ -283,9 +319,323 @@ function mapProductionToSearchEntry(item: ProductionApiItem, locale: Locale, pre
         venue,
         imageUrl: item.image_url ?? undefined,
         year,
-        genre: normalizedGenre,
+        genre: normalizedGenre || '',
         location: normalizedLocation,
+        type: 'production' as const,
     }
+}
+
+type BlogApiItem = {
+    id: string
+    title?: unknown
+    content?: unknown
+    productions: string[]
+    createdAt: string
+    updatedAt: string
+    links?: { self: string }
+}
+
+type SearchApiItem = {
+    id: string
+    type: 'production' | 'blog'
+    title?: unknown
+    teaser?: unknown
+    description_short?: unknown
+    description?: unknown
+    content?: unknown
+    image_url?: string | null
+    venue_name?: string | null
+    venue_names?: string[]
+    production_genres?: string[]
+    performer_type?: string | null
+    attendance_mode?: string | null
+    created_at?: string
+    productions?: string[]
+}
+
+function getBlogExcerpt(content: unknown, locale: Locale, fallback: string): string {
+    const localizedContent = getLocalizedContent(content, locale)
+
+    if (!localizedContent) {
+        return fallback
+    }
+
+    const delta = normalizeContent(localizedContent)
+    if (delta) {
+        const plain = delta.ops
+            .map((operation) => (typeof operation.insert === 'string' ? operation.insert : ''))
+            .join('')
+            .replace(/\s+/g, ' ')
+            .trim()
+
+        return plain || fallback
+    }
+
+    return toPlainText(localizedContent) || fallback
+}
+
+function mapBlogToSearchEntry(item: BlogApiItem, locale: Locale): SearchEntry {
+    const searchMessages = getMessages(locale).search
+    const title = getLocalizedTitle(item.title, locale) || searchMessages.fallbackUntitled
+    const date = item.createdAt ? formatDate(item.createdAt, locale) : '-'
+    const year = item.createdAt ? new Date(item.createdAt).getFullYear() : MIN_PERIOD_YEAR
+
+    return {
+        id: item.id,
+        tag: searchMessages.blogTab,
+        date,
+        title,
+        excerpt: getBlogExcerpt(item.content, locale, title),
+        venue: '',
+        imageUrl: undefined,
+        year,
+        genre: '',
+        location: '',
+        type: 'blog' as const,
+    }
+}
+
+function getRelativePath(url: string | null | undefined): string | null {
+    if (!url) return null
+    const parts = url.split('/api/v1')
+    return parts.length > 1 ? parts[1] : url
+}
+
+interface GalleryItemApi {
+    links?: { crops: string }
+}
+
+interface CropApi {
+    name: string
+    url: string
+}
+
+function useProductionImages(items: ProductionApiItem[]) {
+    const [images, setImages] = useState<Record<string, string>>({})
+
+    useEffect(() => {
+        const fetchImages = async () => {
+            const itemsToFetch = items.filter(item => !item.image_url && item.links?.media_gallery)
+            
+            if (itemsToFetch.length === 0) return
+
+            const results = await Promise.allSettled(
+                itemsToFetch.map(async (item) => {
+                    const galleryPath = getRelativePath(item.links?.media_gallery)
+                    if (!galleryPath) return null
+
+                    try {
+                        // 1. Production -> Gallery
+                        const galleryRes = await apiFetch<{ data: { links: { items: string } } }>(galleryPath)
+                        const itemsPath = getRelativePath(galleryRes.data?.links?.items)
+                        if (!itemsPath) return null
+
+                        // 2. Gallery -> Items
+                        const itemsRes = await apiFetch<{ data: GalleryItemApi[] }>(itemsPath)
+                        const galleryItems = itemsRes.data || []
+                        
+                        // 3. Find first item with crops
+                        for (const galleryItem of galleryItems) {
+                            if (!galleryItem.links?.crops) continue
+                            
+                            // 4. Item -> Crops
+                            const cropsPath = getRelativePath(galleryItem.links.crops)
+                            if (!cropsPath) continue
+                            const cropsRes = await apiFetch<{ data: CropApi[] }>(cropsPath)
+                            const crops = cropsRes.data || []
+                            
+                            // 5. Find target crop
+                            const targetCrop = crops.find((c) => c.name === 'FE3_header') || 
+                                             crops.find((c) => c.name === 'FEA_boxed') || 
+                                             crops[0]
+                            
+                            if (targetCrop?.url) {
+                                return { id: item.id, url: targetCrop.url }
+                            }
+                        }
+                    } catch {
+                        // Silently fail
+                    }
+                    return null
+                })
+            )
+
+            const newImages: Record<string, string> = {}
+            results.forEach(res => {
+                if (res.status === 'fulfilled' && res.value) {
+                    newImages[res.value.id] = res.value.url
+                }
+            })
+            setImages(prev => ({ ...prev, ...newImages }))
+        }
+
+        fetchImages()
+    }, [items])
+
+    return images
+}
+
+function useProductionEventDetails(items: ProductionApiItem[], locale: Locale) {
+    const [details, setDetails] = useState<Record<string, { date: string, venue: string }>>({})
+
+    useEffect(() => {
+        const fetchDetails = async () => {
+            const itemsToFetch = items.filter(item => item.links?.events)
+            if (itemsToFetch.length === 0) return
+
+            const now = new Date()
+            const results = await Promise.allSettled(
+                itemsToFetch.map(async (item) => {
+                    try {
+                        const eventsPath = getRelativePath(item.links?.events)
+                        if (!eventsPath) return null
+
+                        // 1. Fetch events
+                        const res = await apiFetch<{ data: Array<{ starts_at: string, links: { hall: string } }> }>(`${eventsPath}&limit=50`)
+                        const pastEvents = (res.data || [])
+                            .filter(e => new Date(e.starts_at) < now)
+                            .sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime())
+
+                        if (pastEvents.length === 0) return { id: item.id, date: '', venue: '' }
+
+                        // 2. Format Date
+                        const formatDateLocal = (dateStr: string) => {
+                            const date = new Date(dateStr)
+                            return new Intl.DateTimeFormat(locale === 'nl' ? 'nl-BE' : 'en-GB', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric',
+                            }).format(date)
+                        }
+
+                        let displayDate = ''
+                        if (pastEvents.length === 1) {
+                            displayDate = formatDateLocal(pastEvents[0].starts_at)
+                        } else {
+                            const firstYear = new Date(pastEvents[0].starts_at).getFullYear()
+                            const lastYear = new Date(pastEvents[pastEvents.length - 1].starts_at).getFullYear()
+                            displayDate = firstYear === lastYear 
+                                ? `${formatDateLocal(pastEvents[0].starts_at)} - ${formatDateLocal(pastEvents[pastEvents.length - 1].starts_at)}`
+                                : `${firstYear} - ${lastYear}`
+                        }
+
+                        // 3. Fetch Venue Names (Halls)
+                        const venueNames = new Set<string>()
+                        const hallResults = await Promise.allSettled(
+                            pastEvents.slice(0, 5).map(async (event) => {
+                                const hallPath = getRelativePath(event.links?.hall)
+                                if (!hallPath) return null
+                                const hallRes = await apiFetch<{ data: { name: LocalizedText } }>(hallPath)
+                                return getLocalizedText(hallRes.data.name, locale)
+                            })
+                        )
+
+                        hallResults.forEach(hr => {
+                            if (hr.status === 'fulfilled' && hr.value) {
+                                venueNames.add(hr.value)
+                            }
+                        })
+
+                        const displayVenue = Array.from(venueNames).join(' • ')
+
+                        return { id: item.id, date: displayDate, venue: displayVenue }
+                    } catch {
+                        return null
+                    }
+                })
+            )
+
+            const newDetails: Record<string, { date: string, venue: string }> = {}
+            results.forEach(res => {
+                if (res.status === 'fulfilled' && res.value) {
+                    newDetails[res.value.id] = { date: res.value.date, venue: res.value.venue }
+                }
+            })
+            setDetails(prev => ({ ...prev, ...newDetails }))
+        }
+
+        fetchDetails()
+    }, [items, locale])
+
+    return details
+}
+
+function useProductionTaxonomies(items: ProductionApiItem[], locale: Locale) {
+    const [taxonomies, setTaxonomies] = useState<Record<string, string>>({})
+
+    useEffect(() => {
+        const fetchTaxonomies = async () => {
+            const itemsToFetch = items.filter(item => item.links?.genres || item.links?.tags)
+            if (itemsToFetch.length === 0) return
+
+            const results = await Promise.allSettled(
+                itemsToFetch.map(async (item) => {
+                    try {
+                        // 1. Try Genres
+                        const genresPath = getRelativePath(item.links?.genres)
+                        if (genresPath) {
+                            const res = await apiFetch<{ data: Array<{ slug: LocalizedText, name: LocalizedText }> }>(genresPath)
+                            const firstGenre = res.data?.[0]
+                            if (firstGenre) {
+                                const label = getLocalizedText(firstGenre.slug, locale) || getLocalizedText(firstGenre.name, locale)
+                                if (label) return { id: item.id, label }
+                            }
+                        }
+
+                        // 2. Fallback to Tags
+                        const tagsPath = getRelativePath(item.links?.tags)
+                        if (tagsPath) {
+                            const res = await apiFetch<{ data: Array<{ slug: LocalizedText, name: LocalizedText }> }>(tagsPath)
+                            const firstTag = res.data?.[0]
+                            if (firstTag) {
+                                const label = getLocalizedText(firstTag.slug, locale) || getLocalizedText(firstTag.name, locale)
+                                if (label) return { id: item.id, label }
+                            }
+                        }
+
+                        return { id: item.id, label: '' }
+                    } catch {
+                        return null
+                    }
+                })
+            )
+
+            const newTaxonomies: Record<string, string> = {}
+            results.forEach(res => {
+                if (res.status === 'fulfilled' && res.value) {
+                    newTaxonomies[res.value.id] = res.value.label
+                }
+            })
+            setTaxonomies(prev => ({ ...prev, ...newTaxonomies }))
+        }
+
+        fetchTaxonomies()
+    }, [items, locale])
+
+    return taxonomies
+}
+
+function useAllHalls(locale: Locale) {
+    const [halls, setHalls] = useState<string[]>([])
+
+    useEffect(() => {
+        const fetchHalls = async () => {
+            try {
+                // Fetch more halls to be sure
+                const res = await apiFetch<{ data: Array<{ name: LocalizedText }> }>('/archive/halls?limit=500')
+                const names = (res.data || [])
+                    .map(h => getLocalizedText(h.name, locale))
+                    .filter(Boolean)
+                
+                setHalls(Array.from(new Set(names)).sort())
+            } catch {
+                // Silently fail
+            }
+        }
+        fetchHalls()
+    }, [locale])
+
+    return halls
 }
 
 async function copyCurrentUrl() {
@@ -385,6 +735,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
     const selectedLocations = filterState.locations
     const sort = filterState.sort
     const safeLimit = filterState.limit
+    const tab = filterState.tab
     const sliderRef = useRef<HTMLDivElement | null>(null)
 
     const [searchInput, setSearchInput] = useState(query)
@@ -420,22 +771,23 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
                 locations: selectedLocations,
                 sort,
                 limit: safeLimit,
+                tab,
             })
         }, SEARCH_INPUT_DEBOUNCE_MS)
 
         return () => {
             window.clearTimeout(timerId)
         }
-    }, [searchInput, query, safeFromYear, safeToYear, selectedGenres, selectedLocations, sort, safeLimit, pushFilters])
+    }, [searchInput, query, safeFromYear, safeToYear, selectedGenres, selectedLocations, sort, safeLimit, tab, pushFilters])
 
     const handleSearchSubmit = () => {
-        pushFilters({ query: searchInput.trim() || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: safeLimit })
+        pushFilters({ query: searchInput.trim() || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: safeLimit, tab })
     }
 
     const handleGenreChange = (next: string) => {
         const nextGenres = selectedGenres.includes(next) ? [] : [next]
 
-        pushFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: nextGenres, locations: selectedLocations, sort, limit: safeLimit })
+        pushFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: nextGenres, locations: selectedLocations, sort, limit: safeLimit, tab })
     }
 
     const handleLocationChange = (next: string) => {
@@ -443,7 +795,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
             ? selectedLocations.filter((value) => value !== next)
             : [...selectedLocations, next]
 
-        pushFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: selectedGenres, locations: nextLocations, sort, limit: safeLimit })
+        pushFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: selectedGenres, locations: nextLocations, sort, limit: safeLimit, tab })
     }
 
     const handleAddLocation = () => {
@@ -461,6 +813,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
             locations: [...selectedLocations, nextLocation],
             sort,
             limit: safeLimit,
+            tab,
         })
         setLocationInput('')
         setIsLocationSuggestionsOpen(false)
@@ -500,6 +853,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
             locations: [...selectedLocations, nextLocation],
             sort,
             limit: safeLimit,
+            tab,
         })
         setLocationInput('')
         setIsLocationSuggestionsOpen(false)
@@ -507,16 +861,16 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
 
     const handleFromYearChange = (next: number) => {
         const clampedNext = Math.min(next, safeToYear)
-        pushFilters({ query: query || undefined, yearFrom: clampedNext, yearTo: safeToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: safeLimit })
+        pushFilters({ query: query || undefined, yearFrom: clampedNext, yearTo: safeToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: safeLimit, tab })
     }
 
     const handleToYearChange = (next: number) => {
         const clampedNext = Math.max(next, safeFromYear)
-        pushFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: clampedNext, genres: selectedGenres, locations: selectedLocations, sort, limit: safeLimit })
+        pushFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: clampedNext, genres: selectedGenres, locations: selectedLocations, sort, limit: safeLimit, tab })
     }
 
     const handleReset = () => {
-        pushFilters({ yearFrom: MIN_PERIOD_YEAR, yearTo: MAX_PERIOD_YEAR, sort, limit: safeLimit })
+        pushFilters({ yearFrom: MIN_PERIOD_YEAR, yearTo: MAX_PERIOD_YEAR, sort, limit: safeLimit, tab })
     }
 
     const handleSliderPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -576,6 +930,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
                 </form>
             ) : null}
 
+            {tab !== 'blogs' ? (
             <div className="mt-8 border-t border-border pt-5">
                 <div className="mb-4 flex items-center justify-between">
                     <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground">{s.genreLabel}</h3>
@@ -596,6 +951,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
                     })}
                 </div>
             </div>
+            ) : null}
 
             <div className="mt-6 border-t border-border pt-5">
                 <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground">{s.periodLabel}</h3>
@@ -631,27 +987,28 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
                 </div>
             </div>
 
+            {tab !== 'blogs' ? (
             <div className="mt-6 border-t border-border pt-5 pb-5">
                 <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground">{s.locationLabel}</h3>
                 <div className="mt-4 space-y-3 text-sm text-text-accent">
-                    <div className="flex items-center gap-2">
-                        <input
-                            type="text"
-                            value={locationInput}
-                            onChange={(event) => setLocationInput(event.target.value)}
-                            onFocus={() => setIsLocationSuggestionsOpen(true)}
-                            onBlur={() => {
-                                window.setTimeout(() => {
-                                    setIsLocationSuggestionsOpen(false)
-                                }, 120)
-                            }}
-                            onKeyDown={(event) => {
-                                if (event.key === 'Enter') {
-                                    event.preventDefault()
-                                    handleAddLocation()
-                                }
-                            }}
-                            placeholder={s.locationSearchPlaceholder}
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="text"
+                                value={locationInput}
+                                onChange={(event) => setLocationInput(event.target.value)}
+                                onFocus={() => setIsLocationSuggestionsOpen(true)}
+                                onBlur={() => {
+                                    window.setTimeout(() => {
+                                        setIsLocationSuggestionsOpen(false)
+                                    }, 120)
+                                }}
+                                onKeyDown={(event) => {
+                                    if (event.key === 'Enter') {
+                                        event.preventDefault()
+                                        handleAddLocation()
+                                    }
+                                }}
+                                placeholder={s.locationSearchPlaceholder}
                             className="h-10 w-full rounded-full border border-border bg-surface px-4 text-sm text-foreground"
                         />
                         <button
@@ -684,7 +1041,10 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
                                 <button
                                     key={value}
                                     type="button"
-                                    onClick={() => handleLocationChange(value)}
+                                    onMouseDown={(e) => {
+                                        e.preventDefault()
+                                        handleLocationChange(value)
+                                    }}
                                     className="inline-flex items-center gap-1.5 rounded-full bg-accent/15 px-3 py-1 text-xs text-accent"
                                 >
                                     <span>{getLocationLabel(value)}</span>
@@ -695,6 +1055,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
                     ) : null}
                 </div>
             </div>
+            ) : null}
 
             <div className="mt-auto space-y-3">
                 <button
@@ -718,13 +1079,14 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
     )
 }
 
-function MobileSearchForm() {
+function MobileSearchForm({ className = 'mb-5 md:hidden' }: { className?: string }) {
     const [searchParams] = useSearchParams()
     const navigate = useNavigate()
     const { pathname } = useLocation()
     const locale = useMemo(() => getActiveLocale(pathname), [pathname])
     const { search: s } = getMessages(locale)
-    const query = useMemo(() => parseSearchFilterState(searchParams).query, [searchParams])
+    const filterState = useMemo(() => parseSearchFilterState(searchParams), [searchParams])
+    const query = filterState.query
     const [searchInput, setSearchInput] = useState(query)
     const [prevQuery, setPrevQuery] = useState(query)
 
@@ -743,6 +1105,7 @@ function MobileSearchForm() {
             locations: filterState.locations,
             sort: filterState.sort,
             limit: filterState.limit,
+            tab: filterState.tab,
         })
         const path = withLocalePath('/zoeken', locale)
         const qs = params.toString()
@@ -770,7 +1133,7 @@ function MobileSearchForm() {
     }
 
     return (
-        <form className="mb-5 md:hidden" onSubmit={handleSubmit}>
+        <form className={className} onSubmit={handleSubmit}>
             <div className="relative">
                 <input
                     type="text"
@@ -795,10 +1158,16 @@ function SearchPage() {
     const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false)
     const [shareCopied, setShareCopied] = useState(false)
     const [apiEntries, setApiEntries] = useState<SearchEntry[]>([])
+    const [apiRawItems, setApiRawItems] = useState<ProductionApiItem[]>([])
     const [totalResults, setTotalResults] = useState(0)
     const [totalPages, setTotalPages] = useState(1)
     const [isLoading, setIsLoading] = useState(true)
     const [apiError, setApiError] = useState<string | null>(null)
+
+    const fetchedImages = useProductionImages(apiRawItems)
+    const fetchedDetails = useProductionEventDetails(apiRawItems, locale)
+    const fetchedTaxonomies = useProductionTaxonomies(apiRawItems, locale)
+    const allAvailableHalls = useAllHalls(locale)
 
     const filterState = useMemo(() => parseSearchFilterState(searchParams), [searchParams])
     const query = filterState.query
@@ -809,6 +1178,8 @@ function SearchPage() {
     const sort = filterState.sort
     const page = filterState.page
     const pageSize = filterState.limit
+    const tab = filterState.tab
+    const isBlogTab = tab === 'blogs'
 
     useEffect(() => {
         const abortController = new AbortController()
@@ -816,48 +1187,122 @@ function SearchPage() {
         const loadSearchEntries = async () => {
             setIsLoading(true)
             setApiError(null)
+            setApiRawItems([]) // Clear old data
 
             try {
                 const params = new URLSearchParams({
                     page: String(page),
                     limit: String(pageSize),
-                    lang: locale,
                 })
 
                 if (query) {
                     params.set('search', query)
                 }
 
-                if (selectedGenres.length > 0) {
-                    params.set('genres', selectedGenres.join(','))
-                }
-
-                if (selectedLocations.length > 0) {
-                    params.set('locations', selectedLocations.join(','))
-                }
-
-                if (safeFromYear > MIN_PERIOD_YEAR) {
+                if (tab === 'blogs') {
                     params.set('yearFrom', String(safeFromYear))
-                }
-
-                if (safeToYear < MAX_PERIOD_YEAR) {
                     params.set('yearTo', String(safeToYear))
+
+                    const response = await apiFetch<PaginatedApiResponse<BlogApiItem>>(
+                        `/archive/blogs?${params.toString()}`,
+                        { signal: abortController.signal }
+                    )
+                    const mappedEntries = response.data.map((item) => mapBlogToSearchEntry(item, locale))
+                    setApiEntries(mappedEntries)
+                    setTotalResults(response.meta?.total ?? mappedEntries.length)
+                    setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
+                } else if (tab === 'all') {
+                    // Single RESTful call to the unified search endpoint
+                    const searchParams = new URLSearchParams({
+                        page: String(page),
+                        limit: String(pageSize),
+                        lang: locale,
+                    })
+                    if (query) searchParams.set('search', query)
+                    searchParams.set('yearFrom', String(safeFromYear))
+                    searchParams.set('yearTo', String(safeToYear))
+                    if (selectedGenres.length > 0) searchParams.set('genres', selectedGenres.join(','))
+                    if (selectedLocations.length > 0) searchParams.set('locations', selectedLocations.join(','))
+                    if (sort === 'recent' || sort === 'oldest') searchParams.set('sort', sort)
+
+                    const response = await apiFetch<PaginatedApiResponse<SearchApiItem>>(
+                        `/archive/search?${searchParams.toString()}`,
+                        { signal: abortController.signal }
+                    )
+
+                    const preferredGenre = selectedGenres.length === 1 ? selectedGenres[0] : undefined
+                    const mappedEntries = response.data.map((item): SearchEntry => {
+                        if (item.type === 'blog') {
+                            return mapBlogToSearchEntry(
+                                {
+                                    id: item.id,
+                                    title: item.title,
+                                    content: item.content,
+                                    productions: item.productions ?? [],
+                                    createdAt: item.created_at ?? '',
+                                    updatedAt: item.created_at ?? '',
+                                },
+                                locale,
+                            )
+                        }
+                        return mapProductionToSearchEntry(
+                            {
+                                id: item.id,
+                                title: toLocalizedText(item.title),
+                                teaser: toLocalizedText(item.teaser),
+                                description_short: toLocalizedText(item.description_short),
+                                description: toLocalizedText(item.description),
+                                image_url: item.image_url,
+                                venue_name: item.venue_name,
+                                venue_names: item.venue_names,
+                                production_genres: item.production_genres,
+                                performer_type: item.performer_type ?? null,
+                                attendance_mode: item.attendance_mode ?? null,
+                                created_at: item.created_at ?? '',
+                            },
+                            locale,
+                            preferredGenre,
+                        )
+                    })
+
+                    setApiEntries(mappedEntries)
+                    setTotalResults(response.meta?.total ?? mappedEntries.length)
+                    setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
+                } else {
+                    params.set('lang', locale)
+
+                    if (selectedGenres.length > 0) {
+                        params.set('genres', selectedGenres.join(','))
+                    }
+
+                    if (selectedLocations.length > 0) {
+                        params.set('locations', selectedLocations.join(','))
+                    }
+
+                    if (safeFromYear > MIN_PERIOD_YEAR) {
+                        params.set('yearFrom', String(safeFromYear))
+                    }
+
+                    if (safeToYear < MAX_PERIOD_YEAR) {
+                        params.set('yearTo', String(safeToYear))
+                    }
+
+                    if (sort === 'recent' || sort === 'oldest') {
+                        params.set('sort', sort)
+                    }
+
+                    const response = await apiFetch<PaginatedApiResponse<ProductionApiItem>>(
+                        `/archive/productions?${params.toString()}`,
+                        { signal: abortController.signal }
+                    )
+
+                    const preferredGenre = selectedGenres.length === 1 ? selectedGenres[0] : undefined
+                    const mappedEntries = response.data.map((item) => mapProductionToSearchEntry(item, locale, preferredGenre))
+                    setApiRawItems(response.data)
+                    setApiEntries(mappedEntries)
+                    setTotalResults(response.meta?.total ?? mappedEntries.length)
+                    setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
                 }
-
-                if (sort === 'recent' || sort === 'oldest') {
-                    params.set('sort', sort)
-                }
-
-                const response = await apiFetch<PaginatedApiResponse<ProductionApiItem>>(
-                    `/archive/productions?${params.toString()}`,
-                    { signal: abortController.signal }
-                )
-
-                const preferredGenre = selectedGenres.length === 1 ? selectedGenres[0] : undefined
-                const mappedEntries = response.data.map((item) => mapProductionToSearchEntry(item, locale, preferredGenre))
-                setApiEntries(mappedEntries)
-                setTotalResults(response.meta?.total ?? mappedEntries.length)
-                setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
             } catch (error) {
                 if (abortController.signal.aborted) {
                     return
@@ -880,7 +1325,7 @@ function SearchPage() {
         return () => {
             abortController.abort()
         }
-    }, [query, locale, selectedGenres, selectedLocations, safeFromYear, safeToYear, sort, page, pageSize])
+    }, [query, locale, selectedGenres, selectedLocations, safeFromYear, safeToYear, sort, page, pageSize, tab])
 
     const navigateWithFilters = (filters: SearchFilterOverrides) => {
         const params = buildSearchParams(filters)
@@ -890,7 +1335,22 @@ function SearchPage() {
     }
 
     const currentPage = Math.min(page, totalPages)
-    const pageItems = apiEntries
+    const pageItems = useMemo(() => {
+        if (!apiEntries) return []
+        return apiEntries
+            .map(item => {
+                const detail = fetchedDetails[item.id]
+                const fetchedTaxonomy = fetchedTaxonomies[item.id]
+                return {
+                    ...item,
+                    imageUrl: fetchedImages[item.id] || item.imageUrl,
+                    date: detail?.date !== undefined && detail.date !== '' ? detail.date : item.date,
+                    venue: detail?.venue !== undefined && detail.venue !== '' ? detail.venue : item.venue,
+                    tag: fetchedTaxonomy !== undefined && fetchedTaxonomy !== '' ? fetchedTaxonomy : item.tag
+                }
+            })
+            .filter(item => fetchedDetails[item.id]?.date !== '')
+    }, [apiEntries, fetchedImages, fetchedDetails, fetchedTaxonomies])
 
     // Compacte paginering: 1,2,3,...,laatste
     function getCompactPageLabels(current: number, total: number): string[] {
@@ -940,6 +1400,7 @@ function SearchPage() {
             sort,
             page: nextPage,
             limit: pageSize,
+            tab,
         })
     }
 
@@ -953,6 +1414,7 @@ function SearchPage() {
             locations: selectedLocations,
             sort: safeSort,
             limit: pageSize,
+            tab,
         })
     }
 
@@ -965,6 +1427,7 @@ function SearchPage() {
             locations: selectedLocations,
             sort,
             limit: pageSize,
+            tab,
         })
     }
 
@@ -977,6 +1440,7 @@ function SearchPage() {
             locations: selectedLocations.filter((value) => value !== locationToRemove),
             sort,
             limit: pageSize,
+            tab,
         })
     }
 
@@ -989,6 +1453,7 @@ function SearchPage() {
             locations: selectedLocations,
             sort,
             limit: pageSize,
+            tab,
         })
     }
 
@@ -1024,23 +1489,34 @@ function SearchPage() {
 
     const locationSuggestions = useMemo(() => {
         const normalizedLocale = locale === 'en' ? 'en' : 'nl'
-        const values = new Set<string>(Object.values(LOCATION_ALIASES))
+        const uniqueValues = new Set<string>()
 
-        apiEntries.forEach((entry) => {
-            entry.venue
-                .split('•')
-                .map((part) => part.trim())
-                .filter((part) => part.length > 0)
-                .forEach((part) => {
-                    values.add(part)
-                    values.add(part.toLowerCase())
-                })
+        // 1. Add predefined aliases
+        Object.values(LOCATION_ALIASES).forEach(v => uniqueValues.add(v))
+
+        // 2. Add dynamically fetched halls from global DB list
+        allAvailableHalls.forEach(hall => {
+            const exists = Array.from(uniqueValues).some(v => v.toLowerCase() === hall.toLowerCase())
+            if (!exists) uniqueValues.add(hall)
         })
 
-        return Array.from(values).sort((a, b) =>
+        // 3. Add venues currently visible on cards (ensures "De Vooruit - Café" etc. are always there)
+        Object.values(fetchedDetails).forEach(detail => {
+            if (detail.venue) {
+                detail.venue.split(' • ').forEach(v => {
+                    const trimmed = v.trim()
+                    if (trimmed) {
+                        const exists = Array.from(uniqueValues).some(uv => uv.toLowerCase() === trimmed.toLowerCase())
+                        if (!exists) uniqueValues.add(trimmed)
+                    }
+                })
+            }
+        })
+
+        return Array.from(uniqueValues).sort((a, b) =>
             a.localeCompare(b, normalizedLocale === 'nl' ? 'nl-BE' : 'en-GB', { sensitivity: 'base' }),
         )
-    }, [apiEntries, locale])
+    }, [allAvailableHalls, fetchedDetails, locale])
 
     return (
         <PublicLayout>
@@ -1104,75 +1580,97 @@ function SearchPage() {
                                 </>
                             ) : null}
 
-                            <MobileSearchForm key={searchParams.toString()} />
+                            <MobileSearchForm key={searchParams.toString()} className="mb-5 md:hidden" />
 
                             <div className="flex flex-wrap items-center justify-between gap-4">
                                 <div>
-                                    <h1 className="text-3xl leading-none text-foreground">
-                                        <span className="underline decoration-accent decoration-2 underline-offset-4">{m.search.productionsTab}</span>{' '}
-                                        <span className="text-muted">{m.search.blogTab}</span>
+                                    <h1 className="flex items-center gap-3 text-3xl leading-none text-foreground">
+                                        <button
+                                            type="button"
+                                            onClick={() => navigateWithFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: pageSize, page: 1, tab: 'all' })}
+                                            className={tab === 'all' ? 'underline decoration-accent decoration-2 underline-offset-4' : 'text-muted transition-colors hover:text-foreground'}
+                                        >
+                                            {m.search.allTab}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => navigateWithFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: pageSize, page: 1, tab: 'productions' })}
+                                            className={tab === 'productions' ? 'underline decoration-accent decoration-2 underline-offset-4' : 'text-muted transition-colors hover:text-foreground'}
+                                        >
+                                            {m.search.productionsTab}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => navigateWithFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: pageSize, page: 1, tab: 'blogs' })}
+                                            className={tab === 'blogs' ? 'underline decoration-accent decoration-2 underline-offset-4' : 'text-muted transition-colors hover:text-foreground'}
+                                        >
+                                            {m.search.blogTab}
+                                        </button>
                                     </h1>
                                     <p className="mt-2 text-sm text-muted">
                                         <strong className="text-foreground">{totalResults}</strong> {m.search.resultsSuffix}
                                     </p>
                                 </div>
 
-                                <div className="flex items-center gap-3">
-                                    <label className="text-sm text-muted">{m.search.sortLabel}</label>
-                                    <select
-                                        className="h-9 rounded-full border border-border bg-surface px-4 text-sm text-foreground transition-all cursor-pointer duration-200 hover:border-accent/45 hover:text-accent"
-                                        value={sort}
-                                        onChange={(event) => handleSortChange(event.target.value)}
-                                    >
-                                        <option value="relevance">{m.search.sortDefault}</option>
-                                        <option value="recent">{m.search.sortRecent}</option>
-                                        <option value="oldest">{m.search.sortOldest}</option>
-                                    </select>
-                                    <select
-                                        className="h-9 rounded-full border border-border bg-surface px-4 text-sm text-foreground transition-all cursor-pointer duration-200 hover:border-accent/45 hover:text-accent"
-                                        value={String(pageSize)}
-                                        onChange={(event) => {
-                                            const nextLimit = Number(event.target.value)
-                                            navigateWithFilters({
-                                                query: query || undefined,
-                                                yearFrom: safeFromYear,
-                                                yearTo: safeToYear,
-                                                genres: selectedGenres,
-                                                locations: selectedLocations,
-                                                sort,
-                                                page: 1,
-                                                limit: nextLimit,
-                                            })
-                                        }}
-                                        aria-label={m.search.resultsPerPageAriaLabel}
-                                    >
-                                        {PAGE_SIZE_OPTIONS.map((option) => (
-                                            <option key={option} value={option}>
-                                                {`${option} ${m.search.resultsPerPageSuffix}`}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    <button
-                                        type="button"
-                                        className="group hidden h-9 items-center gap-2 rounded-full border border-border bg-surface px-3 text-sm text-foreground transition-all cursor-pointer duration-200 hover:border-accent/45 hover:text-accent md:inline-flex"
-                                        onClick={() => {
-                                            void handleShare()
-                                        }}
-                                    >
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5" aria-hidden="true">
-                                            <circle cx="18" cy="5" r="3" />
-                                            <circle cx="6" cy="12" r="3" />
-                                            <circle cx="18" cy="19" r="3" />
-                                            <path d="M8.59 13.51 15.42 17.49M15.41 6.51 8.59 10.49" strokeLinecap="round" />
-                                        </svg>
-                                        <span>{shareCopied ? m.search.shareCopiedLabel : m.search.shareLabel}</span>
-                                    </button>
-                                </div>
+                                {!isBlogTab ? (
+                                    <div className="flex items-center gap-3">
+                                        <label className="text-sm text-muted">{m.search.sortLabel}</label>
+                                        <select
+                                            className="h-9 rounded-full border border-border bg-surface px-4 text-sm text-foreground transition-all cursor-pointer duration-200 hover:border-accent/45 hover:text-accent"
+                                            value={sort}
+                                            onChange={(event) => handleSortChange(event.target.value)}
+                                        >
+                                            <option value="relevance">{m.search.sortDefault}</option>
+                                            <option value="recent">{m.search.sortRecent}</option>
+                                            <option value="oldest">{m.search.sortOldest}</option>
+                                        </select>
+                                        <select
+                                            className="h-9 rounded-full border border-border bg-surface px-4 text-sm text-foreground transition-all cursor-pointer duration-200 hover:border-accent/45 hover:text-accent"
+                                            value={String(pageSize)}
+                                            onChange={(event) => {
+                                                const nextLimit = Number(event.target.value)
+                                                navigateWithFilters({
+                                                    query: query || undefined,
+                                                    yearFrom: safeFromYear,
+                                                    yearTo: safeToYear,
+                                                    genres: selectedGenres,
+                                                    locations: selectedLocations,
+                                                    sort,
+                                                    page: 1,
+                                                    limit: nextLimit,
+                                                    tab,
+                                                })
+                                            }}
+                                            aria-label={m.search.resultsPerPageAriaLabel}
+                                        >
+                                            {PAGE_SIZE_OPTIONS.map((option) => (
+                                                <option key={option} value={option}>
+                                                    {`${option} ${m.search.resultsPerPageSuffix}`}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <button
+                                            type="button"
+                                            className="group hidden h-9 items-center gap-2 rounded-full border border-border bg-surface px-3 text-sm text-foreground transition-all cursor-pointer duration-200 hover:border-accent/45 hover:text-accent md:inline-flex"
+                                            onClick={() => {
+                                                void handleShare()
+                                            }}
+                                        >
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5" aria-hidden="true">
+                                                <circle cx="18" cy="5" r="3" />
+                                                <circle cx="6" cy="12" r="3" />
+                                                <circle cx="18" cy="19" r="3" />
+                                                <path d="M8.59 13.51 15.42 17.49M15.41 6.51 8.59 10.49" strokeLinecap="round" />
+                                            </svg>
+                                            <span>{shareCopied ? m.search.shareCopiedLabel : m.search.shareLabel}</span>
+                                        </button>
+                                    </div>
+                                ) : null}
                             </div>
 
-                        {filterChips.length > 0 ? (
+                        {(isBlogTab ? filterChips.filter((chip) => chip.key === 'period') : filterChips).length > 0 ? (
                             <div className="mt-5 flex flex-wrap items-center gap-2">
-                                {filterChips.map((chip) => (
+                                {(isBlogTab ? filterChips.filter((chip) => chip.key === 'period') : filterChips).map((chip) => (
                                     <button
                                         key={chip.key}
                                         type="button"
@@ -1213,9 +1711,16 @@ function SearchPage() {
                                 </div>
                             </div>
                         ) : pageItems.length > 0 ? (
-                            <div className="mt-5 grid gap-x-5 gap-y-8 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                            <div className="mt-5 grid items-stretch gap-x-5 gap-y-8 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                                 {pageItems.map((item) => (
-                                    <SearchResultCard key={item.id} item={item} />
+                                    <SearchResultCard
+                                        key={item.id}
+                                        item={item}
+                                        detailHref={ item.type === 'blog'
+                                            ? withLocalePath('/blogs/' + item.id, locale)
+                                            : withLocalePath('/archive/' + item.id, locale)
+                                        }
+                                    />
                                 ))}
                             </div>
                         ) : (

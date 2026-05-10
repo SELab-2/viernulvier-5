@@ -6,6 +6,21 @@ import type { Locale } from '../../i18n/types'
 import SearchResultCard, { type SearchResultItem } from './search/SearchResultCard'
 import SectionTitle from './SectionTitle'
 
+// Canonical values to match SearchPage logic
+const CANONICAL_GENRE_VALUES = [
+    'theater',
+    'dans',
+    'concert',
+    'nightlife',
+    'talks',
+    'comedy',
+    'monument',
+    'circus',
+    'performance',
+    'spoken word',
+    'listening session',
+] as const
+
 type LocalizedText = {
     nl?: string
     en?: string
@@ -18,13 +33,19 @@ type ProductionApiItem = {
     teaser: LocalizedText
     description_short: LocalizedText
     description: LocalizedText
-    created_at?: string
-    on_this_day_event_date?: string | null
-    image_url?: string | null
-    venue_name?: string | null
-    venue_names?: string[]
-    production_genres?: string[]
+    created_at: string
     performer_type: string | null
+    attendance_mode: string | null
+    image_url?: string | null
+    links?: {
+        self: string
+        events: string
+        genres: string
+        tags: string
+        media_gallery: string | null
+        review_gallery: string | null
+        poster_gallery: string | null
+    }
 }
 
 type CarouselMode = 'on-this-day' | 'fallback-recent'
@@ -39,301 +60,299 @@ type PaginatedApiResponse<T> = {
     }
 }
 
-const NON_GENRE_TAG_VALUES = new Set([
-    'group',
-    'in de vooruit',
-    'by viernulvier',
-    'te gast',
-    'nederlands gesproken',
-    'engels gesproken',
-    'frans gesproken',
-    'cadeaubon geldig',
-])
-
-function getDisplayTag(item: ProductionApiItem, locale: Locale): string {
-    const normalizedProductionGenres = (item.production_genres ?? [])
-        .map((value) => value.trim())
-        .filter((value) => value.length > 0)
-        .filter((value) => !NON_GENRE_TAG_VALUES.has(value.toLowerCase()))
-
-    if (normalizedProductionGenres.length > 0) {
-        return normalizedProductionGenres[0]
-    }
-
-    const normalizedPerformerType = item.performer_type?.trim() ?? ''
-    if (normalizedPerformerType.length > 0 && !NON_GENRE_TAG_VALUES.has(normalizedPerformerType.toLowerCase())) {
-        return normalizedPerformerType
-    }
-
-    return locale === 'nl' ? 'productie' : 'production'
-}
-
 function getLocalizedText(text: LocalizedText, locale: Locale): string {
-    if (!text) {
-        return ''
-    }
-
+    if (!text) return ''
+    if (typeof text === 'string') return text
     const values = locale === 'en' ? [text.en, text.nl, text.fr] : [text.nl, text.en, text.fr]
     return values.find((value) => typeof value === 'string' && value.trim().length > 0)?.trim() ?? ''
 }
 
 function toPlainText(value: string): string {
     const trimmed = value.trim()
-    if (!trimmed) {
-        return ''
-    }
-
+    if (!trimmed) return ''
     if (typeof window !== 'undefined' && typeof DOMParser !== 'undefined') {
         const parsed = new DOMParser().parseFromString(trimmed, 'text/html')
         return (parsed.body.textContent ?? '').replace(/\s+/g, ' ').trim()
     }
-
-    return trimmed
-        .replace(/<[^>]*>/g, ' ')
-        .replace(/&nbsp;/gi, ' ')
-        .replace(/&amp;/gi, '&')
-        .replace(/&quot;/gi, '"')
-        .replace(/&#39;|&apos;/gi, "'")
-        .replace(/&lt;/gi, '<')
-        .replace(/&gt;/gi, '>')
-        .replace(/\s+/g, ' ')
-        .trim()
+    return trimmed.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
 }
 
-function formatDate(value: Date, locale: Locale): string {
+function getGenreLabel(value: string, locale: Locale): string {
+    const labels = getMessages(locale).search.genres
+    const index = CANONICAL_GENRE_VALUES.indexOf(value as (typeof CANONICAL_GENRE_VALUES)[number])
+    return index >= 0 ? labels[index] ?? value : value
+}
+
+function formatDate(value: Date | string, locale: Locale): string {
+    const date = typeof value === 'string' ? new Date(value) : value
+    if (Number.isNaN(date.getTime())) return ''
     return new Intl.DateTimeFormat(locale === 'nl' ? 'nl-BE' : 'en-GB', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
-    }).format(value)
+    }).format(date)
 }
 
-function mapProductionToCarouselItem(item: ProductionApiItem, locale: Locale, mode: CarouselMode): SearchResultItem | null {
-    const rawDate = mode === 'on-this-day'
-        ? item.on_this_day_event_date
-        : item.on_this_day_event_date ?? item.created_at
-
-    if (!rawDate) {
-        return null
-    }
-
-    const eventDate = new Date(rawDate)
-
-    if (Number.isNaN(eventDate.getTime())) {
-        return null
-    }
-
-    const title = getLocalizedText(item.title, locale) || (locale === 'nl' ? 'Zonder titel' : 'Untitled')
+function mapProductionToCarouselItem(item: ProductionApiItem, locale: Locale): SearchResultItem {
+    const messages = getMessages(locale)
+    const title = getLocalizedText(item.title, locale) || messages.search.fallbackUntitled
     const excerptRaw =
         getLocalizedText(item.description_short, locale) ||
         getLocalizedText(item.description, locale) ||
         getLocalizedText(item.teaser, locale) ||
         title
     const excerpt = toPlainText(excerptRaw) || title
-    const fallbackVenue = locale === 'nl' ? 'Locatie nog niet bekend' : 'Venue to be announced'
-
-    const venueFromProduction = (item.venue_names ?? []).find((value) => value.trim().length > 0) ?? item.venue_name ?? ''
+    
+    const normalizedLocation = (item.attendance_mode ?? '').trim().toLowerCase()
+    const hasConcreteAttendanceMode = normalizedLocation.length > 0 && normalizedLocation !== 'offline' && normalizedLocation !== 'online'
+    const fallbackVenue = messages.search.fallbackVenue
+    const venue = hasConcreteAttendanceMode ? normalizedLocation : fallbackVenue
+    const fallbackTag = messages.search.fallbackTag
 
     return {
         id: item.id,
-        tag: getDisplayTag(item, locale),
-        date: formatDate(eventDate, locale),
+        tag: fallbackTag,
+        date: formatDate(item.created_at, locale),
         title,
         excerpt,
-        venue: venueFromProduction || fallbackVenue,
-        imageUrl: item.image_url ?? undefined,
+        venue,
+        imageUrl: undefined,
     }
 }
 
 function prioritizeItemsWithImage(items: SearchResultItem[]): SearchResultItem[] {
-    const withImage: SearchResultItem[] = []
-    const withoutImage: SearchResultItem[] = []
+    // Stable sort: items with image come first, but otherwise keep order
+    return [...items].sort((a, b) => {
+        if (a.imageUrl && !b.imageUrl) return -1
+        if (!a.imageUrl && b.imageUrl) return 1
+        return 0
+    })
+}
 
-    for (const item of items) {
-        if (item.imageUrl && item.imageUrl.trim().length > 0) {
-            withImage.push(item)
-        } else {
-            withoutImage.push(item)
+function getRelativePath(url: string | null | undefined): string | null {
+    if (!url) return null
+    const parts = url.split('/api/v1')
+    return parts.length > 1 ? parts[1] : url
+}
+
+function useProductionImages(items: ProductionApiItem[]) {
+    const [images, setImages] = useState<Record<string, string>>({})
+    useEffect(() => {
+        const fetchImages = async () => {
+            const itemsToFetch = items.filter(item => !item.image_url && item.links?.media_gallery)
+            if (itemsToFetch.length === 0) return
+            const results = await Promise.allSettled(
+                itemsToFetch.map(async (item) => {
+                    const galleryPath = getRelativePath(item.links?.media_gallery)
+                    if (!galleryPath) return null
+                    try {
+                        const galleryRes = await apiFetch<{ data: { links: { items: string } } }>(galleryPath)
+                        const itemsPath = getRelativePath(galleryRes.data?.links?.items)
+                        if (!itemsPath) return null
+                        const itemsRes = await apiFetch<{ data: Array<{ links?: { crops: string } }> }>(itemsPath)
+                        for (const galleryItem of (itemsRes.data || [])) {
+                            if (!galleryItem.links?.crops) continue
+                            const cropsPath = getRelativePath(galleryItem.links.crops)
+                            const cropsRes = await apiFetch<{ data: Array<{ name: string, url: string }> }>(cropsPath!)
+                            const target = cropsRes.data.find(c => c.name === 'FE3_header') || cropsRes.data.find(c => c.name === 'FEA_boxed') || cropsRes.data[0]
+                            if (target?.url) return { id: item.id, url: target.url }
+                        }
+                    } catch { return null }
+                    return null
+                })
+            )
+            const newImages: Record<string, string> = {}
+            results.forEach(res => { if (res.status === 'fulfilled' && res.value) newImages[res.value.id] = res.value.url })
+            setImages(prev => ({ ...prev, ...newImages }))
         }
-    }
+        fetchImages()
+    }, [items])
+    return images
+}
 
-    return [...withImage, ...withoutImage]
+function useProductionEventDetails(items: ProductionApiItem[], locale: Locale, referenceDate?: string) {
+    const [details, setDetails] = useState<Record<string, { date: string, venue: string }>>({})
+    useEffect(() => {
+        const fetchDetails = async () => {
+            const itemsToFetch = items.filter(item => item.links?.events)
+            if (itemsToFetch.length === 0) return
+            const now = new Date()
+            const refDateObj = referenceDate ? new Date(`${referenceDate}T00:00:00.000Z`) : null
+            const results = await Promise.allSettled(
+                itemsToFetch.map(async (item) => {
+                    try {
+                        const eventsPath = getRelativePath(item.links?.events)
+                        const res = await apiFetch<{ data: Array<{ starts_at: string, links: { hall: string } }> }>(`${eventsPath}&limit=50`)
+                        const pastEvents = (res.data || []).filter(e => new Date(e.starts_at) < now).sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime())
+                        if (pastEvents.length === 0) return { id: item.id, date: '', venue: '' }
+                        let displayDate = ''
+                        const otdMatch = refDateObj ? pastEvents.find(e => {
+                            const d = new Date(e.starts_at)
+                            return d.getUTCMonth() === refDateObj.getUTCMonth() && d.getUTCDate() === refDateObj.getUTCDate()
+                        }) : null
+                        if (otdMatch) displayDate = formatDate(otdMatch.starts_at, locale)
+                        else if (pastEvents.length === 1) displayDate = formatDate(pastEvents[0].starts_at, locale)
+                        else {
+                            const y1 = new Date(pastEvents[0].starts_at).getFullYear()
+                            const y2 = new Date(pastEvents[pastEvents.length - 1].starts_at).getFullYear()
+                            displayDate = y1 === y2 ? `${formatDate(pastEvents[0].starts_at, locale)} - ${formatDate(pastEvents[pastEvents.length - 1].starts_at, locale)}` : `${y1} - ${y2}`
+                        }
+                        const vNames = new Set<string>()
+                        for (const e of pastEvents.slice(0, 3)) {
+                            const hPath = getRelativePath(e.links?.hall)
+                            if (hPath) {
+                                const hRes = await apiFetch<{ data: { name: LocalizedText } }>(hPath)
+                                if (hRes.data?.name) vNames.add(getLocalizedText(hRes.data.name, locale))
+                            }
+                        }
+                        return { id: item.id, date: displayDate, venue: Array.from(vNames).join(' • ') }
+                    } catch { return null }
+                })
+            )
+            const newDetails: Record<string, { date: string, venue: string }> = {}
+            results.forEach(res => { if (res.status === 'fulfilled' && res.value) newDetails[res.value.id] = res.value })
+            setDetails(prev => ({ ...prev, ...newDetails }))
+        }
+        fetchDetails()
+    }, [items, locale, referenceDate])
+    return details
+}
+
+function useProductionTaxonomies(items: ProductionApiItem[], locale: Locale) {
+    const [taxonomies, setTaxonomies] = useState<Record<string, string>>({})
+    useEffect(() => {
+        const fetchTaxonomies = async () => {
+            const itemsToFetch = items.filter(item => item.links?.genres || item.links?.tags)
+            if (itemsToFetch.length === 0) return
+            const results = await Promise.allSettled(
+                itemsToFetch.map(async (item) => {
+                    try {
+                        const gPath = getRelativePath(item.links?.genres)
+                        if (gPath) {
+                            const res = await apiFetch<{ data: Array<{ slug: LocalizedText, name: LocalizedText }> }>(gPath)
+                            if (res.data?.[0]) {
+                                const slug = getLocalizedText(res.data[0].slug, locale) || getLocalizedText(res.data[0].name, locale)
+                                if (slug) return { id: item.id, label: getGenreLabel(slug.toLowerCase(), locale) }
+                            }
+                        }
+                        const tPath = getRelativePath(item.links?.tags)
+                        if (tPath) {
+                            const res = await apiFetch<{ data: Array<{ slug: LocalizedText, name: LocalizedText }> }>(tPath)
+                            if (res.data?.[0]) {
+                                const slug = getLocalizedText(res.data[0].slug, locale) || getLocalizedText(res.data[0].name, locale)
+                                if (slug) return { id: item.id, label: getGenreLabel(slug.toLowerCase(), locale) }
+                            }
+                        }
+                        return { id: item.id, label: '' }
+                    } catch { return null }
+                })
+            )
+            const newT = {} as Record<string, string>
+            results.forEach(res => { if (res.status === 'fulfilled' && res.value) newT[res.value.id] = res.value.label })
+            setTaxonomies(prev => ({ ...prev, ...newT }))
+        }
+        fetchTaxonomies()
+    }, [items, locale])
+    return taxonomies
 }
 
 function PublicCarousel() {
     const locale = getActiveLocale(window.location.pathname)
     const messages = getMessages(locale)
-    const [items, setItems] = useState<SearchResultItem[]>([])
+    const [apiRawItems, setApiRawItems] = useState<ProductionApiItem[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [mode, setMode] = useState<CarouselMode>('on-this-day')
     const scrollerRef = useRef<HTMLDivElement | null>(null)
+
     const referenceDate = useMemo(() => {
         const now = new Date()
-        const month = String(now.getMonth() + 1).padStart(2, '0')
-        const day = String(now.getDate()).padStart(2, '0')
-        return `${now.getFullYear()}-${month}-${day}`
+        return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
     }, [])
+
+    const fetchedImages = useProductionImages(apiRawItems)
+    const fetchedDetails = useProductionEventDetails(apiRawItems, locale, mode === 'on-this-day' ? referenceDate : undefined)
+    const fetchedTaxonomies = useProductionTaxonomies(apiRawItems, locale)
+
+    // Fix: Force scroll to start when new items arrive
+    useEffect(() => {
+        if (scrollerRef.current && apiRawItems.length > 0) {
+            scrollerRef.current.scrollLeft = 0
+        }
+    }, [apiRawItems])
 
     useEffect(() => {
         const abortController = new AbortController()
-
-        const loadCarouselItems = async () => {
-            setIsLoading(true)
-            setError(null)
-
-            const loadFallbackItems = async () => {
-                const fallbackParams = new URLSearchParams({
-                    page: '1',
-                    limit: '100',
-                    lang: locale,
-                    sort: 'recent',
-                })
-
-                const fallbackResponse = await apiFetch<PaginatedApiResponse<ProductionApiItem>>(
-                    `/archive/productions?${fallbackParams.toString()}`,
-                    { signal: abortController.signal },
-                )
-
-                const fallbackItems = fallbackResponse.data
-                    .map((item) => mapProductionToCarouselItem(item, locale, 'fallback-recent'))
-                    .filter((item): item is SearchResultItem => item !== null)
-
-                return prioritizeItemsWithImage(fallbackItems)
+        const load = async () => {
+            setIsLoading(true); setError(null); setApiRawItems([])
+            const fetchR = async (otd: boolean) => {
+                const p = new URLSearchParams({ page: '1', limit: '12', lang: locale, ...(otd ? { onThisDay: 'true', referenceDate, sort: 'oldest' } : { sort: 'recent' }) })
+                const res = await apiFetch<PaginatedApiResponse<ProductionApiItem>>(`/archive/productions?${p.toString()}`, { signal: abortController.signal })
+                return res.data
             }
-
             try {
-                const onThisDayParams = new URLSearchParams({
-                    page: '1',
-                    limit: '100',
-                    lang: locale,
-                    onThisDay: 'true',
-                    referenceDate,
-                    sort: 'oldest',
-                })
-
-                const onThisDayResponse = await apiFetch<PaginatedApiResponse<ProductionApiItem>>(
-                    `/archive/productions?${onThisDayParams.toString()}`,
-                    { signal: abortController.signal },
-                )
-
-                const onThisDayItems = onThisDayResponse.data
-                    .map((item) => mapProductionToCarouselItem(item, locale, 'on-this-day'))
-                    .filter((item): item is SearchResultItem => item !== null)
-
-                const prioritizedOnThisDayItems = prioritizeItemsWithImage(onThisDayItems)
-
-                if (prioritizedOnThisDayItems.length > 0) {
-                    setMode('on-this-day')
-                    setItems(prioritizedOnThisDayItems)
-                    return
-                }
-
-                const prioritizedFallbackItems = await loadFallbackItems()
-
-                setMode('fallback-recent')
-                setItems(prioritizedFallbackItems)
-            } catch {
-                if (abortController.signal.aborted) {
-                    return
-                }
-
-                try {
-                    const prioritizedFallbackItems = await loadFallbackItems()
-                    setMode('fallback-recent')
-                    setItems(prioritizedFallbackItems)
-                } catch (fallbackError) {
-                    const message = fallbackError instanceof Error ? fallbackError.message : 'Request failed'
-                    setError(message)
-                    setMode('on-this-day')
-                    setItems([])
-                }
-            } finally {
-                if (!abortController.signal.aborted) {
-                    setIsLoading(false)
-                }
-            }
+                const otdData = await fetchR(true)
+                if (otdData.length > 0) { setMode('on-this-day'); setApiRawItems(otdData) }
+                else { setMode('fallback-recent'); setApiRawItems(await fetchR(false)) }
+            } catch (err) { if (!abortController.signal.aborted) setError(err instanceof Error ? err.message : 'Error') }
+            finally { if (!abortController.signal.aborted) setIsLoading(false) }
         }
-
-        void loadCarouselItems()
-
-        return () => {
-            abortController.abort()
-        }
+        load()
+        return () => abortController.abort()
     }, [locale, referenceDate])
 
-    const scrollByPage = (direction: -1 | 1) => {
-        const scroller = scrollerRef.current
-        if (!scroller) {
-            return
-        }
-
-        scroller.scrollBy({
-            left: direction * scroller.clientWidth * 0.9,
-            behavior: 'smooth',
+    const carouselItems = useMemo(() => {
+        const mapped = apiRawItems.map((item): SearchResultItem => {
+            const base = mapProductionToCarouselItem(item, locale)
+            const detail = fetchedDetails[item.id]
+            const taxonomy = fetchedTaxonomies[item.id]
+            return {
+                ...base,
+                imageUrl: fetchedImages[item.id] || base.imageUrl,
+                date: (detail?.date && detail.date !== '') ? detail.date : base.date,
+                venue: (detail?.venue && detail.venue !== '') ? detail.venue : base.venue,
+                tag: (taxonomy && taxonomy !== '') ? taxonomy : base.tag
+            }
         })
-    }
+        return prioritizeItemsWithImage(mapped)
+    }, [apiRawItems, fetchedImages, fetchedDetails, fetchedTaxonomies, locale])
 
-    const heading = mode === 'fallback-recent'
-        ? messages.home.onThisDayFallbackHeading
-        : messages.home.onThisDayHeading
+    const scroll = (d: -1 | 1) => scrollerRef.current?.scrollBy({ left: d * scrollerRef.current.clientWidth * 0.9, behavior: 'smooth' })
+    const heading = mode === 'fallback-recent' ? messages.home.onThisDayFallbackHeading : messages.home.onThisDayHeading
 
     return (
         <section className="bg-foreground/3 py-16">
-            <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="relative flex flex-col items-center sm:block">
-                    <SectionTitle title={heading} subtitle={messages.home.onThisDaySubheading} align="center" />
-                    <Link
-                        to={withLocalePath('/zoeken', locale)}
-                        className="mt-2 text-lg font-semibold text-foreground transition-opacity hover:opacity-70 sm:absolute sm:right-0 sm:top-1/2 sm:-translate-y-1/2 sm:mt-0"
-                    >
+            <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 text-left">
+                <div className="relative flex flex-col items-start sm:block">
+                    <SectionTitle title={heading} subtitle={messages.home.onThisDaySubheading} />
+                    <Link to={withLocalePath('/zoeken', locale)} className="mt-2 text-lg font-semibold text-foreground transition-opacity hover:opacity-70 sm:absolute sm:right-0 sm:top-1/2 sm:-translate-y-1/2 sm:mt-0">
                         {messages.home.onThisDayViewAll} →
                     </Link>
                 </div>
-
-                {isLoading ? <p className="mt-8 text-sm text-muted">{messages.common.loading}</p> : null}
-                {!isLoading && error ? <p className="mt-8 text-sm text-muted">{messages.home.onThisDayEmpty}</p> : null}
-                {!isLoading && !error && items.length === 0 ? <p className="mt-8 text-sm text-muted">{messages.home.onThisDayEmpty}</p> : null}
-
-                {!isLoading && !error && items.length > 0 ? (
+                {isLoading && <p className="mt-8 text-sm text-muted">{messages.common.loading}</p>}
+                {!isLoading && (error || carouselItems.length === 0) && <p className="mt-8 text-sm text-muted">{messages.home.onThisDayEmpty}</p>}
+                {!isLoading && carouselItems.length > 0 && (
                     <>
                         <div
                             ref={scrollerRef}
                             className="mt-8 flex snap-x snap-mandatory gap-6 overflow-x-auto py-6 px-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                         >
-                            {items.map((item, index) => (
-                                <Link
-                                    to={withLocalePath(`/archive/${item.id}`, locale)}
+                            {carouselItems.map((item, index) => (
+                                <div
                                     key={item.id}
-                                    className={`flex w-[280px] shrink-0 snap-start border border-border bg-surface p-4 transition-transform duration-300 hover:rotate-0 hover:shadow-lg sm:w-[310px] ${
-                                        index % 2 === 0 ? '-rotate-3' : 'rotate-3'
-                                    }`}
+                                    className={`flex w-[280px] shrink-0 snap-start border border-border bg-surface p-4 transition-transform duration-300 hover:rotate-0 hover:shadow-lg sm:w-[310px] ${index % 2 === 0 ? '-rotate-3' : 'rotate-3'}`}
                                 >
-                                    <SearchResultCard item={item} />
-                                </Link>
+                                    <SearchResultCard item={item} detailHref={withLocalePath(`/archive/${item.id}`, locale)} />
+                                </div>
                             ))}
                         </div>
-
                         <div className="mt-2 flex items-center justify-end gap-4 text-2xl text-foreground">
-                            <button
-                                type="button"
-                                className="h-10 w-10 rounded-full border border-border transition-colors hover:bg-surface"
-                                onClick={() => scrollByPage(-1)}
-                                aria-label="Previous"
-                            >
-                                ‹
-                            </button>
-                            <button
-                                type="button"
-                                className="h-10 w-10 rounded-full border border-border transition-colors hover:bg-surface"
-                                onClick={() => scrollByPage(1)}
-                                aria-label="Next"
-                            >
-                                ›
-                            </button>
+                            <button type="button" className="h-10 w-10 rounded-full border border-border transition-colors hover:bg-surface" onClick={() => scroll(-1)}>‹</button>
+                            <button type="button" className="h-10 w-10 rounded-full border border-border transition-colors hover:bg-surface" onClick={() => scroll(1)}>›</button>
                         </div>
                     </>
-                ) : null}
+                )}
+
             </div>
         </section>
     )

@@ -1,10 +1,13 @@
 import { useCallback, useMemo, useRef, useState } from 'react'
+import type { SessionUser } from '../../api/adminAuth'
+import { useOptionalAdminSession } from '../../auth/useAdminSessionContext'
 import { logoutAndRedirect } from '../../auth/adminLogout'
 import { getMessages } from '../../i18n'
 import AdminFooter from './AdminFooter'
 import { AdminMessagesContext } from './AdminMessagesContext'
 import AdminSidebar from './AdminSidebar'
 import AdminTopBar from './AdminTopBar'
+import SettingsModal from './SettingsModal'
 import { useFocusTrap } from './useFocusTrap'
 import { useLocale } from './useLocale'
 import { useTheme } from './useTheme'
@@ -28,16 +31,26 @@ function AdminLayout({
   showFooter = true,
   mainClassName = '',
   showLogout = true,
-  userName = 'Artevelde stagiair',
-  userRole = 'Administrator',
+  userName,
+  userRole,
   showSidebar = false,
 }: AdminLayoutProps) {
   const { locale, handleLocaleChange } = useLocale()
   const { theme, handleThemeChange } = useTheme()
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const drawerRef = useRef<HTMLDivElement>(null)
   const openerRef = useRef<HTMLButtonElement>(null)
+  const session = useOptionalAdminSession()
+  const contextUser = showSidebar ? session?.user ?? null : null
+  const [sessionUser, setSessionUser] = useState<SessionUser | null>(contextUser)
+  const [prevUser, setPrevUser] = useState<SessionUser | null>(contextUser)
   const messages = useMemo(() => getMessages(locale), [locale])
+
+  if (prevUser !== contextUser) {
+    setPrevUser(contextUser)
+    setSessionUser(contextUser)
+  }
 
   const closeMobileSidebar = useCallback(() => {
     setMobileSidebarOpen(false)
@@ -53,6 +66,8 @@ function AdminLayout({
   const openMobileSidebar = () => setMobileSidebarOpen(true)
 
   const handleLogoutClick = () => logoutAndRedirect(window.location.hostname)
+  const sidebarUserName = sessionUser?.username ?? userName ?? ''
+  const sidebarUserRole = sessionUser?.role ?? userRole ?? ''
 
   return (
     <AdminMessagesContext.Provider value={messages}>
@@ -71,8 +86,12 @@ function AdminLayout({
 
         <div className={['flex w-full items-stretch flex-1', showSidebar ? 'lg:min-h-[calc(100vh-4.5rem)]' : ''].filter(Boolean).join(' ')}>
           {showSidebar ? (
-            <div className="hidden lg:flex lg:shrink-0">
-              <AdminSidebar userName={userName} userRole={userRole} />
+            <div className="hidden lg:sticky lg:top-0 lg:flex lg:h-screen lg:shrink-0 lg:self-start">
+              <AdminSidebar
+                userName={sidebarUserName}
+                userRole={sidebarUserRole}
+                onOpenSettings={() => setSettingsOpen(true)}
+              />
             </div>
           ) : null}
 
@@ -91,8 +110,9 @@ function AdminLayout({
                 className="fixed inset-y-0 left-0 z-50 flex lg:hidden"
               >
                 <AdminSidebar
-                  userName={userName}
-                  userRole={userRole}
+                  userName={sidebarUserName}
+                  userRole={sidebarUserRole}
+                  onOpenSettings={() => setSettingsOpen(true)}
                   onClose={closeMobileSidebar}
                 />
               </div>
@@ -102,6 +122,15 @@ function AdminLayout({
           <main className={`${getMainClassName(mainClassName)}`}>{children}</main>
         </div>
         {showFooter ? <AdminFooter /> : null}
+
+        {settingsOpen ? (
+          <SettingsModal
+            isOpen={settingsOpen}
+            onClose={() => setSettingsOpen(false)}
+            user={sessionUser}
+            onUserUpdated={setSessionUser}
+          />
+        ) : null}
       </div>
     </AdminMessagesContext.Provider>
   )

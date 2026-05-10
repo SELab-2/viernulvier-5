@@ -12,16 +12,21 @@ export async function apiFetch<T>(
 ): Promise<T> {
     const url = `${API_BASE}${endpoint}`
 
+    const hasBody = options.body !== undefined && options.body !== null
+    const defaultHeaders: Record<string, string> = hasBody
+        ? { 'Content-Type': 'application/json' }
+        : {}
+
     let response: Response
 
     try {
         response = await fetch(url, {
             credentials: 'include', // Include cookies for auth
+            ...options,
             headers: {
-                'Content-Type': 'application/json',
+                ...defaultHeaders,
                 ...options.headers,
             },
-            ...options,
         })
     } catch (error) {
         const message = error instanceof Error ? error.message : 'Network request failed'
@@ -63,6 +68,9 @@ export const api = {
 
     put: <T>(endpoint: string, body: unknown) =>
         apiFetch<T>(endpoint, { method: 'PUT', body: JSON.stringify(body) }),
+
+    patch: <T>(endpoint: string, body: unknown) =>
+        apiFetch<T>(endpoint, { method: 'PATCH', body: JSON.stringify(body) }),
 
     delete: <T>(endpoint: string) =>
         apiFetch<T>(endpoint, { method: 'DELETE' }),
