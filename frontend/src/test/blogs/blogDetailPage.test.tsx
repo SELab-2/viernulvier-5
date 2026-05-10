@@ -25,7 +25,8 @@ vi.mock('quill', () => {
       root: HTMLDivElement
 
       constructor(container: HTMLDivElement) {
-        this.root = container
+        this.root = document.createElement('div')
+        container.appendChild(this.root)
       }
 
       setContents(delta: { ops?: Array<{ insert?: unknown }> }) {
@@ -33,7 +34,7 @@ vi.mock('quill', () => {
           ? delta.ops
               .map((op) => (typeof op.insert === 'string' ? op.insert : ''))
               .join('')
-          : 'mock'
+          : ''
       }
 
       setText(text: string) {

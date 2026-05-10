@@ -231,7 +231,7 @@ Also update:
 - Coverage CI: `.github/workflows/coverage.yml`
   - Backend and frontend Vitest coverage
   - Coverage comments posted to PR
-- Runners: self-hosted
+- Runners: ubuntu-latest
 
 Do not change CI workflows unless the task explicitly includes CI changes.
 
