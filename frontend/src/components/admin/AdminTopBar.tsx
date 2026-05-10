@@ -32,7 +32,7 @@ function AdminTopBar({
     const messages = useAdminMessages()
 
     return (
-        <header className="bg-black text-white">
+        <header className="sticky top-0 z-50 bg-black text-white">
             <div className="site-container flex min-h-16 items-center justify-between gap-4 py-4 max-[640px]:min-h-14 max-[640px]:py-3">
                 <div className="flex items-center gap-1 max-[640px]:gap-1">
                     {showSidebar && onOpenSidebar ? (
