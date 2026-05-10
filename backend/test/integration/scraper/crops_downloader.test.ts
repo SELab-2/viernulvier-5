@@ -54,13 +54,11 @@
 
             expect(mockedFs.writeFileSync).toHaveBeenCalledTimes(2);
 
-            const updatedCrops = await prisma.crop.findMany({
-                where: {
-                    file_location: {
-                        contains: "crops"
-                    }
-                }
-            });
+            const foundCrops = await prisma.crop.findMany();
+
+            const updatedCrops = foundCrops.filter((crop) =>
+                crop.file_location?.includes(crop.id)
+            );
             expect(updatedCrops.length).toBe(2);
             expect(updatedCrops[0].file_location).toContain("crops");
         });
@@ -78,13 +76,11 @@
 
             await download_crops(prisma_crops);
 
-            const updatedCrops = await prisma.crop.findMany({
-                where: {
-                    file_location: {
-                        contains: "crops"
-                    }
-                }
-            });
+            const foundCrops = await prisma.crop.findMany();
+
+            const updatedCrops = foundCrops.filter((crop) =>
+                crop.file_location?.includes(crop.id)
+            );
             expect(updatedCrops.length).toBe(0);
         });
 
@@ -94,13 +90,11 @@
             await download_crops([]);
 
             expect(mockedAxios).not.toHaveBeenCalled();
-            const updatedCrops = await prisma.crop.findMany({
-                where: {
-                    file_location: {
-                        contains: "crops"
-                    }
-                }
-            });
+            const foundCrops = await prisma.crop.findMany();
+
+            const updatedCrops = foundCrops.filter((crop) =>
+                crop.file_location?.includes(crop.id)
+            );
             expect(updatedCrops.length).toBe(0);
         });
 
@@ -120,13 +114,11 @@
             await download_crops(prisma_crops);
 
             expect(mockedAxios).toHaveBeenCalledTimes(25);
-            const updatedCrops = await prisma.crop.findMany({
-                where: {
-                    file_location: {
-                        contains: "crops"
-                    }
-                }
-            });
+            const foundCrops = await prisma.crop.findMany();
+
+            const updatedCrops = foundCrops.filter((crop) =>
+                crop.file_location?.includes(crop.id)
+            );
             expect(updatedCrops.length).toBe(25);
         });
     });
