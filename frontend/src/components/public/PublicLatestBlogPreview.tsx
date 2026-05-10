@@ -1,9 +1,9 @@
 import SectionTitle from './SectionTitle'
 import PublicPillButton from './PublicPillButton'
-import { getMessages } from '../../i18n'
+import { usePublicMessages } from './PublicMessagesContext'
 
 function PublicLatestBlogPreview() {
-    const messages = getMessages()
+    const messages = usePublicMessages()
 
     return (
         <section className="py-16 bg-foreground/3">
