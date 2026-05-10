@@ -99,23 +99,7 @@ function AdminLayout({
             </>
           ) : null}
 
-          {/* {header && (
-            <div>
-              {header}
-            </div>
-          )}
-
-          <div className="bg-background flex overflow-hidden">
-            <main className={getMainClassName(mainClassName)}>{children}</main>
-
-            {sidebar && (
-              <div className='flex'>
-                {sidebar}
-              </div>
-            )}
-          </div> */}
-
-          <main className={getMainClassName(mainClassName)}>{children}</main>
+          <main className={`${getMainClassName(mainClassName)}`}>{children}</main>
         </div>
         {showFooter ? <AdminFooter /> : null}
       </div>

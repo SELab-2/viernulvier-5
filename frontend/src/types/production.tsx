@@ -17,12 +17,34 @@ export interface ProductionContentFields {
     content: string// TODO: depending on what text-editor is used, this type has to change
 }
 
+/**
+ * Localized text structure
+ */
+export interface LocalizedText {
+    nl?: string
+    en?: string
+    fr?: string
+}
+
 export interface ProductionSettingsFields {
     artist: string
     banner: string
     extraPictures: string[]
-    genres: string[]
-    tags: string[]
+    genres: LocalizedText[]
+    tags: LocalizedText[]
+}
+
+/**
+ * Basic structure for a production response from the API
+ */
+export interface ProductionResponse {
+    data: {
+        id: string
+        title: LocalizedText
+        description: LocalizedText
+        artist: LocalizedText
+        // Voeg hier andere velden toe indien nodig
+    }
 }
 
 /**

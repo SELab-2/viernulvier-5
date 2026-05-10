@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type PointerEvent as ReactPointerEvent } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 import { getActiveLocale, getMessages, withLocalePath } from '../../i18n'
 import type { Locale } from '../../i18n/types'
 import { apiFetch } from '../../api/client'
@@ -373,7 +373,8 @@ type FilterPanelProps = {
 function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, onShare, locationSuggestions = [] }: FilterPanelProps) {
     const [searchParams] = useSearchParams()
     const navigate = useNavigate()
-    const locale = getActiveLocale(window.location.pathname)
+    const { pathname } = useLocation()
+    const locale = useMemo(() => getActiveLocale(pathname), [pathname])
     const { search: s } = getMessages(locale)
 
     const filterState = useMemo(() => parseSearchFilterState(searchParams), [searchParams])
@@ -387,12 +388,14 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
     const sliderRef = useRef<HTMLDivElement | null>(null)
 
     const [searchInput, setSearchInput] = useState(query)
+    const [prevQuery, setPrevQuery] = useState(query)
     const [locationInput, setLocationInput] = useState('')
     const [isLocationSuggestionsOpen, setIsLocationSuggestionsOpen] = useState(false)
 
-    useEffect(() => {
+    if (query !== prevQuery) {
+        setPrevQuery(query)
         setSearchInput(query)
-    }, [query])
+    }
 
     const pushFilters = useCallback((filters: SearchFilterOverrides) => {
         const params = buildSearchParams(filters)
@@ -718,14 +721,17 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
 function MobileSearchForm() {
     const [searchParams] = useSearchParams()
     const navigate = useNavigate()
-    const locale = getActiveLocale(window.location.pathname)
+    const { pathname } = useLocation()
+    const locale = useMemo(() => getActiveLocale(pathname), [pathname])
     const { search: s } = getMessages(locale)
     const query = useMemo(() => parseSearchFilterState(searchParams).query, [searchParams])
     const [searchInput, setSearchInput] = useState(query)
+    const [prevQuery, setPrevQuery] = useState(query)
 
-    useEffect(() => {
+    if (query !== prevQuery) {
+        setPrevQuery(query)
         setSearchInput(query)
-    }, [query])
+    }
 
     const pushQuery = useCallback((nextQuery: string) => {
         const filterState = parseSearchFilterState(searchParams)

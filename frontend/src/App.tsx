@@ -40,8 +40,6 @@ function App() {
                         <Route path="/archive/:id" element={<ArchiveDetailPage />} />
                         <Route path="/nl/archive/:id" element={<ArchiveDetailPage />} />
                         <Route path="/en/archive/:id" element={<ArchiveDetailPage />} />
-                        <Route path="/admin/archive/:id/edit" element={<ArchiveEditPage />} />
-                        <Route path="/admin/productions/new" element={<ArchiveEditPage create />} />
                     </>
                 ) : null}
 
@@ -72,7 +70,7 @@ function App() {
                             path={adminRoutes.productionEditPath}
                             element={
                                 <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
-                                    <ArchiveEditPage create />
+                                    <ArchiveEditPage />
                                 </ProtectedAdminRoute>
                             }
                         />
@@ -80,7 +78,7 @@ function App() {
                             path={adminRoutes.productionCreatePath}
                             element={
                                 <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
-                                    <ArchiveEditPage />
+                                    <ArchiveEditPage create />
                                 </ProtectedAdminRoute>
                             }
                         />

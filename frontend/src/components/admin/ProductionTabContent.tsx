@@ -1,24 +1,21 @@
 import type { ProductionContentFields } from "../../types/production"
 import SlugInput from "./SlugInput"
 
-type ArchiveContentTabProps = {
+type ProductionTabContentProps = {
     fields: ProductionContentFields
     titleLabel: string
     contentLabel: string
     slugLabel: string
-
-    // currentTab: ProductionContent
-    // changeLanguage: (field: keyof ProductionFields, value: string) => void
     onChange: (field: keyof ProductionContentFields, value: string) => void
 }
 
-function ArchiveTabContent({
+function ProductionTabContent({
     fields, 
     titleLabel, 
     slugLabel, 
     contentLabel,
     onChange
-} : ArchiveContentTabProps) {
+} : ProductionTabContentProps) {
     return (
         <div className="px-8 py-6 flex flex-col">
             <p className="mb-4 text-sm font-bold tracking-wide">{titleLabel}</p>
@@ -52,4 +49,4 @@ function ArchiveTabContent({
     )
 }
 
-export default ArchiveTabContent
+export default ProductionTabContent
