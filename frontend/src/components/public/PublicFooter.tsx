@@ -1,10 +1,11 @@
 import { Link, useLocation } from 'react-router-dom'
-import { getActiveLocale, getMessages, withLocalePath } from '../../i18n'
+import { getActiveLocale, withLocalePath } from '../../i18n'
+import { usePublicMessages } from './PublicMessagesContext'
 
 function PublicFooter() {
     const location = useLocation()
     const locale = getActiveLocale(location.pathname)
-    const messages = getMessages()
+    const messages = usePublicMessages()
 
     return (
         <footer className="bg-black text-white z-50">
