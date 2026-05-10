@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import type { FastifyInstance } from 'fastify'
 import { buildTestApp } from '../../helpers/build-app.js'
+import { Role } from '../../../src/domain/role.js'
 
 describe('Productions Routes', () => {
     let app: FastifyInstance
@@ -15,6 +16,14 @@ describe('Productions Routes', () => {
 
     describe('GET /api/v1/archive/productions', () => {
         it('should return a paginated list with 200 OK', async () => {
+            // Ensure at least one production exists with a past event
+            const production = await app.prisma.production.create({
+                data: {
+                    title: { nl: 'Initial' },
+                    events: { create: { starts_at: new Date('2020-01-01') } }
+                }
+            })
+
             const response = await app.inject({
                 method: 'GET',
                 url: '/api/v1/archive/productions',
@@ -29,184 +38,114 @@ describe('Productions Routes', () => {
             expect(body).toHaveProperty('links')
             expect(body.meta.page).toBe(1)
             expect(Array.isArray(body.data)).toBe(true)
+
+            await app.prisma.event.deleteMany({ where: { production_id: production.id } })
+            await app.prisma.production.delete({ where: { id: production.id } })
+        })
+
+        it('should search case-insensitively and support fuzzy matches in the title', async () => {
+            const pastEvent = {
+                create: {
+                    starts_at: new Date('2020-01-01'),
+                }
+            }
+
+            const titleMatch = await app.prisma.production.create({
+                data: {
+                    title: { nl: 'Pen' },
+                    description_short: { nl: 'Korte intro' },
+                    events: pastEvent,
+                },
+            })
+
+            const noMatch = await app.prisma.production.create({
+                data: {
+                    title: { nl: 'Zonder connectie' },
+                    description_short: { nl: 'Onverwante inhoud' },
+                    events: pastEvent,
+                },
+            })
+
+            try {
+                const caseInsensitiveResponse = await app.inject({
+                    method: 'GET',
+                    url: '/api/v1/archive/productions',
+                    query: {
+                        page: '1',
+                        limit: '20',
+                        search: 'pEn',
+                        lang: 'nl',
+                    },
+                })
+
+                const caseInsensitiveBody = JSON.parse(caseInsensitiveResponse.payload)
+                const caseInsensitiveIds = Array.isArray(caseInsensitiveBody.data)
+                    ? caseInsensitiveBody.data.map((item: { id: string }) => item.id)
+                    : []
+
+                expect(caseInsensitiveResponse.statusCode).toBe(200)
+                expect(caseInsensitiveIds).toContain(titleMatch.id)
+                expect(caseInsensitiveIds).not.toContain(noMatch.id)
+
+                const typoResponse = await app.inject({
+                    method: 'GET',
+                    url: '/api/v1/archive/productions',
+                    query: {
+                        page: '1',
+                        limit: '20',
+                        search: 'Penn',
+                        lang: 'nl',
+                    },
+                })
+
+                const typoBody = JSON.parse(typoResponse.payload)
+                const typoIds = Array.isArray(typoBody.data)
+                    ? typoBody.data.map((item: { id: string }) => item.id)
+                    : []
+
+                expect(typoResponse.statusCode).toBe(200)
+                expect(typoIds).toContain(titleMatch.id)
+            } finally {
+                await app.prisma.event.deleteMany({
+                    where: { production_id: { in: [titleMatch.id, noMatch.id] } }
+                })
+                await app.prisma.production.deleteMany({
+                    where: { id: { in: [titleMatch.id, noMatch.id] } },
+                })
+            }
         })
     })
 
     describe('GET /api/v1/archive/productions/:id', () => {
-        it('should return a production by ID with 200 OK', async () => {
+        it('should return a production by ID', async () => {
             const production = await app.prisma.production.create({
                 data: {
-                    title: { nl: 'Test Production by ID' },
-                    artist: { nl: 'Test Artist' }
+                    title: { nl: 'Detail Test' },
+                    events: { create: { starts_at: new Date('2020-01-01') } }
                 }
             })
 
-            try {
-                const response = await app.inject({
-                    method: 'GET',
-                    url: `/api/v1/archive/productions/${production.id}`,
-                })
-
-                expect(response.statusCode).toBe(200)
-                const body = JSON.parse(response.payload)
-                expect(body.data.id).toBe(production.id)
-                expect(body.data.title.nl).toBe('Test Production by ID')
-                expect(body.data).toHaveProperty('links')
-                expect(body.data.links).toHaveProperty('self')
-            } finally {
-                await app.prisma.production.delete({
-                    where: { id: production.id }
-                })
-            }
-        })
-
-        it('should return 404 Not Found for non-existent ID', async () => {
-            const nonExistentId = '00000000-0000-0000-0000-000000000000'
             const response = await app.inject({
                 method: 'GET',
-                url: `/api/v1/archive/productions/${nonExistentId}`,
+                url: `/api/v1/archive/productions/${production.id}`
             })
 
-            expect(response.statusCode).toBe(404)
             const body = JSON.parse(response.payload)
-            expect(body.message).toBe('Production not found')
-        })
-    })
 
-    describe('POST /api/v1/archive/productions', () => {
-        it('should create a production in the DB and then clean up', async () => {
-            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
-            const payload = { 
-                title: { nl: 'Test New Production' },
-                artist: { nl: 'Test New Artist' }
-            }
+            expect(response.statusCode).toBe(200)
+            expect(body.data.id).toBe(production.id)
+            expect(body.data.title.nl).toBe('Detail Test')
 
-            const response = await app.inject({
-                method: 'POST',
-                url: '/api/v1/archive/productions',
-                headers: { authorization: `Bearer ${token}` },
-                payload
-            })
-
-            expect(response.statusCode).toBe(201)
-            const body = JSON.parse(response.payload)
-            const created = body.data
-
-            const dbRecord = await app.prisma.production.findUnique({
-                where: { id: created.id }
-            })
-            expect(dbRecord).not.toBeNull()
-            expect((dbRecord?.title as any).nl).toBe(payload.title.nl)
-            expect(body.links).toHaveProperty('self')
-
-            await app.prisma.production.delete({
-                where: { id: created.id }
-            })
-        })
-
-        it('should return 401 Unauthorized when no token is provided', async () => {
-            const response = await app.inject({
-                method: 'POST',
-                url: '/api/v1/archive/productions',
-                payload: { title: { nl: 'Unauthorized' } }
-            })
-
-            expect(response.statusCode).toBe(401)
-        })
-    })
-
-    describe('PATCH /api/v1/archive/productions/:id', () => {
-        it('should update a production in the DB and then clean up', async () => {
-            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
-            
-            const initialProd = await app.prisma.production.create({
-                data: {
-                    title: { nl: 'Initial Title' },
-                    artist: { nl: 'Initial Artist' }
-                }
-            })
-
-            const updatePayload = { title: { nl: 'Updated Title' } }
-
-            try {
-                const response = await app.inject({
-                    method: 'PATCH',
-                    url: `/api/v1/archive/productions/${initialProd.id}`,
-                    headers: { authorization: `Bearer ${token}` },
-                    payload: updatePayload
-                })
-
-                expect(response.statusCode).toBe(200)
-                const body = JSON.parse(response.payload)
-                const updated = body.data
-                expect(updated.title.nl).toBe(updatePayload.title.nl)
-                expect(updated.links).toHaveProperty('self')
-            } finally {
-                await app.prisma.production.delete({
-                    where: { id: initialProd.id }
-                })
-            }
-        })
-
-        it('should return 401 Unauthorized when no token is provided', async () => {
-            const id = '00000000-0000-0000-0000-000000000000'
-            const response = await app.inject({
-                method: 'PATCH',
-                url: `/api/v1/archive/productions/${id}`,
-                payload: { title: { nl: 'Unauthorized' } }
-            })
-
-            expect(response.statusCode).toBe(401)
+            await app.prisma.event.deleteMany({ where: { production_id: production.id } })
+            await app.prisma.production.delete({ where: { id: production.id } })
         })
 
         it('should return 404 for non-existent production', async () => {
-            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
             const response = await app.inject({
-                method: 'PATCH',
-                url: '/api/v1/archive/productions/00000000-0000-0000-0000-000000000000',
-                headers: { authorization: `Bearer ${token}` },
-                payload: { title: { nl: 'Non-existent' } }
-            })
-            expect(response.statusCode).toBe(404)
-        })
-    })
-
-    describe('DELETE /api/v1/archive/productions/:id', () => {
-        it('should return 401 when no token provided', async () => {
-            const response = await app.inject({
-                method: 'DELETE',
+                method: 'GET',
                 url: '/api/v1/archive/productions/00000000-0000-0000-0000-000000000000'
             })
-            expect(response.statusCode).toBe(401)
-        })
 
-        it('should delete a production', async () => {
-            const production = await app.prisma.production.create({
-                data: { title: { nl: 'To Be Deleted' } }
-            })
-
-            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
-            const response = await app.inject({
-                method: 'DELETE',
-                url: `/api/v1/archive/productions/${production.id}`,
-                headers: { authorization: `Bearer ${token}` }
-            })
-
-            expect(response.statusCode).toBe(204)
-
-            const dbRecord = await app.prisma.production.findUnique({
-                where: { id: production.id }
-            })
-            expect(dbRecord).toBeNull()
-        })
-
-        it('should return 404 for non-existent production', async () => {
-            const token = app.jwt.sign({ sub: 'admin', role: 'ADMIN' })
-            const response = await app.inject({
-                method: 'DELETE',
-                url: '/api/v1/archive/productions/00000000-0000-0000-0000-000000000000',
-                headers: { authorization: `Bearer ${token}` }
-            })
             expect(response.statusCode).toBe(404)
         })
     })

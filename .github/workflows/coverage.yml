@@ -13,7 +13,7 @@ concurrency:
 jobs:
   backend-coverage:
     name: Backend Coverage
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     services:
       postgres:
@@ -67,7 +67,7 @@ jobs:
 
   frontend-coverage:
     name: Frontend Coverage
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     permissions:
       contents: read
@@ -78,9 +78,9 @@ jobs:
         working-directory: frontend
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: npm

@@ -3,6 +3,7 @@ import { prisma } from "./prisma";
 import { log } from "./logger";
 
 import Scraper from './scraper';
+import {mkdir} from "node:fs/promises";
 
 // contains the data of the last sync with the API, the scraper will only add data updated or created after this timestamp
 
@@ -36,10 +37,23 @@ export async function main() {
   await Scraper.sync_uit_themes(cutoff_timestamp);
   await Scraper.sync_uit_types(cutoff_timestamp);
 
+  if (process.env.CROP_LOCATION === undefined){
+    console.log("no crop_location given in the .env");
+    return;
+  }
+  try{
+    await mkdir(process.env.CROP_LOCATION, { recursive: true });
+    console.log(`Directory ready: ${process.env.CROP_LOCATION}`);
+  } catch (error) {
+    console.error(`Failed to create directory ${process.env.CROP_LOCATION}:`, error);
+    return;
+  }
+
   await Scraper.sync_crops(cutoff_timestamp);
+
   await Scraper.sync_items(cutoff_timestamp);
   await Scraper.sync_galleries(cutoff_timestamp);
-  await Scraper.sync_genres(cutoff_timestamp);
+  await Scraper.sync_tags(cutoff_timestamp);
   await Scraper.sync_productions(cutoff_timestamp);
   await Scraper.sync_events(cutoff_timestamp);
   await Scraper.sync_event_prices(cutoff_timestamp);

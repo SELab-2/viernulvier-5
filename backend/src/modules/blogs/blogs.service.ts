@@ -5,25 +5,30 @@ import type {
     CreateBlogInput,
     UpdateBlogInput
 } from './blogs.schema.js'
-import { PaginatedResult, calculateTotalPages } from '../../utils/pagination.js'
+import { PaginatedResult, calculateTotalPages, sanitizePage } from '../../utils/pagination.js'
 
 export class BlogsService {
     constructor(private readonly repository: BlogsRepository) {}
 
     async getBlogs(options: BlogPaginationQuery): Promise<PaginatedResult<BlogResponse>> {
-        const { page, limit, search } = options
+        const { page, limit, search, yearFrom, yearTo } = options
 
-        const [items, total] = await Promise.all([
-            this.repository.findAll({ page, limit, search }),
-            this.repository.count({ search }),
-        ])
-
+        const total = await this.repository.count({ search, yearFrom, yearTo })
         const totalPages = calculateTotalPages(total, limit)
+        const sanitizedPage = sanitizePage(page, totalPages)
+
+        const items = await this.repository.findAll({ 
+            page: sanitizedPage, 
+            limit, 
+            search,
+            yearFrom,
+            yearTo,
+        })
 
         return {
             items,
             total,
-            page,
+            page: sanitizedPage,
             limit,
             totalPages,
         }

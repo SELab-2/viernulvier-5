@@ -24,13 +24,20 @@ function getLocalized(obj: any) {
   return obj as { nl: string; en: string; fr: string };
 }
 
-async function* singlePage<T>(data: T[]): AsyncGenerator<T[]> {
-  yield data;
+async function* singlePage<T>(data: T[]): AsyncGenerator<{ members: T[], totalItems: number }> {
+  yield { members: data, totalItems: data.length };
 }
 
 // ------------------------------------------------------------------
 // 1. mock fetcher with mock data
 // ------------------------------------------------------------------
+vi.mock('../../../src/scraper/crops_downloader', () => ({
+  default: {
+    download_crops: vi.fn().mockResolvedValue(undefined),
+  },
+  download_crops: vi.fn().mockResolvedValue(undefined),
+}));
+
 vi.mock('../../../src/scraper/fetcher', () => {
   // mock data
 
@@ -168,6 +175,18 @@ vi.mock('../../../src/scraper/fetcher', () => {
       "@type": "Crop",
       created_at: "2021-01-05T09:00:00Z",
       updated_at: "2021-01-06T09:30:00Z",
+      name: "FE3_header",
+      url: "https://example.com/crop-1.jpg",
+    } as APICrop,
+  ];
+
+  const other_crops: APICrop[] = [
+    {
+      "@context": "/api/context/crop",
+      "@id": "/crop/2",
+      "@type": "Crop",
+      created_at: "2021-01-05T09:00:00Z",
+      updated_at: "2021-01-06T09:30:00Z",
       name: "thumb",
       url: "https://example.com/crop-1.jpg",
     } as APICrop,
@@ -289,8 +308,8 @@ vi.mock('../../../src/scraper/fetcher', () => {
     } as APIUitType,
   ];
 
-  async function* pages<T>(pages: T[][]): AsyncGenerator<T[]> {
-    for (const p of pages) yield p;
+  async function* pages<T>(pageList: T[][]): AsyncGenerator<{ members: T[], totalItems: number }> {
+    for (const p of pageList) yield { members: p, totalItems: p.length };
   }
   return {
     fetchLocationsPages: () => pages([locations]),
@@ -324,6 +343,7 @@ beforeAll(async () => {
   }
 
   // clear DB
+  await prisma.blog_production.deleteMany();
   await prisma.event_price.deleteMany();
   await prisma.event.deleteMany();
   await prisma.uit_keywords_production.deleteMany();
@@ -352,7 +372,7 @@ beforeAll(async () => {
   await Scraper.sync_uit_keywords();
   await Scraper.sync_uit_themes();
   await Scraper.sync_uit_types();
-  await Scraper.sync_genres();
+  await Scraper.sync_tags();
   await Scraper.sync_productions();
   await Scraper.sync_events();
   await Scraper.sync_event_prices();
@@ -550,10 +570,15 @@ describe('scraper integration full coverage', () => {
   it('checks all crop fields', async () => {
     const crop = await prisma.crop.findUnique({ where: { apiId: '/crop/1' } });
     expect(crop).not.toBeNull();
-    expect(crop?.name).toBe('thumb');
+    expect(crop?.name).toBe('FE3_header');
     expect(crop?.url).toBe('https://example.com/crop-1.jpg');
     expect(crop?.created_at.toISOString()).toBe('2021-01-05T09:00:00.000Z');
     expect(crop?.updated_at.toISOString()).toBe('2021-01-06T09:30:00.000Z');
+  });
+
+  it('checks not downloaded crop fields', async () => {
+    const crop = await prisma.crop.findUnique({ where: { apiId: '/crop/2' } });
+    expect(crop).toBeNull();
   });
 
   it('checks all item fields and crop relation', async () => {
@@ -696,7 +721,7 @@ describe('scraper integration full coverage', () => {
     await Scraper.sync_uit_keywords();
     await Scraper.sync_uit_themes();
     await Scraper.sync_uit_types();
-    await Scraper.sync_genres();
+    await Scraper.sync_tags();
     await Scraper.sync_productions();
     await Scraper.sync_event_prices();
 
@@ -756,7 +781,7 @@ describe('scraper integration full coverage', () => {
       await Scraper.sync_hall();
       await Scraper.sync_events();
       await Scraper.sync_productions();
-      await Scraper.sync_genres();
+      await Scraper.sync_tags();
       await Scraper.sync_galleries();
       await Scraper.sync_items();
       await Scraper.sync_crops();
