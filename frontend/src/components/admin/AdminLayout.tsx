@@ -71,7 +71,7 @@ function AdminLayout({
 
   return (
     <AdminMessagesContext.Provider value={messages}>
-      <div className="admin-shell min-h-screen min-w-fit flex flex-col bg-[var(--color-admin-bg)] text-foreground">
+      <div className="admin-shell min-h-screen flex flex-col bg-[var(--color-admin-bg)] text-foreground">
         <AdminTopBar
           locale={locale}
           theme={theme}
