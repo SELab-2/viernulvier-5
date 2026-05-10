@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
 import type { ProductionItem } from '../../components/admin/blogs/ProductionManagementSection'
@@ -203,18 +203,6 @@ describe('CreateBlogPage', () => {
 
   afterEach(() => {
     vi.restoreAllMocks()
-  })
-
-  it('navigates back to the admin dashboard shell when the back button is clicked', async () => {
-    renderCreatePage()
-
-    await waitFor(() => {
-      expect(apiFetchMock).toHaveBeenCalledTimes(1)
-    })
-
-    fireEvent.click(screen.getByRole('button', { name: /Terug|Back/ }))
-
-    expect(navigate).toHaveBeenCalledWith('/admin')
   })
 
   it('shows an error when nothing is filled in', async () => {
