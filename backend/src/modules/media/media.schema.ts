@@ -127,7 +127,7 @@ export const updateCropSchema = z.object({
     apiId: z.string().nullable().optional(),
     name: z.string().nullable().optional(),
     url: z.string().nullable().optional(),
-    file_location: z.string().nullable(),
+    file_location: z.string().nullable().optional(),
     item_id: z.string().uuid().nullable().optional(),
 })
 

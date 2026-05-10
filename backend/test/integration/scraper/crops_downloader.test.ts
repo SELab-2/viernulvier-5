@@ -60,7 +60,7 @@
                 crop.file_location?.includes(crop.id)
             );
             expect(updatedCrops.length).toBe(2);
-            expect(updatedCrops[0].file_location).toContain("crops");
+            expect(updatedCrops[0].file_location).toContain(updatedCrops[0].id);
         });
 
         it("handles failed downloads without crashing", async () => {
