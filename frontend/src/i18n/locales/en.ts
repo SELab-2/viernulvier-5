@@ -123,16 +123,16 @@ const en: Messages = {
     relatedFilesCount: (count: number) => `${count} ${count === 1 ? 'file' : 'files'}`,
     stampSvgPaths: {
       days: {
-        singular: '/dag%20leeg.svg',
-        plural: '/dagen%20leeg.svg',
+        singular: '/DAY.svg',
+        plural: '/DAYS.svg',
       },
       months: {
-        singular: '/maand%20leeg.svg',
-        plural: '/maanden%20leeg.svg',
+        singular: '/MONTH.svg',
+        plural: '/MONTHS.svg',
       },
       years: {
-        singular: '/Jaar%20leeg.svg',
-        plural: '/Jaar%20leeg.svg',
+        singular: '/YEAR.svg',
+        plural: '/YEARS.svg',
       },
     },
   },

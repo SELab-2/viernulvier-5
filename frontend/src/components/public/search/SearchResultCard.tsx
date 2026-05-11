@@ -70,19 +70,28 @@ function getStampInfo(dateStr: string): { kind: 'days' | 'months' | 'years'; cou
     return { kind: 'years', count: Math.max(1, years) }
 }
 
-const STAMP_IMG_SRC = {
-    days: '/dagen%20leeg.svg',
-    months: '/maand%20leeg.svg',
-    years: '/Jaar%20leeg.svg',
-}
-
-function ProductionStamp({ dateStr }: { dateStr: string }) {
+function ProductionStamp({
+    dateStr,
+    stampSvgPaths,
+}: {
+    dateStr: string
+    stampSvgPaths: {
+        days: { singular: string; plural: string }
+        months: { singular: string; plural: string }
+        years: { singular: string; plural: string }
+    }
+}) {
     const info = getStampInfo(dateStr)
     if (!info) return null
+
+    const stampSrc = info.count === 1
+        ? stampSvgPaths[info.kind].singular
+        : stampSvgPaths[info.kind].plural
+
     return (
         <div className="absolute -top-6 -right-6 z-10 h-22 w-22 select-none rounded-full bg-surface-sunken rotate-12" aria-hidden="true">
-            <img src={STAMP_IMG_SRC[info.kind]} alt="" className="h-full w-full brightness-50" />
-            <span className="absolute inset-0 flex items-center justify-center text-xl font-bold leading-none text-black">
+            <img src={stampSrc} alt="" className="h-full w-full brightness-50 dark:brightness-0 dark:invert" />
+            <span className="absolute inset-0 flex items-center justify-center text-xl font-bold leading-none text-black dark:text-white">
                 {info.count}
             </span>
         </div>
@@ -101,7 +110,12 @@ function SearchResultCard({ item, detailHref }: SearchResultCardProps) {
 
     const card = (
         <article className="relative flex h-full w-full flex-col border-b border-border pb-5">
-            {item.type === 'production' ? <ProductionStamp dateStr={item.date} /> : null}
+            {item.type === 'production' ? (
+                <ProductionStamp
+                    dateStr={item.date}
+                    stampSvgPaths={searchMessages.stampSvgPaths}
+                />
+            ) : null}
             <div className="relative h-32 overflow-hidden rounded-md sm:h-36 bg-gradient-to-br from-accent to-accent/50">
                 {isPdf ? (
                     <iframe
