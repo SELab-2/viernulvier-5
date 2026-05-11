@@ -316,7 +316,6 @@ function mapPosterToSearchEntry(item: PosterApiItem, locale: Locale): SearchEntr
         type: 'poster' as const,
     }
 }
-
 function mapProductionToSearchEntry(item: ProductionApiItem, locale: Locale, searchMessages: Messages['search'], preferredGenre?: string): SearchEntry {
     const title = getLocalizedText(item.title, locale) || searchMessages.fallbackUntitled
     const excerptRaw =
@@ -1093,7 +1092,10 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
                                 <button
                                     key={value}
                                     type="button"
-                                    onClick={() => handleLocationChange(value)}
+                                    onMouseDown={(e) => {
+                                        e.preventDefault()
+                                        handleLocationChange(value)
+                                    }}
                                     className="inline-flex items-center gap-1.5 rounded-full bg-accent/15 px-3 py-1 text-xs text-accent"
                                     aria-label={`Remove filter ${getLocationLabel(value)}`}
                                 >
