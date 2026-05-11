@@ -1,7 +1,8 @@
 import { z } from 'zod'
 import { 
     createPaginatedResponseSchema, 
-    createSingleResponseSchema
+    createSingleResponseSchema,
+    paginationQuerySchema
 } from '../../utils/rest-schemas.js'
 
 const localizedTextSchema = z.object({
@@ -12,9 +13,7 @@ const localizedTextSchema = z.object({
 
 const customDataSchema = z.unknown().nullable()
 
-export const paginationQuerySchema = z.object({
-    page: z.coerce.number().int().positive().default(1),
-    limit: z.coerce.number().int().positive().max(100).default(20),
+export const productionPaginationQuerySchema = paginationQuerySchema.extend({
     search: z.string().optional(),
     genres: z.string().optional(),
     locations: z.string().optional(),
@@ -162,7 +161,7 @@ export const errorSchema = z.object({
     message: z.string(),
 })
 
-export type PaginationQuery = z.infer<typeof paginationQuerySchema>
+export type PaginationQuery = z.infer<typeof productionPaginationQuerySchema>
 export type ProductionResponse = z.infer<typeof productionSchema>
 export type ProductionListResponse = z.infer<typeof productionListSchema>
 export type UpdateProductionInput = z.infer<typeof updateProductionSchema>
