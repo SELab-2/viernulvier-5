@@ -21,6 +21,7 @@ export type SearchResultItem = {
 
 type SearchResultCardProps = {
     item: SearchResultItem
+    detailHref?: string
 }
 
 function capitalizeFirst(value: string): string {
@@ -88,7 +89,7 @@ function ProductionStamp({ dateStr }: { dateStr: string }) {
     )
 }
 
-function SearchResultCard({ item }: SearchResultCardProps) {
+function SearchResultCard({ item, detailHref }: SearchResultCardProps) {
     const searchMessages = getMessages(getActiveLocale(window.location.pathname)).search
     const normalizedTitle = capitalizeFirst(item.title.trim())
     const displayTitle = normalizedTitle.length > 110 ? `${normalizedTitle.slice(0, 107)}...` : normalizedTitle
@@ -151,9 +152,10 @@ function SearchResultCard({ item }: SearchResultCardProps) {
         </article>
     )
 
-    if (item.detailHref) {
+    const finalHref = item.detailHref ?? detailHref
+    if (finalHref) {
         return (
-            <Link to={item.detailHref} className="block h-full">
+            <Link to={finalHref} className="block h-full" aria-label={item.title}>
                 {card}
             </Link>
         )
