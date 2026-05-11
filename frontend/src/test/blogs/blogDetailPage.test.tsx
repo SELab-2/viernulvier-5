@@ -4,6 +4,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest'
 import type { ReactNode } from 'react'
 import BlogDetailPage from '../../pages/public/BlogDetailPage'
 import { getMessages } from '../../i18n'
+import { PublicMessagesContext } from '../../components/public/PublicMessagesContext'
 
 const apiGetMock = vi.hoisted(() => vi.fn())
 
@@ -16,7 +17,9 @@ vi.mock('../../api/client', () => ({
 }))
 
 vi.mock('../../components/public/PublicLayout', () => ({
-  default: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  default: ({ children }: { children: ReactNode }) => (
+    <PublicMessagesContext.Provider value={getMessages()}>{children}</PublicMessagesContext.Provider>
+  ),
 }))
 
 vi.mock('quill', () => {
@@ -25,7 +28,8 @@ vi.mock('quill', () => {
       root: HTMLDivElement
 
       constructor(container: HTMLDivElement) {
-        this.root = container
+        this.root = document.createElement('div')
+        container.appendChild(this.root)
       }
 
       setContents(delta: { ops?: Array<{ insert?: unknown }> }) {
@@ -33,7 +37,7 @@ vi.mock('quill', () => {
           ? delta.ops
               .map((op) => (typeof op.insert === 'string' ? op.insert : ''))
               .join('')
-          : 'mock'
+          : ''
       }
 
       setText(text: string) {

@@ -462,6 +462,28 @@ describe('ArchiveDetailPage', () => {
         })
     })
 
+    it('renders a single video when the urls are the same', async () => {
+        getProductionByIdMock.mockResolvedValue({
+            data: { 
+                ...baseProduction, 
+                video_1: { nl: 'https://www.youtube.com/watch?v=abc123' }, 
+                video_2: { nl: 'https://www.youtube.com/watch?v=abc123' }
+            },
+        })
+
+        renderPage()
+
+        await waitFor(() => {
+            const iframe = document.querySelector('iframe')
+            expect(iframe).toHaveAttribute('src', 'https://www.youtube.com/embed/abc123')
+            expect(iframe).toHaveAttribute('title', 'Video 1')
+            expect(iframe).not.toHaveAttribute('title', 'Video 2')
+            // single video gets the wide container
+            const container = iframe?.closest('.max-w-3xl')
+            expect(container).toBeInTheDocument()
+        })
+    })
+
     it('does not render any iframes when there are no valid video urls', async () => {
         getProductionByIdMock.mockResolvedValue({
             data: { ...baseProduction, video_1: null, video_2: null },
