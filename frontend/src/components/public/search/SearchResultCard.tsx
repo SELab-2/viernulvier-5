@@ -38,7 +38,7 @@ function parseLastEventDate(dateStr: string): Date | null {
     if (!dateStr.trim()) return null
     const parts = dateStr.split(' - ')
     const lastPart = parts[parts.length - 1].trim()
-    const ddmmyyyy = lastPart.match(/^(\d{1,2})[.\/\-](\d{1,2})[.\/\-](\d{4})$/)
+    const ddmmyyyy = lastPart.match(/^(\d{1,2})[./-](\d{1,2})[./-](\d{4})$/)
     if (ddmmyyyy) {
         const date = new Date(Number(ddmmyyyy[3]), Number(ddmmyyyy[2]) - 1, Number(ddmmyyyy[1]))
         return isNaN(date.getTime()) ? null : date
