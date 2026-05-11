@@ -19,7 +19,7 @@ import type {
     APISpace,
     APIHall,
     APILocation,
-    APIGenre, APIGallery, APIItem, APIEventPrice, APICrop, APIUitKeyword, APIUitTheme, APIUitType,
+    APIGenre, APIGallery, APIItem, APIEventPrice, APICrop,
 
 } from "./APItypes";
 
@@ -151,17 +151,5 @@ export async function* fetchEventPricePages(cutoff?: Date): AsyncGenerator<{ mem
 
 export async function* fetchCropPages(cutoff?: Date): AsyncGenerator<{ members: APICrop[], totalItems: number }> {
     yield* fetchPagesFromURL<APICrop>("/api/v1/media/items/crops?page=1", false, cutoff);
-}
-
-export async function* fetchUitKeywordPages(cutoff?: Date): AsyncGenerator<{ members: APIUitKeyword[], totalItems: number }>{
-    yield* fetchPagesFromURL<APIUitKeyword>("/api/v1/uitdatabank/keywords?page=1", false, cutoff);
-}
-
-export async function* fetchUitThemePages(cutoff?: Date): AsyncGenerator<{ members: APIUitTheme[], totalItems: number }>{
-    yield* fetchPagesFromURL<APIUitTheme>("/api/v1/uitdatabank/themes?page=1", false, cutoff);
-}
-
-export async function* fetchUitTypePages(cutoff?: Date): AsyncGenerator<{ members: APIUitType[], totalItems: number }>{
-    yield* fetchPagesFromURL<APIUitType>("/api/v1/uitdatabank/types?page=1", false, cutoff);
 }
 

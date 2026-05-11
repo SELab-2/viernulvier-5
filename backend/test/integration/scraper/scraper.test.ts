@@ -3,7 +3,7 @@ import { prisma } from '../../../src/scraper/prisma';
 import Scraper from '../../../src/scraper/scraper';
 import * as Fetcher from '../../../src/scraper/fetcher';
 
-import type { APIProduction, APIEvent, APISpace, APIHall, APILocation, APIGenre, APIGallery, APIItem, APICrop, APIEventPrice, APIUitKeyword, APIUitTheme, APIUitType } from "../../../src/scraper/APItypes";
+import type { APIProduction, APIEvent, APISpace, APIHall, APILocation, APIGenre, APIGallery, APIItem, APICrop, APIEventPrice } from "../../../src/scraper/APItypes";
 
 
 /*
@@ -60,7 +60,6 @@ vi.mock('../../../src/scraper/fetcher', () => {
       phone_2: "0987654321",
       own_location: "true",
       country: "Belgium",
-      uitdatabank_id: "UB123",
     } as APILocation,
   ];
 
@@ -130,9 +129,6 @@ vi.mock('../../../src/scraper/fetcher', () => {
       media_gallery: "/gallery/1",
       review_gallery: "/gallery/1",
       poster_gallery: "/gallery/1",
-      uitdatabank_keywords: ["/uit-keyword/1"],
-      uitdatabank_theme: "/uit-theme/1",
-      uitdatabank_type: "/uit-type/1",
     } as APIProduction,
   ];
 
@@ -240,7 +236,6 @@ vi.mock('../../../src/scraper/fetcher', () => {
       box_office_id: "BOX001",
       vendor_id: "VEND001",
       max_tickets_per_order: 5,
-      uitdatabank_id: "UB001",
       secure: true,
       sms_verification: true,
       production: { "@id": "/prod/1", "@type": "Production" },
@@ -273,41 +268,6 @@ vi.mock('../../../src/scraper/fetcher', () => {
   ];
 
 
-  const uitKeywords: APIUitKeyword[] = [
-    {
-      "@context": "/api/context/uit-keyword",
-      "@id": "/uit-keyword/1",
-      "@type": "UitKeyword",
-      created_at: "2021-01-15T07:00:00Z",
-      updated_at: "2021-01-16T07:00:00Z",
-      name: "Family",
-    } as APIUitKeyword,
-  ];
-
-  const uitThemes: APIUitTheme[] = [
-    {
-      "@context": "/api/context/uit-theme",
-      "@id": "/uit-theme/1",
-      "@type": "UitTheme",
-      created_at: "2021-01-17T07:00:00Z",
-      updated_at: "2021-01-18T07:00:00Z",
-      name: "Music",
-      cdb_cat_id: "THEME001",
-    } as APIUitTheme,
-  ];
-
-  const uitTypes: APIUitType[] = [
-    {
-      "@context": "/api/context/uit-type",
-      "@id": "/uit-type/1",
-      "@type": "UitType",
-      created_at: "2021-01-19T07:00:00Z",
-      updated_at: "2021-01-20T07:00:00Z",
-      name: "Concert",
-      cdb_cat_id: "TYPE001",
-    } as APIUitType,
-  ];
-
   async function* pages<T>(pageList: T[][]): AsyncGenerator<{ members: T[], totalItems: number }> {
     for (const p of pageList) yield { members: p, totalItems: p.length };
   }
@@ -321,9 +281,6 @@ vi.mock('../../../src/scraper/fetcher', () => {
     fetchCropPages: () => pages([crops]),
     fetchEventsPages: () => pages([events]),
     fetchEventPricePages: () => pages([eventPrices]),
-    fetchUitKeywordPages: () => pages([uitKeywords]),
-    fetchUitThemePages: () => pages([uitThemes]),
-    fetchUitTypePages: () => pages([uitTypes]),
     fetchProductionsPages: () => pages([productions]),
   };
 });
@@ -346,14 +303,10 @@ beforeAll(async () => {
   await prisma.blog_production.deleteMany();
   await prisma.event_price.deleteMany();
   await prisma.event.deleteMany();
-  await prisma.uit_keywords_production.deleteMany();
   await prisma.genre_production.deleteMany();
   await prisma.tag_production.deleteMany();
   await prisma.tag.deleteMany();
   await prisma.production.deleteMany();
-  await prisma.uitdatabank_theme.deleteMany();
-  await prisma.uitdatabank_type.deleteMany();
-  await prisma.uitdatabank_keyword.deleteMany();
   await prisma.genre.deleteMany();
   await prisma.gallery.deleteMany();
   await prisma.crop.deleteMany();
@@ -369,9 +322,6 @@ beforeAll(async () => {
   await Scraper.sync_crops();
   await Scraper.sync_items();
   await Scraper.sync_galleries();
-  await Scraper.sync_uit_keywords();
-  await Scraper.sync_uit_themes();
-  await Scraper.sync_uit_types();
   await Scraper.sync_tags();
   await Scraper.sync_productions();
   await Scraper.sync_events();
@@ -403,7 +353,6 @@ describe('scraper integration full coverage', () => {
     expect(loc?.phone_2).toBe("0987654321");
     expect(loc?.own_location).toBe("true");
     expect(loc?.country).toBe("Belgium");
-    expect(loc?.uitdatabank_id).toBe("UB123");
     expect(loc?.created_at.toISOString()).toBe("2021-01-01T10:00:00.000Z");
     expect(loc?.updated_at.toISOString()).toBe("2021-01-02T11:00:00.000Z");
   });
@@ -446,12 +395,8 @@ describe('scraper integration full coverage', () => {
   it('checks all production fields', async () => {
     const prod = await prisma.production.findUnique({ where: { apiId: '/prod/1' } });
     const gallery = await prisma.gallery.findUnique({ where: { apiId: '/gallery/1' } });
-    const theme = await prisma.uitdatabank_theme.findUnique({ where: { apiId: '/uit-theme/1' } });
-    const type = await prisma.uitdatabank_type.findUnique({ where: { apiId: '/uit-type/1' } });
     expect(prod).not.toBeNull();
     expect(gallery).not.toBeNull();
-    expect(theme).not.toBeNull();
-    expect(type).not.toBeNull();
     const supertitle = getLocalized(prod?.super_title);
     const title = getLocalized(prod?.title);
     const artist = getLocalized(prod?.artist);
@@ -466,27 +411,8 @@ describe('scraper integration full coverage', () => {
     expect(prod?.media_gallery_id).toBe(gallery?.id);
     expect(prod?.review_gallery_id).toBe(gallery?.id);
     expect(prod?.poster_gallery_id).toBe(gallery?.id);
-    expect(prod?.uitdatabank_theme).toBe(theme?.id);
-    expect(prod?.uitdatabank_type).toBe(type?.id);
     expect(prod?.created_at.toISOString().startsWith("1970-01-01")).toBe(true);
     expect(prod?.updated_at.toISOString()).toBe("2021-01-02T18:00:00.000Z");
-  });
-
-  it('links production with uitdatabank keyword in uit_keywords_production', async () => {
-    const prod = await prisma.production.findUnique({ where: { apiId: '/prod/1' } });
-    const keyword = await prisma.uitdatabank_keyword.findUnique({ where: { apiId: '/uit-keyword/1' } });
-
-    expect(prod).not.toBeNull();
-    expect(keyword).not.toBeNull();
-
-    const relation = await prisma.uit_keywords_production.findFirst({
-      where: {
-        production_id: prod!.id,
-        uitkeywords_id: keyword!.id,
-      },
-    });
-
-    expect(relation).not.toBeNull();
   });
 
   it('checks all genre fields', async () => {
@@ -684,43 +610,14 @@ describe('scraper integration full coverage', () => {
     expect(eventPrice?.event?.apiId).toBe('/event/1');
   });
 
-  it('checks uitdatabank keyword, theme and type fields', async () => {
-    const keyword = await prisma.uitdatabank_keyword.findUnique({ where: { apiId: '/uit-keyword/1' } });
-    const theme = await prisma.uitdatabank_theme.findUnique({ where: { apiId: '/uit-theme/1' } });
-    const type = await prisma.uitdatabank_type.findUnique({ where: { apiId: '/uit-type/1' } });
-
-    expect(keyword).not.toBeNull();
-    expect(keyword?.name).toBe('Family');
-    expect(keyword?.created_at.toISOString()).toBe('2021-01-15T07:00:00.000Z');
-    expect(keyword?.updated_at.toISOString()).toBe('2021-01-16T07:00:00.000Z');
-
-    expect(theme).not.toBeNull();
-    expect(theme?.name).toBe('Music');
-    expect(theme?.cdb_cat_id).toBe('THEME001');
-    expect(theme?.created_at.toISOString()).toBe('2021-01-17T07:00:00.000Z');
-    expect(theme?.updated_at.toISOString()).toBe('2021-01-18T07:00:00.000Z');
-
-    expect(type).not.toBeNull();
-    expect(type?.name).toBe('Concert');
-    expect(type?.cdb_cat_id).toBe('TYPE001');
-    expect(type?.created_at.toISOString()).toBe('2021-01-19T07:00:00.000Z');
-    expect(type?.updated_at.toISOString()).toBe('2021-01-20T07:00:00.000Z');
-  });
-
   it('does not duplicate records when syncing the same data twice', async () => {
     const before = {
       eventPrices: await prisma.event_price.count({ where: { apiId: '/event-price/1' } }),
       tags: await prisma.tag.count({ where: { apiId: '/tag/1' } }),
-      keywords: await prisma.uitdatabank_keyword.count({ where: { apiId: '/uit-keyword/1' } }),
-      themes: await prisma.uitdatabank_theme.count({ where: { apiId: '/uit-theme/1' } }),
-      types: await prisma.uitdatabank_type.count({ where: { apiId: '/uit-type/1' } }),
       genreLinks: await prisma.genre_production.count(),
       tagLinks: await prisma.tag_production.count(),
     };
 
-    await Scraper.sync_uit_keywords();
-    await Scraper.sync_uit_themes();
-    await Scraper.sync_uit_types();
     await Scraper.sync_tags();
     await Scraper.sync_productions();
     await Scraper.sync_event_prices();
@@ -728,9 +625,6 @@ describe('scraper integration full coverage', () => {
     const after = {
       eventPrices: await prisma.event_price.count({ where: { apiId: '/event-price/1' } }),
       tags: await prisma.tag.count({ where: { apiId: '/tag/1' } }),
-      keywords: await prisma.uitdatabank_keyword.count({ where: { apiId: '/uit-keyword/1' } }),
-      themes: await prisma.uitdatabank_theme.count({ where: { apiId: '/uit-theme/1' } }),
-      types: await prisma.uitdatabank_type.count({ where: { apiId: '/uit-type/1' } }),
       genreLinks: await prisma.genre_production.count(),
       tagLinks: await prisma.tag_production.count(),
     };
@@ -738,9 +632,6 @@ describe('scraper integration full coverage', () => {
     expect(after).toEqual(before);
     expect(after.eventPrices).toBe(1);
     expect(after.tags).toBe(1);
-    expect(after.keywords).toBe(1);
-    expect(after.themes).toBe(1);
-    expect(after.types).toBe(1);
   });
 
   it('handles empty pages without creating extra records', async () => {
@@ -756,9 +647,6 @@ describe('scraper integration full coverage', () => {
       crops: await prisma.crop.count(),
       eventPrices: await prisma.event_price.count(),
       tags: await prisma.tag.count(),
-      keywords: await prisma.uitdatabank_keyword.count(),
-      themes: await prisma.uitdatabank_theme.count(),
-      types: await prisma.uitdatabank_type.count(),
     };
 
     const locationSpy = vi.spyOn(Fetcher, 'fetchLocationsPages').mockImplementation(() => singlePage([]));
@@ -771,9 +659,6 @@ describe('scraper integration full coverage', () => {
     const itemSpy = vi.spyOn(Fetcher, 'fetchItemPages').mockImplementation(() => singlePage([]));
     const cropSpy = vi.spyOn(Fetcher, 'fetchCropPages').mockImplementation(() => singlePage([]));
     const eventPriceSpy = vi.spyOn(Fetcher, 'fetchEventPricePages').mockImplementation(() => singlePage([]));
-    const keywordSpy = vi.spyOn(Fetcher, 'fetchUitKeywordPages').mockImplementation(() => singlePage([]));
-    const themeSpy = vi.spyOn(Fetcher, 'fetchUitThemePages').mockImplementation(() => singlePage([]));
-    const typeSpy = vi.spyOn(Fetcher, 'fetchUitTypePages').mockImplementation(() => singlePage([]));
 
     try {
       await Scraper.sync_locations();
@@ -786,9 +671,6 @@ describe('scraper integration full coverage', () => {
       await Scraper.sync_items();
       await Scraper.sync_crops();
       await Scraper.sync_event_prices();
-      await Scraper.sync_uit_keywords();
-      await Scraper.sync_uit_themes();
-      await Scraper.sync_uit_types();
     } finally {
       locationSpy.mockRestore();
       spaceSpy.mockRestore();
@@ -800,9 +682,6 @@ describe('scraper integration full coverage', () => {
       itemSpy.mockRestore();
       cropSpy.mockRestore();
       eventPriceSpy.mockRestore();
-      keywordSpy.mockRestore();
-      themeSpy.mockRestore();
-      typeSpy.mockRestore();
     }
 
     const after = {
@@ -817,69 +696,9 @@ describe('scraper integration full coverage', () => {
       crops: await prisma.crop.count(),
       eventPrices: await prisma.event_price.count(),
       tags: await prisma.tag.count(),
-      keywords: await prisma.uitdatabank_keyword.count(),
-      themes: await prisma.uitdatabank_theme.count(),
-      types: await prisma.uitdatabank_type.count(),
     };
 
     expect(after).toEqual(before);
-  });
-
-  it('applies cutoff_timestamp and only syncs newer records', async () => {
-    const keywordSpy = vi.spyOn(Fetcher, 'fetchUitKeywordPages').mockImplementation(() => singlePage([
-      {
-        '@context': '/api/context/uit-keyword',
-        '@id': '/uit-keyword/cutoff-old',
-        '@type': 'UitKeyword',
-        created_at: '2021-01-01T00:00:00Z',
-        updated_at: '2021-01-10T00:00:00Z',
-        name: 'Old Keyword',
-      } as APIUitKeyword,
-      {
-        '@context': '/api/context/uit-keyword',
-        '@id': '/uit-keyword/cutoff-new-1',
-        '@type': 'UitKeyword',
-        created_at: '2021-01-01T00:00:00Z',
-        updated_at: '2021-02-10T00:00:00Z',
-        name: 'New Keyword 1',
-      } as APIUitKeyword,
-      {
-        '@context': '/api/context/uit-keyword',
-        '@id': '/uit-keyword/cutoff-new-2',
-        '@type': 'UitKeyword',
-        created_at: '2021-01-01T00:00:00Z',
-        updated_at: '2021-03-10T00:00:00Z',
-        name: 'New Keyword 2',
-      } as APIUitKeyword,
-    ]));
-
-    try {
-      await Scraper.sync_uit_keywords(new Date('2021-02-01T00:00:00Z'));
-    } finally {
-      keywordSpy.mockRestore();
-    }
-
-    const oldKeyword = await prisma.uitdatabank_keyword.findUnique({
-      where: { apiId: '/uit-keyword/cutoff-old' },
-    });
-    const newKeyword1 = await prisma.uitdatabank_keyword.findUnique({
-      where: { apiId: '/uit-keyword/cutoff-new-1' },
-    });
-    const newKeyword2 = await prisma.uitdatabank_keyword.findUnique({
-      where: { apiId: '/uit-keyword/cutoff-new-2' },
-    });
-
-    expect(oldKeyword).toBeNull();
-    expect(newKeyword1?.name).toBe('New Keyword 1');
-    expect(newKeyword2?.name).toBe('New Keyword 2');
-
-    await prisma.uitdatabank_keyword.deleteMany({
-      where: {
-        apiId: {
-          in: ['/uit-keyword/cutoff-old', '/uit-keyword/cutoff-new-1', '/uit-keyword/cutoff-new-2'],
-        },
-      },
-    });
   });
 
 });

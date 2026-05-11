@@ -1,20 +1,60 @@
 name: CI
 
-# Runs on every push to any branch (except main) and on pull request updates.
-# Concurrency ensures stale runs are cancelled when new commits are pushed.
 on:
-  push:
-    branches-ignore:
-      - main
+  pull_request:
+    types: [opened, reopened, synchronize]
+
 
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  backend:
-    name: Backend (Lint + Test)
-    runs-on: self-hosted
+  # ------------------
+  # BACKEND
+  # ------------------
+
+  backend-lint:
+    name: Backend Lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - run: npm ci
+      - run: npm run lint -- --max-warnings=0
+
+  backend-build:
+    name: Backend Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - run: npm ci
+      - run: npm run build
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/viernulvier_test
+
+  backend-test:
+    name: Backend Test
+    runs-on: ubuntu-latest
 
     services:
       postgres:
@@ -42,26 +82,23 @@ jobs:
       SKIP_TEST_DB_START: 1
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Set up Node.js (latest LTS)
-        uses: actions/setup-node@v6
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: npm
           cache-dependency-path: backend/package-lock.json
 
       - run: npm ci
-      # Fail CI on any lint warning. Placeholder exceptions are handled inline.
-      - run: npm run lint -- --max-warnings=0
-      - run: npm run build
       - run: npm test
 
-  frontend:
-    name: Frontend (Lint + Test + Build)
-    runs-on: self-hosted
+  # ------------------
+  # FRONTEND
+  # ------------------
 
+  frontend-lint:
+    name: Frontend Lint
+    runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: frontend
@@ -75,7 +112,40 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - run: npm ci
-      # Fail CI on any lint warning. Placeholder exceptions are handled inline.
       - run: npm run lint -- --max-warnings=0
+
+  frontend-test:
+    name: Frontend Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - run: npm ci
       - run: npm test
+
+  frontend-build:
+    name: Frontend Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - run: npm ci
       - run: npm run build
