@@ -24,7 +24,7 @@ function ArchiveDetailGallery({ images }: ArchiveDetailGalleryProps) {
                     >
                         ‹
                     </button>
-                    <span className="text-sm text-gray-500">{current + 1} / {images.length}</span>
+                    <span className="text-sm text-muted">{current + 1} / {images.length}</span>
                     <button
                         onClick={next}
                         className="h-10 w-10 rounded-full border border-border transition-colors hover:bg-surface"
