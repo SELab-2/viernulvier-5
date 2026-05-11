@@ -1,9 +1,7 @@
 import { z } from 'zod'
-import { createPaginatedResponseSchema } from '../../utils/rest-schemas.js'
+import { createPaginatedResponseSchema, paginationQuerySchema } from '../../utils/rest-schemas.js'
 
-export const searchQuerySchema = z.object({
-    page: z.coerce.number().int().positive().default(1),
-    limit: z.coerce.number().int().positive().max(100).default(20),
+export const searchQuerySchema = paginationQuerySchema.extend({
     search: z.string().optional(),
     yearFrom: z.coerce.number().int().optional(),
     yearTo: z.coerce.number().int().optional(),

@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { apiFetch, normalizeApiAssetUrl } from '../../api/client'
-import { getActiveLocale, getMessages, withLocalePath } from '../../i18n'
-import type { Locale } from '../../i18n/types'
+import { getActiveLocale, withLocalePath } from '../../i18n'
+import type { Locale, Messages } from '../../i18n/types'
+import { usePublicMessages } from './PublicMessagesContext'
 import SearchResultCard, { type SearchResultItem } from './search/SearchResultCard'
 import SectionTitle from './SectionTitle'
 
@@ -77,10 +78,9 @@ function toPlainText(value: string): string {
     return trimmed.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
 }
 
-function getGenreLabel(value: string, locale: Locale): string {
-    const labels = getMessages(locale).search.genres
+function getGenreLabel(value: string, genreLabels: Messages['search']['genres']): string {
     const index = CANONICAL_GENRE_VALUES.indexOf(value as (typeof CANONICAL_GENRE_VALUES)[number])
-    return index >= 0 ? labels[index] ?? value : value
+    return index >= 0 ? genreLabels[index] ?? value : value
 }
 
 function formatDate(value: Date | string, locale: Locale): string {
@@ -93,21 +93,20 @@ function formatDate(value: Date | string, locale: Locale): string {
     }).format(date)
 }
 
-function mapProductionToCarouselItem(item: ProductionApiItem, locale: Locale): SearchResultItem {
-    const messages = getMessages(locale)
-    const title = getLocalizedText(item.title, locale) || messages.search.fallbackUntitled
+function mapProductionToCarouselItem(item: ProductionApiItem, locale: Locale, searchMessages: Messages['search']): SearchResultItem {
+    const title = getLocalizedText(item.title, locale) || searchMessages.fallbackUntitled
     const excerptRaw =
         getLocalizedText(item.description_short, locale) ||
         getLocalizedText(item.description, locale) ||
         getLocalizedText(item.teaser, locale) ||
         title
     const excerpt = toPlainText(excerptRaw) || title
-    
+
     const normalizedLocation = (item.attendance_mode ?? '').trim().toLowerCase()
     const hasConcreteAttendanceMode = normalizedLocation.length > 0 && normalizedLocation !== 'offline' && normalizedLocation !== 'online'
-    const fallbackVenue = messages.search.fallbackVenue
+    const fallbackVenue = searchMessages.fallbackVenue
     const venue = hasConcreteAttendanceMode ? normalizedLocation : fallbackVenue
-    const fallbackTag = messages.search.fallbackTag
+    const fallbackTag = searchMessages.fallbackTag
 
     return {
         id: item.id,
@@ -218,7 +217,7 @@ function useProductionEventDetails(items: ProductionApiItem[], locale: Locale, r
     return details
 }
 
-function useProductionTaxonomies(items: ProductionApiItem[], locale: Locale) {
+function useProductionTaxonomies(items: ProductionApiItem[], locale: Locale, genreLabels: Messages['search']['genres']) {
     const [taxonomies, setTaxonomies] = useState<Record<string, string>>({})
     useEffect(() => {
         const fetchTaxonomies = async () => {
@@ -232,7 +231,7 @@ function useProductionTaxonomies(items: ProductionApiItem[], locale: Locale) {
                             const res = await apiFetch<{ data: Array<{ slug: LocalizedText, name: LocalizedText }> }>(gPath)
                             if (res.data?.[0]) {
                                 const slug = getLocalizedText(res.data[0].slug, locale) || getLocalizedText(res.data[0].name, locale)
-                                if (slug) return { id: item.id, label: getGenreLabel(slug.toLowerCase(), locale) }
+                                if (slug) return { id: item.id, label: getGenreLabel(slug.toLowerCase(), genreLabels) }
                             }
                         }
                         const tPath = getRelativePath(item.links?.tags)
@@ -240,7 +239,7 @@ function useProductionTaxonomies(items: ProductionApiItem[], locale: Locale) {
                             const res = await apiFetch<{ data: Array<{ slug: LocalizedText, name: LocalizedText }> }>(tPath)
                             if (res.data?.[0]) {
                                 const slug = getLocalizedText(res.data[0].slug, locale) || getLocalizedText(res.data[0].name, locale)
-                                if (slug) return { id: item.id, label: getGenreLabel(slug.toLowerCase(), locale) }
+                                if (slug) return { id: item.id, label: getGenreLabel(slug.toLowerCase(), genreLabels) }
                             }
                         }
                         return { id: item.id, label: '' }
@@ -252,13 +251,13 @@ function useProductionTaxonomies(items: ProductionApiItem[], locale: Locale) {
             setTaxonomies(prev => ({ ...prev, ...newT }))
         }
         fetchTaxonomies()
-    }, [items, locale])
+    }, [items, locale, genreLabels])
     return taxonomies
 }
 
 function PublicCarousel() {
     const locale = getActiveLocale(window.location.pathname)
-    const messages = getMessages(locale)
+    const messages = usePublicMessages()
     const [apiRawItems, setApiRawItems] = useState<ProductionApiItem[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -272,7 +271,7 @@ function PublicCarousel() {
 
     const fetchedImages = useProductionImages(apiRawItems)
     const fetchedDetails = useProductionEventDetails(apiRawItems, locale, mode === 'on-this-day' ? referenceDate : undefined)
-    const fetchedTaxonomies = useProductionTaxonomies(apiRawItems, locale)
+    const fetchedTaxonomies = useProductionTaxonomies(apiRawItems, locale, messages.search.genres)
 
     // Fix: Force scroll to start when new items arrive
     useEffect(() => {
@@ -303,7 +302,7 @@ function PublicCarousel() {
 
     const carouselItems = useMemo(() => {
         const mapped = apiRawItems.map((item): SearchResultItem => {
-            const base = mapProductionToCarouselItem(item, locale)
+            const base = mapProductionToCarouselItem(item, locale, messages.search)
             const detail = fetchedDetails[item.id]
             const taxonomy = fetchedTaxonomies[item.id]
             return {
@@ -315,7 +314,7 @@ function PublicCarousel() {
             }
         })
         return prioritizeItemsWithImage(mapped)
-    }, [apiRawItems, fetchedImages, fetchedDetails, fetchedTaxonomies, locale])
+    }, [apiRawItems, fetchedImages, fetchedDetails, fetchedTaxonomies, locale, messages.search])
 
     const scroll = (d: -1 | 1) => scrollerRef.current?.scrollBy({ left: d * scrollerRef.current.clientWidth * 0.9, behavior: 'smooth' })
     const heading = mode === 'fallback-recent' ? messages.home.onThisDayFallbackHeading : messages.home.onThisDayHeading
