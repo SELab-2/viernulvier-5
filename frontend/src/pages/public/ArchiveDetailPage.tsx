@@ -179,8 +179,6 @@ function ArchiveDetailPageContent() {
     const quote = localize(production?.quote, locale)
     const quoteSource = localize(production?.quote_source, locale)
     const info = localize(production?.info, locale)
-    const video1 = localize(production?.video_1, locale)
-    const video2 = localize(production?.video_2, locale)
     const hasSidebar = Boolean(info) || genres.length > 0 || tags.length > 0
     const shareLabel = messages.search.shareLabel
     const shareCopiedLabel = messages.search.shareCopiedLabel
@@ -188,10 +186,18 @@ function ArchiveDetailPageContent() {
     const FALLBACK_IMAGE = '/fallback-hero.svg'
     const heroImage = imageUrl ?? FALLBACK_IMAGE
 
-    const videos = [video1, video2]
-        .filter(Boolean)
-        .map((url) => getYouTubeEmbedUrl(url as string))
-        .filter(Boolean)
+    const videos = Array.from(
+        new Set(
+            [
+                localize(production?.video_1, locale),
+                localize(production?.video_2, locale),
+            ]
+                .filter((url): url is string => Boolean(url))
+                .map(getYouTubeEmbedUrl)
+                .filter((url): url is string => Boolean(url))
+        )
+    )
+        
 
     if (notFound || idIsMalformed) {
         return <NotFoundContent />
