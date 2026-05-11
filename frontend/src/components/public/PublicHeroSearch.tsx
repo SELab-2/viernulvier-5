@@ -150,9 +150,9 @@ function PublicHeroSearch({
     return (
         <section className="relative overflow-hidden min-h-[63vh] flex flex-col justify-center pt-12 pb-0 md:pt-16">
             <img
-                src="/Achtergrond.svg"
+                src="/background.svg"
                 aria-hidden="true"
-                className="pointer-events-none absolute inset-0 w-full h-full object-contain object-center max-w-[1280px] mx-auto left-0 right-0 hidden sm:block px-8"
+                className="pointer-events-none absolute inset-0 w-full h-full object-contain object-center max-w-[1280px] mx-auto left-0 right-0 hidden sm:block px-8 dark:invert"
             />
             <div className="pointer-events-none absolute -left-32 top-44 h-64 w-64 rounded-full bg-accent/20 blur-3xl" />
             <div className="pointer-events-none absolute -right-24 -top-8 h-72 w-72 rounded-full bg-accent/25 blur-3xl" />
