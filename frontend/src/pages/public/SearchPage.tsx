@@ -91,8 +91,6 @@ type ProductionApiItem = {
         media_gallery: string | null
         review_gallery: string | null
         poster_gallery: string | null
-        uitdatabank_theme: string | null
-        uitdatabank_type: string | null
     }
 }
 
