@@ -1,4 +1,3 @@
-
 /*
 --------------------------------------
 --------------TYPES-------------------
@@ -8,19 +7,19 @@
 
 // Sometimes tables referebnce eachother like this
 export type foreignKey = {
-    "@type":string;
+    "@type": string;
     "@id": string;
 }
 
 // For fields with multiple translations
 export type LocalizedString = {
-  nl?: string;
-  en?: string;
-  fr?: string;
+    nl?: string;
+    en?: string;
+    fr?: string;
 };
 
 export type APIProduction = {
-    "@context":string;
+    "@context": string;
     "@id": string;
     "@type": string;
 
@@ -28,9 +27,9 @@ export type APIProduction = {
     updated_at: string;
 
     vendor_id: string;
-    box_office_id:number;
-    
-    performer_field:string;
+    box_office_id: number;
+
+    performer_field: string;
     performer_type: string;
     attendance_mode: string;
 
@@ -39,32 +38,32 @@ export type APIProduction = {
     artist: LocalizedString;
     meta_title: LocalizedString;
     meta_description: LocalizedString;
-    tagline:LocalizedString;
-    teaser:LocalizedString;
-    description:LocalizedString;
-    description_extra:LocalizedString;
-    description_2:LocalizedString;
-    quote:LocalizedString;
-    quote_source:LocalizedString;
-    programme:LocalizedString;
-    info:LocalizedString;
-    description_short:LocalizedString;
-    eticket_info:LocalizedString;
-    custom_data:LocalizedString;
-    
-    video_1:LocalizedString;
+    tagline: LocalizedString;
+    teaser: LocalizedString;
+    description: LocalizedString;
+    description_extra: LocalizedString;
+    description_2: LocalizedString;
+    quote: LocalizedString;
+    quote_source: LocalizedString;
+    programme: LocalizedString;
+    info: LocalizedString;
+    description_short: LocalizedString;
+    eticket_info: LocalizedString;
+    custom_data: LocalizedString;
+
+    video_1: LocalizedString;
     video_2: LocalizedString;
 
     genres: string[];
 
     events: string[];
 
-    media_gallery:string;
-    review_gallery:string;
-    poster_gallery:string;
-    };
+    media_gallery: string;
+    review_gallery: string;
+    poster_gallery: string;
+};
 
-    export type APILocation = {
+export type APILocation = {
     "@context": string;
     "@id": string;
     "@type": string;
@@ -81,9 +80,9 @@ export type APIProduction = {
     own_location: string;
     country: string;
     spaces: string[];
-    };
+};
 
-    export type APISpace = {
+export type APISpace = {
     "@context": string;
     "@id": string;
     "@type": string;
@@ -93,9 +92,9 @@ export type APIProduction = {
     name: LocalizedString;
     location: string;
     halls: string[];
-    };
+};
 
-    export type APIHall = {
+export type APIHall = {
     "@context": string;
     "@id": string;
     "@type": string;
@@ -108,9 +107,9 @@ export type APIProduction = {
     name: LocalizedString;
     remark: LocalizedString;
     space: string;
-    };
+};
 
-    export type APIEvent = {
+export type APIEvent = {
     "@context": string;
     "@id": string;
     "@type": string;
@@ -133,9 +132,9 @@ export type APIProduction = {
     eticket_info: LocalizedString;
     external_order_url: LocalizedString;
     order_url: string;
-    };
+};
 
-    export type APIGenre = {
+export type APIGenre = {
     "@context": string;
     "@id": string;
     "@type": string;
@@ -147,9 +146,9 @@ export type APIProduction = {
     name: LocalizedString;
     slug: LocalizedString;
     description: LocalizedString;
-    };
+};
 
-    export type APIGallery = {
+export type APIGallery = {
     "@context": string;
     "@id": string;
     "@type": string;
@@ -157,9 +156,9 @@ export type APIProduction = {
     updated_at: string;
     name: string;
     items: string[];
-    }
+};
 
-    export type APIItem = {
+export type APIItem = {
     "@context": string;
     "@id": string;
     "@type": string;
@@ -176,10 +175,10 @@ export type APIProduction = {
     description: LocalizedString;
     credits: LocalizedString;
     link: LocalizedString;
-    crops: foreignKey[] // reference crops
-    }
+    crops: foreignKey[]; // reference crops
+};
 
-    export type APIEventPrice = {
+export type APIEventPrice = {
     "@context": string;
     "@id": string;
     "@type": string;
@@ -193,10 +192,9 @@ export type APIProduction = {
     event: string; // reference to event
     price: string; // reference to price
     rank: string; // reference to rank
+};
 
-    }
-
-    export type APICrop = {
+export type APICrop = {
     "@context": string;
     "@id": string;
     "@type": string;
@@ -204,11 +202,11 @@ export type APIProduction = {
     updated_at: string;
     name: string;
     url: string;
-    }
+};
 
-    /*
-    --------------------------------------
-    --------------TYPES-------------------
-    --------------------------------------
+/*
+--------------------------------------
+--------------TYPES-------------------
+--------------------------------------
 
-    */
+*/
