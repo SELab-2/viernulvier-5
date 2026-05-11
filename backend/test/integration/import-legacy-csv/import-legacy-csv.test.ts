@@ -13,9 +13,6 @@ import { prisma } from '../../../src/scraper/prisma';
 - Make sure `DATABASE_URL` points to your test database (URL must contain 'test')
 */
 
-// ------------------------------------------------------------------
-// Helpers
-// ------------------------------------------------------------------
 
 /** Write a temp CSV file and return its path. Cleaned up in afterAll. */
 const tempFiles: string[] = [];
@@ -41,9 +38,7 @@ async function runImport(args: string[]) {
   process.argv = original;
 }
 
-// ------------------------------------------------------------------
-// DB cleanup helpers (respect FK order)
-// ------------------------------------------------------------------
+
 async function clearLegacyData() {
   await prisma.event.deleteMany({ where: { apiId: { startsWith: 'legacy-event-' } } });
   await prisma.genre_production.deleteMany();
@@ -52,9 +47,7 @@ async function clearLegacyData() {
   await prisma.hall.deleteMany({ where: { apiId: { startsWith: 'legacy-hall-' } } });
 }
 
-// ------------------------------------------------------------------
-// Setup / teardown
-// ------------------------------------------------------------------
+
 beforeAll(async () => {
   const testDatabaseUrl = process.env.DATABASE_URL;
 
@@ -82,14 +75,10 @@ afterAll(async () => {
   await prisma.$disconnect();
 });
 
-// ------------------------------------------------------------------
-// Tests
-// ------------------------------------------------------------------
+
 describe('legacy CSV importer', () => {
 
-  // ----------------------------------------------------------------
-  // Productions
-  // ----------------------------------------------------------------
+  //productions
   describe('importProductions', () => {
 
     it('creates a production with all fields mapped correctly', async () => {
@@ -238,9 +227,7 @@ describe('legacy CSV importer', () => {
 
   });
 
-  // ----------------------------------------------------------------
   // Events
-  // ----------------------------------------------------------------
   describe('importEvents', () => {
 
     // Seed a production for the event tests to link to
@@ -396,9 +383,7 @@ describe('legacy CSV importer', () => {
 
   });
 
-  // ----------------------------------------------------------------
   // Combined run
-  // ----------------------------------------------------------------
   describe('combined productions + events import', () => {
 
     it('links events to productions when both files are imported together', async () => {
