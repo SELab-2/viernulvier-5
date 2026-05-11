@@ -911,7 +911,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
         const clickRatio = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width))
         const nextYear = Math.round(MIN_PERIOD_YEAR + clickRatio * yearRange)
 
-        if (Math.abs(nextYear - safeFromYear) <= Math.abs(nextYear - safeToYear)) {
+        if (Math.abs(nextYear - draftFromYear) <= Math.abs(nextYear - draftToYear)) {
             const nextFromYear = Math.min(nextYear, draftToYear)
             setDraftFromYear(nextFromYear)
             pushFilters({ query: query || undefined, yearFrom: nextFromYear, yearTo: draftToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: safeLimit, tab })
