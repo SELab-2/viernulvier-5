@@ -116,8 +116,6 @@ const baseProduction = {
     media_gallery_id: 'e9e00000-0000-0000-0000-000000000001',
     review_gallery_id: null,
     poster_gallery_id: null,
-    uitdatabank_theme: null,
-    uitdatabank_type: null,
     created_at: new Date('2026-03-26T15:28:32.000Z'),
     updated_at: new Date('2026-03-27T08:20:10.000Z'),
 }
@@ -447,6 +445,28 @@ describe('ArchiveDetailPage', () => {
             expect(iframes[0]).toHaveAttribute('src', 'https://www.youtube.com/embed/abc123')
             expect(iframes[1]).toHaveAttribute('src', 'https://www.youtube.com/embed/def456')
             const container = iframes[0]?.closest('.max-w-5xl')
+            expect(container).toBeInTheDocument()
+        })
+    })
+
+    it('renders a single video when the urls are the same', async () => {
+        getProductionByIdMock.mockResolvedValue({
+            data: { 
+                ...baseProduction, 
+                video_1: { nl: 'https://www.youtube.com/watch?v=abc123' }, 
+                video_2: { nl: 'https://www.youtube.com/watch?v=abc123' }
+            },
+        })
+
+        renderPage()
+
+        await waitFor(() => {
+            const iframe = document.querySelector('iframe')
+            expect(iframe).toHaveAttribute('src', 'https://www.youtube.com/embed/abc123')
+            expect(iframe).toHaveAttribute('title', 'Video 1')
+            expect(iframe).not.toHaveAttribute('title', 'Video 2')
+            // single video gets the wide container
+            const container = iframe?.closest('.max-w-3xl')
             expect(container).toBeInTheDocument()
         })
     })
