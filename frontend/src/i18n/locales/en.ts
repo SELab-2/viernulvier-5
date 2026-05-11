@@ -162,6 +162,7 @@ const en: Messages = {
     genresAndTags: 'Genres & tags',
     previousImage: 'Previous image',
     nextImage: 'Next image',
+    relatedBlogs: 'Related blog posts',
   },
   settings: {
     title: 'Settings',
