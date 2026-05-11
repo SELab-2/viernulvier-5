@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { paginationQuerySchema } from '../../utils/rest-schemas.js'
 
 const deltaSchema = z.object({
     changePct: z.number().int().nullable(),
@@ -27,8 +28,7 @@ const countsSchema = z.object({
     editors: z.number().int().nonnegative(),
 })
 
-export const dashboardSummaryQuerySchema = z.object({
-    page: z.coerce.number().int().min(1).default(1),
+export const dashboardSummaryQuerySchema = paginationQuerySchema.extend({
     limit: z.coerce.number().int().min(1).max(50).default(3),
 })
 
