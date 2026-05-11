@@ -45,6 +45,7 @@ export const productionSchema = z.object({
     links: z
         .object({
             self: z.string(),
+            blogs: z.string().optional(),
         })
         .optional(),
 })
