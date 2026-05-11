@@ -33,6 +33,10 @@ function PublicLayout({ children }: PublicLayoutProps) {
         trackNavigation(location.pathname + location.search + location.hash)
     }, [location.pathname, location.search, location.hash])
 
+    useEffect(() => {
+        window.scrollTo(0, 0)
+    }, [location.pathname])
+
 
     return (
         <PublicMessagesContext.Provider value={messages}>
