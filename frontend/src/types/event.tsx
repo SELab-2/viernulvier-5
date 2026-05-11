@@ -1,12 +1,18 @@
 /**
  * Event type 
  */
-export type Event = {
-    key: string
-    startDateTime: string
-    endDateTime: string
-    location: string
-    tags: string[]
+export type EventLinks = {
+    production?: string
+    hall?: string
 }
 
-export type EventForm = Omit<Event, 'key'>
+export type Event = {
+    key: string
+    info?: string
+    production_id?: string
+    hall_id?: string
+    starts_at?: string
+    ends_at?: string
+    links?: EventLinks
+}
+export type EventPayload = Omit<Event, 'key'>

@@ -47,7 +47,6 @@ function App() {
                         <Route path="/blogs/:id" element={<BlogDetailPage />} />
                         <Route path="/nl/blogs/:id" element={<BlogDetailPage />} />
                         <Route path="/en/blogs/:id" element={<BlogDetailPage />} />
-
                     </>
                 ) : null}
 

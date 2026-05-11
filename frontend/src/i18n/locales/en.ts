@@ -133,9 +133,14 @@ const en: Messages = {
     englishOption: 'English',
     productionEditTitle: 'Edit production',
     productionEditSubTitle: 'Manage archive details and translation for this event',
-    title: 'Title',
-    slug: 'Slug',
-    content: 'Content',
+    contentLabels: {
+      super_title: 'Super title',
+      title: 'Title',
+      artist: 'Artist',
+      teaser: 'Teaser',
+      description: 'Description',
+      description_2: 'Second Description'
+    },
     back: '← Back to overview',
     saveOnDraft: 'Save as draft',
     publish: 'Publish',
@@ -154,7 +159,7 @@ const en: Messages = {
     addLabel: 'Add event',
     timeLabel: 'Time (start - end)',
     locationLabel: 'Location',
-    tagsLabel: 'Extra tags',
+    commentLabel: 'Comment',
   },
   auth: {
     localeToggleLabel: 'Switch language',

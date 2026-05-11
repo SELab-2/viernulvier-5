@@ -137,9 +137,14 @@ export type Messages = {
     dutchOption: string
     englishOption: string
     // tab content
-    title: string
-    slug: string
-    content: string
+    contentLabels: {
+        super_title: string
+        title: string
+        artist: string
+        teaser: string
+        description: string
+        description_2: string
+    }
     back: string
     saveOnDraft: string
     publish: string
@@ -160,7 +165,7 @@ export type Messages = {
     addLabel: string
     timeLabel: string
     locationLabel: string
-    tagsLabel: string
+    commentLabel: string
   },
   detail: {
     navBack: string

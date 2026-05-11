@@ -131,11 +131,16 @@ const nl: Messages = {
     artistLabel: 'Artiest',
     dutchOption: 'Nederlands',
     englishOption: 'Engels',
+    contentLabels: {
+      super_title: 'Super titel',
+      title: 'Titel',
+      artist: 'Artiest',
+      teaser: 'Teaser',
+      description: 'Beschrijving',
+      description_2: 'Tweede Beschrijving'
+    },
     productionEditTitle: 'Productie bewerken',
     productionEditSubTitle: 'Beheer archiefdetails en vertalingen voor deze voorstelling',
-    title: 'Titel',
-    slug: 'Slug',
-    content: 'Inhoud',
     back: '← Terug naar overzicht',
     saveOnDraft: 'Opslaan als draft',
     publish: 'Publiceren',
@@ -145,7 +150,7 @@ const nl: Messages = {
     eventsDateLabel: 'Datum',
     eventsTimeLabel: 'Tijd',
     eventsLocationLabel: 'Locatie',
-    eventsCommentLabel: 'Opmerkking',
+    eventsCommentLabel: 'Opmerking',
     eventsActionsLabel: 'Acties'
   },
   event: {
@@ -154,7 +159,7 @@ const nl: Messages = {
     addLabel: 'Event toevoegen',
     timeLabel: 'Tijd (start - einde)',
     locationLabel: 'Locatie',
-    tagsLabel: 'Extra tags',
+    commentLabel: 'Opmerking',
   },
   auth: {
     localeToggleLabel: 'Wissel taal',

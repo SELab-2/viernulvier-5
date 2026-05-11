@@ -1,6 +1,38 @@
 import type { Event } from "./event"
 
 /**
+ * Localized text structure
+ */
+export type LocalizedText = {
+    nl?: string
+    fr?: string
+    en?: string
+} | null;
+
+export interface ProductionPayload {
+  super_title?: LocalizedText,
+  title?: LocalizedText,
+  artist?: LocalizedText, 
+  teaser?: LocalizedText, 
+  description?: LocalizedText, 
+  description_2?: LocalizedText, 
+  // is_draft: boolean,
+}
+
+export interface ProductionPayloadRespone {
+    data: {
+        id: string,
+        super_title?: LocalizedText,
+        title?: LocalizedText,
+        artist?: LocalizedText, 
+        teaser?: LocalizedText, 
+        description?: LocalizedText, 
+        description_2?: LocalizedText, 
+        // is_draft: boolean,
+    }
+}
+
+/**
  * Languages supported for production content
  */
 export type Language = 'nl' | 'en'
@@ -15,15 +47,6 @@ export interface ProductionContentFields {
     slug: string
     /** content of the production */
     content: string// TODO: depending on what text-editor is used, this type has to change
-}
-
-/**
- * Localized text structure
- */
-export interface LocalizedText {
-    nl?: string
-    en?: string
-    fr?: string
 }
 
 export interface ProductionSettingsFields {

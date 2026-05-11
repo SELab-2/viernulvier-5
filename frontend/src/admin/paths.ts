@@ -5,7 +5,6 @@ export type AdminRouteConfig = {
   loginPath: string
   dashboardPath: string
   legacyDashboardPaths: string[]
-  archiveEditPath: string
   productionEditPath: string
   productionCreatePath: string
 }
@@ -17,21 +16,7 @@ export function getAdminRouteConfig(hostname: string): AdminRouteConfig {
   const isPublicAdminHost = normalizedHostname === 'sel2-5.ugent.be'
   const canRenderAdminRoutes = isAdminHost || isLocalDevHost || isPublicAdminHost
 
-  if (isAdminHost) {
-    return {
-      isAdminHost,
-      isLocalDevHost,
-      canRenderAdminRoutes: true,
-      loginPath: '/login',
-      dashboardPath: '/dashboard',
-      legacyDashboardPaths: ['/'],
-      archiveEditPath: '/archive/:id/edit',
-      productionEditPath: '/productions/:id/edit',
-      productionCreatePath: '/productions/new'
-    }
-  }
-
-  if (isLocalDevHost) {
+  if (isAdminHost || isLocalDevHost) {
     return {
       isAdminHost,
       isLocalDevHost,
@@ -39,9 +24,8 @@ export function getAdminRouteConfig(hostname: string): AdminRouteConfig {
       loginPath: '/admin/login',
       dashboardPath: '/admin/dashboard',
       legacyDashboardPaths: ['/admin', '/dashboard', '/'],
-      archiveEditPath: '/admin/archive/:id/edit',
-      productionEditPath: '/admin/productions/:id/edit',
-      productionCreatePath: '/admin/productions/new'
+      productionEditPath: '/admin/archive/:id/edit',
+      productionCreatePath: '/admin/archive/create'
     }
   }
 
@@ -52,8 +36,7 @@ export function getAdminRouteConfig(hostname: string): AdminRouteConfig {
     loginPath: '/admin/login',
     dashboardPath: '/admin',
     legacyDashboardPaths: [],
-    archiveEditPath: '/admin/archive/:id/edit',
-    productionEditPath: '/admin/productions/:id/edit',
-    productionCreatePath: '/admin/productions/new'
+    productionEditPath: '/admin/archive/:id/edit',
+    productionCreatePath: '/admin/archive/create'
   }
 }

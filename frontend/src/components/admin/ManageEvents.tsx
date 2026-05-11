@@ -1,4 +1,4 @@
-import type { Event } from '../../types/event'
+import type { Event } from "../../types/event"
 
 type EventsProps = {
     events: Event[],
@@ -45,20 +45,17 @@ function EventsEdit({
                     <tbody>
                         {events.map((event) =>
                             <tr className="h-12 bg-surface" key={event.key}>
-                                <td className="px-4 py-4">{event.startDateTime.split('T')[0]}</td>
-                                <td className="px-4 py-4">{event.startDateTime.split('T')[1]} - {event.endDateTime.split('T')[1]}</td>
-                                <td className="px-4 py-4">{event.location}</td>
+                                <td className="px-4 py-4">{event.starts_at?.split('T')[0] ?? ''}</td>
+                                <td className="px-4 py-4">{event.starts_at?.split('T')[1] ?? ''} - {event.ends_at?.split('T')[1] ?? ''}</td>
+                                <td className="px-4 py-4">{event.links?.hall}</td>
                                 <td className="px-4 py-4">
                                     <div className='flex flex-wrap gap-1'>
-                                        {event.tags.map(tag => (
-                                            <span
-                                                key={tag}
-                                                className='rounded-full bg-accent px-2 py-0.5 text-xs font-bold text-background whitespace-nowrap'
-                                            >
-                                                {tag}
-                                            </span>
-                                        ))}
-                                        {/* {event.tags} */}
+                                        <span
+                                            key={event.info}
+                                            className='rounded-full bg-accent px-2 py-0.5 text-xs font-bold text-background whitespace-nowrap'
+                                        >
+                                            {event.info}
+                                        </span>
                                     </div>
                                 </td>
                                 <td className="px-4 py-4">
