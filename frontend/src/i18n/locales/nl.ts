@@ -14,6 +14,8 @@ const nl: Messages = {
     navAriaLabel: 'Hoofdnavigatie',
     openMenuLabel: 'Open menu',
     closeMenuLabel: 'Sluit menu',
+    searchLink: 'Doorzoek archief',
+    blogsLink: 'Blogs',
   },
   home: {
     title: 'VIERNULVIER Archief',
