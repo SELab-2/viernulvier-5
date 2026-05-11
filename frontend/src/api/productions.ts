@@ -38,8 +38,6 @@ export const productionSchema = z.object({
     media_gallery_id: z.string().uuid().nullable(),
     review_gallery_id: z.string().uuid().nullable(),
     poster_gallery_id: z.string().uuid().nullable(),
-    uitdatabank_theme: z.string().uuid().nullable(),
-    uitdatabank_type: z.string().uuid().nullable(),
 
     created_at: z.coerce.date(),
     updated_at: z.coerce.date(),

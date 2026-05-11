@@ -116,8 +116,6 @@ const baseProduction = {
     media_gallery_id: 'e9e00000-0000-0000-0000-000000000001',
     review_gallery_id: null,
     poster_gallery_id: null,
-    uitdatabank_theme: null,
-    uitdatabank_type: null,
     created_at: new Date('2026-03-26T15:28:32.000Z'),
     updated_at: new Date('2026-03-27T08:20:10.000Z'),
 }
