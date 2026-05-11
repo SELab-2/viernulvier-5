@@ -636,15 +636,15 @@ describe('SearchPage FilterPanel interactions', () => {
     })
 
     it('clicking a selected location chip in FilterPanel removes it', async () => {
-        renderPage('/nl/zoeken?locations=balzaal')
+        const { container } = renderPage('/nl/zoeken?locations=balzaal')
 
         await screen.findByText('Geen resultaten gevonden.')
 
-        const locationInput = screen.getAllByPlaceholderText('Zoek op halnaam en voeg toe...')[0]
+        const locationInput = within(container).getAllByPlaceholderText('Zoek op halnaam en voeg toe...')[0]
         const filterPanel = locationInput.closest('aside')
         expect(filterPanel).not.toBeNull()
 
-        const locationChip = within(filterPanel as HTMLElement).getByRole('button', { name: /balzaal/i })
+        const locationChip = within(filterPanel as HTMLElement).getByRole('button', { name: 'Remove filter balzaal' })
         await act(async () => {
             fireEvent.click(locationChip)
         })

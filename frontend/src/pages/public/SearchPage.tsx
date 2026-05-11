@@ -1099,6 +1099,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
                                     type="button"
                                     onClick={() => handleLocationChange(value)}
                                     className="inline-flex items-center gap-1.5 rounded-full bg-accent/15 px-3 py-1 text-xs text-accent"
+                                    aria-label={`Remove filter ${getLocationLabel(value)}`}
                                 >
                                     <span>{getLocationLabel(value)}</span>
                                     <span className="text-sm leading-none">×</span>
