@@ -18,18 +18,13 @@ import { prisma } from "../scraper/prisma";
 import { log } from "../scraper/logger";
 
 
-//  CLI args
+// helpers
 
-const args = process.argv.slice(2);
 function getArg(flag: string): string | undefined {
+    const args = process.argv.slice(2);
     const idx = args.indexOf(flag);
     return idx !== -1 ? args[idx + 1] : undefined;
 }
-const PRODUCTIONS_FILE = getArg("--productions");
-const EVENTS_FILE = getArg("--events");
-
-
-// Helpers
 
 /**
  * Builds the apiId used in the database for legacy records.
@@ -336,9 +331,12 @@ async function importEvents(filePath: string) {
 }
 
 
-// Main
+// main
 
-async function main() {
+export async function main() {
+    const PRODUCTIONS_FILE = getArg("--productions");
+    const EVENTS_FILE = getArg("--events");
+
     if (!PRODUCTIONS_FILE && !EVENTS_FILE) {
         console.error(
             "Usage: npx tsx import-legacy-csv.ts [--productions <file>] [--events <file>]"

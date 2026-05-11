@@ -23,17 +23,12 @@ function writeTempCsv(content: string): string {
   return filePath;
 }
 
-/**
- * Dynamically import the importer with the CLI args pre-set.
- * We re-import each time because the module reads process.argv at load time.
- */
 async function runImport(args: string[]) {
-  // Override argv so getArg() inside the module picks up our flags
   const original = process.argv;
   process.argv = ['node', 'import-legacy-csv.ts', ...args];
 
-  // Use a cache-busting query param so Vitest re-executes the module
-  await import(`../../../src/import/import-legacy-csv.ts?t=${Date.now()}`);
+  const { main } = await import('../../../src/import/import-legacy-csv');
+  await main();
 
   process.argv = original;
 }
