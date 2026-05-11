@@ -37,6 +37,7 @@ export const paginationQuerySchema = z.object({
  */
 export const productionLinksSchema = z.object({
     self: z.string().url().default('https://example.com/'),
+    blogs: z.string().url().optional().nullable().default('https://example.com/'),
     events: z.string().url().optional().nullable().default('https://example.com/'),
     genres: z.string().url().optional().nullable().default('https://example.com/'),
     tags: z.string().url().optional().nullable().default('https://example.com/'),

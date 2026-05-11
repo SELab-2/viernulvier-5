@@ -8,7 +8,7 @@ import type {
 } from './blogs.schema.js'
 import { AppError } from '../../errors/app-error.js'
 
-type BlogFilterOptions = Pick<BlogPaginationQuery, 'search' | 'yearFrom' | 'yearTo'>
+type BlogFilterOptions = Pick<BlogPaginationQuery, 'search' | 'yearFrom' | 'yearTo' | 'productionId'>
 
 export class BlogsRepository {
     constructor(private readonly prisma: PrismaClient) {}
@@ -90,6 +90,16 @@ export class BlogsRepository {
                 createdAt: {
                     gte: new Date(Date.UTC(fromYear, 0, 1)),
                     lt: new Date(Date.UTC(toYear + 1, 0, 1)),
+                },
+            })
+        }
+
+        if (options.productionId) {
+            conditions.push({
+                blog_production: {
+                    some: {
+                        production_id: options.productionId,
+                    },
                 },
             })
         }

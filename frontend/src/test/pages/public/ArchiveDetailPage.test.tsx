@@ -34,6 +34,10 @@ vi.mock('../../../i18n', () => ({
             showMore: locale === 'en' ? 'Show more' : 'Meer tonen',
             showLess: locale === 'en' ? 'Show less' : 'Minder tonen',
             credits: 'Credits',
+            genresAndTags: 'Genres & tags',
+            previousImage: 'Vorige afbeelding',
+            nextImage: 'Volgende afbeelding',
+            relatedBlogs: 'Gerelateerde blogs',
         },
         footer: {
             privacy: 'Privacy',
@@ -60,6 +64,7 @@ vi.mock('../../../components/public/PublicPillButton', () => ({
     ),
 }))
 
+const getBlogsByProductionIdMock = vi.hoisted(() => vi.fn())
 const getProductionByIdMock = vi.hoisted(() => vi.fn())
 const getEventsByProductionIdMock = vi.hoisted(() => vi.fn())
 const getGenresByProductionIdMock = vi.hoisted(() => vi.fn())
@@ -70,6 +75,7 @@ const getHallByIdMock = vi.hoisted(() => vi.fn())
 const getSpaceByIdMock = vi.hoisted(() => vi.fn())
 const getLocationByIdMock = vi.hoisted(() => vi.fn())
 
+vi.mock('../../../api/blogs', () => ({ getBlogsByProductionId: getBlogsByProductionIdMock }))
 vi.mock('../../../api/productions', () => ({ getProductionById: getProductionByIdMock }))
 vi.mock('../../../api/events', () => ({ getEventsByProductionId: getEventsByProductionIdMock }))
 vi.mock('../../../api/genres', () => ({ getGenresByProductionId: getGenresByProductionIdMock}))
@@ -136,6 +142,7 @@ describe('ArchiveDetailPage', () => {
         document.documentElement.dataset.theme = 'light'
         localStorage.setItem('locale', 'nl')
 
+        getBlogsByProductionIdMock.mockResolvedValue({ data: [] })
         getProductionByIdMock.mockResolvedValue({ data: baseProduction })
         getEventsByProductionIdMock.mockResolvedValue({ data: [] })
         getGenresByProductionIdMock.mockResolvedValue({
@@ -286,6 +293,10 @@ describe('ArchiveDetailPage', () => {
         await waitFor(() => {
             expect(getProductionByIdMock).toHaveBeenCalledWith('dab70000-0000-0000-0000-000000000001')
             expect(getEventsByProductionIdMock).toHaveBeenCalledWith('dab70000-0000-0000-0000-000000000001')
+            expect(getGenresByProductionIdMock).toHaveBeenCalledWith('dab70000-0000-0000-0000-000000000001')
+            expect(getTagsByProductionIdMock).toHaveBeenCalledWith('dab70000-0000-0000-0000-000000000001')
+            expect(getBlogsByProductionIdMock).toHaveBeenCalledWith('dab70000-0000-0000-0000-000000000001')
+
         })
     })
 
@@ -560,5 +571,39 @@ describe('ArchiveDetailPage', () => {
         await waitFor(() => {
             expect(screen.queryByText('Credits')).not.toBeInTheDocument()
         })
+    })
+
+    // ---- blogs ----
+    it('does not render the blogs section when there are no related blogs', async () => {
+        getBlogsByProductionIdMock.mockResolvedValue({ data: [] })
+
+        renderPage()
+
+        await waitFor(() => {
+            expect(screen.queryByText('Gerelateerde blogs')).not.toBeInTheDocument()
+        })
+    })
+
+    it('renders related blogs in the sidebar when present', async () => {
+        // no longer need to mock links.blogs on the production
+        getBlogsByProductionIdMock.mockResolvedValue({
+            data: [
+                { id: 'b1000000-0000-0000-0000-000000000001', title: { nl: 'Blog over de voorstelling', en: 'Blog about the show' } },
+            ],
+        })
+
+        renderPage()
+
+        expect(await screen.findByText('Gerelateerde blogs')).toBeInTheDocument()
+        expect(await screen.findByText('Blog over de voorstelling')).toBeInTheDocument()
+    })
+
+    it('does not crash when the blogs fetch fails', async () => {
+        getBlogsByProductionIdMock.mockRejectedValue(new Error('Network error'))
+
+        renderPage()
+
+        expect(await screen.findByText('Terug')).toBeInTheDocument()
+        expect(screen.queryByText('Gerelateerde blogs')).not.toBeInTheDocument()
     })
 })
