@@ -20,6 +20,7 @@ export const blogPaginationQuerySchema = z.object({
     search: z.string().optional(),
     yearFrom: z.coerce.number().int().optional(),
     yearTo: z.coerce.number().int().optional(),
+    productionId: z.string().uuid().optional(),
 })
 
 /**
