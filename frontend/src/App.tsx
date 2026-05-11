@@ -85,7 +85,7 @@ function App() {
                             path={adminRoutes.productionCreatePath}
                             element={
                                 <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
-                                    <ArchiveEditPage create />
+                                    <ArchiveEditPage />
                                 </ProtectedAdminRoute>
                             }
                         />

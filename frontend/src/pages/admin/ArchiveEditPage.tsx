@@ -74,14 +74,6 @@ const defaultEvent : Event = {
     }
 }
 
-type ProductionEditPageProps = {
-    /**
-     * If true this will create a new production else it will try
-     * to open an existing production
-     */
-    create?: boolean
-}
-
 /**
  * Admin page for editing/creating a production
  * 
@@ -92,7 +84,7 @@ type ProductionEditPageProps = {
  * After a user is done with the edit they should be able to save it as
  * draft or publish it.
  */
-function ArchiveEditPage({ create } : ProductionEditPageProps) {
+function ArchiveEditPage() {
     const locale = useLocale().locale;
     const messages = getMessages(locale);
     const navigate = useNavigate();
