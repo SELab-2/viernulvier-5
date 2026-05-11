@@ -1,11 +1,11 @@
-import { getMessages } from '../../i18n'
+import { usePublicMessages } from './PublicMessagesContext'
 
 type PublicPopularTagsProps = {
     onTagClick: (tag: string) => void
 }
 
 function PublicPopularTags({ onTagClick }: PublicPopularTagsProps) {
-    const messages = getMessages()
+    const messages = usePublicMessages()
 
     return (
         <section className="mt-14 bg-[var(--color-accent)] py-8">
