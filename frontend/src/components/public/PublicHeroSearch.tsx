@@ -77,7 +77,7 @@ function PublicHeroSearch({
     initialFilters,
     onSearch,
 }: PublicHeroSearchProps) {
-    const messages = getMessages()
+    const messages = usePublicMessages()
     const genreOptions = useMemo(
         () => messages.home.popularTags.map((tag) => ({ value: tag, label: tag })),
         [messages.home.popularTags]
