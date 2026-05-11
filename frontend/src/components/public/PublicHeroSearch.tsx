@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent, type PointerEvent as ReactPointerEvent } from 'react'
-import { getMessages } from '../../i18n'
+import { usePublicMessages } from './PublicMessagesContext'
 
 const MIN_PERIOD_YEAR = 1982
 const MAX_PERIOD_YEAR = new Date().getFullYear()
