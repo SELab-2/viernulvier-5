@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { render, screen, waitFor, fireEvent, within } from '@testing-library/react'
+import { act, render, screen, waitFor, fireEvent, within } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import SearchPage from '../../../pages/public/SearchPage'
 
@@ -645,7 +645,9 @@ describe('SearchPage FilterPanel interactions', () => {
         expect(filterPanel).not.toBeNull()
 
         const locationChip = within(filterPanel as HTMLElement).getByRole('button', { name: /balzaal/i })
-        fireEvent.click(locationChip)
+        await act(async () => {
+            fireEvent.click(locationChip)
+        })
 
         await waitFor(() => {
             const productionCalls = apiFetchMock.mock.calls.filter(
