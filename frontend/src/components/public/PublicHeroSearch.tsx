@@ -1,5 +1,5 @@
 import { useMemo, useState, type FormEvent } from 'react'
-import { getMessages } from '../../i18n'
+import { usePublicMessages } from './PublicMessagesContext'
 
 export type HeroSearchFilters = {
     query: string
@@ -78,7 +78,7 @@ function PublicHeroSearch({
     initialFilters,
     onSearch,
 }: PublicHeroSearchProps) {
-    const messages = getMessages()
+    const messages = usePublicMessages()
     const genreOptions = useMemo(
         () => messages.home.popularTags.map((tag) => ({ value: tag, label: tag })),
         [messages.home.popularTags]
