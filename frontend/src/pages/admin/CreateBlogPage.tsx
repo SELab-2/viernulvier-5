@@ -6,7 +6,6 @@ import { useNavigate, useParams } from 'react-router-dom'
 import SectionHeading from '../../components/admin/SectionHeading'
 import BlogsTab from '../../components/admin/BlogsTab'
 import BlogsTabContent from '../../components/admin/BlogsTabContent'
-import EditHeader from '../../components/admin/EditHeader'
 import ProductionManagementSection, { type ProductionItem } from '../../components/admin/blogs/ProductionManagementSection'
 import {
     formatBlogDetailForForm,
@@ -18,7 +17,8 @@ import {
 
 import type { Language, BlogContent } from '../../types/blog'
 import type { Locale } from '../../i18n/types'
-import PublicLayout from '../../components/public/PublicLayout'
+
+import AdminLayout from '../../components/admin/AdminLayout'
 
 
 /*
@@ -313,10 +313,6 @@ function CreateBlogPage() {
         }))
     }
 
-    const back = () => {
-        navigate('/admin')
-    }
-
     const saveAsDraft = () => {
         // TODO: save as draft impl.
     }
@@ -471,28 +467,21 @@ function CreateBlogPage() {
         setIsProductionPopupOpen(true)
     }
 
+
     if (isEditMode && isBlogNotFound) {
         return (
             <>
-                <PublicLayout>
-                <section className="px-8 py-8">
-                    <p className="text-base text-foreground">{messages.blogs.blogNotFound}</p>
-                </section>
-                </PublicLayout>
+                <AdminLayout mainClassName="px-4 py-8 lg:px-8 lg:py-8" userName="Artevelde stagiair" showSidebar>
+                    <section className="px-8 py-8">
+                        <p className="text-base text-foreground">{messages.blogs.blogNotFound}</p>
+                    </section>
+                </AdminLayout>
             </>
         )
     }
 
     return (
-        <PublicLayout>
-            <EditHeader
-                backLabel={messages.editHeader.back}
-                saveAsDraftLabel={messages.editHeader.saveOnDraft}
-                publishLabel={messages.editHeader.publish}
-                back={back}
-                saveAsDraft={saveAsDraft}
-                publish={publish}
-            />
+        <AdminLayout mainClassName="px-4 py-8 lg:px-8 lg:py-8" userName="Artevelde stagiair" showSidebar>
 
             <SectionHeading
                 title={isEditMode ? messages.blogs.editBlogTitle : messages.blogs.createBlogTitle}
@@ -540,9 +529,18 @@ function CreateBlogPage() {
                             type="button"
                             onClick={publish}
                             disabled={isSaving || isLoadingBlog || isDeleting}
-                            className="text-sm text-white font-regular tracking-wide text-accent bg-accent py-3 px-6 rounded-full"
+                            className="rounded-full bg-accent px-6 py-3 text-sm font-regular tracking-wide text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             {isSaving ? (messages.blogs.savingButton) : (messages.editHeader.publish)}
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={saveAsDraft}
+                            disabled={isSaving || isLoadingBlog || isDeleting}
+                            className="rounded-full bg-accent px-6 py-3 text-sm font-regular tracking-wide text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            {isSaving ? (messages.blogs.savingButton) : (messages.editHeader.saveOnDraft)}
                         </button>
 
                         {isEditMode ? (
@@ -550,7 +548,7 @@ function CreateBlogPage() {
                                 type="button"
                                 onClick={removeBlog}
                                 disabled={isSaving || isLoadingBlog || isDeleting}
-                                className="text-sm text-white font-regular tracking-wide text-accent bg-accent py-2 px-4 rounded-full"
+                                className="rounded-full bg-accent px-4 py-2 text-sm font-regular tracking-wide text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                             >
                                 {isDeleting ? messages.blogs.deletingButton : messages.blogs.deleteButton}
                             </button>
@@ -601,7 +599,7 @@ function CreateBlogPage() {
                     </div>
                 </div>
             ) : null}
-        </PublicLayout>
+        </AdminLayout>
     )
 }
 
