@@ -1,5 +1,5 @@
 import { useMemo, useState, type FormEvent } from 'react'
-import { getMessages } from '../../i18n'
+import { usePublicMessages } from './PublicMessagesContext'
 
 export type HeroSearchFilters = {
     query: string
@@ -58,7 +58,7 @@ function SelectPill({
                 value={value}
                 onChange={(event) => onChange(event.target.value)}
                 disabled={disabled}
-                className="h-12 w-full appearance-none rounded-md bg-background pl-4 pr-12 text-sm font-semibold text-foreground disabled:cursor-not-allowed disabled:opacity-70"
+                className="h-12 w-full appearance-none rounded-md bg-background pl-4 pr-12 text-sm font-semibold text-foreground disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer"
             >
                 <option value="">{label}</option>
                 {options.map((option) => (
@@ -78,7 +78,7 @@ function PublicHeroSearch({
     initialFilters,
     onSearch,
 }: PublicHeroSearchProps) {
-    const messages = getMessages()
+    const messages = usePublicMessages()
     const genreOptions = useMemo(
         () => messages.home.popularTags.map((tag) => ({ value: tag, label: tag })),
         [messages.home.popularTags]

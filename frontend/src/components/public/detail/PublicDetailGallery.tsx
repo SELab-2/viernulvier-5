@@ -15,6 +15,11 @@ function ArchiveDetailGallery({ images }: ArchiveDetailGalleryProps) {
 
     return (
         <div className="relative w-full">
+            <div className="hidden">
+                {images.map((src, i) => src && i !== current && (
+                    <img key={i} src={src} alt="" />
+                ))}
+            </div>
             <div className="w-full rounded-xl overflow-hidden">
                 {images[current] && (
                     <img

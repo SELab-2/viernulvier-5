@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type PointerEvent as ReactPointerEvent } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { getActiveLocale, getMessages, withLocalePath } from '../../i18n'
-import type { Locale } from '../../i18n/types'
+import type { Locale, Messages } from '../../i18n/types'
 import { apiFetch, normalizeApiAssetUrl } from '../../api/client'
 import { getLocalizedContent, getLocalizedTitle, normalizeContent } from './blogDetailPage.formatters'
 import PublicLayout from '../../components/public/PublicLayout'
+import { usePublicMessages } from '../../components/public/PublicMessagesContext'
 import SearchPagination from '../../components/public/search/SearchPagination'
 import SearchResultCard, { type SearchResultItem } from '../../components/public/search/SearchResultCard'
 
@@ -91,8 +92,6 @@ type ProductionApiItem = {
         media_gallery: string | null
         review_gallery: string | null
         poster_gallery: string | null
-        uitdatabank_theme: string | null
-        uitdatabank_type: string | null
     }
 }
 
@@ -318,8 +317,7 @@ function mapPosterToSearchEntry(item: PosterApiItem, locale: Locale): SearchEntr
     }
 }
 
-function mapProductionToSearchEntry(item: ProductionApiItem, locale: Locale, preferredGenre?: string): SearchEntry {
-    const searchMessages = getMessages(locale).search
+function mapProductionToSearchEntry(item: ProductionApiItem, locale: Locale, searchMessages: Messages['search'], preferredGenre?: string): SearchEntry {
     const title = getLocalizedText(item.title, locale) || searchMessages.fallbackUntitled
     const excerptRaw =
         getLocalizedText(item.description_short, locale) ||
@@ -367,7 +365,7 @@ function mapProductionToSearchEntry(item: ProductionApiItem, locale: Locale, pre
 
     return {
         id: item.id,
-        tag: normalizedGenre ? getGenreLabel(normalizedGenre, locale) : searchMessages.fallbackTag,
+        tag: normalizedGenre ? getGenreLabel(normalizedGenre, searchMessages.genres) : searchMessages.fallbackTag,
         date: formatDate(item.created_at, locale),
         title,
         excerpt,
@@ -432,8 +430,7 @@ function getBlogExcerpt(content: unknown, locale: Locale, fallback: string): str
     return toPlainText(localizedContent) || fallback
 }
 
-function mapBlogToSearchEntry(item: BlogApiItem, locale: Locale): SearchEntry {
-    const searchMessages = getMessages(locale).search
+function mapBlogToSearchEntry(item: BlogApiItem, locale: Locale, searchMessages: Messages['search']): SearchEntry {
     const title = getLocalizedTitle(item.title, locale) || searchMessages.fallbackUntitled
     const date = item.createdAt ? formatDate(item.createdAt, locale) : '-'
     const year = item.createdAt ? new Date(item.createdAt).getFullYear() : MIN_PERIOD_YEAR
@@ -743,10 +740,9 @@ function parseSelectedLocations(searchParams: URLSearchParams): string[] {
     return legacyLocation ? [LOCATION_ALIASES[legacyLocation] ?? legacyLocation] : []
 }
 
-function getGenreLabel(value: string, locale: Locale): string {
-    const labels = getMessages(locale).search.genres
+function getGenreLabel(value: string, genreLabels: Messages['search']['genres']): string {
     const index = CANONICAL_GENRE_VALUES.indexOf(value as (typeof CANONICAL_GENRE_VALUES)[number])
-    return index >= 0 ? labels[index] ?? value : value
+    return index >= 0 ? genreLabels[index] ?? value : value
 }
 
 function getLocationLabel(value: string): string {
@@ -782,7 +778,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
     const [searchParams] = useSearchParams()
     const navigate = useNavigate()
     const locale = getActiveLocale(window.location.pathname)
-    const { search: s } = getMessages(locale)
+    const { search: s } = usePublicMessages()
 
     const filterState = useMemo(() => parseSearchFilterState(searchParams), [searchParams])
     const query = filterState.query
@@ -1047,24 +1043,24 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
             <div className="mt-6 border-t border-border pt-5 pb-5">
                 <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground">{s.locationLabel}</h3>
                 <div className="mt-4 space-y-3 text-sm text-text-accent">
-                    <div className="flex items-center gap-2">
-                        <input
-                            type="text"
-                            value={locationInput}
-                            onChange={(event) => setLocationInput(event.target.value)}
-                            onFocus={() => setIsLocationSuggestionsOpen(true)}
-                            onBlur={() => {
-                                window.setTimeout(() => {
-                                    setIsLocationSuggestionsOpen(false)
-                                }, 120)
-                            }}
-                            onKeyDown={(event) => {
-                                if (event.key === 'Enter') {
-                                    event.preventDefault()
-                                    handleAddLocation()
-                                }
-                            }}
-                            placeholder={s.locationSearchPlaceholder}
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="text"
+                                value={locationInput}
+                                onChange={(event) => setLocationInput(event.target.value)}
+                                onFocus={() => setIsLocationSuggestionsOpen(true)}
+                                onBlur={() => {
+                                    window.setTimeout(() => {
+                                        setIsLocationSuggestionsOpen(false)
+                                    }, 120)
+                                }}
+                                onKeyDown={(event) => {
+                                    if (event.key === 'Enter') {
+                                        event.preventDefault()
+                                        handleAddLocation()
+                                    }
+                                }}
+                                placeholder={s.locationSearchPlaceholder}
                             className="h-10 w-full rounded-full border border-border bg-surface px-4 text-sm text-foreground"
                         />
                         <button
@@ -1137,7 +1133,7 @@ function MobileSearchForm({ className = 'mb-5 md:hidden' }: { className?: string
     const [searchParams] = useSearchParams()
     const navigate = useNavigate()
     const locale = getActiveLocale(window.location.pathname)
-    const { search: s } = getMessages(locale)
+    const { search: s } = usePublicMessages()
     const filterState = useMemo(() => parseSearchFilterState(searchParams), [searchParams])
     const query = filterState.query
     const [searchInput, setSearchInput] = useState(query)
@@ -1201,11 +1197,12 @@ function MobileSearchForm({ className = 'mb-5 md:hidden' }: { className?: string
     )
 }
 
-function SearchPage() {
+function SearchPageContent() {
     const [searchParams] = useSearchParams()
     const navigate = useNavigate()
     const locale = getActiveLocale(window.location.pathname)
-    const m = getMessages(locale)
+    const m = usePublicMessages()
+    const searchMessages = m.search
     const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false)
     const [shareCopied, setShareCopied] = useState(false)
     const [apiEntries, setApiEntries] = useState<SearchEntry[]>([])
@@ -1259,7 +1256,7 @@ function SearchPage() {
                         `/archive/blogs?${params.toString()}`,
                         { signal: abortController.signal }
                     )
-                    const mappedEntries = response.data.map((item) => mapBlogToSearchEntry(item, locale))
+                    const mappedEntries = response.data.map((item) => mapBlogToSearchEntry(item, locale, searchMessages))
                     setApiEntries(mappedEntries)
                     setTotalResults(response.meta?.total ?? mappedEntries.length)
                     setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
@@ -1296,6 +1293,7 @@ function SearchPage() {
                                     updatedAt: item.created_at ?? '',
                                 },
                                 locale,
+                                searchMessages,
                             )
                         }
                         if (item.type === 'poster') {
@@ -1331,7 +1329,7 @@ function SearchPage() {
 
                         productionItemsForHydration.push(productionItem)
 
-                        return mapProductionToSearchEntry(productionItem, locale, preferredGenre)
+                        return mapProductionToSearchEntry(productionItem, locale, searchMessages, preferredGenre)
                     })
 
                     setApiRawItems(productionItemsForHydration)
@@ -1391,7 +1389,7 @@ function SearchPage() {
                     )
 
                     const preferredGenre = selectedGenres.length === 1 ? selectedGenres[0] : undefined
-                    const mappedEntries = response.data.map((item) => mapProductionToSearchEntry(item, locale, preferredGenre))
+                    const mappedEntries = response.data.map((item) => mapProductionToSearchEntry(item, locale, searchMessages, preferredGenre))
                     setApiRawItems(response.data)
                     setApiEntries(mappedEntries)
                     setTotalResults(response.meta?.total ?? mappedEntries.length)
@@ -1419,7 +1417,7 @@ function SearchPage() {
         return () => {
             abortController.abort()
         }
-    }, [query, locale, selectedGenres, selectedLocations, safeFromYear, safeToYear, sort, page, pageSize, tab])
+    }, [query, locale, selectedGenres, selectedLocations, safeFromYear, safeToYear, sort, page, pageSize, tab, searchMessages])
 
     const navigateWithFilters = (filters: SearchFilterOverrides) => {
         const params = buildSearchParams(filters)
@@ -1605,7 +1603,7 @@ function SearchPage() {
         : [
         ...selectedGenres.map((value) => ({
             key: `genre-${value}`,
-            label: getGenreLabel(value, locale),
+            label: getGenreLabel(value, searchMessages.genres),
             onRemove: () => handleRemoveGenreChip(value),
         })),
         ...selectedLocations.map((value) => ({
@@ -1660,8 +1658,7 @@ function SearchPage() {
     }, [activeTab, allAvailableHalls, fetchedDetails, locale])
 
     return (
-        <PublicLayout>
-            <section className="relative bg-surface-sunken">
+        <section className="relative bg-surface-sunken">
                 <div className="w-full md:flex md:items-stretch">
                     <div
                         aria-hidden="true"
@@ -1898,7 +1895,14 @@ function SearchPage() {
                         </div>
                     </div>
                 </div>
-            </section>
+        </section>
+    )
+}
+
+function SearchPage() {
+    return (
+        <PublicLayout>
+            <SearchPageContent />
         </PublicLayout>
     )
 }

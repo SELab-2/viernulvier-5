@@ -37,15 +37,13 @@ export const paginationQuerySchema = z.object({
  */
 export const productionLinksSchema = z.object({
     self: z.string().url().default('https://example.com/'),
+    blogs: z.string().url().optional().nullable().default('https://example.com/'),
     events: z.string().url().optional().nullable().default('https://example.com/'),
     genres: z.string().url().optional().nullable().default('https://example.com/'),
     tags: z.string().url().optional().nullable().default('https://example.com/'),
     media_gallery: z.string().url().optional().nullable().default('https://example.com/'),
     review_gallery: z.string().url().optional().nullable().default('https://example.com/'),
     poster_gallery: z.string().url().optional().nullable().default('https://example.com/'),
-    poster: z.string().url().optional().nullable().default('https://example.com/'),
-    uitdatabank_theme: z.string().url().optional().nullable().default('https://example.com/'),
-    uitdatabank_type: z.string().url().optional().nullable().default('https://example.com/'),
 })
 
 
@@ -114,8 +112,6 @@ export const productionSchema = z.object({
     media_gallery_id: z.string().uuid().nullable(),
     review_gallery_id: z.string().uuid().nullable(),
     poster_gallery_id: z.string().uuid().nullable(),
-    uitdatabank_theme: z.string().uuid().nullable(),
-    uitdatabank_type: z.string().uuid().nullable(),
     created_at: z.coerce.date(),
     updated_at: z.coerce.date(),
     // RESTful links inside the resource
@@ -154,8 +150,6 @@ export const updateProductionSchema = z.object({
     media_gallery_id: z.string().uuid().nullable().optional(),
     review_gallery_id: z.string().uuid().nullable().optional(),
     poster_gallery_id: z.string().uuid().nullable().optional(),
-    uitdatabank_theme: z.string().uuid().nullable().optional(),
-    uitdatabank_type: z.string().uuid().nullable().optional(),
 })
 
 export const updateProductionParamsSchema = z.object({

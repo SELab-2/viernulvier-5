@@ -21,7 +21,6 @@ import spacesRoutes from './modules/spaces/spaces.routes.js'
 import mediaRoutes from './modules/media/media.routes.js'
 import authRoutes from './modules/auth/auth.routes.js'
 import editorsRoutes from './modules/editors/editors.routes.js'
-import uitdatabankRoutes from './modules/uitdatabank/uitdatabank.routes.js'
 import blogsRoutes from './modules/blogs/blogs.routes.js'
 import postersRoutes from './modules/posters/posters.routes.js'
 import dashboardRoutes from './modules/dashboard/dashboard.routes.js'
@@ -67,7 +66,6 @@ export async function buildApp(opts = {}): Promise<FastifyInstance> {
     await app.register(hallsRoutes, { prefix: '/api/v1/archive/halls' })
     await app.register(spacesRoutes, { prefix: '/api/v1/archive/spaces' })
     await app.register(mediaRoutes, { prefix: '/api/v1/archive/media' })
-    await app.register(uitdatabankRoutes, { prefix: '/api/v1/archive/uitdatabank' })
     await app.register(blogsRoutes, { prefix: '/api/v1/archive/blogs' })
     await app.register(postersRoutes, { prefix: '/api/v1/archive/posters' })
     await app.register(searchRoutes, { prefix: '/api/v1/archive/search' })
