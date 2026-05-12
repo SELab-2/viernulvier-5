@@ -1,4 +1,4 @@
-import { describe, it, beforeAll, afterAll, expect } from 'vitest';
+import { describe, it, beforeAll, afterAll, expect, vi } from 'vitest';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
@@ -27,6 +27,11 @@ async function runImport(args: string[]) {
   const original = process.argv;
   process.argv = ['node', 'import-legacy-csv.ts', ...args];
 
+  // Reset the module cache before each import so every runImport call gets a
+  // fresh module instance. Without this the in-memory hallCache Map (and any
+  // other module-level state) leaks between calls
+  vi.resetModules();
+
   const { main } = await import('../../../src/import/import-legacy-csv');
   await main();
 
@@ -52,7 +57,7 @@ beforeAll(async () => {
 
   if (!/test/i.test(testDatabaseUrl)) {
     throw new Error(
-      'Unsafe DATABASE_URL detected. Use a dedicated test database (URL should clearly indicate "test").'
+        'Unsafe DATABASE_URL detected. Use a dedicated test database (URL should clearly indicate "test").'
     );
   }
 
@@ -350,7 +355,7 @@ describe('legacy CSV importer', () => {
       const count = await prisma.event.count({
         where: {
           production_id: prod!.id,
-          apiId: `legacy-event-${PROD_ID}-20070101T200000000Z`,
+          apiId: `legacy-event-${PROD_ID}-20070101T190000000Z`,
         },
       });
       expect(count).toBe(1);
