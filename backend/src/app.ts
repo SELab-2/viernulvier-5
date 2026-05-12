@@ -1,9 +1,7 @@
-    import Fastify from 'fastify'
-    import type { FastifyInstance } from 'fastify'
-    import fastifyStatic from '@fastify/static'
-    import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod'
-    import { env } from './config/env.js'
-    import path from 'path'
+import Fastify from 'fastify'
+import type { FastifyInstance } from 'fastify'
+import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod'
+import { env } from './config/env.js'
 
 // Plugins
 import prismaPlugin from './plugins/prisma.js'
@@ -44,24 +42,8 @@ export async function buildApp(opts = {}): Promise<FastifyInstance> {
         ...opts,
     })
 
-
-        if (env.CROP_LOCATION) {
-            await app.register(fastifyStatic, {
-                root: path.resolve(env.CROP_LOCATION),
-                prefix: '/crops/',
-            })
-        }
-
-        // allow cross-origin in order to use images
-        app.addHook('onSend', (request, reply, payload, done) => {
-            if (request.url.startsWith('/crops/')) {
-                reply.header('Cross-Origin-Resource-Policy', 'cross-origin')
-            }
-            done()
-        })
-
-        app.setValidatorCompiler(validatorCompiler)
-        app.setSerializerCompiler(serializerCompiler)
+    app.setValidatorCompiler(validatorCompiler)
+    app.setSerializerCompiler(serializerCompiler)
 
     // --- Global plugins (fp-wrapped, available everywhere) ---
     await app.register(corsPlugin)
