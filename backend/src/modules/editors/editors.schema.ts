@@ -1,12 +1,11 @@
 import { z } from 'zod'
 import { 
     createPaginatedResponseSchema, 
-    createSingleResponseSchema 
+    createSingleResponseSchema,
+    paginationQuerySchema
 } from '../../utils/rest-schemas.js'
 
-export const editorPaginationQuerySchema = z.object({
-    page: z.coerce.number().int().positive().default(1),
-    limit: z.coerce.number().int().positive().max(100).default(20),
+export const editorPaginationQuerySchema = paginationQuerySchema.extend({
     search: z.string().optional(),
 })
 
@@ -30,13 +29,13 @@ export const editorListSchema = createPaginatedResponseSchema(editorSchema)
 export const singleEditorSchema = createSingleResponseSchema(editorSchema)
 
 export const createEditorSchema = z.object({
-    username: z.string().min(1),
+    username: z.string().min(1).transform((value) => value.trim().toLowerCase()),
     password: z.string().min(6),
     role: z.enum(['ADMIN', 'EDITOR']).default('EDITOR'),
 })
 
 export const updateEditorSchema = z.object({
-    username: z.string().min(1).optional(),
+    username: z.string().min(1).transform((value) => value.trim().toLowerCase()).optional(),
     password: z.string().min(6).optional(),
     role: z.enum(['ADMIN', 'EDITOR']).optional(),
 })

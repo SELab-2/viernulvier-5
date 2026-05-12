@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 describe('auth routes', () => {
     let app: Awaited<ReturnType<typeof Fastify>>
     let findUnique: ReturnType<typeof vi.fn>
+    let update: ReturnType<typeof vi.fn>
 
     beforeEach(async () => {
         vi.resetModules()
@@ -20,13 +21,25 @@ describe('auth routes', () => {
         const authRoutes = (await import('../../../../src/modules/auth/auth.routes.js')).default
 
         findUnique = vi.fn()
+        update = vi.fn()
         const passwordHash = await hashPassword('admin12345')
 
         findUnique.mockImplementation(async ({ where: { username, id } }) => {
-            const userId = id || (username === 'editor' 
-                ? '00000000-0000-0000-0000-000000000002' 
+            if (username === 'taken-user') {
+                return {
+                    id: '00000000-0000-0000-0000-000000000099',
+                    username,
+                    passwordHash,
+                    role: 'EDITOR',
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                }
+            }
+
+            const userId = id || (username === 'editor'
+                ? '00000000-0000-0000-0000-000000000002'
                 : '00000000-0000-0000-0000-000000000001')
-            
+
             return {
                 id: userId,
                 username: username || (userId === '00000000-0000-0000-0000-000000000002' ? 'editor' : 'admin'),
@@ -37,6 +50,14 @@ describe('auth routes', () => {
             }
         })
 
+        update.mockImplementation(async ({ where: { id }, data }) => ({
+            id,
+            username: data.username ?? 'admin',
+            role: 'ADMIN',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        }))
+
         app = Fastify({ logger: false })
         app.setValidatorCompiler(validatorCompiler)
         app.setSerializerCompiler(serializerCompiler)
@@ -44,6 +65,7 @@ describe('auth routes', () => {
         app.decorate('prisma', {
             adminUser: {
                 findUnique,
+                update,
             },
         })
         await app.register(authRoutes, { prefix: '/api/v1/auth' })
@@ -229,6 +251,92 @@ describe('auth routes', () => {
             expect(body.data.username).toBe('admin')
             expect(body.data).toHaveProperty('links')
             expect(body.links.self).toContain('/api/v1/auth/me')
+        })
+    })
+
+    describe('PATCH /me', () => {
+        it('updates the authenticated user username and password', async () => {
+            const loginResponse = await app.inject({
+                method: 'POST',
+                url: '/api/v1/auth/login',
+                payload: {
+                    username: 'admin',
+                    password: 'admin12345',
+                },
+            })
+
+            const tokenCookie = loginResponse.cookies.find((cookie) => cookie.name === 'token')
+
+            const updateResponse = await app.inject({
+                method: 'PATCH',
+                url: '/api/v1/auth/me',
+                cookies: {
+                    token: tokenCookie?.value ?? '',
+                },
+                payload: {
+                    username: 'admin-renamed',
+                    currentPassword: 'admin12345',
+                    newPassword: 'admin54321',
+                },
+            })
+
+            expect(updateResponse.statusCode).toBe(200)
+            const body = updateResponse.json()
+            expect(body.data.username).toBe('admin-renamed')
+            expect(body.links.self).toContain('/api/v1/auth/me')
+        })
+
+        it('rejects a password change when the current password is wrong', async () => {
+            const loginResponse = await app.inject({
+                method: 'POST',
+                url: '/api/v1/auth/login',
+                payload: {
+                    username: 'admin',
+                    password: 'admin12345',
+                },
+            })
+
+            const tokenCookie = loginResponse.cookies.find((cookie) => cookie.name === 'token')
+
+            const updateResponse = await app.inject({
+                method: 'PATCH',
+                url: '/api/v1/auth/me',
+                cookies: {
+                    token: tokenCookie?.value ?? '',
+                },
+                payload: {
+                    currentPassword: 'wrong-password',
+                    newPassword: 'admin54321',
+                },
+            })
+
+            expect(updateResponse.statusCode).toBe(401)
+        })
+
+        it('rejects a username that is already taken', async () => {
+            const loginResponse = await app.inject({
+                method: 'POST',
+                url: '/api/v1/auth/login',
+                payload: {
+                    username: 'admin',
+                    password: 'admin12345',
+                },
+            })
+
+            const tokenCookie = loginResponse.cookies.find((cookie) => cookie.name === 'token')
+
+            const updateResponse = await app.inject({
+                method: 'PATCH',
+                url: '/api/v1/auth/me',
+                cookies: {
+                    token: tokenCookie?.value ?? '',
+                },
+                payload: {
+                    username: 'taken-user',
+                },
+            })
+
+            expect(updateResponse.statusCode).toBe(409)
         })
     })
 })

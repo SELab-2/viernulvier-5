@@ -14,6 +14,8 @@ export type Messages = {
     navAriaLabel: string
     openMenuLabel: string
     closeMenuLabel: string
+    searchLink: string
+    blogsLink: string
   }
   home: {
     title: string
@@ -58,6 +60,7 @@ export type Messages = {
     subtitle: string
     productionsTab: string
     blogTab: string
+    allTab: string
     resultsCount: string
     resultsSuffix: string
     sortLabel: string
@@ -93,6 +96,12 @@ export type Messages = {
     resetFiltersLabel: string
     paginationPrevious: string
     paginationNext: string
+    relatedFilesCount: (count: number) => string
+    stampSvgPaths: {
+      days: { singular: string; plural: string }
+      months: { singular: string; plural: string }
+      years: { singular: string; plural: string }
+    }
   }
   auth: {
     localeToggleLabel: string
@@ -120,16 +129,41 @@ export type Messages = {
     archiveLabel: string
     logoutLabel: string
   }
+  detail: {
+    navBack: string
+    events: string
+    noEvents: string
+    loadError: string
+    date: string
+    time: string
+    location: string
+    remark: string
+    showLess: string
+    showMore: string
+    credits: string
+    genresAndTags: string
+    previousImage: string
+    nextImage: string
+    relatedBlogs: string
+  }
   footer: {
     brandLogoAlt: string
     organizationName: string
     about: string
     navigationTitle: string
     navHome: string
+    navBlogs: string
     navAgenda: string
     navArchiveSearch: string
     navAbout: string
     contactTitle: string
+    addressLine1: string
+    addressLine2: string
+    phone: string
+    email: string
+    vatNumber: string
+    socialTitle: string
+    stayUpdatedCta: string
     newsletterTitle: string
     newsletterText: string
     newsletterPlaceholder: string
@@ -137,7 +171,66 @@ export type Messages = {
     privacy: string
     cookies: string
     disclaimer: string
+    privacyAndCookies: string
     rights: string
+  }
+  settings: {
+    title: string
+    subtitle: string
+    closeAriaLabel: string
+    tabAccount: string
+    tabEditors: string
+    accountSectionTitle: string
+    usernameLabel: string
+    usernameHint: string
+    saveButton: string
+    saving: string
+    securitySectionTitle: string
+    securityHint: string
+    changePasswordButton: string
+    currentPasswordLabel: string
+    newPasswordLabel: string
+    confirmPasswordLabel: string
+    savePasswordButton: string
+    savingPassword: string
+    cancelButton: string
+    passwordMismatchError: string
+    accountSavedSuccess: string
+    accountSaveError: string
+    passwordChangedSuccess: string
+    passwordChangeError: string
+    editorsSectionTitle: string
+    editorsLoadError: string
+    noEditorsTitle: string
+    noEditorsHint: string
+    clickToManageHint: string
+    newEditorTitle: string
+    editEditorTitle: string
+    addNewEditorButton: string
+    editorUsernameLabel: string
+    temporaryPasswordLabel: string
+    temporaryPasswordHint: string
+    passwordMinLengthHint: string
+    createEditorButton: string
+    creatingEditor: string
+    editorCreatedSuccess: string
+    editorCreateError: string
+    saveUsernameButton: string
+    resetPasswordTitle: string
+    resetPasswordHint: string
+    resetPasswordPlaceholder: string
+    resetPasswordButton: string
+    resettingPassword: string
+    editorPasswordResetSuccess: string
+    editorPasswordResetError: string
+    dangerZoneTitle: string
+    dangerZoneHint: string
+    deleteEditorButton: string
+    deletingEditor: string
+    deleteEditorConfirm: string
+    editorSavedSuccess: string
+    editorSaveError: string
+    editorDeleteError: string
   }
   admin: {
     themeToggleDark: string
@@ -200,6 +293,56 @@ export type Messages = {
     archiveEdit: {
       pageTitle: string
       itemIdLabel: string
+    }
+  }
+
+  editHeader: {
+    back: string
+    publish: string
+    saveOnDraft: string
+  }
+
+  blogs: {
+    languageError:string
+    detailPageBack:string
+    loadingBlog: string
+    loadingProductions: string
+    relatedProductions: string
+    untitledBlog: string
+
+    dutchOption:string
+    englishOption:string
+    title: string
+    content: string
+    editBlogTitle: string
+    editBlogDescription: string
+    createBlogTitle: string
+    createBlogDescription: string
+    manageProduction: string
+    manageProductionButton: string
+    removeProductionAriaLabel: string
+    savingButton: string
+    deletingButton: string
+    deleteButton: string
+    deleteConfirm: string
+    deleteError: string
+    blogNotFound: string
+    noTitleError:string
+    filledLanguageNeedsTitleError: string
+    filledLanguageNeedsContentError: string
+    publishConfirmTitle: string
+    publishConfirmWithoutEnglish: string
+    publishConfirmWithoutDutch: string
+    publishConfirmCancel: string
+    publishConfirmProceed: string
+
+    productionPopUp : {
+      title:string
+      cancelButton: string
+      addButton: string
+      close: string
+      queryHint: string
+      noProductionFound:string
     }
   }
 }

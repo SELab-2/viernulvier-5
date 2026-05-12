@@ -1,6 +1,7 @@
 import { prisma } from "./prisma";
 import * as Fetcher from "./fetcher"
 import { updateStatus, finishStatus, createProgressBar } from "./logger";
+import CropsDownloader from "./crops_downloader";
 
 
 import type {
@@ -14,9 +15,6 @@ import type {
   APIItem,
   APIEventPrice,
   APICrop,
-  APIUitKeyword,
-  APIUitTheme,
-  APIUitType,
 } from "./APItypes";
 
 
@@ -31,9 +29,6 @@ export default {
   sync_items,
   sync_crops,
   sync_event_prices,
-  sync_uit_keywords,
-  sync_uit_themes,
-  sync_uit_types,
 };
 /*
 
@@ -124,7 +119,6 @@ function mapEvent(event: APIEvent) {
     box_office_id: event.box_office_id || undefined,
     vendor_id: event.vendor_id || undefined,
     max_tickets_per_order: event.max_tickets_per_order || undefined,
-    uitdatabank_id: event.uitdatabank_id || undefined,
     secure: event.secure || undefined,
     sms_verification: event.sms_verification || undefined,
     info: event.info || null,
@@ -181,7 +175,6 @@ function mapProduction(prod: APIProduction) {
       review_gallery_id: prod.review_gallery,
       poster_gallery_id: prod.poster_gallery,
 
-    // uitdatabank_type/theme or keyword relations are handled separately.
   };
 }
 
@@ -204,7 +197,6 @@ function mapLocation(location:APILocation) {
     phone_2: location.phone_2,
     own_location: location.own_location,
     country: location.country,
-    uitdatabank_id: location.uitdatabank_id,
   };
 }
 
@@ -306,34 +298,6 @@ function mapCrop(crop: APICrop){
     name: crop.name,
     url: crop.url,
     // item: link items in function
-  }
-}
-
-function mapUitKeyword(keyword: APIUitKeyword){
-  return {
-    created_at: sanitizeTimestampRequired(keyword.created_at),
-    updated_at: sanitizeTimestampRequired(keyword.updated_at),
-    apiId: keyword["@id"],
-    name: keyword.name,
-  }
-}
-
-function mapUitTheme(theme: APIUitTheme){
-  return {
-    created_at: sanitizeTimestampRequired(theme.created_at),
-    updated_at: sanitizeTimestampRequired(theme.updated_at),
-    apiId: theme["@id"],
-    name: theme.name,
-    cdb_cat_id: theme.cdb_cat_id,
-  }
-}
-function mapUitType(type: APIUitType){
-  return {
-    created_at: sanitizeTimestampRequired(type.created_at),
-    updated_at: sanitizeTimestampRequired(type.updated_at),
-    apiId: type["@id"],
-    name: type.name,
-    cdb_cat_id: type.cdb_cat_id,
   }
 }
 
@@ -551,40 +515,26 @@ async function sync_productions(cutoff_timestamp: Date | undefined = undefined) 
     await prisma.$transaction(async (tx) => {
       // Collect all apiIds for lookups to avoid N+1 queries
       const galleryIds = new Set<string>();
-      const themeIds = new Set<string>();
-      const typeIds = new Set<string>();
-      const keywordIds = new Set<string>();
       const genreIds = new Set<string>();
 
       for (const prod of page) {
         if (prod.media_gallery) galleryIds.add(prod.media_gallery);
         if (prod.poster_gallery) galleryIds.add(prod.poster_gallery);
         if (prod.review_gallery) galleryIds.add(prod.review_gallery);
-        if (prod.uitdatabank_theme) themeIds.add(prod.uitdatabank_theme);
-        if (prod.uitdatabank_type) typeIds.add(prod.uitdatabank_type);
-        if (prod.uitdatabank_keywords) {
-          prod.uitdatabank_keywords.forEach(k => keywordIds.add(k));
-        }
         if (prod.genres) {
           prod.genres.forEach(g => genreIds.add(g));
         }
       }
 
       // Fetch all required relations in bulk
-      const [galleries, themes, types, keywords, genres, tags] = await Promise.all([
+      const [galleries, genres, tags] = await Promise.all([
         tx.gallery.findMany({ where: { apiId: { in: Array.from(galleryIds) } } }),
-        tx.uitdatabank_theme.findMany({ where: { apiId: { in: Array.from(themeIds) } } }),
-        tx.uitdatabank_type.findMany({ where: { apiId: { in: Array.from(typeIds) } } }),
-        tx.uitdatabank_keyword.findMany({ where: { apiId: { in: Array.from(keywordIds) } } }),
         tx.genre.findMany({ where: { apiId: { in: Array.from(genreIds) } } }),
         tx.tag.findMany({ where: { apiId: { in: Array.from(genreIds) } } }),
       ]);
 
       // Create lookup maps
       const galleryMap = new Map(galleries.map(g => [g.apiId, g.id]));
-      const themeMap = new Map(themes.map(t => [t.apiId, t.id]));
-      const typeMap = new Map(types.map(t => [t.apiId, t.id]));
-      const keywordMap = new Map(keywords.map(k => [k.apiId, k.id]));
       const genreMap = new Map(genres.map(g => [g.apiId, g.id]));
       const tagMap = new Map(tags.map(t => [t.apiId, t.id]));
 
@@ -593,43 +543,19 @@ async function sync_productions(cutoff_timestamp: Date | undefined = undefined) 
           where: {apiId: production["@id"]},
           update: {
             ...mapProduction(production),
+            draft: false,
             media_gallery_id: production.media_gallery ? galleryMap.get(production.media_gallery) : null,
             poster_gallery_id: production.poster_gallery ? galleryMap.get(production.poster_gallery) : null,
             review_gallery_id: production.review_gallery ? galleryMap.get(production.review_gallery) : null,
-            uitdatabank_theme: production.uitdatabank_theme ? themeMap.get(production.uitdatabank_theme) : null,
-            uitdatabank_type: production.uitdatabank_type ? typeMap.get(production.uitdatabank_type) : null,
           },
           create: {
             ...mapProduction(production),
+            draft: false,
             media_gallery_id: production.media_gallery ? galleryMap.get(production.media_gallery) : null,
             poster_gallery_id: production.poster_gallery ? galleryMap.get(production.poster_gallery) : null,
             review_gallery_id: production.review_gallery ? galleryMap.get(production.review_gallery) : null,
-            uitdatabank_theme: production.uitdatabank_theme ? themeMap.get(production.uitdatabank_theme) : null,
-            uitdatabank_type: production.uitdatabank_type ? typeMap.get(production.uitdatabank_type) : null,
           },
         })
-
-        // Link keywords
-        if (production.uitdatabank_keywords) {
-          for (const keyword of production.uitdatabank_keywords) {
-            const keywordId = keywordMap.get(keyword);
-            if (keywordId) {
-              await tx.uit_keywords_production.upsert({
-                where: {
-                  production_id_uitkeywords_id: {
-                    production_id: db_production.id,
-                    uitkeywords_id: keywordId
-                  }
-                },
-                update: {}, // exists, no update needed
-                create: {
-                  production_id: db_production.id,
-                  uitkeywords_id: keywordId
-                },
-              });
-            }
-          }
-        }
 
         // Link genres
         if (production.genres) {
@@ -888,6 +814,9 @@ async function sync_event_prices(cutoff_timestamp: Date | undefined = undefined)
 async function sync_crops(cutoff_timestamp: Date | undefined = undefined){
   let totalProcessed = 0;
   let pageCount = 0;
+  let actualDownloaded = 0;
+
+
 
   for await (const { members: rawPage, totalItems } of Fetcher.fetchCropPages(cutoff_timestamp)) {
     pageCount++;
@@ -897,8 +826,9 @@ async function sync_crops(cutoff_timestamp: Date | undefined = undefined){
     if (rawPage.length === 0) break;
     const page = filterByCutoff(rawPage, cutoff_timestamp);
 
-    await prisma.$transaction(
-        page.map(crop =>
+    const prisma_crops = await prisma.$transaction(
+        page.filter(crop => (crop.name?.toLowerCase() === "fe3_header" || crop.name?.toLowerCase() == "fe3_boxed") && crop.url !== undefined)
+            .map(crop =>
             prisma.crop.upsert({
               where: {apiId: crop["@id"]},
               update: mapCrop(crop),
@@ -906,89 +836,13 @@ async function sync_crops(cutoff_timestamp: Date | undefined = undefined){
             })
         )
     );
+
+
+    await CropsDownloader.download_crops(prisma_crops);
+    actualDownloaded += prisma_crops.length;
   }
 
-  finishStatus(`\u2705 Completed syncing ${totalProcessed} crops from ${pageCount} pages`);
-}
-
-async function sync_uit_keywords(cutoff_timestamp: Date | undefined = undefined){
-  let totalProcessed = 0;
-  let pageCount = 0;
-
-  for await (const { members: rawPage, totalItems } of Fetcher.fetchUitKeywordPages(cutoff_timestamp)) {
-    pageCount++;
-    totalProcessed += rawPage.length;
-    updateStatus("Keywords", createProgressBar(totalProcessed, totalItems));
-
-    if (rawPage.length === 0) break;
-    const page = filterByCutoff(rawPage, cutoff_timestamp);
-
-    await prisma.$transaction(
-        page.map(keyword =>
-            prisma.uitdatabank_keyword.upsert({
-              where: {apiId: keyword["@id"]},
-              update: mapUitKeyword(keyword),
-              create: mapUitKeyword(keyword),
-            })
-        )
-    );
-  }
-
-  finishStatus(`\u2705 Completed syncing ${totalProcessed} keywords from ${pageCount} pages`);
-}
-
-
-async function sync_uit_themes(cutoff_timestamp: Date | undefined = undefined){
-  let totalProcessed = 0;
-  let pageCount = 0;
-
-  for await (const { members: rawPage, totalItems } of Fetcher.fetchUitThemePages(cutoff_timestamp)) {
-    pageCount++;
-    totalProcessed += rawPage.length;
-    updateStatus("Themes", createProgressBar(totalProcessed, totalItems));
-
-    if (rawPage.length === 0) break;
-    const page = filterByCutoff(rawPage, cutoff_timestamp);
-
-    await prisma.$transaction(
-        page.map(theme =>
-            prisma.uitdatabank_theme.upsert({
-              where: {apiId: theme["@id"]},
-              update: mapUitTheme(theme),
-              create: mapUitTheme(theme),
-            })
-        )
-    );
-  }
-
-  finishStatus(`\u2705 Completed syncing ${totalProcessed} themes from ${pageCount} pages`);
-}
-
-
-async function sync_uit_types(cutoff_timestamp: Date | undefined = undefined){
-  let totalProcessed = 0;
-  let pageCount = 0;
-
-  for await (const { members: rawPage, totalItems } of Fetcher.fetchUitTypePages(cutoff_timestamp)) {
-    pageCount++;
-    totalProcessed += rawPage.length;
-    updateStatus("Types", createProgressBar(totalProcessed, totalItems));
-
-    if (rawPage.length === 0) break;
-    const page = filterByCutoff(rawPage, cutoff_timestamp);
-
-    await prisma.$transaction(
-        page.map(type =>
-            prisma.uitdatabank_type.upsert({
-              where: {apiId: type["@id"]},
-              update: mapUitType(type),
-              create: mapUitType(type),
-            })
-        )
-    );
-  }
-
-  finishStatus(`\u2705 Completed syncing ${totalProcessed} types from ${pageCount} pages`);
+  finishStatus(`\u2705 Completed syncing ${totalProcessed} crops from ${pageCount} pages and downloaded ${actualDownloaded} crops`);
 }
 
 

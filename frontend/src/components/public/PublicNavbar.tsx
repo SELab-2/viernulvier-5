@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { getActiveLocale, getMessages, setActiveLocale, withLocalePath } from '../../i18n'
+import { withLocalePath } from '../../i18n'
 import { NextLocaleToggle, SegmentedThemeToggle } from '../shared/TopBarControls'
+import { usePublicMessages } from './PublicMessagesContext'
 
 type Theme = 'light' | 'dark'
 
@@ -60,11 +61,15 @@ function SearchToggleButton({ onToggle, ariaLabel, isExpanded, className }: Sear
     )
 }
 
-function PublicNavbar() {
+type PublicNavbarProps = {
+    locale: 'nl' | 'en'
+    onToggleLocale: () => void
+}
+
+function PublicNavbar({ locale, onToggleLocale }: PublicNavbarProps) {
     const location = useLocation()
     const navigate = useNavigate()
-    const locale = getActiveLocale(location.pathname)
-    const messages = getMessages(locale)
+    const messages = usePublicMessages()
     const [theme, setTheme] = useState<Theme>(resolveTheme)
     const [isSearchOpen, setIsSearchOpen] = useState(false)
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -102,8 +107,8 @@ function PublicNavbar() {
     }
 
     const toggleLocale = () => {
+        onToggleLocale()
         const nextLocale = locale === 'nl' ? 'en' : 'nl'
-        setActiveLocale(nextLocale)
         const localizedPath = withLocalePath(location.pathname, nextLocale)
         navigate(`${localizedPath}${location.search}${location.hash}`)
     }
@@ -130,6 +135,23 @@ function PublicNavbar() {
 
                 <nav aria-label={messages.nav.navAriaLabel} className="max-[480px]:hidden">
                     <ul className="flex items-center gap-6 text-sm font-medium text-white">
+                        <li>
+                            <Link
+                                to={withLocalePath('/zoeken', locale)}
+                                className="inline-flex items-center gap-1.5 rounded-full border border-white/30 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-white transition hover:border-white hover:bg-white hover:text-black"
+                            >
+                                <SearchIcon className="h-3 w-3" />
+                                {messages.nav.searchLink}
+                            </Link>
+                        </li>
+                        <li>
+                            <Link
+                                to={withLocalePath('/blogs', locale)}
+                                className="inline-flex items-center rounded-full border border-white/30 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-white transition hover:border-white hover:bg-white hover:text-black"
+                            >
+                                {messages.nav.blogsLink}
+                            </Link>
+                        </li>
                         <li>
                             <div className="flex items-center gap-4">
                                 <SegmentedThemeToggle
@@ -172,6 +194,23 @@ function PublicNavbar() {
                 className={`hidden overflow-hidden border-t border-white/10 max-[480px]:block ${isMobileMenuOpen ? 'max-h-64 py-3' : 'max-h-0 py-0'}`}
             >
                 <div className="site-container space-y-3 text-xs text-white">
+                    <div className="flex items-center gap-2">
+                        <Link
+                            to={withLocalePath('/zoeken', locale)}
+                            className="inline-flex items-center gap-1 rounded-full border border-white/30 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-white transition hover:border-white hover:bg-white hover:text-black"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                            <SearchIcon className="h-3 w-3" />
+                            {messages.nav.searchLink}
+                        </Link>
+                        <Link
+                            to={withLocalePath('/blogs', locale)}
+                            className="inline-flex items-center rounded-full border border-white/30 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-white transition hover:border-white hover:bg-white hover:text-black"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                            {messages.nav.blogsLink}
+                        </Link>
+                    </div>
                     <div className="flex items-center justify-between">
                         <SegmentedThemeToggle
                             theme={theme}

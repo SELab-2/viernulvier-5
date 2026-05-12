@@ -1,16 +1,12 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { getAdminSession, loginAdmin } from '../../api/adminAuth'
+import { loginAdmin } from '../../api/adminAuth'
 import type { Messages } from '../../i18n/types'
 import AdminLayout from '../../components/admin/AdminLayout'
 import { useAdminMessages } from '../../components/admin/AdminMessagesContext'
 import AdminLoginForm from '../../components/admin/AdminLoginForm'
 import { getAdminRouteConfig } from '../../admin/paths'
 import { primeAdminSession } from '../../auth/primedAdminSession'
-
-function loginAndFetchSession(username: string, password: string) {
-  return loginAdmin(username, password).then(() => getAdminSession())
-}
 
 const LOGIN_ERROR_KEYS = {
   invalidCredentials: 'invalidCredentials',
@@ -61,7 +57,7 @@ function LoginPageContent() {
     setIsSubmitting(true)
 
     try {
-      const session = await loginAndFetchSession(username, password)
+      const session = await loginAdmin(username, password)
       primeAdminSession(session)
       navigate(from, { replace: true })
     } catch (err) {
@@ -81,7 +77,7 @@ function LoginPageContent() {
         <h1 className="text-[2rem] font-bold tracking-[-0.04em] text-foreground max-[640px]:text-[1.75rem]">
           {messages.auth.loginTitle}
         </h1>
-        <p className="text-sm text-slate-500">{messages.auth.loginSubtitle}</p>
+        <p className="text-sm text-slate-500 dark:text-slate-400">{messages.auth.loginSubtitle}</p>
       </div>
 
       <AdminLoginForm
