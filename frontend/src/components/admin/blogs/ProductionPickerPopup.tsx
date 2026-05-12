@@ -108,7 +108,7 @@ function ProductionPickerPopup({
     onSearchQueryChange,
     onAdd,
 }: ProductionPickerPopupProps) {
-    const limitedProductions = productions.slice(0, 100)
+    const limitedProductions = productions.slice(0, 25)
     const fetchedImages = useProductionImages(limitedProductions)
     if (!isOpen) {
         return null
