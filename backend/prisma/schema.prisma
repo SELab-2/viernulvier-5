@@ -173,6 +173,8 @@ model blog {
   title           Json?
   content         Json?
   blog_production blog_production[]
+  editor_blog     editor_blog[]
+  draft           Boolean?
 
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt DateTime  @default(now()) @map("updated_at") @db.Timestamp(6)
@@ -186,6 +188,16 @@ model blog_production {
 
   @@id([blog_id, production_id])
 }
+
+model editor_blog {
+  editor_id     String     @db.Uuid
+  blog_id       String     @db.Uuid
+  editor        AdminUser  @relation(fields: [editor_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  blog          blog       @relation(fields: [blog_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([editor_id, blog_id])
+}
+
 
 model production {
   created_at        DateTime           @default(now()) @db.Timestamp(6)
@@ -223,9 +235,20 @@ model production {
   events            event[]            @relation("event_production")
   genre_production  genre_production[]
   tag_production    tag_production[]
+  editor_production editor_production[]
+  draft             Boolean?
   media_gallery     gallery?           @relation("production_media_gallery", fields: [media_gallery_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   poster_gallery    gallery?           @relation("production_poster_gallery", fields: [poster_gallery_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   review_gallery    gallery?           @relation("production_review_gallery", fields: [review_gallery_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model editor_production {
+  editor_id     String     @db.Uuid
+  production_id String     @db.Uuid
+  editor        AdminUser  @relation(fields: [editor_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  production    production @relation(fields: [production_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([editor_id, production_id])
 }
 
 model space {
@@ -260,6 +283,8 @@ model AdminUser {
   role         AdminRole @default(ADMIN)
   createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt    DateTime  @default(now()) @map("updated_at") @db.Timestamp(6)
+  editor_blog  editor_blog[]
+  editor_production editor_production[]
 
   @@map("users")
 }
