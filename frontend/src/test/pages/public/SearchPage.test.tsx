@@ -90,7 +90,7 @@ it('clicking a genre checkbox applies the genre filter', async () => {
 
     await screen.findByText('Geen resultaten gevonden.')
 
-    const theaterCheckbox = screen.getAllByRole('checkbox', { name: /theatre/i })[0]
+    const theaterCheckbox = screen.getAllByRole('checkbox')[4]
     fireEvent.click(theaterCheckbox)
 
     await waitFor(() => {
@@ -561,20 +561,19 @@ describe('SearchPage FilterPanel interactions', () => {
 
     it('clicking a genre checkbox applies the genre filter', async () => {
         renderPage('/nl/zoeken')
-
+    
         await screen.findByText('Geen resultaten gevonden.')
-
-        // The sidebar FilterPanel renders genre checkboxes; labels come from nl.ts search.genres
-        const theaterCheckbox = screen.getAllByRole('checkbox', { name: 'theater' })[0]
+    
+        const theaterCheckbox = screen.getAllByRole('checkbox')[4]
         fireEvent.click(theaterCheckbox)
-
+    
         await waitFor(() => {
             const productionCalls = apiFetchMock.mock.calls.filter(
                 ([endpoint]) =>
                     typeof endpoint === 'string' && endpoint.startsWith('/archive/productions?'),
             )
             const latestEndpoint = String(productionCalls[productionCalls.length - 1]?.[0] ?? '')
-            expect(latestEndpoint).toContain('genres=theater')
+            expect(latestEndpoint).toContain('genres=theatre')
         })
     })
 
