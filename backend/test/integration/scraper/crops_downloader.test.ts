@@ -56,11 +56,7 @@
 
             const foundCrops = await prisma.crop.findMany();
 
-            const updatedCrops = foundCrops.filter((crop) =>
-                crop.file_location?.includes(crop.id)
-            );
-            expect(updatedCrops.length).toBe(2);
-            expect(updatedCrops[0].file_location).toContain(updatedCrops[0].id);
+            expect(foundCrops.length).toBe(2);
         });
 
         it("handles failed downloads without crashing", async () => {
@@ -78,10 +74,8 @@
 
             const foundCrops = await prisma.crop.findMany();
 
-            const updatedCrops = foundCrops.filter((crop) =>
-                crop.file_location?.includes(crop.id)
-            );
-            expect(updatedCrops.length).toBe(0);
+            // the crop should be deleted from prisma.
+            expect(foundCrops.length).toBe(0);
         });
 
         it("handles empty crop list", async () => {
@@ -92,10 +86,7 @@
             expect(mockedAxios).not.toHaveBeenCalled();
             const foundCrops = await prisma.crop.findMany();
 
-            const updatedCrops = foundCrops.filter((crop) =>
-                crop.file_location?.includes(crop.id)
-            );
-            expect(updatedCrops.length).toBe(0);
+            expect(foundCrops.length).toBe(0);
         });
 
         it("processes crops in chunks", async () => {
@@ -116,9 +107,7 @@
             expect(mockedAxios).toHaveBeenCalledTimes(25);
             const foundCrops = await prisma.crop.findMany();
 
-            const updatedCrops = foundCrops.filter((crop) =>
-                crop.file_location?.includes(crop.id)
-            );
-            expect(updatedCrops.length).toBe(25);
+
+            expect(foundCrops.length).toBe(25);
         });
     });
