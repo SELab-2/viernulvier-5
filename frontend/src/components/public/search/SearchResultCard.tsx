@@ -23,6 +23,8 @@ export type SearchResultItem = {
 type SearchResultCardProps = {
     item: SearchResultItem
     detailHref?: string
+    onTagClick?: (genreValue: string) => void
+    genreValue?: string
 }
 
 function capitalizeFirst(value: string): string {
@@ -63,7 +65,7 @@ function ProductionStamp({
     )
 }
 
-function SearchResultCard({ item, detailHref }: SearchResultCardProps) {
+function SearchResultCard({ item, detailHref, onTagClick, genreValue }: SearchResultCardProps) {
     const searchMessages = getMessages(getActiveLocale(window.location.pathname)).search
     const normalizedTitle = capitalizeFirst(item.title.trim())
     const displayTitle = normalizedTitle.length > 110 ? `${normalizedTitle.slice(0, 107)}...` : normalizedTitle
@@ -72,6 +74,8 @@ function SearchResultCard({ item, detailHref }: SearchResultCardProps) {
     const isPdf = item.mimeType === 'application/pdf'
     const hasMultipleAssets = (item.relatedAssetCount ?? 0) > 1
     const previewUrls = (item.relatedAssetPreviewUrls ?? []).slice(0, 3)
+    const effectiveGenreValue = (genreValue?.trim() || item.tag.trim())
+    const hasClickableTag = typeof onTagClick === 'function' && effectiveGenreValue.length > 0
 
     const card = (
         <article className="relative flex h-full w-full flex-col border-b border-border pb-5">
@@ -99,9 +103,23 @@ function SearchResultCard({ item, detailHref }: SearchResultCardProps) {
                     />
                 )}
                 <div className="absolute inset-0 bg-black/20" />
-                <span className="absolute left-3 top-3 rounded-full border border-white/50 bg-white/25 px-3 py-1 text-xs font-semibold lowercase text-white backdrop-blur-sm">
-                    {item.tag}
-                </span>
+                {hasClickableTag ? (
+                    <button
+                        type="button"
+                        className="absolute left-3 top-3 z-10 rounded-full border border-white/50 bg-white/25 px-3 py-1 text-xs font-semibold lowercase text-white backdrop-blur-sm cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/40 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-1"
+                        onClick={(event) => {
+                            event.preventDefault()
+                            event.stopPropagation()
+                            onTagClick?.(effectiveGenreValue)
+                        }}
+                    >
+                        {item.tag}
+                    </button>
+                ) : (
+                    <span className="absolute left-3 top-3 rounded-full border border-white/50 bg-white/25 px-3 py-1 text-xs font-semibold lowercase text-white backdrop-blur-sm">
+                        {item.tag}
+                    </span>
+                )}
                 {hasMultipleAssets ? (
                     <div className="absolute bottom-2 right-2 flex items-center gap-1.5 rounded-full border border-white/45 bg-black/55 px-2 py-1 text-[10px] font-semibold text-white backdrop-blur-sm">
                         <div className="flex items-center -space-x-2">
