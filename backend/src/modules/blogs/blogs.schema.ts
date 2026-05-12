@@ -31,6 +31,7 @@ export const blogLinksSchema = z.object({
 
 export const blogSchema = z.object({
     id: z.string().uuid(),
+    draft: z.boolean().nullable().optional(),
     title: blogTitleSchema.nullable().optional(),
     content: z.unknown().nullable().optional(),
     productions: z.array(z.string().uuid()),
@@ -43,12 +44,14 @@ export const blogListSchema = createPaginatedResponseSchema(blogSchema)
 export const singleBlogSchema = createSingleResponseSchema(blogSchema)
 
 export const createBlogSchema = z.object({
+    draft: z.boolean().nullable().optional(),
     title: blogTitleSchema.optional(),
     content: z.unknown().optional(),
     productionIds: z.array(z.string().uuid()),
 })
 
 export const updateBlogSchema = z.object({
+    draft: z.boolean().nullable().optional(),
     title: blogTitleSchema.optional(),
     content: z.unknown().optional(),
     productionIds: z.array(z.string().uuid()).optional(),
