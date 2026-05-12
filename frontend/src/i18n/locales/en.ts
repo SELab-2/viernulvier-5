@@ -14,6 +14,8 @@ const en: Messages = {
     navAriaLabel: 'Main navigation',
     openMenuLabel: 'Open menu',
     closeMenuLabel: 'Close menu',
+    searchLink: 'Search archive',
+    blogsLink: 'Blogs',
   },
   home: {
     title: 'VIERNULVIER Archive',
@@ -120,6 +122,21 @@ const en: Messages = {
     resetFiltersLabel: 'reset filters',
     paginationPrevious: '<',
     paginationNext: '>',
+    relatedFilesCount: (count: number) => `${count} ${count === 1 ? 'file' : 'files'}`,
+    stampSvgPaths: {
+      days: {
+        singular: '/search/stamps/en/day.svg',
+        plural: '/search/stamps/en/days.svg',
+      },
+      months: {
+        singular: '/search/stamps/en/month.svg',
+        plural: '/search/stamps/en/months.svg',
+      },
+      years: {
+        singular: '/search/stamps/en/year.svg',
+        plural: '/search/stamps/en/years.svg',
+      },
+    },
   },
   auth: {
     localeToggleLabel: 'Switch language',
@@ -162,6 +179,7 @@ const en: Messages = {
     genresAndTags: 'Genres & tags',
     previousImage: 'Previous image',
     nextImage: 'Next image',
+    relatedBlogs: 'Related blog posts',
   },
   settings: {
     title: 'Settings',

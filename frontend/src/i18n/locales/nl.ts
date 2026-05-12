@@ -14,6 +14,8 @@ const nl: Messages = {
     navAriaLabel: 'Hoofdnavigatie',
     openMenuLabel: 'Open menu',
     closeMenuLabel: 'Sluit menu',
+    searchLink: 'Doorzoek archief',
+    blogsLink: 'Blogs',
   },
   home: {
     title: 'VIERNULVIER Archief',
@@ -120,6 +122,21 @@ const nl: Messages = {
     resetFiltersLabel: 'reset filters',
     paginationPrevious: '<',
     paginationNext: '>',
+    relatedFilesCount: (count: number) => `${count} ${count === 1 ? 'bestand' : 'bestanden'}`,
+    stampSvgPaths: {
+      days: {
+        singular: '/search/stamps/nl/day.svg',
+        plural: '/search/stamps/nl/days.svg',
+      },
+      months: {
+        singular: '/search/stamps/nl/month.svg',
+        plural: '/search/stamps/nl/months.svg',
+      },
+      years: {
+        singular: '/search/stamps/nl/year.svg',
+        plural: '/search/stamps/nl/year.svg',
+      },
+    },
   },
   auth: {
     localeToggleLabel: 'Wissel taal',
@@ -162,6 +179,7 @@ const nl: Messages = {
     genresAndTags: 'Genres & labels',
     previousImage: 'Vorige afbeelding',
     nextImage: 'Volgende afbeelding',
+    relatedBlogs: 'Gerelateerde blog posts',
   },
   settings: {
     title: 'Instellingen',

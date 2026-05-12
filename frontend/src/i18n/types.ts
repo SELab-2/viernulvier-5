@@ -14,6 +14,8 @@ export type Messages = {
     navAriaLabel: string
     openMenuLabel: string
     closeMenuLabel: string
+    searchLink: string
+    blogsLink: string
   }
   home: {
     title: string
@@ -94,6 +96,12 @@ export type Messages = {
     resetFiltersLabel: string
     paginationPrevious: string
     paginationNext: string
+    relatedFilesCount: (count: number) => string
+    stampSvgPaths: {
+      days: { singular: string; plural: string }
+      months: { singular: string; plural: string }
+      years: { singular: string; plural: string }
+    }
   }
   auth: {
     localeToggleLabel: string
@@ -136,6 +144,7 @@ export type Messages = {
     genresAndTags: string
     previousImage: string
     nextImage: string
+    relatedBlogs: string
   }
   footer: {
     brandLogoAlt: string

@@ -34,8 +34,6 @@ const baseProduction = {
     media_gallery_id: 'e9e00000-0000-0000-0000-000000000001',
     review_gallery_id: null,
     poster_gallery_id: null,
-    uitdatabank_theme: null,
-    uitdatabank_type: null,
     created_at: '2026-03-26T15:28:32.000Z',
     updated_at: '2026-03-27T08:20:10.000Z',
 }
@@ -96,6 +94,29 @@ describe('productions api', () => {
         expect(result.data.media_gallery_id).toBe('e9e00000-0000-0000-0000-000000000001')
         expect(result.data.review_gallery_id).toBeNull()
         expect(result.data.poster_gallery_id).toBeNull()
+    })
+
+    it('includes a blogs link when present in the response', async () => {
+        fetchMock.mockResolvedValueOnce({
+            ok: true,
+            status: 200,
+            json: vi.fn().mockResolvedValueOnce({
+                data: {
+                    ...baseProduction,
+                    links: {
+                        self: 'http://localhost/api/v1/archive/productions/dab70000-0000-0000-0000-000000000001',
+                        blogs: 'http://localhost/api/v1/archive/blogs?productionId=dab70000-0000-0000-0000-000000000001',
+                    },
+                },
+                links: { self: 'http://localhost' },
+            }),
+        } as unknown as Response)
+
+        const result = await getProductionById('dab70000-0000-0000-0000-000000000001')
+
+        expect(result.data.links?.blogs).toBe(
+            'http://localhost/api/v1/archive/blogs?productionId=dab70000-0000-0000-0000-000000000001'
+        )
     })
 
     it('throws when the server returns an error status', async () => {
