@@ -14,7 +14,7 @@ const nl: Messages = {
     navAriaLabel: 'Hoofdnavigatie',
     openMenuLabel: 'Open menu',
     closeMenuLabel: 'Sluit menu',
-    searchLink: 'Doorzoek archief',
+    searchLink: 'Zoeken',
     blogsLink: 'Blogs',
   },
   home: {

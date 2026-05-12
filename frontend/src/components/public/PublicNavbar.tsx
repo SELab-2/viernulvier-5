@@ -15,15 +15,6 @@ function resolveTheme(): Theme {
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
 
-function SearchIcon({ className }: { className: string }) {
-    return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
-            <circle cx="11" cy="11" r="6.5" />
-            <path d="M16 16L21 21" />
-        </svg>
-    )
-}
-
 function HamburgerIcon({ className }: { className: string }) {
     return (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
@@ -40,27 +31,6 @@ function CloseIcon({ className }: { className: string }) {
     )
 }
 
-type SearchToggleButtonProps = {
-    onToggle: () => void
-    ariaLabel: string
-    isExpanded: boolean
-    className: string
-}
-
-function SearchToggleButton({ onToggle, ariaLabel, isExpanded, className }: SearchToggleButtonProps) {
-    return (
-        <button
-            type="button"
-            onClick={onToggle}
-            className={className}
-            aria-label={ariaLabel}
-            aria-expanded={isExpanded}
-        >
-            <SearchIcon className="h-4 w-4" />
-        </button>
-    )
-}
-
 type PublicNavbarProps = {
     locale: 'nl' | 'en'
     onToggleLocale: () => void
@@ -71,7 +41,6 @@ function PublicNavbar({ locale, onToggleLocale }: PublicNavbarProps) {
     const navigate = useNavigate()
     const messages = usePublicMessages()
     const [theme, setTheme] = useState<Theme>(resolveTheme)
-    const [isSearchOpen, setIsSearchOpen] = useState(false)
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
     useEffect(() => {
@@ -92,7 +61,6 @@ function PublicNavbar({ locale, onToggleLocale }: PublicNavbarProps) {
         const updateMobileState = () => {
             if (!mobileQuery.matches) {
                 setIsMobileMenuOpen(false)
-                setIsSearchOpen(false)
             }
         }
 
@@ -167,23 +135,6 @@ function PublicNavbar({ locale, onToggleLocale }: PublicNavbarProps) {
                                     onToggleLocale={toggleLocale}
                                     className="text-md text-white max-[480px]:text-sm"
                                 />
-
-                                <SearchToggleButton
-                                    onToggle={() => setIsSearchOpen((open) => !open)}
-                                    ariaLabel={messages.nav.searchAriaLabel}
-                                    isExpanded={isSearchOpen}
-                                    className="inline-flex h-8 items-center justify-center text-white"
-                                />
-
-                                <div
-                                    className={`overflow-hidden transition-all duration-300 ${isSearchOpen ? 'ml-2 w-72 opacity-100' : 'ml-0 w-0 opacity-0'}`}
-                                >
-                                    <input
-                                        type="text"
-                                        placeholder={messages.nav.searchPlaceholder}
-                                        className="h-8 w-72 border rounded-sm bg-surface px-3 text-sm text-foreground placeholder:text-muted"
-                                    />
-                                </div>
                             </div>
                         </li>
                     </ul>
@@ -225,22 +176,7 @@ function PublicNavbar({ locale, onToggleLocale }: PublicNavbarProps) {
                             onToggleLocale={toggleLocale}
                             className="text-sm text-white"
                         />
-
-                        <SearchToggleButton
-                            onToggle={() => setIsSearchOpen((open) => !open)}
-                            ariaLabel={messages.nav.searchAriaLabel}
-                            isExpanded={isSearchOpen}
-                            className="inline-flex h-8 w-8 items-center justify-center text-white"
-                        />
                     </div>
-
-                    {isSearchOpen ? (
-                        <input
-                            type="text"
-                            placeholder={messages.nav.searchPlaceholder}
-                            className="h-9 w-full rounded-sm border bg-surface px-3 text-xs text-foreground placeholder:text-muted"
-                        />
-                    ) : null}
                 </div>
             </div>
         </header>
