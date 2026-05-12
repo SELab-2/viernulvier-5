@@ -68,6 +68,7 @@ export function SegmentedThemeToggle({
   className = '',
   compact = false,
 }: ThemeToggleProps) {
+  const toggleTheme = () => onSelectTheme(theme === 'dark' ? 'light' : 'dark')
   const containerClassName = compact ? 'inline-flex items-center gap-1' : `inline-flex h-8 w-16 items-center border border-border bg-grey ${className}`.trim()
   const buttonBaseClassName = compact
     ? 'inline-flex h-8 w-8 items-center justify-center cursor-pointer rounded-full text-white transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/40'
@@ -79,7 +80,7 @@ export function SegmentedThemeToggle({
         className={`${buttonBaseClassName} ${!compact && theme === 'dark' ? 'bg-white' : !compact ? 'bg-grey' : ''}`.trim()}
         ariaLabel={darkLabel}
         ariaPressed={theme === 'dark'}
-        onClick={() => onSelectTheme('dark')}
+        onClick={toggleTheme}
       >
         <MoonIcon className={compact ? 'h-3.5 w-3.5' : 'h-4 w-4'} />
       </ControlButton>
@@ -87,7 +88,7 @@ export function SegmentedThemeToggle({
         className={`${buttonBaseClassName} ${!compact && theme === 'light' ? 'bg-white' : !compact ? 'bg-grey' : ''}`.trim()}
         ariaLabel={lightLabel}
         ariaPressed={theme === 'light'}
-        onClick={() => onSelectTheme('light')}
+        onClick={toggleTheme}
       >
         <SunIcon className={compact ? 'h-3.5 w-3.5' : 'h-4 w-4'} />
       </ControlButton>
