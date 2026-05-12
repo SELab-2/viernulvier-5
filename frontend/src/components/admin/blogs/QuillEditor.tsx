@@ -9,13 +9,14 @@ type QuillEditorProps = {
     onJsonChange?: (value: unknown) => void
     placeholder?: string
     onImageUpload?: (file: File) => Promise<string>
+    showImages?: boolean
 }
 
-const toolbarOptions = [
+const toolbarOptions = (showImages: boolean) => [
     [{ header: [1, 2, 3, false] }],
     ['bold', 'italic', 'underline', 'strike'],
     [{ list: 'ordered' }, { list: 'bullet' }],
-    ['link', 'image'],
+    showImages ? ['link', 'image'] : ['link'],
     ['clean'],
 ]
 
@@ -37,7 +38,7 @@ function fileToDataUrl(file: File): Promise<string> {
     })
 }
 
-function QuillEditor({ value, onChange, onJsonChange, placeholder, onImageUpload }: QuillEditorProps) {
+function QuillEditor({ value, onChange, onJsonChange, placeholder, onImageUpload, showImages = true }: QuillEditorProps) {
     const containerRef = useRef<HTMLDivElement | null>(null)
     const quillRef = useRef<Quill | null>(null)
 
@@ -73,19 +74,19 @@ function QuillEditor({ value, onChange, onJsonChange, placeholder, onImageUpload
             return
         }
 
+        const toolbar = showImages
+            ? {
+                container: toolbarOptions(true),
+                handlers: {
+                    image: () => { void handleImageUpload(quill) },
+                },
+            }
+            : { container: toolbarOptions(false) }
+
         const quill = new Quill(containerRef.current, {
             theme: 'snow',
             placeholder,
-            modules: {
-                toolbar: {
-                    container: toolbarOptions,
-                    handlers: {
-                        image: () => {
-                            void handleImageUpload(quill)
-                        },
-                    },
-                },
-            },
+            modules: { toolbar },
         })
 
         quill.on('text-change', () => {

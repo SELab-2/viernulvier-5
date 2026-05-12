@@ -13,7 +13,7 @@ function ArchiveTab({options, language, setTab}: ArchiveTabProps) {
             {options.map(({ key, label }) => (
                 <button 
                 className={[
-                    "relative px-4 py-4 pb-8 text-sm font-bold tracking-wide transition-colors",
+                    "relative px-4 py-4 pb-4 text-sm font-bold tracking-wide transition-colors",
                     language === key ? "text-accent" : "text-muted hover:text-foreground"
                 ].join(' ')} // HACK: weird way to do this, maybe there is a better way?
                 key={key} onClick={() =>{

@@ -1,5 +1,6 @@
 import type { ProductionSettingsFields, LocalizedText } from "../../types/production"
 import FuzzyTagInput from "./FuzzyTagInput"
+import { useState } from "react"
 
 type ArchiveSidebarProps = {
     fields: ProductionSettingsFields
@@ -13,11 +14,14 @@ type ArchiveSidebarProps = {
     onRemoveGenre: (tag: LocalizedText) => void
     onChange: (field: keyof ProductionSettingsFields, value: string) => void
     productionSettingsLabel: string,
-    statusLabel: string,
+    // statusLabel: string,
     genreLabel: string,
-    tagLabel: string
+    tagLabel: string,
     bannerLabel: string,
     extraPicturesLabel: string,
+    addGenrePlaceholder: string,
+    addTagPlaceholder: string,
+    chooseFilePlaceholder: string,
 }
 
 // const info = <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-accent lucide lucide-info-icon lucide-info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
@@ -42,96 +46,103 @@ function ArchiveSidebar({
     tagLabel,
     bannerLabel,
     extraPicturesLabel,
+    addGenrePlaceholder,
+    addTagPlaceholder,
+    chooseFilePlaceholder,
 }: ArchiveSidebarProps){
+    const [bannerFileName, setBannerFileName] = useState<string | undefined>(undefined)
+    const [extraFiles, setExtraFiles] = useState<string | undefined>(undefined)
+
     return (
-        <div className="bg-surface w-1/3">
-            <div 
-                // onSubmit={}
-                className="m-4"
-            >   
-                <p className="text-m text-accent mb-8 font-bold tracking-wide">
+        <div className="bg-surface w-1/4">
+            <div className="m-4 flex flex-col gap-6">
+                <p className="text-xl text-accent font-semibold tracking-wide">
                     {productionSettingsLabel}
                 </p>
-                {/* Extra feature draft, might add this back later*/}
-                {/* <div className="flex gap-2">
-                    {info}
-                    <p className="mb-4 text-sm font-bold tracking-wide">
-                        {statusLabel}
-                    </p>
-                </div>
-                <div className="mb-8 gap-2 w-9/10">
-                    <div className="flex h-12 items-center rounded-md bg-background px-4 text-muted">
-                        <select
-                            // value={fields.title}
-                            // onChange={e => onChange(e.target.title, 'abc')}
-                            // placeholder={}
-                            className="w-full text-foreground"
-                        >
-                            <option>Option A</option>
-                            <option>Option B</option>
-                            <option>Option C</option>
-                        </select>
+                {/* Genre */}
+                <div className="flex flex-col gap-2">
+                    <div className="flex gap-2 items-center">
+                        {hashtag}
+                        <p className="text-sm font-bold tracking-wide">
+                            {genreLabel}
+                        </p>
                     </div>
-                </div> */}
-                <div className="flex gap-2">
-                    {hashtag}
-                    <p className="mb-4 text-sm font-bold tracking-wide">
-                        {genreLabel}
-                    </p>
+                    <FuzzyTagInput
+                        tag={genre}
+                        tags={fields.genres}
+                        endpoint="/archive/genres"
+                        addTag={onAddGenre}
+                        onChange={onChangeGenre}
+                        onRemove={onRemoveGenre}
+                        placeholder={addGenrePlaceholder}
+                    />
                 </div>
-                <FuzzyTagInput
-                    tag={genre}
-                    tags={fields.genres}
-                    endpoint="/archive/genres"
-                    addTag={onAddGenre}
-                    onChange={onChangeGenre}
-                    onRemove={onRemoveGenre}
-                    placeholder="Add genre..."
-                />
-                <div className="flex gap-2">
-                    {hashtag}
-                    <p className="mb-4 text-sm font-bold tracking-wide">
-                        {tagLabel}
-                    </p>
+                {/* Tags */}
+                <div className="flex flex-col gap-2">
+                    <div className="flex gap-2 items-center">
+                        {hashtag}
+                        <p className="text-sm font-bold tracking-wide">
+                            {tagLabel}
+                        </p>
+                    </div>
+                    <FuzzyTagInput
+                        tag={tag}
+                        tags={fields.tags}
+                        endpoint="/archive/tags"
+                        addTag={onAddTag}
+                        onChange={onChangeTag}
+                        onRemove={onRemoveTag}
+                        placeholder={addTagPlaceholder}
+                    />
                 </div>
-                <FuzzyTagInput
-                    tag={tag}
-                    tags={fields.tags}
-                    endpoint="/archive/tags"
-                    addTag={onAddTag}
-                    onChange={onChangeTag}
-                    onRemove={onRemoveTag}
-                    placeholder="Add tag..."
-                />
-                <div className="flex gap-2">
-                    {image}
-                    <p className="mb-4 text-sm font-bold tracking-wide">
-                    {bannerLabel}
-                    </p>
-                </div>
-                <div className="mb-8 gap-2 w-9/10">
-                    <div className="flex h-12 items-center rounded-md bg-background px-4 text-muted">
+                {/* Banner upload */}
+                <div className="flex flex-col gap-2 mb-6">
+                    <div className="flex gap-2 items-center">
+                        {image}
+                        <p className="text-sm font-bold tracking-wide">
+                            {bannerLabel}
+                        </p>
+                    </div>
+                    <label className="flex h-12 items-center rounded-md bg-background px-4 text-muted border border-border cursor-pointer relative overflow-hidden">
                         <input
                             type="file"
                             accept="image/*"
-                            // onChange={e => onChange(e.target.title, 'abc')}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                            onChange={e => {
+                                const file = e.target.files?.[0];
+                                setBannerFileName(file ? file.name : undefined);
+                            }}
                         />
+                        <span className="flex-1 truncate text-foreground">
+                            {bannerFileName ? bannerFileName : chooseFilePlaceholder}
+                        </span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="ml-2 text-accent"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" /></svg>
+                    </label>
+                </div>
+                {/* Extra foto's upload */}
+                <div className="flex flex-col gap-2">
+                    <div className="flex gap-2 items-center">
+                        {images}
+                        <p className="text-sm font-bold tracking-wide">
+                            {extraPicturesLabel}
+                        </p>
                     </div>
-                </div>
-                <div className="flex gap-2">
-                    {images}
-                    <p className="mb-4 text-sm font-bold tracking-wide">
-                    {extraPicturesLabel}
-                    </p>
-                </div>
-                <div className="mb-8 gap-2 w-9/10">
-                    <div className="flex h-12 items-center rounded-md bg-background px-4">
+                    <label className="flex h-12 items-center rounded-md bg-background px-4 text-muted border border-border cursor-pointer relative overflow-hidden">
                         <input
                             type="file"
                             accept="image/*"
-                            // onChange={e => onChange(e.target.title, 'abc')}
+                            multiple
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                            onChange={e => {
+                                const files = e.target.files;
+                                setExtraFiles(files ? Array.from(files).map(f => f.name).join(', ') : undefined);
+                            }}
                         />
-                    </div>
+                        <span className="flex-1 truncate text-foreground">
+                            {extraFiles ? extraFiles : chooseFilePlaceholder}
+                        </span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="ml-2 text-accent"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" /></svg>
+                    </label>
                 </div>
             </div>
         </div>

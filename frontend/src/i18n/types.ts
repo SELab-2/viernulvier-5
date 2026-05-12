@@ -134,6 +134,9 @@ export type Messages = {
     tagLabel: string
     bannerLabel: string
     extraPicturesLabel: string
+    addGenrePlaceholder: string
+    addTagPlaceholder: string
+    chooseFilePlaceholder: string
     artistLabel: string
     // production edit
     productionEditTitle: string

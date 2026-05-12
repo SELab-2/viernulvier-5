@@ -360,6 +360,9 @@ function ArchiveEditPage() {
                     tagLabel={messages.production.tagLabel}
                     bannerLabel={messages.production.bannerLabel}
                     extraPicturesLabel={messages.production.extraPicturesLabel}
+                    addGenrePlaceholder={messages.production.addGenrePlaceholder}
+                    addTagPlaceholder={messages.production.addTagPlaceholder}
+                    chooseFilePlaceholder={messages.production.chooseFilePlaceholder}
                 />
             </div>
 

@@ -1,3 +1,4 @@
+import QuillEditor from "./blogs/QuillEditor"
 import type { Locale } from "../../i18n/types"
 import type { LocalizedText, ProductionPayload } from "../../types/production"
 
@@ -9,6 +10,7 @@ type ArchiveContentTabProps = {
     contentLabels: Record<string, string>
 
     onChange: (field: keyof ProductionPayload, lang: Locale, value: string) => void
+    onDescriptionJsonChange?: (field: keyof ProductionPayload, lang: Locale, value: unknown) => void
 }
 
 function ArchiveTabContent({
@@ -17,14 +19,15 @@ function ArchiveTabContent({
     basicFields,
     descriptionFields,
     contentLabels,
-    onChange
+    onChange,
+    onDescriptionJsonChange,
 } : ArchiveContentTabProps) {
     return (
-        <div className="px-8 py-6 flex flex-col">
+        <div className="px-8 py-6 flex flex-col gap-4">
             {basicFields.map((field) => ( 
                 <div key={field}>
                     <p className="mb-4 text-sm font-bold tracking-wide">{contentLabels[field]}</p>
-                    <div className="mb-8 flex h-12 items-center rounded-xl border border-border bg-surface px-4">
+                    <div className="flex h-12 items-center rounded-xl border border-border bg-surface px-4">
                         <input
                             type="text"
                             value={(production[field] as LocalizedText)?.[editLanguage] ?? ""}
@@ -38,16 +41,14 @@ function ArchiveTabContent({
             {descriptionFields.map((field) => (
                 <div key={field}>
                     <p className="mb-4 text-sm font-bold tracking-wide">{contentLabels[field]}</p>
-                    <div className="mb-8 rounded-xl border border-border bg-surface px-4 py-3">
-                        <textarea
-                            value={(production[field] as LocalizedText)?.[editLanguage] ?? ""}
-                            onChange={e => onChange(field, editLanguage, e.target.value)}
-                            placeholder="type here ..."
-                            rows={6}
-                            className="w-full bg-transparent text-sm text-foreground placeholder:text-muted outline-none "
-                        />
-                    </div>
-
+                    <QuillEditor
+                        value={(production[field] as LocalizedText)?.[editLanguage] ?? ""}
+                        onChange={value => onChange(field, editLanguage, value)}
+                        onJsonChange={onDescriptionJsonChange
+                            ? value => onDescriptionJsonChange(field, editLanguage, value)
+                            : undefined}
+                        showImages={false}
+                    />
                 </div>
             ))}
         </div>

@@ -51,14 +51,15 @@ function FuzzyTagInput({
                 if (response && response.data) {
                     // Extract all possible names from existing tags for duplicate checking
                     const existingNamesLower = tags.flatMap(t => [
-                        t.nl?.toLowerCase(),
-                        t.en?.toLowerCase(),
-                        t.fr?.toLowerCase()
+                        t?.nl?.toLowerCase(),
+                        t?.en?.toLowerCase(),
+                        t?.fr?.toLowerCase()
                     ].filter((v): v is string => !!v))
 
                     const newSuggestions = response.data
                         .map((item: TaxonomyItem) => item.name)
-                        .filter((nameObj: LocalizedText) => {
+                        .filter((nameObj: LocalizedText | null) => {
+                            if (!nameObj) return false
                             const currentName = (nameObj[locale] || nameObj.nl || nameObj.en || '').toLowerCase()
                             // Also check if any of the localized names of this suggestion already exist
                             const suggestionNames = [nameObj.nl?.toLowerCase(), nameObj.en?.toLowerCase(), nameObj.fr?.toLowerCase()].filter((v): v is string => !!v)
@@ -93,10 +94,10 @@ function FuzzyTagInput({
     }
 
     return (
-        <div className="flex flex-col gap-2 relative" ref={containerRef}>
+        <div className="flex flex-col relative" ref={containerRef}>
             <div className="flex flex-wrap gap-2 mb-2">
                 {tags.map((t, idx) => {
-                    const displayName = t[locale] || t.nl || t.en || '???'
+                    const displayName = t?.[locale] || t?.nl || t?.en || '???'
                     return (
                         <span
                             key={`${displayName}-${idx}`}
@@ -110,7 +111,7 @@ function FuzzyTagInput({
                     )
                 })}
             </div>
-            <div className="border border-border mb-8 gap-2 w-9/10 flex h-12 items-center rounded-md bg-background px-4 text-muted">
+            <div className="border border-border gap-2 flex h-12 items-center rounded-md bg-background px-4 text-muted">
                 <input
                     type="text"
                     value={tag}
@@ -135,8 +136,9 @@ function FuzzyTagInput({
             </div>
 
             {isOpen && suggestions.length > 0 && (
-                <ul className="absolute z-10 w-9/10 bg-surface border border-border rounded-md shadow-lg top-full -mt-7 max-h-40 overflow-auto">
+                <ul className="absolute z-10 bg-surface border border-border rounded-md shadow-lg top-full -mt-7 max-h-40 overflow-auto">
                     {suggestions.map((suggestion, index) => {
+                        if (!suggestion) return null
                         const suggestionName = suggestion[locale] || suggestion.nl || suggestion.en || ''
                         return (
                             <li
