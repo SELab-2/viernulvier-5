@@ -127,6 +127,7 @@ export type Messages = {
     genresAndTags: string
     previousImage: string
     nextImage: string
+    relatedBlogs: string
   }
   footer: {
     brandLogoAlt: string

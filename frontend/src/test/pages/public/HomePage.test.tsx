@@ -23,7 +23,7 @@ vi.mock('react-router-dom', async () => {
 
 vi.mock('../../../i18n', () => ({
     getActiveLocale: getActiveLocaleMock,
-    getMessages: () => ({
+    getMessages: (locale: 'nl' | 'en' = 'nl') => ({
         home: {
             latestBlogHeading: 'Recente blog post',
             latestBlogSubheading: 'verhalen, context en updates',
@@ -52,7 +52,11 @@ vi.mock('../../../i18n', () => ({
             onThisDayFallbackSubheading: '',
         },
         nav: { home: 'Home', archive: 'Archief', searchAriaLabel: 'Zoeken', searchPlaceholder: 'Zoek...' },
-        search: { shareLabel: 'Deel', shareCopiedLabel: 'Gekopieerd' },
+        search: {
+            shareLabel: 'Deel',
+            shareCopiedLabel: 'Gekopieerd',
+            fallbackUntitled: locale === 'en' ? 'Untitled' : 'Zonder titel',
+        },
         footer: { privacy: 'Privacy', cookies: 'Cookies', disclaimer: 'Disclaimer', rights: '© 2026' },
         auth: {},
     }),

@@ -2,8 +2,8 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import PublicLatestBlogPreview from '../../../components/public/PublicLatestBlogPreview'
 
-vi.mock('../../../i18n', () => ({
-    getMessages: () => ({
+vi.mock('../../../components/public/PublicMessagesContext', () => ({
+    usePublicMessages: () => ({
         home: {
             latestBlogHeading: 'Recente blog post',
             latestBlogSubheading: 'verhalen, context en updates',

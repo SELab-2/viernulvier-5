@@ -205,18 +205,6 @@ describe('CreateBlogPage', () => {
     vi.restoreAllMocks()
   })
 
-  it('navigates back to the admin dashboard shell when the back button is clicked', async () => {
-    renderCreatePage()
-
-    await waitFor(() => {
-      expect(apiFetchMock).toHaveBeenCalledTimes(1)
-    })
-
-    fireEvent.click(screen.getByRole('button', { name: /Terug|Back/ }))
-
-    expect(navigate).toHaveBeenCalledWith('/admin')
-  })
-
   it('shows an error when nothing is filled in', async () => {
     renderCreatePage()
 

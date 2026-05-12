@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
-import { getMessages } from '../../i18n'
+import { usePublicMessages } from './PublicMessagesContext'
 
 type PublicPopularTagsProps = {
     onTagClick: (tag: string) => void
@@ -9,7 +9,7 @@ type PublicPopularTagsProps = {
 const GAP_PX = 12
 
 function PublicPopularTags({ onTagClick }: PublicPopularTagsProps) {
-    const messages = getMessages()
+    const messages = usePublicMessages()
     const tags = messages.home.popularTags
     const moreLabel = messages.home.popularTagsMore
     const lessLabel = messages.home.popularTagsLess

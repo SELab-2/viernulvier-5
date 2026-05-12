@@ -1,6 +1,6 @@
 import SectionTitle from './SectionTitle'
 import PublicPillButton from './PublicPillButton'
-import { getMessages } from '../../i18n'
+import { usePublicMessages } from './PublicMessagesContext'
 
 function RightChevronIcon({ className }: { className: string }) {
     return (
@@ -29,7 +29,7 @@ function PublicRecentDigitized({
     onViewItem,
     onViewAll,
 }: PublicRecentDigitizedProps) {
-    const messages = getMessages()
+    const messages = usePublicMessages()
 
     return (
         <section className="site-container mt-20 pb-10">

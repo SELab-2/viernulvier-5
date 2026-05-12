@@ -21,8 +21,8 @@ const homeMessagesState = vi.hoisted(() => ({
     },
 }))
 
-vi.mock('../../../i18n', () => ({
-    getMessages: () => ({
+vi.mock('../../../components/public/PublicMessagesContext', () => ({
+    usePublicMessages: () => ({
         home: homeMessagesState.current,
     }),
 }))

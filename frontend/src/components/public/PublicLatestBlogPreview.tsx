@@ -1,6 +1,6 @@
 import SectionTitle from './SectionTitle'
 import PublicPillButton from './PublicPillButton'
-import { getMessages } from '../../i18n'
+import { usePublicMessages } from './PublicMessagesContext'
 
 type PublicLatestBlogPreviewProps = {
     blog: {
@@ -13,7 +13,7 @@ type PublicLatestBlogPreviewProps = {
 }
 
 function PublicLatestBlogPreview({ blog, onReadMore, onViewAll }: PublicLatestBlogPreviewProps) {
-    const messages = getMessages()
+    const messages = usePublicMessages()
 
     if (!blog) {
         return null
