@@ -167,11 +167,11 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
           <div className="overflow-x-auto">
             <table className="w-full min-w-[560px] table-fixed border-collapse">
               <colgroup>
-                <col className="w-[38%]" />
-                <col className="w-[15%]" />
+                <col className="w-[36%]" />
+                <col className="w-[14%]" />
                 <col className="w-[12%]" />
+                <col className="w-[18%]" />
                 <col className="w-[20%]" />
-                <col className="w-[15%]" />
               </colgroup>
               <thead className="bg-[rgba(248,250,252,0.7)] dark:bg-slate-900/60">
                 <tr>
@@ -246,8 +246,8 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
                       </div>
                     </td>
                     <td className="px-4 py-4 text-sm text-[#475569] dark:text-slate-300">{formatDate(item.updatedAt)}</td>
-                    <td className="px-4 py-4">
-                      <div className="flex gap-1">
+                    <td className="px-2 py-4">
+                      <div className="flex flex-wrap justify-end gap-1">
                         <button className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white">
                           {d.actionView}
                         </button>
