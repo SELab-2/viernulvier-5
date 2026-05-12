@@ -640,17 +640,19 @@ describe('SearchPage FilterPanel interactions', () => {
 
         await screen.findByText('Geen resultaten gevonden.')
 
-        // Inside FilterPanel, selected locations are shown as chip buttons with the location label
-        const locationChips = await screen.findAllByRole('button', {
-            name: (name) => name.includes('balzaal'),
+        // Click the result-chip remove control for the active location filter.
+        const removeLocationChip = await screen.findByRole('button', {
+            name: 'Remove filter balzaal',
         })
-        expect(locationChips.length).toBeGreaterThan(0)
-
-        const callsBefore = apiFetchMock.mock.calls.length
-        fireEvent.click(locationChips[0])
+        fireEvent.click(removeLocationChip)
 
         await waitFor(() => {
-            expect(apiFetchMock.mock.calls.length).toBeGreaterThan(callsBefore)
+            const productionCalls = apiFetchMock.mock.calls.filter(
+                ([endpoint]) =>
+                    typeof endpoint === 'string' && endpoint.startsWith('/archive/productions?'),
+            )
+            const latestEndpoint = String(productionCalls[productionCalls.length - 1]?.[0] ?? '')
+            expect(latestEndpoint).not.toContain('locations=')
         })
     })
 })
