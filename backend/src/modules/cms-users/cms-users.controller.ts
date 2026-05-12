@@ -12,9 +12,8 @@ import { buildPaginationLinks } from '../../utils/pagination.js'
 export class CmsUsersController {
     constructor(private readonly service: CmsUsersService) { }
 
-    private getBaseUrl(request: FastifyRequest): string {
-        const host = request.headers.host || request.hostname
-        return `${request.protocol}://${host}/api/v1/cms-users`
+    private getBaseUrl(): string {
+        return '/api/v1/cms-users'
     }
 
     private mapCmsUserLinks(cmsUser: CmsUserResponse, baseUrl: string): CmsUserResponse {
@@ -28,7 +27,7 @@ export class CmsUsersController {
 
     async getCmsUsers(request: FastifyRequest<{ Querystring: CmsUserPaginationQuery }>, reply: FastifyReply) {
         const cmsUsers = await this.service.getCmsUsers(request.query)
-        const baseUrl = this.getBaseUrl(request)
+        const baseUrl = this.getBaseUrl()
         const dataWithLinks = cmsUsers.items.map((cmsUser) => this.mapCmsUserLinks(cmsUser, baseUrl))
 
         return reply.status(200).send({
@@ -51,7 +50,7 @@ export class CmsUsersController {
             return reply.status(404).send({ message: 'CMS user not found' })
         }
 
-        const baseUrl = this.getBaseUrl(request)
+        const baseUrl = this.getBaseUrl()
         const dataWithLinks = this.mapCmsUserLinks(cmsUser, baseUrl)
 
         return reply.status(200).send({
@@ -64,7 +63,7 @@ export class CmsUsersController {
 
     async createCmsUser(request: FastifyRequest<{ Body: CreateCmsUserInput }>, reply: FastifyReply) {
         const cmsUser = await this.service.createCmsUser(request.body)
-        const baseUrl = this.getBaseUrl(request)
+        const baseUrl = this.getBaseUrl()
         const selfUrl = `${baseUrl}/${cmsUser.id}`
         const dataWithLinks = this.mapCmsUserLinks(cmsUser, baseUrl)
 
@@ -82,7 +81,7 @@ export class CmsUsersController {
     async updateCmsUser(request: FastifyRequest<{ Params: CmsUserIdParams, Body: UpdateCmsUserInput }>, reply: FastifyReply) {
         const { id } = request.params
         const cmsUser = await this.service.updateCmsUser(id, request.body)
-        const baseUrl = this.getBaseUrl(request)
+        const baseUrl = this.getBaseUrl()
         const dataWithLinks = this.mapCmsUserLinks(cmsUser, baseUrl)
 
         return reply.status(200).send({

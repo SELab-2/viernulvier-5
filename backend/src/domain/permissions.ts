@@ -11,7 +11,7 @@ export enum Permission {
     ARCHIVE_CREATE = 'archive:create',
     ARCHIVE_UPDATE = 'archive:update',
     ARCHIVE_DELETE = 'archive:delete',
-    CMS_USERS_MANAGE = 'cms-users:manage',
+    EDITORS_MANAGE = 'editors:manage',
 }
 
 export const rolePermissions: Record<Role, Permission[]> = {
@@ -20,7 +20,7 @@ export const rolePermissions: Record<Role, Permission[]> = {
         Permission.ARCHIVE_CREATE,
         Permission.ARCHIVE_UPDATE,
         Permission.ARCHIVE_DELETE,
-        Permission.CMS_USERS_MANAGE,
+        Permission.EDITORS_MANAGE,
     ],
     [Role.EDITOR]: [
         Permission.ARCHIVE_READ,

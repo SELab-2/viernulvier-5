@@ -399,7 +399,7 @@ function EditorsTab({ isVisible }: EditorsTabProps) {
 
         let isActive = true
 
-        api.get<EditorsResponse>('/cms-users')
+        api.get<EditorsResponse>('/editors')
             .then((response) => {
                 if (!isActive) {
                     return
@@ -445,7 +445,7 @@ function EditorsTab({ isVisible }: EditorsTabProps) {
         setCreateState((current) => ({ ...current, isSubmitting: true, error: null, success: null }))
 
         try {
-            const response = await api.post<{ data: EditorEntry }>('/cms-users', {
+            const response = await api.post<{ data: EditorEntry }>('/editors', {
                 username: createState.username.trim(),
                 password: createState.password,
             })
@@ -475,7 +475,7 @@ function EditorsTab({ isVisible }: EditorsTabProps) {
         setEditState((current) => ({ ...current, isSaving: true, error: null, success: null }))
 
         try {
-            const response = await api.patch<{ data: EditorEntry }>(`/cms-users/${selectedEditor.id}`, {
+            const response = await api.patch<{ data: EditorEntry }>(`/editors/${selectedEditor.id}`, {
                 username: editState.username.trim(),
             })
             setState((current) => ({
@@ -497,7 +497,7 @@ function EditorsTab({ isVisible }: EditorsTabProps) {
         setEditState((current) => ({ ...current, isResettingPassword: true, error: null, success: null }))
 
         try {
-            await api.patch(`/cms-users/${selectedEditor.id}`, {
+            await api.patch(`/editors/${selectedEditor.id}`, {
                 password: editState.resetPassword,
             })
             setEditState((current) => ({
@@ -526,7 +526,7 @@ function EditorsTab({ isVisible }: EditorsTabProps) {
         setEditState((current) => ({ ...current, isDeleting: true, error: null, success: null }))
 
         try {
-            await api.delete(`/cms-users/${selectedEditor.id}`)
+            await api.delete(`/editors/${selectedEditor.id}`)
             setState((current) => ({
                 ...current,
                 editors: current.editors.filter((editor) => editor.id !== selectedEditor.id),

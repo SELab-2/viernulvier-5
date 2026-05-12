@@ -21,8 +21,8 @@ describe('requirePermission', () => {
             handler: async () => ({ success: true }),
         })
 
-        app.get('/cms-users-manage', {
-            preHandler: [requirePermission(Permission.CMS_USERS_MANAGE)],
+        app.get('/editors-manage', {
+            preHandler: [requirePermission(Permission.EDITORS_MANAGE)],
             handler: async () => ({ success: true }),
         })
     })
@@ -43,7 +43,7 @@ describe('requirePermission', () => {
     it('allows an ADMIN token through for CMS user management', async () => {
         const response = await app.inject({
             method: 'GET',
-            url: '/cms-users-manage',
+            url: '/editors-manage',
             cookies: {
                 token: app.jwt.sign({ sub: 'admin-id', username: 'admin', role: 'ADMIN' }),
             },
@@ -69,7 +69,7 @@ describe('requirePermission', () => {
     it('rejects an EDITOR token without the needed admin permission', async () => {
         const response = await app.inject({
             method: 'GET',
-            url: '/cms-users-manage',
+            url: '/editors-manage',
             cookies: {
                 token: app.jwt.sign({ sub: 'editor-id', username: 'editor', role: 'EDITOR' }),
             },

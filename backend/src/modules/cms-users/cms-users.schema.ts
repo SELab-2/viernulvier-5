@@ -11,7 +11,7 @@ export const cmsUserPaginationQuerySchema = z.object({
 })
 
 export const cmsUserLinksSchema = z.object({
-    self: z.string().url().default('https://example.com/'),
+    self: z.string().default('/api/v1/cms-users/example'),
 })
 
 export const cmsUserSchema = z.object({

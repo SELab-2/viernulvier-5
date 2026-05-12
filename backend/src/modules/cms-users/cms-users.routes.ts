@@ -21,7 +21,7 @@ const cmsUsersRoutes: FastifyPluginAsync = async (fastify) => {
     const controller = new CmsUsersController(service)
 
     fastify.get('/', {
-        preHandler: [requirePermission(Permission.CMS_USERS_MANAGE)],
+        preHandler: [requirePermission(Permission.EDITORS_MANAGE)],
         schema: {
             tags: ['cms-users'],
             summary: 'Get all CMS users',
@@ -34,7 +34,7 @@ const cmsUsersRoutes: FastifyPluginAsync = async (fastify) => {
     })
 
     fastify.get('/:id', {
-        preHandler: [requirePermission(Permission.CMS_USERS_MANAGE)],
+        preHandler: [requirePermission(Permission.EDITORS_MANAGE)],
         schema: {
             tags: ['cms-users'],
             summary: 'Get a CMS user by ID',
@@ -48,7 +48,7 @@ const cmsUsersRoutes: FastifyPluginAsync = async (fastify) => {
     })
 
     fastify.post('/', {
-        preHandler: [requirePermission(Permission.CMS_USERS_MANAGE)],
+        preHandler: [requirePermission(Permission.EDITORS_MANAGE)],
         schema: {
             tags: ['cms-users'],
             summary: 'Create a new CMS user',
@@ -61,7 +61,7 @@ const cmsUsersRoutes: FastifyPluginAsync = async (fastify) => {
     })
 
     fastify.patch('/:id', {
-        preHandler: [requirePermission(Permission.CMS_USERS_MANAGE)],
+        preHandler: [requirePermission(Permission.EDITORS_MANAGE)],
         schema: {
             tags: ['cms-users'],
             summary: 'Update a CMS user',
@@ -76,7 +76,7 @@ const cmsUsersRoutes: FastifyPluginAsync = async (fastify) => {
     })
 
     fastify.delete('/:id', {
-        preHandler: [requirePermission(Permission.CMS_USERS_MANAGE)],
+        preHandler: [requirePermission(Permission.EDITORS_MANAGE)],
         schema: {
             tags: ['cms-users'],
             summary: 'Delete a CMS user',
