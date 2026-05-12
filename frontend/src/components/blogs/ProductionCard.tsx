@@ -23,6 +23,10 @@ export type ProductionCardItem = {
     venue_name?: string | null
     venue_names?: string[]
     attendance_mode?: string | null
+    links?: {
+        media_gallery?: string | null
+        poster_gallery?: string | null
+    }
 }
 
 type ProductionCardProps = {

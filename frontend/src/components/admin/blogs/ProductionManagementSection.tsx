@@ -1,33 +1,10 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { getActiveLocale, getMessages } from '../../../i18n'
-import { apiFetch } from '../../../api/client'
 import ProductionCard, { type ProductionCardItem } from '../../blogs/ProductionCard'
 import ProductionPickerPopup from './ProductionPickerPopup'
+import { useProductionImages } from '../hooks/useProductionImages'
 
 export type ProductionItem = ProductionCardItem
-
-type GalleryResponse = {
-    data: {
-        links?: {
-            items?: string
-        }
-    }
-}
-
-type GalleryItemsResponse = {
-    data: Array<{
-        links?: {
-            crops?: string
-        }
-    }>
-}
-
-type CropResponse = {
-    data: Array<{
-        name: string
-        url: string
-    }>
-}
 
 
 /*
@@ -68,112 +45,17 @@ function ProductionManagementSection({
     const locale = getActiveLocale(window.location.pathname)
     const messages = getMessages(locale)
 
-    const getRelativePath = (url: string | null | undefined): string | null => {
-        if (!url) {
-            return null
-        }
+    const mergedProductions = [...selectedProductions, ...availableProductions]
+    const uniqueById = new Map(mergedProductions.map((production) => [production.id, production]))
+    const allUniqueProductions = [...uniqueById.values()].map((production) => ({
+        ...production,
+        links: {
+            media_gallery: production.media_gallery_id ? `/archive/media/galleries/${production.media_gallery_id}` : undefined,
+            poster_gallery: production.poster_gallery_id ? `/archive/media/galleries/${production.poster_gallery_id}` : undefined,
+        },
+    }))
 
-        const parts = url.split('/api/v1')
-        return parts.length > 1 ? parts[1] : url
-    }
-
-    const [imageUrls, setImageUrls] = useState<Record<string, string>>({})
-
-    useEffect(() => {
-        const abortController = new AbortController()
-
-        const fetchProductionImages = async () => {
-            const mergedProductions = [...selectedProductions, ...availableProductions]
-            const uniqueById = new Map(mergedProductions.map((production) => [production.id, production]))
-
-            const candidates = [...uniqueById.values()].filter(
-                (production) =>
-                    !production.image_url
-                    && !imageUrls[production.id]
-                    && (production.poster_gallery_id || production.media_gallery_id),
-            )
-
-            if (candidates.length === 0) {
-                return
-            }
-
-            const results = await Promise.allSettled(
-                candidates.map(async (production) => {
-                    const galleryId = production.poster_gallery_id ?? production.media_gallery_id
-                    if (!galleryId) {
-                        return null
-                    }
-
-                    const galleryRes = await apiFetch<GalleryResponse>(`/archive/media/galleries/${galleryId}`, {
-                        signal: abortController.signal,
-                    })
-                    const itemsPath = getRelativePath(galleryRes.data?.links?.items)
-                    if (!itemsPath) {
-                        return null
-                    }
-
-                    const itemsRes = await apiFetch<GalleryItemsResponse>(itemsPath, {
-                        signal: abortController.signal,
-                    })
-
-                    for (const galleryItem of itemsRes.data ?? []) {
-                        const cropsPath = getRelativePath(galleryItem.links?.crops)
-                        if (!cropsPath) {
-                            continue
-                        }
-
-                        const cropsRes = await apiFetch<CropResponse>(cropsPath, {
-                            signal: abortController.signal,
-                        })
-
-                        const targetCrop =
-                            cropsRes.data.find((crop) => crop.name === 'FE3_header')
-                            ?? cropsRes.data.find((crop) => crop.name === 'FEA_boxed')
-                            ?? cropsRes.data[0]
-
-                        if (targetCrop?.url) {
-                            return { id: production.id, url: targetCrop.url }
-                        }
-                    }
-
-                    return null
-                }),
-            )
-
-            if (abortController.signal.aborted) {
-                return
-            }
-
-            const nextImageUrls: Record<string, string> = {}
-            results.forEach((result) => {
-                if (result.status === 'fulfilled' && result.value) {
-                    nextImageUrls[result.value.id] = result.value.url
-                }
-            })
-
-            if (Object.keys(nextImageUrls).length > 0) {
-                setImageUrls((current) => {
-                    let changed = false
-                    const merged = { ...current }
-
-                    Object.entries(nextImageUrls).forEach(([id, url]) => {
-                        if (!merged[id]) {
-                            merged[id] = url
-                            changed = true
-                        }
-                    })
-
-                    return changed ? merged : current
-                })
-            }
-        }
-
-        void fetchProductionImages()
-
-        return () => {
-            abortController.abort()
-        }
-    }, [availableProductions, imageUrls, selectedProductions])
+    const imageUrls = useProductionImages(allUniqueProductions)
 
     const productionsWithImages = useMemo(
         () =>
