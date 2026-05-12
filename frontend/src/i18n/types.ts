@@ -14,6 +14,8 @@ export type Messages = {
     navAriaLabel: string
     openMenuLabel: string
     closeMenuLabel: string
+    searchLink: string
+    blogsLink: string
   }
   home: {
     title: string
@@ -133,6 +135,7 @@ export type Messages = {
     genresAndTags: string
     previousImage: string
     nextImage: string
+    relatedBlogs: string
   }
   footer: {
     brandLogoAlt: string

@@ -1,7 +1,8 @@
 import { z } from 'zod'
 import { 
     createPaginatedResponseSchema, 
-    createSingleResponseSchema 
+    createSingleResponseSchema,
+    paginationQuerySchema
 } from '../../utils/rest-schemas.js'
 
 export const localizedBlogTitleSchema = z.object({
@@ -14,12 +15,11 @@ export const blogTitleSchema = z.union([
     z.string().min(1),
 ])
 
-export const blogPaginationQuerySchema = z.object({
-    page: z.coerce.number().int().positive().default(1),
-    limit: z.coerce.number().int().positive().max(100).default(20),
+export const blogPaginationQuerySchema = paginationQuerySchema.extend({
     search: z.string().optional(),
     yearFrom: z.coerce.number().int().optional(),
     yearTo: z.coerce.number().int().optional(),
+    productionId: z.string().uuid().optional(),
 })
 
 /**

@@ -14,6 +14,8 @@ const nl: Messages = {
     navAriaLabel: 'Hoofdnavigatie',
     openMenuLabel: 'Open menu',
     closeMenuLabel: 'Sluit menu',
+    searchLink: 'Doorzoek archief',
+    blogsLink: 'Blogs',
   },
   home: {
     title: 'VIERNULVIER Archief',
@@ -159,6 +161,7 @@ const nl: Messages = {
     genresAndTags: 'Genres & labels',
     previousImage: 'Vorige afbeelding',
     nextImage: 'Volgende afbeelding',
+    relatedBlogs: 'Gerelateerde blog posts',
   },
   settings: {
     title: 'Instellingen',

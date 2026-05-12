@@ -14,6 +14,8 @@ const en: Messages = {
     navAriaLabel: 'Main navigation',
     openMenuLabel: 'Open menu',
     closeMenuLabel: 'Close menu',
+    searchLink: 'Search archive',
+    blogsLink: 'Blogs',
   },
   home: {
     title: 'VIERNULVIER Archive',
@@ -159,6 +161,7 @@ const en: Messages = {
     genresAndTags: 'Genres & tags',
     previousImage: 'Previous image',
     nextImage: 'Next image',
+    relatedBlogs: 'Related blog posts',
   },
   settings: {
     title: 'Settings',
