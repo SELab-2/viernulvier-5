@@ -4,8 +4,8 @@ import PublicRecentDigitized from '../../../components/public/PublicRecentDigiti
 
 // ─── Mocks ───────────────────────────────────────────────────────────────────
 
-vi.mock('../../../i18n', () => ({
-    getMessages: () => ({
+vi.mock('../../../components/public/PublicMessagesContext', () => ({
+    usePublicMessages: () => ({
         home: {
             recentDigitizedHeading: 'Recent gedigitaliseerd',
             recentDigitizedViewItem: 'bekijk item',

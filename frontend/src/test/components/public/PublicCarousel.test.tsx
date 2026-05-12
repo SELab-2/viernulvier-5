@@ -14,7 +14,12 @@ vi.mock('../../../api/client', () => ({
 
 vi.mock('../../../i18n', () => ({
     getActiveLocale: getActiveLocaleMock,
-    getMessages: () => ({
+    withLocalePath: (path: string) => path,
+    setActiveLocale: vi.fn(),
+}))
+
+vi.mock('../../../components/public/PublicMessagesContext', () => ({
+    usePublicMessages: () => ({
         common: { loading: 'Laden...', brandName: 'VIERNULVIER', brandLogoAlt: 'VIERNULVIER logo' },
         home: {
             onThisDayHeading: 'Op deze dag',
@@ -31,8 +36,6 @@ vi.mock('../../../i18n', () => ({
             genres: ['theater', 'dans', 'concert', 'nightlife', 'talks', 'comedy', 'monument', 'circus', 'performance', 'spoken word', 'listening session'],
         },
     }),
-    withLocalePath: (path: string) => path,
-    setActiveLocale: vi.fn(),
 }))
 
 vi.mock('../../../components/public/SectionTitle', () => ({
