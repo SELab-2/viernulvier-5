@@ -17,6 +17,8 @@ export type ProductionCardItem = {
     description?: LocalizedText
     teaser?: LocalizedText
     image_url?: string | null
+    poster_gallery_id?: string | null
+    media_gallery_id?: string | null
     created_at?: string
     venue_name?: string | null
     venue_names?: string[]
