@@ -15,6 +15,15 @@ function resolveTheme(): Theme {
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
 
+function SearchIcon({ className }: { className: string }) {
+    return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
+            <circle cx="11" cy="11" r="6.5" />
+            <path d="M16 16L21 21" />
+        </svg>
+    )
+}
+
 function HamburgerIcon({ className }: { className: string }) {
     return (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
@@ -83,17 +92,17 @@ function PublicNavbar({ locale, onToggleLocale }: PublicNavbarProps) {
 
     return (
         <header className="sticky top-0 z-50 bg-black">
-            <div className="site-container flex h-16 items-center justify-between max-[480px]:h-14">
+            <div className="site-container flex h-16 items-center justify-between max-md:h-14">
                 <div className="flex items-end gap-1">
                     <Link to={withLocalePath('/', locale)} className="inline-flex items-center" aria-label={messages.home.title}>
-                        <img src="/logo-white.png" alt={messages.common.brandLogoAlt} className="h-8 w-auto max-[480px]:h-7" />
+                        <img src="/logo-white.png" alt={messages.common.brandLogoAlt} className="h-8 w-auto max-md:h-7" />
                     </Link>
-                    <h3 className="text-lg leading-none font-light text-grey max-[480px]:text-base">| {messages.nav.archive}</h3>
+                    <h3 className="text-lg leading-none font-light text-grey max-md:text-base">| {messages.nav.archive}</h3>
                 </div>
 
                 <button
                     type="button"
-                    className="hidden h-9 w-9 items-center justify-center text-white max-[480px]:inline-flex"
+                    className="hidden h-9 w-9 items-center justify-center text-white max-md:inline-flex"
                     aria-label={isMobileMenuOpen ? messages.nav.closeMenuLabel : messages.nav.openMenuLabel}
                     aria-expanded={isMobileMenuOpen}
                     onClick={() => setIsMobileMenuOpen((open) => !open)}
@@ -101,7 +110,7 @@ function PublicNavbar({ locale, onToggleLocale }: PublicNavbarProps) {
                     {isMobileMenuOpen ? <CloseIcon className="h-5 w-5" /> : <HamburgerIcon className="h-5 w-5" />}
                 </button>
 
-                <nav aria-label={messages.nav.navAriaLabel} className="max-[480px]:hidden">
+                <nav aria-label={messages.nav.navAriaLabel} className="max-md:hidden">
                     <ul className="flex items-center gap-6 text-sm font-medium text-white">
                         <li>
                             <Link
@@ -133,7 +142,7 @@ function PublicNavbar({ locale, onToggleLocale }: PublicNavbarProps) {
                                     locale={locale}
                                     ariaLabel={messages.auth.localeToggleLabel}
                                     onToggleLocale={toggleLocale}
-                                    className="text-md text-white max-[480px]:text-sm"
+                                    className="text-md text-white max-md:text-sm"
                                 />
                             </div>
                         </li>
@@ -142,10 +151,11 @@ function PublicNavbar({ locale, onToggleLocale }: PublicNavbarProps) {
             </div>
 
             <div
-                className={`hidden overflow-hidden border-t border-white/10 max-[480px]:block ${isMobileMenuOpen ? 'max-h-64 py-3' : 'max-h-0 py-0'}`}
+                className={`hidden overflow-hidden border-t border-white/10 max-md:block ${isMobileMenuOpen ? 'max-h-64 py-3' : 'max-h-0 py-0'}`}
             >
-                <div className="site-container space-y-3 text-xs text-white">
-                    <div className="flex items-center gap-2">
+                <div className="site-container text-xs text-white">
+                    <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
                         <Link
                             to={withLocalePath('/zoeken', locale)}
                             className="inline-flex items-center gap-1 rounded-full border border-white/30 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-white transition hover:border-white hover:bg-white hover:text-black"
@@ -161,8 +171,8 @@ function PublicNavbar({ locale, onToggleLocale }: PublicNavbarProps) {
                         >
                             {messages.nav.blogsLink}
                         </Link>
-                    </div>
-                    <div className="flex items-center justify-between">
+                        </div>
+                        <div className="flex items-center gap-3">
                         <SegmentedThemeToggle
                             theme={theme}
                             darkLabel={messages.auth.darkModeLabel}
@@ -176,6 +186,7 @@ function PublicNavbar({ locale, onToggleLocale }: PublicNavbarProps) {
                             onToggleLocale={toggleLocale}
                             className="text-sm text-white"
                         />
+                        </div>
                     </div>
                 </div>
             </div>
