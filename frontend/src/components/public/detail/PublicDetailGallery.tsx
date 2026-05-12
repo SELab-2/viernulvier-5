@@ -20,15 +20,6 @@ function ArchiveDetailGallery({ images }: ArchiveDetailGalleryProps) {
                     <img key={i} src={src} alt="" />
                 ))}
             </div>
-            <div className="w-full rounded-xl overflow-hidden">
-                {images[current] && (
-                    <img
-                        src={images[current]!}
-                        alt={`Gallery image ${current + 1}`}
-                        className="w-full h-auto"
-                    />
-                )}
-            </div>
 
             {images.length > 1 && (
                 <div className="flex items-center justify-end gap-4 text-2xl text-foreground mb-2">
