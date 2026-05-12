@@ -113,12 +113,12 @@ describe('getPreferredHeroCropUrl', () => {
 
     it('returns the FE3_header url when present', () => {
         const crops = [makeCrop('FE3_boxed'), makeCrop('FE3_header')]
-        expect(getPreferredHeroCropUrl(crops)).toBe(`/api/v1/images/crops/FE3_header.jpg`)
+        expect(getPreferredHeroCropUrl(crops)).toBe(`/api/v1/images/crops/00000000-0000-0000-0000-0000000000010`)
     })
 
     it('falls back to FE3_boxed when FE3_header is missing', () => {
         const crops = [makeCrop('FE3_boxed'), makeCrop('banner')]
-        expect(getPreferredHeroCropUrl(crops)).toBe('/api/v1/images/crops/FE3_boxed.jpg')
+        expect(getPreferredHeroCropUrl(crops)).toBe('/api/v1/images/crops/00000000-0000-0000-0000-000000000009')
     })
 
     it('returns null when neither FE3_header nor FE3_boxed are present', () => {
@@ -128,7 +128,7 @@ describe('getPreferredHeroCropUrl', () => {
 
     it('respects priority order regardless of array order', () => {
         const crops = [makeCrop('FE3_boxed'), makeCrop('banner'), makeCrop('FE3_header')]
-        expect(getPreferredHeroCropUrl(crops)).toBe('/api/v1/images/crops/FE3_header.jpg')
+        expect(getPreferredHeroCropUrl(crops)).toBe('/api/v1/images/crops/00000000-0000-0000-0000-0000000000010')
     })
 })
 
@@ -139,12 +139,12 @@ describe('getPreferredMediaCropUrl', () => {
 
     it('returns the FE3_boxed url when present', () => {
         const crops = [makeCrop('FE3_header'), makeCrop('FE3_boxed')]
-        expect(getPreferredMediaCropUrl(crops)).toBe('/api/v1/images/crops/FE3_boxed.jpg')
+        expect(getPreferredMediaCropUrl(crops)).toBe('/api/v1/images/crops/00000000-0000-0000-0000-000000000009')
     })
 
     it('falls back to FE3_header when FE3_boxed is missing', () => {
         const crops = [makeCrop('FE3_header'), makeCrop('banner')]
-        expect(getPreferredMediaCropUrl(crops)).toBe('/api/v1/images/crops/FE3_header.jpg')
+        expect(getPreferredMediaCropUrl(crops)).toBe('/api/v1/images/crops/00000000-0000-0000-0000-0000000000010')
     })
 
     it('returns null when neither FE3_boxed nor FE3_header are present', () => {
@@ -154,6 +154,6 @@ describe('getPreferredMediaCropUrl', () => {
 
     it('respects priority order regardless of array order', () => {
         const crops = [makeCrop('FE3_header'), makeCrop('banner'), makeCrop('FE3_boxed')]
-        expect(getPreferredMediaCropUrl(crops)).toBe('/api/v1/images/crops/FE3_boxed.jpg')
+        expect(getPreferredMediaCropUrl(crops)).toBe('/api/v1/images/crops/00000000-0000-0000-0000-000000000009')
     })
 })
