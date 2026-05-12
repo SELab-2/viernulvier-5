@@ -23,28 +23,53 @@ const MAX_PERIOD_YEAR = 2026
 const SEARCH_INPUT_DEBOUNCE_MS = 250
 
 const CANONICAL_GENRE_VALUES = [
-    'theater',
-    'dans',
     'concert',
     'nightlife',
     'talks',
-    'comedy',
-    'monument',
-    'circus',
+    'installation',
+    'theatre',
     'performance',
+    'dance',
+    'comedy',
+    'film',
     'spoken word',
-    'listening session',
+    'circus',
+    'food',
+    'monument',
+    'workshop',
+    'party',
+    'expo',
+    'festival',
 ] as const
 
 const GENRE_ALIASES: Record<string, string> = {
-    theater: 'theater',
-    theatre: 'theater',
-    dans: 'dans',
-    dance: 'dans',
+    theater: 'theatre',
+    theatre: 'theatre',
+    dans: 'dance',
+    dance: 'dance',
     music: 'concert',
     komedie: 'comedy',
+    talk: 'talks',
+    talks: 'talks',
+    installatie: 'installation',
+    installation: 'installation',
+    expo: 'expo',
+    tentoonstelling: 'expo',
+    food: 'food',
+    eten: 'food',
+    etenendrinken: 'food',
+    'eten & drinken': 'food',
+    film: 'film',
+    workshop: 'workshop',
+    party: 'party',
+    monument: 'monument',
+    circus: 'circus',
+    performance: 'performance',
+    festival: 'festival',
+    feest: 'party',
     voorstelling: 'performance',
     'spoken-word': 'spoken word',
+    spokenword: 'spoken word',
 }
 
 const NON_GENRE_TAG_VALUES = new Set([
@@ -284,19 +309,7 @@ function mapProductionToSearchEntry(item: ProductionApiItem, locale: Locale, sea
     const normalizedPreferredGenre = preferredGenre?.trim().toLowerCase() ?? ''
     const matchedPreferredGenre = normalizedPreferredGenre
         ? normalizedProductionGenres.find((genre) => {
-              if (genre === normalizedPreferredGenre) {
-                  return true
-              }
-
-              if (normalizedPreferredGenre === 'dans' && genre === 'dance') {
-                  return true
-              }
-
-              if (normalizedPreferredGenre === 'theater' && genre === 'theatre') {
-                  return true
-              }
-
-              return false
+              return genre === normalizedPreferredGenre
           })
         : undefined
 
