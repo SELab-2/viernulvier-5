@@ -40,7 +40,7 @@ function AdminFooter() {
                 <span key={item} className="text-grey">{item}</span>
               ))}
             </div>
-            <p>{messages.footer.rights.replace('{year}', String(new Date().getFullYear()))}</p>
+            <p>{messages.footer.rights(new Date().getFullYear())}</p>
           </div>
         </div>
       </div>
