@@ -342,6 +342,7 @@ export type Messages = {
       addButton: string
       close: string
       queryHint: string
+      loading: string
       noProductionFound:string
     }
   }

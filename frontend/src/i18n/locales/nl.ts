@@ -375,6 +375,7 @@ const nl: Messages = {
           addButton: "Toevoegen",
           close: "Sluiten",
           queryHint: "Zoek productie",
+          loading: "Laden...",
           noProductionFound: "Geen producties beschikbaar"
       }
   }

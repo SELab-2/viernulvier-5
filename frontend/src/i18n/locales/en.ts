@@ -375,6 +375,7 @@ const en: Messages = {
           addButton: 'Add',
           close: 'Close',
           queryHint: 'Search production',
+          loading: 'Loading...',
           noProductionFound: 'No production found'
       },
   },

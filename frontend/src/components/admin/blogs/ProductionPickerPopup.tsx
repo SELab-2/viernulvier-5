@@ -199,7 +199,11 @@ function ProductionPickerPopup({
                     />
 
                     <div className="max-h-[420px] space-y-3 overflow-y-auto pr-1">
-                        {hasOptions ? (
+                        {isLoading ? (
+                            <p className="rounded-lg border border-border px-3 py-2 text-sm text-muted">
+                                {messages.blogs.productionPopUp.loading}
+                            </p>
+                        ) : hasOptions ? (
                             limitedProductions.map((production) => {
                                 const isSelected = production.id === selectedProductionId
 
