@@ -113,7 +113,7 @@ async function importProductions(filePath: string) {
         const apiId = legacyApiId(numericId);
 
         // Build title as a JSON object (same pattern as live productions).
-        // The CSV has (it seems mostly) Dutch titles; we store under "nl" key.
+        // The CSV has Dutch titles; we store under "nl" key.
         const titleJson = row.Titel ? { nl: row.Titel.trim() } : null;
         const taglineJson = row.Ondertitel ? { nl: row.Ondertitel.trim() } : null;
 

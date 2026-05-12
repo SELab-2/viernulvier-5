@@ -350,7 +350,7 @@ describe('legacy CSV importer', () => {
       const count = await prisma.event.count({
         where: {
           production_id: prod!.id,
-          apiId: `legacy-event-${PROD_ID}-20070101T190000000Z`,
+          apiId: `legacy-event-${PROD_ID}-20070101T200000000Z`,
         },
       });
       expect(count).toBe(1);
