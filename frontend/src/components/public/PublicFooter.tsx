@@ -65,7 +65,7 @@ function PublicFooter() {
                             <button type="button" className="text-grey hover:text-white">{messages.footer.cookies}</button>
                             <button type="button" className="text-grey hover:text-white">{messages.footer.disclaimer}</button>
                         </div>
-                        <p>{messages.footer.rights.replace('{year}', String(new Date().getFullYear()))}</p>
+                        <p>{messages.footer.rights(new Date().getFullYear())}</p>
                     </div>
                 </div>
             </div>
