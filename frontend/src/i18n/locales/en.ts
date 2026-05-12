@@ -122,6 +122,21 @@ const en: Messages = {
     resetFiltersLabel: 'reset filters',
     paginationPrevious: '<',
     paginationNext: '>',
+    relatedFilesCount: (count: number) => `${count} ${count === 1 ? 'file' : 'files'}`,
+    stampSvgPaths: {
+      days: {
+        singular: '/search/stamps/en/day.svg',
+        plural: '/search/stamps/en/days.svg',
+      },
+      months: {
+        singular: '/search/stamps/en/month.svg',
+        plural: '/search/stamps/en/months.svg',
+      },
+      years: {
+        singular: '/search/stamps/en/year.svg',
+        plural: '/search/stamps/en/years.svg',
+      },
+    },
   },
   auth: {
     localeToggleLabel: 'Switch language',
@@ -230,10 +245,18 @@ const en: Messages = {
     about: 'The VIERNULVIER Arts Centre archive collection preserves and provides access to over 40 years of performing arts history at De Vooruit.',
     navigationTitle: 'Navigation',
     navHome: 'Home',
+    navBlogs: 'Blogs',
     navAgenda: 'Agenda',
     navArchiveSearch: 'Search Archive',
     navAbout: 'About us',
     contactTitle: 'Contact',
+    addressLine1: 'Sint-Pietersnieuwstraat 23',
+    addressLine2: '9000 Ghent',
+    phone: 'T. 09 267 28 20',
+    email: 'info@viernulvier.gent',
+    vatNumber: 'VAT BE 0423.063.619',
+    socialTitle: 'Follow us',
+    stayUpdatedCta: 'Stay updated',
     newsletterTitle: 'Newsletter',
     newsletterText: 'Stay informed about our archive releases.',
     newsletterPlaceholder: 'Email address',
@@ -241,6 +264,7 @@ const en: Messages = {
     privacy: 'Privacy',
     cookies: 'Cookies',
     disclaimer: 'Disclaimer',
+    privacyAndCookies: 'Privacy & Cookies',
     rights: '© 2026 VIERNULVIER. All rights reserved.',
   },
   admin: {
