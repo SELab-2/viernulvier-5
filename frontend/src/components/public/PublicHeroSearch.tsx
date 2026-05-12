@@ -192,7 +192,7 @@ function PublicHeroSearch({
                                     onClick={() => setIsYearOpen((open) => !open)}
                                     className="flex h-12 w-full items-center justify-between rounded-md bg-background pl-4 pr-4 text-sm font-semibold text-foreground md:min-w-36"
                                 >
-                                    <span className={isYearDefault ? 'text-muted' : 'text-foreground'}>{yearLabel}</span>
+                                    <span>{yearLabel}</span>
                                     <ChevronIcon className={`ml-2 h-4 w-4 shrink-0 text-muted transition-transform ${isYearOpen ? 'rotate-180' : ''}`} />
                                 </button>
                                 {isYearOpen && (
