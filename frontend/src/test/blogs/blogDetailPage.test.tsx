@@ -81,10 +81,10 @@ describe('BlogDetailPage', () => {
       </MemoryRouter>,
     )
 
-  expect(await screen.findByText('English title')).toBeInTheDocument()
-  expect(await screen.findByText((content) => content.includes('English content'))).toBeInTheDocument()
-  expect(screen.queryByText(messages.blogs.languageError)).not.toBeInTheDocument()
-  expect(screen.queryByText('Gerelateerde producties')).not.toBeInTheDocument()
+    expect(await screen.findByText('English title')).toBeInTheDocument()
+    expect(await screen.findByText(/English content/)).toBeInTheDocument()
+    expect(screen.queryByText(messages.blogs.languageError)).not.toBeInTheDocument()
+    expect(screen.queryByText('Gerelateerde producties')).not.toBeInTheDocument()
   })
 
   it('shows a not found message when no blog id is available', async () => {
