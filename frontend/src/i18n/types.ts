@@ -151,7 +151,7 @@ export type Messages = {
     privacy: string
     cookies: string
     disclaimer: string
-    rights: string
+    rights: (year: number) => string
   }
   settings: {
     title: string
