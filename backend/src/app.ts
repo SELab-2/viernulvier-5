@@ -25,6 +25,7 @@ import blogsRoutes from './modules/blogs/blogs.routes.js'
 import postersRoutes from './modules/posters/posters.routes.js'
 import dashboardRoutes from './modules/dashboard/dashboard.routes.js'
 import searchRoutes from './modules/search/search.routes.js'
+import imagesRoutes from './modules/images/images.routes.js'
 
 /**
  * Build the Fastify application.
@@ -72,6 +73,7 @@ export async function buildApp(opts = {}): Promise<FastifyInstance> {
     await app.register(dashboardRoutes, { prefix: '/api/v1/dashboard' })
     await app.register(authRoutes, { prefix: '/api/v1/auth' })
     await app.register(editorsRoutes, { prefix: '/api/v1/editors' })
+    await app.register(imagesRoutes, { prefix: '/api/v1/images' })
 
     return app
 }
