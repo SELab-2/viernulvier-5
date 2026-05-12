@@ -158,50 +158,54 @@ async function importProductions(filePath: string) {
         }
 
         if (row.Genre?.trim()) {
-            const genreName = row.Genre.trim();
-            const genreApiId = `legacy-genre-${genreName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+            const genresNames = row.Genre.trim().split(',');
 
-            // Find or create the genre record
-            let dbGenre = await prisma.genre.findUnique({
-                where: { apiId: genreApiId },
-            });
+            for (const genreName of genresNames) {
 
-            if (!dbGenre) {
-                // Check if a live genre with this name already exists (any language)
-                dbGenre = await prisma.genre.findFirst({
+                const genreApiId = `legacy-genre-${genreName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+
+                // Find or create the genre record
+                let dbGenre = await prisma.genre.findUnique({
+                    where: {apiId: genreApiId},
+                });
+
+                if (!dbGenre) {
+                    // Check if a live genre with this name already exists (any language)
+                    dbGenre = await prisma.genre.findFirst({
+                        where: {
+                            OR: [
+                                {name: {path: ["nl"], equals: genreName}},
+                                {name: {path: ["en"], equals: genreName}},
+                                {name: {path: ["fr"], equals: genreName}},
+                            ],
+                        },
+                    });
+                }
+
+                if (!dbGenre) {
+                    dbGenre = await prisma.genre.create({
+                        data: {
+                            apiId: genreApiId,
+                            name: {nl: genreName},
+                        },
+                    });
+                    log(`  ✚ Created genre "${genreName}" (${dbGenre.id})`);
+                }
+
+                await prisma.genre_production.upsert({
                     where: {
-                        OR: [
-                            { name: { path: ["nl"], equals: genreName } },
-                            { name: { path: ["en"], equals: genreName } },
-                            { name: { path: ["fr"], equals: genreName } },
-                        ],
+                        genre_id_production_id: {
+                            genre_id: dbGenre.id,
+                            production_id: result.id,
+                        },
                     },
-                });
-            }
-
-            if (!dbGenre) {
-                dbGenre = await prisma.genre.create({
-                    data: {
-                        apiId: genreApiId,
-                        name: { nl: genreName },
-                    },
-                });
-                log(`  ✚ Created genre "${genreName}" (${dbGenre.id})`);
-            }
-
-            await prisma.genre_production.upsert({
-                where: {
-                    genre_id_production_id: {
+                    update: {},
+                    create: {
                         genre_id: dbGenre.id,
                         production_id: result.id,
                     },
-                },
-                update: {},
-                create: {
-                    genre_id: dbGenre.id,
-                    production_id: result.id,
-                },
-            });
+                });
+            }
         }
     }
 
