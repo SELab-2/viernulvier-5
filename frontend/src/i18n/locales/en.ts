@@ -14,6 +14,8 @@ const en: Messages = {
     navAriaLabel: 'Main navigation',
     openMenuLabel: 'Open menu',
     closeMenuLabel: 'Close menu',
+    searchLink: 'Search archive',
+    blogsLink: 'Blogs',
   },
   home: {
     title: 'VIERNULVIER Archive',
