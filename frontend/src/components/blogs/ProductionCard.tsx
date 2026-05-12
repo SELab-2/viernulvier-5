@@ -115,12 +115,12 @@ function ProductionCard({ production, locale, href, className = '', selected = f
 
     const content = (
         <article className="flex w-full flex-col p-3">
-            <div className="relative h-24 overflow-hidden rounded-md bg-gradient-to-br from-accent to-accent/50">
+            <div className="relative aspect-[16/9] overflow-hidden rounded-md bg-gradient-to-br from-accent to-accent/50">
                 {production.image_url ? (
                     <img
                         src={production.image_url}
                         alt={label}
-                        className="absolute inset-0 h-full w-full object-cover"
+                        className="absolute inset-0 h-full w-full object-cover object-center"
                         loading="lazy"
                         referrerPolicy="no-referrer"
                     />

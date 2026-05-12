@@ -83,8 +83,14 @@ function ProductionManagementSection({
         const abortController = new AbortController()
 
         const fetchProductionImages = async () => {
-            const candidates = [...selectedProductions, ...availableProductions].filter(
-                (production) => !production.image_url && (production.poster_gallery_id || production.media_gallery_id),
+            const mergedProductions = [...selectedProductions, ...availableProductions]
+            const uniqueById = new Map(mergedProductions.map((production) => [production.id, production]))
+
+            const candidates = [...uniqueById.values()].filter(
+                (production) =>
+                    !production.image_url
+                    && !imageUrls[production.id]
+                    && (production.poster_gallery_id || production.media_gallery_id),
             )
 
             if (candidates.length === 0) {
@@ -146,7 +152,19 @@ function ProductionManagementSection({
             })
 
             if (Object.keys(nextImageUrls).length > 0) {
-                setImageUrls((current) => ({ ...current, ...nextImageUrls }))
+                setImageUrls((current) => {
+                    let changed = false
+                    const merged = { ...current }
+
+                    Object.entries(nextImageUrls).forEach(([id, url]) => {
+                        if (!merged[id]) {
+                            merged[id] = url
+                            changed = true
+                        }
+                    })
+
+                    return changed ? merged : current
+                })
             }
         }
 
@@ -155,7 +173,7 @@ function ProductionManagementSection({
         return () => {
             abortController.abort()
         }
-    }, [availableProductions, selectedProductions])
+    }, [availableProductions, imageUrls, selectedProductions])
 
     const productionsWithImages = useMemo(
         () =>

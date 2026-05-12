@@ -41,7 +41,10 @@ function useProductionImages(items: ProductionItem[]) {
         const abortController = new AbortController()
 
         const fetchImages = async () => {
-            const itemsToFetch = items.filter(item => !item.image_url && (item.links?.media_gallery || item.links?.poster_gallery))
+            const uniqueById = new Map(items.map((item) => [item.id, item]))
+            const itemsToFetch = [...uniqueById.values()].filter(
+                (item) => !item.image_url && !images[item.id] && (item.links?.media_gallery || item.links?.poster_gallery),
+            )
             if (itemsToFetch.length === 0) return
 
             const results = await Promise.allSettled(
@@ -74,13 +77,27 @@ function useProductionImages(items: ProductionItem[]) {
 
             const newImages: Record<string, string> = {}
             results.forEach(res => { if (res.status === 'fulfilled' && res.value) newImages[res.value.id] = res.value.url })
-            if (Object.keys(newImages).length > 0) setImages(prev => ({ ...prev, ...newImages }))
+            if (Object.keys(newImages).length > 0) {
+                setImages((prev) => {
+                    let changed = false
+                    const merged = { ...prev }
+
+                    Object.entries(newImages).forEach(([id, url]) => {
+                        if (!merged[id]) {
+                            merged[id] = url
+                            changed = true
+                        }
+                    })
+
+                    return changed ? merged : prev
+                })
+            }
         }
 
         void fetchImages()
 
         return () => abortController.abort()
-    }, [items])
+    }, [images, items])
 
     return images
 }
