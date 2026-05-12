@@ -14,6 +14,8 @@ export type Messages = {
     navAriaLabel: string
     openMenuLabel: string
     closeMenuLabel: string
+    searchLink: string
+    blogsLink: string
   }
   home: {
     title: string
