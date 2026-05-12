@@ -39,7 +39,7 @@ const en: Messages = {
     popularTagsLess: '- less',
     popularTags: ['theatre', 'dance', 'concert', 'nightlife', 'talks', 'comedy', 'monument', 'circus', 'performance', 'spoken word', 'listening session'],
     latestBlogHeading: 'Latest blog post',
-    latestBlogSubheading: 'stories, context and updates from our arts centre',
+    latestBlogSubheading: 'Stories, context and updates from our arts centre.',
     latestBlogReadMore: 'read more',
     latestBlogViewAll: 'View all blog posts',
     recentDigitizedHeading: 'Recently digitized',

@@ -39,7 +39,7 @@ const nl: Messages = {
     popularTagsLess: '- minder',
     popularTags: ['theater', 'dans', 'concert', 'nightlife', 'talks', 'comedy', 'monument', 'circus', 'performance', 'spoken word', 'listening session'],
     latestBlogHeading: 'Recente blog post',
-    latestBlogSubheading: 'verhalen, achtergronden en nieuws uit ons kunstencentrum',
+    latestBlogSubheading: 'Verhalen, achtergronden en nieuws uit ons kunstencentrum.',
     latestBlogReadMore: 'lees meer',
     latestBlogViewAll: 'Bekijk alle blog posts',
     recentDigitizedHeading: 'Recent gedigitaliseerd',
