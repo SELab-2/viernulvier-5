@@ -35,15 +35,6 @@ async function download_crop(crop: crop) {
         const filename = `${crop.id}.${extension}`;
         const filepath = path.join(process.env.CROP_LOCATION!, filename);
         fs.writeFileSync(filepath, response.data);
-        await prisma.crop.update({
-                where: {
-                    id: crop.id,
-                },
-                data: {
-                    file_location: filename
-                }
-            }
-        )
 
 
     } catch (error) {

@@ -58,12 +58,8 @@ export const getPreferredHeroCropUrl = (crops: Crop[]): string | null => {
     for (const name of HERO_CROP_FALLBACK_ORDER) {
         const crop = crops.find((c) => c.name === name)
         if (crop) {
-            if (crop.file_location) {
-                const location = crop.file_location;
-                return `http://localhost:3001/crops/${location}`
-            } else{
-                return crop.url;
-            }
+            const cropId = crop.id;
+            return `/api/v1/images/${cropId}`
         }
     }
     return null
@@ -73,12 +69,8 @@ export const getPreferredMediaCropUrl = (crops: Crop[]): string | null => {
     for (const name of MEDIA_CROP_FALLBACK_ORDER) {
         const crop = crops.find((c) => c.name === name)
         if (crop) {
-            if (crop.file_location) {
-                const location = crop.file_location;
-                return `http://localhost:3001/crops/${location}`
-            } else{
-                return crop.url;
-            }
+            const cropId = crop.id;
+            return `/api/v1/images/${cropId}`
         }
     }
     return null
