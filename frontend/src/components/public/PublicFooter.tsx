@@ -131,7 +131,7 @@ function PublicFooter() {
                         <div className="flex gap-6">
                             <a href={PRIVACY_POLICY_URL} target="_blank" rel="noreferrer" className="text-grey hover:text-white">{messages.footer.privacyAndCookies}</a>
                         </div>
-                        <p>{messages.footer.rights}</p>
+                        <p>{messages.footer.rights(new Date().getFullYear())}</p>
                     </div>
                 </div>
             </div>
