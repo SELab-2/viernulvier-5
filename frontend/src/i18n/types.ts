@@ -144,10 +144,18 @@ export type Messages = {
     about: string
     navigationTitle: string
     navHome: string
+    navBlogs: string
     navAgenda: string
     navArchiveSearch: string
     navAbout: string
     contactTitle: string
+    addressLine1: string
+    addressLine2: string
+    phone: string
+    email: string
+    vatNumber: string
+    socialTitle: string
+    stayUpdatedCta: string
     newsletterTitle: string
     newsletterText: string
     newsletterPlaceholder: string
@@ -155,6 +163,7 @@ export type Messages = {
     privacy: string
     cookies: string
     disclaimer: string
+    privacyAndCookies: string
     rights: string
   }
   settings: {
