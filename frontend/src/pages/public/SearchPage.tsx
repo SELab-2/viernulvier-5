@@ -23,28 +23,53 @@ const MAX_PERIOD_YEAR = 2026
 const SEARCH_INPUT_DEBOUNCE_MS = 250
 
 const CANONICAL_GENRE_VALUES = [
-    'theater',
-    'dans',
     'concert',
     'nightlife',
     'talks',
-    'comedy',
-    'monument',
-    'circus',
+    'installation',
+    'theatre',
     'performance',
+    'dance',
+    'comedy',
+    'film',
     'spoken word',
-    'listening session',
+    'circus',
+    'food',
+    'monument',
+    'workshop',
+    'party',
+    'expo',
+    'festival',
 ] as const
 
 const GENRE_ALIASES: Record<string, string> = {
-    theater: 'theater',
-    theatre: 'theater',
-    dans: 'dans',
-    dance: 'dans',
+    theater: 'theatre',
+    theatre: 'theatre',
+    dans: 'dance',
+    dance: 'dance',
     music: 'concert',
     komedie: 'comedy',
+    talk: 'talks',
+    talks: 'talks',
+    installatie: 'installation',
+    installation: 'installation',
+    expo: 'expo',
+    tentoonstelling: 'expo',
+    food: 'food',
+    eten: 'food',
+    etenendrinken: 'food',
+    'eten & drinken': 'food',
+    film: 'film',
+    workshop: 'workshop',
+    party: 'party',
+    monument: 'monument',
+    circus: 'circus',
+    performance: 'performance',
+    festival: 'festival',
+    feest: 'party',
     voorstelling: 'performance',
     'spoken-word': 'spoken word',
+    spokenword: 'spoken word',
 }
 
 const NON_GENRE_TAG_VALUES = new Set([
@@ -284,19 +309,7 @@ function mapProductionToSearchEntry(item: ProductionApiItem, locale: Locale, sea
     const normalizedPreferredGenre = preferredGenre?.trim().toLowerCase() ?? ''
     const matchedPreferredGenre = normalizedPreferredGenre
         ? normalizedProductionGenres.find((genre) => {
-              if (genre === normalizedPreferredGenre) {
-                  return true
-              }
-
-              if (normalizedPreferredGenre === 'dans' && genre === 'dance') {
-                  return true
-              }
-
-              if (normalizedPreferredGenre === 'theater' && genre === 'theatre') {
-                  return true
-              }
-
-              return false
+              return genre === normalizedPreferredGenre
           })
         : undefined
 
@@ -562,30 +575,19 @@ function useProductionTaxonomies(items: ProductionApiItem[], locale: Locale) {
 
     useEffect(() => {
         const fetchTaxonomies = async () => {
-            const itemsToFetch = items.filter(item => item.links?.genres || item.links?.tags)
+            const itemsToFetch = items.filter((item) => item.id)
             if (itemsToFetch.length === 0) return
 
             const results = await Promise.allSettled(
                 itemsToFetch.map(async (item) => {
                     try {
-                        // 1. Try Genres
-                        const genresPath = getRelativePath(item.links?.genres)
+                        // Prefer the localized genre name for card labels to keep parity with detail pages.
+                        const genresPath = getRelativePath(item.links?.genres) ?? `/archive/genres?productionId=${item.id}`
                         if (genresPath) {
                             const res = await apiFetch<{ data: Array<{ slug: LocalizedText, name: LocalizedText }> }>(genresPath)
                             const firstGenre = res.data?.[0]
                             if (firstGenre) {
-                                const label = getLocalizedText(firstGenre.slug, locale) || getLocalizedText(firstGenre.name, locale)
-                                if (label) return { id: item.id, label }
-                            }
-                        }
-
-                        // 2. Fallback to Tags
-                        const tagsPath = getRelativePath(item.links?.tags)
-                        if (tagsPath) {
-                            const res = await apiFetch<{ data: Array<{ slug: LocalizedText, name: LocalizedText }> }>(tagsPath)
-                            const firstTag = res.data?.[0]
-                            if (firstTag) {
-                                const label = getLocalizedText(firstTag.slug, locale) || getLocalizedText(firstTag.name, locale)
+                                const label = getLocalizedText(firstGenre.name, locale) || getLocalizedText(firstGenre.slug, locale)
                                 if (label) return { id: item.id, label }
                             }
                         }
@@ -1258,6 +1260,25 @@ function SearchPageContent() {
                         )
                     })
 
+                    const productionItemsForTaxonomy: ProductionApiItem[] = response.data
+                        .filter((item) => item.type === 'production')
+                        .map((item) => ({
+                            id: item.id,
+                            title: toLocalizedText(item.title),
+                            teaser: toLocalizedText(item.teaser),
+                            description_short: toLocalizedText(item.description_short),
+                            description: toLocalizedText(item.description),
+                            image_url: item.image_url,
+                            venue_name: item.venue_name,
+                            venue_names: item.venue_names,
+                            production_genres: item.production_genres,
+                            performer_type: item.performer_type ?? null,
+                            attendance_mode: item.attendance_mode ?? null,
+                            created_at: item.created_at ?? '',
+                            links: undefined,
+                        }))
+
+                    setApiRawItems(productionItemsForTaxonomy)
                     setApiEntries(mappedEntries)
                     setTotalResults(response.meta?.total ?? mappedEntries.length)
                     setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
@@ -1334,16 +1355,19 @@ function SearchPageContent() {
             .map(item => {
                 const detail = fetchedDetails[item.id]
                 const fetchedTaxonomy = fetchedTaxonomies[item.id]
+                const normalizedFetchedGenre = fetchedTaxonomy ? normalizeGenreValue(fetchedTaxonomy) : ''
+                const mappedFetchedGenreLabel = normalizedFetchedGenre ? getGenreLabel(normalizedFetchedGenre, searchMessages.genres) : ''
+                const nextTag = mappedFetchedGenreLabel || fetchedTaxonomy || item.tag
                 return {
                     ...item,
                     imageUrl: fetchedImages[item.id] || item.imageUrl,
                     date: detail?.date !== undefined && detail.date !== '' ? detail.date : item.date,
                     venue: detail?.venue !== undefined && detail.venue !== '' ? detail.venue : item.venue,
-                    tag: fetchedTaxonomy !== undefined && fetchedTaxonomy !== '' ? fetchedTaxonomy : item.tag
+                    tag: nextTag
                 }
             })
             .filter(item => fetchedDetails[item.id]?.date !== '')
-    }, [apiEntries, fetchedImages, fetchedDetails, fetchedTaxonomies])
+    }, [apiEntries, fetchedImages, fetchedDetails, fetchedTaxonomies, searchMessages.genres])
 
     // Compacte paginering: 1,2,3,...,laatste
     function getCompactPageLabels(current: number, total: number): string[] {
@@ -1406,6 +1430,25 @@ function SearchPageContent() {
             genres: selectedGenres,
             locations: selectedLocations,
             sort: safeSort,
+            limit: pageSize,
+            tab,
+        })
+    }
+
+    const handleCardGenreClick = (genre: string) => {
+        const nextGenre = normalizeGenreValue(genre)
+        if (!nextGenre) {
+            return
+        }
+
+        navigateWithFilters({
+            query: query || undefined,
+            yearFrom: safeFromYear,
+            yearTo: safeToYear,
+            genres: [nextGenre],
+            locations: selectedLocations,
+            sort,
+            page: 1,
             limit: pageSize,
             tab,
         })
@@ -1708,6 +1751,8 @@ function SearchPageContent() {
                                     <SearchResultCard
                                         key={item.id}
                                         item={item}
+                                        genreValue={item.genre}
+                                        onTagClick={handleCardGenreClick}
                                         detailHref={ item.type === 'blog'
                                             ? withLocalePath('/blogs/' + item.id, locale)
                                             : withLocalePath('/archive/' + item.id, locale)
