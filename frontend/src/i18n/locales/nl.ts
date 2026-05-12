@@ -235,7 +235,7 @@ const nl: Messages = {
     privacy: 'Privacy',
     cookies: 'Cookies',
     disclaimer: 'Disclaimer',
-    rights: '© {year} VIERNULVIER. Alle rechten voorbehouden.',
+    rights: (year) => `© ${year} VIERNULVIER. Alle rechten voorbehouden.`,
   },
   admin: {
     themeToggleDark: 'Donkere modus',
