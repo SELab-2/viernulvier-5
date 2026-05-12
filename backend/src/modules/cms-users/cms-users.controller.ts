@@ -2,8 +2,8 @@ import type { FastifyReply, FastifyRequest } from 'fastify'
 import { CmsUsersService } from './cms-users.service.js'
 import type {
     CmsUserPaginationQuery,
-    CreateCmsUserInput,
-    UpdateCmsUserInput,
+    CreateEditorInput,
+    UpdateEditorInput,
     CmsUserIdParams,
     CmsUserResponse
 } from './cms-users.schema.js'
@@ -12,8 +12,8 @@ import { buildPaginationLinks } from '../../utils/pagination.js'
 export class CmsUsersController {
     constructor(private readonly service: CmsUsersService) { }
 
-    private getBaseUrl(): string {
-        return '/api/v1/cms-users'
+    private getBaseUrl(path = ''): string {
+        return `/api/v1/cms-users${path}`
     }
 
     private mapCmsUserLinks(cmsUser: CmsUserResponse, baseUrl: string): CmsUserResponse {
@@ -61,11 +61,47 @@ export class CmsUsersController {
         })
     }
 
-    async createCmsUser(request: FastifyRequest<{ Body: CreateCmsUserInput }>, reply: FastifyReply) {
-        const cmsUser = await this.service.createCmsUser(request.body)
-        const baseUrl = this.getBaseUrl()
-        const selfUrl = `${baseUrl}/${cmsUser.id}`
-        const dataWithLinks = this.mapCmsUserLinks(cmsUser, baseUrl)
+    async getEditors(request: FastifyRequest<{ Querystring: CmsUserPaginationQuery }>, reply: FastifyReply) {
+        const editors = await this.service.getEditors(request.query)
+        const baseUrl = this.getBaseUrl('/editors')
+        const dataWithLinks = editors.items.map((editor) => this.mapCmsUserLinks(editor, baseUrl))
+
+        return reply.status(200).send({
+            data: dataWithLinks,
+            meta: {
+                total: editors.total,
+                page: editors.page,
+                limit: editors.limit,
+                totalPages: editors.totalPages,
+            },
+            links: buildPaginationLinks(baseUrl, editors.page, editors.limit, editors.totalPages)
+        })
+    }
+
+    async getEditor(request: FastifyRequest<{ Params: CmsUserIdParams }>, reply: FastifyReply) {
+        const { id } = request.params
+        const editor = await this.service.getEditor(id)
+
+        if (!editor) {
+            return reply.status(404).send({ message: 'Editor not found' })
+        }
+
+        const baseUrl = this.getBaseUrl('/editors')
+        const dataWithLinks = this.mapCmsUserLinks(editor, baseUrl)
+
+        return reply.status(200).send({
+            data: dataWithLinks,
+            links: {
+                self: `${baseUrl}/${id}`
+            }
+        })
+    }
+
+    async createEditor(request: FastifyRequest<{ Body: CreateEditorInput }>, reply: FastifyReply) {
+        const editor = await this.service.createEditor(request.body)
+        const baseUrl = this.getBaseUrl('/editors')
+        const selfUrl = `${baseUrl}/${editor.id}`
+        const dataWithLinks = this.mapCmsUserLinks(editor, baseUrl)
 
         return reply
             .status(201)
@@ -78,11 +114,11 @@ export class CmsUsersController {
             })
     }
 
-    async updateCmsUser(request: FastifyRequest<{ Params: CmsUserIdParams, Body: UpdateCmsUserInput }>, reply: FastifyReply) {
+    async updateEditor(request: FastifyRequest<{ Params: CmsUserIdParams, Body: UpdateEditorInput }>, reply: FastifyReply) {
         const { id } = request.params
-        const cmsUser = await this.service.updateCmsUser(id, request.body)
-        const baseUrl = this.getBaseUrl()
-        const dataWithLinks = this.mapCmsUserLinks(cmsUser, baseUrl)
+        const editor = await this.service.updateEditor(id, request.body)
+        const baseUrl = this.getBaseUrl('/editors')
+        const dataWithLinks = this.mapCmsUserLinks(editor, baseUrl)
 
         return reply.status(200).send({
             data: dataWithLinks,
@@ -92,9 +128,9 @@ export class CmsUsersController {
         })
     }
 
-    async deleteCmsUser(request: FastifyRequest<{ Params: CmsUserIdParams }>, reply: FastifyReply) {
+    async deleteEditor(request: FastifyRequest<{ Params: CmsUserIdParams }>, reply: FastifyReply) {
         const { id } = request.params
-        await this.service.deleteCmsUser(id, request.user.sub)
+        await this.service.deleteEditor(id, request.user.sub)
         return reply.status(204).send()
     }
 }

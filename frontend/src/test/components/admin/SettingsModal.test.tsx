@@ -157,7 +157,7 @@ describe('SettingsModal', () => {
     expect(screen.getByDisplayValue('admin')).toBeInTheDocument()
   })
 
-  it('switches to Editors tab and loads editors from the legacy endpoint', async () => {
+  it('switches to Editors tab and loads editors from the cms-users editor endpoint', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
@@ -171,7 +171,7 @@ describe('SettingsModal', () => {
 
     expect(screen.getByText('Editors beheren')).toBeInTheDocument()
     await waitFor(() => {
-      expect(fetchMock).toHaveBeenCalledWith('/api/v1/editors', expect.any(Object))
+      expect(fetchMock).toHaveBeenCalledWith('/api/v1/cms-users/editors', expect.any(Object))
     })
   })
 

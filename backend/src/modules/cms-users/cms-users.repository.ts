@@ -1,5 +1,5 @@
 import type { PrismaClient } from '@prisma/client'
-import type { Role } from '../../domain/role.js'
+import { Role } from '../../domain/role.js'
 
 const cmsUserSelect = {
     id: true,
@@ -13,6 +13,13 @@ function buildCmsUserWhere(search?: string) {
     return search
         ? { username: { contains: search, mode: 'insensitive' as const } }
         : {}
+}
+
+function buildEditorWhere(search?: string) {
+    return {
+        role: Role.EDITOR,
+        ...buildCmsUserWhere(search),
+    }
 }
 
 export class CmsUsersRepository {
@@ -42,6 +49,33 @@ export class CmsUsersRepository {
         })
     }
 
+    async listEditors(options: { page: number; limit: number; search?: string }) {
+        const { page, limit, search } = options
+        const skip = (page - 1) * limit
+
+        return this.prisma.adminUser.findMany({
+            where: buildEditorWhere(search),
+            select: cmsUserSelect,
+            skip,
+            take: limit,
+            orderBy: { username: 'asc' },
+        })
+    }
+
+    async countEditors(options: { search?: string }) {
+        return this.prisma.adminUser.count({ where: buildEditorWhere(options.search) })
+    }
+
+    async findEditorById(id: string) {
+        return this.prisma.adminUser.findFirst({
+            where: {
+                id,
+                role: Role.EDITOR,
+            },
+            select: cmsUserSelect,
+        })
+    }
+
     async findByUsername(username: string) {
         return this.prisma.adminUser.findUnique({
             where: { username },
@@ -53,28 +87,34 @@ export class CmsUsersRepository {
         })
     }
 
-    async createCmsUser(data: { username: string, passwordHash: string, role: Role }) {
+    async createEditor(data: { username: string, passwordHash: string }) {
         return this.prisma.adminUser.create({
             data: {
                 username: data.username,
                 passwordHash: data.passwordHash,
-                role: data.role,
+                role: Role.EDITOR,
             },
             select: cmsUserSelect,
         })
     }
 
-    async updateCmsUser(id: string, data: { username?: string, passwordHash?: string, role?: Role }) {
+    async updateEditor(id: string, data: { username?: string, passwordHash?: string }) {
         return this.prisma.adminUser.update({
-            where: { id },
+            where: {
+                id,
+                role: Role.EDITOR,
+            },
             data,
             select: cmsUserSelect,
         })
     }
 
-    async deleteCmsUser(id: string) {
+    async deleteEditor(id: string) {
         return this.prisma.adminUser.delete({
-            where: { id },
+            where: {
+                id,
+                role: Role.EDITOR,
+            },
             select: cmsUserSelect,
         })
     }

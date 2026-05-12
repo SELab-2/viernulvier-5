@@ -4,10 +4,9 @@ import { CmsUsersRepository } from './cms-users.repository.js'
 import type {
     CmsUserPaginationQuery,
     CmsUserResponse,
-    CreateCmsUserInput,
-    UpdateCmsUserInput
+    CreateEditorInput,
+    UpdateEditorInput
 } from './cms-users.schema.js'
-import type { Role } from '../../domain/role.js'
 import { PaginatedResult, calculateTotalPages, sanitizePage } from '../../utils/pagination.js'
 
 export class CmsUsersService {
@@ -39,7 +38,33 @@ export class CmsUsersService {
         return this.repository.findCmsUserById(id) as Promise<CmsUserResponse | null>
     }
 
-    async createCmsUser(input: CreateCmsUserInput): Promise<CmsUserResponse> {
+    async getEditors(options: CmsUserPaginationQuery): Promise<PaginatedResult<CmsUserResponse>> {
+        const { page, limit, search } = options
+
+        const total = await this.repository.countEditors({ search })
+        const totalPages = calculateTotalPages(total, limit)
+        const sanitizedPage = sanitizePage(page, totalPages)
+
+        const items = await this.repository.listEditors({
+            page: sanitizedPage,
+            limit,
+            search
+        })
+
+        return {
+            items: items as CmsUserResponse[],
+            total,
+            page: sanitizedPage,
+            limit,
+            totalPages,
+        }
+    }
+
+    async getEditor(id: string): Promise<CmsUserResponse | null> {
+        return this.repository.findEditorById(id) as Promise<CmsUserResponse | null>
+    }
+
+    async createEditor(input: CreateEditorInput): Promise<CmsUserResponse> {
         const existingUser = await this.repository.findByUsername(input.username)
 
         if (existingUser) {
@@ -48,21 +73,20 @@ export class CmsUsersService {
 
         const passwordHash = await hashPassword(input.password)
 
-        return this.repository.createCmsUser({
+        return this.repository.createEditor({
             username: input.username,
             passwordHash,
-            role: input.role as Role,
         }) as Promise<CmsUserResponse>
     }
 
-    async updateCmsUser(id: string, input: UpdateCmsUserInput): Promise<CmsUserResponse> {
-        const existingUser = await this.repository.findCmsUserById(id)
+    async updateEditor(id: string, input: UpdateEditorInput): Promise<CmsUserResponse> {
+        const existingEditor = await this.repository.findEditorById(id)
 
-        if (!existingUser) {
-            throw new AppError('CMS user not found', 404)
+        if (!existingEditor) {
+            throw new AppError('Editor not found', 404)
         }
 
-        if (input.username && input.username !== existingUser.username) {
+        if (input.username && input.username !== existingEditor.username) {
             const userWithUsername = await this.repository.findByUsername(input.username)
 
             if (userWithUsername && userWithUsername.id !== id) {
@@ -72,24 +96,23 @@ export class CmsUsersService {
 
         const passwordHash = input.password ? await hashPassword(input.password) : undefined
 
-        return this.repository.updateCmsUser(id, {
+        return this.repository.updateEditor(id, {
             username: input.username,
             passwordHash,
-            role: input.role as Role | undefined,
         }) as Promise<CmsUserResponse>
     }
 
-    async deleteCmsUser(id: string, currentUserId?: string): Promise<void> {
+    async deleteEditor(id: string, currentUserId?: string): Promise<void> {
         if (currentUserId === id) {
             throw new AppError('Cannot delete your own account', 400)
         }
 
-        const existingUser = await this.repository.findCmsUserById(id)
+        const existingEditor = await this.repository.findEditorById(id)
 
-        if (!existingUser) {
-            throw new AppError('CMS user not found', 404)
+        if (!existingEditor) {
+            throw new AppError('Editor not found', 404)
         }
 
-        await this.repository.deleteCmsUser(id)
+        await this.repository.deleteEditor(id)
     }
 }

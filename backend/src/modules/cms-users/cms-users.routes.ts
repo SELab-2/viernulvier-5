@@ -6,8 +6,8 @@ import {
     cmsUserPaginationQuerySchema,
     cmsUserListSchema,
     singleCmsUserSchema,
-    createCmsUserSchema,
-    updateCmsUserSchema,
+    createEditorSchema,
+    updateEditorSchema,
     cmsUserIdSchema,
     errorSchema
 } from './cms-users.schema.js'
@@ -33,6 +33,76 @@ const cmsUsersRoutes: FastifyPluginAsync = async (fastify) => {
         handler: (request, reply) => controller.getCmsUsers(request as any, reply),
     })
 
+    fastify.get('/editors', {
+        preHandler: [requirePermission(Permission.EDITORS_MANAGE)],
+        schema: {
+            tags: ['cms-users'],
+            summary: 'Get all editors',
+            querystring: cmsUserPaginationQuerySchema,
+            response: {
+                200: cmsUserListSchema,
+            },
+        },
+        handler: (request, reply) => controller.getEditors(request as any, reply),
+    })
+
+    fastify.get('/editors/:id', {
+        preHandler: [requirePermission(Permission.EDITORS_MANAGE)],
+        schema: {
+            tags: ['cms-users'],
+            summary: 'Get an editor by ID',
+            params: cmsUserIdSchema,
+            response: {
+                200: singleCmsUserSchema,
+                404: errorSchema
+            },
+        },
+        handler: (request, reply) => controller.getEditor(request as any, reply),
+    })
+
+    fastify.post('/editors', {
+        preHandler: [requirePermission(Permission.EDITORS_MANAGE)],
+        schema: {
+            tags: ['cms-users'],
+            summary: 'Create a new editor',
+            body: createEditorSchema,
+            response: {
+                201: singleCmsUserSchema,
+            },
+        },
+        handler: (request, reply) => controller.createEditor(request as any, reply),
+    })
+
+    fastify.patch('/editors/:id', {
+        preHandler: [requirePermission(Permission.EDITORS_MANAGE)],
+        schema: {
+            tags: ['cms-users'],
+            summary: 'Update an editor',
+            params: cmsUserIdSchema,
+            body: updateEditorSchema,
+            response: {
+                200: singleCmsUserSchema,
+                404: errorSchema
+            },
+        },
+        handler: (request, reply) => controller.updateEditor(request as any, reply),
+    })
+
+    fastify.delete('/editors/:id', {
+        preHandler: [requirePermission(Permission.EDITORS_MANAGE)],
+        schema: {
+            tags: ['cms-users'],
+            summary: 'Delete an editor',
+            params: cmsUserIdSchema,
+            response: {
+                204: z.null(),
+                400: errorSchema,
+                404: errorSchema
+            },
+        },
+        handler: (request, reply) => controller.deleteEditor(request as any, reply),
+    })
+
     fastify.get('/:id', {
         preHandler: [requirePermission(Permission.EDITORS_MANAGE)],
         schema: {
@@ -45,49 +115,6 @@ const cmsUsersRoutes: FastifyPluginAsync = async (fastify) => {
             },
         },
         handler: (request, reply) => controller.getCmsUser(request as any, reply),
-    })
-
-    fastify.post('/', {
-        preHandler: [requirePermission(Permission.EDITORS_MANAGE)],
-        schema: {
-            tags: ['cms-users'],
-            summary: 'Create a new CMS user',
-            body: createCmsUserSchema,
-            response: {
-                201: singleCmsUserSchema,
-            },
-        },
-        handler: (request, reply) => controller.createCmsUser(request as any, reply),
-    })
-
-    fastify.patch('/:id', {
-        preHandler: [requirePermission(Permission.EDITORS_MANAGE)],
-        schema: {
-            tags: ['cms-users'],
-            summary: 'Update a CMS user',
-            params: cmsUserIdSchema,
-            body: updateCmsUserSchema,
-            response: {
-                200: singleCmsUserSchema,
-                404: errorSchema
-            },
-        },
-        handler: (request, reply) => controller.updateCmsUser(request as any, reply),
-    })
-
-    fastify.delete('/:id', {
-        preHandler: [requirePermission(Permission.EDITORS_MANAGE)],
-        schema: {
-            tags: ['cms-users'],
-            summary: 'Delete a CMS user',
-            params: cmsUserIdSchema,
-            response: {
-                204: z.null(),
-                400: errorSchema,
-                404: errorSchema
-            },
-        },
-        handler: (request, reply) => controller.deleteCmsUser(request as any, reply),
     })
 }
 
