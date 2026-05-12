@@ -413,6 +413,7 @@ describe('scraper integration full coverage', () => {
     expect(prod?.poster_gallery_id).toBe(gallery?.id);
     expect(prod?.created_at.toISOString().startsWith("1970-01-01")).toBe(true);
     expect(prod?.updated_at.toISOString()).toBe("2021-01-02T18:00:00.000Z");
+    expect(prod?.draft).toBe(false);
   });
 
   it('checks all genre fields', async () => {
