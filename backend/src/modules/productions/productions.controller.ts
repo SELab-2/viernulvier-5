@@ -26,6 +26,7 @@ export class ProductionsController {
                 events: `${baseUrl}/events?productionId=${prodId}`,
                 genres: `${baseUrl}/genres?productionId=${prodId}`,
                 tags: `${baseUrl}/tags?productionId=${prodId}`,
+                editors: `${baseUrl}/editors?productionId=${prodId}`,
                 media_gallery: production.media_gallery_id ? `${baseUrl}/media/galleries/${production.media_gallery_id}` : null,
                 review_gallery: production.review_gallery_id ? `${baseUrl}/media/galleries/${production.review_gallery_id}` : null,
                 poster_gallery: production.poster_gallery_id ? `${baseUrl}/media/galleries/${production.poster_gallery_id}` : null,

@@ -22,6 +22,8 @@ export class EditorsController {
             ...editor,
             links: {
                 self: `${baseUrl}/${editor.id}`,
+                productions: `${baseUrl}/productions?editorId=${editor.id}`,
+                blogs: `${baseUrl}/blogs?editorId=${editor.id}`,
             }
         }
     }

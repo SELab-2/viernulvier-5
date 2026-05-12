@@ -40,6 +40,7 @@ export const productionLinksSchema = z.object({
     events: z.string().url().optional().nullable().default('https://example.com/'),
     genres: z.string().url().optional().nullable().default('https://example.com/'),
     tags: z.string().url().optional().nullable().default('https://example.com/'),
+    editors: z.string().url().optional().nullable().default('https://example.com/'),
     media_gallery: z.string().url().optional().nullable().default('https://example.com/'),
     review_gallery: z.string().url().optional().nullable().default('https://example.com/'),
     poster_gallery: z.string().url().optional().nullable().default('https://example.com/'),

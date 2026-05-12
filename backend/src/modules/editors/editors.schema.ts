@@ -14,6 +14,8 @@ export const editorPaginationQuerySchema = paginationQuerySchema.extend({
  */
 export const editorLinksSchema = z.object({
     self: z.string().url().default('https://example.com/'),
+    productions:  z.string().url().optional().nullable().default('https://example.com/'),
+    blogs:  z.string().url().optional().nullable().default('https://example.com/'),
 })
 
 export const editorSchema = z.object({
