@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { getActiveLocale, withLocalePath } from '../../i18n'
+import { getActiveLocale, getMessages, withLocalePath } from '../../i18n'
 import PublicLayout from '../../components/public/PublicLayout'
 import PublicHeroSearch, { type HeroSearchFilters } from '../../components/public/PublicHeroSearch'
 import PublicPopularTags from '../../components/public/PublicPopularTags'
@@ -51,6 +51,8 @@ function HomePage() {
     const navigate = useNavigate()
     const [searchParams] = useSearchParams()
     const locale = getActiveLocale(window.location.pathname)
+    const homeMessages = getMessages(locale).home
+    const fallbackUntitled = homeMessages.fallbackUntitled
     const [latestBlog, setLatestBlog] = useState<{ id: string; title: string; excerpt: string } | null>(null)
     const [recentItems, setRecentItems] = useState<Array<{
         id: string
@@ -124,7 +126,7 @@ function HomePage() {
 
                 const excerpt = excerptRaw.length > 320 ? `${excerptRaw.slice(0, 317)}...` : excerptRaw
 
-                setLatestBlog({ id: item.id, title: title || (locale === 'nl' ? 'Zonder titel' : 'Untitled'), excerpt })
+                setLatestBlog({ id: item.id, title: title || fallbackUntitled, excerpt })
             } catch {
                 if (!canceled) {
                     setLatestBlog(null)
@@ -137,7 +139,7 @@ function HomePage() {
         return () => {
             canceled = true
         }
-    }, [locale])
+    }, [locale, fallbackUntitled])
 
     const handlePopularTagClick = (tag: string) => {
         const params = new URLSearchParams()
@@ -164,8 +166,8 @@ function HomePage() {
                         id: item.id,
                         dateLabel: formatArchiveDate(item.created_at, locale),
                         archiveLabel: formatArchiveLabel(item.apiId),
-                        title: title || (locale === 'nl' ? 'Zonder titel' : 'Untitled'),
-                        description: toPlainText(descriptionRaw) || title || (locale === 'nl' ? 'Zonder titel' : 'Untitled'),
+                        title: title || fallbackUntitled,
+                        description: toPlainText(descriptionRaw) || title || fallbackUntitled,
                     }
                 })
 
@@ -184,7 +186,7 @@ function HomePage() {
         return () => {
             canceled = true
         }
-    }, [locale])
+    }, [locale, fallbackUntitled])
 
     const handleRecentDigitizedItemClick = (id: string) => {
         navigate(withLocalePath(`/archive/${id}`, locale))

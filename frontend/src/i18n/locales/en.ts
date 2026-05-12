@@ -43,6 +43,7 @@ const en: Messages = {
     recentDigitizedHeading: 'Recently digitized',
     recentDigitizedViewItem: 'view item',
     recentDigitizedViewAll: 'browse the full archive >',
+    fallbackUntitled: 'Untitled',
   },
   search: {
     heading: 'Archive',

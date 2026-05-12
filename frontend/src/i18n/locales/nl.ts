@@ -43,6 +43,7 @@ const nl: Messages = {
     recentDigitizedHeading: 'Recent gedigitaliseerd',
     recentDigitizedViewItem: 'bekijk item',
     recentDigitizedViewAll: 'doorzoek het volledige archief >',
+    fallbackUntitled: 'Zonder titel',
   },
   search: {
     heading: 'Archief',
