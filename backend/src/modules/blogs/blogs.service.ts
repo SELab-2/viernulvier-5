@@ -11,9 +11,9 @@ export class BlogsService {
     constructor(private readonly repository: BlogsRepository) {}
 
     async getBlogs(options: BlogPaginationQuery): Promise<PaginatedResult<BlogResponse>> {
-        const { page, limit, search, yearFrom, yearTo } = options
+        const { page, limit, search, yearFrom, yearTo, productionId } = options
 
-        const total = await this.repository.count({ search, yearFrom, yearTo })
+        const total = await this.repository.count({ search, yearFrom, yearTo, productionId })
         const totalPages = calculateTotalPages(total, limit)
         const sanitizedPage = sanitizePage(page, totalPages)
 
@@ -23,6 +23,7 @@ export class BlogsService {
             search,
             yearFrom,
             yearTo,
+            productionId,
         })
 
         return {

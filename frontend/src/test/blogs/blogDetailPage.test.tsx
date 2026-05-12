@@ -4,6 +4,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest'
 import type { ReactNode } from 'react'
 import BlogDetailPage from '../../pages/public/BlogDetailPage'
 import { getMessages } from '../../i18n'
+import { PublicMessagesContext } from '../../components/public/PublicMessagesContext'
 
 const apiGetMock = vi.hoisted(() => vi.fn())
 
@@ -16,7 +17,9 @@ vi.mock('../../api/client', () => ({
 }))
 
 vi.mock('../../components/public/PublicLayout', () => ({
-  default: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  default: ({ children }: { children: ReactNode }) => (
+    <PublicMessagesContext.Provider value={getMessages()}>{children}</PublicMessagesContext.Provider>
+  ),
 }))
 
 vi.mock('quill', () => {
@@ -79,7 +82,7 @@ describe('BlogDetailPage', () => {
     )
 
     expect(await screen.findByText('English title')).toBeInTheDocument()
-    expect(screen.getByText('English content')).toBeInTheDocument()
+    expect(screen.getByText((content) => content.includes('English content'))).toBeInTheDocument()
     expect(screen.queryByText(messages.blogs.languageError)).not.toBeInTheDocument()
     expect(screen.queryByText('Gerelateerde producties')).not.toBeInTheDocument()
   })
