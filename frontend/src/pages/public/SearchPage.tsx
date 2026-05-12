@@ -403,8 +403,8 @@ interface GalleryItemApi {
 }
 
 interface CropApi {
-    name: string
-    file_location: string
+    name: string,
+    id: string,
     url: string
 }
 
@@ -447,14 +447,10 @@ function useProductionImages(items: ProductionApiItem[]) {
                                              crops.find((c) => c.name === 'FEA_boxed') || 
                                              crops[0]
 
-                            if (targetCrop?.file_location) {
-                                const filename = targetCrop.file_location;
-                                const fileUrl = `http://localhost:3001/crops/${filename}`;
+                            if (targetCrop) {
+                                const fileId = targetCrop.id;
+                                const fileUrl = `/api/v1/images/${fileId}`;
                                 return { id: item.id, url: fileUrl }
-                            }
-                            // use url as fallback
-                            if (targetCrop?.url) {
-                                return { id: item.id, url: targetCrop.url }
                             }
                         }
                     } catch {
