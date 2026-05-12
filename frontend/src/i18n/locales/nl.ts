@@ -119,6 +119,21 @@ const nl: Messages = {
     resetFiltersLabel: 'reset filters',
     paginationPrevious: '<',
     paginationNext: '>',
+    relatedFilesCount: (count: number) => `${count} ${count === 1 ? 'bestand' : 'bestanden'}`,
+    stampSvgPaths: {
+      days: {
+        singular: '/search/stamps/nl/day.svg',
+        plural: '/search/stamps/nl/days.svg',
+      },
+      months: {
+        singular: '/search/stamps/nl/month.svg',
+        plural: '/search/stamps/nl/months.svg',
+      },
+      years: {
+        singular: '/search/stamps/nl/year.svg',
+        plural: '/search/stamps/nl/year.svg',
+      },
+    },
   },
   auth: {
     localeToggleLabel: 'Wissel taal',
@@ -227,10 +242,18 @@ const nl: Messages = {
     about: 'De Kunstencentrum VIERNULVIER archiefcollectie bewaart en ontsluit meer dan 40 jaar podiumkunsten geschiedenis in De Vooruit.',
     navigationTitle: 'Navigatie',
     navHome: 'Home',
+    navBlogs: 'Blogs',
     navAgenda: 'Agenda',
     navArchiveSearch: 'Archief Zoeken',
     navAbout: 'Over ons',
     contactTitle: 'Contact',
+    addressLine1: 'Sint-Pietersnieuwstraat 23',
+    addressLine2: '9000 Gent',
+    phone: 'T. 09 267 28 20',
+    email: 'info@viernulvier.gent',
+    vatNumber: 'BTW BE 0423.063.619',
+    socialTitle: 'Volg ons',
+    stayUpdatedCta: 'Blijf op de hoogte',
     newsletterTitle: 'Nieuwsbrief',
     newsletterText: 'Blijf op de hoogte van onze archief ontsluitingen.',
     newsletterPlaceholder: 'Email adres',
@@ -238,6 +261,7 @@ const nl: Messages = {
     privacy: 'Privacy',
     cookies: 'Cookies',
     disclaimer: 'Disclaimer',
+    privacyAndCookies: 'Privacy & Cookies',
     rights: (year) => `© ${year} VIERNULVIER. Alle rechten voorbehouden.`,
   },
   admin: {
