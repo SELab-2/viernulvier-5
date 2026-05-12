@@ -15,6 +15,7 @@ const envSchema = z.object({
     LOGIN_RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(15 * 60 * 1000),
     LOGIN_RATE_LIMIT_MAX_ATTEMPTS: z.coerce.number().int().positive().default(5),
     NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+    CROP_LOCATION: z.string().default('./crops'),
 })
 
 export type Env = z.infer<typeof envSchema>
