@@ -60,10 +60,18 @@ function getStampInfo(dateStr: string): { kind: 'days' | 'months' | 'years'; cou
     const diffMs = now.getTime() - ref.getTime()
     if (diffMs < 0) return null
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-    if (diffDays < 31) return { kind: 'days', count: diffDays }
+
     let months = (now.getFullYear() - ref.getFullYear()) * 12 + (now.getMonth() - ref.getMonth())
-    if (now.getDate() < ref.getDate()) months -= 1
+    if (now.getDate() < ref.getDate()) {
+        const daysInCurrentMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()
+        const isNowAtMonthEnd = now.getDate() === daysInCurrentMonth
+        const refDayFallsOutsideCurrentMonth = ref.getDate() > daysInCurrentMonth
+        if (!(isNowAtMonthEnd && refDayFallsOutsideCurrentMonth)) {
+            months -= 1
+        }
+    }
     months = Math.max(0, months)
+    if (months === 0) return { kind: 'days', count: diffDays }
     if (months < 12) return { kind: 'months', count: months }
     let years = now.getFullYear() - ref.getFullYear()
     if (now.getMonth() < ref.getMonth() || (now.getMonth() === ref.getMonth() && now.getDate() < ref.getDate())) years -= 1
