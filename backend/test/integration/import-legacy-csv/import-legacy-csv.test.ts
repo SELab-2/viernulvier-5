@@ -107,7 +107,7 @@ describe('legacy CSV importer', () => {
     it('creates and links a genre via genre_production', async () => {
       const csv = [
         'Titel,Ondertitel,Description1,Description2,Genre,ID,Planning ID',
-        'Mijn Voorstelling,Een ondertitel,Eerste beschrijving,Tweede beschrijving,Theater,1002,legacy-1002',
+        'Theatershow,,,,Theater,1002,legacy-1002',
       ].join('\n');
 
       const file = writeTempCsv(csv);
