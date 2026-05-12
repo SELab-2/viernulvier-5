@@ -107,7 +107,7 @@ describe('legacy CSV importer', () => {
     it('creates and links a genre via genre_production', async () => {
       const csv = [
         'Titel,Ondertitel,Description1,Description2,Genre,ID,Planning ID',
-        'Theatershow,,,,Theater,1002,legacy-1002',
+        'Theatershow,,,,LegacyTheater,1002,legacy-1002',
       ].join('\n');
 
       const file = writeTempCsv(csv);
@@ -117,11 +117,11 @@ describe('legacy CSV importer', () => {
       expect(prod).not.toBeNull();
 
       const genre = await prisma.genre.findUnique({
-        where: { apiId: 'legacy-genre-theater' },
+        where: { apiId: 'legacy-genre-legacytheater' },
       });
       expect(genre).not.toBeNull();
       const genreName = genre?.name as { nl: string };
-      expect(genreName.nl).toBe('Theater');
+      expect(genreName.nl).toBe('LegacyTheater');
 
       const link = await prisma.genre_production.findUnique({
         where: {
