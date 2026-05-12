@@ -41,6 +41,9 @@ async function download_crop(crop: crop) {
         console.log(error);
         console.log(url);
         console.log(crop.id);
+        await prisma.crop.delete({
+            where: { id: crop.id }
+        });
     }
 }
 
