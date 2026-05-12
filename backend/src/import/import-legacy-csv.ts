@@ -73,6 +73,12 @@ function parseDate(raw: string | undefined | null): Date | null {
 }
 
 
+// Treat CSV \\N (MySQL NULL export) as empty string
+function nullN(v: string | undefined | null): string {
+    if (!v) return '';
+    return v.trim() === '\\N' ? '' : v;
+}
+
 // Productions
 
 interface ProductionRow {
@@ -112,15 +118,15 @@ async function importProductions(filePath: string) {
 
         const apiId = legacyApiId(numericId);
 
-        const titleJson = row.Titel ? { nl: row.Titel.trim() } : null;
-        const taglineJson = row.Ondertitel ? { nl: row.Ondertitel.trim() } : null;
+        const titel = nullN(row.Titel);
+        const titleJson = titel ? { nl: titel } : null;
+        const ondertitel = nullN(row.Ondertitel);
+        const taglineJson = ondertitel ? { nl: ondertitel } : null;
 
-        const descriptionJson = row.Description1
-            ? { nl: row.Description1.trim() }
-            : null;
-        const description2Json = row.Description2
-            ? { nl: row.Description2.trim() }
-            : null;
+        const desc1 = nullN(row.Description1);
+        const descriptionJson = desc1 ? { nl: desc1 } : null;
+        const desc2 = nullN(row.Description2);
+        const description2Json = desc2 ? { nl: desc2 } : null;
 
         const vendorId = row["Planning ID"]?.trim()
             ? `legacy-${row["Planning ID"].trim()}`
@@ -154,7 +160,7 @@ async function importProductions(filePath: string) {
 
         if (row.Genre?.trim()) {
             // Support comma-separated genres per production
-            const genreNames = row.Genre.trim().split(',').map(g => g.trim()).filter(Boolean);
+            const genreNames = row.Genre.trim().split(',').map(g => g.trim().replace(/^#+/, '')).filter(Boolean);
 
             for (const genreName of genreNames) {
                 const genreApiId = `legacy-genre-${genreName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
@@ -229,7 +235,7 @@ async function findOrCreateHall(rawName: string): Promise<string> {
         const n = hall.name as Record<string, string> | null;
         if (!n) return false;
         return Object.values(n).some(
-            (v) => typeof v === "string" && v.toLowerCase() === nameLower
+            (v) => v.toLowerCase() === nameLower
         );
     });
 
