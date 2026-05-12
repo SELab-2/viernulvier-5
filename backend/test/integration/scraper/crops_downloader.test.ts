@@ -35,7 +35,7 @@
             await prisma.$disconnect();
         });
 
-        it("downloads crops and stores file_location", async () => {
+        it("downloads crops", async () => {
             const crops = [
                 {url: "https://img/1.jpg", name: "FE3_header"},
                 {url: "https://img/2.jpg", name: "FE3_boxed"},

@@ -25,7 +25,6 @@ export const cropSchema = z.object({
     apiId: z.string().nullable(),
     name: z.string(),
     url: z.string(),
-    file_location: z.string(),
     item_id: z.string().uuid(),
     created_at: z.coerce.date(),
     updated_at: z.coerce.date(),

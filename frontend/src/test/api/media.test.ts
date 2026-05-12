@@ -13,7 +13,6 @@ function makeCrop(name: string): Crop {
         item_id: '9e110000-0000-0000-0000-000000000001',
         created_at: new Date('2026-01-01'),
         updated_at: new Date('2026-01-01'),
-        file_location: `${name}.jpg`
     }
 }
 
@@ -82,7 +81,6 @@ describe('getItemCrops', () => {
                     item_id: '9e110000-0000-0000-0000-000000000001',
                     created_at: '2026-01-01T00:00:00.000Z',
                     updated_at: '2026-01-01T00:00:00.000Z',
-                    file_location: "8f360000-0000-0000-0000-000000000001.jpg",
                 }],
             }),
         } as unknown as Response)
