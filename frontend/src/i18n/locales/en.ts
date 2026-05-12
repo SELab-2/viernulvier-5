@@ -238,7 +238,7 @@ const en: Messages = {
     privacy: 'Privacy',
     cookies: 'Cookies',
     disclaimer: 'Disclaimer',
-    rights: '© {year} VIERNULVIER. All rights reserved.',
+    rights: (year) => `© ${year} VIERNULVIER. All rights reserved.`,
   },
   admin: {
     themeToggleDark: 'Dark mode',
