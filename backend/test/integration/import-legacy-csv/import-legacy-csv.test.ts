@@ -1,4 +1,4 @@
-import { describe, it, beforeAll, afterAll, expect, vi } from 'vitest';
+import { describe, it, beforeAll, afterAll, expect } from 'vitest';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
@@ -23,16 +23,24 @@ function writeTempCsv(content: string): string {
   return filePath;
 }
 
+// Import main once at module level so the module is never re-imported.
+// Re-importing would either use the stale module cache (hallCache not reset)
+// or — if resetModules() is used — tear down the shared Prisma connection.
+import('../../../src/import/import-legacy-csv');
+let _main: (() => Promise<void>) | undefined;
+async function getMain() {
+  if (!_main) {
+    const mod = await import('../../../src/import/import-legacy-csv');
+    _main = mod.main;
+  }
+  return _main;
+}
+
 async function runImport(args: string[]) {
   const original = process.argv;
   process.argv = ['node', 'import-legacy-csv.ts', ...args];
 
-  // Reset the module cache before each import so every runImport call gets a
-  // fresh module instance. Without this the in-memory hallCache Map (and any
-  // other module-level state) leaks between calls
-  vi.resetModules();
-
-  const { main } = await import('../../../src/import/import-legacy-csv');
+  const main = await getMain();
   await main();
 
   process.argv = original;
@@ -344,6 +352,7 @@ describe('legacy CSV importer', () => {
     it('does not duplicate events when the same CSV is imported twice', async () => {
       const csv = [
         'Starttime,Endtime,Hall,Production',
+        // 2007-01-01 is in CET (UTC+1), so 20:00 local = 19:00 UTC → apiId ends in 20070101T190000000Z
         `2007-01-01 20:00:00,2007-01-01 22:00:00,Concertzaal,${PROD_ID}`,
       ].join('\n');
 
@@ -373,6 +382,7 @@ describe('legacy CSV importer', () => {
       const event = await prisma.event.findFirst({
         where: {
           production_id: prod!.id,
+          // 2007-02-01 is in CET (UTC+1), so 20:00 local = 19:00 UTC
           starts_at: new Date('2007-02-01T19:00:00Z'),
         },
       });

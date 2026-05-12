@@ -112,12 +112,9 @@ async function importProductions(filePath: string) {
 
         const apiId = legacyApiId(numericId);
 
-        // Build title as a JSON object (same pattern as live productions).
-        // The CSV has Dutch titles; we store under "nl" key.
         const titleJson = row.Titel ? { nl: row.Titel.trim() } : null;
         const taglineJson = row.Ondertitel ? { nl: row.Ondertitel.trim() } : null;
 
-        // Description1 → description, Description2 → description_2
         const descriptionJson = row.Description1
             ? { nl: row.Description1.trim() }
             : null;
@@ -149,8 +146,6 @@ async function importProductions(filePath: string) {
             create: data,
         });
 
-        // Determine whether this was a create or update for logging purposes.
-        // upsert always returns the record; we check updatedAt vs createdAt as a proxy.
         if (result.created_at.getTime() === result.updated_at.getTime()) {
             created++;
         } else {
@@ -158,15 +153,15 @@ async function importProductions(filePath: string) {
         }
 
         if (row.Genre?.trim()) {
-            const genresNames = row.Genre.trim().split(',');
+            // Support comma-separated genres per production
+            const genreNames = row.Genre.trim().split(',').map(g => g.trim()).filter(Boolean);
 
-            for (const genreName of genresNames) {
-
+            for (const genreName of genreNames) {
                 const genreApiId = `legacy-genre-${genreName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
 
                 // Find or create the genre record
                 let dbGenre = await prisma.genre.findUnique({
-                    where: {apiId: genreApiId},
+                    where: { apiId: genreApiId },
                 });
 
                 if (!dbGenre) {
@@ -174,9 +169,9 @@ async function importProductions(filePath: string) {
                     dbGenre = await prisma.genre.findFirst({
                         where: {
                             OR: [
-                                {name: {path: ["nl"], equals: genreName}},
-                                {name: {path: ["en"], equals: genreName}},
-                                {name: {path: ["fr"], equals: genreName}},
+                                { name: { path: ["nl"], equals: genreName } },
+                                { name: { path: ["en"], equals: genreName } },
+                                { name: { path: ["fr"], equals: genreName } },
                             ],
                         },
                     });
@@ -186,7 +181,7 @@ async function importProductions(filePath: string) {
                     dbGenre = await prisma.genre.create({
                         data: {
                             apiId: genreApiId,
-                            name: {nl: genreName},
+                            name: { nl: genreName },
                         },
                     });
                     log(`  ✚ Created genre "${genreName}" (${dbGenre.id})`);
@@ -234,7 +229,7 @@ async function findOrCreateHall(rawName: string): Promise<string> {
         const n = hall.name as Record<string, string> | null;
         if (!n) return false;
         return Object.values(n).some(
-            (v) => v.toLowerCase() === nameLower
+            (v) => typeof v === "string" && v.toLowerCase() === nameLower
         );
     });
 
@@ -339,8 +334,6 @@ async function importEvents(filePath: string) {
             create: data,
         });
 
-        // Determine whether this was a create or update for logging purposes.
-        // upsert always returns the record; we check updatedAt vs createdAt as a proxy.
         if (result.created_at.getTime() === result.updated_at.getTime()) {
             created++;
         } else {
@@ -381,4 +374,12 @@ export async function main() {
     }
 }
 
-main();
+// Only run automatically when executed directly (e.g. `npx tsx import-legacy-csv.ts`).
+// When imported as a module in tests, main() is called explicitly via the export.
+const isMain = process.argv[1] && (
+    process.argv[1].endsWith("import-legacy-csv.ts") ||
+    process.argv[1].endsWith("import-legacy-csv.js")
+);
+if (isMain) {
+    main();
+}
