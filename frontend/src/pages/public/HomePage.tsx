@@ -51,10 +51,8 @@ function HomePage() {
     const navigate = useNavigate()
     const [searchParams] = useSearchParams()
     const locale = getActiveLocale(window.location.pathname)
-    const fallbackUntitled = useMemo(
-        () => getMessages(locale).search.fallbackUntitled,
-        [locale],
-    )
+    const homeMessages = getMessages(locale).home
+    const fallbackUntitled = homeMessages.fallbackUntitled
     const [latestBlog, setLatestBlog] = useState<{ id: string; title: string; excerpt: string } | null>(null)
     const [recentItems, setRecentItems] = useState<Array<{
         id: string
@@ -141,7 +139,7 @@ function HomePage() {
         return () => {
             canceled = true
         }
-    }, [fallbackUntitled, locale])
+    }, [locale, fallbackUntitled])
 
     const handlePopularTagClick = (tag: string) => {
         const params = new URLSearchParams()
@@ -188,7 +186,7 @@ function HomePage() {
         return () => {
             canceled = true
         }
-    }, [fallbackUntitled, locale])
+    }, [locale, fallbackUntitled])
 
     const handleRecentDigitizedItemClick = (id: string) => {
         navigate(withLocalePath(`/archive/${id}`, locale))

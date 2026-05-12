@@ -43,6 +43,7 @@ export type Messages = {
     recentDigitizedHeading: string
     recentDigitizedViewItem: string
     recentDigitizedViewAll: string
+    fallbackUntitled: string
   }
   search: {
     heading: string
