@@ -10,10 +10,35 @@ const localizedTextSchema = z.object({
     en: z.string().optional(),
 }).nullable()
 
+const customDataSchema = z.unknown().nullable()
+
+const galleryItemSchema = z.object({
+    id: z.string().uuid(),
+    link: z.unknown().nullable(),
+}).passthrough()
+
+const gallerySchema = z.object({
+    id: z.string().uuid(),
+    items: z.array(galleryItemSchema),
+}).passthrough().nullable()
+
 export const paginationQuerySchema = z.object({
     page: z.coerce.number().int().positive().default(1),
     limit: z.coerce.number().int().positive().max(100).default(20),
     search: z.string().optional(),
+    genres: z.string().optional(),
+    locations: z.string().optional(),
+    yearFrom: z.coerce.number().int().optional(),
+    yearTo: z.coerce.number().int().optional(),
+    onThisDay: z.coerce.boolean().optional().default(false),
+    referenceDate: z
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/)
+        .refine((value) => !Number.isNaN(new Date(`${value}T00:00:00.000Z`).getTime()), {
+            message: 'referenceDate must be a valid YYYY-MM-DD date',
+        })
+        .optional(),
+    sort: z.enum(['relevance', 'recent', 'oldest']).optional().default('relevance'),
     lang: z.string().optional().default('nl'),
 })
 
@@ -68,7 +93,14 @@ export const productionSchema = z.object({
     info: localizedTextSchema,
     description_short: localizedTextSchema,
     eticket_info: localizedTextSchema,
-    custom_data: localizedTextSchema,
+    custom_data: customDataSchema,
+    image_url: z.string().nullable().optional(),
+    on_this_day_event_date: z.string().datetime().nullable().optional(),
+    venue_name: z.string().nullable().optional(),
+    venue_names: z.array(z.string()).optional(),
+    production_genres: z.array(z.string()).optional(),
+    media_gallery: gallerySchema.optional(),
+    poster_gallery: gallerySchema.optional(),
     genres: z.array(genreSchema).optional(),
     tags: z.array(tagSchema).optional(),
     media_gallery_id: z.string().uuid().nullable(),
@@ -110,7 +142,9 @@ export const updateProductionSchema = z.object({
     info: localizedTextSchema.optional(),
     description_short: localizedTextSchema.optional(),
     eticket_info: localizedTextSchema.optional(),
-    custom_data: localizedTextSchema.optional(),
+    custom_data: customDataSchema.optional(),
+    media_gallery: gallerySchema.optional(),
+    poster_gallery: gallerySchema.optional(),
     genres: z.array(genreSchema).optional(),
     tags: z.array(tagSchema).optional(),
     media_gallery_id: z.string().uuid().nullable().optional(),

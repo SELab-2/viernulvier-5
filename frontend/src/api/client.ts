@@ -12,18 +12,38 @@ export async function apiFetch<T>(
 ): Promise<T> {
     const url = `${API_BASE}${endpoint}`
 
-    const response = await fetch(url, {
-        credentials: 'include', // Include cookies for auth
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers,
-        },
-        ...options,
-    })
+    let response: Response
+
+    try {
+        response = await fetch(url, {
+            credentials: 'include', // Include cookies for auth
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers,
+            },
+            ...options,
+        })
+    } catch (error) {
+        const message = error instanceof Error ? error.message : 'Network request failed'
+        throw new Error(`Network error while requesting ${url}: ${message}`)
+    }
 
     if (!response.ok) {
-        const error = await response.json().catch(() => ({ message: 'Request failed' }))
-        throw new Error(error.message || error.error || `HTTP ${response.status}`)
+        const contentType = response.headers.get('content-type') ?? ''
+        const errorPayload = contentType.includes('application/json')
+            ? await response.json().catch(() => null)
+            : await response.text().catch(() => '')
+
+        const message =
+            (typeof errorPayload === 'object' && errorPayload !== null && 'message' in errorPayload
+                ? String((errorPayload as { message?: unknown }).message ?? '')
+                : typeof errorPayload === 'object' && errorPayload !== null && 'error' in errorPayload
+                    ? String((errorPayload as { error?: unknown }).error ?? '')
+                : typeof errorPayload === 'string'
+                    ? errorPayload
+                    : '') || `HTTP ${response.status}`
+
+        throw new Error(message)
     }
 
     // Handle 204 No Content
