@@ -543,12 +543,14 @@ async function sync_productions(cutoff_timestamp: Date | undefined = undefined) 
           where: {apiId: production["@id"]},
           update: {
             ...mapProduction(production),
+            draft: false,
             media_gallery_id: production.media_gallery ? galleryMap.get(production.media_gallery) : null,
             poster_gallery_id: production.poster_gallery ? galleryMap.get(production.poster_gallery) : null,
             review_gallery_id: production.review_gallery ? galleryMap.get(production.review_gallery) : null,
           },
           create: {
             ...mapProduction(production),
+            draft: false,
             media_gallery_id: production.media_gallery ? galleryMap.get(production.media_gallery) : null,
             poster_gallery_id: production.poster_gallery ? galleryMap.get(production.poster_gallery) : null,
             review_gallery_id: production.review_gallery ? galleryMap.get(production.review_gallery) : null,
