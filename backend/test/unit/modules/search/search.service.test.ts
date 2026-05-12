@@ -141,12 +141,22 @@ describe('SearchService', () => {
             yearFrom: 2024,
             yearTo: 2026,
         })
-        expect(postersService.getPosters).toHaveBeenCalledWith({
+        expect(postersService.getPosters).toHaveBeenNthCalledWith(1, {
             search: 'term',
             yearFrom: 2024,
             yearTo: 2026,
             page: 1,
-            limit: 1000,
+            limit: 1,
+            sort: 'recent',
+            lang: 'nl',
+        })
+
+        expect(postersService.getPosters).toHaveBeenNthCalledWith(2, {
+            search: 'term',
+            yearFrom: 2024,
+            yearTo: 2026,
+            page: 1,
+            limit: 1,
             sort: 'recent',
             lang: 'nl',
         })
