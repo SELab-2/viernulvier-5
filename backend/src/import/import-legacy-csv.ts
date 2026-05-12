@@ -14,6 +14,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { parse } from "csv-parse/sync";
 import { Prisma } from "@prisma/client";
+import { fromZonedTime } from "date-fns-tz";
 import { prisma } from "../scraper/prisma";
 import { log } from "../scraper/logger";
 
@@ -42,17 +43,32 @@ const NULL_DATES = new Set([
     "1970-01-01T00:00:00.000Z",
 ]);
 
+/**
+ * The legacy CSV dates are in Europe/Brussels local time (no timezone suffix).
+ * We explicitly interpret them as such so the result is consistent regardless
+ * of the server's local timezone (e.g. UTC on CI vs CET/CEST locally).
+ */
+const LEGACY_TIMEZONE = "Europe/Brussels";
+
 function parseDate(raw: string | undefined | null): Date | null {
     if (!raw || NULL_DATES.has(raw.trim())) return null;
-    const d = new Date(raw.trim());
+
+    // Normalise "YYYY-MM-DD HH:mm:ss" → "YYYY-MM-DDTHH:mm:ss" so date-fns-tz
+    // can parse it reliably without ambiguity.
+    const normalized = raw.trim().replace(" ", "T");
+
+    const d = fromZonedTime(normalized, LEGACY_TIMEZONE);
+
     if (isNaN(d.getTime())) {
         log(`  ⚠  Could not parse date "${raw}", storing as NULL`);
         return null;
     }
-    // Extra guard: epoch / year-0 variants
+
+    // Extra guard: epoch / year-0 variants that slipped through NULL_DATES
     if (d.getFullYear() <= 1970 && d.getMonth() === 0 && d.getDate() === 1) {
         return null;
     }
+
     return d;
 }
 
@@ -125,13 +141,20 @@ async function importProductions(filePath: string) {
             vendor_id: vendorId,
         };
 
-        const existing = await prisma.production.findUnique({ where: { apiId } });
-        if (existing) {
-            await prisma.production.update({ where: { apiId }, data });
-            updated++;
-        } else {
-            await prisma.production.create({ data });
+        // Use upsert instead of findUnique + create/update to avoid race
+        // conditions when tests run in parallel and to make reruns idempotent.
+        const result = await prisma.production.upsert({
+            where: { apiId },
+            update: data,
+            create: data,
+        });
+
+        // Determine whether this was a create or update for logging purposes.
+        // upsert always returns the record; we check updatedAt vs createdAt as a proxy.
+        if (result.created_at.getTime() === result.updated_at.getTime()) {
             created++;
+        } else {
+            updated++;
         }
 
         if (row.Genre?.trim()) {
@@ -166,27 +189,19 @@ async function importProductions(filePath: string) {
                 log(`  ✚ Created genre "${genreName}" (${dbGenre.id})`);
             }
 
-            // Get the production id (either just created or updated above)
-            const dbProduction = await prisma.production.findUnique({
-                where: { apiId },
-                select: { id: true },
-            });
-
-            if (dbProduction) {
-                await prisma.genre_production.upsert({
-                    where: {
-                        genre_id_production_id: {
-                            genre_id: dbGenre.id,
-                            production_id: dbProduction.id,
-                        },
-                    },
-                    update: {},
-                    create: {
+            await prisma.genre_production.upsert({
+                where: {
+                    genre_id_production_id: {
                         genre_id: dbGenre.id,
-                        production_id: dbProduction.id,
+                        production_id: result.id,
                     },
-                });
-            }
+                },
+                update: {},
+                create: {
+                    genre_id: dbGenre.id,
+                    production_id: result.id,
+                },
+            });
         }
     }
 
@@ -215,7 +230,7 @@ async function findOrCreateHall(rawName: string): Promise<string> {
         const n = hall.name as Record<string, string> | null;
         if (!n) return false;
         return Object.values(n).some(
-            (v) => typeof v === "string" && v.toLowerCase() === nameLower
+            (v) => v.toLowerCase() === nameLower
         );
     });
 
@@ -313,15 +328,19 @@ async function importEvents(filePath: string) {
             hall_id,
         };
 
-        const existing = await prisma.event.findUnique({
+        // Use upsert to avoid race conditions and make reruns idempotent.
+        const result = await prisma.event.upsert({
             where: { apiId: eventApiId },
+            update: data,
+            create: data,
         });
-        if (existing) {
-            await prisma.event.update({ where: { apiId: eventApiId }, data });
-            updated++;
-        } else {
-            await prisma.event.create({ data });
+
+        // Determine whether this was a create or update for logging purposes.
+        // upsert always returns the record; we check updatedAt vs createdAt as a proxy.
+        if (result.created_at.getTime() === result.updated_at.getTime()) {
             created++;
+        } else {
+            updated++;
         }
     }
 
