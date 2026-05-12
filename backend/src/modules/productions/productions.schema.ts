@@ -1,7 +1,8 @@
 import { z } from 'zod'
 import { 
     createPaginatedResponseSchema, 
-    createSingleResponseSchema
+    createSingleResponseSchema,
+    paginationQuerySchema
 } from '../../utils/rest-schemas.js'
 
 const localizedTextSchema = z.object({
@@ -12,9 +13,7 @@ const localizedTextSchema = z.object({
 
 const customDataSchema = z.unknown().nullable()
 
-export const paginationQuerySchema = z.object({
-    page: z.coerce.number().int().positive().default(1),
-    limit: z.coerce.number().int().positive().max(100).default(20),
+export const productionPaginationQuerySchema = paginationQuerySchema.extend({
     search: z.string().optional(),
     genres: z.string().optional(),
     locations: z.string().optional(),
@@ -37,14 +36,13 @@ export const paginationQuerySchema = z.object({
  */
 export const productionLinksSchema = z.object({
     self: z.string().url().default('https://example.com/'),
+    blogs: z.string().url().optional().nullable().default('https://example.com/'),
     events: z.string().url().optional().nullable().default('https://example.com/'),
     genres: z.string().url().optional().nullable().default('https://example.com/'),
     tags: z.string().url().optional().nullable().default('https://example.com/'),
     media_gallery: z.string().url().optional().nullable().default('https://example.com/'),
     review_gallery: z.string().url().optional().nullable().default('https://example.com/'),
     poster_gallery: z.string().url().optional().nullable().default('https://example.com/'),
-    uitdatabank_theme: z.string().url().optional().nullable().default('https://example.com/'),
-    uitdatabank_type: z.string().url().optional().nullable().default('https://example.com/'),
 })
 
 
@@ -79,8 +77,6 @@ export const productionSchema = z.object({
     media_gallery_id: z.string().uuid().nullable(),
     review_gallery_id: z.string().uuid().nullable(),
     poster_gallery_id: z.string().uuid().nullable(),
-    uitdatabank_theme: z.string().uuid().nullable(),
-    uitdatabank_type: z.string().uuid().nullable(),
     created_at: z.coerce.date(),
     updated_at: z.coerce.date(),
     // RESTful links inside the resource
@@ -119,8 +115,6 @@ export const updateProductionSchema = z.object({
     media_gallery_id: z.string().uuid().nullable().optional(),
     review_gallery_id: z.string().uuid().nullable().optional(),
     poster_gallery_id: z.string().uuid().nullable().optional(),
-    uitdatabank_theme: z.string().uuid().nullable().optional(),
-    uitdatabank_type: z.string().uuid().nullable().optional(),
 })
 
 export const updateProductionParamsSchema = z.object({
@@ -133,7 +127,7 @@ export const errorSchema = z.object({
     message: z.string(),
 })
 
-export type PaginationQuery = z.infer<typeof paginationQuerySchema>
+export type PaginationQuery = z.infer<typeof productionPaginationQuerySchema>
 export type ProductionResponse = z.infer<typeof productionSchema>
 export type ProductionListResponse = z.infer<typeof productionListSchema>
 export type UpdateProductionInput = z.infer<typeof updateProductionSchema>

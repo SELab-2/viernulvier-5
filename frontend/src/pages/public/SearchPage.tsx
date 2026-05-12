@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type PointerEvent as ReactPointerEvent } from 'react'
-import { useNavigate, useSearchParams, useLocation } from 'react-router-dom'
-import { getActiveLocale, getMessages, withLocalePath } from '../../i18n'
-import type { Locale } from '../../i18n/types'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { getActiveLocale, withLocalePath } from '../../i18n'
+import type { Locale, Messages } from '../../i18n/types'
 import { apiFetch } from '../../api/client'
 import { getLocalizedContent, getLocalizedTitle, normalizeContent } from './blogDetailPage.formatters'
 import PublicLayout from '../../components/public/PublicLayout'
+import { usePublicMessages } from '../../components/public/PublicMessagesContext'
 import SearchPagination from '../../components/public/search/SearchPagination'
 import SearchResultCard, { type SearchResultItem } from '../../components/public/search/SearchResultCard'
 
@@ -18,32 +19,57 @@ type SearchEntry = SearchResultItem & {
 const DEFAULT_PAGE_SIZE = 12
 const PAGE_SIZE_OPTIONS = [12, 24, 48] as const
 const MIN_PERIOD_YEAR = 1982
-const MAX_PERIOD_YEAR = 2026
+const MAX_PERIOD_YEAR = new Date().getFullYear()
 const SEARCH_INPUT_DEBOUNCE_MS = 250
 
 const CANONICAL_GENRE_VALUES = [
-    'theater',
-    'dans',
     'concert',
     'nightlife',
     'talks',
-    'comedy',
-    'monument',
-    'circus',
+    'installation',
+    'theatre',
     'performance',
+    'dance',
+    'comedy',
+    'film',
     'spoken word',
-    'listening session',
+    'circus',
+    'food',
+    'monument',
+    'workshop',
+    'party',
+    'expo',
+    'festival',
 ] as const
 
 const GENRE_ALIASES: Record<string, string> = {
-    theater: 'theater',
-    theatre: 'theater',
-    dans: 'dans',
-    dance: 'dans',
+    theater: 'theatre',
+    theatre: 'theatre',
+    dans: 'dance',
+    dance: 'dance',
     music: 'concert',
     komedie: 'comedy',
+    talk: 'talks',
+    talks: 'talks',
+    installatie: 'installation',
+    installation: 'installation',
+    expo: 'expo',
+    tentoonstelling: 'expo',
+    food: 'food',
+    eten: 'food',
+    etenendrinken: 'food',
+    'eten & drinken': 'food',
+    film: 'film',
+    workshop: 'workshop',
+    party: 'party',
+    monument: 'monument',
+    circus: 'circus',
+    performance: 'performance',
+    festival: 'festival',
+    feest: 'party',
     voorstelling: 'performance',
     'spoken-word': 'spoken word',
+    spokenword: 'spoken word',
 }
 
 const NON_GENRE_TAG_VALUES = new Set([
@@ -90,8 +116,6 @@ type ProductionApiItem = {
         media_gallery: string | null
         review_gallery: string | null
         poster_gallery: string | null
-        uitdatabank_theme: string | null
-        uitdatabank_type: string | null
     }
 }
 
@@ -263,8 +287,7 @@ function normalizeGenreValue(value: string): string {
     return GENRE_ALIASES[normalized] ?? normalized
 }
 
-function mapProductionToSearchEntry(item: ProductionApiItem, locale: Locale, preferredGenre?: string): SearchEntry {
-    const searchMessages = getMessages(locale).search
+function mapProductionToSearchEntry(item: ProductionApiItem, locale: Locale, searchMessages: Messages['search'], preferredGenre?: string): SearchEntry {
     const title = getLocalizedText(item.title, locale) || searchMessages.fallbackUntitled
     const excerptRaw =
         getLocalizedText(item.description_short, locale) ||
@@ -286,19 +309,7 @@ function mapProductionToSearchEntry(item: ProductionApiItem, locale: Locale, pre
     const normalizedPreferredGenre = preferredGenre?.trim().toLowerCase() ?? ''
     const matchedPreferredGenre = normalizedPreferredGenre
         ? normalizedProductionGenres.find((genre) => {
-              if (genre === normalizedPreferredGenre) {
-                  return true
-              }
-
-              if (normalizedPreferredGenre === 'dans' && genre === 'dance') {
-                  return true
-              }
-
-              if (normalizedPreferredGenre === 'theater' && genre === 'theatre') {
-                  return true
-              }
-
-              return false
+              return genre === normalizedPreferredGenre
           })
         : undefined
 
@@ -312,7 +323,7 @@ function mapProductionToSearchEntry(item: ProductionApiItem, locale: Locale, pre
 
     return {
         id: item.id,
-        tag: normalizedGenre ? getGenreLabel(normalizedGenre, locale) : searchMessages.fallbackTag,
+        tag: normalizedGenre ? getGenreLabel(normalizedGenre, searchMessages.genres) : searchMessages.fallbackTag,
         date: formatDate(item.created_at, locale),
         title,
         excerpt,
@@ -374,8 +385,7 @@ function getBlogExcerpt(content: unknown, locale: Locale, fallback: string): str
     return toPlainText(localizedContent) || fallback
 }
 
-function mapBlogToSearchEntry(item: BlogApiItem, locale: Locale): SearchEntry {
-    const searchMessages = getMessages(locale).search
+function mapBlogToSearchEntry(item: BlogApiItem, locale: Locale, searchMessages: Messages['search']): SearchEntry {
     const title = getLocalizedTitle(item.title, locale) || searchMessages.fallbackUntitled
     const date = item.createdAt ? formatDate(item.createdAt, locale) : '-'
     const year = item.createdAt ? new Date(item.createdAt).getFullYear() : MIN_PERIOD_YEAR
@@ -565,30 +575,19 @@ function useProductionTaxonomies(items: ProductionApiItem[], locale: Locale) {
 
     useEffect(() => {
         const fetchTaxonomies = async () => {
-            const itemsToFetch = items.filter(item => item.links?.genres || item.links?.tags)
+            const itemsToFetch = items.filter((item) => item.id)
             if (itemsToFetch.length === 0) return
 
             const results = await Promise.allSettled(
                 itemsToFetch.map(async (item) => {
                     try {
-                        // 1. Try Genres
-                        const genresPath = getRelativePath(item.links?.genres)
+                        // Prefer the localized genre name for card labels to keep parity with detail pages.
+                        const genresPath = getRelativePath(item.links?.genres) ?? `/archive/genres?productionId=${item.id}`
                         if (genresPath) {
                             const res = await apiFetch<{ data: Array<{ slug: LocalizedText, name: LocalizedText }> }>(genresPath)
                             const firstGenre = res.data?.[0]
                             if (firstGenre) {
-                                const label = getLocalizedText(firstGenre.slug, locale) || getLocalizedText(firstGenre.name, locale)
-                                if (label) return { id: item.id, label }
-                            }
-                        }
-
-                        // 2. Fallback to Tags
-                        const tagsPath = getRelativePath(item.links?.tags)
-                        if (tagsPath) {
-                            const res = await apiFetch<{ data: Array<{ slug: LocalizedText, name: LocalizedText }> }>(tagsPath)
-                            const firstTag = res.data?.[0]
-                            if (firstTag) {
-                                const label = getLocalizedText(firstTag.slug, locale) || getLocalizedText(firstTag.name, locale)
+                                const label = getLocalizedText(firstGenre.name, locale) || getLocalizedText(firstGenre.slug, locale)
                                 if (label) return { id: item.id, label }
                             }
                         }
@@ -685,10 +684,9 @@ function parseSelectedLocations(searchParams: URLSearchParams): string[] {
     return legacyLocation ? [LOCATION_ALIASES[legacyLocation] ?? legacyLocation] : []
 }
 
-function getGenreLabel(value: string, locale: Locale): string {
-    const labels = getMessages(locale).search.genres
+function getGenreLabel(value: string, genreLabels: Messages['search']['genres']): string {
     const index = CANONICAL_GENRE_VALUES.indexOf(value as (typeof CANONICAL_GENRE_VALUES)[number])
-    return index >= 0 ? labels[index] ?? value : value
+    return index >= 0 ? genreLabels[index] ?? value : value
 }
 
 function getLocationLabel(value: string): string {
@@ -723,9 +721,8 @@ type FilterPanelProps = {
 function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, onShare, locationSuggestions = [] }: FilterPanelProps) {
     const [searchParams] = useSearchParams()
     const navigate = useNavigate()
-    const { pathname } = useLocation()
-    const locale = useMemo(() => getActiveLocale(pathname), [pathname])
-    const { search: s } = getMessages(locale)
+    const locale = getActiveLocale(window.location.pathname)
+    const { search: s } = usePublicMessages()
 
     const filterState = useMemo(() => parseSearchFilterState(searchParams), [searchParams])
     const query = filterState.query
@@ -1082,9 +1079,8 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
 function MobileSearchForm({ className = 'mb-5 md:hidden' }: { className?: string }) {
     const [searchParams] = useSearchParams()
     const navigate = useNavigate()
-    const { pathname } = useLocation()
-    const locale = useMemo(() => getActiveLocale(pathname), [pathname])
-    const { search: s } = getMessages(locale)
+    const locale = getActiveLocale(window.location.pathname)
+    const { search: s } = usePublicMessages()
     const filterState = useMemo(() => parseSearchFilterState(searchParams), [searchParams])
     const query = filterState.query
     const [searchInput, setSearchInput] = useState(query)
@@ -1150,11 +1146,12 @@ function MobileSearchForm({ className = 'mb-5 md:hidden' }: { className?: string
     )
 }
 
-function SearchPage() {
+function SearchPageContent() {
     const [searchParams] = useSearchParams()
     const navigate = useNavigate()
     const locale = getActiveLocale(window.location.pathname)
-    const m = getMessages(locale)
+    const m = usePublicMessages()
+    const searchMessages = m.search
     const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false)
     const [shareCopied, setShareCopied] = useState(false)
     const [apiEntries, setApiEntries] = useState<SearchEntry[]>([])
@@ -1207,7 +1204,7 @@ function SearchPage() {
                         `/archive/blogs?${params.toString()}`,
                         { signal: abortController.signal }
                     )
-                    const mappedEntries = response.data.map((item) => mapBlogToSearchEntry(item, locale))
+                    const mappedEntries = response.data.map((item) => mapBlogToSearchEntry(item, locale, searchMessages))
                     setApiEntries(mappedEntries)
                     setTotalResults(response.meta?.total ?? mappedEntries.length)
                     setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
@@ -1243,6 +1240,7 @@ function SearchPage() {
                                     updatedAt: item.created_at ?? '',
                                 },
                                 locale,
+                                searchMessages,
                             )
                         }
                         return mapProductionToSearchEntry(
@@ -1261,10 +1259,30 @@ function SearchPage() {
                                 created_at: item.created_at ?? '',
                             },
                             locale,
+                            searchMessages,
                             preferredGenre,
                         )
                     })
 
+                    const productionItemsForTaxonomy: ProductionApiItem[] = response.data
+                        .filter((item) => item.type === 'production')
+                        .map((item) => ({
+                            id: item.id,
+                            title: toLocalizedText(item.title),
+                            teaser: toLocalizedText(item.teaser),
+                            description_short: toLocalizedText(item.description_short),
+                            description: toLocalizedText(item.description),
+                            image_url: item.image_url,
+                            venue_name: item.venue_name,
+                            venue_names: item.venue_names,
+                            production_genres: item.production_genres,
+                            performer_type: item.performer_type ?? null,
+                            attendance_mode: item.attendance_mode ?? null,
+                            created_at: item.created_at ?? '',
+                            links: undefined,
+                        }))
+
+                    setApiRawItems(productionItemsForTaxonomy)
                     setApiEntries(mappedEntries)
                     setTotalResults(response.meta?.total ?? mappedEntries.length)
                     setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
@@ -1297,7 +1315,7 @@ function SearchPage() {
                     )
 
                     const preferredGenre = selectedGenres.length === 1 ? selectedGenres[0] : undefined
-                    const mappedEntries = response.data.map((item) => mapProductionToSearchEntry(item, locale, preferredGenre))
+                    const mappedEntries = response.data.map((item) => mapProductionToSearchEntry(item, locale, searchMessages, preferredGenre))
                     setApiRawItems(response.data)
                     setApiEntries(mappedEntries)
                     setTotalResults(response.meta?.total ?? mappedEntries.length)
@@ -1325,7 +1343,7 @@ function SearchPage() {
         return () => {
             abortController.abort()
         }
-    }, [query, locale, selectedGenres, selectedLocations, safeFromYear, safeToYear, sort, page, pageSize, tab])
+    }, [query, locale, selectedGenres, selectedLocations, safeFromYear, safeToYear, sort, page, pageSize, tab, searchMessages])
 
     const navigateWithFilters = (filters: SearchFilterOverrides) => {
         const params = buildSearchParams(filters)
@@ -1341,16 +1359,19 @@ function SearchPage() {
             .map(item => {
                 const detail = fetchedDetails[item.id]
                 const fetchedTaxonomy = fetchedTaxonomies[item.id]
+                const normalizedFetchedGenre = fetchedTaxonomy ? normalizeGenreValue(fetchedTaxonomy) : ''
+                const mappedFetchedGenreLabel = normalizedFetchedGenre ? getGenreLabel(normalizedFetchedGenre, searchMessages.genres) : ''
+                const nextTag = mappedFetchedGenreLabel || fetchedTaxonomy || item.tag
                 return {
                     ...item,
                     imageUrl: fetchedImages[item.id] || item.imageUrl,
                     date: detail?.date !== undefined && detail.date !== '' ? detail.date : item.date,
                     venue: detail?.venue !== undefined && detail.venue !== '' ? detail.venue : item.venue,
-                    tag: fetchedTaxonomy !== undefined && fetchedTaxonomy !== '' ? fetchedTaxonomy : item.tag
+                    tag: nextTag
                 }
             })
             .filter(item => fetchedDetails[item.id]?.date !== '')
-    }, [apiEntries, fetchedImages, fetchedDetails, fetchedTaxonomies])
+    }, [apiEntries, fetchedImages, fetchedDetails, fetchedTaxonomies, searchMessages.genres])
 
     // Compacte paginering: 1,2,3,...,laatste
     function getCompactPageLabels(current: number, total: number): string[] {
@@ -1418,6 +1439,25 @@ function SearchPage() {
         })
     }
 
+    const handleCardGenreClick = (genre: string) => {
+        const nextGenre = normalizeGenreValue(genre)
+        if (!nextGenre) {
+            return
+        }
+
+        navigateWithFilters({
+            query: query || undefined,
+            yearFrom: safeFromYear,
+            yearTo: safeToYear,
+            genres: [nextGenre],
+            locations: selectedLocations,
+            sort,
+            page: 1,
+            limit: pageSize,
+            tab,
+        })
+    }
+
     const handleRemoveGenreChip = (genreToRemove: string) => {
         navigateWithFilters({
             query: query || undefined,
@@ -1468,7 +1508,7 @@ function SearchPage() {
     const filterChips: Array<{ key: string; label: string; onRemove: () => void }> = [
         ...selectedGenres.map((value) => ({
             key: `genre-${value}`,
-            label: getGenreLabel(value, locale),
+            label: getGenreLabel(value, searchMessages.genres),
             onRemove: () => handleRemoveGenreChip(value),
         })),
         ...selectedLocations.map((value) => ({
@@ -1519,8 +1559,7 @@ function SearchPage() {
     }, [allAvailableHalls, fetchedDetails, locale])
 
     return (
-        <PublicLayout>
-            <section className="relative bg-surface-sunken">
+        <section className="relative bg-surface-sunken">
                 <div className="w-full md:flex md:items-stretch">
                     <div
                         aria-hidden="true"
@@ -1716,6 +1755,8 @@ function SearchPage() {
                                     <SearchResultCard
                                         key={item.id}
                                         item={item}
+                                        genreValue={item.genre}
+                                        onTagClick={handleCardGenreClick}
                                         detailHref={ item.type === 'blog'
                                             ? withLocalePath('/blogs/' + item.id, locale)
                                             : withLocalePath('/archive/' + item.id, locale)
@@ -1744,7 +1785,14 @@ function SearchPage() {
                         </div>
                     </div>
                 </div>
-            </section>
+        </section>
+    )
+}
+
+function SearchPage() {
+    return (
+        <PublicLayout>
+            <SearchPageContent />
         </PublicLayout>
     )
 }
