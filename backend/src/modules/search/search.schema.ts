@@ -21,6 +21,7 @@ export const searchResultItemSchema = z.object({
     content: z.unknown().nullable().optional(),
     image_url: z.string().nullable().optional(),
     mime_type: z.string().nullable().optional(),
+    poster_file_count: z.number().int().positive().optional(),
     production_id: z.string().uuid().nullable().optional(),
     venue_name: z.string().nullable().optional(),
     venue_names: z.array(z.string()).optional(),

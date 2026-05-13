@@ -82,6 +82,8 @@ function getPdfPreviewUrl(fileUrl: string): string {
   return normalized.includes('#') ? normalized : `${normalized}${hash}`
 }
 
+const ALLOWED_UPLOAD_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf'])
+
 function PostersPageContent() {
   const i18n = useAdminMessages()
   const locale = getActiveLocale(window.location.pathname)
@@ -106,12 +108,14 @@ function PostersPageContent() {
   const loadProductionsErrorMessage = i18n.admin.posters.loadProductionsError
 
   const sortedProductions = useMemo(() => {
+    const sortLocale = locale === 'en' ? 'en-GB' : 'nl-BE'
+
     return [...productions].sort((a, b) => {
       const first = getLocalizedTitle(a.title)
       const second = getLocalizedTitle(b.title)
-      return first.localeCompare(second, 'nl-BE', { sensitivity: 'base' })
+      return first.localeCompare(second, sortLocale, { sensitivity: 'base' })
     })
-  }, [productions])
+  }, [locale, productions])
 
   const selectedProductions = useMemo(
     () => sortedProductions.filter((p) => selectedProductionIds.includes(p.id)),
@@ -384,10 +388,21 @@ function PostersPageContent() {
               accept="image/*,application/pdf"
               onChange={(event) => {
                 const nextFiles = Array.from(event.target.files ?? [])
-                setSelectedFiles(nextFiles)
+                const acceptedFiles = nextFiles.filter((file) => ALLOWED_UPLOAD_TYPES.has(file.type))
+                const rejectedFiles = nextFiles.filter((file) => !ALLOWED_UPLOAD_TYPES.has(file.type))
+
+                if (rejectedFiles.length > 0) {
+                  const rejectedNames = rejectedFiles.map((file) => file.name).join(', ')
+                  setError(`${i18n.admin.posters.validationInvalidFileType}: ${rejectedNames}`)
+                } else {
+                  setError(null)
+                }
+
+                setSelectedFiles(acceptedFiles)
               }}
               className="block w-full rounded-md border border-[var(--color-admin-card-border)] p-2"
             />
+            <p className="text-xs text-muted">{i18n.admin.posters.formFileHint}</p>
             {selectedFiles.length > 0 ? (
               <p className="text-xs text-muted">{i18n.admin.posters.filesSelectedCount(selectedFiles.length)}</p>
             ) : null}
@@ -459,7 +474,7 @@ function PostersPageContent() {
                   {poster.mime_type === 'application/pdf' ? (
                     <iframe
                       src={getPdfPreviewUrl(poster.file_url)}
-                      title={`${poster.title} PDF preview`}
+                      title={i18n.admin.posters.pdfPreviewTitle(poster.title)}
                       className="absolute inset-0 h-full w-full border-0"
                       loading="lazy"
                     />
@@ -479,7 +494,7 @@ function PostersPageContent() {
                     <p className="text-xs text-muted">
                       {(poster.productions?.map((production) => production.title).join(' • ') || poster.production?.title) ?? i18n.admin.posters.noProductionAssigned}
                     </p>
-                    <p className="text-xs text-muted">{poster.files?.length ?? 1} file(s)</p>
+                    <p className="text-xs text-muted">{i18n.admin.posters.filesCountLabel(poster.files?.length ?? 1)}</p>
                     <p className="text-xs text-muted">{new Date(poster.created_at).toLocaleDateString(locale === 'en' ? 'en-GB' : 'nl-BE')}</p>
                   </div>
                   <div className="mt-auto pt-3">

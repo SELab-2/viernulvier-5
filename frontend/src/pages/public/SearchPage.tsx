@@ -139,6 +139,7 @@ type PosterApiItem = {
         file_url: string
         mime_type: string | null
     }>
+    file_count?: number
     created_at: string
     production: {
         id: string
@@ -332,6 +333,11 @@ function mapPosterToSearchEntry(item: PosterApiItem, locale: Locale, searchMessa
         .map((file) => normalizeApiAssetUrl(file.file_url))
         .filter((url): url is string => Boolean(url))
         .slice(0, 3)
+    const knownAssetCount = posterFiles.length > 0
+        ? posterFiles.length
+        : typeof item.file_count === 'number' && item.file_count > 0
+            ? item.file_count
+            : undefined
 
     return {
         id: item.id,
@@ -342,7 +348,7 @@ function mapPosterToSearchEntry(item: PosterApiItem, locale: Locale, searchMessa
         venue: productionTitle,
         imageUrl: normalizeApiAssetUrl(item.file_url),
         mimeType: item.mime_type,
-        relatedAssetCount: posterFiles.length > 0 ? posterFiles.length : undefined,
+        relatedAssetCount: knownAssetCount,
         relatedAssetPreviewUrls: previewUrls.length > 0 ? previewUrls : undefined,
         year: new Date(item.created_at).getFullYear() || MIN_PERIOD_YEAR,
         genre: '',
@@ -421,6 +427,7 @@ type SearchApiItem = {
     content?: unknown
     image_url?: string | null
     mime_type?: string | null
+    poster_file_count?: number
     production_id?: string | null
     venue_name?: string | null
     venue_names?: string[]
@@ -1316,6 +1323,7 @@ function SearchPageContent() {
                                     title: (item.title as string) || '',
                                     file_url: item.image_url || '',
                                     mime_type: item.mime_type ?? null,
+                                    file_count: item.poster_file_count,
                                     created_at: item.created_at ?? '',
                                     production: item.production_id
                                         ? { id: item.production_id, title: item.venue_name ?? '' }

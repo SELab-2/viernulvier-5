@@ -100,6 +100,7 @@ export class SearchService {
                 title: poster.title ?? null,
                 image_url: `/api/v1/archive/posters/${poster.id}/file`,
                 mime_type: poster.mime_type ?? null,
+                poster_file_count: Array.isArray(poster.files) && poster.files.length > 0 ? poster.files.length : undefined,
                 production_id: poster.production?.id ?? null,
                 venue_name: venueName,
                 created_at: poster.created_at ? new Date(poster.created_at).toISOString() : undefined,

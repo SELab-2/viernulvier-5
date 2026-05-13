@@ -118,7 +118,7 @@ function PosterDetailPage() {
                     return
                 }
 
-                setError(loadError instanceof Error ? loadError.message : locale === 'en' ? 'Failed to load poster.' : 'Kon affiche niet laden.')
+                setError(loadError instanceof Error ? loadError.message : detailMessages.posterLoadError)
             } finally {
                 if (isActive) {
                     setIsLoading(false)
@@ -133,9 +133,9 @@ function PosterDetailPage() {
         }
     }, [id, locale, detailMessages])
 
-    const backLabel = locale === 'en' ? 'Back to search' : 'Terug naar zoeken'
-    const relatedProductionLabel = locale === 'en' ? 'Related' : 'Gerelateerd'
-    const noLinkedProductionLabel = locale === 'en' ? 'No linked production' : 'Geen gekoppelde productie'
+    const backLabel = detailMessages.backToSearch
+    const relatedProductionLabel = detailMessages.relatedProductions
+    const noLinkedProductionLabel = detailMessages.noLinkedProduction
 
     const relatedItems = (() => {
         if (!poster) {
@@ -181,7 +181,7 @@ function PosterDetailPage() {
                         {`← ${backLabel}`}
                     </Link>
 
-                    {isLoading ? <p className="text-center text-muted">{locale === 'en' ? 'Loading poster...' : 'Affiche laden...'}</p> : null}
+                    {isLoading ? <p className="text-center text-muted">{detailMessages.loadingPoster}</p> : null}
                     {error ? <p className="text-center text-red-500">{error}</p> : null}
 
                     {!isLoading && !error && poster ? (

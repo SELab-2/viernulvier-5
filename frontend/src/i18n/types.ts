@@ -133,6 +133,11 @@ export type Messages = {
     noEvents: string
     loadError: string
     posterNotFound: string
+    posterLoadError: string
+    loadingPoster: string
+    backToSearch: string
+    relatedProductions: string
+    noLinkedProduction: string
     date: string
     time: string
     location: string
@@ -301,6 +306,7 @@ export type Messages = {
       formTitleLabel: string
       formProductionLabel: string
       formFileLabel: string
+      formFileHint: string
       submitButton: string
       submittingButton: string
       overviewHeading: string
@@ -318,10 +324,13 @@ export type Messages = {
       validationTitleRequired: string
       validationProductionRequired: string
       validationFileRequired: string
+      validationInvalidFileType: string
       loadPostersError: string
       loadProductionsError: string
       noProductionAssigned: string
       filesSelectedCount: (count: number) => string
+      filesCountLabel: (count: number) => string
+      pdfPreviewTitle: (title: string) => string
     }
   }
 

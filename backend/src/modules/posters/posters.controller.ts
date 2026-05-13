@@ -106,6 +106,10 @@ function resolveStoredFilePath(storedName: string): string {
 export class PostersController {
     constructor(private readonly service: PostersService) {}
 
+    private getLang(lang?: string) {
+        return lang === 'en' || lang === 'fr' ? lang : 'nl'
+    }
+
     private getArchiveBaseUrl(request: FastifyRequest) {
         const host = request.headers.host || request.hostname
         return `${request.protocol}://${host}/api/v1/archive`
@@ -165,9 +169,10 @@ export class PostersController {
         const archiveBaseUrl = this.getArchiveBaseUrl(request)
         const host = request.headers.host || request.hostname
         const currentUrl = `${request.protocol}://${host}${request.url}`
+        const lang = this.getLang(request.query.lang)
 
         return reply.status(200).send({
-            data: posters.items.map((poster) => this.mapPosterLinks(poster, archiveBaseUrl)),
+            data: posters.items.map((poster) => this.mapPosterLinks(poster, archiveBaseUrl, lang)),
             meta: {
                 total: posters.total,
                 page: posters.page,
@@ -178,23 +183,24 @@ export class PostersController {
         })
     }
 
-    async getPoster(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
+    async getPoster(request: FastifyRequest<{ Params: { id: string }; Querystring: { lang?: string } }>, reply: FastifyReply) {
         const poster = await this.service.getPoster(request.params.id)
         if (!poster) {
             return reply.status(404).send({ message: 'Poster not found' })
         }
 
         const archiveBaseUrl = this.getArchiveBaseUrl(request)
+        const lang = this.getLang(request.query.lang)
 
         return reply.status(200).send({
-            data: this.mapPosterLinks(poster, archiveBaseUrl),
+            data: this.mapPosterLinks(poster, archiveBaseUrl, lang),
             links: {
                 self: `${archiveBaseUrl}/posters/${poster.id}`,
             },
         })
     }
 
-    async createPoster(request: FastifyRequest<{ Body: CreatePosterInput }>, reply: FastifyReply) {
+    async createPoster(request: FastifyRequest<{ Body: CreatePosterInput; Querystring: { lang?: string } }>, reply: FastifyReply) {
         const storedFileNames: string[] = []
 
         try {
@@ -280,13 +286,14 @@ export class PostersController {
             })
 
             const archiveBaseUrl = this.getArchiveBaseUrl(request)
+            const lang = this.getLang(request.query.lang)
             const selfUrl = `${archiveBaseUrl}/posters/${poster.id}`
 
             return reply
                 .status(201)
                 .header('Location', selfUrl)
                 .send({
-                    data: this.mapPosterLinks(poster, archiveBaseUrl),
+                    data: this.mapPosterLinks(poster, archiveBaseUrl, lang),
                     links: {
                         self: selfUrl,
                     },
@@ -305,7 +312,7 @@ export class PostersController {
                     'Poster file payload is invalid',
                 ].includes(error.message)
 
-                if (knownValidationError) {
+                if (knownValidationError || error.message.startsWith('Unknown production IDs: ')) {
                     return reply.status(400).send({ message: error.message })
                 }
             }
@@ -315,15 +322,16 @@ export class PostersController {
     }
 
     async updatePoster(
-        request: FastifyRequest<{ Params: { id: string }; Body: UpdatePosterInput }>,
+        request: FastifyRequest<{ Params: { id: string }; Body: UpdatePosterInput; Querystring: { lang?: string } }>,
         reply: FastifyReply,
     ) {
         try {
             const poster = await this.service.updatePoster(request.params.id, request.body)
             const archiveBaseUrl = this.getArchiveBaseUrl(request)
+            const lang = this.getLang(request.query.lang)
 
             return reply.status(200).send({
-                data: this.mapPosterLinks(poster, archiveBaseUrl),
+                data: this.mapPosterLinks(poster, archiveBaseUrl, lang),
                 links: {
                     self: `${archiveBaseUrl}/posters/${poster.id}`,
                 },
@@ -331,6 +339,10 @@ export class PostersController {
         } catch (error) {
             if (error instanceof Error && error.message.includes('Record to update not found')) {
                 return reply.status(404).send({ message: 'Poster not found' })
+            }
+
+            if (error instanceof Error && error.message.startsWith('Unknown production IDs: ')) {
+                return reply.status(400).send({ message: error.message })
             }
 
             throw error

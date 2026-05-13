@@ -304,11 +304,17 @@ export class ProductionsService {
     }
 
     async createProduction(data: CreateProductionInput): Promise<ProductionResponse> {
-        return this.repository.create(data) as any
+        const created = await this.repository.create(data)
+        const reloaded = await this.repository.findById(created.id)
+
+        return this.mapProductionResponse(reloaded ?? created) as any
     }
 
     async updateProduction(id: string, data: UpdateProductionInput): Promise<ProductionResponse> {
-        return this.repository.update(id, data) as any
+        const updated = await this.repository.update(id, data)
+        const reloaded = await this.repository.findById(updated.id)
+
+        return this.mapProductionResponse(reloaded ?? updated) as any
     }
 
     async deleteProduction(id: string): Promise<void> {

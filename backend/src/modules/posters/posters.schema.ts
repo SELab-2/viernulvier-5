@@ -12,6 +12,10 @@ export const posterPaginationQuerySchema = z.object({
     lang: z.string().optional().default('nl'),
 })
 
+export const posterLanguageQuerySchema = z.object({
+    lang: z.string().optional().default('nl'),
+})
+
 export const posterLinksSchema = z.object({
     self: z.string().url().default('https://example.com/'),
     file: z.string().url().default('https://example.com/'),

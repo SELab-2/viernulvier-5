@@ -300,10 +300,26 @@ export class PostersRepository {
     private async ensurePosterGalleryForProductions(tx: Prisma.TransactionClient, productionIds: string[]) {
         const [primaryId, ...otherIds] = productionIds
 
-        const primary = await tx.production.findUnique({
-            where: { id: primaryId },
-            select: { id: true, poster_gallery_id: true },
+        const requestedIds = Array.from(new Set(productionIds))
+        const linkedProductions = await tx.production.findMany({
+            where: {
+                id: {
+                    in: requestedIds,
+                },
+            },
+            select: {
+                id: true,
+                poster_gallery_id: true,
+            },
         })
+
+        const linkedById = new Map(linkedProductions.map((production) => [production.id, production]))
+        const unknownProductionIds = requestedIds.filter((id) => !linkedById.has(id))
+        if (unknownProductionIds.length > 0) {
+            throw new Error(`Unknown production IDs: ${unknownProductionIds.join(', ')}`)
+        }
+
+        const primary = linkedById.get(primaryId)
 
         if (!primary) {
             throw new Error('Production not found')
@@ -323,10 +339,7 @@ export class PostersRepository {
         }
 
         for (const otherId of otherIds) {
-            const other = await tx.production.findUnique({
-                where: { id: otherId },
-                select: { id: true, poster_gallery_id: true },
-            })
+            const other = linkedById.get(otherId)
 
             if (!other) {
                 continue

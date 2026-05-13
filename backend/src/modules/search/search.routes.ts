@@ -21,7 +21,7 @@ const searchRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.get('/', {
         schema: {
             tags: ['search'],
-            summary: 'Search across productions and blogs',
+            summary: 'Search across productions, blogs and posters',
             querystring: searchQuerySchema,
             response: {
                 200: searchListSchema,

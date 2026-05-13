@@ -8,6 +8,7 @@ import {
     createPosterSchema,
     errorSchema,
     posterIdParamSchema,
+    posterLanguageQuerySchema,
     posterListSchema,
     posterPaginationQuerySchema,
     singlePosterSchema,
@@ -37,6 +38,7 @@ const postersRoutes: FastifyPluginAsync = async (fastify) => {
             tags: ['posters'],
             summary: 'Get a poster by ID',
             params: posterIdParamSchema,
+            querystring: posterLanguageQuerySchema,
             response: {
                 200: singlePosterSchema,
                 404: errorSchema,
@@ -62,6 +64,7 @@ const postersRoutes: FastifyPluginAsync = async (fastify) => {
         schema: {
             tags: ['posters'],
             summary: 'Create a poster with title, production and image file',
+            querystring: posterLanguageQuerySchema,
             body: createPosterSchema,
             response: {
                 201: singlePosterSchema,
@@ -77,6 +80,7 @@ const postersRoutes: FastifyPluginAsync = async (fastify) => {
             tags: ['posters'],
             summary: 'Update poster metadata',
             params: posterIdParamSchema,
+            querystring: posterLanguageQuerySchema,
             body: updatePosterSchema,
             response: {
                 200: singlePosterSchema,
