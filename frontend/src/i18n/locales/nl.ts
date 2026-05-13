@@ -342,6 +342,7 @@ const nl: Messages = {
       formProductionLabel: 'Productie',
       formFileLabel: 'Bestand',
       formFileHint: 'Toegelaten formaten: JPG, PNG, WEBP, GIF, PDF. Maximale bestandsgrootte: 15 MB per bestand.',
+      addFileButton: 'Voeg bestanden toe',
       submitButton: 'Affiche toevoegen',
       submittingButton: 'Bezig...',
       overviewHeading: 'Overzicht affiches',

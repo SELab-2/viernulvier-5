@@ -342,6 +342,7 @@ const en: Messages = {
       formProductionLabel: 'Production',
       formFileLabel: 'File',
       formFileHint: 'Allowed formats: JPG, PNG, WEBP, GIF, PDF. Maximum file size: 15 MB per file.',
+      addFileButton: 'Add files',
       submitButton: 'Add poster',
       submittingButton: 'Adding...',
       overviewHeading: 'Posters overview',

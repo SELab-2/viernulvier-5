@@ -5,7 +5,7 @@ import { AdminMessagesContext } from '../../../components/admin/AdminMessagesCon
 import ArchiveEditPage from '../../../pages/admin/ArchiveEditPage'
 import type { Messages } from '../../../i18n/types'
 
-const mockMessages = {
+const mockMessages: Pick<Messages, 'admin'> = {
   admin: {
     themeToggleDark: 'Dark mode',
     themeToggleLight: 'Light mode',
@@ -76,6 +76,8 @@ const mockMessages = {
       formTitleLabel: 'Title',
       formProductionLabel: 'Production',
       formFileLabel: 'File',
+      formFileHint: 'Allowed formats: JPG, PNG, WEBP, GIF, PDF. Maximum file size: 15 MB per file.',
+      addFileButton: 'Add files',
       submitButton: 'Create poster',
       submittingButton: 'Creating...',
       overviewHeading: 'Poster overview',
@@ -93,17 +95,20 @@ const mockMessages = {
       validationTitleRequired: 'Title is required.',
       validationProductionRequired: 'Production is required.',
       validationFileRequired: 'File is required.',
+      validationInvalidFileType: 'Some files are not supported',
       loadPostersError: 'Could not load posters.',
       loadProductionsError: 'Could not load productions.',
       noProductionAssigned: 'No production assigned',
       filesSelectedCount: (count: number) => `${count} file${count === 1 ? '' : 's'} selected`,
+      filesCountLabel: (count: number) => `${count} file${count === 1 ? '' : 's'}`,
+      pdfPreviewTitle: (title: string) => `${title} PDF preview`,
     },
   },
 }
 
 vi.mock('../../../components/admin/AdminLayout', () => ({
   default: ({ children }: { children: React.ReactNode }) => (
-    <AdminMessagesContext.Provider value={mockMessages as unknown as Messages}>
+    <AdminMessagesContext.Provider value={mockMessages}>
       <div>{children}</div>
     </AdminMessagesContext.Provider>
   ),

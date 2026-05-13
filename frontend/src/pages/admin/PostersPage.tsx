@@ -325,6 +325,7 @@ function PostersPageContent() {
 
       setTitle('')
       setSelectedFiles([])
+      setSelectedProductionIds([])
       await loadData(search)
     } catch (submitError) {
       const message = submitError instanceof Error ? submitError.message : i18n.admin.posters.loadPostersError
@@ -382,30 +383,77 @@ function PostersPageContent() {
 
           <label className="flex flex-col gap-2 text-sm text-foreground">
             <span>{i18n.admin.posters.formFileLabel}</span>
-            <input
-              type="file"
-              multiple
-              accept="image/*,application/pdf"
-              onChange={(event) => {
-                const nextFiles = Array.from(event.target.files ?? [])
-                const acceptedFiles = nextFiles.filter((file) => ALLOWED_UPLOAD_TYPES.has(file.type))
-                const rejectedFiles = nextFiles.filter((file) => !ALLOWED_UPLOAD_TYPES.has(file.type))
+            <div className="space-y-3">
+              <div>
+                <input
+                  ref={(input) => {
+                    // Store reference for programmatic access
+                    if (input) {
+                      (window as any).__posterFileInput = input
+                    }
+                  }}
+                  type="file"
+                  multiple
+                  accept="image/*,application/pdf"
+                  onChange={(event) => {
+                    const nextFiles = Array.from(event.target.files ?? [])
+                    const acceptedFiles = nextFiles.filter((file) => ALLOWED_UPLOAD_TYPES.has(file.type))
+                    const rejectedFiles = nextFiles.filter((file) => !ALLOWED_UPLOAD_TYPES.has(file.type))
 
-                if (rejectedFiles.length > 0) {
-                  const rejectedNames = rejectedFiles.map((file) => file.name).join(', ')
-                  setError(`${i18n.admin.posters.validationInvalidFileType}: ${rejectedNames}`)
-                } else {
-                  setError(null)
-                }
+                    if (rejectedFiles.length > 0) {
+                      const rejectedNames = rejectedFiles.map((file) => file.name).join(', ')
+                      setError(`${i18n.admin.posters.validationInvalidFileType}: ${rejectedNames}`)
+                    } else {
+                      setError(null)
+                    }
 
-                setSelectedFiles(acceptedFiles)
-              }}
-              className="block w-full rounded-md border border-[var(--color-admin-card-border)] p-2"
-            />
-            <p className="text-xs text-muted">{i18n.admin.posters.formFileHint}</p>
-            {selectedFiles.length > 0 ? (
-              <p className="text-xs text-muted">{i18n.admin.posters.filesSelectedCount(selectedFiles.length)}</p>
-            ) : null}
+                    // Accumulate files instead of replacing
+                    setSelectedFiles((currentFiles) => [...currentFiles, ...acceptedFiles])
+                    
+                    // Reset the input so the same file can be selected again
+                    event.target.value = ''
+                  }}
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const input = (window as any).__posterFileInput as HTMLInputElement | undefined
+                    input?.click()
+                  }}
+                  className="inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent/90"
+                >
+                  <span>+</span>
+                  <span>{i18n.admin.posters.addFileButton}</span>
+                </button>
+              </div>
+
+              {selectedFiles.length > 0 ? (
+                <div className="flex flex-wrap items-center gap-2">
+                  {selectedFiles.map((file, index) => (
+                    <button
+                      key={`${file.name}-${index}`}
+                      type="button"
+                      onClick={() => {
+                        setSelectedFiles((currentFiles) =>
+                          currentFiles.filter((_, i) => i !== index),
+                        )
+                      }}
+                      className="inline-flex items-center gap-1.5 rounded-full bg-accent/15 px-3 py-1 text-xs text-accent"
+                      aria-label={`Remove file ${file.name}`}
+                    >
+                      <span className="truncate max-w-[150px]">{file.name}</span>
+                      <span className="text-sm leading-none">×</span>
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+
+              <p className="text-xs text-muted">{i18n.admin.posters.formFileHint}</p>
+              {selectedFiles.length > 0 ? (
+                <p className="text-xs text-muted">{i18n.admin.posters.filesSelectedCount(selectedFiles.length)}</p>
+              ) : null}
+            </div>
           </label>
 
           <ProductionManagementSection

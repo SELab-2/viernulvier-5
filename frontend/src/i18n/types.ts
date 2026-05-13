@@ -307,6 +307,7 @@ export type Messages = {
       formProductionLabel: string
       formFileLabel: string
       formFileHint: string
+      addFileButton: string
       submitButton: string
       submittingButton: string
       overviewHeading: string
