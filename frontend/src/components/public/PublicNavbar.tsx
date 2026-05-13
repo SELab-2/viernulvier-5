@@ -40,27 +40,6 @@ function CloseIcon({ className }: { className: string }) {
     )
 }
 
-type SearchToggleButtonProps = {
-    onToggle: () => void
-    ariaLabel: string
-    isExpanded: boolean
-    className: string
-}
-
-function SearchToggleButton({ onToggle, ariaLabel, isExpanded, className }: SearchToggleButtonProps) {
-    return (
-        <button
-            type="button"
-            onClick={onToggle}
-            className={className}
-            aria-label={ariaLabel}
-            aria-expanded={isExpanded}
-        >
-            <SearchIcon className="h-4 w-4" />
-        </button>
-    )
-}
-
 type PublicNavbarProps = {
     locale: 'nl' | 'en'
     onToggleLocale: () => void
@@ -71,7 +50,6 @@ function PublicNavbar({ locale, onToggleLocale }: PublicNavbarProps) {
     const navigate = useNavigate()
     const messages = usePublicMessages()
     const [theme, setTheme] = useState<Theme>(resolveTheme)
-    const [isSearchOpen, setIsSearchOpen] = useState(false)
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
     useEffect(() => {
@@ -92,7 +70,6 @@ function PublicNavbar({ locale, onToggleLocale }: PublicNavbarProps) {
         const updateMobileState = () => {
             if (!mobileQuery.matches) {
                 setIsMobileMenuOpen(false)
-                setIsSearchOpen(false)
             }
         }
 
@@ -115,17 +92,17 @@ function PublicNavbar({ locale, onToggleLocale }: PublicNavbarProps) {
 
     return (
         <header className="sticky top-0 z-50 bg-black">
-            <div className="site-container flex h-16 items-center justify-between max-[480px]:h-14">
+            <div className="site-container flex h-16 items-center justify-between max-md:h-14">
                 <div className="flex items-end gap-1">
                     <Link to={withLocalePath('/', locale)} className="inline-flex items-center" aria-label={messages.home.title}>
-                        <img src="/logo-white.png" alt={messages.common.brandLogoAlt} className="h-8 w-auto max-[480px]:h-7" />
+                        <img src="/logo-white.png" alt={messages.common.brandLogoAlt} className="h-8 w-auto max-md:h-7" />
                     </Link>
-                    <h3 className="text-lg leading-none font-light text-grey max-[480px]:text-base">| {messages.nav.archive}</h3>
+                    <h3 className="text-lg leading-none font-light text-grey max-md:text-base">| {messages.nav.archive}</h3>
                 </div>
 
                 <button
                     type="button"
-                    className="hidden h-9 w-9 items-center justify-center text-white max-[480px]:inline-flex"
+                    className="hidden h-9 w-9 items-center justify-center text-white max-md:inline-flex"
                     aria-label={isMobileMenuOpen ? messages.nav.closeMenuLabel : messages.nav.openMenuLabel}
                     aria-expanded={isMobileMenuOpen}
                     onClick={() => setIsMobileMenuOpen((open) => !open)}
@@ -133,8 +110,25 @@ function PublicNavbar({ locale, onToggleLocale }: PublicNavbarProps) {
                     {isMobileMenuOpen ? <CloseIcon className="h-5 w-5" /> : <HamburgerIcon className="h-5 w-5" />}
                 </button>
 
-                <nav aria-label={messages.nav.navAriaLabel} className="max-[480px]:hidden">
+                <nav aria-label={messages.nav.navAriaLabel} className="max-md:hidden">
                     <ul className="flex items-center gap-6 text-sm font-medium text-white">
+                        <li>
+                            <Link
+                                to={withLocalePath('/zoeken', locale)}
+                                className="inline-flex items-center gap-1.5 rounded-full border border-white/30 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-white transition hover:border-white hover:bg-white hover:text-black"
+                            >
+                                <SearchIcon className="h-3 w-3" />
+                                {messages.nav.searchLink}
+                            </Link>
+                        </li>
+                        <li>
+                            <Link
+                                to={withLocalePath('/blogs', locale)}
+                                className="inline-flex items-center rounded-full border border-white/30 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-white transition hover:border-white hover:bg-white hover:text-black"
+                            >
+                                {messages.nav.blogsLink}
+                            </Link>
+                        </li>
                         <li>
                             <div className="flex items-center gap-4">
                                 <SegmentedThemeToggle
@@ -148,25 +142,8 @@ function PublicNavbar({ locale, onToggleLocale }: PublicNavbarProps) {
                                     locale={locale}
                                     ariaLabel={messages.auth.localeToggleLabel}
                                     onToggleLocale={toggleLocale}
-                                    className="text-md text-white max-[480px]:text-sm"
+                                    className="text-md text-white max-md:text-sm"
                                 />
-
-                                <SearchToggleButton
-                                    onToggle={() => setIsSearchOpen((open) => !open)}
-                                    ariaLabel={messages.nav.searchAriaLabel}
-                                    isExpanded={isSearchOpen}
-                                    className="inline-flex h-8 items-center justify-center text-white"
-                                />
-
-                                <div
-                                    className={`overflow-hidden transition-all duration-300 ${isSearchOpen ? 'ml-2 w-72 opacity-100' : 'ml-0 w-0 opacity-0'}`}
-                                >
-                                    <input
-                                        type="text"
-                                        placeholder={messages.nav.searchPlaceholder}
-                                        className="h-8 w-72 border rounded-sm bg-surface px-3 text-sm text-foreground placeholder:text-muted"
-                                    />
-                                </div>
                             </div>
                         </li>
                     </ul>
@@ -174,10 +151,28 @@ function PublicNavbar({ locale, onToggleLocale }: PublicNavbarProps) {
             </div>
 
             <div
-                className={`hidden overflow-hidden border-t border-white/10 max-[480px]:block ${isMobileMenuOpen ? 'max-h-64 py-3' : 'max-h-0 py-0'}`}
+                className={`hidden overflow-hidden border-t border-white/10 max-md:block ${isMobileMenuOpen ? 'max-h-64 py-3' : 'max-h-0 py-0'}`}
             >
-                <div className="site-container space-y-3 text-xs text-white">
-                    <div className="flex items-center justify-between">
+                <div className="site-container text-xs text-white">
+                    <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                        <Link
+                            to={withLocalePath('/zoeken', locale)}
+                            className="inline-flex items-center gap-1 rounded-full border border-white/30 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-white transition hover:border-white hover:bg-white hover:text-black"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                            <SearchIcon className="h-3 w-3" />
+                            {messages.nav.searchLink}
+                        </Link>
+                        <Link
+                            to={withLocalePath('/blogs', locale)}
+                            className="inline-flex items-center rounded-full border border-white/30 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-white transition hover:border-white hover:bg-white hover:text-black"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                            {messages.nav.blogsLink}
+                        </Link>
+                        </div>
+                        <div className="flex items-center gap-3">
                         <SegmentedThemeToggle
                             theme={theme}
                             darkLabel={messages.auth.darkModeLabel}
@@ -191,22 +186,8 @@ function PublicNavbar({ locale, onToggleLocale }: PublicNavbarProps) {
                             onToggleLocale={toggleLocale}
                             className="text-sm text-white"
                         />
-
-                        <SearchToggleButton
-                            onToggle={() => setIsSearchOpen((open) => !open)}
-                            ariaLabel={messages.nav.searchAriaLabel}
-                            isExpanded={isSearchOpen}
-                            className="inline-flex h-8 w-8 items-center justify-center text-white"
-                        />
+                        </div>
                     </div>
-
-                    {isSearchOpen ? (
-                        <input
-                            type="text"
-                            placeholder={messages.nav.searchPlaceholder}
-                            className="h-9 w-full rounded-sm border bg-surface px-3 text-xs text-foreground placeholder:text-muted"
-                        />
-                    ) : null}
                 </div>
             </div>
         </header>

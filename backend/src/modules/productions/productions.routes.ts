@@ -4,7 +4,7 @@ import { ProductionsService } from './productions.service.js'
 import { ProductionsController } from './productions.controller.js'
 import { z } from 'zod'
 import { 
-    paginationQuerySchema, 
+    productionPaginationQuerySchema, 
     productionListSchema, 
     singleProductionSchema, 
     updateProductionSchema,
@@ -25,7 +25,7 @@ const productionsRoutes: FastifyPluginAsync = async (fastify) => {
         schema: {
             tags: ['productions'],
             summary: 'Get a paginated list of productions',
-            querystring: paginationQuerySchema,
+            querystring: productionPaginationQuerySchema,
             response: {
                 200: productionListSchema,
             },
