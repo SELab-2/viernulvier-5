@@ -334,10 +334,12 @@ const nl: Messages = {
       statusUnavailable: 'Nog niet beschikbaar in archief',
       actionView: 'Bekijk',
       actionEdit: 'Bewerk',
+      actionDelete: 'Verwijder',
       languageStatusComplete: 'Vertaling volledig',
       languageStatusAttention: 'Vertaling heeft aandacht nodig',
       languageStatusMissing: 'Vertaling ontbreekt',
       emptyRecent: 'Nog geen recente archiefconcepten gevonden.',
+      loadingMessage: 'Concepten worden geladen...',
     }
   },
 

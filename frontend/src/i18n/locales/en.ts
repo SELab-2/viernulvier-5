@@ -334,10 +334,12 @@ const en: Messages = {
       statusUnavailable: 'Not yet available in archive',
       actionView: 'View',
       actionEdit: 'Edit',
+      actionDelete: 'Delete',
       languageStatusComplete: 'Translation complete',
       languageStatusAttention: 'Translation needs attention',
       languageStatusMissing: 'Translation missing',
       emptyRecent: 'No recent archive drafts found.',
+      loadingMessage: 'Loading drafts...',
     }
   },
 

@@ -68,6 +68,27 @@ const mockMessages: Pick<Messages, 'admin'> = {
       pageTitle: 'Edit archive item',
       itemIdLabel: 'Item ID:',
     },
+    drafts: {
+      pageTitle: 'Drafts',
+      pageSubtitle: 'View all drafts here',
+      productions: 'Productions',
+      blogs: 'Blogs',
+      tableColTitle: 'Title',
+      tableColType: 'Type',
+      tableColStatus: 'Status',
+      tableColLanguage: 'Language Status',
+      tableColDate: 'Date',
+      tableColActions: 'Actions',
+      statusUnavailable: 'Not yet available in archive',
+      actionView: 'View',
+      actionEdit: 'Edit',
+      actionDelete: 'Delete',
+      languageStatusComplete: 'Translation complete',
+      languageStatusAttention: 'Translation needs attention',
+      languageStatusMissing: 'Translation missing',
+      emptyRecent: 'No recent archive drafts found.',
+      loadingMessage: 'Loading drafts...',
+    }
   },
 }
 
