@@ -131,7 +131,7 @@ function PosterDetailPage() {
         return () => {
             isActive = false
         }
-    }, [id, locale])
+    }, [id, locale, detailMessages])
 
     const backLabel = locale === 'en' ? 'Back to search' : 'Terug naar zoeken'
     const relatedProductionLabel = locale === 'en' ? 'Related' : 'Gerelateerd'
