@@ -320,6 +320,12 @@ const en: Messages = {
       pageTitle: 'Edit archive item',
       itemIdLabel: 'Item ID:',
     },
+    drafts: {
+      pageTitle: 'Drafts',
+      pageSubtitle: 'View all drafts here',
+      productions: 'Productions',
+      blogs: 'Blogs',
+    }
   },
 
   editHeader: {

@@ -285,6 +285,13 @@ export type Messages = {
       pageTitle: string
       itemIdLabel: string
     }
+
+    drafts: {
+      pageTitle: string,
+      pageSubtitle: string,
+      productions: string,
+      blogs: string,
+    }
   }
 
   editHeader: {
@@ -336,4 +343,7 @@ export type Messages = {
       noProductionFound:string
     }
   }
+
+
+
 }

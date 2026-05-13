@@ -17,6 +17,8 @@ const ArchiveEditPage = lazy(() => import('./pages/admin/ArchiveEditPage'))
 
 import CreateBlogPage from './pages/admin/CreateBlogPage'
 import BlogDetailPage from './pages/public/BlogDetailPage'
+
+import DraftsDashboard from './pages/admin/DraftsDashboard.tsx'
 /**
  * Root App component.
  *
@@ -75,6 +77,14 @@ function App() {
                             }
                         />
                         <Route
+                            path={adminRoutes.draftsPath}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <DraftsDashboard />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+                        <Route
                             path={adminRoutes.archiveEditPath}
                             element={
                                 <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
@@ -82,7 +92,6 @@ function App() {
                                 </ProtectedAdminRoute>
                             }
                         />
-
                         <Route
                             path="/admin/blogs/create"
                             element={

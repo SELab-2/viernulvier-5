@@ -320,6 +320,12 @@ const nl: Messages = {
       pageTitle: 'Archief item bewerken',
       itemIdLabel: 'Item-ID:',
     },
+    drafts: {
+      pageTitle: 'Concepten',
+      pageSubtitle: 'Bekijk hier alle concepten',
+      productions: 'Producties',
+      blogs: 'Blogs'
+    }
   },
 
   editHeader: {
