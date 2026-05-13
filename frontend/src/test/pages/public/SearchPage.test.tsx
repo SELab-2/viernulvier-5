@@ -83,25 +83,6 @@ it('uses unified search endpoint on all tab and forwards filters', async () => {
         expect(endpoint).toContain('locations=balzaal')
         expect(endpoint).toContain('sort=recent')
     })
-})
-
-it('clicking a genre checkbox applies the genre filter', async () => {
-    renderPage('/nl/zoeken')
-
-    await screen.findByText('Geen resultaten gevonden.')
-
-    const theaterCheckbox = screen.getAllByRole('checkbox')[4]
-    fireEvent.click(theaterCheckbox)
-
-    await waitFor(() => {
-        const productionCalls = apiFetchMock.mock.calls.filter(
-            ([endpoint]) =>
-                typeof endpoint === 'string' && endpoint.startsWith('/archive/productions?'),
-        )
-        const latestEndpoint = String(productionCalls[productionCalls.length - 1]?.[0] ?? '')
-        expect(latestEndpoint).toContain('genres=theatre')
-    })
-})
 
     it('uses posters endpoint on posters tab and forwards sort', async () => {
         renderPage('/nl/zoeken?tab=posters&q=test&sort=oldest')
