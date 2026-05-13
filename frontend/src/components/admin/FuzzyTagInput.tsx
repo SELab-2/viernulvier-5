@@ -4,11 +4,11 @@ import type { LocalizedText } from '../../types/production'
 import { useLocale } from './useLocale'
 
 type FuzzyTagInputProps = {
-    tags: LocalizedText[]
+    tags: string[]
     tag: string
     endpoint: '/archive/genres' | '/archive/tags'
-    addTag: (tag: LocalizedText) => void
-    onRemove: (tag: LocalizedText) => void
+    addTag: (id: string) => void
+    onRemove: (id: string) => void
     onChange: (value: string) => void
     placeholder?: string
 }

@@ -4,9 +4,9 @@ import AdminLayout from '../../components/admin/AdminLayout'
 import SectionHeading from '../../components/admin/SectionHeading'
 import EventsEdit from '../../components/admin/ManageEvents'
 
-import type { Language, ProductionContent, ProductionPayload, ProductionForm, ProductionSettingsFields, LocalizedText, ProductionResponse, ProductionPayloadRespone } from '../../types/production'
+import type { Language, ProductionPayload, LocalizedText, ProductionPayloadRespone } from '../../types/production'
 import type { Locale } from '../../i18n/types'
-import type { Event, EventLinks, EventPayload } from '../../types/event'
+import type { Event, EventLinks } from '../../types/event'
 
 import { useNavigate, useParams } from 'react-router-dom'
 import { getMessages } from '../../i18n'
@@ -16,19 +16,6 @@ import EventPopup from '../../components/admin/EventPopup'
 import ArchiveSidebar from '../../components/admin/ArchiveSidebar'
 import ArchiveEditHeader from '../../components/admin/ArchiveEditHeader'
 import { useLocale } from '../../components/admin/useLocale'
-
-const defaultContentForm : ProductionContent = {
-    nl: {title: '', slug: '', content: ''},
-    en: {title: '', slug: '', content: ''}
-}
-
-const defaultSettingsForm : ProductionSettingsFields = {
-    artist: '',
-    banner: '',
-    extraPictures: [],
-    genres: [],
-    tags: []
-}
 
 const defaultLocalizedText: LocalizedText = {
     nl: '',
@@ -56,12 +43,6 @@ const descriptionFields: (keyof ProductionPayload)[] = [
     "description",
     "description_2"
 ];
-
-const defaultForm : ProductionForm = {
-    content: defaultContentForm,
-    settings: defaultSettingsForm,
-    events: []
-}
 
 const defaultEvent : Event = {
     key: '',
@@ -101,14 +82,13 @@ function ArchiveEditPage() {
     const [production, setProduction] = useState<ProductionPayload>(defaultProduciton);
     const [events, setEvents] = useState<Event[]>([]);
     const [genres, setGenres] = useState<string[]>([]);
+    const [genre, setGenre] = useState<string>('');
     const [tags, setTags] = useState<string[]>([]);
+    const [tag, setTag] = useState<string>('');
     const [editLanguage, setEditLanguage] = useState<Locale>('nl');
     const [editingEvent, setEditingEvent] = useState<Event>(defaultEvent) // currently selected event
 
     const [popupOpen, setPopupOpen] = useState(false)
-    const [form, setForm] = useState<ProductionForm>(defaultForm)
-    const [tagInput, setTagInput] = useState('')
-    const [genreInput, setGenreInput] = useState('')
 
     // Visual indicators  TODO:
     const [saving, setSaving] = useState(false);
@@ -160,6 +140,8 @@ function ArchiveEditPage() {
     }
 
     const saveEvents = async (productionId: string) => {
+        // TODO: figure out if you need EventLinks, by looking at the response
+        // when creating an event
         Promise.all(events.map(e =>
             api.post('/archive/events', {
                 starts_at: e.starts_at,
@@ -192,7 +174,6 @@ function ArchiveEditPage() {
     // Open the event create popup
     const makeEvent = () => {
         setEditingEvent(defaultEvent)
-        setEventTagInput('')
         setPopupOpen(true)
     }
 
@@ -230,63 +211,30 @@ function ArchiveEditPage() {
         }))
     }
 
-
-    // TODO:
-    const changeSettings = <K extends keyof ProductionSettingsFields>(field: K, value: ProductionSettingsFields[K]) => {
-        setForm(prev => ({
-            ...prev,
-            settings: {
-                ...prev.settings,
-                [field]: value
-            }
-        }))
+    const onAddGenre = (id: string) => {
+        setGenres(prev => prev.includes(id) ? prev : [...prev, id]);
+        setGenre('');
     }
 
-    // Adding a tag to a new or existing production
-    const onAddProductionTag = (tag: LocalizedText) => {
-        const trimmed = (tag?.[locale] || tag?.nl || tag?.en || '').trim()
-        if (!trimmed) return
-        
-        // Case-insensitive check
-        const exists = form.settings.tags.some(t => {
-            const existingName = (t?.[locale] || t?.nl || t?.en || '').trim().toLowerCase()
-            return existingName === trimmed.toLowerCase()
-        })
-        if (exists) return
-
-        changeSettings('tags', [...form.settings.tags, tag])
-        setTagInput('')
+    const onRemoveGenre = (id: string) => {
+        setGenres(prev => prev.filter(g => g !== id))
     }
 
-    const onAddProductionGenre = (genre: LocalizedText) => {
-        const trimmed = (genre?.[locale] || genre?.nl || genre?.en || '').trim()
-        if (!trimmed) return
-
-        // Case-insensitive check
-        const exists = form.settings.genres.some(g => {
-            const existingName = (g?.[locale] || g?.nl || g?.en || '').trim().toLowerCase()
-            return existingName === trimmed.toLowerCase()
-        })
-        if (exists) return
-
-        changeSettings('genres', [...form.settings.genres, genre])
-        setGenreInput('')
+    const onChangeGenre = (input: string) => {
+        setGenre(input);
     }
 
-    const onRemoveProductionTag = (tag: LocalizedText) => {
-        changeSettings('tags', form.settings.tags.filter(t => t !== tag))
+    const onAddTag = (id : string) => {
+        setTags(prev => prev.includes(id) ? prev : [...prev, id]);
+        setTag('');
     }
 
-    const onRemoveProductionGenre = (genre: LocalizedText) => {
-        changeSettings('genres', form.settings.genres.filter(g => g !== genre))
+    const onRemoveTag = (id : string) => {
+        setTags(prev => prev.filter(t => t !== id));
     }
 
-    const onChangeProductionTagInput = (tag: string) => {
-        setTagInput(tag)
-    }
-
-    const onChangeProductionGenreInput = (genre: string) => {
-        setGenreInput(genre)
+    const onChangeTag = (input: string) => {
+        setTag(input);
     }
 
     return (
@@ -343,16 +291,16 @@ function ArchiveEditPage() {
                 </div>
 
                 <ArchiveSidebar
-                    fields={form.settings}
-                    tag={tagInput}
-                    genre={genreInput}
-                    onAddTag={onAddProductionTag}
-                    onChangeTag={onChangeProductionTagInput}
-                    onRemoveTag={onRemoveProductionTag}
-                    onAddGenre={onAddProductionGenre}
-                    onChangeGenre={onChangeProductionGenreInput}
-                    onRemoveGenre={onRemoveProductionGenre}
-                    onChange={changeSettings}
+                    genre={genre}
+                    genres={genres}
+                    onAddGenre={onAddGenre}
+                    onRemoveGenre={onRemoveGenre}
+                    onChangeGenre={onChangeGenre}
+                    tag={tag}
+                    tags={tags}
+                    onAddTag={onAddTag}
+                    onRemoveTag={onRemoveTag}
+                    onChangeTag={onChangeTag}
 
                     productionSettingsLabel={messages.production.productionSettingsLabel}
                     statusLabel={messages.production.statusLabel}
@@ -368,7 +316,7 @@ function ArchiveEditPage() {
 
             {popupOpen && (
                 <EventPopup
-                    fields={editingEvent!}
+                    fields={editingEvent}
                     isEdit={editingEvent !== undefined}
                     locations={[]} // TODO: fetch these
                     onSave={addEvent}
