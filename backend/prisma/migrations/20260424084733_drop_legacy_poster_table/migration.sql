@@ -5,7 +5,7 @@
 
 */
 -- DropForeignKey
-ALTER TABLE "poster" DROP CONSTRAINT "poster_production_id_fkey";
+ALTER TABLE IF EXISTS "poster" DROP CONSTRAINT IF EXISTS "poster_production_id_fkey";
 
 -- DropTable
-DROP TABLE "poster";
+DROP TABLE IF EXISTS "poster";
