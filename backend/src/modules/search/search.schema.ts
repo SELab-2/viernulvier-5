@@ -9,23 +9,29 @@ export const searchQuerySchema = paginationQuerySchema.extend({
     locations: z.string().optional(),
     sort: z.enum(['relevance', 'recent', 'oldest']).optional().default('relevance'),
     lang: z.string().optional().default('nl'),
+    tab: z.enum(['all', 'productions', 'blogs']).optional().default('all'),
 })
 
 export const searchResultItemSchema = z.object({
     id: z.string().uuid(),
     type: z.enum(['production', 'blog']),
-    title: z.unknown().nullable().optional(),
+    title: z.union([z.string(), z.record(z.string(), z.string())]).nullable().optional(),
+    excerpt: z.string().nullable().optional(),
+    image_url: z.string().nullable().optional(),
+    date_label: z.string().nullable().optional(),
+    venue_label: z.string().nullable().optional(),
+    genre_label: z.string().nullable().optional(),
+    created_at: z.string().optional(),
+    // Legacy fields for backward compatibility
     teaser: z.unknown().nullable().optional(),
     description_short: z.unknown().nullable().optional(),
     description: z.unknown().nullable().optional(),
     content: z.unknown().nullable().optional(),
-    image_url: z.string().nullable().optional(),
     venue_name: z.string().nullable().optional(),
     venue_names: z.array(z.string()).optional(),
     production_genres: z.array(z.string()).optional(),
     performer_type: z.string().nullable().optional(),
     attendance_mode: z.string().nullable().optional(),
-    created_at: z.string().optional(),
     productions: z.array(z.string().uuid()).optional(),
 })
 

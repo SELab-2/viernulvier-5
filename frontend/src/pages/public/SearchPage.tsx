@@ -3,7 +3,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { getActiveLocale, withLocalePath } from '../../i18n'
 import type { Locale, Messages } from '../../i18n/types'
 import { apiFetch } from '../../api/client'
-import { getLocalizedContent, getLocalizedTitle, normalizeContent } from './blogDetailPage.formatters'
 import PublicLayout from '../../components/public/PublicLayout'
 import { usePublicMessages } from '../../components/public/PublicMessagesContext'
 import SearchPagination from '../../components/public/search/SearchPagination'
@@ -72,17 +71,6 @@ const GENRE_ALIASES: Record<string, string> = {
     spokenword: 'spoken word',
 }
 
-const NON_GENRE_TAG_VALUES = new Set([
-    'group',
-    'in de vooruit',
-    'by viernulvier',
-    'te gast',
-    'nederlands gesproken',
-    'engels gesproken',
-    'frans gesproken',
-    'cadeaubon geldig',
-])
-
 const LOCATION_ALIASES: Record<string, string> = {
     'theatre hall': 'theaterzaal',
     ballroom: 'balzaal',
@@ -93,30 +81,18 @@ type LocalizedText = {
     nl?: string
     en?: string
     fr?: string
-} | null
+} | string | null
 
-type ProductionApiItem = {
+type SearchApiItem = {
     id: string
-    title: LocalizedText
-    teaser: LocalizedText
-    description_short: LocalizedText
-    description: LocalizedText
+    type: 'production' | 'blog'
+    title?: LocalizedText
+    excerpt?: string
     image_url?: string | null
-    venue_name?: string | null
-    venue_names?: string[]
-    production_genres?: string[]
-    performer_type: string | null
-    attendance_mode: string | null
-    created_at: string
-    links?: {
-        self: string
-        events: string
-        genres: string
-        tags: string
-        media_gallery: string | null
-        review_gallery: string | null
-        poster_gallery: string | null
-    }
+    date_label?: string | null
+    venue_label?: string | null
+    genre_label?: string | null
+    created_at?: string
 }
 
 type PaginatedApiResponse<T> = {
@@ -160,23 +136,12 @@ function getLocalizedText(text: LocalizedText, locale: Locale): string {
         return ''
     }
 
+    if (typeof text === 'string') {
+        return text
+    }
+
     const values = locale === 'en' ? [text.en, text.nl, text.fr] : [text.nl, text.en, text.fr]
     return values.find((value) => typeof value === 'string' && value.trim().length > 0)?.trim() ?? ''
-}
-
-function toLocalizedText(value: unknown): LocalizedText {
-    if (!value || typeof value !== 'object') {
-        return null
-    }
-
-    const source = value as Record<string, unknown>
-    const pick = (input: unknown): string | undefined => (typeof input === 'string' ? input : undefined)
-
-    return {
-        nl: pick(source.nl),
-        en: pick(source.en),
-        fr: pick(source.fr),
-    }
 }
 
 function normalizeSort(value: string): SearchSort {
@@ -236,382 +201,6 @@ function buildSearchParams(filters: SearchFilterOverrides): URLSearchParams {
     if (filters.tab === 'all') params.set('tab', 'all')
 
     return params
-}
-
-function formatDate(value: string, locale: Locale): string {
-    const parsedDate = new Date(value)
-    if (Number.isNaN(parsedDate.getTime())) {
-        return '-'
-    }
-
-    return new Intl.DateTimeFormat(locale === 'nl' ? 'nl-BE' : 'en-GB', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-    }).format(parsedDate)
-}
-
-function toPlainText(value: string): string {
-    const trimmed = value.trim()
-    if (!trimmed) {
-        return ''
-    }
-
-    if (!/[<&]/.test(trimmed)) {
-        return trimmed.replace(/\s+/g, ' ').trim()
-    }
-
-    if (typeof window !== 'undefined' && typeof DOMParser !== 'undefined') {
-        const parsed = new DOMParser().parseFromString(trimmed, 'text/html')
-        return (parsed.body.textContent ?? '').replace(/\s+/g, ' ').trim()
-    }
-
-    return trimmed
-        .replace(/<[^>]*>/g, ' ')
-        .replace(/&nbsp;/gi, ' ')
-        .replace(/&amp;/gi, '&')
-        .replace(/&quot;/gi, '"')
-        .replace(/&#39;|&apos;/gi, "'")
-        .replace(/&lt;/gi, '<')
-        .replace(/&gt;/gi, '>')
-        .replace(/\s+/g, ' ')
-        .trim()
-}
-
-function normalizeGenreValue(value: string): string {
-    const normalized = value.trim().toLowerCase()
-    if (!normalized) {
-        return ''
-    }
-
-    return GENRE_ALIASES[normalized] ?? normalized
-}
-
-function mapProductionToSearchEntry(item: ProductionApiItem, locale: Locale, searchMessages: Messages['search'], preferredGenre?: string): SearchEntry {
-    const title = getLocalizedText(item.title, locale) || searchMessages.fallbackUntitled
-    const excerptRaw =
-        getLocalizedText(item.description_short, locale) ||
-        getLocalizedText(item.description, locale) ||
-        getLocalizedText(item.teaser, locale) ||
-        title
-    const excerpt = toPlainText(excerptRaw) || title
-    const createdDate = new Date(item.created_at)
-    const year = Number.isNaN(createdDate.getTime()) ? MIN_PERIOD_YEAR : createdDate.getFullYear()
-    const normalizedProductionGenres = (item.production_genres ?? [])
-        .map((value) => normalizeGenreValue(value))
-        .filter((value) => value.length > 0 && !NON_GENRE_TAG_VALUES.has(value))
-
-    const normalizedPerformerType = normalizeGenreValue(item.performer_type ?? '')
-    const fallbackPerformerTag = normalizedPerformerType.length > 0 && normalizedPerformerType !== 'group'
-        ? normalizedPerformerType
-        : ''
-
-    const normalizedPreferredGenre = preferredGenre?.trim().toLowerCase() ?? ''
-    const matchedPreferredGenre = normalizedPreferredGenre
-        ? normalizedProductionGenres.find((genre) => {
-              return genre === normalizedPreferredGenre
-          })
-        : undefined
-
-    const normalizedGenre = matchedPreferredGenre ?? normalizedProductionGenres[0] ?? fallbackPerformerTag
-    const normalizedLocation = (item.attendance_mode ?? '').trim().toLowerCase()
-    const hasConcreteAttendanceMode = normalizedLocation.length > 0 && normalizedLocation !== 'offline' && normalizedLocation !== 'online'
-    const eventVenues = (item.venue_names ?? []).map((value) => value.trim()).filter((value) => value.length > 0)
-    const venueFromEvents = eventVenues.length > 0 ? eventVenues.join(' • ') : ''
-    const fallbackVenue = searchMessages.fallbackVenue
-    const venue = venueFromEvents || (item.venue_name ?? '').trim() || (hasConcreteAttendanceMode ? normalizedLocation : fallbackVenue)
-
-    return {
-        id: item.id,
-        tag: normalizedGenre ? getGenreLabel(normalizedGenre, searchMessages.genres) : searchMessages.fallbackTag,
-        date: formatDate(item.created_at, locale),
-        title,
-        excerpt,
-        venue,
-        imageUrl: item.image_url ?? undefined,
-        year,
-        genre: normalizedGenre || '',
-        location: normalizedLocation,
-        type: 'production' as const,
-    }
-}
-
-type BlogApiItem = {
-    id: string
-    title?: unknown
-    content?: unknown
-    productions: string[]
-    createdAt: string
-    updatedAt: string
-    links?: { self: string }
-}
-
-type SearchApiItem = {
-    id: string
-    type: 'production' | 'blog'
-    title?: unknown
-    teaser?: unknown
-    description_short?: unknown
-    description?: unknown
-    content?: unknown
-    image_url?: string | null
-    venue_name?: string | null
-    venue_names?: string[]
-    production_genres?: string[]
-    performer_type?: string | null
-    attendance_mode?: string | null
-    created_at?: string
-    productions?: string[]
-}
-
-function getBlogExcerpt(content: unknown, locale: Locale, fallback: string): string {
-    const localizedContent = getLocalizedContent(content, locale)
-
-    if (!localizedContent) {
-        return fallback
-    }
-
-    const delta = normalizeContent(localizedContent)
-    if (delta) {
-        const plain = delta.ops
-            .map((operation) => (typeof operation.insert === 'string' ? operation.insert : ''))
-            .join('')
-            .replace(/\s+/g, ' ')
-            .trim()
-
-        return plain || fallback
-    }
-
-    return toPlainText(localizedContent) || fallback
-}
-
-function mapBlogToSearchEntry(item: BlogApiItem, locale: Locale, searchMessages: Messages['search']): SearchEntry {
-    const title = getLocalizedTitle(item.title, locale) || searchMessages.fallbackUntitled
-    const date = item.createdAt ? formatDate(item.createdAt, locale) : '-'
-    const year = item.createdAt ? new Date(item.createdAt).getFullYear() : MIN_PERIOD_YEAR
-
-    return {
-        id: item.id,
-        tag: searchMessages.blogTab,
-        date,
-        title,
-        excerpt: getBlogExcerpt(item.content, locale, title),
-        venue: '',
-        imageUrl: undefined,
-        year,
-        genre: '',
-        location: '',
-        type: 'blog' as const,
-    }
-}
-
-function getRelativePath(url: string | null | undefined): string | null {
-    if (!url) return null
-    const parts = url.split('/api/v1')
-    return parts.length > 1 ? parts[1] : url
-}
-
-interface GalleryItemApi {
-    links?: { crops: string }
-}
-
-interface CropApi {
-    name: string
-    url: string
-}
-
-function useProductionImages(items: ProductionApiItem[]) {
-    const [images, setImages] = useState<Record<string, string>>({})
-
-    useEffect(() => {
-        const fetchImages = async () => {
-            const itemsToFetch = items.filter(item => !item.image_url && item.links?.media_gallery)
-            
-            if (itemsToFetch.length === 0) return
-
-            const results = await Promise.allSettled(
-                itemsToFetch.map(async (item) => {
-                    const galleryPath = getRelativePath(item.links?.media_gallery)
-                    if (!galleryPath) return null
-
-                    try {
-                        // 1. Production -> Gallery
-                        const galleryRes = await apiFetch<{ data: { links: { items: string } } }>(galleryPath)
-                        const itemsPath = getRelativePath(galleryRes.data?.links?.items)
-                        if (!itemsPath) return null
-
-                        // 2. Gallery -> Items
-                        const itemsRes = await apiFetch<{ data: GalleryItemApi[] }>(itemsPath)
-                        const galleryItems = itemsRes.data || []
-                        
-                        // 3. Find first item with crops
-                        for (const galleryItem of galleryItems) {
-                            if (!galleryItem.links?.crops) continue
-                            
-                            // 4. Item -> Crops
-                            const cropsPath = getRelativePath(galleryItem.links.crops)
-                            if (!cropsPath) continue
-                            const cropsRes = await apiFetch<{ data: CropApi[] }>(cropsPath)
-                            const crops = cropsRes.data || []
-                            
-                            // 5. Find target crop
-                            const targetCrop = crops.find((c) => c.name === 'FE3_header') || 
-                                             crops.find((c) => c.name === 'FEA_boxed') || 
-                                             crops[0]
-                            
-                            if (targetCrop?.url) {
-                                return { id: item.id, url: targetCrop.url }
-                            }
-                        }
-                    } catch {
-                        // Silently fail
-                    }
-                    return null
-                })
-            )
-
-            const newImages: Record<string, string> = {}
-            results.forEach(res => {
-                if (res.status === 'fulfilled' && res.value) {
-                    newImages[res.value.id] = res.value.url
-                }
-            })
-            setImages(prev => ({ ...prev, ...newImages }))
-        }
-
-        fetchImages()
-    }, [items])
-
-    return images
-}
-
-function useProductionEventDetails(items: ProductionApiItem[], locale: Locale) {
-    const [details, setDetails] = useState<Record<string, { date: string, venue: string }>>({})
-
-    useEffect(() => {
-        const fetchDetails = async () => {
-            const itemsToFetch = items.filter(item => item.links?.events)
-            if (itemsToFetch.length === 0) return
-
-            const now = new Date()
-            const results = await Promise.allSettled(
-                itemsToFetch.map(async (item) => {
-                    try {
-                        const eventsPath = getRelativePath(item.links?.events)
-                        if (!eventsPath) return null
-
-                        // 1. Fetch events
-                        const res = await apiFetch<{ data: Array<{ starts_at: string, links: { hall: string } }> }>(`${eventsPath}&limit=50`)
-                        const pastEvents = (res.data || [])
-                            .filter(e => new Date(e.starts_at) < now)
-                            .sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime())
-
-                        if (pastEvents.length === 0) return { id: item.id, date: '', venue: '' }
-
-                        // 2. Format Date
-                        const formatDateLocal = (dateStr: string) => {
-                            const date = new Date(dateStr)
-                            return new Intl.DateTimeFormat(locale === 'nl' ? 'nl-BE' : 'en-GB', {
-                                day: '2-digit',
-                                month: '2-digit',
-                                year: 'numeric',
-                            }).format(date)
-                        }
-
-                        let displayDate = ''
-                        if (pastEvents.length === 1) {
-                            displayDate = formatDateLocal(pastEvents[0].starts_at)
-                        } else {
-                            const firstYear = new Date(pastEvents[0].starts_at).getFullYear()
-                            const lastYear = new Date(pastEvents[pastEvents.length - 1].starts_at).getFullYear()
-                            displayDate = firstYear === lastYear 
-                                ? `${formatDateLocal(pastEvents[0].starts_at)} - ${formatDateLocal(pastEvents[pastEvents.length - 1].starts_at)}`
-                                : `${firstYear} - ${lastYear}`
-                        }
-
-                        // 3. Fetch Venue Names (Halls)
-                        const venueNames = new Set<string>()
-                        const hallResults = await Promise.allSettled(
-                            pastEvents.slice(0, 5).map(async (event) => {
-                                const hallPath = getRelativePath(event.links?.hall)
-                                if (!hallPath) return null
-                                const hallRes = await apiFetch<{ data: { name: LocalizedText } }>(hallPath)
-                                return getLocalizedText(hallRes.data.name, locale)
-                            })
-                        )
-
-                        hallResults.forEach(hr => {
-                            if (hr.status === 'fulfilled' && hr.value) {
-                                venueNames.add(hr.value)
-                            }
-                        })
-
-                        const displayVenue = Array.from(venueNames).join(' • ')
-
-                        return { id: item.id, date: displayDate, venue: displayVenue }
-                    } catch {
-                        return null
-                    }
-                })
-            )
-
-            const newDetails: Record<string, { date: string, venue: string }> = {}
-            results.forEach(res => {
-                if (res.status === 'fulfilled' && res.value) {
-                    newDetails[res.value.id] = { date: res.value.date, venue: res.value.venue }
-                }
-            })
-            setDetails(prev => ({ ...prev, ...newDetails }))
-        }
-
-        fetchDetails()
-    }, [items, locale])
-
-    return details
-}
-
-function useProductionTaxonomies(items: ProductionApiItem[], locale: Locale) {
-    const [taxonomies, setTaxonomies] = useState<Record<string, string>>({})
-
-    useEffect(() => {
-        const fetchTaxonomies = async () => {
-            const itemsToFetch = items.filter((item) => item.id)
-            if (itemsToFetch.length === 0) return
-
-            const results = await Promise.allSettled(
-                itemsToFetch.map(async (item) => {
-                    try {
-                        // Prefer the localized genre name for card labels to keep parity with detail pages.
-                        const genresPath = getRelativePath(item.links?.genres) ?? `/archive/genres?productionId=${item.id}`
-                        if (genresPath) {
-                            const res = await apiFetch<{ data: Array<{ slug: LocalizedText, name: LocalizedText }> }>(genresPath)
-                            const firstGenre = res.data?.[0]
-                            if (firstGenre) {
-                                const label = getLocalizedText(firstGenre.name, locale) || getLocalizedText(firstGenre.slug, locale)
-                                if (label) return { id: item.id, label }
-                            }
-                        }
-
-                        return { id: item.id, label: '' }
-                    } catch {
-                        return null
-                    }
-                })
-            )
-
-            const newTaxonomies: Record<string, string> = {}
-            results.forEach(res => {
-                if (res.status === 'fulfilled' && res.value) {
-                    newTaxonomies[res.value.id] = res.value.label
-                }
-            })
-            setTaxonomies(prev => ({ ...prev, ...newTaxonomies }))
-        }
-
-        fetchTaxonomies()
-    }, [items, locale])
-
-    return taxonomies
 }
 
 function useAllHalls(locale: Locale) {
@@ -1151,15 +740,11 @@ function SearchPageContent() {
     const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false)
     const [shareCopied, setShareCopied] = useState(false)
     const [apiEntries, setApiEntries] = useState<SearchEntry[]>([])
-    const [apiRawItems, setApiRawItems] = useState<ProductionApiItem[]>([])
     const [totalResults, setTotalResults] = useState(0)
     const [totalPages, setTotalPages] = useState(1)
     const [isLoading, setIsLoading] = useState(true)
     const [apiError, setApiError] = useState<string | null>(null)
 
-    const fetchedImages = useProductionImages(apiRawItems)
-    const fetchedDetails = useProductionEventDetails(apiRawItems, locale)
-    const fetchedTaxonomies = useProductionTaxonomies(apiRawItems, locale)
     const allAvailableHalls = useAllHalls(locale)
 
     const filterState = useMemo(() => parseSearchFilterState(searchParams), [searchParams])
@@ -1172,7 +757,6 @@ function SearchPageContent() {
     const page = filterState.page
     const pageSize = filterState.limit
     const tab = filterState.tab
-    const isBlogTab = tab === 'blogs'
 
     useEffect(() => {
         const abortController = new AbortController()
@@ -1180,143 +764,49 @@ function SearchPageContent() {
         const loadSearchEntries = async () => {
             setIsLoading(true)
             setApiError(null)
-            setApiRawItems([]) // Clear old data
 
             try {
                 const params = new URLSearchParams({
                     page: String(page),
                     limit: String(pageSize),
+                    lang: locale,
+                    tab,
                 })
 
-                if (query) {
-                    params.set('search', query)
-                }
+                if (query) params.set('search', query)
+                if (safeFromYear > MIN_PERIOD_YEAR) params.set('yearFrom', String(safeFromYear))
+                if (safeToYear < MAX_PERIOD_YEAR) params.set('yearTo', String(safeToYear))
+                if (selectedGenres.length > 0) params.set('genres', selectedGenres.join(','))
+                if (selectedLocations.length > 0) params.set('locations', selectedLocations.join(','))
+                if (sort === 'recent' || sort === 'oldest') params.set('sort', sort)
 
-                if (tab === 'blogs') {
-                    params.set('yearFrom', String(safeFromYear))
-                    params.set('yearTo', String(safeToYear))
+                const response = await apiFetch<PaginatedApiResponse<SearchApiItem>>(
+                    `/archive/search?${params.toString()}`,
+                    { signal: abortController.signal }
+                )
 
-                    const response = await apiFetch<PaginatedApiResponse<BlogApiItem>>(
-                        `/archive/blogs?${params.toString()}`,
-                        { signal: abortController.signal }
-                    )
-                    const mappedEntries = response.data.map((item) => mapBlogToSearchEntry(item, locale, searchMessages))
-                    setApiEntries(mappedEntries)
-                    setTotalResults(response.meta?.total ?? mappedEntries.length)
-                    setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
-                } else if (tab === 'all') {
-                    // Single RESTful call to the unified search endpoint
-                    const searchParams = new URLSearchParams({
-                        page: String(page),
-                        limit: String(pageSize),
-                        lang: locale,
-                    })
-                    if (query) searchParams.set('search', query)
-                    searchParams.set('yearFrom', String(safeFromYear))
-                    searchParams.set('yearTo', String(safeToYear))
-                    if (selectedGenres.length > 0) searchParams.set('genres', selectedGenres.join(','))
-                    if (selectedLocations.length > 0) searchParams.set('locations', selectedLocations.join(','))
-                    if (sort === 'recent' || sort === 'oldest') searchParams.set('sort', sort)
+                const mappedEntries = response.data.map((item): SearchEntry => {
+                    const createdDate = new Date(item.created_at ?? '')
+                    const year = Number.isNaN(createdDate.getTime()) ? MIN_PERIOD_YEAR : createdDate.getFullYear()
 
-                    const response = await apiFetch<PaginatedApiResponse<SearchApiItem>>(
-                        `/archive/search?${searchParams.toString()}`,
-                        { signal: abortController.signal }
-                    )
-
-                    const preferredGenre = selectedGenres.length === 1 ? selectedGenres[0] : undefined
-                    const mappedEntries = response.data.map((item): SearchEntry => {
-                        if (item.type === 'blog') {
-                            return mapBlogToSearchEntry(
-                                {
-                                    id: item.id,
-                                    title: item.title,
-                                    content: item.content,
-                                    productions: item.productions ?? [],
-                                    createdAt: item.created_at ?? '',
-                                    updatedAt: item.created_at ?? '',
-                                },
-                                locale,
-                                searchMessages,
-                            )
-                        }
-                        return mapProductionToSearchEntry(
-                            {
-                                id: item.id,
-                                title: toLocalizedText(item.title),
-                                teaser: toLocalizedText(item.teaser),
-                                description_short: toLocalizedText(item.description_short),
-                                description: toLocalizedText(item.description),
-                                image_url: item.image_url,
-                                venue_name: item.venue_name,
-                                venue_names: item.venue_names,
-                                production_genres: item.production_genres,
-                                performer_type: item.performer_type ?? null,
-                                attendance_mode: item.attendance_mode ?? null,
-                                created_at: item.created_at ?? '',
-                            },
-                            locale,
-                            searchMessages,
-                            preferredGenre,
-                        )
-                    })
-
-                    const productionItemsForTaxonomy: ProductionApiItem[] = response.data
-                        .filter((item) => item.type === 'production')
-                        .map((item) => ({
-                            id: item.id,
-                            title: toLocalizedText(item.title),
-                            teaser: toLocalizedText(item.teaser),
-                            description_short: toLocalizedText(item.description_short),
-                            description: toLocalizedText(item.description),
-                            image_url: item.image_url,
-                            venue_name: item.venue_name,
-                            venue_names: item.venue_names,
-                            production_genres: item.production_genres,
-                            performer_type: item.performer_type ?? null,
-                            attendance_mode: item.attendance_mode ?? null,
-                            created_at: item.created_at ?? '',
-                            links: undefined,
-                        }))
-
-                    setApiRawItems(productionItemsForTaxonomy)
-                    setApiEntries(mappedEntries)
-                    setTotalResults(response.meta?.total ?? mappedEntries.length)
-                    setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
-                } else {
-                    params.set('lang', locale)
-
-                    if (selectedGenres.length > 0) {
-                        params.set('genres', selectedGenres.join(','))
+                    return {
+                        id: item.id,
+                        type: item.type,
+                        title: getLocalizedText(item.title as LocalizedText, locale) || searchMessages.fallbackUntitled,
+                        excerpt: item.excerpt || '',
+                        imageUrl: item.image_url ?? undefined,
+                        date: item.date_label || '',
+                        venue: item.venue_label || '',
+                        tag: item.genre_label || (item.type === 'blog' ? searchMessages.blogTab : searchMessages.fallbackTag),
+                        year,
+                        genre: item.genre_label || '',
+                        location: '', // Handled by backend filter
                     }
+                })
 
-                    if (selectedLocations.length > 0) {
-                        params.set('locations', selectedLocations.join(','))
-                    }
-
-                    if (safeFromYear > MIN_PERIOD_YEAR) {
-                        params.set('yearFrom', String(safeFromYear))
-                    }
-
-                    if (safeToYear < MAX_PERIOD_YEAR) {
-                        params.set('yearTo', String(safeToYear))
-                    }
-
-                    if (sort === 'recent' || sort === 'oldest') {
-                        params.set('sort', sort)
-                    }
-
-                    const response = await apiFetch<PaginatedApiResponse<ProductionApiItem>>(
-                        `/archive/productions?${params.toString()}`,
-                        { signal: abortController.signal }
-                    )
-
-                    const preferredGenre = selectedGenres.length === 1 ? selectedGenres[0] : undefined
-                    const mappedEntries = response.data.map((item) => mapProductionToSearchEntry(item, locale, searchMessages, preferredGenre))
-                    setApiRawItems(response.data)
-                    setApiEntries(mappedEntries)
-                    setTotalResults(response.meta?.total ?? mappedEntries.length)
-                    setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
-                }
+                setApiEntries(mappedEntries)
+                setTotalResults(response.meta?.total ?? mappedEntries.length)
+                setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
             } catch (error) {
                 if (abortController.signal.aborted) {
                     return
@@ -1349,25 +839,7 @@ function SearchPageContent() {
     }
 
     const currentPage = Math.min(page, totalPages)
-    const pageItems = useMemo(() => {
-        if (!apiEntries) return []
-        return apiEntries
-            .map(item => {
-                const detail = fetchedDetails[item.id]
-                const fetchedTaxonomy = fetchedTaxonomies[item.id]
-                const normalizedFetchedGenre = fetchedTaxonomy ? normalizeGenreValue(fetchedTaxonomy) : ''
-                const mappedFetchedGenreLabel = normalizedFetchedGenre ? getGenreLabel(normalizedFetchedGenre, searchMessages.genres) : ''
-                const nextTag = mappedFetchedGenreLabel || fetchedTaxonomy || item.tag
-                return {
-                    ...item,
-                    imageUrl: fetchedImages[item.id] || item.imageUrl,
-                    date: detail?.date !== undefined && detail.date !== '' ? detail.date : item.date,
-                    venue: detail?.venue !== undefined && detail.venue !== '' ? detail.venue : item.venue,
-                    tag: nextTag
-                }
-            })
-            .filter(item => fetchedDetails[item.id]?.date !== '')
-    }, [apiEntries, fetchedImages, fetchedDetails, fetchedTaxonomies, searchMessages.genres])
+    const pageItems = apiEntries
 
     // Compacte paginering: 1,2,3,...,laatste
     function getCompactPageLabels(current: number, total: number): string[] {
@@ -1454,6 +926,14 @@ function SearchPageContent() {
         })
     }
 
+    function normalizeGenreValue(value: string): string {
+        const normalized = value.trim().toLowerCase()
+        if (!normalized) {
+            return ''
+        }
+        return GENRE_ALIASES[normalized] ?? normalized
+    }
+
     const handleRemoveGenreChip = (genreToRemove: string) => {
         navigateWithFilters({
             query: query || undefined,
@@ -1536,10 +1016,10 @@ function SearchPageContent() {
             if (!exists) uniqueValues.add(hall)
         })
 
-        // 3. Add venues currently visible on cards (ensures "De Vooruit - Café" etc. are always there)
-        Object.values(fetchedDetails).forEach(detail => {
-            if (detail.venue) {
-                detail.venue.split(' • ').forEach(v => {
+        // 3. Add venues currently visible on cards
+        apiEntries.forEach(entry => {
+            if (entry.venue) {
+                entry.venue.split(' • ').forEach(v => {
                     const trimmed = v.trim()
                     if (trimmed) {
                         const exists = Array.from(uniqueValues).some(uv => uv.toLowerCase() === trimmed.toLowerCase())
@@ -1552,7 +1032,9 @@ function SearchPageContent() {
         return Array.from(uniqueValues).sort((a, b) =>
             a.localeCompare(b, normalizedLocale === 'nl' ? 'nl-BE' : 'en-GB', { sensitivity: 'base' }),
         )
-    }, [allAvailableHalls, fetchedDetails, locale])
+    }, [allAvailableHalls, apiEntries, locale])
+
+    const isBlogTab = tab === 'blogs'
 
     return (
         <section className="relative bg-surface-sunken">

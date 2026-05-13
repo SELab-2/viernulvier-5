@@ -11,74 +11,54 @@ export class SearchService {
     ) {}
 
     async search(options: SearchQuery): Promise<PaginatedResult<SearchResultItem>> {
-        const { page, limit, search, yearFrom, yearTo, genres, locations, sort, lang } = options
+        const { limit, page, tab, search, yearFrom, yearTo, sort } = options
 
-        const commonProductionOptions = {
-            search,
-            genres,
-            locations,
-            yearFrom,
-            yearTo,
-            sort,
-            lang,
-            onThisDay: false as const,
+        if (tab === 'blogs') {
+            const blogResults = await this.searchRepository.findAllBlogs({ search, yearFrom, yearTo, sort })
+            const blogItems: SearchResultItem[] = blogResults.map((blog) => {
+                const contentObj = blog.content as Record<string, string> | null
+                const lang = options.lang === 'en' || options.lang === 'fr' ? options.lang : 'nl'
+                const rawContent = (contentObj?.[lang] || contentObj?.['nl'] || '') as string
+
+                return {
+                    id: blog.id,
+                    type: 'blog' as const,
+                    title: blog.title as any,
+                    excerpt: this.searchRepository.stripHtml(rawContent).substring(0, 200),
+                    image_url: null,
+                    date_label: blog.createdAt ? new Date(blog.createdAt).toLocaleDateString('nl-BE') : '',
+                    venue_label: '',
+                    genre_label: 'Blog',
+                    created_at: blog.createdAt ? new Date(blog.createdAt).toISOString() : undefined,
+                    // Legacy support
+                    content: blog.content ?? null,
+                    productions: blog.productions,
+                }
+            })
+
+            const total = blogItems.length
+            const totalPages = calculateTotalPages(total, limit)
+            const sanitizedPage = sanitizePage(page, totalPages)
+            const startIndex = (sanitizedPage - 1) * limit
+            const items = blogItems.slice(startIndex, startIndex + limit)
+
+            return {
+                items,
+                total,
+                page: sanitizedPage,
+                limit,
+                totalPages,
+            }
         }
 
-        // Get total count of matching productions first, then fetch all without an artificial ceiling
-        const prodsPreview = await this.productionsService.getProductions({ ...commonProductionOptions, page: 1, limit: 1 })
+        const result = await this.searchRepository.searchAll(options)
 
-        const [blogResults, prodResults] = await Promise.all([
-            this.searchRepository.findAllBlogs({ search, yearFrom, yearTo }),
-            prodsPreview.total > 0
-                ? this.productionsService.getProductions({ ...commonProductionOptions, page: 1, limit: prodsPreview.total })
-                : Promise.resolve({ items: [], total: 0, page: 1, limit: 1, totalPages: 0 }),
-        ])
-
-        // --- map to a common shape ---
-        const blogItems: SearchResultItem[] = blogResults.map((blog) => ({
-            id: blog.id,
-            type: 'blog' as const,
-            title: blog.title ?? null,
-            content: blog.content ?? null,
-            productions: blog.productions,
-            created_at: blog.createdAt ? new Date(blog.createdAt).toISOString() : undefined,
-        }))
-
-        const prodItems: SearchResultItem[] = prodResults.items.map((prod) => ({
-            id: prod.id,
-            type: 'production' as const,
-            title: prod.title ?? null,
-            teaser: prod.teaser ?? null,
-            description_short: prod.description_short ?? null,
-            description: prod.description ?? null,
-            image_url: null,
-            venue_name: null,
-            venue_names: [],
-            production_genres: [],
-            performer_type: prod.performer_type ?? null,
-            attendance_mode: prod.attendance_mode ?? null,
-            created_at: prod.created_at ? new Date(prod.created_at).toISOString() : undefined,
-        }))
-
-        // --- merge sorted by date descending ---
-        const getDate = (item: SearchResultItem) =>
-            item.created_at ? new Date(item.created_at).getTime() : 0
-
-        const merged = [...blogItems, ...prodItems].sort((a, b) => {
-            if (sort === 'oldest') return getDate(a) - getDate(b)
-            return getDate(b) - getDate(a)
-        })
-
-        // --- paginate ---
-        const total = merged.length
-        const totalPages = calculateTotalPages(total, limit)
-        const sanitizedPage = sanitizePage(page, totalPages)
-        const startIndex = (sanitizedPage - 1) * limit
-        const pageItems = merged.slice(startIndex, startIndex + limit)
+        const totalPages = calculateTotalPages(result.total, limit)
+        const sanitizedPage = sanitizePage(options.page, totalPages)
 
         return {
-            items: pageItems,
-            total,
+            items: result.items,
+            total: result.total,
             page: sanitizedPage,
             limit,
             totalPages,
