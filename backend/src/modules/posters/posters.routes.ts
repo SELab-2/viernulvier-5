@@ -63,7 +63,7 @@ const postersRoutes: FastifyPluginAsync = async (fastify) => {
         preHandler: [requirePermission(Permission.ARCHIVE_CREATE)],
         schema: {
             tags: ['posters'],
-            summary: 'Create a poster with title, production and image file',
+            summary: 'Create a poster with title, production_ids, and one or more files (including PDFs)',
             querystring: posterLanguageQuerySchema,
             body: createPosterSchema,
             response: {
