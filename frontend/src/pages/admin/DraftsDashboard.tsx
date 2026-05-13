@@ -14,8 +14,17 @@ function DraftsDashboardPageContent() {
 
     const [tab, setTab] = useState<TabKey>('productions')
 
-    const productions = useProductionDrafts({ page: 1, limit: 10 })
-    const blogs = useBlogDrafts({ page: 1, limit: 10 })
+    const productions = useProductionDrafts({
+        page: 1,
+        limit: 10,
+        enabled: tab === 'productions'
+    })
+
+    const blogs = useBlogDrafts({
+        page: 1,
+        limit: 10,
+        enabled: tab === 'blogs'
+    })
 
     const { items, isLoading, error } = tab === 'productions' ? productions : blogs
 
@@ -29,21 +38,26 @@ function DraftsDashboardPageContent() {
                     {d.pageSubtitle}
                 </p>
             </header>
-            {error ? (
+            {error && (
                 <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-200">
                     {error}
                 </div>
-            ) : null}
+            )}
+
+            <DraftsTab tab={tab} setTab={setTab} />
             {isLoading ? (
-                <div className="flex h-[400px] w-full flex-col items-center justify-center gap-4 rounded-[12px] border border-[var(--color-admin-card-border)] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.05)] dark:bg-[#111318]">
-                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-accent dark:border-slate-700 dark:border-t-accent" />
-                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                <div
+                    className="flex h-[200px] w-full flex-col items-center justify-center gap-4 rounded-[12px] border border-[var(--color-admin-card-border)] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.05)] dark:bg-[#111318]">
+                    <div
+                        className="h-6 w-6 animate-spin rounded-full border-3 border-slate-200 border-t-accent dark:border-slate-700 dark:border-t-accent"/>
+                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
                         {d.loadingMessage}
                     </p>
                 </div>
-            ) : null}
-            <DraftsTab tab={tab} setTab={setTab} />
-            <DraftsTable items={items} isLoading={isLoading} />
+            ) : (
+                <DraftsTable items={items} isLoading={isLoading}/>
+
+            )}
         </section>
     )
 }
@@ -51,7 +65,7 @@ function DraftsDashboardPageContent() {
 function DraftsDashboardPage() {
     return (
         <AdminLayout mainClassName="px-4 py-8 lg:px-8 lg:py-8" userName="Artevelde stagiair" showSidebar>
-            <DraftsDashboardPageContent />
+            <DraftsDashboardPageContent/>
         </AdminLayout>
     )
 }

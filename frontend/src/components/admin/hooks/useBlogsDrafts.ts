@@ -11,17 +11,20 @@ type DraftState = {
 type Args = {
     page: number
     limit: number
+    enabled?: boolean
 }
 
-export function useBlogDrafts({ page, limit }: Args): DraftState {
+export function useBlogDrafts({ page, limit, enabled = true }: Args): DraftState {
     const [state, setState] = useState<DraftState>({
         items: [],
-        isLoading: true,
+        isLoading: enabled,
         error: null,
     })
 
     useEffect(() => {
+        if (!enabled) return;
         let isActive = true
+
 
         api.get<{ data: DraftItem[] }>(`/archive/blogs?draft=true&page=${page}&limit=${limit}`)
             .then((response) => {
@@ -35,7 +38,7 @@ export function useBlogDrafts({ page, limit }: Args): DraftState {
             })
 
         return () => { isActive = false }
-    }, [page, limit])
+    }, [page, limit, enabled])
 
     return state
 }
