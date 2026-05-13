@@ -218,12 +218,16 @@ export class PostersController {
             const uploadDir = path.resolve(process.cwd(), env.POSTER_LOCATION)
             await mkdir(uploadDir, { recursive: true })
 
-            const persistedFiles = [] as Array<{
-                file_path: string
+            // Phase 1: parse + validate every file before writing any to disk.
+            // This prevents orphaned files when a later file fails validation.
+            type ValidatedFile = {
+                buffer: Buffer
+                storedFileName: string
                 mime_type: string
                 original_filename: string
                 file_size_bytes: number
-            }>
+            }
+            const validatedFiles: ValidatedFile[] = []
 
             for (const file of files) {
                 const fileName = file.file_name.trim()
@@ -238,15 +242,34 @@ export class PostersController {
                 const originalName = fileName || 'poster-file'
                 const safeName = sanitizeFilename(originalName)
                 const storedFileName = `${crypto.randomUUID()}-${safeName}`
-                const absoluteFilePath = path.join(uploadDir, storedFileName)
-                await writeFile(absoluteFilePath, fileBuffer)
-                storedFileNames.push(storedFileName)
 
-                persistedFiles.push({
-                    file_path: storedFileName,
+                validatedFiles.push({
+                    buffer: fileBuffer,
+                    storedFileName,
                     mime_type: detectedMimeType,
                     original_filename: originalName,
                     file_size_bytes: fileBuffer.length,
+                })
+            }
+
+            // Phase 2: all files passed validation — write them to disk.
+            const persistedFiles = [] as Array<{
+                file_path: string
+                mime_type: string
+                original_filename: string
+                file_size_bytes: number
+            }>
+
+            for (const vf of validatedFiles) {
+                const absoluteFilePath = path.join(uploadDir, vf.storedFileName)
+                await writeFile(absoluteFilePath, vf.buffer)
+                storedFileNames.push(vf.storedFileName)
+
+                persistedFiles.push({
+                    file_path: vf.storedFileName,
+                    mime_type: vf.mime_type,
+                    original_filename: vf.original_filename,
+                    file_size_bytes: vf.file_size_bytes,
                 })
             }
 
