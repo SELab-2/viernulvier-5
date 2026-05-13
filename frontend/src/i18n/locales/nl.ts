@@ -167,6 +167,7 @@ const nl: Messages = {
     events: 'Speelreeks Geschiedenis',
     noEvents: 'Geen verleden events.',
     loadError: 'Kon de productie niet laden.',
+    posterNotFound: 'Affiche niet gevonden.',
     date: 'Datum',
     time: 'Tijd',
     location: 'Locatie',
@@ -355,6 +356,7 @@ const nl: Messages = {
       loadPostersError: 'Affiches konden niet geladen worden.',
       loadProductionsError: 'Producties konden niet geladen worden.',
       noProductionAssigned: 'Geen productie gekoppeld',
+      filesSelectedCount: (count: number) => `${count} bestand${count === 1 ? '' : 'en'} geselecteerd`,
     },
   },
 

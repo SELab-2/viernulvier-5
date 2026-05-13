@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type PointerEvent as ReactPointerEvent } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { getActiveLocale, getMessages, withLocalePath } from '../../i18n'
+import { getActiveLocale, withLocalePath } from '../../i18n'
 import type { Locale, Messages } from '../../i18n/types'
 import { apiFetch, normalizeApiAssetUrl } from '../../api/client'
 import { getLocalizedContent, getLocalizedTitle, normalizeContent } from './blogDetailPage.formatters'
@@ -313,8 +313,7 @@ function normalizeGenreValue(value: string): string {
     return GENRE_ALIASES[normalized] ?? normalized
 }
 
-function mapPosterToSearchEntry(item: PosterApiItem, locale: Locale): SearchEntry {
-    const searchMessages = getMessages(locale).search
+function mapPosterToSearchEntry(item: PosterApiItem, locale: Locale, searchMessages: Messages['search']): SearchEntry {
     const date = formatDate(item.created_at, locale)
     const productionEntries = item.productions?.length
         ? item.productions
@@ -1323,6 +1322,7 @@ function SearchPageContent() {
                                         : (item.venue_name ? { id: '', title: item.venue_name } : null),
                                 },
                                 locale,
+                                searchMessages,
                             )
                         }
                         const productionItem: ProductionApiItem = {
@@ -1386,7 +1386,7 @@ function SearchPageContent() {
                         { signal: abortController.signal }
                     )
 
-                    const mappedEntries = response.data.map((item) => mapPosterToSearchEntry(item, locale))
+                    const mappedEntries = response.data.map((item) => mapPosterToSearchEntry(item, locale, searchMessages))
                     setApiEntries(mappedEntries)
                     setTotalResults(response.meta?.total ?? mappedEntries.length)
                     setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
@@ -1757,7 +1757,7 @@ function SearchPageContent() {
                                         </button>
                                         <button
                                             type="button"
-                                            onClick={() => navigateWithFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: pageSize, page: 1, tab: 'posters' })}
+                                            onClick={() => navigateWithFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: [], locations: [], sort, limit: pageSize, page: 1, tab: 'posters' })}
                                             className={tab === 'posters' ? 'underline decoration-accent decoration-2 underline-offset-4' : 'text-muted transition-colors hover:text-foreground'}
                                         >
                                             {m.search.postersTab}

@@ -77,13 +77,18 @@ export class SearchService {
         }))
 
         const posterItems: SearchResultItem[] = posterResults.items.map((poster) => {
-            // Extract production title (JSONB) for venue name
+            // Extract production title (JSONB) for venue name, respecting requested language
             let venueName: string | null = null
             if (poster.production?.title) {
                 const title = poster.production.title as Record<string, string> | string | null
                 if (typeof title === 'object' && title !== null) {
-                    // JSONB object, try to extract localized value
-                    venueName = (title.nl || title.en || title.fr || Object.values(title)[0] as string | undefined) ?? null
+                    // JSONB object, try to extract localized value with lang preference first
+                    const langPreferences = [options.lang, 'nl', 'en', 'fr'].filter(Boolean) as string[]
+                    venueName = langPreferences.reduce<string | null>((acc, lang) => acc || (title[lang] as string | undefined) || null, null)
+                    // Fallback to first available value if no lang matches
+                    if (!venueName && Object.keys(title).length > 0) {
+                        venueName = (Object.values(title)[0] as string | undefined) ?? null
+                    }
                 } else if (typeof title === 'string') {
                     venueName = title
                 }

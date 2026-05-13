@@ -132,6 +132,7 @@ export type Messages = {
     events: string
     noEvents: string
     loadError: string
+    posterNotFound: string
     date: string
     time: string
     location: string
@@ -320,6 +321,7 @@ export type Messages = {
       loadPostersError: string
       loadProductionsError: string
       noProductionAssigned: string
+      filesSelectedCount: (count: number) => string
     }
   }
 

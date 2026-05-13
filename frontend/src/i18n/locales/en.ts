@@ -167,6 +167,7 @@ const en: Messages = {
     events: 'Event History',
     noEvents: 'No past events.',
     loadError: 'Could not load the production.',
+    posterNotFound: 'Poster not found.',
     date: 'Date',
     time: 'Time',
     location: 'Location',
@@ -355,6 +356,7 @@ const en: Messages = {
       loadPostersError: 'Could not load posters.',
       loadProductionsError: 'Could not load productions.',
       noProductionAssigned: 'No production assigned',
+      filesSelectedCount: (count: number) => `${count} file${count === 1 ? '' : 's'} selected`,
     },
   },
 

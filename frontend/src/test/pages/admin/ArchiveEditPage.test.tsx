@@ -96,6 +96,7 @@ const mockMessages: Pick<Messages, 'admin'> = {
       loadPostersError: 'Could not load posters.',
       loadProductionsError: 'Could not load productions.',
       noProductionAssigned: 'No production assigned',
+      filesSelectedCount: (count: number) => `${count} file${count === 1 ? '' : 's'} selected`,
     },
   },
 }

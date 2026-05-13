@@ -389,7 +389,7 @@ function PostersPageContent() {
               className="block w-full rounded-md border border-[var(--color-admin-card-border)] p-2"
             />
             {selectedFiles.length > 0 ? (
-              <p className="text-xs text-muted">{selectedFiles.length} file(s) geselecteerd</p>
+              <p className="text-xs text-muted">{i18n.admin.posters.filesSelectedCount(selectedFiles.length)}</p>
             ) : null}
           </label>
 

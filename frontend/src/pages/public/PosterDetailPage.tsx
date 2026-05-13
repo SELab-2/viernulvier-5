@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { apiFetch, normalizeApiAssetUrl } from '../../api/client'
 import PublicLayout from '../../components/public/PublicLayout'
 import { getActiveLocale, withLocalePath } from '../../i18n'
+import { usePublicMessages } from '../../components/public/PublicMessagesContext'
 
 type LocalizedText = {
     nl?: string
@@ -58,6 +59,7 @@ function getLocalizedText(text: LocalizedText, locale: 'nl' | 'en'): string {
 function PosterDetailPage() {
     const { id } = useParams<{ id: string }>()
     const locale = getActiveLocale(window.location.pathname)
+    const { detail: detailMessages } = usePublicMessages()
     const [poster, setPoster] = useState<PosterDetail | null>(null)
     const [relatedProductions, setRelatedProductions] = useState<ProductionPreview[]>([])
     const [isLoading, setIsLoading] = useState(true)
@@ -68,7 +70,7 @@ function PosterDetailPage() {
 
         const loadPoster = async () => {
             if (!id) {
-                setError(locale === 'en' ? 'Poster not found.' : 'Affiche niet gevonden.')
+                setError(detailMessages.posterNotFound)
                 setIsLoading(false)
                 return
             }
