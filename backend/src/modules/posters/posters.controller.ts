@@ -111,13 +111,13 @@ export class PostersController {
         return `${request.protocol}://${host}/api/v1/archive`
     }
 
-    private mapPosterLinks(poster: any, baseArchiveUrl: string): PosterResponse {
+    private mapPosterLinks(poster: any, baseArchiveUrl: string, lang: string = 'nl'): PosterResponse {
         const productionTitle = poster.production
-            ? this.service.mapProductionTitle(poster.production.title, 'nl')
+            ? this.service.mapProductionTitle(poster.production.title, lang)
             : ''
         const productions = Array.isArray(poster.productions)
             ? poster.productions.map((production: { id: string; title: unknown }) => {
-                  const localizedTitle = this.service.mapProductionTitle(production.title, 'nl')
+                  const localizedTitle = this.service.mapProductionTitle(production.title, lang)
                   return {
                       id: production.id,
                       title: localizedTitle || production.id,
