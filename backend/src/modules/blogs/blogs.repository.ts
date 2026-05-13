@@ -8,7 +8,7 @@ import type {
 } from './blogs.schema.js'
 import { AppError } from '../../errors/app-error.js'
 
-type BlogFilterOptions = Pick<BlogPaginationQuery, 'search' | 'yearFrom' | 'yearTo' | 'productionId'>
+type BlogFilterOptions = Pick<BlogPaginationQuery, 'search' | 'yearFrom' | 'yearTo' | 'productionId' | 'draft'>
 
 export class BlogsRepository {
     constructor(private readonly prisma: PrismaClient) {}
@@ -46,6 +46,10 @@ export class BlogsRepository {
     private buildWhere(options: BlogFilterOptions): Prisma.blogWhereInput {
         const conditions: Prisma.blogWhereInput[] = []
         const trimmedSearch = options.search?.trim()
+
+        if (options.draft !== undefined) {
+            conditions.push({ draft: options.draft })
+        }
 
         if (trimmedSearch) {
             const dateRange = this.parseSearchDate(trimmedSearch)
@@ -169,6 +173,7 @@ export class BlogsRepository {
         id: string
         title: unknown
         content: unknown
+        draft: boolean | null
         createdAt: Date
         updatedAt: Date
         blog_production?: Array<{ production_id: string }>
@@ -177,6 +182,7 @@ export class BlogsRepository {
             id: blog.id,
             title: this.normalizeBlogTitle(blog.title),
             content: blog.content,
+            draft: blog.draft ?? false,
             productions: blog.blog_production?.map((relation) => relation.production_id) ?? [],
             createdAt: blog.createdAt,
             updatedAt: blog.updatedAt,
@@ -230,6 +236,7 @@ export class BlogsRepository {
             data: {
                 title,
                 content: (data.content ?? null) as Prisma.InputJsonValue,
+                draft: data.draft ?? false,
                 blog_production: {
                     create: data.productionIds.map((productionId) => ({
                         production: {
@@ -257,6 +264,7 @@ export class BlogsRepository {
                     ? { title }
                     : {}),
                 ...(data.content !== undefined ? { content: data.content as Prisma.InputJsonValue } : {}),
+                ...(data.draft !== undefined ? {draft: data.draft} : {}),
                 ...(data.productionIds !== undefined
                     ? {
                         blog_production: {

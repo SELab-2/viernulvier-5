@@ -30,6 +30,7 @@ type FindAllOptions = {
     onThisDayDate?: Date
     sort?: 'relevance' | 'recent' | 'oldest'
     lang?: string
+    draft?: boolean
 }
 
 type CountOptions = Omit<FindAllOptions, 'page' | 'limit' | 'sort'>
@@ -209,7 +210,7 @@ export class ProductionsRepository {
     }
 
     private async buildWhere(options: CountOptions): Promise<Prisma.productionWhereInput> {
-        const { search, searchIds, genres, locations, yearFrom, yearTo, onThisDayDate, lang = 'nl' } = options
+        const { search, searchIds, genres, locations, yearFrom, yearTo, onThisDayDate, lang = 'nl', draft } = options
         const andFilters: Prisma.productionWhereInput[] = []
         const now = new Date()
 
@@ -223,6 +224,9 @@ export class ProductionsRepository {
                 }
             }
         })
+        if (draft !== undefined) {
+            andFilters.push({ draft })
+        }
 
         if (onThisDayDate) {
             const matchingProductionIds = await this.findProductionIdsOnMonthDay(onThisDayDate)

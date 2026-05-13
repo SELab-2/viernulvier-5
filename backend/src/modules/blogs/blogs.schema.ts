@@ -20,6 +20,9 @@ export const blogPaginationQuerySchema = paginationQuerySchema.extend({
     yearFrom: z.coerce.number().int().optional(),
     yearTo: z.coerce.number().int().optional(),
     productionId: z.string().uuid().optional(),
+    draft: z.enum(['true', 'false'])
+        .optional()
+        .transform((val) => (val ? val === 'true' : undefined)),
 })
 
 /**

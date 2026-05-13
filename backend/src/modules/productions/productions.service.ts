@@ -17,7 +17,7 @@ export class ProductionsService {
     }
 
     async getProductions(options: PaginationQuery): Promise<PaginatedResult<ProductionResponse>> {
-        const { page, limit, search, lang, genres, locations, yearFrom, yearTo, sort, onThisDay, referenceDate } = options
+        const { page, limit, search, lang, genres, locations, yearFrom, yearTo, sort, onThisDay, referenceDate, draft } = options
         const normalizedSearch = search?.trim() || undefined
 
         const normalizedGenres = genres
@@ -66,6 +66,7 @@ export class ProductionsService {
             yearFrom: safeYearFrom,
             yearTo: safeYearTo,
             onThisDayDate,
+            draft,
         })
         const totalPages = calculateTotalPages(total, limit)
         const sanitizedPage = sanitizePage(page, totalPages)
@@ -82,6 +83,7 @@ export class ProductionsService {
             yearTo: safeYearTo,
             onThisDayDate,
             sort,
+            draft,
         })
 
         return {
