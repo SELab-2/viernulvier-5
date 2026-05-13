@@ -14,7 +14,7 @@ const en: Messages = {
     navAriaLabel: 'Main navigation',
     openMenuLabel: 'Open menu',
     closeMenuLabel: 'Close menu',
-    searchLink: 'Search archive',
+    searchLink: 'Search',
     blogsLink: 'Blogs',
   },
   home: {
