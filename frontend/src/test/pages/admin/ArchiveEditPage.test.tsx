@@ -5,7 +5,7 @@ import { AdminMessagesContext } from '../../../components/admin/AdminMessagesCon
 import ArchiveEditPage from '../../../pages/admin/ArchiveEditPage'
 import type { Messages } from '../../../i18n/types'
 
-const mockMessages: Pick<Messages, 'admin'> = {
+const mockMessages = {
   admin: {
     themeToggleDark: 'Dark mode',
     themeToggleLight: 'Light mode',
