@@ -324,7 +324,20 @@ const nl: Messages = {
       pageTitle: 'Concepten',
       pageSubtitle: 'Bekijk hier alle concepten',
       productions: 'Producties',
-      blogs: 'Blogs'
+      blogs: 'Blogs',
+      tableColTitle: 'Titel',
+      tableColType: 'Type',
+      tableColStatus: 'Status',
+      tableColLanguage: 'Taal Status',
+      tableColDate: 'Datum',
+      tableColActions: 'Acties',
+      statusUnavailable: 'Nog niet beschikbaar in archief',
+      actionView: 'Bekijk',
+      actionEdit: 'Bewerk',
+      languageStatusComplete: 'Vertaling volledig',
+      languageStatusAttention: 'Vertaling heeft aandacht nodig',
+      languageStatusMissing: 'Vertaling ontbreekt',
+      emptyRecent: 'Nog geen recente archiefconcepten gevonden.',
     }
   },
 

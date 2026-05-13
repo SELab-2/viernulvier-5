@@ -291,6 +291,19 @@ export type Messages = {
       pageSubtitle: string,
       productions: string,
       blogs: string,
+      tableColTitle: string
+      tableColType: string
+      tableColStatus: string
+      tableColLanguage: string
+      tableColDate: string
+      tableColActions: string
+      statusUnavailable: string
+      actionView: string
+      actionEdit: string
+      languageStatusComplete: string
+      languageStatusAttention: string
+      languageStatusMissing: string
+      emptyRecent: string
     }
   }
 
