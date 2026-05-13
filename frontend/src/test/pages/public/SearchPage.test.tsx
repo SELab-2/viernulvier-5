@@ -68,20 +68,21 @@ describe('SearchPage API routing by tab', () => {
         })
     })
 
-it('uses unified search endpoint on all tab and forwards filters', async () => {
-    renderPage('/nl/zoeken?tab=all&q=test&genres=theater&locations=balzaal&sort=recent')
+    it('uses unified search endpoint on all tab and forwards filters', async () => {
+        renderPage('/nl/zoeken?tab=all&q=test&genres=theater&locations=balzaal&sort=recent')
 
-    await waitFor(() => {
-        const searchCall = apiFetchMock.mock.calls.find(([endpoint]) =>
-            typeof endpoint === 'string' && endpoint.startsWith('/archive/search?'),
-        )
+        await waitFor(() => {
+            const searchCall = apiFetchMock.mock.calls.find(([endpoint]) =>
+                typeof endpoint === 'string' && endpoint.startsWith('/archive/search?'),
+            )
 
-        expect(searchCall).toBeDefined()
-        const endpoint = String(searchCall?.[0] ?? '')
-        expect(endpoint).toContain('search=test')
-        expect(endpoint).toContain('genres=theatre')
-        expect(endpoint).toContain('locations=balzaal')
-        expect(endpoint).toContain('sort=recent')
+            expect(searchCall).toBeDefined()
+            const endpoint = String(searchCall?.[0] ?? '')
+            expect(endpoint).toContain('search=test')
+            expect(endpoint).toContain('genres=theatre')
+            expect(endpoint).toContain('locations=balzaal')
+            expect(endpoint).toContain('sort=recent')
+        })
     })
 
     it('uses posters endpoint on posters tab and forwards sort', async () => {
