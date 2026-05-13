@@ -54,15 +54,38 @@ describe('CMS Users Routes', () => {
             await deleteUsersIfExist(app, [admin.id, editor.id])
         })
 
-        it('returns 403 Forbidden for EDITOR role', async () => {
+        it('returns editors and admins for EDITOR users', async () => {
             const token = app.jwt.sign({ sub: 'editor', role: 'EDITOR' })
+            const suffix = Date.now()
+            const admin = await app.prisma.adminUser.create({
+                data: {
+                    username: `cms-editor-access-admin-${suffix}`,
+                    passwordHash: 'password-hash',
+                    role: 'ADMIN',
+                },
+            })
+            const editor = await app.prisma.adminUser.create({
+                data: {
+                    username: `cms-editor-access-editor-${suffix}`,
+                    passwordHash: 'password-hash',
+                    role: 'EDITOR',
+                },
+            })
+
             const response = await app.inject({
                 method: 'GET',
-                url: '/api/v1/cms-users',
+                url: `/api/v1/cms-users?search=${suffix}`,
                 headers: { authorization: `Bearer ${token}` }
             })
 
-            expect(response.statusCode).toBe(403)
+            expect(response.statusCode).toBe(200)
+            const body = response.json()
+            expect(body.data).toEqual(expect.arrayContaining([
+                expect.objectContaining({ id: admin.id, username: admin.username, role: 'ADMIN' }),
+                expect.objectContaining({ id: editor.id, username: editor.username, role: 'EDITOR' }),
+            ]))
+
+            await deleteUsersIfExist(app, [admin.id, editor.id])
         })
     })
 

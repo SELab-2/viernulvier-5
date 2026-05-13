@@ -1,4 +1,4 @@
-import type { FastifyPluginAsync } from 'fastify'
+import type { FastifyPluginAsync, FastifyReply, FastifyRequest } from 'fastify'
 import { CmsUsersRepository } from './cms-users.repository.js'
 import { CmsUsersService } from './cms-users.service.js'
 import { CmsUsersController } from './cms-users.controller.js'
@@ -15,13 +15,21 @@ import { requirePermission } from '../../hooks/require-permission.js'
 import { Permission } from '../../domain/permissions.js'
 import { z } from 'zod'
 
+async function requireAuthenticated(request: FastifyRequest, reply: FastifyReply) {
+    try {
+        await request.jwtVerify()
+    } catch {
+        await reply.status(401).send({ error: 'Authentication required' })
+    }
+}
+
 const cmsUsersRoutes: FastifyPluginAsync = async (fastify) => {
     const repository = new CmsUsersRepository(fastify.prisma)
     const service = new CmsUsersService(repository)
     const controller = new CmsUsersController(service)
 
     fastify.get('/', {
-        preHandler: [requirePermission(Permission.EDITORS_MANAGE)],
+        preHandler: [requireAuthenticated],
         schema: {
             tags: ['cms-users'],
             summary: 'Get all CMS users',
