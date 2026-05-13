@@ -164,7 +164,7 @@ export class PostersController {
         const posters = await this.service.getPosters(request.query)
         const archiveBaseUrl = this.getArchiveBaseUrl(request)
         const host = request.headers.host || request.hostname
-        const currentUrl = `${request.protocol}://${host}${request.url.split('?')[0]}`
+        const currentUrl = `${request.protocol}://${host}${request.url}`
 
         return reply.status(200).send({
             data: posters.items.map((poster) => this.mapPosterLinks(poster, archiveBaseUrl)),
