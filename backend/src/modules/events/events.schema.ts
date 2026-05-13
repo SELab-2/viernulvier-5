@@ -1,7 +1,8 @@
 import { z } from 'zod'
 import { 
     createPaginatedResponseSchema, 
-    createSingleResponseSchema 
+    createSingleResponseSchema,
+    paginationQuerySchema
 } from '../../utils/rest-schemas.js'
 
 const localizedTextSchema = z.object({
@@ -10,17 +11,13 @@ const localizedTextSchema = z.object({
     en: z.string().optional(),
 }).nullable()
 
-export const eventPaginationQuerySchema = z.object({
-    page: z.coerce.number().int().positive().default(1),
-    limit: z.coerce.number().int().positive().max(100).default(20),
+export const eventPaginationQuerySchema = paginationQuerySchema.extend({
     productionId: z.string().uuid().optional(),
     search: z.string().optional(),
     lang: z.string().optional().default('nl'),
 })
 
-export const eventPricePaginationQuerySchema = z.object({
-    page: z.coerce.number().int().positive().default(1),
-    limit: z.coerce.number().int().positive().max(100).default(20),
+export const eventPricePaginationQuerySchema = paginationQuerySchema.extend({
     eventId: z.string().uuid().optional(),
     search: z.string().optional(),
 })
@@ -45,7 +42,6 @@ export const eventSchema = z.object({
     box_office_id: z.string().nullable(),
     vendor_id: z.string().nullable(),
     max_tickets_per_order: z.number().int().nullable(),
-    uitdatabank_id: z.string().nullable(),
     secure: z.boolean().nullable(),
     sms_verification: z.boolean().nullable(),
     info: localizedTextSchema,
@@ -97,7 +93,6 @@ export const updateEventSchema = z.object({
     box_office_id: z.string().nullable().optional(),
     vendor_id: z.string().nullable().optional(),
     max_tickets_per_order: z.number().int().nullable().optional(),
-    uitdatabank_id: z.string().nullable().optional(),
     secure: z.boolean().nullable().optional(),
     sms_verification: z.boolean().nullable().optional(),
     info: localizedTextSchema.optional(),

@@ -7,14 +7,15 @@ datasource db {
 }
 
 model crop {
-  created_at DateTime @default(now()) @db.Timestamp(6)
-  updated_at DateTime @default(now()) @db.Timestamp(6)
-  id         String   @id @default(uuid()) @db.Uuid
-  apiId      String?  @unique @db.VarChar
-  name       String?  @db.VarChar
-  url        String?  @db.VarChar
-  item_id    String?  @db.Uuid
-  item       item?    @relation("item_crops", fields: [item_id], references: [id])
+  created_at    DateTime @default(now()) @db.Timestamp(6)
+  updated_at    DateTime @default(now()) @db.Timestamp(6)
+  id            String   @id @default(uuid()) @db.Uuid
+  apiId         String?  @unique @db.VarChar
+  name          String?  @db.VarChar
+  url           String?  @db.VarChar
+  item_id       String?  @db.Uuid
+  file_location String?
+  item          item?    @relation("item_crops", fields: [item_id], references: [id])
 }
 
 model event {
@@ -29,7 +30,6 @@ model event {
   box_office_id         String?       @db.VarChar
   vendor_id             String?       @db.VarChar
   max_tickets_per_order Int?
-  uitdatabank_id        String?       @db.VarChar
   secure                Boolean?
   sms_verification      Boolean?
   info                  Json?
@@ -151,22 +151,21 @@ model item {
 }
 
 model location {
-  created_at     DateTime @default(now()) @db.Timestamp(6)
-  updated_at     DateTime @default(now()) @db.Timestamp(6)
-  id             String   @id @default(uuid()) @db.Uuid
-  apiId          String?  @unique @db.VarChar
-  name           Json?
-  code           String?  @db.VarChar
-  street         String?  @db.VarChar
-  number         String?  @db.VarChar
-  postal_code    String?  @db.VarChar
-  city           String?  @db.VarChar
-  phone_1        String?  @db.VarChar
-  phone_2        String?  @db.VarChar
-  own_location   String?  @db.VarChar
-  country        String?  @db.VarChar
-  uitdatabank_id String?  @db.VarChar
-  spaces         space[]  @relation("space_location")
+  created_at   DateTime @default(now()) @db.Timestamp(6)
+  updated_at   DateTime @default(now()) @db.Timestamp(6)
+  id           String   @id @default(uuid()) @db.Uuid
+  apiId        String?  @unique @db.VarChar
+  name         Json?
+  code         String?  @db.VarChar
+  street       String?  @db.VarChar
+  number       String?  @db.VarChar
+  postal_code  String?  @db.VarChar
+  city         String?  @db.VarChar
+  phone_1      String?  @db.VarChar
+  phone_2      String?  @db.VarChar
+  own_location String?  @db.VarChar
+  country      String?  @db.VarChar
+  spaces       space[]  @relation("space_location")
 }
 
 model blog {
@@ -174,6 +173,8 @@ model blog {
   title           Json?
   content         Json?
   blog_production blog_production[]
+  editor_blog     editor_blog[]
+  draft           Boolean?
 
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt DateTime  @default(now()) @map("updated_at") @db.Timestamp(6)
@@ -188,50 +189,66 @@ model blog_production {
   @@id([blog_id, production_id])
 }
 
+model editor_blog {
+  editor_id     String     @db.Uuid
+  blog_id       String     @db.Uuid
+  editor        AdminUser  @relation(fields: [editor_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  blog          blog       @relation(fields: [blog_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([editor_id, blog_id])
+}
+
+
 model production {
-  created_at               DateTime                  @default(now()) @db.Timestamp(6)
-  updated_at               DateTime                  @default(now()) @db.Timestamp(6)
-  id                       String                    @id @default(uuid()) @db.Uuid
-  apiId                    String?                   @unique @db.VarChar
-  vendor_id                String?                   @db.VarChar
-  box_office_id            Int?
-  performer_field          String?                   @db.VarChar
-  performer_type           String?                   @db.VarChar
-  attendance_mode          String?                   @db.VarChar
-  super_title              Json?
-  title                    Json?
-  artist                   Json?
-  meta_title               Json?
-  meta_description         Json?
-  tagline                  Json?
-  teaser                   Json?
-  description              Json?
-  description_extra        Json?
-  description_2            Json?
-  video_1                  Json?
-  video_2                  Json?
-  quote                    Json?
-  quote_source             Json?
-  programme                Json?
-  info                     Json?
-  description_short        Json?
-  eticket_info             Json?
-  custom_data              Json?
-  media_gallery_id         String?                   @db.Uuid
-  review_gallery_id        String?                   @db.Uuid
-  poster_gallery_id        String?                   @db.Uuid
-  uitdatabank_theme        String?                   @db.Uuid
-  uitdatabank_type         String?                   @db.Uuid
-  blog_production          blog_production[]
-  events                   event[]                   @relation("event_production")
-  genre_production         genre_production[]
-  tag_production           tag_production[]
-  media_gallery            gallery?                  @relation("production_media_gallery", fields: [media_gallery_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  poster_gallery           gallery?                  @relation("production_poster_gallery", fields: [poster_gallery_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  review_gallery           gallery?                  @relation("production_review_gallery", fields: [review_gallery_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  uitdatabank_themes       uitdatabank_theme?        @relation(fields: [uitdatabank_theme], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  uitdatabank_types        uitdatabank_type?         @relation(fields: [uitdatabank_type], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  uit_keywords_productions uit_keywords_production[]
+  created_at        DateTime           @default(now()) @db.Timestamp(6)
+  updated_at        DateTime           @default(now()) @db.Timestamp(6)
+  id                String             @id @default(uuid()) @db.Uuid
+  apiId             String?            @unique @db.VarChar
+  vendor_id         String?            @db.VarChar
+  box_office_id     Int?
+  performer_field   String?            @db.VarChar
+  performer_type    String?            @db.VarChar
+  attendance_mode   String?            @db.VarChar
+  super_title       Json?
+  title             Json?
+  artist            Json?
+  meta_title        Json?
+  meta_description  Json?
+  tagline           Json?
+  teaser            Json?
+  description       Json?
+  description_extra Json?
+  description_2     Json?
+  video_1           Json?
+  video_2           Json?
+  quote             Json?
+  quote_source      Json?
+  programme         Json?
+  info              Json?
+  description_short Json?
+  eticket_info      Json?
+  custom_data       Json?
+  media_gallery_id  String?            @db.Uuid
+  review_gallery_id String?            @db.Uuid
+  poster_gallery_id String?            @db.Uuid
+  blog_production   blog_production[]
+  events            event[]            @relation("event_production")
+  genre_production  genre_production[]
+  tag_production    tag_production[]
+  editor_production editor_production[]
+  draft             Boolean?
+  media_gallery     gallery?           @relation("production_media_gallery", fields: [media_gallery_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  poster_gallery    gallery?           @relation("production_poster_gallery", fields: [poster_gallery_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  review_gallery    gallery?           @relation("production_review_gallery", fields: [review_gallery_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model editor_production {
+  editor_id     String     @db.Uuid
+  production_id String     @db.Uuid
+  editor        AdminUser  @relation(fields: [editor_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  production    production @relation(fields: [production_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([editor_id, production_id])
 }
 
 model space {
@@ -244,44 +261,6 @@ model space {
   location_id String?   @db.Uuid
   halls       hall[]    @relation("hall_space")
   location    location? @relation("space_location", fields: [location_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-}
-
-model uit_keywords_production {
-  production_id        String              @db.Uuid
-  uitkeywords_id       String              @db.Uuid
-  production           production          @relation(fields: [production_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  uitdatabank_keywords uitdatabank_keyword @relation(fields: [uitkeywords_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-
-  @@id([production_id, uitkeywords_id])
-}
-
-model uitdatabank_keyword {
-  created_at               DateTime                  @default(now()) @db.Timestamp(6)
-  updated_at               DateTime                  @default(now()) @db.Timestamp(6)
-  id                       String                    @id @default(uuid()) @db.Uuid
-  apiId                    String?                   @unique @db.VarChar
-  name                     String?                   @db.VarChar
-  uit_keywords_productions uit_keywords_production[]
-}
-
-model uitdatabank_theme {
-  created_at DateTime     @default(now()) @db.Timestamp(6)
-  updated_at DateTime     @default(now()) @db.Timestamp(6)
-  id         String       @id @default(uuid()) @db.Uuid
-  apiId      String?      @unique @db.VarChar
-  name       String?      @db.VarChar
-  cdb_cat_id String?      @db.VarChar
-  production production[]
-}
-
-model uitdatabank_type {
-  created_at DateTime     @default(now()) @db.Timestamp(6)
-  updated_at DateTime     @default(now()) @db.Timestamp(6)
-  id         String       @id @default(uuid()) @db.Uuid
-  apiId      String?      @unique @db.VarChar
-  name       String?      @db.VarChar
-  cdb_cat_id String?      @db.VarChar
-  production production[]
 }
 
 // last scraped time
@@ -304,6 +283,8 @@ model AdminUser {
   role         AdminRole @default(ADMIN)
   createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt    DateTime  @default(now()) @map("updated_at") @db.Timestamp(6)
+  editor_blog  editor_blog[]
+  editor_production editor_production[]
 
   @@map("users")
 }

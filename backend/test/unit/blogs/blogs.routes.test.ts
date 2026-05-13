@@ -90,6 +90,53 @@ describe('Blogs Routes', () => {
                 await app.prisma.production.delete({ where: { id: production.id } })
             }
         })
+
+        it('should filter blogs by productionId', async () => {
+            const token = app.jwt.sign({ sub: 'admin', username: 'admin', role: Role.ADMIN })
+            const productionA = await app.prisma.production.create({ data: {} })
+            const productionB = await app.prisma.production.create({ data: {} })
+
+            try {
+                const blogAResponse = await app.inject({
+                    method: 'POST',
+                    url: '/api/v1/archive/blogs',
+                    headers: { authorization: `Bearer ${token}` },
+                    payload: {
+                        title: { nl: 'Blog A', en: 'Blog A' },
+                        productionIds: [productionA.id],
+                    },
+                })
+                const blogA = JSON.parse(blogAResponse.payload).data
+
+                const blogBResponse = await app.inject({
+                    method: 'POST',
+                    url: '/api/v1/archive/blogs',
+                    headers: { authorization: `Bearer ${token}` },
+                    payload: {
+                        title: { nl: 'Blog B', en: 'Blog B' },
+                        productionIds: [productionB.id],
+                    },
+                })
+                const blogB = JSON.parse(blogBResponse.payload).data
+
+                const response = await app.inject({
+                    method: 'GET',
+                    url: `/api/v1/archive/blogs?productionId=${productionA.id}`,
+                })
+
+                expect(response.statusCode).toBe(200)
+                const ids = JSON.parse(response.payload).data.map((item: { id: string }) => item.id)
+                expect(ids).toContain(blogA.id)
+                expect(ids).not.toContain(blogB.id)
+            } finally {
+                await app.prisma.blog_production.deleteMany({
+                    where: { production_id: { in: [productionA.id, productionB.id] } },
+                })
+                await app.prisma.production.deleteMany({
+                    where: { id: { in: [productionA.id, productionB.id] } },
+                })
+            }
+        })
     })
 
     describe('POST /api/v1/archive/blogs', () => {
