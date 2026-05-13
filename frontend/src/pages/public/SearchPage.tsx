@@ -19,7 +19,7 @@ type SearchEntry = SearchResultItem & {
 const DEFAULT_PAGE_SIZE = 12
 const PAGE_SIZE_OPTIONS = [12, 24, 48] as const
 const MIN_PERIOD_YEAR = 1982
-const MAX_PERIOD_YEAR = 2026
+const MAX_PERIOD_YEAR = new Date().getFullYear()
 const SEARCH_INPUT_DEBOUNCE_MS = 250
 
 const CANONICAL_GENRE_VALUES = [
