@@ -22,6 +22,7 @@ const MIN_PERIOD_YEAR = 1982
 const MAX_PERIOD_YEAR = new Date().getFullYear()
 const SEARCH_INPUT_DEBOUNCE_MS = 250
 
+
 const CANONICAL_GENRE_VALUES = [
     'concert',
     'nightlife',
@@ -813,10 +814,17 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
     const [searchInput, setSearchInput] = useState(query)
     const [locationInput, setLocationInput] = useState('')
     const [isLocationSuggestionsOpen, setIsLocationSuggestionsOpen] = useState(false)
+    const [draftFromYear, setDraftFromYear] = useState(safeFromYear)
+    const [draftToYear, setDraftToYear] = useState(safeToYear)
 
     useEffect(() => {
         setSearchInput(query)
     }, [query])
+
+    useEffect(() => {
+        setDraftFromYear(safeFromYear)
+        setDraftToYear(safeToYear)
+    }, [safeFromYear, safeToYear])
 
     const pushFilters = useCallback((filters: SearchFilterOverrides) => {
         const params = buildSearchParams(filters)
@@ -835,8 +843,8 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
         const timerId = window.setTimeout(() => {
             pushFilters({
                 query: nextQuery || undefined,
-                yearFrom: safeFromYear,
-                yearTo: safeToYear,
+                yearFrom: draftFromYear,
+                yearTo: draftToYear,
                 genres: selectedGenres,
                 locations: selectedLocations,
                 sort,
@@ -848,16 +856,16 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
         return () => {
             window.clearTimeout(timerId)
         }
-    }, [searchInput, query, safeFromYear, safeToYear, selectedGenres, selectedLocations, sort, safeLimit, tab, pushFilters])
+    }, [searchInput, query, draftFromYear, draftToYear, selectedGenres, selectedLocations, sort, safeLimit, tab, pushFilters])
 
     const handleSearchSubmit = () => {
-        pushFilters({ query: searchInput.trim() || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: safeLimit, tab })
+        pushFilters({ query: searchInput.trim() || undefined, yearFrom: draftFromYear, yearTo: draftToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: safeLimit, tab })
     }
 
     const handleGenreChange = (next: string) => {
         const nextGenres = selectedGenres.includes(next) ? [] : [next]
 
-        pushFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: nextGenres, locations: selectedLocations, sort, limit: safeLimit, tab })
+        pushFilters({ query: query || undefined, yearFrom: draftFromYear, yearTo: draftToYear, genres: nextGenres, locations: selectedLocations, sort, limit: safeLimit, tab })
     }
 
     const handleLocationChange = (next: string) => {
@@ -865,7 +873,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
             ? selectedLocations.filter((value) => value !== next)
             : [...selectedLocations, next]
 
-        pushFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: selectedGenres, locations: nextLocations, sort, limit: safeLimit, tab })
+        pushFilters({ query: query || undefined, yearFrom: draftFromYear, yearTo: draftToYear, genres: selectedGenres, locations: nextLocations, sort, limit: safeLimit, tab })
     }
 
     const handleAddLocation = () => {
@@ -877,8 +885,8 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
 
         pushFilters({
             query: query || undefined,
-            yearFrom: safeFromYear,
-            yearTo: safeToYear,
+            yearFrom: draftFromYear,
+            yearTo: draftToYear,
             genres: selectedGenres,
             locations: [...selectedLocations, nextLocation],
             sort,
@@ -917,8 +925,8 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
 
         pushFilters({
             query: query || undefined,
-            yearFrom: safeFromYear,
-            yearTo: safeToYear,
+            yearFrom: draftFromYear,
+            yearTo: draftToYear,
             genres: selectedGenres,
             locations: [...selectedLocations, nextLocation],
             sort,
@@ -930,16 +938,39 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
     }
 
     const handleFromYearChange = (next: number) => {
-        const clampedNext = Math.min(next, safeToYear)
-        pushFilters({ query: query || undefined, yearFrom: clampedNext, yearTo: safeToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: safeLimit, tab })
+        setDraftFromYear(Math.min(next, draftToYear))
     }
 
     const handleToYearChange = (next: number) => {
-        const clampedNext = Math.max(next, safeFromYear)
-        pushFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: clampedNext, genres: selectedGenres, locations: selectedLocations, sort, limit: safeLimit, tab })
+        setDraftToYear(Math.max(next, draftFromYear))
+    }
+
+    const commitDraftYears = useCallback(() => {
+        if (draftFromYear === safeFromYear && draftToYear === safeToYear) {
+            return
+        }
+
+        pushFilters({
+            query: query || undefined,
+            yearFrom: draftFromYear,
+            yearTo: draftToYear,
+            genres: selectedGenres,
+            locations: selectedLocations,
+            sort,
+            limit: safeLimit,
+            tab,
+        })
+    }, [draftFromYear, draftToYear, safeFromYear, safeToYear, pushFilters, query, selectedGenres, selectedLocations, sort, safeLimit, tab])
+
+    const handleSliderKeyUp = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key.startsWith('Arrow') || event.key === 'Home' || event.key === 'End' || event.key === 'PageUp' || event.key === 'PageDown') {
+            commitDraftYears()
+        }
     }
 
     const handleReset = () => {
+        setDraftFromYear(MIN_PERIOD_YEAR)
+        setDraftToYear(MAX_PERIOD_YEAR)
         pushFilters({ yearFrom: MIN_PERIOD_YEAR, yearTo: MAX_PERIOD_YEAR, sort, limit: safeLimit, tab })
     }
 
@@ -957,17 +988,21 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
         const clickRatio = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width))
         const nextYear = Math.round(MIN_PERIOD_YEAR + clickRatio * yearRange)
 
-        if (Math.abs(nextYear - safeFromYear) <= Math.abs(nextYear - safeToYear)) {
-            handleFromYearChange(nextYear)
+        if (Math.abs(nextYear - draftFromYear) <= Math.abs(nextYear - draftToYear)) {
+            const nextFromYear = Math.min(nextYear, draftToYear)
+            setDraftFromYear(nextFromYear)
+            pushFilters({ query: query || undefined, yearFrom: nextFromYear, yearTo: draftToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: safeLimit, tab })
             return
         }
 
-        handleToYearChange(nextYear)
+        const nextToYear = Math.max(nextYear, draftFromYear)
+        setDraftToYear(nextToYear)
+        pushFilters({ query: query || undefined, yearFrom: draftFromYear, yearTo: nextToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: safeLimit, tab })
     }
 
     const yearRange = MAX_PERIOD_YEAR - MIN_PERIOD_YEAR
-    const fromPercent = ((safeFromYear - MIN_PERIOD_YEAR) / yearRange) * 100
-    const toPercent = ((safeToYear - MIN_PERIOD_YEAR) / yearRange) * 100
+    const fromPercent = ((draftFromYear - MIN_PERIOD_YEAR) / yearRange) * 100
+    const toPercent = ((draftToYear - MIN_PERIOD_YEAR) / yearRange) * 100
     const genreOptions = s.genres.map((label, index) => ({
         label,
         value: CANONICAL_GENRE_VALUES[index] ?? label.toLowerCase(),
@@ -1034,8 +1069,10 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
                         type="range"
                         min={MIN_PERIOD_YEAR}
                         max={MAX_PERIOD_YEAR}
-                        value={safeFromYear}
+                        value={draftFromYear}
                         onChange={(event) => handleFromYearChange(Number(event.target.value))}
+                        onPointerUp={commitDraftYears}
+                        onKeyUp={handleSliderKeyUp}
                         className="range-input"
                         aria-label="Start year"
                     />
@@ -1043,8 +1080,10 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
                         type="range"
                         min={MIN_PERIOD_YEAR}
                         max={MAX_PERIOD_YEAR}
-                        value={safeToYear}
+                        value={draftToYear}
                         onChange={(event) => handleToYearChange(Number(event.target.value))}
+                        onPointerUp={commitDraftYears}
+                        onKeyUp={handleSliderKeyUp}
                         className="range-input"
                         aria-label="End year"
                     />
@@ -1052,7 +1091,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
                 <div className="mt-2 flex items-center justify-between text-xs text-muted">
                     <span>{MIN_PERIOD_YEAR}</span>
                     <span className="rounded-full bg-foreground px-2 py-0.5 font-semibold text-surface">
-                        {safeFromYear} - {safeToYear}
+                        {draftFromYear} - {draftToYear}
                     </span>
                     <span>{MAX_PERIOD_YEAR}</span>
                 </div>
