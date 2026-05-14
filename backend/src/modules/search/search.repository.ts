@@ -77,14 +77,14 @@ export class SearchRepository {
         if (trimmedSearch) {
             const dateRange = this.parseSearchDate(trimmedSearch)
             const searchConditions: Prisma.blogWhereInput[] = [
-                { title: { path: ['nl'], string_contains: trimmedSearch } },
-                { title: { path: ['en'], string_contains: trimmedSearch } },
-                { content: { path: ['nl'], string_contains: trimmedSearch } },
-                { content: { path: ['en'], string_contains: trimmedSearch } },
+                { title: { path: ['nl'], string_contains: trimmedSearch, mode: 'insensitive' } },
+                { title: { path: ['en'], string_contains: trimmedSearch, mode: 'insensitive' } },
+                { content: { path: ['nl'], string_contains: trimmedSearch, mode: 'insensitive' } },
+                { content: { path: ['en'], string_contains: trimmedSearch, mode: 'insensitive' } },
             ]
 
             if (dateRange) {
-                searchConditions.push({ createdAt: { gte: dateRange.from, lt: dateRange.to } })
+                searchConditions.push({ created_at: { gte: dateRange.from, lt: dateRange.to } })
             }
 
             conditions.push({ OR: searchConditions })
@@ -94,7 +94,7 @@ export class SearchRepository {
             const fromYear = Math.min(options.yearFrom ?? 1970, options.yearTo ?? 9999)
             const toYear = Math.max(options.yearFrom ?? 1970, options.yearTo ?? 9999)
             conditions.push({
-                createdAt: {
+                created_at: {
                     gte: new Date(Date.UTC(fromYear, 0, 1)),
                     lt: new Date(Date.UTC(toYear + 1, 0, 1)),
                 },
@@ -112,7 +112,7 @@ export class SearchRepository {
             include: {
                 blog_production: { select: { production_id: true } },
             },
-            orderBy: { createdAt: 'desc' },
+            orderBy: { created_at: 'desc' },
         })
 
         return blogs.map((blog) => ({
@@ -120,8 +120,8 @@ export class SearchRepository {
             title: this.normalizeBlogTitle(blog.title),
             content: blog.content,
             productions: blog.blog_production.map((r) => r.production_id),
-            createdAt: blog.createdAt,
-            updatedAt: blog.updatedAt,
+            created_at: blog.created_at,
+            updated_at: blog.updated_at,
         }))
     }
 }

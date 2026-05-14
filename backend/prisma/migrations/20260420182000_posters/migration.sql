@@ -1,0 +1,5 @@
+-- Legacy no-op migration.
+-- The `poster` table created here was later removed by
+-- `20260424084733_drop_legacy_poster_table`, so fresh installs should not
+-- create it at all. This migration is intentionally left empty to preserve
+-- migration history without introducing an obsolete table.

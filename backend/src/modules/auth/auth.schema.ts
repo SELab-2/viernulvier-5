@@ -20,8 +20,8 @@ export const userSchema = z.object({
     id: z.string().uuid(),
     username: z.string(),
     role: z.string(),
-    createdAt: z.coerce.date().optional(),
-    updatedAt: z.coerce.date().optional(),
+    created_at: z.coerce.date().optional(),
+    updated_at: z.coerce.date().optional(),
     links: authLinksSchema.optional(),
 })
 
