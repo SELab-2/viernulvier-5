@@ -150,6 +150,15 @@ export type Messages = {
     nextImage: string
     relatedBlogs: string
   }
+  notFound: {
+    titleTop: string
+    titleAccent: string
+    titleBottom: string
+    joke: string
+    description: string
+    homeButton: string
+    searchButton: string
+  }
   footer: {
     brandLogoAlt: string
     organizationName: string
@@ -328,6 +337,14 @@ export type Messages = {
       untitledLabel: string
       paginationShowing: (from: number, to: number, total: number) => string
       paginationPageLabel: (page: number) => string
+    }
+    notFound: {
+      titleTop: string
+      titleAccent: string
+      titleBottom: string
+      joke: string
+      description: string
+      dashboardButton: string
     }
     posters: {
       pageTitle: string

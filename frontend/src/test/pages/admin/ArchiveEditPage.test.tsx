@@ -99,6 +99,14 @@ const mockMessages: Pick<Messages, 'admin'> = {
       paginationShowing: (from: number, to: number, total: number) => `Showing ${from}–${to} of ${total} results`,
       paginationPageLabel: (page: number) => `Page ${page}`,
     },
+    notFound: {
+      titleTop: 'Four',
+      titleAccent: 'zero',
+      titleBottom: 'four',
+      joke: 'Coincidence? We don\'t think so. Our name is literally a 404.',
+      description: 'This admin page doesn\'t exist.',
+      dashboardButton: 'back to dashboard',
+    },
     posters: {
       pageTitle: 'Posters',
       pageSubtitle: 'Manage posters',

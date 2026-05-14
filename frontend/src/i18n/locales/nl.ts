@@ -243,6 +243,15 @@ const nl: Messages = {
     editorSaveError: 'Editor opslaan mislukt.',
     editorDeleteError: 'Editor verwijderen mislukt.',
   },
+  notFound: {
+    titleTop: 'Vier',
+    titleAccent: 'nul',
+    titleBottom: 'vier',
+    joke: 'Toeval? We dachten het niet. Onze naam is letterlijk een 404.',
+    description: 'Deze pagina staat niet in het archief. Misschien is ze nog niet gedigitaliseerd, misschien bestond ze nooit.\nIn de tussentijd: terug naar de start of duik het archief in.',
+    homeButton: 'naar home',
+    searchButton: 'doorzoek archief',
+  },
   footer: {
     brandLogoAlt: 'VIERNULVIER logo',
     organizationName: 'Kunstencentrum VIERNULVIER vzw.',
@@ -363,6 +372,14 @@ const nl: Messages = {
       untitledLabel: '(Geen titel)',
       paginationShowing: (from: number, to: number, total: number) => `Toont ${from}–${to} van ${total} resultaten`,
       paginationPageLabel: (page: number) => `Pagina ${page}`,
+    },
+    notFound: {
+      titleTop: 'Vier',
+      titleAccent: 'nul',
+      titleBottom: 'vier',
+      joke: 'Toeval? We dachten het niet. Onze naam is letterlijk een 404.',
+      description: 'Deze admin-pagina bestaat niet.\nMisschien is de route verplaatst, of klopt de URL niet helemaal.',
+      dashboardButton: 'naar dashboard',
     },
     posters: {
       pageTitle: 'Affiches',
