@@ -1,5 +1,8 @@
 import { useAdminMessages } from '../AdminMessagesContext'
 import { useDashboardFormatters } from '../hooks/useDashboardFormatters'
+import {useNavigate} from "react-router-dom";
+import {useState} from "react";
+import DeleteConfirmModal from "./DeleteConfirmModal.tsx";
 
 
 export type LocalizedString = {
@@ -10,7 +13,7 @@ export type LocalizedString = {
 export type DraftItem = {
     id: string
     title: LocalizedString
-    updatedAt: string
+    updated_at: string
     languageStatus: {
         nl: 'complete' | 'attention' | 'missing'
         en: 'complete' | 'attention' | 'missing'
@@ -20,13 +23,28 @@ export type DraftItem = {
 type DraftsTableProps = {
     items: DraftItem[]
     isLoading: boolean
+    tab: 'productions' | 'blogs'
 }
 
 
-function DraftsTable({ items, isLoading }: DraftsTableProps) {
+function DraftsTable({ items, isLoading, tab}: DraftsTableProps) {
+    const [showDeleteModal, setShowDeleteModal] = useState(false)
+    const [selectedDraft, setSelectedDraft] = useState<DraftItem | null>(null)
+
     const messages = useAdminMessages();
     const d = messages.admin.drafts;
     const { formatDate, locale } = useDashboardFormatters();
+    const navigate = useNavigate();
+
+    const adminBaseRoute =
+        tab === "productions"
+            ? "/admin/archive"
+            : "/admin/blogs";
+    const baseRoute =
+        tab === "productions"
+            ? "/archive"
+            : "/blogs"
+
 
     return (
         <div className="overflow-hidden rounded-[12px] border border-[var(--color-admin-card-border)] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.05)] dark:bg-[#111318]">
@@ -110,18 +128,25 @@ function DraftsTable({ items, isLoading }: DraftsTableProps) {
                                     {/*    })}*/}
                                     {/*</div>*/}
                                 </td>
-                                <td className="px-4 py-4 text-sm text-[#475569] dark:text-slate-300">{formatDate(item.updatedAt)}</td>
+                                <td className="px-4 py-4 text-sm text-[#475569] dark:text-slate-300">
+                                    {formatDate(item.updated_at)}</td>
                                 <td className="px-4 py-4">
                                     <div className="flex gap-1 -ml-2">
                                         <button
+                                            onClick={() => navigate(`${baseRoute}/${item.id}`)}
                                             className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white">
                                             {d.actionView}
                                         </button>
                                         <button
+                                            onClick={() => navigate(`${adminBaseRoute}/${item.id}/edit`)}
                                             className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white">
                                             {d.actionEdit}
                                         </button>
                                         <button
+                                            onClick={() => {
+                                                setSelectedDraft(item)
+                                                setShowDeleteModal(true)
+                                            }}
                                             className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white">
                                             {d.actionDelete}
                                         </button>
@@ -141,7 +166,23 @@ function DraftsTable({ items, isLoading }: DraftsTableProps) {
                     </tbody>
                 </table>
             </div>
+            <DeleteConfirmModal
+                isOpen={showDeleteModal}
+                title="Delete concept"
+                message="Are you sure you want to delete this concept?"
+                onCancel={() => {
+                    setShowDeleteModal(false)
+                    setSelectedDraft(null)
+                }}
+                onConfirm={() => {
+                    console.log("Delete:", selectedDraft?.id)
+
+                    setShowDeleteModal(false)
+                    setSelectedDraft(null)
+                }}
+            />
         </div>
+
     )
 }
 

@@ -55,7 +55,7 @@ function DraftsDashboardPageContent() {
                     </p>
                 </div>
             ) : (
-                <DraftsTable items={items} isLoading={isLoading}/>
+                <DraftsTable items={items} isLoading={isLoading} tab={tab}/>
 
             )}
         </section>
