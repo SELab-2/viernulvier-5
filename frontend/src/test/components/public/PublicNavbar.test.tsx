@@ -45,6 +45,8 @@ const messages = {
         home: 'Home',
         archive: 'ARCHIEF',
         searchAriaLabel: 'Zoeken',
+        searchLink: 'Zoeken',
+        blogsLink: 'Blogs',
         searchPlaceholder: 'Zoek...',
         navAriaLabel: 'Hoofdnavigatie',
         openMenuLabel: 'Menu openen',
