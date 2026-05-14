@@ -118,7 +118,7 @@ function BlogsPageContent() {
                 setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
             } catch (err) {
                 if (abortController.signal.aborted) return
-                setError(err instanceof Error ? err.message : 'Onbekende fout')
+                setError(err instanceof Error ? err.message : b.loadError)
                 setBlogs([])
                 setTotal(0)
                 setTotalPages(1)

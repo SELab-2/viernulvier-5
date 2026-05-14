@@ -306,6 +306,7 @@ export type Messages = {
       searchPlaceholder: string
       newButton: string
       deleteError: string
+      loadError: string
       paginationShowing: (from: number, to: number, total: number) => string
       paginationPageLabel: (page: number) => string
       tableColLinkedProductions: string

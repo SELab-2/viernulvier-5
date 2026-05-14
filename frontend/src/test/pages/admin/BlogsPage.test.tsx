@@ -41,6 +41,7 @@ const mockMessages = {
             searchPlaceholder: 'Zoek op titel...',
             newButton: 'Nieuwe Blog',
             deleteError: 'Verwijderen mislukt. Probeer opnieuw.',
+            loadError: 'Kon blogs niet laden.',
             paginationShowing: (from: number, to: number, total: number) => `Toont ${from}–${to} van ${total} resultaten`,
             paginationPageLabel: (page: number) => `Pagina ${page}`,
             tableColLinkedProductions: 'Gekoppelde producties'

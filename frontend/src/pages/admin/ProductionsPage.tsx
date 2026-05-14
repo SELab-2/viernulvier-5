@@ -130,7 +130,7 @@ function ProductionsPageContent() {
                 setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
             } catch (err) {
                 if (abortController.signal.aborted) return
-                setError(err instanceof Error ? err.message : 'Onbekende fout')
+                setError(err instanceof Error ? err.message : t.admin.posters.loadProductionsError)
                 setProductions([])
                 setTotal(0)
                 setTotalPages(1)

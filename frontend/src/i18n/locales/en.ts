@@ -341,6 +341,7 @@ const en: Messages = {
       searchPlaceholder: 'Search by title...',
       newButton: 'New Blog',
       deleteError: 'Failed to delete. Please try again.',
+      loadError:'Could not load blogs.',
       paginationShowing: (from: number, to: number, total: number) => `Showing ${from}–${to} of ${total} results`,
       paginationPageLabel: (page: number) => `Page ${page}`,
       tableColLinkedProductions: 'Linked productions',
