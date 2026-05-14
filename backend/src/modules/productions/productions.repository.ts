@@ -1,22 +1,5 @@
 import { Prisma, type PrismaClient } from '@prisma/client'
-
-const GENRE_SEARCH_ALIASES: Record<string, string[]> = {
-    theater: ['theater', 'theatre'],
-    theatre: ['theatre', 'theater'],
-    dans: ['dans', 'dance'],
-    dance: ['dance', 'dans'],
-    concert: ['concert'],
-    nightlife: ['nightlife'],
-    talks: ['talks', 'talk'],
-    comedy: ['comedy', 'komedie'],
-    komedie: ['komedie', 'comedy'],
-    monument: ['monument'],
-    circus: ['circus'],
-    performance: ['performance', 'voorstelling'],
-    voorstelling: ['voorstelling', 'performance'],
-    'spoken word': ['spoken word'],
-    'listening session': ['listening session'],
-}
+import { expandGenreTerms } from '../../domain/genre-aliases.js'
 
 type FindAllOptions = {
     page: number
@@ -175,16 +158,6 @@ export class ProductionsRepository {
         return rows.map((row) => row.id)
     }
 
-    private expandGenreTerms(genre: string): string[] {
-        const normalized = genre.trim().toLowerCase()
-        if (!normalized) {
-            return []
-        }
-
-        const fromAliases = GENRE_SEARCH_ALIASES[normalized] ?? [normalized]
-        return Array.from(new Set(fromAliases))
-    }
-
     async findSearchIds(search: string, lang = 'nl'): Promise<string[]> {
         return this.findProductionIdsBySearch(search, lang)
     }
@@ -253,7 +226,7 @@ export class ProductionsRepository {
             const tagFilters: any[] = []
 
             for (const genre of genres) {
-                const searchTerms = this.expandGenreTerms(genre)
+                const searchTerms = expandGenreTerms(genre)
                 const languages = Array.from(new Set([lang, 'nl', 'en', 'fr'])).filter(Boolean) as string[]
 
                 for (const term of searchTerms) {
@@ -364,59 +337,54 @@ export class ProductionsRepository {
         return { created_at: 'desc' }
     }
 
-    async findAll(options: FindAllOptions) {
-        const { page, limit, sort, search, searchIds, lang } = options
-        const skip = (page - 1) * limit
-
-        if (sort === 'relevance' && search && search.trim().length > 0) {
-            const rankedSearchIds = Array.isArray(searchIds)
-                ? searchIds
-                : await this.findProductionIdsBySearch(search, lang)
-            if (rankedSearchIds.length === 0) {
-                return []
-            }
-
-            const filtersWithoutSearch = await this.buildWhere({
-                ...options,
-                search: undefined,
-            })
-
-            const filteredIds = await this.prisma.production.findMany({
-                where: {
-                    AND: [
-                        filtersWithoutSearch,
-                        {
-                            id: {
-                                in: rankedSearchIds,
-                            },
-                        },
-                    ],
-                },
-                select: {
-                    id: true,
-                },
-            })
-
-            const filteredIdSet = new Set(filteredIds.map((item) => item.id))
-            const orderedFilteredIds = rankedSearchIds.filter((id) => filteredIdSet.has(id))
-            const pagedIds = orderedFilteredIds.slice(skip, skip + limit)
-
-            if (pagedIds.length === 0) {
-                return []
-            }
-
-            const rows = await this.prisma.production.findMany({
-                where: {
-                    id: {
-                        in: pagedIds,
+    private get productionInclude() {
+        return {
+            poster_gallery: {
+                include: {
+                    other_files: {
+                        orderBy: { created_at: 'desc' as const },
                     },
                 },
-            })
-
-            const rowsById = new Map(rows.map((item) => [item.id, item]))
-            return pagedIds.map((id) => rowsById.get(id)).filter((item): item is NonNullable<typeof item> => Boolean(item))
+            },
+            media_gallery: {
+                include: {
+                    items: {
+                        take: 10,
+                        orderBy: { created_at: 'asc' as const },
+                        include: {
+                            crops: {
+                                orderBy: { created_at: 'asc' as const },
+                            },
+                        },
+                    },
+                },
+            },
+            events: {
+                take: 50,
+                orderBy: { starts_at: 'asc' as const },
+                include: {
+                    hall: {
+                        select: {
+                            name: true,
+                        },
+                    },
+                },
+            },
+            genre_production: {
+                include: {
+                    genre: {
+                        select: {
+                            name: true,
+                        },
+                    },
+                },
+            },
         }
+    }
 
+    async findAll(options: FindAllOptions) {
+        const { page, limit, sort } = options
+        const skip = (page - 1) * limit
         const where = await this.buildWhere(options)
 
         return this.prisma.production.findMany({
@@ -424,8 +392,37 @@ export class ProductionsRepository {
             skip,
             take: limit,
             orderBy: this.buildOrderBy(sort),
+            include: this.productionInclude,
         })
     }
+
+    async findFilteredIds(options: CountOptions & { rankedIds: string[] }): Promise<string[]> {
+        const { rankedIds, ...countOptions } = options
+        const filtersWithoutSearch = await this.buildWhere({ ...countOptions, search: undefined })
+
+        const rows = await this.prisma.production.findMany({
+            where: {
+                AND: [
+                    filtersWithoutSearch,
+                    { id: { in: rankedIds } },
+                ],
+            },
+            select: { id: true },
+        })
+
+        return rows.map((row) => row.id)
+    }
+
+    async findManyByIds(ids: string[]) {
+        const rows = await this.prisma.production.findMany({
+            where: { id: { in: ids } },
+            include: this.productionInclude,
+        })
+
+        const rowsById = new Map(rows.map((item) => [item.id, item]))
+        return ids.map((id) => rowsById.get(id)).filter((item): item is NonNullable<typeof item> => Boolean(item))
+    }
+
 
     async count(options: CountOptions) {
         const where = await this.buildWhere(options)
@@ -438,6 +435,48 @@ export class ProductionsRepository {
     async findById(id: string) {
         const production = await this.prisma.production.findUnique({
             where: { id },
+            include: {
+                events: {
+                    include: {
+                        hall: {
+                            select: {
+                                name: true,
+                            },
+                        },
+                    },
+                },
+                genre_production: {
+                    include: {
+                        genre: true
+                    }
+                },
+                poster_gallery: {
+                    include: {
+                        other_files: {
+                            orderBy: { created_at: 'desc' as const },
+                        },
+                        items: {
+                            include: {
+                                crops: true,
+                            },
+                        },
+                    },
+                },
+                media_gallery: {
+                    include: {
+                        items: {
+                            include: {
+                                crops: true,
+                            },
+                        },
+                    },
+                },
+                tag_production: {
+                    include: {
+                        tag: true,
+                    },
+                },
+            }
         });
 
         if (!production) return null;

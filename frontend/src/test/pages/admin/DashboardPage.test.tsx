@@ -16,11 +16,9 @@ const mockMessages = vi.hoisted(() => ({
       recentlyEdited: 'Recently edited',
       tableColTitle: 'Title',
       tableColType: 'Type',
-      tableColStatus: 'Status',
       tableColLanguage: 'Language Status',
       tableColDate: 'Date',
       tableColActions: 'Actions',
-      statusAvailable: 'Available in archive',
       actionView: 'View',
       actionEdit: 'Edit',
       emptyRecent: 'No recent archive items found.',
@@ -111,7 +109,6 @@ describe('DashboardPage', () => {
 
     expect(screen.getByText('1.284')).toBeInTheDocument()
     expect(screen.getByText('SNOBS: Editie #11')).toBeInTheDocument()
-    expect(screen.getByText('Available in archive')).toBeInTheDocument()
     await waitFor(() => {
       expect(adminLayoutMock).toHaveBeenLastCalledWith(
         expect.objectContaining({

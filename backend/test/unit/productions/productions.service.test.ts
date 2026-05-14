@@ -23,7 +23,7 @@ describe('ProductionsService', () => {
         service = new ProductionsService(repository as any)
     })
 
-    it('returns a production by id without derived fields', async () => {
+    it('returns a production by id with derived fields', async () => {
         const mockProduction = {
             id: productionId,
             title: { nl: 'Test Productie' },
@@ -32,12 +32,19 @@ describe('ProductionsService', () => {
 
         const result = await service.getProduction(productionId)
 
-        expect(result).toEqual(mockProduction)
-        expect(result).not.toHaveProperty('image_url')
-        expect(result).not.toHaveProperty('venue_name')
+        expect(result).toEqual({
+            ...mockProduction,
+            image_url: null,
+            venue_name: null,
+            venue_names: [],
+            production_genres: [],
+            on_this_day_event_date: null,
+            poster: null,
+            poster_file_url: null,
+        })
     })
 
-    it('returns paginated productions without derived fields', async () => {
+    it('returns paginated productions with derived fields', async () => {
         const mockProductions = [
             { id: '1', title: { nl: 'Prod 1' } },
             { id: '2', title: { nl: 'Prod 2' } },
@@ -47,8 +54,29 @@ describe('ProductionsService', () => {
 
         const result = await service.getProductions({ page: 1, limit: 10 })
 
-        expect(result.items).toEqual(mockProductions)
+        expect(result.items).toEqual([
+            {
+                ...mockProductions[0],
+                image_url: null,
+                venue_name: null,
+                venue_names: [],
+                production_genres: [],
+                on_this_day_event_date: null,
+                poster: null,
+                poster_file_url: null,
+            },
+            {
+                ...mockProductions[1],
+                image_url: null,
+                venue_name: null,
+                venue_names: [],
+                production_genres: [],
+                on_this_day_event_date: null,
+                poster: null,
+                poster_file_url: null,
+            },
+        ])
         expect(result.total).toBe(2)
-        expect(result.items[0]).not.toHaveProperty('image_url')
+        expect(result.items[0]).toHaveProperty('image_url')
     })
 })

@@ -77,10 +77,10 @@ export class SearchRepository {
         if (trimmedSearch) {
             const dateRange = this.parseSearchDate(trimmedSearch)
             const searchConditions: Prisma.blogWhereInput[] = [
-                { title: { path: ['nl'], string_contains: trimmedSearch } },
-                { title: { path: ['en'], string_contains: trimmedSearch } },
-                { content: { path: ['nl'], string_contains: trimmedSearch } },
-                { content: { path: ['en'], string_contains: trimmedSearch } },
+                { title: { path: ['nl'], string_contains: trimmedSearch, mode: 'insensitive' } },
+                { title: { path: ['en'], string_contains: trimmedSearch, mode: 'insensitive' } },
+                { content: { path: ['nl'], string_contains: trimmedSearch, mode: 'insensitive' } },
+                { content: { path: ['en'], string_contains: trimmedSearch, mode: 'insensitive' } },
             ]
 
             if (dateRange) {
