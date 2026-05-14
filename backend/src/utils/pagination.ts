@@ -29,9 +29,18 @@ export function sanitizePage(page: number, totalPages: number): number {
 
 /**
  * Builds links for a paginated resource.
+ * Accepts either a bare path URL (no query string) or a full URL with existing query params.
+ * Existing query params are preserved; only `page` and `limit` are overwritten.
  */
-export function buildPaginationLinks(baseUrl: string, page: number, limit: number, totalPages: number) {
-    const buildUrl = (p: number) => `${baseUrl}?page=${p}&limit=${limit}`
+export function buildPaginationLinks(requestUrl: string, page: number, limit: number, totalPages: number) {
+    const [urlPath, existingQuery] = requestUrl.split('?', 2)
+    
+    const buildUrl = (p: number) => {
+        const params = new URLSearchParams(existingQuery ?? '')
+        params.set('page', String(p))
+        params.set('limit', String(limit))
+        return `${urlPath}?${params.toString()}`
+    }
     
     // If we're beyond total pages, prev should lead back to the last valid page
     const prevPage = page > totalPages ? totalPages : page - 1
