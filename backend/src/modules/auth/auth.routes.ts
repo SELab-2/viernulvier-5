@@ -158,7 +158,6 @@ const authRoutes: FastifyPluginAsync = async (fastify) => {
             body: updateMeSchema,
             response: {
                 200: meResponseSchema,
-                401: errorSchema,
                 404: errorSchema,
                 409: errorSchema,
             }
