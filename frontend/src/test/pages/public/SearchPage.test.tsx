@@ -10,6 +10,12 @@ vi.mock('../../../api/client', () => ({
     normalizeApiAssetUrl: (value: string | null | undefined) => value ?? undefined,
 }))
 
+// Mock window.scrollTo to reduce noise in test output
+Object.defineProperty(window, 'scrollTo', {
+    value: vi.fn(),
+    writable: true,
+})
+
 function buildPaginatedEmpty() {
     return {
         data: [],
@@ -584,6 +590,7 @@ describe('SearchPage FilterPanel interactions', () => {
 
         const startYearSlider = screen.getAllByRole('slider', { name: 'Start year' })[0]
         fireEvent.change(startYearSlider, { target: { value: '2010' } })
+        fireEvent.pointerUp(startYearSlider)
 
         await waitFor(() => {
             const productionCalls = apiFetchMock.mock.calls.filter(
@@ -602,6 +609,7 @@ describe('SearchPage FilterPanel interactions', () => {
 
         const endYearSlider = screen.getAllByRole('slider', { name: 'End year' })[0]
         fireEvent.change(endYearSlider, { target: { value: '2020' } })
+        fireEvent.pointerUp(endYearSlider)
 
         await waitFor(() => {
             const productionCalls = apiFetchMock.mock.calls.filter(
