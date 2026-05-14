@@ -26,8 +26,8 @@ type MutationRoute = {
 const PLACEHOLDER_UUID = '00000000-0000-0000-0000-000000000000'
 
 const MUTATION_ROUTES: MutationRoute[] = [
-    // auth
-    { method: 'PATCH', url: '/api/v1/auth/me', payload: {} },
+    // auth — payload must satisfy the `at least one updatable field` refine
+    { method: 'PATCH', url: '/api/v1/auth/me', payload: { username: 'auth-sweep-user' } },
 
     // blogs
     { method: 'POST', url: '/api/v1/archive/blogs', payload: { productionIds: [] } },
