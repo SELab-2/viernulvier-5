@@ -85,7 +85,7 @@ export class CmsUsersRepository {
     }
 
 
-    async countEditors(options: {search: string; blogId: string, productionId: string }) {
+    async countEditors(options: {search?: string; blogId?: string, productionId?: string }) {
         return this.prisma.adminUser.count({ where: buildEditorWhere(options.search, options.blogId, options.productionId) })
     }
 
