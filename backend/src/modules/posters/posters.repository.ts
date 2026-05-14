@@ -66,7 +66,7 @@ function mapFileTypeToMime(type: PosterFileRecord['type']): string | null {
     }
 
     if (type === 'image') {
-        return 'image/*'
+        return null
     }
 
     return null

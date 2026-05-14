@@ -195,7 +195,7 @@ export class ProductionsService {
             ? {
                 id: posterFile.id,
                 title: String(posterFile.name ?? ''),
-                mime_type: posterFile.type === 'pdf' ? 'application/pdf' : 'image/*',
+                mime_type: posterFile.type === 'pdf' ? 'application/pdf' : null,
                 original_filename: posterFile.description ?? null,
                 file_size_bytes: null,
                 created_at: posterFile.created_at,

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import AdminLayout from '../../components/admin/AdminLayout'
 import { apiFetch, normalizeApiAssetUrl } from '../../api/client'
 import ProductionManagementSection, { type ProductionItem as ManagedProductionItem } from '../../components/admin/blogs/ProductionManagementSection'
@@ -102,6 +102,7 @@ function PostersPageContent() {
   const [deletingPosterId, setDeletingPosterId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [productionError, setProductionError] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   const pageTitle = i18n.admin.posters.pageTitle
   const loadPostersErrorMessage = i18n.admin.posters.loadPostersError
@@ -326,6 +327,9 @@ function PostersPageContent() {
       setTitle('')
       setSelectedFiles([])
       setSelectedProductionIds([])
+      setProductionSearchQuery('')
+      setProductionToAdd('')
+      setIsProductionPopupOpen(false)
       await loadData(search)
     } catch (submitError) {
       const message = submitError instanceof Error ? submitError.message : i18n.admin.posters.loadPostersError
@@ -386,12 +390,7 @@ function PostersPageContent() {
             <div className="space-y-3">
               <div>
                 <input
-                  ref={(input) => {
-                    // Store reference for programmatic access
-                    if (input) {
-                      (window as any).__posterFileInput = input
-                    }
-                  }}
+                  ref={fileInputRef}
                   type="file"
                   multiple
                   accept="image/*,application/pdf"
@@ -407,8 +406,18 @@ function PostersPageContent() {
                       setError(null)
                     }
 
-                    // Accumulate files instead of replacing
-                    setSelectedFiles((currentFiles) => [...currentFiles, ...acceptedFiles])
+                    // Accumulate files instead of replacing; keep first occurrence by name+size+mtime.
+                    setSelectedFiles((currentFiles) => {
+                      const existingKeys = new Set(
+                        currentFiles.map((file) => `${file.name}-${file.size}-${file.lastModified}`),
+                      )
+                      const uniqueAccepted = acceptedFiles.filter((file) => {
+                        const key = `${file.name}-${file.size}-${file.lastModified}`
+                        return !existingKeys.has(key)
+                      })
+
+                      return [...currentFiles, ...uniqueAccepted]
+                    })
                     
                     // Reset the input so the same file can be selected again
                     event.target.value = ''
@@ -418,8 +427,7 @@ function PostersPageContent() {
                 <button
                   type="button"
                   onClick={() => {
-                    const input = (window as any).__posterFileInput as HTMLInputElement | undefined
-                    input?.click()
+                    fileInputRef.current?.click()
                   }}
                   className="inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent/90"
                 >

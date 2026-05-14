@@ -170,6 +170,13 @@ function PosterDetailPage() {
             ? [{ id: poster.id, file_url: poster.file_url, mime_type: poster.mime_type }]
             : []
 
+    const resolvedPosterAssets = displayPosters
+        .map((asset) => ({
+            ...asset,
+            resolvedUrl: normalizeApiAssetUrl(asset.file_url) ?? asset.file_url,
+        }))
+        .filter((asset) => typeof asset.resolvedUrl === 'string' && asset.resolvedUrl.trim().length > 0)
+
     return (
         <PublicLayout>
             <section className="site-container py-12">
@@ -191,18 +198,18 @@ function PosterDetailPage() {
                             </header>
 
                             <div className="grid gap-4">
-                                {displayPosters.map((asset) => (
+                                {resolvedPosterAssets.map((asset) => (
                                     <div key={asset.id} className="overflow-hidden rounded-2xl border border-border bg-surface">
                                         <div className="flex items-center justify-center p-2 md:p-4">
                                             {asset.mime_type === 'application/pdf' ? (
                                                 <iframe
-                                                    src={normalizeApiAssetUrl(asset.file_url)}
+                                                    src={asset.resolvedUrl}
                                                     title={poster.title}
                                                     className="h-[80vh] w-full rounded-md border border-border"
                                                 />
                                             ) : (
                                                 <img
-                                                    src={normalizeApiAssetUrl(asset.file_url)}
+                                                    src={asset.resolvedUrl}
                                                     alt={poster.title}
                                                     className="h-auto w-auto max-h-[80vh] max-w-full object-contain"
                                                 />

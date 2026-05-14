@@ -695,7 +695,7 @@ function useAllHalls(locale: Locale) {
     useEffect(() => {
         const fetchHalls = async () => {
             try {
-                // Fetch more halls to be sure
+                // Fetch enough halls for autocomplete while keeping the request bounded.
                 const res = await apiFetch<{ data: Array<{ name: LocalizedText }> }>('/archive/halls?limit=100')
                 const names = (res.data || [])
                     .map(h => getLocalizedText(h.name, locale))
