@@ -9,7 +9,7 @@ export class ProductionsController {
     private getBaseUrl(request: FastifyRequest) {
         // Use the Host header to include the port (important for local dev on :3001)
         const host = request.headers.host || request.hostname
-        return `${request.protocol}://${host}/api/v1/archive`
+        return `${request.protocol}://${host}/api/v1/`
     }
 
     /**
@@ -17,20 +17,21 @@ export class ProductionsController {
      */
     private mapProductionLinks(production: any, baseUrl: string): ProductionResponse {
         const prodId = production.id
+        const archiveUrl = `${baseUrl}/archive`
         
         return {
             ...production,
             links: {
-                self: `${baseUrl}/productions/${prodId}`,
-                blogs: `${baseUrl}/blogs?productionId=${prodId}`,
-                events: `${baseUrl}/events?productionId=${prodId}`,
-                genres: `${baseUrl}/genres?productionId=${prodId}`,
-                tags: `${baseUrl}/tags?productionId=${prodId}`,
-                editors: `${baseUrl}/editors?productionId=${prodId}`,
-                media_gallery: production.media_gallery_id ? `${baseUrl}/media/galleries/${production.media_gallery_id}` : null,
-                review_gallery: production.review_gallery_id ? `${baseUrl}/media/galleries/${production.review_gallery_id}` : null,
-                poster_gallery: production.poster_gallery_id ? `${baseUrl}/media/galleries/${production.poster_gallery_id}` : null,
-                poster: production.poster?.id ? `${baseUrl}/posters/${production.poster.id}` : null,
+                self: `${archiveUrl}/productions/${prodId}`,
+                blogs: `${archiveUrl}/blogs?productionId=${prodId}`,
+                events: `${archiveUrl}/events?productionId=${prodId}`,
+                genres: `${archiveUrl}/genres?productionId=${prodId}`,
+                tags: `${archiveUrl}/tags?productionId=${prodId}`,
+                editors: `${baseUrl}/cms-users?productionId=${prodId}`,
+                media_gallery: production.media_gallery_id ? `${archiveUrl}/media/galleries/${production.media_gallery_id}` : null,
+                review_gallery: production.review_gallery_id ? `${archiveUrl}/media/galleries/${production.review_gallery_id}` : null,
+                poster_gallery: production.poster_gallery_id ? `${archiveUrl}/media/galleries/${production.poster_gallery_id}` : null,
+                poster: production.poster?.id ? `${archiveUrl}/posters/${production.poster.id}` : null,
             }
         }
     }
@@ -68,7 +69,7 @@ export class ProductionsController {
         return reply.status(200).send({
             data: dataWithLinks,
             links: {
-                self: `${baseUrl}/productions/${id}`
+                self: `${baseUrl}/archive/productions/${id}`
             }
         })
     }
@@ -76,7 +77,7 @@ export class ProductionsController {
     async createProduction(request: FastifyRequest<{ Body: CreateProductionInput }>, reply: FastifyReply) {
         const production = await this.service.createProduction(request.body)
         const baseUrl = this.getBaseUrl(request)
-        const selfUrl = `${baseUrl}/productions/${production.id}`
+        const selfUrl = `${baseUrl}/archive/productions/${production.id}`
         
         const dataWithLinks = this.mapProductionLinks(production, baseUrl)
 
@@ -100,7 +101,7 @@ export class ProductionsController {
         return reply.status(200).send({
             data: dataWithLinks,
             links: {
-                self: `${baseUrl}/productions/${id}`
+                self: `${baseUrl}/archive/productions/${id}`
             }
         })
     }
@@ -108,6 +109,18 @@ export class ProductionsController {
     async deleteProduction(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
         const { id } = request.params
         await this.service.deleteProduction(id)
+        return reply.status(204).send()
+    }
+
+    async addEditor(request: FastifyRequest<{ Params: { id: string }, Body: { editorId: string } }>, reply: FastifyReply) {
+        const { id } = request.params
+        await this.service.addEditor(id, request.body.editorId)
+        return reply.status(204).send()
+    }
+
+    async removeEditor(request: FastifyRequest<{ Params: { id: string, editorId: string } }>, reply: FastifyReply) {
+        const { id, editorId } = request.params
+        await this.service.removeEditor(id, editorId)
         return reply.status(204).send()
     }
 }

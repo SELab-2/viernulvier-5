@@ -294,4 +294,24 @@ export class BlogsRepository {
         ])
 
     }
+
+    async addEditor(productionId: string, editorId: string) {
+        return this.prisma.editor_blog.create({
+            data: {
+                blog_id: productionId,
+                editor_id: editorId,
+            }
+        })
+    }
+
+    async removeEditor(productionId: string, editorId: string) {
+        return this.prisma.editor_blog.delete({
+            where: {
+                editor_id_blog_id: {
+                    editor_id: editorId,
+                    blog_id: productionId,
+                }
+            }
+        })
+    }
 }

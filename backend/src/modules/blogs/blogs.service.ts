@@ -6,6 +6,7 @@ import type {
     UpdateBlogInput
 } from './blogs.schema.js'
 import { PaginatedResult, calculateTotalPages, sanitizePage } from '../../utils/pagination.js'
+import {AppError} from "../../errors/app-error";
 
 export class BlogsService {
     constructor(private readonly repository: BlogsRepository) {}
@@ -50,5 +51,17 @@ export class BlogsService {
 
     async deleteBlog(id: string): Promise<void> {
         await this.repository.delete(id)
+    }
+
+    async addEditor(blogId: string, editorId: string) {
+        const blog = await this.repository.findById(blogId)
+        if (!blog) throw new AppError('blog not found', 404)
+        return this.repository.addEditor(blogId, editorId)
+    }
+
+    async removeEditor(blogId: string, editorId: string) {
+        const blog = await this.repository.findById(blogId)
+        if (!blog) throw new AppError('blog not found', 404)
+        return this.repository.removeEditor(blogId, editorId)
     }
 }

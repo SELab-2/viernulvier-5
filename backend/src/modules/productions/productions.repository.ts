@@ -502,4 +502,24 @@ export class ProductionsRepository {
             where: { id }
         })
     }
+
+    async addEditor(productionId: string, editorId: string) {
+        return this.prisma.editor_production.create({
+            data: {
+                production_id: productionId,
+                editor_id: editorId,
+            }
+        })
+    }
+
+    async removeEditor(productionId: string, editorId: string) {
+        return this.prisma.editor_production.delete({
+            where: {
+                editor_id_production_id: {
+                    editor_id: editorId,
+                    production_id: productionId,
+                }
+            }
+        })
+    }
 }

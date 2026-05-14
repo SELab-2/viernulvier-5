@@ -6,6 +6,7 @@ import type {
     CreateProductionInput 
 } from './productions.schema.js'
 import { PaginatedResult, calculateTotalPages, sanitizePage } from '../../utils/pagination.js'
+import {AppError} from "../../errors/app-error";
 
 export class ProductionsService {
     constructor(private readonly repository: ProductionsRepository) { }
@@ -320,5 +321,17 @@ export class ProductionsService {
 
     async deleteProduction(id: string): Promise<void> {
         await this.repository.delete(id)
+    }
+
+    async addEditor(productionId: string, editorId: string) {
+        const production = await this.repository.findById(productionId)
+        if (!production) throw new AppError('Production not found', 404)
+        return this.repository.addEditor(productionId, editorId)
+    }
+
+    async removeEditor(productionId: string, editorId: string) {
+        const production = await this.repository.findById(productionId)
+        if (!production) throw new AppError('Production not found', 404)
+        return this.repository.removeEditor(productionId, editorId)
     }
 }

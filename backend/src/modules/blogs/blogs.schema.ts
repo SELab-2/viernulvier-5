@@ -30,6 +30,7 @@ export const blogPaginationQuerySchema = paginationQuerySchema.extend({
  */
 export const blogLinksSchema = z.object({
     self: z.string().url().default('https://example.com/'),
+    editors: z.string().url().optional().nullable().default('https://example.com/'),
 })
 
 export const blogSchema = z.object({
