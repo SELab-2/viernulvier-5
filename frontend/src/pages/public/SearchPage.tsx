@@ -413,8 +413,8 @@ type BlogApiItem = {
     title?: unknown
     content?: unknown
     productions: string[]
-    createdAt: string
-    updatedAt: string
+    created_at: string
+    updated_at: string
     links?: { self: string }
 }
 
@@ -463,8 +463,8 @@ function getBlogExcerpt(content: unknown, locale: Locale, fallback: string): str
 
 function mapBlogToSearchEntry(item: BlogApiItem, locale: Locale, searchMessages: Messages['search']): SearchEntry {
     const title = getLocalizedTitle(item.title, locale) || searchMessages.fallbackUntitled
-    const date = item.createdAt ? formatDate(item.createdAt, locale) : '-'
-    const year = item.createdAt ? new Date(item.createdAt).getFullYear() : MIN_PERIOD_YEAR
+    const date = item.created_at ? formatDate(item.created_at, locale) : '-'
+    const year = item.created_at ? new Date(item.created_at).getFullYear() : MIN_PERIOD_YEAR
 
     return {
         id: item.id,
@@ -1348,8 +1348,8 @@ function SearchPageContent() {
                                     title: item.title,
                                     content: item.content,
                                     productions: item.productions ?? [],
-                                    createdAt: item.created_at ?? '',
-                                    updatedAt: item.created_at ?? '',
+                                    created_at: item.created_at ?? '',
+                                    updated_at: item.created_at ?? '',
                                 },
                                 locale,
                                 searchMessages,
