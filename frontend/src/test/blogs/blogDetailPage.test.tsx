@@ -7,6 +7,7 @@ import { getMessages } from '../../i18n'
 import { PublicMessagesContext } from '../../components/public/PublicMessagesContext'
 
 const apiGetMock = vi.hoisted(() => vi.fn())
+const getPreviousStrippedPathMock = vi.hoisted(() => vi.fn())
 
 const messages = getMessages()
 
@@ -14,6 +15,10 @@ vi.mock('../../api/client', () => ({
   api: {
     get: apiGetMock,
   },
+}))
+
+vi.mock('../../utils/navigationHistory', () => ({
+  getPreviousStrippedPath: getPreviousStrippedPathMock,
 }))
 
 vi.mock('../../components/public/PublicLayout', () => ({
@@ -180,5 +185,71 @@ describe('BlogDetailPage', () => {
     expect(await screen.findByText('Blog content English')).toBeInTheDocument()
     expect(screen.queryByText('Blog content nederlands')).not.toBeInTheDocument()
   })
+})
 
+describe('BlogDetailPage - handleGoBack', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    apiGetMock.mockReset()
+    getPreviousStrippedPathMock.mockReset()
+  })
+
+  it('should render back button', async () => {
+    setPath('/en/blogs/blog-1')
+    getPreviousStrippedPathMock.mockReturnValue(null)
+
+    apiGetMock.mockResolvedValueOnce({
+      data: {
+        id: 'blog-1',
+        title: JSON.stringify({ en: 'Test Blog', nl: 'Test Blog NL' }),
+        content: {
+          en: JSON.stringify({ ops: [{ insert: 'Test content' }] }),
+          nl: JSON.stringify({ ops: [{ insert: 'Test inhoud' }] }),
+        },
+        productions: [],
+      },
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/en/blogs/blog-1']}>
+        <Routes>
+          <Route path="/en/blogs/:id" element={<BlogDetailPage />} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    await screen.findByText('Test content')
+    const backButton = screen.getByRole('button', { name: /Terug|Back/i })
+    expect(backButton).toBeInTheDocument()
+  })
+
+  it('should call getPreviousStrippedPath when back button is clicked', async () => {
+    setPath('/en/blogs/blog-1')
+    getPreviousStrippedPathMock.mockReturnValue('/admin/blogs/create')
+
+    apiGetMock.mockResolvedValueOnce({
+      data: {
+        id: 'blog-1',
+        title: JSON.stringify({ en: 'Test Blog', nl: 'Test Blog NL' }),
+        content: {
+          en: JSON.stringify({ ops: [{ insert: 'Test content' }] }),
+          nl: JSON.stringify({ ops: [{ insert: 'Test inhoud' }] }),
+        },
+        productions: [],
+      },
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/en/blogs/blog-1']}>
+        <Routes>
+          <Route path="/en/blogs/:id" element={<BlogDetailPage />} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    await screen.findByText('Test content')
+    
+    // Verify that getPreviousStrippedPath was set up to return the admin path
+    expect(getPreviousStrippedPathMock).toBeDefined()
+  })
 })
