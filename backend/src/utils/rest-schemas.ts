@@ -26,6 +26,14 @@ export const metaSchema = z.object({
 })
 
 /**
+ * Standard pagination query parameters.
+ */
+export const paginationQuerySchema = z.object({
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce.number().int().min(1).max(100).default(20),
+})
+
+/**
  * Creates a paginated response schema for a given data schema.
  */
 export function createPaginatedResponseSchema<T extends z.ZodTypeAny>(dataSchema: T) {

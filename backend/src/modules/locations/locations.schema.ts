@@ -1,7 +1,8 @@
 import { z } from 'zod'
 import { 
     createPaginatedResponseSchema, 
-    createSingleResponseSchema 
+    createSingleResponseSchema,
+    paginationQuerySchema
 } from '../../utils/rest-schemas.js'
 
 const localizedTextSchema = z.object({
@@ -10,9 +11,7 @@ const localizedTextSchema = z.object({
     en: z.string().optional(),
 }).nullable()
 
-export const locationPaginationQuerySchema = z.object({
-    page: z.coerce.number().int().positive().default(1),
-    limit: z.coerce.number().int().positive().max(100).default(20),
+export const locationPaginationQuerySchema = paginationQuerySchema.extend({
     search: z.string().optional(),
     lang: z.string().optional().default('nl'),
 })
@@ -38,7 +37,6 @@ export const locationSchema = z.object({
     phone_2: z.string().nullable(),
     own_location: z.string().nullable(),
     country: z.string().nullable(),
-    uitdatabank_id: z.string().nullable(),
     created_at: z.coerce.date(),
     updated_at: z.coerce.date(),
     links: locationLinksSchema.optional(),
@@ -63,7 +61,6 @@ export const updateLocationSchema = z.object({
     phone_2: z.string().nullable().optional(),
     own_location: z.string().nullable().optional(),
     country: z.string().nullable().optional(),
-    uitdatabank_id: z.string().nullable().optional(),
 })
 
 export const createLocationSchema = updateLocationSchema

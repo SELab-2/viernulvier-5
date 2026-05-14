@@ -33,10 +33,6 @@ export async function main() {
   await Scraper.sync_spaces(cutoff_timestamp);
   await Scraper.sync_hall(cutoff_timestamp);
 
-  await Scraper.sync_uit_keywords(cutoff_timestamp);
-  await Scraper.sync_uit_themes(cutoff_timestamp);
-  await Scraper.sync_uit_types(cutoff_timestamp);
-
   if (process.env.CROP_LOCATION === undefined){
     console.log("no crop_location given in the .env");
     return;
