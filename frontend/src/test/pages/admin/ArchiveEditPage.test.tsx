@@ -94,6 +94,7 @@ const mockMessages: Pick<Messages, 'admin'> = {
       tabPublished: 'Published',
       tabConcepts: 'Concepts',
       tabAriaLabel: 'Productions filter',
+      untitledLabel: '(Untitled)',
       paginationShowing: (from: number, to: number, total: number) => `Showing ${from}–${to} of ${total} results`,
       paginationPageLabel: (page: number) => `Page ${page}`,
     },
