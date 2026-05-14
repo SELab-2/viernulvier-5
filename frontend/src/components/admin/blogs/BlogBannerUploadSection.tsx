@@ -64,7 +64,10 @@ export function BlogBannerUploadSection({
         onPendingFilesChange(newFiles)
     }
 
-    const selectThumbnail = (index: number) => {
+    const selectThumbnail = (index: number | null) => {
+        if (index === null){
+            return;
+        }
         onThumbnailIndexChange(index)
     }
 
@@ -107,12 +110,13 @@ export function BlogBannerUploadSection({
                     <p className="text-sm font-medium text-foreground mb-2">{messages.blogs.bannerUpload.uploadedImagesLabel}</p>
                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
                         {images.map((imagePath, index) => (
-                            <div key={imagePath} className="relative group">
+                            <div key={imagePath} className="relative group cursor-pointer">
                                 <div
+                                    onClick={() => selectThumbnail(thumbnailIndex === index ? null : index)}
                                     className={`aspect-square overflow-hidden rounded-lg border-2 transition ${
                                         thumbnailIndex === index
-                                            ? 'border-amber-400 ring-2 ring-amber-400/50'
-                                            : 'border-border hover:border-accent/50'
+                                            ? 'border-blue-500 ring-2 ring-blue-500/30'
+                                            : 'border-border hover:border-blue-400'
                                     }`}
                                 >
                                     <img
@@ -124,17 +128,6 @@ export function BlogBannerUploadSection({
                                 {thumbnailIndex === index && (
                                     <div className="absolute top-1 right-1 text-xl">⭐</div>
                                 )}
-                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition rounded-lg flex items-center justify-center gap-1">
-                                    {thumbnailIndex !== index && (
-                                        <button
-                                            type="button"
-                                            onClick={() => selectThumbnail(index)}
-                                            className="px-2 py-1 bg-amber-500 text-white text-xs font-medium rounded hover:bg-amber-600 transition opacity-0 group-hover:opacity-100"
-                                        >
-                                            {messages.blogs.bannerUpload.setThumbnailButton}
-                                        </button>
-                                    )}
-                                </div>
                             </div>
                         ))}
                     </div>
