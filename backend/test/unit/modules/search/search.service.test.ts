@@ -84,8 +84,8 @@ describe('SearchService', () => {
                 title: { nl: 'Blog 1' },
                 content: { nl: 'Blog content' },
                 productions: [],
-                createdAt: new Date('2025-10-01T00:00:00.000Z'),
-                updatedAt: new Date('2025-10-01T00:00:00.000Z'),
+                created_at: new Date('2025-10-01T00:00:00.000Z'),
+                updated_at: new Date('2025-10-01T00:00:00.000Z'),
             },
         ])
 
@@ -236,8 +236,8 @@ describe('SearchService', () => {
                 title: { nl: 'Older blog' },
                 content: { nl: 'Old content' },
                 productions: [],
-                createdAt: new Date('2020-01-01T00:00:00.000Z'),
-                updatedAt: new Date('2020-01-01T00:00:00.000Z'),
+                created_at: new Date('2020-01-01T00:00:00.000Z'),
+                updated_at: new Date('2020-01-01T00:00:00.000Z'),
             },
         ])
 

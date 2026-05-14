@@ -17,8 +17,8 @@ export const cmsUserSchema = z.object({
     id: z.string().uuid(),
     username: z.string().min(1),
     role: z.enum(['ADMIN', 'EDITOR']),
-    createdAt: z.coerce.date(),
-    updatedAt: z.coerce.date(),
+    created_at: z.coerce.date(),
+    updated_at: z.coerce.date(),
     links: cmsUserLinksSchema.optional(),
 })
 

@@ -62,7 +62,7 @@ describe('Blogs Routes', () => {
 
                 await app.prisma.blog.update({
                     where: { id: contentBlog.id },
-                    data: { createdAt: new Date('2026-04-22T10:00:00.000Z') },
+                    data: { created_at: new Date('2026-04-22T10:00:00.000Z') },
                 })
 
                 const titleSearchResponse = await app.inject({
