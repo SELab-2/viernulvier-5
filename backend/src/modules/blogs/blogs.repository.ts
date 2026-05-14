@@ -169,6 +169,8 @@ export class BlogsRepository {
         id: string
         title: unknown
         content: unknown
+        thumbnail_index: number | null
+        images: string[]
         createdAt: Date
         updatedAt: Date
         blog_production?: Array<{ production_id: string }>
@@ -177,6 +179,8 @@ export class BlogsRepository {
             id: blog.id,
             title: this.normalizeBlogTitle(blog.title),
             content: blog.content,
+            thumbnail_index: blog.thumbnail_index,
+            images: blog.images,
             productions: blog.blog_production?.map((relation) => relation.production_id) ?? [],
             createdAt: blog.createdAt,
             updatedAt: blog.updatedAt,
@@ -230,6 +234,8 @@ export class BlogsRepository {
             data: {
                 title,
                 content: (data.content ?? null) as Prisma.InputJsonValue,
+                thumbnail_index: data.thumbnail_index ?? null,
+                images: data.images ?? [],
                 blog_production: {
                     create: data.productionIds.map((productionId) => ({
                         production: {
@@ -257,6 +263,8 @@ export class BlogsRepository {
                     ? { title }
                     : {}),
                 ...(data.content !== undefined ? { content: data.content as Prisma.InputJsonValue } : {}),
+                ...(data.thumbnail_index !== undefined ? { thumbnail_index: data.thumbnail_index } : {}),
+                ...(data.images !== undefined ? { images: data.images } : {}),
                 ...(data.productionIds !== undefined
                     ? {
                         blog_production: {

@@ -33,6 +33,8 @@ export const blogSchema = z.object({
     id: z.string().uuid(),
     title: blogTitleSchema.nullable().optional(),
     content: z.unknown().nullable().optional(),
+    thumbnail_index: z.number().int().nonnegative().nullable().optional(),
+    images: z.array(z.string()).optional(),
     productions: z.array(z.string().uuid()),
     createdAt: z.coerce.date().optional(),
     updatedAt: z.coerce.date().optional(),
@@ -45,12 +47,16 @@ export const singleBlogSchema = createSingleResponseSchema(blogSchema)
 export const createBlogSchema = z.object({
     title: blogTitleSchema.optional(),
     content: z.unknown().optional(),
+    thumbnail_index: z.number().int().nonnegative().nullable().optional(),
+    images: z.array(z.string()).optional(),
     productionIds: z.array(z.string().uuid()),
 })
 
 export const updateBlogSchema = z.object({
     title: blogTitleSchema.optional(),
     content: z.unknown().optional(),
+    thumbnail_index: z.number().int().nonnegative().nullable().optional(),
+    images: z.array(z.string()).optional(),
     productionIds: z.array(z.string().uuid()).optional(),
 })
 
