@@ -1,25 +1,19 @@
 import { useEffect, useState, useRef } from 'react'
 import { api } from '../../api/client'
 import type { LocalizedText } from '../../types/production'
+import type { TaxonomyItem, TaxonomyResponse } from '../../types/taxonomies'
 import { useLocale } from './useLocale'
 
 type FuzzyTagInputProps = {
-    tags: string[]
+    tags: TaxonomyItem[]
     tag: string
     endpoint: '/archive/genres' | '/archive/tags'
-    addTag: (id: string) => void
+    addTag: (id: string, text: LocalizedText) => void
     onRemove: (id: string) => void
     onChange: (value: string) => void
     placeholder?: string
 }
 
-interface TaxonomyItem {
-    name: LocalizedText
-}
-
-interface TaxonomyResponse {
-    data: TaxonomyItem[]
-}
 
 function FuzzyTagInput({
     tags,
@@ -30,19 +24,20 @@ function FuzzyTagInput({
     onChange,
     placeholder
 }: FuzzyTagInputProps) {
-    const { locale } = useLocale()
-    const [suggestions, setSuggestions] = useState<LocalizedText[]>([])
-    const [isOpen, setIsOpen] = useState(false)
-    const containerRef = useRef<HTMLDivElement>(null)
+    const { locale } = useLocale();
+    const [suggestions, setSuggestions] = useState<TaxonomyItem[]>([]);
+    const [isOpen, setIsOpen] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
 
     const defaultPlaceholder = locale === 'nl' ? 'Toevoegen...' : 'Add...'
     const activePlaceholder = placeholder || defaultPlaceholder
-
+    
+    // Fetch suggestions
     useEffect(() => {
         const fetchSuggestions = async () => {
             if (tag.length < 1) {
-                setSuggestions([])
-                return
+                setSuggestions([]);
+                return;
             }
 
             try {
@@ -51,60 +46,59 @@ function FuzzyTagInput({
                 if (response && response.data) {
                     // Extract all possible names from existing tags for duplicate checking
                     const existingNamesLower = tags.flatMap(t => [
-                        t?.nl?.toLowerCase(),
-                        t?.en?.toLowerCase(),
-                        t?.fr?.toLowerCase()
-                    ].filter((v): v is string => !!v))
+                        t.name?.nl?.toLowerCase(),
+                        t.name?.en?.toLowerCase(),
+                        t.name?.fr?.toLowerCase()
+                    ].filter((v): v is string => !!v));
 
-                    const newSuggestions = response.data
-                        .map((item: TaxonomyItem) => item.name)
-                        .filter((nameObj: LocalizedText | null) => {
-                            if (!nameObj) return false
-                            const currentName = (nameObj[locale] || nameObj.nl || nameObj.en || '').toLowerCase()
-                            // Also check if any of the localized names of this suggestion already exist
-                            const suggestionNames = [nameObj.nl?.toLowerCase(), nameObj.en?.toLowerCase(), nameObj.fr?.toLowerCase()].filter((v): v is string => !!v)
-                            const alreadyExists = suggestionNames.some(name => existingNamesLower.includes(name))
-                            
-                            return currentName !== '' && !alreadyExists
-                        })
-                    setSuggestions(newSuggestions)
+                    const newSuggestions = response.data.filter((item: TaxonomyItem) => {
+                        const nameObj = item.name;
+                        if (!nameObj) return false;
+                        const currentName = (nameObj[locale] || nameObj.nl || nameObj.en || '').toLowerCase();
+                        const suggestionNames = [nameObj.nl?.toLowerCase(), nameObj.en?.toLowerCase()]
+                            .map(v => v?.toLowerCase())
+                            .filter((v): v is string => !!v);
+                        const alreadyExists = suggestionNames.some(name => existingNamesLower.includes(name));
+                        return currentName !== '' && !alreadyExists;
+                    });
+                    setSuggestions(newSuggestions);
                 }
             } catch (error) {
                 console.error('Failed to fetch suggestions:', error)
             }
         }
 
-        const timer = setTimeout(fetchSuggestions, 300)
-        return () => clearTimeout(timer)
+        const timer = setTimeout(fetchSuggestions, 300);
+        return () => clearTimeout(timer);
     }, [tag, endpoint, tags, locale])
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-                setIsOpen(false)
+                setIsOpen(false);
             }
         }
-        document.addEventListener('mousedown', handleClickOutside)
-        return () => document.removeEventListener('mousedown', handleClickOutside)
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [])
 
-    const handleSelectSuggestion = (suggestion: LocalizedText) => {
-        addTag(suggestion)
-        setIsOpen(false)
+    const handleSelectSuggestion = (suggestion: TaxonomyItem) => {
+        addTag(suggestion.id, suggestion.name);
+        setIsOpen(false);
     }
 
     return (
         <div className="flex flex-col relative" ref={containerRef}>
             <div className="flex flex-wrap gap-2 mb-2">
                 {tags.map((t, idx) => {
-                    const displayName = t?.[locale] || t?.nl || t?.en || '???'
+                    const displayName = t.name?.[locale] || t.name?.nl || t.name?.en || '???'
                     return (
                         <span
                             key={`${displayName}-${idx}`}
                             className="flex items-center gap-1 rounded-full bg-accent/25 border-accent border px-3 py-1 text-xs font-bold text-foreground"
                         >
                             {displayName}
-                            <button type='button' onClick={() => onRemove(t)} className="hover:opacity-70">
+                            <button type='button' onClick={() => onRemove(t.id)} className="hover:opacity-70">
                                 ×
                             </button>
                         </span>
@@ -124,8 +118,8 @@ function FuzzyTagInput({
                         if (e.key === 'Enter') {
                             e.preventDefault()
                             if (tag.trim()) {
-                                // Manual add stores it in the current locale
-                                addTag({ [locale]: tag.trim() })
+                                // Only select existing tags
+                                handleSelectSuggestion(suggestions[0])
                                 setIsOpen(false)
                             }
                         }
@@ -136,17 +130,19 @@ function FuzzyTagInput({
             </div>
 
             {isOpen && suggestions.length > 0 && (
-                <ul className="absolute z-10 bg-surface border border-border rounded-md shadow-lg top-full -mt-7 max-h-40 overflow-auto">
-                    {suggestions.map((suggestion, index) => {
-                        if (!suggestion) return null
-                        const suggestionName = suggestion[locale] || suggestion.nl || suggestion.en || ''
+                <ul className="absolute z-10 w-full bg-background border border-border rounded-lg shadow-xl top-full mt-1 overflow-hidden">
+                    {suggestions.map((suggestion) => {
+                        const suggestionName = suggestion.name?.[locale] || suggestion.name?.nl || suggestion.name?.en || ''
                         return (
                             <li
-                                key={index}
+                                key={suggestion.id}
                                 onClick={() => handleSelectSuggestion(suggestion)}
-                                className="px-4 py-2 text-sm hover:bg-accent hover:text-white cursor-pointer"
+                                className="flex items-center justify-between px-4 py-2.5 text-sm text-foreground hover:bg-accent/10 cursor-pointer transition-colors duration-100 group border-b border-border/40 last:border-0"
                             >
-                                {suggestionName}
+                                <span className="font-medium">{suggestionName}</span>
+                                <span className="text-xs text-muted opacity-0 group-hover:opacity-100 transition-opacity duration-100">
+                                    Add ↵
+                                </span>
                             </li>
                         )
                     })}

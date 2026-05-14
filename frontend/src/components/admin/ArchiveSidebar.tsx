@@ -1,15 +1,17 @@
+import type { LocalizedText } from "../../types/production"
+import type { TaxonomyItem } from "../../types/taxonomies"
 import FuzzyTagInput from "./FuzzyTagInput"
 import { useState } from "react"
 
 type ArchiveSidebarProps = {
     genre: string
-    genres: string[]
+    genres: TaxonomyItem[]
     tag: string
-    tags: string[]
-    onAddGenre: (id: string) => void
+    tags: TaxonomyItem[]
+    onAddGenre: (id: string, text: LocalizedText) => void
     onRemoveGenre: (id: string) => void
     onChangeGenre: (id: string) => void
-    onAddTag: (id: string) => void
+    onAddTag: (id: string, text: LocalizedText) => void
     onRemoveTag: (id: string) => void
     onChangeTag: (id: string) => void
 

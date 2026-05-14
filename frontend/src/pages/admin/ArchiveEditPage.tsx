@@ -16,6 +16,7 @@ import EventPopup from '../../components/admin/EventPopup'
 import ArchiveSidebar from '../../components/admin/ArchiveSidebar'
 import ArchiveEditHeader from '../../components/admin/ArchiveEditHeader'
 import { useLocale } from '../../components/admin/useLocale'
+import type { TaxonomyItem } from '../../types/taxonomies'
 
 const defaultLocalizedText: LocalizedText = {
     nl: '',
@@ -81,9 +82,9 @@ function ArchiveEditPage() {
     // production state
     const [production, setProduction] = useState<ProductionPayload>(defaultProduciton);
     const [events, setEvents] = useState<Event[]>([]);
-    const [genres, setGenres] = useState<string[]>([]);
+    const [genres, setGenres] = useState<TaxonomyItem[]>([]);
     const [genre, setGenre] = useState<string>('');
-    const [tags, setTags] = useState<string[]>([]);
+    const [tags, setTags] = useState<TaxonomyItem[]>([]);
     const [tag, setTag] = useState<string>('');
     const [editLanguage, setEditLanguage] = useState<Locale>('nl');
     const [editingEvent, setEditingEvent] = useState<Event>(defaultEvent) // currently selected event
@@ -211,26 +212,26 @@ function ArchiveEditPage() {
         }))
     }
 
-    const onAddGenre = (id: string) => {
-        setGenres(prev => prev.includes(id) ? prev : [...prev, id]);
+    const onAddGenre = (id: string, text: LocalizedText) => {
+        setGenres(prev => prev.some(t => t.id === id) ?  prev : [...prev, {id: id, name: text}]);
         setGenre('');
     }
 
     const onRemoveGenre = (id: string) => {
-        setGenres(prev => prev.filter(g => g !== id))
+        setGenres(prev => prev.filter(g => g.id !== id))
     }
 
     const onChangeGenre = (input: string) => {
         setGenre(input);
     }
 
-    const onAddTag = (id : string) => {
-        setTags(prev => prev.includes(id) ? prev : [...prev, id]);
+    const onAddTag = (id: string, text: LocalizedText) => {
+        setTags(prev => prev.some(t => t.id === id) ? prev : [...prev, {id: id, name: text}]);
         setTag('');
     }
 
     const onRemoveTag = (id : string) => {
-        setTags(prev => prev.filter(t => t !== id));
+        setTags(prev => prev.filter(t => t.id !== id));
     }
 
     const onChangeTag = (input: string) => {
@@ -303,7 +304,6 @@ function ArchiveEditPage() {
                     onChangeTag={onChangeTag}
 
                     productionSettingsLabel={messages.production.productionSettingsLabel}
-                    statusLabel={messages.production.statusLabel}
                     genreLabel={messages.production.genreLabel}
                     tagLabel={messages.production.tagLabel}
                     bannerLabel={messages.production.bannerLabel}

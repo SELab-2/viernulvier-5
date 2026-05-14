@@ -1,7 +1,7 @@
 import type { Language } from "../../types/production"
 
 type ArchiveTabProps = {
-    language: Language // QUESTION: maybe a separate type for languages in /types/production.tsx?
+    language: Language
     options: { key: Language, label: string}[]
     setTab: (key: Language) => void
 }
