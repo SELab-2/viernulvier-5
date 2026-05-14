@@ -67,10 +67,11 @@ function BlogDetailPageContent() {
     const handleGoBack = () => {
         const prev = getPreviousStrippedPath()
         if (prev) {
+            // navigate directly to the previous page in the current locale
+            // this bypasses any locale-switch history entries entirely
             navigate(withLocalePath(prev, locale))
             return
         }
-
         navigate(withLocalePath('/', locale))
     }
 
