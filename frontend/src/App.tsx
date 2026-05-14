@@ -11,12 +11,13 @@ import ArchiveDetailPage from './pages/public/ArchiveDetailPage'
 import SearchPage from './pages/public/SearchPage'
 import NotFoundPage from './pages/public/NotFoundPage'
 import PosterDetailPage from './pages/public/PosterDetailPage'
+// Eager: NotFound must render instantly for unknown routes (no Suspense flash).
+import AdminNotFoundPage from './pages/admin/NotFoundPage'
 
 // Admin pages (lazy loaded — not included in public bundle)
 const LoginPage = lazy(() => import('./pages/admin/LoginPage'))
 const DashboardPage = lazy(() => import('./pages/admin/DashboardPage'))
 const ArchiveEditPage = lazy(() => import('./pages/admin/ArchiveEditPage'))
-const AdminNotFoundPage = lazy(() => import('./pages/admin/NotFoundPage'))
 const PostersPage = lazy(() => import('./pages/admin/PostersPage'))
 
 import CreateBlogPage from './pages/admin/CreateBlogPage'
