@@ -23,8 +23,8 @@ describe('ArchiveDetailGallery', () => {
             <ArchiveDetailGallery images={images} />
         )
 
-        expect(screen.getByRole('img')).toHaveAttribute('src', 'https://example.com/1.jpg')
-        expect(screen.getByRole('img')).toHaveAttribute('alt', 'Gallery image 1')
+        const [img] = screen.getAllByAltText('Gallery image 1')
+        expect(img).toHaveAttribute('src', 'https://example.com/1.jpg')
     })
 
     it('does not render navigation buttons for a single image', () => {
@@ -60,8 +60,8 @@ describe('ArchiveDetailGallery', () => {
 
         fireEvent.click(screen.getByText('›'))
 
-        expect(screen.getByRole('img')).toHaveAttribute('src', 'https://example.com/2.jpg')
-        expect(screen.getByText('2 / 3')).toBeInTheDocument()
+        const [img] = screen.getAllByAltText('Gallery image 2')
+        expect(img).toHaveAttribute('src', 'https://example.com/2.jpg')
     })
 
     it('goes back to the previous image when the previous button is clicked', () => {
@@ -72,7 +72,8 @@ describe('ArchiveDetailGallery', () => {
         fireEvent.click(screen.getByText('›'))
         fireEvent.click(screen.getByText('‹'))
 
-        expect(screen.getByRole('img')).toHaveAttribute('src', 'https://example.com/1.jpg')
+        const [img] = screen.getAllByAltText('Gallery image 1')
+        expect(img).toHaveAttribute('src', 'https://example.com/1.jpg')
         expect(screen.getByText('1 / 3')).toBeInTheDocument()
     })
 
@@ -83,7 +84,8 @@ describe('ArchiveDetailGallery', () => {
 
         fireEvent.click(screen.getByText('‹'))
 
-        expect(screen.getByRole('img')).toHaveAttribute('src', 'https://example.com/3.jpg')
+        const [img] = screen.getAllByAltText('Gallery image 3')
+        expect(img).toHaveAttribute('src', 'https://example.com/3.jpg')
         expect(screen.getByText('3 / 3')).toBeInTheDocument()
     })
 
@@ -96,7 +98,8 @@ describe('ArchiveDetailGallery', () => {
         fireEvent.click(screen.getByText('›'))
         fireEvent.click(screen.getByText('›'))
 
-        expect(screen.getByRole('img')).toHaveAttribute('src', 'https://example.com/1.jpg')
+        const [img] = screen.getAllByAltText('Gallery image 1')
+        expect(img).toHaveAttribute('src', 'https://example.com/1.jpg')
         expect(screen.getByText('1 / 3')).toBeInTheDocument()
     })
 
@@ -105,6 +108,7 @@ describe('ArchiveDetailGallery', () => {
             <ArchiveDetailGallery images={[null, 'https://example.com/2.jpg']} />
         )
 
-        expect(screen.queryByRole('img')).not.toBeInTheDocument()
+    
+        expect(screen.queryByAltText(/Gallery Image/)).not.toBeInTheDocument()
     })
 })

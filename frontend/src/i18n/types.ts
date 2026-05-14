@@ -74,7 +74,6 @@ export type Messages = {
     filterCloseOverlayLabel: string
     noResults: string
     loadErrorPrefix: string
-    activeFilterTags: string[]
     searchPlaceholder: string
     fallbackUntitled: string
     fallbackTag: string
@@ -87,8 +86,6 @@ export type Messages = {
     genres: string[]
     periodLabel: string
     periodMin: string
-    periodCurrent: string
-    periodMax: string
     locationLabel: string
     locationSearchPlaceholder: string
     addLocationLabel: string
@@ -152,10 +149,18 @@ export type Messages = {
     about: string
     navigationTitle: string
     navHome: string
+    navBlogs: string
     navAgenda: string
     navArchiveSearch: string
     navAbout: string
     contactTitle: string
+    addressLine1: string
+    addressLine2: string
+    phone: string
+    email: string
+    vatNumber: string
+    socialTitle: string
+    stayUpdatedCta: string
     newsletterTitle: string
     newsletterText: string
     newsletterPlaceholder: string
@@ -163,7 +168,8 @@ export type Messages = {
     privacy: string
     cookies: string
     disclaimer: string
-    rights: string
+    privacyAndCookies: string
+    rights: (year: number) => string
   }
   settings: {
     title: string

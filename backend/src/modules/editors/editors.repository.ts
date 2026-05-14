@@ -5,8 +5,8 @@ const editorSelect = {
     id: true,
     username: true,
     role: true,
-    createdAt: true,
-    updatedAt: true,
+    created_at: true,
+    updated_at: true,
 } as const
 
 export class EditorsRepository {
