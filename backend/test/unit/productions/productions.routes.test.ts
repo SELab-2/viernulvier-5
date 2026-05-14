@@ -149,4 +149,98 @@ describe('Productions Routes', () => {
             expect(response.statusCode).toBe(404)
         })
     })
+
+    describe('POST /api/v1/archive/productions/:id/editors', () => {
+        it('should assign an editor to a production and return 204', async () => {
+            const production = await app.prisma.production.create({
+                data: {
+                    title: { nl: 'Editor Test' },
+                    events: { create: { starts_at: new Date('2020-01-01') } }
+                }
+            })
+
+            const editor = await app.prisma.adminUser.create({
+                data: {
+                    username: 'testeditor',
+                    passwordHash: 'hash',
+                    role: Role.EDITOR,
+                }
+            })
+
+            try {
+                const response = await app.inject({
+                    method: 'POST',
+                    url: `/api/v1/archive/productions/${production.id}/editors`,
+                    payload: { editorId: editor.id }
+                })
+
+                expect(response.statusCode).toBe(204)
+
+                const link = await app.prisma.editor_production.findUnique({
+                    where: {
+                        editor_id_production_id: {
+                            editor_id: editor.id,
+                            production_id: production.id,
+                        }
+                    }
+                })
+                expect(link).not.toBeNull()
+            } finally {
+                await app.prisma.editor_production.deleteMany({ where: { production_id: production.id } })
+                await app.prisma.event.deleteMany({ where: { production_id: production.id } })
+                await app.prisma.production.delete({ where: { id: production.id } })
+                await app.prisma.adminUser.delete({ where: { id: editor.id } })
+            }
+        })
+    })
+
+    describe('DELETE /api/v1/archive/productions/:id/editors/:editorId', () => {
+        it('should remove an editor from a production and return 204', async () => {
+            const production = await app.prisma.production.create({
+                data: {
+                    title: { nl: 'Editor Remove Test' },
+                    events: { create: { starts_at: new Date('2020-01-01') } }
+                }
+            })
+
+            const editor = await app.prisma.adminUser.create({
+                data: {
+                    username: 'testeditor2',
+                    passwordHash: 'hash',
+                    role: Role.EDITOR,
+                }
+            })
+
+            await app.prisma.editor_production.create({
+                data: {
+                    editor_id: editor.id,
+                    production_id: production.id,
+                }
+            })
+
+            try {
+                const response = await app.inject({
+                    method: 'DELETE',
+                    url: `/api/v1/archive/productions/${production.id}/editors/${editor.id}`,
+                })
+
+                expect(response.statusCode).toBe(204)
+
+                const link = await app.prisma.editor_production.findUnique({
+                    where: {
+                        editor_id_production_id: {
+                            editor_id: editor.id,
+                            production_id: production.id,
+                        }
+                    }
+                })
+                expect(link).toBeNull()
+            } finally {
+                await app.prisma.editor_production.deleteMany({ where: { production_id: production.id } })
+                await app.prisma.event.deleteMany({ where: { production_id: production.id } })
+                await app.prisma.production.delete({ where: { id: production.id } })
+                await app.prisma.adminUser.delete({ where: { id: editor.id } })
+            }
+        })
+    })
 })
