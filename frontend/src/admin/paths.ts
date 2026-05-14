@@ -11,6 +11,7 @@ export type AdminRouteConfig = {
   productionCreatePath: string
   blogEditPath: string
   blogCreatePath: string
+  postersPath: string
 }
 
 export function getAdminRouteConfig(hostname: string): AdminRouteConfig {
@@ -34,6 +35,7 @@ export function getAdminRouteConfig(hostname: string): AdminRouteConfig {
       productionCreatePath: '/admin/productions/new',
       blogEditPath: '/admin/blogs/:id/edit',
       blogCreatePath: '/admin/blogs/create',
+      postersPath: '/admin/posters',
     }
   }
 
@@ -50,5 +52,6 @@ export function getAdminRouteConfig(hostname: string): AdminRouteConfig {
     productionCreatePath: '/admin/productions/new',
     blogEditPath: '/admin/blogs/:id/edit',
     blogCreatePath: '/admin/blogs/create'
+    postersPath: '/admin/posters',
   }
 }

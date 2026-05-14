@@ -10,12 +10,14 @@ import HomePage from './pages/public/HomePage'
 import ArchiveDetailPage from './pages/public/ArchiveDetailPage'
 import SearchPage from './pages/public/SearchPage'
 import BlogsPage from "./pages/admin/BlogsPage.tsx";
+import PosterDetailPage from './pages/public/PosterDetailPage'
 
 // Admin pages (lazy loaded — not included in public bundle)
 const LoginPage = lazy(() => import('./pages/admin/LoginPage'))
 const DashboardPage = lazy(() => import('./pages/admin/DashboardPage'))
 const ProductionsPage = lazy(() => import('./pages/admin/ProductionsPage'))
 const ArchiveEditPage = lazy(() => import('./pages/admin/ArchiveEditPage'))
+const PostersPage = lazy(() => import('./pages/admin/PostersPage'))
 
 import CreateBlogPage from './pages/admin/CreateBlogPage'
 import BlogDetailPage from './pages/public/BlogDetailPage'
@@ -45,13 +47,13 @@ function App() {
                         <Route path="/archive/:id" element={<ArchiveDetailPage />} />
                         <Route path="/nl/archive/:id" element={<ArchiveDetailPage />} />
                         <Route path="/en/archive/:id" element={<ArchiveDetailPage />} />
+                        <Route path="/posters/:id" element={<PosterDetailPage />} />
+                        <Route path="/nl/posters/:id" element={<PosterDetailPage />} />
+                        <Route path="/en/posters/:id" element={<PosterDetailPage />} />
 
                         <Route path="/blogs/:id" element={<BlogDetailPage />} />
                         <Route path="/nl/blogs/:id" element={<BlogDetailPage />} />
                         <Route path="/en/blogs/:id" element={<BlogDetailPage />} />
-                        <Route path="/archive/blogs/:id" element={<BlogDetailPage />} />
-                        <Route path="/nl/archive/blogs/:id" element={<BlogDetailPage />} />
-                        <Route path="/en/archive/blogs/:id" element={<BlogDetailPage />} />
 
                     </>
                 ) : null}
@@ -104,13 +106,21 @@ function App() {
                             }
                         />
                         <Route
+                            path={adminRoutes.postersPath}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <PostersPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+                        <Route
                             path="/admin/blogs"
                             element={
                                 <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
                                     <CreateBlogPage />
                                 </ProtectedAdminRoute>
                             }
-                        />   
+                        />
                         <Route
                             path="/admin/productions"
                             element={
