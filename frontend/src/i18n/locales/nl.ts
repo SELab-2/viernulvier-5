@@ -301,7 +301,6 @@ const nl: Messages = {
       loadingMessage: 'Dashboard wordt geladen...',
       recentlyEdited: 'Recent bewerkt',
       tableColTitle: 'Titel',
-      tableColType: 'Type',
       tableColLanguage: 'Taal Status',
       tableColDate: 'Datum',
       tableColActions: 'Acties',

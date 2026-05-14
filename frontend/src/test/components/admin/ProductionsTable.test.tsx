@@ -14,12 +14,9 @@ const testMessages = {
     admin: {
         dashboard: {
             tableColTitle: 'Titel',
-            tableColType: 'Type',
-            tableColStatus: 'Status',
             tableColLanguage: 'Taal',
             tableColDate: 'Datum',
             tableColActions: 'Acties',
-            statusAvailable: 'Beschikbaar',
             languageStatusComplete: 'Volledig',
             languageStatusAttention: 'Aandacht vereist',
             languageStatusMissing: 'Ontbreekt',
@@ -42,8 +39,6 @@ const baseItem: ProductionRow = {
     id: 'prod-1',
     title: 'De Grote Voorstelling',
     detailHref: '/archive/prod-1',
-    type: 'Theater',
-    status: 'published',
     languageStatus: { nl: 'complete', en: 'attention' },
     updatedAt: '2024-03-15T10:00:00Z',
 }
@@ -52,8 +47,6 @@ const secondItem: ProductionRow = {
     id: 'prod-2',
     title: 'Kleine Voorstelling',
     detailHref: '/archive/prod-2',
-    type: 'Dans',
-    status: 'concept',
     languageStatus: { nl: 'missing', en: 'complete' },
     updatedAt: '2024-04-01T08:00:00Z',
 }

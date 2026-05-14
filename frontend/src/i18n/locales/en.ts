@@ -301,7 +301,6 @@ const en: Messages = {
       loadingMessage: 'Loading dashboard...',
       recentlyEdited: 'Recently edited',
       tableColTitle: 'Title',
-      tableColType: 'Type',
       tableColLanguage: 'Language Status',
       tableColDate: 'Date',
       tableColActions: 'Actions',

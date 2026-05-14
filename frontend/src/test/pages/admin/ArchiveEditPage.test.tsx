@@ -36,7 +36,6 @@ const mockMessages: Pick<Messages, 'admin'> = {
       loadingMessage: 'Loading dashboard...',
       recentlyEdited: 'Recently edited',
       tableColTitle: 'Title',
-      tableColType: 'Type',
       tableColLanguage: 'Language Status',
       tableColDate: 'Date',
       tableColActions: 'Actions',
@@ -81,6 +80,8 @@ const mockMessages: Pick<Messages, 'admin'> = {
       paginationPageLabel: (page: number) => `Page ${page}`,
       tableColLinkedProductions: 'Linked productions',
       untitledLabel: 'Untitled production',
+      productionCountSingular: '1 production',
+      productionCountPlural: (count: number) => `${count} productions`,
     },
     productions: {
       pageTitle: 'Productions',

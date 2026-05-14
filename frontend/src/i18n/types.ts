@@ -266,7 +266,6 @@ export type Messages = {
       loadingMessage: string
       recentlyEdited: string
       tableColTitle: string
-      tableColType: string
       tableColLanguage: string
       tableColDate: string
       tableColActions: string
