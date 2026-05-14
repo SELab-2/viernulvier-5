@@ -7,6 +7,7 @@ import SectionHeading from '../../components/admin/SectionHeading'
 import BlogsTab from '../../components/admin/BlogsTab'
 import BlogsTabContent from '../../components/admin/BlogsTabContent'
 import ProductionManagementSection, { type ProductionItem } from '../../components/admin/blogs/ProductionManagementSection'
+import { BlogBannerUploadSection } from '../../components/admin/blogs/BlogBannerUploadSection'
 import {
     formatBlogDetailForForm,
     validateBlogPublishInput,
@@ -20,17 +21,27 @@ import type { Locale } from '../../i18n/types'
 
 import AdminLayout from '../../components/admin/AdminLayout'
 
-
 /*
 With this page you can create or edit a blog, the blog will look like this:
 
 {
     title: { nl: '' , en: ''},
     content: { nl: '', en: ''},
-    productionIds: []
+    productionIds: [],
+    images: [],
+    thumbnail_index: null
 }
 
 */
+
+async function fileToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(String(reader.result ?? ''))
+        reader.onerror = () => reject(new Error('Could not read file'))
+        reader.readAsDataURL(file)
+    })
+}
 
 function mergeUniqueProductions(productionList: ProductionItem[]): ProductionItem[] {
     const byId = new Map<string, ProductionItem>()
@@ -118,6 +129,11 @@ function CreateBlogPage() {
     const [isLoadingProductions, setIsLoadingProductions] = useState(false)
     const [productionsError, setProductionsError] = useState('')
 
+    const [blogImages, setBlogImages] = useState<string[]>([])
+    const [thumbnailIndex, setThumbnailIndex] = useState<number | null>(null)
+    const [pendingImages, setPendingImages] = useState<File[]>([])
+    const [isUploadingImages, setIsUploadingImages] = useState(false)
+
     const navigate = useNavigate()
     const locale = getActiveLocale(window.location.pathname)
     const messages = getMessages(locale)
@@ -154,6 +170,8 @@ function CreateBlogPage() {
                 setContentJson(formattedContentJson)
 
                 setSelectedProductionIds(response.data.productions ?? [])
+                setBlogImages(response.data.images ?? [])
+                setThumbnailIndex(response.data.thumbnail_index ?? null)
             } catch (loadError) {
                 if (isActive) {
                     if (isNotFoundError(loadError)) {
@@ -348,18 +366,50 @@ function CreateBlogPage() {
                 productionIds: selectedProductionIds,
             }
 
+            let createdBlogId: string
+
             if (isEditMode && blogId) {
                 const response = await apiFetch<{ data: { id: string } }>(`/archive/blogs/${blogId}`, {
                     method: 'PATCH',
                     body: JSON.stringify(payload),
                 })
-                navigate(`/blogs/${response.data.id}`)
+                createdBlogId = response.data.id
             } else {
                 const response = await api.post<{ data: { id: string } }>('/archive/blogs', payload)
-                navigate(`/blogs/${response.data.id}`)
+                createdBlogId = response.data.id
             }
+
+            // Upload images if there are any pending
+            if (pendingImages.length > 0) {
+                setIsUploadingImages(true)
+                const filesPayload = await Promise.all(
+                    pendingImages.map(async (file) => ({
+                        file_name: file.name,
+                        file_base64: await fileToBase64(file),
+                    }))
+                )
+
+                const imagesResponse = await apiFetch<{ data: { images: string[]; thumbnail_index: number | null } }>(
+                    `/archive/blogs/${createdBlogId}/images`,
+                    {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            files: filesPayload,
+                            thumbnail_index: thumbnailIndex,
+                        }),
+                    }
+                )
+
+                setBlogImages(imagesResponse.data.images ?? [])
+                setThumbnailIndex(imagesResponse.data.thumbnail_index ?? null)
+                setPendingImages([])
+                setIsUploadingImages(false)
+            }
+
+            navigate(`/blogs/${createdBlogId}`)
         } catch (saveError) {
             setError(saveError instanceof Error ? saveError.message : 'Failed to save blog.')
+            setIsUploadingImages(false)
         } finally {
             setIsSaving(false)
         }
@@ -521,6 +571,19 @@ function CreateBlogPage() {
                 onAddProduction={addProduction}
                 onRemoveProduction={removeProduction}
             />
+
+            <section className="border-t border-border px-4 py-6 sm:px-8">
+                <SectionHeading title="Blog banners" subTitle="Add banner images and select thumbnail" />
+                <div className="mt-4">
+                    <BlogBannerUploadSection
+                        images={blogImages}
+                        thumbnailIndex={thumbnailIndex}
+                        onThumbnailIndexChange={setThumbnailIndex}
+                        onPendingFilesChange={setPendingImages}
+                        isUploading={isUploadingImages}
+                    />
+                </div>
+            </section>
 
             <section className="relative px-4 py-4 overflow-hidden">
                 <div className="px-4 py-4 relative flex flex-col">

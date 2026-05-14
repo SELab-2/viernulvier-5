@@ -45,7 +45,7 @@ export async function main() {
     return;
   }
 
-  await Scraper.sync_crops(cutoff_timestamp);
+  //await Scraper.sync_crops(cutoff_timestamp);
 
   await Scraper.sync_items(cutoff_timestamp);
   await Scraper.sync_galleries(cutoff_timestamp);

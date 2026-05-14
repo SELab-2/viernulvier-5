@@ -3,12 +3,19 @@ import type {
     BlogPaginationQuery, 
     BlogResponse,
     CreateBlogInput,
-    UpdateBlogInput
+    UpdateBlogInput,
+    UploadBlogImageInput,
+    UploadBlogImageResponse
 } from './blogs.schema.js'
 import { PaginatedResult, calculateTotalPages, sanitizePage } from '../../utils/pagination.js'
+import { BlogImagesStorage } from './blogs-images.storage.js'
 
 export class BlogsService {
-    constructor(private readonly repository: BlogsRepository) {}
+    private readonly storage: BlogImagesStorage
+
+    constructor(private readonly repository: BlogsRepository) {
+        this.storage = new BlogImagesStorage()
+    }
 
     async getBlogs(options: BlogPaginationQuery): Promise<PaginatedResult<BlogResponse>> {
         const { page, limit, search, yearFrom, yearTo, productionId } = options
@@ -49,5 +56,30 @@ export class BlogsService {
 
     async deleteBlog(id: string): Promise<void> {
         await this.repository.delete(id)
+    }
+
+    async uploadBlogImages(id: string, data: UploadBlogImageInput): Promise<UploadBlogImageResponse> {
+        // Verify blog exists
+        const blog = await this.repository.findById(id)
+        if (!blog) {
+            throw new Error('Blog not found')
+        }
+
+        // Persist image files
+        const persistedFiles = await this.storage.persistBlogImageFiles(id, data.files)
+        const filePaths = persistedFiles.map((file) => file.file_path)
+
+        // Update blog with new images and thumbnail index
+        const thumbnailIndex = data.thumbnail_index ?? (filePaths.length > 0 ? 0 : null)
+        
+        await this.repository.update(id, {
+            images: filePaths,
+            thumbnail_index: thumbnailIndex,
+        })
+
+        return {
+            images: filePaths,
+            thumbnail_index: thumbnailIndex,
+        }
     }
 }
