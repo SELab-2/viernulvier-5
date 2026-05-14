@@ -9,13 +9,13 @@ import ProtectedAdminRoute, { AdminEntryRoute } from './pages/admin/ProtectedAdm
 import HomePage from './pages/public/HomePage'
 import ArchiveDetailPage from './pages/public/ArchiveDetailPage'
 import SearchPage from './pages/public/SearchPage'
-import BlogsPage from "./pages/admin/BlogsPage.tsx";
 import PosterDetailPage from './pages/public/PosterDetailPage'
 
 // Admin pages (lazy loaded — not included in public bundle)
 const LoginPage = lazy(() => import('./pages/admin/LoginPage'))
 const DashboardPage = lazy(() => import('./pages/admin/DashboardPage'))
 const ProductionsPage = lazy(() => import('./pages/admin/ProductionsPage'))
+const BlogsPage = lazy(() => import('./pages/admin/BlogsPage'))
 const ArchiveEditPage = lazy(() => import('./pages/admin/ArchiveEditPage'))
 const PostersPage = lazy(() => import('./pages/admin/PostersPage'))
 
