@@ -22,7 +22,11 @@ const testMessages = {
             languageStatusMissing: 'Ontbreekt',
             actionEdit: 'Bewerk',
             actionDelete: 'Verwijder',
+            actionView: 'Bekijk',
             emptyRecent: 'Geen producties gevonden.',
+        },
+        productions: {
+            untitledLabel: '(Zonder titel)',
         },
     },
 } as unknown as Messages
@@ -61,22 +65,18 @@ describe('ProductionsTable', () => {
         )
 
         expect(screen.getByText('Titel')).toBeInTheDocument()
-        expect(screen.getByText('Type')).toBeInTheDocument()
-        expect(screen.getByText('Status')).toBeInTheDocument()
         expect(screen.getByText('Taal')).toBeInTheDocument()
         expect(screen.getByText('Datum')).toBeInTheDocument()
         expect(screen.getByText('Acties')).toBeInTheDocument()
     })
 
     // Rendering: rij-inhoud
-    it('renders title, type, status and formatted date for each item', () => {
+    it('renders title and formatted date for each item', () => {
         renderTable(
             <ProductionsTable items={[baseItem]} isLoading={false} pageSize={10} />,
         )
 
         expect(screen.getByText('De Grote Voorstelling')).toBeInTheDocument()
-        expect(screen.getByText('Theater')).toBeInTheDocument()
-        expect(screen.getByText('Beschikbaar')).toBeInTheDocument()
         expect(screen.getByText('formatted:2024-03-15T10:00:00Z')).toBeInTheDocument()
     })
 
