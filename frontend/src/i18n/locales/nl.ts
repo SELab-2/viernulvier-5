@@ -369,14 +369,14 @@ const nl: Messages = {
   },
 
   editHeader: {
-    back: '← Terug',
+    back: 'Terug',
     publish: 'Publiceren',
     saveOnDraft: 'Opslaan als draft'
   },
 
   blogs: {
       languageError:'Blog bestaat niet in deze taal',
-      detailPageBack:'← terug naar hoofdpagina',
+      detailPageBack: 'Terug naar hoofdpagina',
       loadingBlog: 'Blog wordt geladen...',
       loadingProductions: 'Producties laden...',
       relatedProductions: 'Gerelateerde producties',
