@@ -150,6 +150,15 @@ export type Messages = {
     nextImage: string
     relatedBlogs: string
   }
+  notFound: {
+    titleTop: string
+    titleAccent: string
+    titleBottom: string
+    joke: string
+    description: string
+    homeButton: string
+    searchButton: string
+  }
   footer: {
     brandLogoAlt: string
     organizationName: string
@@ -297,6 +306,14 @@ export type Messages = {
     archiveEdit: {
       pageTitle: string
       itemIdLabel: string
+    }
+    notFound: {
+      titleTop: string
+      titleAccent: string
+      titleBottom: string
+      joke: string
+      description: string
+      dashboardButton: string
     }
     posters: {
       pageTitle: string
