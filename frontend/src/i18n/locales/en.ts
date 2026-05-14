@@ -345,7 +345,9 @@ const en: Messages = {
       paginationShowing: (from: number, to: number, total: number) => `Showing ${from}–${to} of ${total} results`,
       paginationPageLabel: (page: number) => `Page ${page}`,
       tableColLinkedProductions: 'Linked productions',
-      untitledLabel: '(Untitled)'
+      untitledLabel: '(Untitled)',
+      productionCountSingular: '1 production',
+      productionCountPlural: (count: number) => `${count} productions`,
     },
     productions: {
       pageTitle: 'Productions',

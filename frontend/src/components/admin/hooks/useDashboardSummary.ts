@@ -18,12 +18,11 @@ export type DashboardSummary = {
         id: string
         title: string
         type: string
-        status: 'published' | 'concept'
         languageStatus: {
             nl: 'complete' | 'attention'
             en: 'complete' | 'attention' | 'missing'
         }
-        updated_at: string
+        updatedAt: string
     }>
     totalRecentItems: number
     lastScrapedAt: string | null

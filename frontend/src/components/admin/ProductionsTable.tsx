@@ -2,13 +2,10 @@ import { useAdminMessages } from './AdminMessagesContext'
 import {useDashboardFormatters} from "./hooks/useDashboardFormatters.ts";
 
 export type LanguageState = 'complete' | 'attention' | 'missing'
-export type ProductionStatus = 'published' | 'concept'
 
 export type ProductionRow = {
     id: string
     title: string
-    type: string
-    status: ProductionStatus
     languageStatus: { nl: LanguageState; en: LanguageState }
     updatedAt: string
     detailHref: string
@@ -50,8 +47,6 @@ export function ProductionsTable({
                 <tr>
                     {[
                         d.tableColTitle,
-                        d.tableColType,
-                        d.tableColStatus,
                         d.tableColLanguage,
                         d.tableColDate,
                         d.tableColActions,
@@ -80,17 +75,6 @@ export function ProductionsTable({
                     {item.title}
                   </span>
                             </div>
-                        </td>
-                        <td className="whitespace-nowrap px-4 py-4">
-                            <span className="inline-block whitespace-nowrap rounded-full bg-slate-100 px-3 py-1 text-xs text-[#475569] dark:bg-slate-800 dark:text-[color:var(--color-text-muted)]">
-                                {item.type}
-                            </span>
-                        </td>
-                        <td className="whitespace-nowrap px-4 py-4">
-                            <span className="inline-flex items-center gap-2 whitespace-nowrap text-xs text-[#059669] dark:text-emerald-300">
-                                <span className="h-2 w-2 shrink-0 rounded-full bg-[#10b981]" />
-                                {d.statusAvailable}
-                            </span>
                         </td>
                         <td className="px-4 py-4">
                             <div className="flex gap-3 text-[9px] uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">

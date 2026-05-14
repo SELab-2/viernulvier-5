@@ -47,10 +47,9 @@ type PaginatedApiResponse<T> = {
 const PAGE_SIZE = 10
 
 function mapBlogApiItem(item: BlogApiItem, locale: 'nl' | 'en'): BlogRow {
-    const d = useAdminMessages().admin.blogsPage
     return {
         id: item.id,
-        title: getLocalizedTitle(item.title, locale) || d.untitledLabel,
+        title: getLocalizedTitle(item.title, locale) ,
         productionCount: item.productions?.length ?? 0,
         languageStatus: {
             nl: getLanguageState(item.title, 'nl'),

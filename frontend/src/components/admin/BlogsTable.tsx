@@ -75,7 +75,7 @@ export function BlogsTable({
                                     className="block min-w-0 flex-1 truncate text-base text-[#0f172a] dark:text-white"
                                     title={item.title}
                                 >
-                                        {item.title}
+                                        {item.title || b.untitledLabel}
                                     </span>
                             </div>
                         </td>
@@ -84,8 +84,8 @@ export function BlogsTable({
                         <td className="px-6 py-4">
                                 <span className="rounded-full bg-slate-100 px-3 py-1 text-xs text-[#475569] dark:bg-slate-800 dark:text-slate-300">
                                     {item.productionCount === 1
-                                        ? '1 productie'
-                                        : `${item.productionCount} producties`}
+                                        ? b.productionCountSingular
+                                        : b.productionCountPlural(item.productionCount)}
                                 </span>
                         </td>
 

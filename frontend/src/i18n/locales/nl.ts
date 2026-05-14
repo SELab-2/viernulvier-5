@@ -345,7 +345,9 @@ const nl: Messages = {
       paginationShowing: (from: number, to: number, total: number) => `Toont ${from}–${to} van ${total} resultaten`,
       paginationPageLabel: (page: number) => `Pagina ${page}`,
       tableColLinkedProductions: 'Gekoppelde producties',
-      untitledLabel: '(Geen titel)'
+      untitledLabel: '(Geen titel)',
+      productionCountSingular: '1 productie',
+      productionCountPlural: (count: number) => `${count} producties`,
     },
     productions: {
       pageTitle: 'Producties',

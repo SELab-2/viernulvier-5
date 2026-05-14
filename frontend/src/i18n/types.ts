@@ -311,6 +311,8 @@ export type Messages = {
       paginationPageLabel: (page: number) => string
       tableColLinkedProductions: string
       untitledLabel: string
+      productionCountSingular: string
+      productionCountPlural: (count: number) => string
     }
     productions: {
       pageTitle: string

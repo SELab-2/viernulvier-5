@@ -23,9 +23,7 @@ type ProductionApiItem = {
     id: string
     title: LocalizedText
     image_url?: string | null
-    production_genres?: string[]
     performer_type: string | null
-    status?: string | null
     language_status?: { nl?: string; en?: string } | null
     updated_at: string
 }
@@ -58,12 +56,9 @@ function getUntitledLabel(locale: 'nl' | 'en'): string {
 }
 
 function mapProductionApiItem(item: ProductionApiItem, locale: 'nl' | 'en'): Production {
-    const genre = (item.production_genres ?? [])[0] ?? item.performer_type ?? ''
     return {
         id: item.id,
         title: getLocalizedTitle(item.title, locale) || getUntitledLabel(locale),
-        type: genre,
-        status: item.status === 'published' ? 'published' : 'concept',
         languageStatus: {
             nl: hasLocalizedText(item.title, 'nl') ? 'complete' : 'missing',
             en: hasLocalizedText(item.title, 'en') ? 'complete' : 'missing',
