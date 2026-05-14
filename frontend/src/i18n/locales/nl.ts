@@ -359,6 +359,7 @@ const nl: Messages = {
       tabPublished: 'Gepubliceerd',
       tabConcepts: 'Concepten',
       tabAriaLabel: 'Producties filter',
+      untitledLabel: '(Geen titel)',
       paginationShowing: (from: number, to: number, total: number) => `Toont ${from}–${to} van ${total} resultaten`,
       paginationPageLabel: (page: number) => `Pagina ${page}`,
     },

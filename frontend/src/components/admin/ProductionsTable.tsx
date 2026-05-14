@@ -30,6 +30,7 @@ export function ProductionsTable({
                                  }: ProductionsTableProps) {
     const messages = useAdminMessages()
     const d = messages.admin.dashboard
+    const p = messages.admin.productions
     const { formatDate } = useDashboardFormatters()
 
     return (
@@ -64,13 +65,13 @@ export function ProductionsTable({
                         <td className="px-4 py-4">
                             <div className="flex items-center gap-3">
                                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-slate-100 text-xs font-semibold text-slate-500 dark:bg-slate-800 dark:text-slate-300">
-                                    {item.title.slice(0, 2).toUpperCase()}
+                                    {(item.title || p.untitledLabel).slice(0, 2).toUpperCase()}
                                 </div>
                                 <span
                                     className="block min-w-0 flex-1 truncate text-base text-[#0f172a] dark:text-white"
-                                    title={item.title}
+                                    title={item.title || p.untitledLabel}
                                 >
-                    {item.title}
+                    {item.title || p.untitledLabel}
                   </span>
                             </div>
                         </td>

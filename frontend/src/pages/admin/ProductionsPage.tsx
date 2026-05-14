@@ -51,14 +51,11 @@ function hasLocalizedText(text: LocalizedText, locale: 'nl' | 'en'): boolean {
     return typeof value === 'string' && value.trim().length > 0
 }
 
-function getUntitledLabel(locale: 'nl' | 'en'): string {
-    return locale === 'en' ? '(Untitled)' : '(Zonder titel)'
-}
 
 function mapProductionApiItem(item: ProductionApiItem, locale: 'nl' | 'en'): Production {
     return {
         id: item.id,
-        title: getLocalizedTitle(item.title, locale) || getUntitledLabel(locale),
+        title: getLocalizedTitle(item.title, locale),
         languageStatus: {
             nl: hasLocalizedText(item.title, 'nl') ? 'complete' : 'missing',
             en: hasLocalizedText(item.title, 'en') ? 'complete' : 'missing',
