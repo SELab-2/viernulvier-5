@@ -41,7 +41,6 @@ export class CmsUsersRepository {
 
     async listCmsUsers(options: { page: number; limit: number; search?: string, blogId?: string, productionId?: string }) {
         const { page, limit, search, blogId, productionId } = options
-        console.log('listCmsUsers filters:', { search, blogId, productionId }) // ← add this
         const skip = (page - 1) * limit
 
 

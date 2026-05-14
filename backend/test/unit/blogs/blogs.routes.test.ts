@@ -322,4 +322,126 @@ describe('Blogs Routes', () => {
             expect(response.statusCode).toBe(404)
         })
     })
+    describe('POST /api/v1/archive/blogs/:id/editors', () => {
+        it('should assign an editor to a blog and return 204', async () => {
+            const token = app.jwt.sign({ sub: 'admin', username: 'admin', role: Role.ADMIN })
+
+            const production = await app.prisma.production.create({ data: {} })
+            const blog = await app.prisma.blog.create({
+                data: {
+                    title: { nl: 'Editor Test' },
+                    blog_production: { create: { production_id: production.id } }
+                }
+            })
+
+            const editor = await app.prisma.adminUser.create({
+                data: {
+                    username: 'testeditor',
+                    password_hash: 'hash',
+                    role: Role.EDITOR,
+                }
+            })
+
+            try {
+                const response = await app.inject({
+                    method: 'POST',
+                    url: `/api/v1/archive/blogs/${blog.id}/editors`,
+                    headers: { authorization: `Bearer ${token}` },
+                    payload: { editorId: editor.id }
+                })
+
+                expect(response.statusCode).toBe(204)
+
+                const link = await app.prisma.editor_blog.findUnique({
+                    where: {
+                        editor_id_blog_id: {
+                            editor_id: editor.id,
+                            blog_id: blog.id,
+                        }
+                    }
+                })
+                expect(link).not.toBeNull()
+            } finally {
+                await app.prisma.editor_blog.deleteMany({ where: { blog_id: blog.id } })
+                await app.prisma.blog_production.deleteMany({ where: { blog_id: blog.id } })
+                await app.prisma.blog.delete({ where: { id: blog.id } })
+                await app.prisma.production.delete({ where: { id: production.id } })
+                await app.prisma.adminUser.delete({ where: { id: editor.id } })
+            }
+        })
+
+        it('should return 401 Unauthorized when no token is provided', async () => {
+            const response = await app.inject({
+                method: 'POST',
+                url: '/api/v1/archive/blogs/00000000-0000-0000-0000-000000000000/editors',
+                payload: { editorId: '00000000-0000-0000-0000-000000000001' }
+            })
+
+            expect(response.statusCode).toBe(401)
+        })
+    })
+
+    describe('DELETE /api/v1/archive/blogs/:id/editors/:editorId', () => {
+        it('should remove an editor from a blog and return 204', async () => {
+            const token = app.jwt.sign({ sub: 'admin', username: 'admin', role: Role.ADMIN })
+
+            const production = await app.prisma.production.create({ data: {} })
+            const blog = await app.prisma.blog.create({
+                data: {
+                    title: { nl: 'Editor Remove Test' },
+                    blog_production: { create: { production_id: production.id } }
+                }
+            })
+
+            const editor = await app.prisma.adminUser.create({
+                data: {
+                    username: 'testeditor2',
+                    password_hash: 'hash',
+                    role: Role.EDITOR,
+                }
+            })
+
+            await app.prisma.editor_blog.create({
+                data: {
+                    editor_id: editor.id,
+                    blog_id: blog.id,
+                }
+            })
+
+            try {
+                const response = await app.inject({
+                    method: 'DELETE',
+                    url: `/api/v1/archive/blogs/${blog.id}/editors/${editor.id}`,
+                    headers: { authorization: `Bearer ${token}` },
+                })
+
+                expect(response.statusCode).toBe(204)
+
+                const link = await app.prisma.editor_blog.findUnique({
+                    where: {
+                        editor_id_blog_id: {
+                            editor_id: editor.id,
+                            blog_id: blog.id,
+                        }
+                    }
+                })
+                expect(link).toBeNull()
+            } finally {
+                await app.prisma.editor_blog.deleteMany({ where: { blog_id: blog.id } })
+                await app.prisma.blog_production.deleteMany({ where: { blog_id: blog.id } })
+                await app.prisma.blog.delete({ where: { id: blog.id } })
+                await app.prisma.production.delete({ where: { id: production.id } })
+                await app.prisma.adminUser.delete({ where: { id: editor.id } })
+            }
+        })
+
+        it('should return 401 Unauthorized when no token is provided', async () => {
+            const response = await app.inject({
+                method: 'DELETE',
+                url: '/api/v1/archive/blogs/00000000-0000-0000-0000-000000000000/editors/00000000-0000-0000-0000-000000000001',
+            })
+
+            expect(response.statusCode).toBe(401)
+        })
+    })
 })
