@@ -54,12 +54,11 @@ export function getNavIconAlt(id: AdminNavItemId, nav: AdminNavMessages): string
 
 export function getAdminNavigationItems(hostname: string = window.location.hostname): AdminNavigationGroup {
     const { dashboardPath, productionsPath, blogsPath, postersPath } = getAdminRouteConfig(hostname)
-    //TODO: get icon for blogs
     return {
         primary: [
             { id: 'dashboard', to: dashboardPath, iconSrc: '/admin/sidebar-dashboard.svg' },
             { id: 'productions', to: productionsPath, iconSrc: '/admin/sidebar-productions.svg' },
-            { id: 'blogs', to: blogsPath, iconSrc: '/admin/sidebar-productions.svg' },
+            { id: 'blogs', to: blogsPath, iconSrc: '/admin/sidebar-blogs.svg' },
             { id: 'posters', to: postersPath, iconSrc: '/admin/sidebar-gallery.svg' },
             { id: 'organisation', disabled: true, iconSrc: '/admin/sidebar-organization.svg' },
         ],
