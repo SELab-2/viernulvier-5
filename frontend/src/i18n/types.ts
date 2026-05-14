@@ -381,5 +381,17 @@ export type Messages = {
       queryHint: string
       noProductionFound:string
     }
+    bannerUpload: {
+      title: string
+      subtitle: string
+      label: string
+      addButton: string
+      allowedFormats: string
+      alreadyUploaded: (count: number) => string
+      uploadedImagesLabel: string
+      setThumbnailButton: string
+      pendingUploadLabel: (count: number) => string
+      removeButton: string
+    }
   }
 }

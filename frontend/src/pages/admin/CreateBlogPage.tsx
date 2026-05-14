@@ -572,16 +572,22 @@ function CreateBlogPage() {
                 onRemoveProduction={removeProduction}
             />
 
-            <section className="border-t border-border px-4 py-6 sm:px-8">
-                <SectionHeading title="Blog banners" subTitle="Add banner images and select thumbnail" />
-                <div className="mt-4">
-                    <BlogBannerUploadSection
-                        images={blogImages}
-                        thumbnailIndex={thumbnailIndex}
-                        onThumbnailIndexChange={setThumbnailIndex}
-                        onPendingFilesChange={setPendingImages}
-                        isUploading={isUploadingImages}
-                    />
+            <section className="relative px-4 py-4 overflow-hidden">
+                <div className="px-4 py-4 relative flex flex-col">
+                    <div className="min-w-0 max-w-full rounded-xl border border-border bg-background">
+                        <div className="bg-surface rounded-xl p-4">
+                            <h2 className="mb-4 text-lg font-semibold text-foreground">{messages.blogs.bannerUpload.title}</h2>
+                            <p className="mb-4 text-sm text-muted">{messages.blogs.bannerUpload.subtitle}</p>
+                            <BlogBannerUploadSection
+                                images={blogImages}
+                                thumbnailIndex={thumbnailIndex}
+                                onThumbnailIndexChange={setThumbnailIndex}
+                                onPendingFilesChange={setPendingImages}
+                                isUploading={isUploadingImages}
+                                messages={messages}
+                            />
+                        </div>
+                    </div>
                 </div>
             </section>
 

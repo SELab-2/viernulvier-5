@@ -413,6 +413,18 @@ const nl: Messages = {
           close: "Sluiten",
           queryHint: "Zoek productie",
           noProductionFound: "Geen producties beschikbaar"
+      },
+      bannerUpload: {
+          title: "Blog banners",
+          subtitle: "Voeg bannerafbeeldingen toe.",
+          label: "Blog banners / afbeeldingen",
+          addButton: "+ Afbeeldingen toevoegen",
+          allowedFormats: "Toegestane formaten: JPG, PNG, WEBP, GIF.",
+          alreadyUploaded: (count: number) => ` ${count} afbeelding${count !== 1 ? 'en' : ''} al geüpload.`,
+          uploadedImagesLabel: "Geüploade afbeeldingen",
+          setThumbnailButton: "Instellen",
+          pendingUploadLabel: (count: number) => `Wacht op upload (${count})`,
+          removeButton: "Verwijderen"
       }
   }
 }

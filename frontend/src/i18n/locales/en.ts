@@ -414,6 +414,18 @@ const en: Messages = {
           queryHint: 'Search production',
           noProductionFound: 'No production found'
       },
+      bannerUpload: {
+          title: 'Blog banners',
+          subtitle: 'Add banner images.',
+          label: 'Blog banners / images',
+          addButton: '+ Add images',
+          allowedFormats: 'Allowed formats: JPG, PNG, WEBP, GIF.',
+          alreadyUploaded: (count: number) => ` ${count} image${count !== 1 ? 's' : ''} already uploaded.`,
+          uploadedImagesLabel: 'Uploaded images',
+          setThumbnailButton: 'Set',
+          pendingUploadLabel: (count: number) => `Pending upload (${count})`,
+          removeButton: 'Remove'
+      }
   },
 }
 

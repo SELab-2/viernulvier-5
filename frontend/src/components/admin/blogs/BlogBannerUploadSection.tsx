@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import type { Messages } from '../../../i18n/types'
 
 type BlogBannerUploadSectionProps = {
     images: string[]
@@ -6,6 +7,7 @@ type BlogBannerUploadSectionProps = {
     onThumbnailIndexChange: (index: number | null) => void
     onPendingFilesChange: (files: File[]) => void
     isUploading?: boolean
+    messages: Messages
 }
 
 const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
@@ -16,6 +18,7 @@ export function BlogBannerUploadSection({
     onThumbnailIndexChange,
     onPendingFilesChange,
     isUploading = false,
+    messages,
 }: BlogBannerUploadSectionProps) {
     const fileInputRef = useRef<HTMLInputElement | null>(null)
     const [selectedFiles, setSelectedFiles] = useState<File[]>([])
@@ -68,7 +71,7 @@ export function BlogBannerUploadSection({
     return (
         <div className="space-y-4">
             <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Blog banners / images</label>
+                <label className="block text-sm font-medium text-foreground mb-2">{messages.blogs.bannerUpload.label}</label>
                 <input
                     ref={fileInputRef}
                     type="file"
@@ -87,13 +90,12 @@ export function BlogBannerUploadSection({
                     disabled={isUploading}
                     className="inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    <span>+</span>
-                    <span>Add images</span>
+                    <span>{messages.blogs.bannerUpload.addButton}</span>
                 </button>
 
                 <p className="text-xs text-muted mt-2">
-                    Allowed formats: JPG, PNG, WEBP, GIF. 
-                    {images.length > 0 && ` ${images.length} image${images.length !== 1 ? 's' : ''} already uploaded.`}
+                    {messages.blogs.bannerUpload.allowedFormats}
+                    {images.length > 0 && messages.blogs.bannerUpload.alreadyUploaded(images.length)}
                 </p>
             </div>
 
@@ -102,7 +104,7 @@ export function BlogBannerUploadSection({
             {/* Display uploaded images */}
             {images.length > 0 && (
                 <div>
-                    <p className="text-sm font-medium text-foreground mb-2">Uploaded images</p>
+                    <p className="text-sm font-medium text-foreground mb-2">{messages.blogs.bannerUpload.uploadedImagesLabel}</p>
                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
                         {images.map((imagePath, index) => (
                             <div key={imagePath} className="relative group">
@@ -129,7 +131,7 @@ export function BlogBannerUploadSection({
                                             onClick={() => selectThumbnail(index)}
                                             className="px-2 py-1 bg-amber-500 text-white text-xs font-medium rounded hover:bg-amber-600 transition opacity-0 group-hover:opacity-100"
                                         >
-                                            Set
+                                            {messages.blogs.bannerUpload.setThumbnailButton}
                                         </button>
                                     )}
                                 </div>
@@ -143,7 +145,7 @@ export function BlogBannerUploadSection({
             {selectedFiles.length > 0 && (
                 <div>
                     <p className="text-sm font-medium text-foreground mb-2">
-                        Pending upload ({selectedFiles.length})
+                        {messages.blogs.bannerUpload.pendingUploadLabel(selectedFiles.length)}
                     </p>
                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
                         {selectedFiles.map((file, index) => (
@@ -165,7 +167,7 @@ export function BlogBannerUploadSection({
                                         disabled={isUploading}
                                         className="px-2 py-1 bg-red-500 text-white text-xs font-medium rounded hover:bg-red-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
-                                        Remove
+                                        {messages.blogs.bannerUpload.removeButton}
                                     </button>
                                 </div>
                             </div>
