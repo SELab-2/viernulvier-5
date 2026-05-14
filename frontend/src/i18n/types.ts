@@ -330,9 +330,6 @@ export type Messages = {
       newButton: string
       deleteConfirm: string
       deleteError: string
-      tabAll: string
-      tabPublished: string
-      tabConcepts: string
       tabAriaLabel: string
       untitledLabel: string
       paginationShowing: (from: number, to: number, total: number) => string

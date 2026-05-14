@@ -38,8 +38,6 @@ type PaginatedApiResponse<T> = {
     }
 }
 
-type TabFilter = 'all' | 'published' | 'concept'
-
 const PAGE_SIZE = 10
 
 function getLocalizedTitle(text: LocalizedText, locale: 'nl' | 'en'): string {
@@ -75,7 +73,6 @@ function ProductionsPageContent() {
     const paginationNextLabel = t.admin.dashboard.paginationNext ?? 'Volgende pagina'
 
 
-    const [tab, setTab] = useState<TabFilter>('all')
     const [query, setQuery] = useState('')
     const [debouncedQuery, setDebouncedQuery] = useState('')
     const [page, setPage] = useState(1)
@@ -97,12 +94,6 @@ function ProductionsPageContent() {
         return () => window.clearTimeout(timer)
     }, [query])
 
-    // reset page on tab change
-    const handleTabChange = (next: TabFilter) => {
-        setTab(next)
-        setPage(1)
-    }
-
     // data ophalen
     useEffect(() => {
         const abortController = new AbortController()
@@ -118,7 +109,6 @@ function ProductionsPageContent() {
                 })
 
                 if (debouncedQuery) params.set('search', debouncedQuery)
-                if (tab !== 'all') params.set('status', tab)
 
                 const response = await apiFetch<PaginatedApiResponse<ProductionApiItem>>(
                     `/archive/productions?${params.toString()}`,
@@ -141,7 +131,7 @@ function ProductionsPageContent() {
 
         void load()
         return () => abortController.abort()
-    }, [page, tab, debouncedQuery, reloadToken, locale, t.admin.productions.loadError])
+    }, [page, debouncedQuery, reloadToken, locale, t.admin.productions.loadError])
 
     const handleDelete = async (id: string) => {
         if (!window.confirm(t.admin.productions.deleteConfirm)) return
@@ -163,12 +153,6 @@ function ProductionsPageContent() {
         pageSize: PAGE_SIZE,
         totalItems: total,
     })
-
-    const tabs: { key: TabFilter; label: string; disabled?: boolean }[] = [
-        { key: 'all', label: `${t.admin.productions.tabAll}${tab === 'all' && total > 0 ? ` (${total})` : ''}` },
-        { key: 'published', label: t.admin.productions.tabPublished },
-        { key: 'concept', label: t.admin.productions.tabConcepts },
-    ]
 
     return (
         <section className="mx-auto flex w-full max-w-[960px] flex-col gap-6 xl:max-w-[1280px] 2xl:max-w-[1536px]">
@@ -232,33 +216,7 @@ function ProductionsPageContent() {
                 </button>
             </div>
 
-
             <div className="overflow-hidden rounded-[12px] border border-[var(--color-admin-card-border)] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.05)] dark:bg-[#111318]">
-
-                <div className="border-b border-[var(--color-admin-card-border)] px-6">
-                    <nav className="flex gap-6" role="tablist" aria-label={t.admin.productions.tabAriaLabel}>
-                        {tabs.map(({ key, label, disabled }) => (
-                            <button
-                                key={key}
-                                role="tab"
-                                aria-selected={tab === key}
-                                aria-disabled={disabled}
-                                disabled={disabled}
-                                onClick={() => handleTabChange(key)}
-                                className={`py-3 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 ${
-                                    disabled
-                                        ? 'cursor-not-allowed text-slate-300 dark:text-slate-600'
-                                        : tab === key
-                                            ? 'border-b-2 border-accent text-accent'
-                                            : 'text-[#475569] hover:text-[#0f172a] dark:text-slate-400 dark:hover:text-white'
-                                }`}
-                            >
-                                {label}
-                            </button>
-                        ))}
-                    </nav>
-                </div>
-
                 <ProductionsTable
                     items={productions}
                     isLoading={isLoading}
