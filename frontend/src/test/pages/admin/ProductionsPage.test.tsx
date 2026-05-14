@@ -49,10 +49,6 @@ const mockMessages = {
             newButton: 'Nieuwe Productie',
             deleteConfirm: 'Weet je zeker dat je deze productie wilt verwijderen?',
             deleteError: 'Verwijderen mislukt. Probeer opnieuw.',
-            tabAll: 'Alle',
-            tabPublished: 'Gepubliceerd',
-            tabConcepts: 'Concepten',
-            tabAriaLabel: 'Producties filter',
             paginationShowing: (from: number, to: number, total: number) => `Toont ${from}–${to} van ${total} resultaten`,
             paginationPageLabel: (page: number) => `Pagina ${page}`,
             loadError: 'Kon producties niet laden.',
@@ -142,16 +138,6 @@ describe('ProductionsPage', () => {
         expect(screen.getByText('Overzicht van alle gearchiveerde en actuele voorstellingen.')).toBeInTheDocument()
     })
 
-    it('renders the tab bar with all three tabs', async () => {
-        apiFetchMock.mockResolvedValue(makePaginatedResponse([]))
-
-        renderPage()
-
-        expect(screen.getByRole('tab', { name: 'Alle' })).toBeInTheDocument()
-        expect(screen.getByRole('tab', { name: 'Gepubliceerd' })).toBeInTheDocument()
-        expect(screen.getByRole('tab', { name: 'Concepten' })).toBeInTheDocument()
-    })
-
     it('renders the search input and new-production button', async () => {
         apiFetchMock.mockResolvedValue(makePaginatedResponse([]))
 
@@ -212,85 +198,7 @@ describe('ProductionsPage', () => {
         renderPage()
 
         await waitFor(() => {
-            expect(screen.getByText('Onbekende fout')).toBeInTheDocument()
-        })
-    })
-
-    // Tabs
-    it('"Alle" tab is selected by default', async () => {
-        apiFetchMock.mockResolvedValue(makePaginatedResponse([]))
-
-        renderPage()
-
-        await waitFor(() => {
-            expect(screen.getByRole('tab', { name: 'Alle' })).toHaveAttribute('aria-selected', 'true')
-        })
-    })
-
-    it('clicking "Gepubliceerd" tab sends status=published to the API', async () => {
-        apiFetchMock.mockResolvedValue(makePaginatedResponse([]))
-
-        renderPage()
-
-        await waitFor(() => expect(apiFetchMock).toHaveBeenCalled())
-        apiFetchMock.mockClear()
-        apiFetchMock.mockResolvedValue(makePaginatedResponse([]))
-
-        fireEvent.click(screen.getByRole('tab', { name: 'Gepubliceerd' }))
-
-        await waitFor(() => {
-            expect(apiFetchMock).toHaveBeenCalledWith(
-                expect.stringContaining('status=published'),
-                expect.any(Object),
-            )
-        })
-    })
-
-    it('clicking "Concepten" tab sends status=concept to the API', async () => {
-        apiFetchMock.mockResolvedValue(makePaginatedResponse([]))
-
-        renderPage()
-
-        await waitFor(() => expect(apiFetchMock).toHaveBeenCalled())
-        apiFetchMock.mockClear()
-        apiFetchMock.mockResolvedValue(makePaginatedResponse([]))
-
-        fireEvent.click(screen.getByRole('tab', { name: 'Concepten' }))
-
-        await waitFor(() => {
-            expect(apiFetchMock).toHaveBeenCalledWith(
-                expect.stringContaining('status=concept'),
-                expect.any(Object),
-            )
-        })
-    })
-
-    it('switching tabs resets the page back to 1', async () => {
-        apiFetchMock.mockResolvedValue(makePaginatedResponse([], 25, 3))
-
-        renderPage()
-
-        await waitFor(() => expect(apiFetchMock).toHaveBeenCalled())
-
-        // Ga naar pagina 2
-        fireEvent.click(await screen.findByRole('button', { name: 'Pagina 2' }))
-        await waitFor(() =>
-            expect(apiFetchMock).toHaveBeenCalledWith(
-                expect.stringContaining('page=2'),
-                expect.any(Object),
-            ),
-        )
-
-        apiFetchMock.mockClear()
-        apiFetchMock.mockResolvedValue(makePaginatedResponse([]))
-
-        fireEvent.click(screen.getByRole('tab', { name: 'Gepubliceerd' }))
-
-        await waitFor(() => {
-            expect(apiFetchMock).toHaveBeenCalledWith(
-                expect.stringContaining('page=1'),
-                expect.any(Object),
-            )
+            expect(screen.getByText('Kon producties niet laden.')).toBeInTheDocument()
         })
     })
 
@@ -328,17 +236,6 @@ describe('ProductionsPage', () => {
                 expect.stringContaining('search=snobs'),
                 expect.any(Object),
             )
-        })
-    })
-
-    // Totaalteller in tab-label
-    it('shows the total count in the "Alle" tab label when items are loaded', async () => {
-        apiFetchMock.mockResolvedValue(makePaginatedResponse([productionA], 42, 5))
-
-        renderPage()
-
-        await waitFor(() => {
-            expect(screen.getByRole('tab', { name: 'Alle (42)' })).toBeInTheDocument()
         })
     })
 
