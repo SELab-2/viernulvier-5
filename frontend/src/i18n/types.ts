@@ -256,11 +256,9 @@ export type Messages = {
       recentlyEdited: string
       tableColTitle: string
       tableColType: string
-      tableColStatus: string
       tableColLanguage: string
       tableColDate: string
       tableColActions: string
-      statusAvailable: string
       actionView: string
       actionEdit: string
       emptyRecent: string
