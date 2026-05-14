@@ -142,9 +142,11 @@ function SearchResultCard({ item, detailHref, onTagClick, genreValue }: SearchRe
                 <p className={`mt-2 line-clamp-2 text-sm leading-relaxed ${showExcerpt ? 'text-text-accent' : 'invisible'}`}>
                     {showExcerpt ? item.excerpt : '\u00a0'}
                 </p>
-                <p className="mt-auto line-clamp-2 pt-4 text-xs font-semibold lowercase tracking-wide text-text-accent">
-                    {item.isProductionReference ? `∋ ${item.venue}` : item.venue}
-                </p>
+                {item.venue ? (
+                    <p className="mt-auto line-clamp-2 pt-4 text-xs font-semibold lowercase tracking-wide text-text-accent">
+                        {item.isProductionReference ? `∋ ${item.venue}` : item.venue}
+                    </p>
+                ) : null}
             </div>
         </article>
     )

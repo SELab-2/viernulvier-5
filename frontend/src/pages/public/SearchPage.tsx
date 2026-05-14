@@ -326,7 +326,7 @@ function mapPosterToSearchEntry(item: PosterApiItem, locale: Locale, searchMessa
         .filter((title) => title.length > 0)
     const productionTitle = productionTitles.length > 0
         ? productionTitles.join(' • ')
-        : searchMessages.fallbackVenue
+        : ''
     const posterFiles = Array.isArray(item.files) ? item.files : []
     const previewUrls = posterFiles
         .filter((file) => file.mime_type !== 'application/pdf')
