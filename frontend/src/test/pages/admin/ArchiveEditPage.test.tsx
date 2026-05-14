@@ -108,7 +108,7 @@ const mockMessages: Pick<Messages, 'admin'> = {
 
 vi.mock('../../../components/admin/AdminLayout', () => ({
   default: ({ children }: { children: React.ReactNode }) => (
-    <AdminMessagesContext.Provider value={mockMessages}>
+    <AdminMessagesContext.Provider value={mockMessages as Messages}>
       <div>{children}</div>
     </AdminMessagesContext.Provider>
   ),

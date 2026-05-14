@@ -20,9 +20,6 @@ export class PostersController {
     }
 
     private mapPosterLinks(poster: any, baseArchiveUrl: string, lang: string = 'nl'): PosterResponse {
-        const productionTitle = poster.production
-            ? this.service.mapProductionTitle(poster.production.title, lang)
-            : ''
         const productions = Array.isArray(poster.productions)
             ? poster.productions.map((production: { id: string; title: unknown }) => {
                   const localizedTitle = this.service.mapProductionTitle(production.title, lang)
@@ -32,6 +29,7 @@ export class PostersController {
                   }
               })
             : []
+        const primaryProduction = productions[0] ?? null
         const files = Array.isArray(poster.files)
             ? poster.files.map((file: { id: string; mime_type: string | null; original_filename: string | null; file_size_bytes: number | null }) => ({
                   id: file.id,
@@ -51,19 +49,14 @@ export class PostersController {
             original_filename: primaryFile?.original_filename ?? poster.original_filename,
             file_size_bytes: primaryFile?.file_size_bytes ?? poster.file_size_bytes,
             files,
-            production: poster.production
-                ? {
-                      id: poster.production.id,
-                      title: productionTitle || poster.production.id,
-                  }
-                : null,
+            production: primaryProduction,
             productions,
             created_at: poster.created_at,
             updated_at: poster.updated_at,
             links: {
                 self: `${baseArchiveUrl}/posters/${poster.id}`,
                 file: primaryFile?.file_url ?? `${baseArchiveUrl}/posters/${poster.id}/file`,
-                production: poster.production ? `${baseArchiveUrl}/productions/${poster.production.id}` : null,
+                production: primaryProduction ? `${baseArchiveUrl}/productions/${primaryProduction.id}` : null,
             },
         }
     }
@@ -113,10 +106,6 @@ export class PostersController {
 
             if (!title) {
                 return reply.status(400).send({ message: 'Poster title is required' })
-            }
-
-            if (productionIds.length === 0) {
-                return reply.status(400).send({ message: 'At least one production is required' })
             }
 
             if (files.length === 0) {

@@ -20,7 +20,6 @@ export type PosterRecord = {
     mime_type: string | null
     original_filename: string | null
     file_size_bytes: number | null
-    production_id: string
     files: Array<{
         id: string
         file_path: string
@@ -28,10 +27,6 @@ export type PosterRecord = {
         original_filename: string | null
         file_size_bytes: number | null
     }>
-    production: {
-        id: string
-        title: unknown
-    } | null
     productions: Array<{
         id: string
         title: unknown
@@ -105,8 +100,6 @@ export class PostersRepository {
             title: production.title,
         }))
 
-        const production = productions[0] ?? null
-
         const createdAtMs = groupRecords.map((entry) => entry.created_at.getTime())
         const updatedAtMs = groupRecords.map((entry) => entry.updated_at.getTime())
 
@@ -136,13 +129,6 @@ export class PostersRepository {
             original_filename: representative.description ?? null,
             file_size_bytes: null,
             files,
-            production_id: production?.id ?? '',
-            production: production
-                ? {
-                      id: production.id,
-                      title: production.title,
-                  }
-                : null,
             productions,
         }
     }
@@ -171,13 +157,6 @@ export class PostersRepository {
         const where: Prisma.fileWhereInput = {
             type: {
                 in: ['image', 'pdf'],
-            },
-            gallery: {
-                is: {
-                    poster_gallery_productions: {
-                        some: {},
-                    },
-                },
             },
         }
 
@@ -358,7 +337,12 @@ export class PostersRepository {
 
     async create(data: CreatePosterPersistenceInput) {
         const createdId = await this.prisma.$transaction(async (tx) => {
-            const galleryId = await this.ensurePosterGalleryForProductions(tx, data.production_ids)
+            const galleryId = data.production_ids.length > 0
+                ? await this.ensurePosterGalleryForProductions(tx, data.production_ids)
+                : (await tx.gallery.create({
+                    data: { name: `Unassigned poster ${Date.now()}` },
+                    select: { id: true },
+                })).id
 
             const createdRecords = await Promise.all(
                 data.files.map((file, index) =>

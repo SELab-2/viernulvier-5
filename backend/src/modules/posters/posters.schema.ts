@@ -70,7 +70,7 @@ const createPosterFileSchema = z.object({
 
 export const createPosterSchema = z.object({
     title: z.string().min(1),
-    production_ids: z.array(z.string().uuid()).min(1),
+    production_ids: z.array(z.string().uuid()).default([]),
     files: z.array(createPosterFileSchema).min(1),
 })
 

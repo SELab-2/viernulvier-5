@@ -293,11 +293,6 @@ function PostersPageContent() {
       return
     }
 
-    if (selectedProductionIds.length === 0) {
-      setError(i18n.admin.posters.validationProductionRequired)
-      return
-    }
-
     if (selectedFiles.length === 0) {
       setError(i18n.admin.posters.validationFileRequired)
       return
