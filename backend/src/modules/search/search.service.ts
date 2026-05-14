@@ -57,7 +57,7 @@ export class SearchService {
             title: blog.title ?? null,
             content: blog.content ?? null,
             productions: blog.productions,
-            created_at: blog.createdAt ? new Date(blog.createdAt).toISOString() : undefined,
+            created_at: blog.created_at ? new Date(blog.created_at).toISOString() : undefined,
         }))
 
         const prodItems: SearchResultItem[] = prodResults.items.map((prod) => ({

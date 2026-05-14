@@ -8,7 +8,7 @@ const baseBlog = {
     id: 'b1000000-0000-0000-0000-000000000001',
     title: { nl: 'Test blog', en: 'Test blog' },
     content: { nl: 'Inhoud' },
-    createdAt: '2026-04-01T10:00:00.000Z',
+    created_at: '2026-04-01T10:00:00.000Z',
 }
 
 describe('blogs api', () => {
