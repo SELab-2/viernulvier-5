@@ -35,7 +35,7 @@ const mockMessages = {
             actionDelete: 'Verwijder',
             emptyRecent: 'Geen blogs gevonden.',
         },
-        blogs: {
+        blogsPage: {
             pageTitle: 'Blogs',
             pageSubtitle: 'Overzicht van alle blogberichten.',
             searchPlaceholder: 'Zoek op titel...',
