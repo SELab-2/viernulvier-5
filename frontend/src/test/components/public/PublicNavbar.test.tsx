@@ -94,23 +94,23 @@ describe('PublicNavbar', () => {
         expect(screen.getByText(/ARCHIEF/)).toBeInTheDocument()
     })
 
-    it('renders the search toggle button with correct aria-label', () => {
+    it('renders the search link', () => {
         renderNavbar()
-        const buttons = screen.getAllByRole('button', { name: 'Zoeken' })
-        expect(buttons.length).toBeGreaterThan(0)
+        const links = screen.getAllByRole('link', { name: /zoeken/i })
+        expect(links.length).toBeGreaterThan(0)
     })
-
-    it('desktop search toggle starts with aria-expanded=false', () => {
+    
+    it('desktop search link points to the search page', () => {
         renderNavbar()
-        const searchButtons = screen.getAllByRole('button', { name: 'Zoeken' })
-        expect(searchButtons[0]).toHaveAttribute('aria-expanded', 'false')
+        const searchLinks = screen.getAllByRole('link', { name: /zoeken/i })
+        expect(searchLinks[0]).toHaveAttribute('href', '/zoeken')
     })
-
-    it('desktop search toggle sets aria-expanded=true after click', () => {
+    
+    it('mobile search link is available when the menu is opened', () => {
         renderNavbar()
-        const searchButtons = screen.getAllByRole('button', { name: 'Zoeken' })
-        fireEvent.click(searchButtons[0])
-        expect(searchButtons[0]).toHaveAttribute('aria-expanded', 'true')
+        fireEvent.click(screen.getByRole('button', { name: 'Menu openen' }))
+        const searchLinks = screen.getAllByRole('link', { name: /zoeken/i })
+        expect(searchLinks.length).toBeGreaterThan(0)
     })
 
     it('calls onToggleLocale when locale toggle is clicked', () => {
