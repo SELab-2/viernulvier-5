@@ -38,8 +38,8 @@ export const blogSchema = z.object({
     title: blogTitleSchema.nullable().optional(),
     content: z.unknown().nullable().optional(),
     productions: z.array(z.string().uuid()),
-    createdAt: z.coerce.date().optional(),
-    updatedAt: z.coerce.date().optional(),
+    created_at: z.coerce.date().optional(),
+    updated_at: z.coerce.date().optional(),
     links: blogLinksSchema.optional(),
 })
 

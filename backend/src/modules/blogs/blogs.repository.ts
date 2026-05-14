@@ -81,7 +81,7 @@ export class BlogsRepository {
             ]
 
             if (dateRange) {
-                searchConditions.push({ createdAt: { gte: dateRange.from, lt: dateRange.to } })
+                searchConditions.push({ created_at: { gte: dateRange.from, lt: dateRange.to } })
             }
 
             conditions.push({ OR: searchConditions })
@@ -91,7 +91,7 @@ export class BlogsRepository {
             const fromYear = Math.min(options.yearFrom ?? 1970, options.yearTo ?? 9999)
             const toYear = Math.max(options.yearFrom ?? 1970, options.yearTo ?? 9999)
             conditions.push({
-                createdAt: {
+                created_at: {
                     gte: new Date(Date.UTC(fromYear, 0, 1)),
                     lt: new Date(Date.UTC(toYear + 1, 0, 1)),
                 },
@@ -174,8 +174,8 @@ export class BlogsRepository {
         title: unknown
         content: unknown
         draft: boolean | null
-        createdAt: Date
-        updatedAt: Date
+        created_at: Date
+        updated_at: Date
         blog_production?: Array<{ production_id: string }>
     }): BlogResponse {
         return {
@@ -184,8 +184,8 @@ export class BlogsRepository {
             content: blog.content,
             draft: blog.draft ?? false,
             productions: blog.blog_production?.map((relation) => relation.production_id) ?? [],
-            createdAt: blog.createdAt,
-            updatedAt: blog.updatedAt,
+            created_at: blog.created_at,
+            updated_at: blog.updated_at,
         }
     }
 
@@ -197,7 +197,7 @@ export class BlogsRepository {
         const blogs = await this.prisma.blog.findMany({
             where,
             include: this.blogInclude,
-            orderBy: { createdAt: 'desc' },
+            orderBy: { created_at: 'desc' },
             skip,
             take: limit,
         })
@@ -213,7 +213,7 @@ export class BlogsRepository {
     async countInRange({ from, to }: { from: Date; to: Date }): Promise<number> {
         return this.prisma.blog.count({
             where: {
-                createdAt: {
+                created_at: {
                     gte: from,
                     lt: to,
                 },
