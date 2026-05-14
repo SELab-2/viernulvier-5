@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import Quill from 'quill'
 import 'quill/dist/quill.snow.css'
 import { api } from '../../api/client'
 import PublicLayout from '../../components/public/PublicLayout'
 import { usePublicMessages } from '../../components/public/PublicMessagesContext'
 import { getActiveLocale, withLocalePath } from '../../i18n'
+import PublicPillButton from '../../components/public/PublicPillButton'
 import ProductionCard from '../../components/blogs/ProductionCard'
+import { getPreviousStrippedPath } from '../../utils/navigationHistory'
 import {
     getLocalizedContent,
     getLocalizedTitle,
@@ -53,6 +55,7 @@ function QuillReadOnly({ content }: { content: unknown }) {
 
 function BlogDetailPageContent() {
     const { id } = useParams<{ id: string }>()
+    const navigate = useNavigate()
     const locale = getActiveLocale(window.location.pathname)
     const message = usePublicMessages()
     const [blog, setBlog] = useState<BlogDetails | null>(null)
@@ -60,6 +63,16 @@ function BlogDetailPageContent() {
     const [isLoading, setIsLoading] = useState(true)
     const [isLoadingProductions, setIsLoadingProductions] = useState(false)
     const [error, setError] = useState('')
+
+    const handleGoBack = () => {
+        const prev = getPreviousStrippedPath()
+        if (prev) {
+            navigate(withLocalePath(prev, locale))
+            return
+        }
+
+        navigate(withLocalePath('/', locale))
+    }
 
     // load productions or catch not existing production
     useEffect(() => {
@@ -120,12 +133,7 @@ function BlogDetailPageContent() {
     return (
         <section className="site-container py-12">
             <div className="mb-8 flex items-center justify-between gap-4">
-                <Link
-                    to={withLocalePath('/', locale)}
-                    className="text-sm font-medium text-[var(--color-accent)] transition hover:opacity-80"
-                >
-                    {message.blogs.detailPageBack}
-                </Link>
+                <PublicPillButton label={message.detail.navBack} onClick={handleGoBack} />
             </div>
 
             {isLoading ? <p className="text-center text-muted">{message.blogs.loadingBlog}</p> : null}
