@@ -337,7 +337,7 @@ describe('Blogs Routes', () => {
             const editor = await app.prisma.adminUser.create({
                 data: {
                     username: 'testeditor',
-                    password_hash: 'hash',
+                    passwordHash: 'hash',
                     role: Role.EDITOR,
                 }
             })
@@ -396,7 +396,7 @@ describe('Blogs Routes', () => {
             const editor = await app.prisma.adminUser.create({
                 data: {
                     username: 'testeditor2',
-                    password_hash: 'hash',
+                    passwordHash: 'hash',
                     role: Role.EDITOR,
                 }
             })
