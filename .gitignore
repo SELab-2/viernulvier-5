@@ -36,3 +36,6 @@ coverage/
 # Logs
 *.log
 npm-debug.log*
+
+# Local poster uploads
+backend/uploads/

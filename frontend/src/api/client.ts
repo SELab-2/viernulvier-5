@@ -10,6 +10,37 @@ export class ApiError extends Error {
     }
 }
 
+export function normalizeApiAssetUrl(value: string | null | undefined): string | undefined {
+    if (!value) {
+        return undefined
+    }
+
+    const trimmed = value.trim()
+    if (!trimmed) {
+        return undefined
+    }
+
+    if (trimmed.startsWith('/api/')) {
+        return trimmed
+    }
+
+    if (typeof window === 'undefined') {
+        return trimmed
+    }
+
+    try {
+        const url = new URL(trimmed, window.location.origin)
+
+        if (url.pathname.startsWith('/api/')) {
+            return `${url.pathname}${url.search}${url.hash}`
+        }
+    } catch {
+        return trimmed
+    }
+
+    return trimmed
+}
+
 /**
  * API client for communicating with the Fastify backend.
  *
@@ -21,10 +52,13 @@ export async function apiFetch<T>(
     options: RequestInit = {}
 ): Promise<T> {
     const url = `${API_BASE}${endpoint}`
+    const isFormDataBody = typeof FormData !== 'undefined' && options.body instanceof FormData
 
     const hasBody = options.body !== undefined && options.body !== null
     const defaultHeaders: Record<string, string> = hasBody
+        ? !isFormDataBody
         ? { 'Content-Type': 'application/json' }
+        : {}
         : {}
 
     let response: Response

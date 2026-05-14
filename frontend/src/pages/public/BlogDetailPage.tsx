@@ -139,11 +139,7 @@ function BlogDetailPageContent() {
     }, [id, idIsMalformed, locale])
 
     if (notFound || !id || idIsMalformed) {
-        return (
-            <PublicLayout>
-                <NotFoundContent />
-            </PublicLayout>
-        )
+        return <NotFoundContent />
     }
 
     return (
