@@ -1,4 +1,4 @@
-import { Link, useParams } from 'react-router-dom'
+import { useNavigate, Link, useParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { apiFetch, normalizeApiAssetUrl } from '../../api/client'
 import PublicLayout from '../../components/public/PublicLayout'
@@ -75,6 +75,7 @@ function PosterDetailPageContent({
     id: string
     locale: Locale
 }) {
+    const navigate = useNavigate()
     const { detail: detailMessages } = usePublicMessages()
     const [poster, setPoster] = useState<PosterDetail | null>(null)
     const [relatedProductions, setRelatedProductions] = useState<ProductionPreview[]>([])
@@ -198,12 +199,12 @@ function PosterDetailPageContent({
     return (
         <section className="site-container py-12">
             <div className="mx-auto max-w-5xl">
-                <Link
-                    to={withLocalePath('/zoeken', locale)}
-                    className="mb-6 inline-block text-sm font-medium text-[var(--color-accent)] transition hover:opacity-80"
+                <button
+                    onClick={() => navigate(-1)}
+                    className="mb-6 inline-block text-sm font-medium text-[var(--color-accent)] transition hover:opacity-80 bg-none border-none cursor-pointer p-0"
                 >
                     {`← ${backLabel}`}
-                </Link>
+                </button>
 
                 {isLoading ? <p className="text-center text-muted">{detailMessages.loadingPoster}</p> : null}
                 {error ? <p className="text-center text-red-500">{error}</p> : null}
