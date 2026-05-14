@@ -40,7 +40,7 @@ describe('requirePermission', () => {
         expect(response.statusCode).toBe(401)
     })
 
-    it('allows an ADMIN token through for editor management', async () => {
+    it('allows an ADMIN token through for CMS user management', async () => {
         const response = await app.inject({
             method: 'GET',
             url: '/editors-manage',
