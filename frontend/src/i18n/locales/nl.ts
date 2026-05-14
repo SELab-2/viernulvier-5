@@ -372,6 +372,7 @@ const nl: Messages = {
       untitledLabel: '(Geen titel)',
       paginationShowing: (from: number, to: number, total: number) => `Toont ${from}–${to} van ${total} resultaten`,
       paginationPageLabel: (page: number) => `Pagina ${page}`,
+      loadError: 'Kon producties niet laden',
     },
     notFound: {
       titleTop: 'Vier',

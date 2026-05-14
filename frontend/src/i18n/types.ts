@@ -337,6 +337,7 @@ export type Messages = {
       untitledLabel: string
       paginationShowing: (from: number, to: number, total: number) => string
       paginationPageLabel: (page: number) => string
+      loadError: string
     }
     notFound: {
       titleTop: string

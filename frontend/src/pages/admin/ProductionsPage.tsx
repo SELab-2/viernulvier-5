@@ -130,7 +130,7 @@ function ProductionsPageContent() {
                 setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
             } catch (err) {
                 if (abortController.signal.aborted) return
-                setError(err instanceof Error ? err.message : t.admin.posters.loadProductionsError)
+                setError(err instanceof Error ? err.message : t.admin.productions.loadError)
                 setProductions([])
                 setTotal(0)
                 setTotalPages(1)
@@ -141,7 +141,7 @@ function ProductionsPageContent() {
 
         void load()
         return () => abortController.abort()
-    }, [page, tab, debouncedQuery, reloadToken, locale, t.admin.posters.loadProductionsError])
+    }, [page, tab, debouncedQuery, reloadToken, locale, t.admin.productions.loadError])
 
     const handleDelete = async (id: string) => {
         if (!window.confirm(t.admin.productions.deleteConfirm)) return

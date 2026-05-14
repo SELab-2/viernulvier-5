@@ -372,6 +372,7 @@ const en: Messages = {
       untitledLabel: '(Untitled)',
       paginationShowing: (from: number, to: number, total: number) => `Showing ${from}–${to} of ${total} results`,
       paginationPageLabel: (page: number) => `Page ${page}`,
+      loadError: 'Could not load productions.'
     },
     notFound: {
       titleTop: 'Four',
