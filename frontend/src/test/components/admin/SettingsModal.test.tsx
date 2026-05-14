@@ -157,18 +157,22 @@ describe('SettingsModal', () => {
     expect(screen.getByDisplayValue('admin')).toBeInTheDocument()
   })
 
-  it('switches to Editors tab when clicked', () => {
-    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+  it('switches to Editors tab and loads editors from the cms-users editor endpoint', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
       json: async () => ({ data: [] }),
     } as Response)
+    vi.stubGlobal('fetch', fetchMock)
 
     renderWithMessages(<SettingsModal isOpen onClose={vi.fn()} user={adminUser} />)
 
     fireEvent.click(screen.getByRole('tab', { name: 'Editors' }))
 
     expect(screen.getByText('Editors beheren')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith('/api/v1/cms-users/editors', expect.any(Object))
+    })
   })
 
   it('shows password reset flow trigger on My Account tab, not always-open password fields', () => {
