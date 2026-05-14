@@ -22,6 +22,7 @@ import mediaRoutes from './modules/media/media.routes.js'
 import authRoutes from './modules/auth/auth.routes.js'
 import cmsUsersRoutes from './modules/cms-users/cms-users.routes.js'
 import blogsRoutes from './modules/blogs/blogs.routes.js'
+import postersRoutes from './modules/posters/posters.routes.js'
 import dashboardRoutes from './modules/dashboard/dashboard.routes.js'
 import searchRoutes from './modules/search/search.routes.js'
 import imagesRoutes from './modules/images/images.routes.js'
@@ -39,6 +40,7 @@ export async function buildApp(opts = {}): Promise<FastifyInstance> {
                 ? { target: 'pino-pretty', options: { colorize: true } }
                 : undefined,
         },
+        bodyLimit: env.REQUEST_BODY_LIMIT_BYTES,
         ...opts,
     })
 
@@ -66,6 +68,7 @@ export async function buildApp(opts = {}): Promise<FastifyInstance> {
     await app.register(spacesRoutes, { prefix: '/api/v1/archive/spaces' })
     await app.register(mediaRoutes, { prefix: '/api/v1/archive/media' })
     await app.register(blogsRoutes, { prefix: '/api/v1/archive/blogs' })
+    await app.register(postersRoutes, { prefix: '/api/v1/archive/posters' })
     await app.register(searchRoutes, { prefix: '/api/v1/archive/search' })
     await app.register(dashboardRoutes, { prefix: '/api/v1/dashboard' })
     await app.register(authRoutes, { prefix: '/api/v1/auth' })
