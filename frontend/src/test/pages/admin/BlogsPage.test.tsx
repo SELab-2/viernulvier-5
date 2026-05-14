@@ -44,7 +44,8 @@ const mockMessages = {
             loadError: 'Kon blogs niet laden.',
             paginationShowing: (from: number, to: number, total: number) => `Toont ${from}–${to} van ${total} resultaten`,
             paginationPageLabel: (page: number) => `Pagina ${page}`,
-            tableColLinkedProductions: 'Gekoppelde producties'
+            tableColLinkedProductions: 'Gekoppelde producties',
+            untitledLabel: '(Zonder titel)',
         },
     },
 } as unknown as Messages
@@ -225,7 +226,7 @@ describe('BlogsPage', () => {
         renderPage()
 
         await waitFor(() => {
-            expect(screen.getByText('Onbekende fout')).toBeInTheDocument()
+            expect(screen.getByText('Kon blogs niet laden')).toBeInTheDocument()
         })
     })
 
