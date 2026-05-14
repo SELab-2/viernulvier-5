@@ -13,13 +13,16 @@ export const searchQuerySchema = paginationQuerySchema.extend({
 
 export const searchResultItemSchema = z.object({
     id: z.string().uuid(),
-    type: z.enum(['production', 'blog']),
+    type: z.enum(['production', 'blog', 'poster']),
     title: z.unknown().nullable().optional(),
     teaser: z.unknown().nullable().optional(),
     description_short: z.unknown().nullable().optional(),
     description: z.unknown().nullable().optional(),
     content: z.unknown().nullable().optional(),
     image_url: z.string().nullable().optional(),
+    mime_type: z.string().nullable().optional(),
+    poster_file_count: z.number().int().positive().optional(),
+    production_id: z.string().uuid().nullable().optional(),
     venue_name: z.string().nullable().optional(),
     venue_names: z.array(z.string()).optional(),
     production_genres: z.array(z.string()).optional(),
