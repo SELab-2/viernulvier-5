@@ -129,7 +129,7 @@ function BlogsPageContent() {
 
         void load()
         return () => abortController.abort()
-    }, [page, debouncedQuery, reloadToken, locale])
+    }, [page, debouncedQuery, reloadToken, locale, b.loadError])
 
     const handleDelete = async (id: string) => {
         const deleteConfirmMessage = messages.blogs.deleteConfirm

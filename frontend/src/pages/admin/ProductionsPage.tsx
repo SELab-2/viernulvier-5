@@ -141,7 +141,7 @@ function ProductionsPageContent() {
 
         void load()
         return () => abortController.abort()
-    }, [page, tab, debouncedQuery, reloadToken, locale])
+    }, [page, tab, debouncedQuery, reloadToken, locale, t.admin.posters.loadProductionsError])
 
     const handleDelete = async (id: string) => {
         if (!window.confirm(t.admin.productions.deleteConfirm)) return
