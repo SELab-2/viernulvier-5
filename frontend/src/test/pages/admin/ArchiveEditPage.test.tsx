@@ -37,13 +37,12 @@ const mockMessages: Pick<Messages, 'admin'> = {
       recentlyEdited: 'Recently edited',
       tableColTitle: 'Title',
       tableColType: 'Type',
-      tableColStatus: 'Status',
       tableColLanguage: 'Language Status',
       tableColDate: 'Date',
       tableColActions: 'Actions',
-      statusAvailable: 'Available in archive',
       actionView: 'View',
       actionEdit: 'Edit',
+      actionDelete: 'delete',
       emptyRecent: 'No recent archive items found.',
       paginationShowing: (from: number, to: number, total: number) => `Showing ${from}-${to} of ${total} results`,
       paginationPrev: 'Previous page',
@@ -72,7 +71,7 @@ const mockMessages: Pick<Messages, 'admin'> = {
       pageTitle: 'Edit archive item',
       itemIdLabel: 'Item ID:',
     },
-    blogs: {
+    blogsPage: {
       pageTitle: 'Blogs',
       pageSubtitle: 'Overview of all blog posts.',
       searchPlaceholder: 'Search by title...',
@@ -81,6 +80,7 @@ const mockMessages: Pick<Messages, 'admin'> = {
       paginationShowing: (from: number, to: number, total: number) => `Showing ${from}–${to} of ${total} results`,
       paginationPageLabel: (page: number) => `Page ${page}`,
       tableColLinkedProductions: 'Linked productions',
+      untitledLabel: 'Untitled production',
     },
     productions: {
       pageTitle: 'Productions',

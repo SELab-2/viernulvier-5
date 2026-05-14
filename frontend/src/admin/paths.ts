@@ -51,7 +51,7 @@ export function getAdminRouteConfig(hostname: string): AdminRouteConfig {
     archiveEditPath: '/admin/archive/:id/edit',
     productionCreatePath: '/admin/productions/new',
     blogEditPath: '/admin/blogs/:id/edit',
-    blogCreatePath: '/admin/blogs/create'
+    blogCreatePath: '/admin/blogs/create',
     postersPath: '/admin/posters',
   }
 }
