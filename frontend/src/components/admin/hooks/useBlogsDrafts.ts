@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api } from '../../../api/client'
-import type {DraftItem, LocalizedString} from '../drafts/DraftsTable'
+import type {DraftItem} from '../drafts/DraftsTable'
 
 type DraftState = {
     items: DraftItem[]
@@ -12,16 +12,6 @@ type Args = {
     page: number
     limit: number
     enabled?: boolean
-}
-
-type BlogItem = {
-    id: string
-    title: LocalizedString
-    updatedAt: string
-    languageStatus: {
-        nl: 'complete' | 'attention' | 'missing'
-        en: 'complete' | 'attention' | 'missing'
-    }
 }
 
 export function useBlogDrafts({ page, limit, enabled = true }: Args): DraftState {
@@ -36,14 +26,10 @@ export function useBlogDrafts({ page, limit, enabled = true }: Args): DraftState
         let isActive = true
 
 
-        api.get<{ data: BlogItem[] }>(`/archive/blogs?draft=true&page=${page}&limit=${limit}`)
+        api.get<{ data: DraftItem[] }>(`/archive/blogs?draft=true&page=${page}&limit=${limit}`)
             .then((response) => {
                 if (!isActive) return
-                const items = response.data.map(item => ({
-                    ...item,
-                    updated_at: item.updatedAt,
-                }))
-                setState({ items, isLoading: false, error: null })
+                setState({ items: response.data, isLoading: false, error: null })
             })
             .catch((error: unknown) => {
                 if (!isActive) return
