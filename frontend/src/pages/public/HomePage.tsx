@@ -65,9 +65,9 @@ function HomePage() {
     const initialFilters = useMemo<HeroSearchFilters>(
         () => ({
             query: searchParams.get('q') ?? '',
-            year: searchParams.get('year') ?? undefined,
+            yearFrom: searchParams.get('yearFrom') ? Number(searchParams.get('yearFrom')) : undefined,
+            yearTo: searchParams.get('yearTo') ? Number(searchParams.get('yearTo')) : undefined,
             genre: searchParams.get('genre') ?? undefined,
-            location: searchParams.get('location') ?? undefined,
         }),
         [searchParams]
     )
@@ -79,16 +79,16 @@ function HomePage() {
             params.set('q', filters.query)
         }
 
-        if (filters.year) {
-            params.set('year', filters.year)
+        if (filters.yearFrom) {
+            params.set('yearFrom', String(filters.yearFrom))
+        }
+
+        if (filters.yearTo) {
+            params.set('yearTo', String(filters.yearTo))
         }
 
         if (filters.genre) {
             params.set('genre', filters.genre)
-        }
-
-        if (filters.location) {
-            params.set('location', filters.location)
         }
 
         const queryString = params.toString()
