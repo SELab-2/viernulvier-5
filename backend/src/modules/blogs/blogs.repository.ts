@@ -172,6 +172,8 @@ export class BlogsRepository {
 
         created_at: Date
         updated_at: Date
+        thumbnail_index: number | null
+        images: string[]
 
         blog_production?: Array<{ production_id: string }>
     }): BlogResponse {
