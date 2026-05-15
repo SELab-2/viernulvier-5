@@ -3,14 +3,14 @@ import { BlogsRepository } from './blogs.repository.js'
 import { BlogsService } from './blogs.service.js'
 import { BlogsController } from './blogs.controller.js'
 import { z } from 'zod'
-import { 
+import {
     blogPaginationQuerySchema,
     blogListSchema,
     singleBlogSchema,
-    createBlogSchema, 
-    updateBlogSchema, 
+    createBlogSchema,
+    updateBlogSchema,
     blogIdSchema,
-    errorSchema
+    errorSchema, updateBlogParamsSchema
 } from './blogs.schema.js'
 import { requirePermission } from '../../hooks/require-permission.js'
 import { Permission } from '../../domain/permissions.js'
@@ -96,9 +96,9 @@ const blogsRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.post('/:id/editors', {
         preHandler: [requirePermission(Permission.ARCHIVE_UPDATE)],
         schema: {
-            tags: ['productions'],
-            summary: 'Assign an editor to a production',
-            params: updateProductionParamsSchema,
+            tags: ['blogs'],
+            summary: 'Assign an editor to a blog',
+            params: updateBlogParamsSchema,
             body: z.object({ editorId: z.string().uuid() }),
             response: { 204: z.null() },
         },
@@ -108,8 +108,8 @@ const blogsRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.delete('/:id/editors/:editorId', {
         preHandler: [requirePermission(Permission.ARCHIVE_UPDATE)],
         schema: {
-            tags: ['productions'],
-            summary: 'Remove an editor from a production',
+            tags: ['blogs'],
+            summary: 'Remove an editor from a blog',
             params: z.object({ id: z.string().uuid(), editorId: z.string().uuid() }),
             response: { 204: z.null() },
         },

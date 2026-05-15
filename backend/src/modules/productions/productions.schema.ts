@@ -19,7 +19,9 @@ export const productionPaginationQuerySchema = paginationQuerySchema.extend({
     locations: z.string().optional(),
     yearFrom: z.coerce.number().int().optional(),
     yearTo: z.coerce.number().int().optional(),
-    onThisDay: z.coerce.boolean().optional().default(false),
+    onThisDay: z.enum(['true', 'false'])
+    .optional().default('false')
+    .transform((val) => val === 'true'),
     referenceDate: z
         .string()
         .regex(/^\d{4}-\d{2}-\d{2}$/)
@@ -30,8 +32,9 @@ export const productionPaginationQuerySchema = paginationQuerySchema.extend({
     sort: z.enum(['relevance', 'recent', 'oldest']).optional().default('relevance'),
     lang: z.string().optional().default('nl'),
     draft: z.enum(['true', 'false'])
-        .optional()
+        .optional().default('false')
         .transform((val) => (val ? val === 'true' : undefined)),
+    editorId: z.string().uuid().optional(),
 })
 
 /**

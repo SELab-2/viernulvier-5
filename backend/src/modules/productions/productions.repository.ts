@@ -14,6 +14,7 @@ type FindAllOptions = {
     sort?: 'relevance' | 'recent' | 'oldest'
     lang?: string
     draft?: boolean
+    editorId?: string
 }
 
 type CountOptions = Omit<FindAllOptions, 'page' | 'limit' | 'sort'>
@@ -183,29 +184,33 @@ export class ProductionsRepository {
     }
 
     private async buildWhere(options: CountOptions): Promise<Prisma.productionWhereInput> {
-        const { search, searchIds, genres, locations, yearFrom, yearTo, onThisDayDate, lang = 'nl', draft } = options
+        const { search, searchIds, genres, locations, yearFrom, yearTo, onThisDayDate, lang = 'nl', draft, editorId} = options
         const andFilters: Prisma.productionWhereInput[] = []
         const now = new Date()
 
         // Requirement: Only show productions that have at least one event in the past
-        andFilters.push({
-            events: {
-                some: {
-                    starts_at: {
-                        lt: now
+        if (draft !== true) {
+            andFilters.push({
+                events: {
+                    some: {
+                        starts_at: {
+                            lt: now
+                        }
                     }
                 }
-            }
-        })
+            })
+        }
         if (draft !== undefined) {
             andFilters.push({ draft })
         }
 
-        if (onThisDayDate) {
-            const matchingProductionIds = await this.findProductionIdsOnMonthDay(onThisDayDate)
+
+        if (editorId) {
             andFilters.push({
-                id: {
-                    in: matchingProductionIds,
+                editor_production: {
+                    some: {
+                        editor_id: editorId,
+                    },
                 },
             })
         }
