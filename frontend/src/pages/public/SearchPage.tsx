@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { getActiveLocale, withLocalePath } from '../../i18n'
 import type { Locale, Messages } from '../../i18n/types'
-import { apiFetch } from '../../api/client'
+import { apiFetch, normalizeApiAssetUrl } from '../../api/client'
+import { getLocalizedContent, getLocalizedTitle, normalizeContent } from './blogDetailPage.formatters'
 import PublicLayout from '../../components/public/PublicLayout'
 import { usePublicMessages } from '../../components/public/PublicMessagesContext'
 import SearchPagination from '../../components/public/search/SearchPagination'
@@ -12,7 +13,7 @@ type SearchEntry = SearchResultItem & {
     year: number
     genre: string
     location: string
-    type: 'production' | 'blog'
+    type: 'production' | 'blog' | 'poster'
 }
 
 const DEFAULT_PAGE_SIZE = 12
@@ -86,7 +87,7 @@ type LocalizedText = {
 
 type SearchApiItem = {
     id: string
-    type: 'production' | 'blog'
+    type: 'production' | 'blog' | 'poster'
     title?: LocalizedText
     excerpt?: string
     image_url?: string | null
@@ -106,9 +107,33 @@ type PaginatedApiResponse<T> = {
     }
 }
 
+type PosterApiItem = {
+    id: string
+    title: string
+    file_url: string
+    mime_type: string | null
+    files?: Array<{
+        id: string
+        file_url: string
+        mime_type: string | null
+    }>
+    file_count?: number
+    created_at: string
+    production: {
+        id: string
+        title: string
+    } | null
+    productions?: Array<{
+        id: string
+        title: string
+    }>
+}
+
 type SearchSort = 'relevance' | 'recent' | 'oldest'
+type SearchTab = 'productions' | 'blogs' | 'all' | 'posters'
 
 type SearchFilterState = {
+    tab: SearchTab
     query: string
     yearFrom: number
     yearTo: number
@@ -117,10 +142,10 @@ type SearchFilterState = {
     sort: SearchSort
     page: number
     limit: number
-    tab: 'productions' | 'blogs' | 'all'
 }
 
 type SearchFilterOverrides = {
+    tab?: SearchTab
     query?: string
     yearFrom?: number
     yearTo?: number
@@ -129,7 +154,13 @@ type SearchFilterOverrides = {
     sort?: SearchSort
     page?: number
     limit?: number
-    tab?: 'productions' | 'blogs' | 'all'
+}
+
+function normalizeTab(value: string | null): SearchTab {
+    if (value === 'blogs') return 'blogs'
+    if (value === 'all') return 'all'
+    if (value === 'posters') return 'posters'
+    return 'productions'
 }
 
 function getLocalizedText(text: LocalizedText, locale: Locale): string {
@@ -155,6 +186,7 @@ function normalizePageSize(value: number): number {
 }
 
 function parseSearchFilterState(searchParams: URLSearchParams): SearchFilterState {
+    const tab = normalizeTab(searchParams.get('tab'))
     const query = (searchParams.get('q') ?? '').trim()
     const legacyYear = Number(searchParams.get('year') ?? String(MAX_PERIOD_YEAR))
     const yearFromParam = Number(searchParams.get('yearFrom') ?? String(MIN_PERIOD_YEAR))
@@ -170,10 +202,8 @@ function parseSearchFilterState(searchParams: URLSearchParams): SearchFilterStat
     const limitParam = Number(searchParams.get('limit') ?? String(DEFAULT_PAGE_SIZE))
     const limit = normalizePageSize(limitParam)
 
-    const tabParam = searchParams.get('tab')
-    const tab: 'productions' | 'blogs' | 'all' = tabParam === 'blogs' ? 'blogs' : tabParam === 'all' ? 'all' : 'productions'
-
     return {
+        tab,
         query,
         yearFrom,
         yearTo,
@@ -182,7 +212,6 @@ function parseSearchFilterState(searchParams: URLSearchParams): SearchFilterStat
         sort,
         page,
         limit,
-        tab,
     }
 }
 
@@ -190,6 +219,7 @@ function buildSearchParams(filters: SearchFilterOverrides): URLSearchParams {
     const params = new URLSearchParams()
     const trimmedQuery = filters.query?.trim() ?? ''
 
+    if (filters.tab && filters.tab !== 'productions') params.set('tab', filters.tab)
     if (trimmedQuery) params.set('q', trimmedQuery)
     if (filters.yearFrom && filters.yearFrom > MIN_PERIOD_YEAR) params.set('yearFrom', String(filters.yearFrom))
     if (filters.yearTo && filters.yearTo < MAX_PERIOD_YEAR) params.set('yearTo', String(filters.yearTo))
@@ -198,11 +228,10 @@ function buildSearchParams(filters: SearchFilterOverrides): URLSearchParams {
     if (filters.sort && filters.sort !== 'relevance') params.set('sort', filters.sort)
     if (filters.page && filters.page > 1) params.set('page', String(filters.page))
     if (filters.limit && filters.limit !== DEFAULT_PAGE_SIZE) params.set('limit', String(filters.limit))
-    if (filters.tab === 'blogs') params.set('tab', 'blogs')
-    if (filters.tab === 'all') params.set('tab', 'all')
 
     return params
 }
+
 
 function useAllHalls(locale: Locale) {
     const [halls, setHalls] = useState<string[]>([])
@@ -210,8 +239,8 @@ function useAllHalls(locale: Locale) {
     useEffect(() => {
         const fetchHalls = async () => {
             try {
-                // Fetch more halls to be sure
-                const res = await apiFetch<{ data: Array<{ name: LocalizedText }> }>('/archive/halls?limit=500')
+                // Fetch enough halls for autocomplete while keeping the request bounded.
+                const res = await apiFetch<{ data: Array<{ name: LocalizedText }> }>('/archive/halls?limit=100')
                 const names = (res.data || [])
                     .map(h => getLocalizedText(h.name, locale))
                     .filter(Boolean)
@@ -521,6 +550,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
         label,
         value: CANONICAL_GENRE_VALUES[index] ?? label.toLowerCase(),
     }))
+
     return (
         <aside className={`flex h-full flex-col ${className}`}>
             <h2 className="text-3xl text-foreground">{s.heading}</h2>
@@ -549,7 +579,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
                 </form>
             ) : null}
 
-            {tab !== 'blogs' ? (
+            {tab !== 'blogs' && tab !== 'posters' ? (
             <div className="mt-8 border-t border-border pt-5">
                 <div className="mb-4 flex items-center justify-between">
                     <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground">{s.genreLabel}</h3>
@@ -610,7 +640,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
                 </div>
             </div>
 
-            {tab !== 'blogs' ? (
+            {tab !== 'blogs' && tab !== 'posters' ? (
             <div className="mt-6 border-t border-border pt-5 pb-5">
                 <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground">{s.locationLabel}</h3>
                 <div className="mt-4 space-y-3 text-sm text-text-accent">
@@ -683,7 +713,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
             <div className="mt-auto space-y-3">
                 <button
                     type="button"
-                    className="h-10 w-full rounded-full border border-border bg-surface text-sm font-semibold text-foreground md:hidden transition-colors duration-200"
+                    className="h-10 w-full rounded-full border border-border bg-surface text-sm font-semibold text-foreground transition-colors duration-200 md:hidden"
                     onClick={() => {
                         onShare?.()
                     }}
@@ -787,6 +817,7 @@ function SearchPageContent() {
     const allAvailableHalls = useAllHalls(locale)
 
     const filterState = useMemo(() => parseSearchFilterState(searchParams), [searchParams])
+    const activeTab = filterState.tab
     const query = filterState.query
     const safeFromYear = filterState.yearFrom
     const safeToYear = filterState.yearTo
@@ -1020,7 +1051,9 @@ function SearchPageContent() {
         }, 1800)
     }
 
-    const filterChips: Array<{ key: string; label: string; onRemove: () => void }> = [
+    const filterChips: Array<{ key: string; label: string; onRemove: () => void }> = activeTab === 'posters'
+        ? []
+        : [
         ...selectedGenres.map((value) => ({
             key: `genre-${value}`,
             label: getGenreLabel(value, searchMessages.genres),
@@ -1045,6 +1078,10 @@ function SearchPageContent() {
     const locationSuggestions = useMemo(() => {
         const normalizedLocale = locale === 'en' ? 'en' : 'nl'
         const uniqueValues = new Set<string>()
+
+        if (activeTab === 'blogs' || activeTab === 'posters') {
+            return []
+        }
 
         // 1. Add predefined aliases
         Object.values(LOCATION_ALIASES).forEach(v => uniqueValues.add(v))
@@ -1140,7 +1177,7 @@ function SearchPageContent() {
 
                             <div className="flex flex-wrap items-center justify-between gap-4">
                                 <div>
-                                    <h1 className="flex items-center gap-3 text-3xl leading-none text-foreground">
+                                    <h1 className="flex items-center gap-3 text-xl md:text-2xl leading-none text-foreground">
                                         <button
                                             type="button"
                                             onClick={() => navigateWithFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: pageSize, page: 1, tab: 'all' })}
@@ -1161,6 +1198,13 @@ function SearchPageContent() {
                                             className={tab === 'blogs' ? 'underline decoration-accent decoration-2 underline-offset-4' : 'text-muted transition-colors hover:text-foreground'}
                                         >
                                             {m.search.blogTab}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => navigateWithFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: [], locations: [], sort, limit: pageSize, page: 1, tab: 'posters' })}
+                                            className={tab === 'posters' ? 'underline decoration-accent decoration-2 underline-offset-4' : 'text-muted transition-colors hover:text-foreground'}
+                                        >
+                                            {m.search.postersTab}
                                         </button>
                                     </h1>
                                     <p className="mt-2 text-sm text-muted">
@@ -1218,7 +1262,7 @@ function SearchPageContent() {
                                                 <circle cx="18" cy="19" r="3" />
                                                 <path d="M8.59 13.51 15.42 17.49M15.41 6.51 8.59 10.49" strokeLinecap="round" />
                                             </svg>
-                                            <span>{shareCopied ? m.search.shareCopiedLabel : m.search.shareLabel}</span>
+                                            <span className="hidden lg:inline">{shareCopied ? m.search.shareCopiedLabel : m.search.shareLabel}</span>
                                         </button>
                                     </div>
                                 ) : null}
@@ -1276,6 +1320,8 @@ function SearchPageContent() {
                                         onTagClick={handleCardGenreClick}
                                         detailHref={ item.type === 'blog'
                                             ? withLocalePath('/blogs/' + item.id, locale)
+                                            : item.type === 'poster'
+                                                ? withLocalePath('/posters/' + item.id, locale)
                                             : withLocalePath('/archive/' + item.id, locale)
                                         }
                                     />

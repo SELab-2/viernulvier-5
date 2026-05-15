@@ -9,12 +9,12 @@ export const searchQuerySchema = paginationQuerySchema.extend({
     locations: z.string().optional(),
     sort: z.enum(['relevance', 'recent', 'oldest']).optional().default('relevance'),
     lang: z.string().optional().default('nl'),
-    tab: z.enum(['all', 'productions', 'blogs']).optional().default('all'),
+    tab: z.enum(['all', 'productions', 'blogs', 'posters']).optional().default('all'),
 })
 
 export const searchResultItemSchema = z.object({
     id: z.string().uuid(),
-    type: z.enum(['production', 'blog']),
+    type: z.enum(['production', 'blog', 'poster']),
     title: z.union([z.string(), z.record(z.string(), z.string())]).nullable().optional(),
     excerpt: z.string().nullable().optional(),
     image_url: z.string().nullable().optional(),
@@ -22,6 +22,9 @@ export const searchResultItemSchema = z.object({
     venue_label: z.string().nullable().optional(),
     genre_label: z.string().nullable().optional(),
     created_at: z.string().optional(),
+    mime_type: z.string().nullable().optional(),
+    poster_file_count: z.number().int().positive().optional(),
+    production_id: z.string().uuid().nullable().optional(),
     // Legacy fields for backward compatibility
     teaser: z.unknown().nullable().optional(),
     description_short: z.unknown().nullable().optional(),

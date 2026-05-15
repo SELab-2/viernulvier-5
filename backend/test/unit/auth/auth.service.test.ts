@@ -71,8 +71,8 @@ describe('AuthService', () => {
                 id: 'user-1',
                 username: 'admin',
                 role: 'ADMIN',
-                createdAt: new Date(),
-                updatedAt: new Date(),
+                created_at: new Date(),
+                updated_at: new Date(),
             }
             repository.findById.mockResolvedValue(mockUser)
 

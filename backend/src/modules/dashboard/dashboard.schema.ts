@@ -17,7 +17,7 @@ const recentItemSchema = z.object({
     type: z.string(),
     status: z.enum(['available']),
     languageStatus: languageStatusSchema,
-    updatedAt: z.date(),
+    updated_at: z.date(),
 })
 
 const countsSchema = z.object({
