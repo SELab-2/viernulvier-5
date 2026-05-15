@@ -245,7 +245,7 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
                         })}
                       </div>
                     </td>
-                    <td className="px-4 py-4 text-sm text-[#475569] dark:text-slate-300">{formatDate(item.updatedAt)}</td>
+                    <td className="px-4 py-4 text-sm text-[#475569] dark:text-slate-300">{formatDate(item.updated_at)}</td>
                     <td className="px-2 py-4">
                       <div className="flex flex-wrap gap-1">
                         <button className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white">
