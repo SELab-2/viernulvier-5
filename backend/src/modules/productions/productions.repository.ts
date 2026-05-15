@@ -494,8 +494,15 @@ export class ProductionsRepository {
     }
 
     async delete(id: string) {
-        return this.prisma.production.delete({
-            where: { id }
-        })
+        const [, , , , , , production] = await this.prisma.$transaction([
+            this.prisma.event_price.deleteMany({ where: { event: { production_id: id } } }),
+            this.prisma.event.deleteMany({ where: { production_id: id } }),
+            this.prisma.genre_production.deleteMany({ where: { production_id: id } }),
+            this.prisma.tag_production.deleteMany({ where: { production_id: id } }),
+            this.prisma.blog_production.deleteMany({ where: { production_id: id } }),
+            this.prisma.editor_production.deleteMany({ where: { production_id: id } }),
+            this.prisma.production.delete({ where: { id } }),
+        ])
+        return production
     }
 }
