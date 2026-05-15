@@ -375,7 +375,7 @@ const en: Messages = {
   },
 
   blogs: {
-      placeholder: 'Write your content here...',
+      placeholder: 'Write your blog content here...',
       languageError:'Blog does not exist in this language',
       detailPageBack:'← Back to Homepage',
       loadingBlog: 'Loading blog...',
