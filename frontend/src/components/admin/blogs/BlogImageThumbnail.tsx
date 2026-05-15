@@ -8,6 +8,32 @@ type BlogImageThumbnailProps = {
     isPending?: boolean
 }
 
+function convertImagePathToPublicUrl(imagePath: string): string {
+    const trimmed = imagePath.trim()
+
+    if (
+        trimmed.startsWith('data:') ||
+        trimmed.startsWith('blob:') ||
+        trimmed.startsWith('/api/') ||
+        trimmed.startsWith('http://') ||
+        trimmed.startsWith('https://')
+    ) {
+        return trimmed
+    }
+
+    const fileName = trimmed.split('/').pop() ?? trimmed
+    const uuidMatch = fileName.match(
+        /[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/i
+    )
+
+    if (uuidMatch) {
+        return `/api/v1/images/${uuidMatch[0]}`
+    }
+
+    const fileNameWithoutExtension = fileName.replace(/\.[^.]+$/, '')
+    return `/api/v1/images/${encodeURIComponent(fileNameWithoutExtension)}`
+}
+
 export function BlogImageThumbnail({
     imagePath,
     index,
@@ -29,7 +55,7 @@ export function BlogImageThumbnail({
                 }`}
             >
                 <img
-                    src={imagePath}
+                    src={convertImagePathToPublicUrl(imagePath)}
                     alt={`Blog image ${index + 1}`}
                     className="h-full w-full object-cover"
                 />
