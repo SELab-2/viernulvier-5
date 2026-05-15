@@ -394,6 +394,7 @@ export type Messages = {
       removeButton: string
       coverLabel: string
       deleteImageAriaLabel: string
+      coverHint: string
     }
   }
 }

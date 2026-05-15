@@ -426,7 +426,8 @@ const nl: Messages = {
           pendingUploadLabel: (count: number) => `Wacht op upload (${count})`,
           removeButton: "Verwijderen",
           coverLabel: "Voorkant",
-          deleteImageAriaLabel: "Afbeelding verwijderen"
+          deleteImageAriaLabel: "Afbeelding verwijderen",
+          coverHint: "Klik op een afbeelding om het als voorkant in te stellen. Klik opnieuw om het uit te schakelen."
       }
   }
 }

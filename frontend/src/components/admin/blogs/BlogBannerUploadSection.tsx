@@ -76,7 +76,12 @@ export function BlogBannerUploadSection({
     }
 
     const selectThumbnail = (index: number) => {
-        onThumbnailIndexChange(index)
+        // Toggle: if already selected, deselect it
+        if (thumbnailIndex === index) {
+            onThumbnailIndexChange(null)
+        } else {
+            onThumbnailIndexChange(index)
+        }
     }
 
     return (
@@ -116,6 +121,7 @@ export function BlogBannerUploadSection({
             {(images.length > 0 || selectedFiles.length > 0) && (
                 <div>
                     <p className="text-sm font-medium text-foreground mb-2">{messages.blogs.bannerUpload.uploadedImagesLabel}</p>
+                    <p className="text-xs text-muted mb-4">{messages.blogs.bannerUpload.coverHint}</p>
                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
                         {/* Display uploaded images */}
                         {images.map((imagePath, index) => (

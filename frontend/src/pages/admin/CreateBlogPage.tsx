@@ -629,7 +629,7 @@ function CreateBlogPage() {
                                 type="button"
                                 onClick={removeBlog}
                                 disabled={isSaving || isLoadingBlog || isDeleting}
-                                className="rounded-full bg-accent px-4 py-2 text-sm font-regular tracking-wide text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                                className="rounded-full bg-accent px-6 py-3 text-sm font-regular tracking-wide text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                             >
                                 {isDeleting ? messages.blogs.deletingButton : messages.blogs.deleteButton}
                             </button>
