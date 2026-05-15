@@ -55,7 +55,7 @@ export function BlogImageThumbnail({
                 }}
                 disabled={isUploading}
                 aria-label={messages.blogs.bannerUpload.deleteImageAriaLabel}
-                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity rounded-full border border-border bg-background/90 p-2 text-muted hover:border-red-500 hover:text-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 transition-opacity rounded-full border border-border bg-background/90 p-2 text-muted hover:border-red-500 hover:text-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
