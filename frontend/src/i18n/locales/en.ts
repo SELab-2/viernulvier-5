@@ -243,6 +243,15 @@ const en: Messages = {
     editorSaveError: 'Failed to save editor.',
     editorDeleteError: 'Failed to delete editor.',
   },
+  notFound: {
+    titleTop: 'Four',
+    titleAccent: 'zero',
+    titleBottom: 'four',
+    joke: 'Coincidence? We think not. Our name is literally a 404 (vier-nul-vier).',
+    description: 'This page is not in the archive. Maybe it has not been digitised yet, maybe it never existed.\nEither way: head back home or dive into the archive.',
+    homeButton: 'back to home',
+    searchButton: 'search the archive',
+  },
   footer: {
     brandLogoAlt: 'VIERNULVIER logo',
     organizationName: 'VIERNULVIER Arts Centre vzw.',
@@ -332,6 +341,14 @@ const en: Messages = {
     archiveEdit: {
       pageTitle: 'Edit archive item',
       itemIdLabel: 'Item ID:',
+    },
+    notFound: {
+      titleTop: 'Four',
+      titleAccent: 'zero',
+      titleBottom: 'four',
+      joke: "Coincidence? We don't think so. Our name is literally a 404.",
+      description: "This admin page doesn't exist.\nThe route may have moved, or the URL might be off.",
+      dashboardButton: 'back to dashboard',
     },
     posters: {
       pageTitle: 'Posters',
