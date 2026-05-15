@@ -68,17 +68,22 @@ export class BlogsService {
         // Persist image files
         const persistedFiles = await this.storage.persistBlogImageFiles(id, data.files)
         const imageUrls = persistedFiles.map((file) => file.public_url)
+        const existingImages = blog.images ?? []
+        const mergedImages = [...existingImages, ...imageUrls]
 
-        // Update blog with new images and thumbnail index
-        const thumbnailIndex = data.thumbnail_index ?? (imageUrls.length > 0 ? 0 : null)
+        // Update blog with merged images and thumbnail index
+        const thumbnailIndex =
+            data.thumbnail_index ??
+            blog.thumbnail_index ??
+            (mergedImages.length > 0 ? 0 : null)
         
         await this.repository.update(id, {
-            images: imageUrls,
+            images: mergedImages,
             thumbnail_index: thumbnailIndex,
         })
 
         return {
-            images: imageUrls,
+            images: mergedImages,
             thumbnail_index: thumbnailIndex,
         }
     }
