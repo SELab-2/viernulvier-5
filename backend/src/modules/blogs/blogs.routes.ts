@@ -10,8 +10,9 @@ import {
     createBlogSchema, 
     updateBlogSchema, 
     blogIdSchema,
-    uploadBlogImageSchema,
+    blogImageDeleteParamsSchema,
     uploadBlogImageResponseSchema,
+    uploadBlogImageSchema,
     errorSchema
 } from './blogs.schema.js'
 import { requirePermission } from '../../hooks/require-permission.js'
@@ -92,6 +93,26 @@ const blogsRoutes: FastifyPluginAsync = async (fastify) => {
             },
         },
         handler: (request, reply) => controller.deleteBlog(request as any, reply),
+    })
+
+    // DELETE /api/v1/archive/blogs/:id/images/:index
+    fastify.delete('/:id/images/:index', {
+        preHandler: [requirePermission(Permission.ARCHIVE_UPDATE)],
+        schema: {
+            tags: ['blogs'],
+            summary: 'Delete a blog image',
+            params: blogImageDeleteParamsSchema,
+            response: {
+                200: z.object({
+                    data: uploadBlogImageResponseSchema,
+                    links: z.object({
+                        self: z.string().url(),
+                    }),
+                }),
+                404: errorSchema,
+            },
+        },
+        handler: (request, reply) => controller.deleteBlogImage(request as any, reply),
     })
 
     // POST /api/v1/archive/blogs/:id/images

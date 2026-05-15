@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { api, apiFetch } from '../../api/client'
 import { getActiveLocale, getMessages, LOCALE_CHANGE_EVENT, setActiveLocale } from '../../i18n'
 
@@ -132,7 +132,9 @@ function CreateBlogPage() {
     const [blogImages, setBlogImages] = useState<string[]>([])
     const [thumbnailIndex, setThumbnailIndex] = useState<number | null>(null)
     const [pendingImages, setPendingImages] = useState<File[]>([])
+    const [deletedBlogImageUrls, setDeletedBlogImageUrls] = useState<string[]>([])
     const [isUploadingImages, setIsUploadingImages] = useState(false)
+    const initialBlogImagesRef = useRef<string[]>([])
 
     const navigate = useNavigate()
     const [locale, setLocale] = useState<Locale>(() => getActiveLocale(window.location.pathname))
@@ -161,6 +163,8 @@ function CreateBlogPage() {
             setContentJson({ nl: null, en: null })
             setSelectedProductionIds([])
             setIsBlogNotFound(false)
+            setDeletedBlogImageUrls([])
+            initialBlogImagesRef.current = []
             return
         }
 
@@ -183,7 +187,9 @@ function CreateBlogPage() {
 
                 setSelectedProductionIds(response.data.productions ?? [])
                 setBlogImages(response.data.images ?? [])
+                initialBlogImagesRef.current = response.data.images ?? []
                 setThumbnailIndex(response.data.thumbnail_index ?? null)
+                setDeletedBlogImageUrls([])
             } catch (loadError) {
                 if (isActive) {
                     if (isNotFoundError(loadError)) {
@@ -419,6 +425,36 @@ function CreateBlogPage() {
                 setIsUploadingImages(false)
             }
 
+            //Delete the deleted images in the backend
+            if (deletedBlogImageUrls.length > 0) {
+                const indicesToDelete = Array.from(
+                    new Set(
+                        deletedBlogImageUrls
+                            .map((imageUrl) => initialBlogImagesRef.current.indexOf(imageUrl))
+                            .filter((index) => index >= 0)
+                    )
+                ).sort((left, right) => right - left)
+
+                let latestImages = blogImages
+                let latestThumbnailIndex = thumbnailIndex
+
+                for (const imageIndex of indicesToDelete) {
+                    const response = await apiFetch<{ data: { images: string[]; thumbnail_index: number | null } }>(
+                        `/archive/blogs/${blogId}/images/${imageIndex}`,
+                        {
+                            method: 'DELETE',
+                        },
+                    )
+
+                    latestImages = response.data.images ?? latestImages
+                    latestThumbnailIndex = response.data.thumbnail_index ?? null
+                }
+
+                setBlogImages(latestImages)
+                setThumbnailIndex(latestThumbnailIndex)
+                setDeletedBlogImageUrls([])
+            }
+
             navigate(`/blogs/${createdBlogId}`)
         } catch (saveError) {
             setError(saveError instanceof Error ? saveError.message : 'Failed to save blog.')
@@ -531,7 +567,27 @@ function CreateBlogPage() {
     }
 
     const handleDeleteImage = (index: number) => {
+        if (!isEditMode || !blogId) {
+            setBlogImages((current) => current.filter((_, i) => i !== index))
+            // If the deleted image was the thumbnail, reset thumbnail to null
+            if (thumbnailIndex === index) {
+                setThumbnailIndex(null)
+            }
+            // If there are images after the deleted one, adjust their indices
+            else if (thumbnailIndex !== null && thumbnailIndex > index) {
+                setThumbnailIndex(thumbnailIndex - 1)
+            }
+            return
+        }
+
+        const imageToDelete = blogImages[index]
+        if (typeof imageToDelete === 'undefined') {
+            return
+        }
+
+        setDeletedBlogImageUrls((current) => (current.includes(imageToDelete) ? current : [...current, imageToDelete]))
         setBlogImages((current) => current.filter((_, i) => i !== index))
+
         // If the deleted image was the thumbnail, reset thumbnail to null
         if (thumbnailIndex === index) {
             setThumbnailIndex(null)
@@ -540,6 +596,7 @@ function CreateBlogPage() {
         else if (thumbnailIndex !== null && thumbnailIndex > index) {
             setThumbnailIndex(thumbnailIndex - 1)
         }
+
     }
 
     if (isEditMode && isBlogNotFound) {

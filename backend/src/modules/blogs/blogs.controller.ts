@@ -6,7 +6,6 @@ import type {
     CreateBlogInput, 
     UpdateBlogInput,
     UploadBlogImageInput,
-    UploadBlogImageResponse
 } from './blogs.schema.js'
 import { buildPaginationLinks } from '../../utils/pagination.js'
 
@@ -113,6 +112,32 @@ export class BlogsController {
             if (error.message === 'Blog not found') {
                 return reply.status(404).send({ message: 'Blog not found' })
             }
+            throw error
+        }
+    }
+
+    async deleteBlogImage(
+        request: FastifyRequest<{ Params: { id: string; index: string } }>,
+        reply: FastifyReply,
+    ) {
+        const { id, index } = request.params
+        try {
+            const result = await this.service.deleteBlogImage(id, Number(index))
+            return reply.status(200).send({
+                data: result,
+                links: {
+                    self: `${this.getBaseUrl(request)}/${id}`,
+                },
+            })
+        } catch (error: any) {
+            if (error.message === 'Blog not found') {
+                return reply.status(404).send({ message: 'Blog not found' })
+            }
+
+            if (error.message === 'Image not found') {
+                return reply.status(404).send({ message: 'Image not found' })
+            }
+
             throw error
         }
     }

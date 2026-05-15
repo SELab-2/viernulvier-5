@@ -1,4 +1,4 @@
-import { mkdir, writeFile, unlink } from 'node:fs/promises'
+import { mkdir, writeFile, unlink, readdir } from 'node:fs/promises'
 import path from 'node:path'
 import { randomUUID } from 'node:crypto'
 import { fileTypeFromBuffer } from 'file-type'
@@ -40,6 +40,19 @@ function parseBase64Payload(fileBase64: string): Buffer {
 export class BlogImagesStorage {
     private getUploadDir() {
         return path.resolve(process.cwd(), env.CROP_LOCATION)
+    }
+
+    private extractStoredName(imageReference: string): string | null {
+        const trimmed = imageReference.trim()
+
+        if (!trimmed) {
+            return null
+        }
+
+        const baseName = path.basename(trimmed)
+        const parsedName = path.parse(baseName).name
+
+        return parsedName || null
     }
 
     resolveStoredFilePath(storedName: string): string {
@@ -136,5 +149,31 @@ export class BlogImagesStorage {
                 console.error('Failed to delete file:', deleteError)
             }
         }
+    }
+
+    async findStoredFilePaths(imageReference: string): Promise<string[]> {
+        const storedName = this.extractStoredName(imageReference)
+        if (!storedName) {
+            return []
+        }
+
+        const uploadDir = this.getUploadDir()
+
+        try {
+            const entries = await readdir(uploadDir, { withFileTypes: true })
+            return entries
+                .filter((entry) => entry.isFile() && path.parse(entry.name).name === storedName)
+                .map((entry) => path.join(uploadDir, entry.name))
+        } catch {
+            return []
+        }
+    }
+
+    async deleteBlogImages(imageReferences: string[]) {
+        const filePaths = (
+            await Promise.all(imageReferences.map((imageReference) => this.findStoredFilePaths(imageReference)))
+        ).flat()
+
+        await this.deleteStoredFiles(filePaths)
     }
 }

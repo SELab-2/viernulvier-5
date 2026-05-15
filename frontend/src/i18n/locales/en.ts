@@ -420,7 +420,7 @@ const en: Messages = {
           subtitle: 'Add banner images.',
           label: 'Blog banners / images',
           addButton: '+ Add images',
-          allowedFormats: 'Allowed formats: JPG, PNG, WEBP, GIF.',
+          allowedFormats: 'Allowed formats: JPG, PNG, WEBP.',
           alreadyUploaded: (count: number) => ` ${count} image${count !== 1 ? 's' : ''} already uploaded.`,
           uploadedImagesLabel: 'Uploaded images',
           setThumbnailButton: 'Set',

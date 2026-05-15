@@ -55,7 +55,52 @@ export class BlogsService {
     }
 
     async deleteBlog(id: string): Promise<void> {
+        const blog = await this.repository.findById(id)
+        if (!blog) {
+            throw new Error('Blog not found')
+        }
+
+        if ((blog.images ?? []).length > 0) {
+            await this.storage.deleteBlogImages(blog.images ?? [])
+        }
+
         await this.repository.delete(id)
+    }
+
+    async deleteBlogImage(id: string, index: number): Promise<UploadBlogImageResponse> {
+        const blog = await this.repository.findById(id)
+        if (!blog) {
+            throw new Error('Blog not found')
+        }
+
+        const images = blog.images ?? []
+        if (index < 0 || index >= images.length) {
+            throw new Error('Image not found')
+        }
+
+        const imageToDelete = images[index]
+        await this.storage.deleteBlogImages([imageToDelete])
+
+        const remainingImages = images.filter((_, currentIndex) => currentIndex !== index)
+        const currentThumbnailIndex = blog.thumbnail_index ?? null
+        const thumbnailIndex =
+            currentThumbnailIndex === null
+                ? null
+                : currentThumbnailIndex === index
+                    ? null
+                    : currentThumbnailIndex > index
+                        ? currentThumbnailIndex - 1
+                        : currentThumbnailIndex
+
+        await this.repository.update(id, {
+            images: remainingImages,
+            thumbnail_index: thumbnailIndex,
+        })
+
+        return {
+            images: remainingImages,
+            thumbnail_index: thumbnailIndex,
+        }
     }
 
     async uploadBlogImages(id: string, data: UploadBlogImageInput): Promise<UploadBlogImageResponse> {

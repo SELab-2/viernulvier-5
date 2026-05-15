@@ -420,7 +420,7 @@ const nl: Messages = {
           subtitle: "Voeg bannerafbeeldingen toe.",
           label: "Blog banners / afbeeldingen",
           addButton: "+ Afbeeldingen toevoegen",
-          allowedFormats: "Toegestane formaten: JPG, PNG, WEBP, GIF.",
+          allowedFormats: "Toegestane formaten: JPG, PNG, WEBP.",
           alreadyUploaded: (count: number) => ` ${count} afbeelding${count !== 1 ? 'en' : ''} al geüpload.`,
           uploadedImagesLabel: "Geüploade afbeeldingen",
           setThumbnailButton: "Instellen",

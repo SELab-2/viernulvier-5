@@ -64,6 +64,11 @@ export const blogIdSchema = z.object({
     id: z.string().uuid(),
 })
 
+export const blogImageDeleteParamsSchema = z.object({
+    id: z.string().uuid(),
+    index: z.coerce.number().int().nonnegative(),
+})
+
 export const uploadBlogImageSchema = z.object({
     files: z.array(
         z.object({
