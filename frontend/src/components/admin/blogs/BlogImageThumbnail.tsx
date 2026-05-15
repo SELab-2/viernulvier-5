@@ -16,13 +16,12 @@ export function BlogImageThumbnail({
     onSelect,
     onDelete,
     isUploading = false,
-    isPending = false
 }: BlogImageThumbnailProps) {
     return (
-        <div className={`relative group ${isPending ? 'opacity-75' : ''}`}>
+        <div className={`relative group`}>
             {/* Image container - clickable to select as thumbnail */}
             <div 
-                onClick={() => !isPending && onSelect(index)}
+                onClick={() => onSelect(index)}
                 className={`aspect-square overflow-hidden rounded-lg transition cursor-pointer ${
                     isSelected
                         ? 'border-4 border-blue-500'

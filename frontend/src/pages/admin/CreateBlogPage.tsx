@@ -598,6 +598,9 @@ function CreateBlogPage() {
                                 isUploading={isUploadingImages}
                                 messages={messages}
                             />
+                            <p className="mt-4 text-sm text-muted">
+                                Thumbnailindex: {thumbnailIndex === null ? 'geen geselecteerd' : thumbnailIndex}
+                            </p>
                         </div>
                     </div>
                 </div>
