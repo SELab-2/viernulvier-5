@@ -54,7 +54,7 @@ export const getEventsByProductionId = async (productionId: string) => {
     const first = await api.get<PaginatedResponse<Event>>(`/archive/events?productionId=${productionId}&page=1`)
     const { totalPages } = first.meta
 
-    if (totalPages <= 1) return first.data
+    if (totalPages <= 1) return { data: first.data }
 
     const rest = await Promise.all(
         Array.from({ length: totalPages - 1 }, (_, i) =>
