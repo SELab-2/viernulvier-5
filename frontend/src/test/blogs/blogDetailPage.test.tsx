@@ -238,12 +238,12 @@ describe('BlogDetailPage - handleGoBack', () => {
   })
 
   it('should render back button', async () => {
-    setPath('/en/blogs/blog-1')
+    setPath('/en/blogs/11111111-1111-1111-1111-111111111111')
     getPreviousStrippedPathMock.mockReturnValue(null)
 
     apiGetMock.mockResolvedValueOnce({
       data: {
-        id: 'blog-1',
+        id: '11111111-1111-1111-1111-111111111111',
         title: JSON.stringify({ en: 'Test Blog', nl: 'Test Blog NL' }),
         content: {
           en: JSON.stringify({ ops: [{ insert: 'Test content' }] }),
@@ -254,7 +254,7 @@ describe('BlogDetailPage - handleGoBack', () => {
     })
 
     render(
-      <MemoryRouter initialEntries={['/en/blogs/blog-1']}>
+      <MemoryRouter initialEntries={['/en/blogs/11111111-1111-1111-1111-111111111111']}>
         <Routes>
           <Route path="/en/blogs/:id" element={<BlogDetailPage />} />
         </Routes>
@@ -267,12 +267,12 @@ describe('BlogDetailPage - handleGoBack', () => {
   })
 
   it('should call getPreviousStrippedPath when back button is clicked', async () => {
-    setPath('/en/blogs/blog-1')
+    setPath('/en/blogs/22222222-2222-2222-2222-222222222222')
     getPreviousStrippedPathMock.mockReturnValue('/admin/blogs/create')
 
     apiGetMock.mockResolvedValueOnce({
       data: {
-        id: 'blog-1',
+        id: '22222222-2222-2222-2222-222222222222',
         title: JSON.stringify({ en: 'Test Blog', nl: 'Test Blog NL' }),
         content: {
           en: JSON.stringify({ ops: [{ insert: 'Test content' }] }),
@@ -283,7 +283,7 @@ describe('BlogDetailPage - handleGoBack', () => {
     })
 
     render(
-      <MemoryRouter initialEntries={['/en/blogs/blog-1']}>
+      <MemoryRouter initialEntries={['/en/blogs/22222222-2222-2222-2222-222222222222']}>
         <Routes>
           <Route path="/en/blogs/:id" element={<BlogDetailPage />} />
         </Routes>
