@@ -1,8 +1,10 @@
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAdminSession } from '../../auth/useAdminSession'
 import { AdminSessionProvider } from '../../auth/AdminSessionContext'
+import { trackNavigation } from '../../utils/navigationHistory'
 
 import type { ReactElement } from 'react'
+import { useEffect } from 'react'
 
 type ProtectedAdminRouteProps = {
   children: ReactElement
@@ -27,6 +29,11 @@ export function AdminEntryRoute({ loginPath, dashboardPath }: AdminEntryRoutePro
 function ProtectedAdminRoute({ children, loginPath }: ProtectedAdminRouteProps) {
   const location = useLocation()
   const session = useAdminSession()
+
+  // Track navigation history for all admin routes
+  useEffect(() => {
+    trackNavigation(location.pathname + location.search + location.hash)
+  }, [location.pathname, location.search, location.hash])
 
   if (session.isLoading) {
     return null
