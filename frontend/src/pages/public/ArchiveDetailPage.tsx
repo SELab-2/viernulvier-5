@@ -220,7 +220,7 @@ function ArchiveDetailPageContent() {
             <div className="site-container mt-8">
                 <PublicPillButton
                     label={messages.detail.navBack}
-                    icon={<LeftArrowIcon className="h-3 w-3" />}
+                    icon={<LeftArrowIcon className="h-5 w-5" />}
                     onClick={handleGoBack}
                 />
             </div>
