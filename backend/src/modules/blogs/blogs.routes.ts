@@ -14,7 +14,6 @@ import {
 } from './blogs.schema.js'
 import { requirePermission } from '../../hooks/require-permission.js'
 import { Permission } from '../../domain/permissions.js'
-import {updateProductionParamsSchema} from "../productions/productions.schema";
 
 const blogsRoutes: FastifyPluginAsync = async (fastify) => {
     const repository = new BlogsRepository(fastify.prisma)

@@ -215,6 +215,15 @@ export class ProductionsRepository {
             })
         }
 
+        if (onThisDayDate) {
+            const matchingProductionIds = await this.findProductionIdsOnMonthDay(onThisDayDate)
+            andFilters.push({
+                id: {
+                    in: matchingProductionIds,
+                },
+            })
+        }
+
         if (search && search.trim().length > 0) {
             const matchingProductionIds = Array.isArray(searchIds)
                 ? searchIds
