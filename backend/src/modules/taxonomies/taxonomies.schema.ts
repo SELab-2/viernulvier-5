@@ -14,7 +14,7 @@ const localizedTextSchema = z.object({
 export const genrePaginationQuerySchema = paginationQuerySchema.extend({
     search: z.string().optional(),
     lang: z.string().optional().default('nl'),
-    productionId: z.string().optional(),
+    productionId: z.string().uuid().optional(),
 })
 export const tagPaginationQuerySchema = genrePaginationQuerySchema
 

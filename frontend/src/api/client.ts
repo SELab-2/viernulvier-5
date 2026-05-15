@@ -1,5 +1,15 @@
 const API_BASE = '/api/v1'
 
+export class ApiError extends Error {
+    status: number
+
+    constructor(status: number, message: string) {
+        super(message)
+        this.name = 'ApiError'
+        this.status = status
+    }
+}
+
 export function normalizeApiAssetUrl(value: string | null | undefined): string | undefined {
     if (!value) {
         return undefined
@@ -82,7 +92,7 @@ export async function apiFetch<T>(
                     ? errorPayload
                     : '') || `HTTP ${response.status}`
 
-        throw new Error(message)
+        throw new ApiError(response.status, message)
     }
 
     // Handle 204 No Content
