@@ -96,7 +96,7 @@ const blogsRoutes: FastifyPluginAsync = async (fastify) => {
 
     // POST /api/v1/archive/blogs/:id/images
     fastify.post('/:id/images', {
-        preHandler: [requirePermission(Permission.ARCHIVE_CREATE)],
+        preHandler: [requirePermission(Permission.ARCHIVE_UPDATE)],
         schema: {
             tags: ['blogs'],
             summary: 'Upload images to a blog',
