@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import type { Messages } from '../../../i18n/types'
 import { BlogImageThumbnail } from './BlogImageThumbnail'
+import { resolveBlogImageUrl } from './blogImageUrl'
 
 type BlogBannerUploadSectionProps = {
     images: string[]
@@ -120,7 +121,7 @@ export function BlogBannerUploadSection({
                         {images.map((imagePath, index) => (
                             <BlogImageThumbnail
                                 key={`uploaded-${imagePath}`}
-                                imagePath={imagePath}
+                                imagePath={resolveBlogImageUrl(imagePath)}
                                 index={index}
                                 isSelected={thumbnailIndex === index}
                                 onSelect={selectThumbnail}

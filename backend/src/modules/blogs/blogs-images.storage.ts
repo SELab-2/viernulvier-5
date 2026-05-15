@@ -1,5 +1,6 @@
 import { mkdir, writeFile, unlink } from 'node:fs/promises'
 import path from 'node:path'
+import { randomUUID } from 'node:crypto'
 import { fileTypeFromBuffer } from 'file-type'
 import { env } from '../../config/env.js'
 
@@ -13,6 +14,7 @@ type RawCreateBlogImageFile = {
 
 export type PersistedBlogImageFile = {
     file_path: string
+    public_url: string
     mime_type: string
     original_filename: string
     file_size_bytes: number
@@ -58,6 +60,7 @@ export class BlogImagesStorage {
         type ValidatedFile = {
             buffer: Buffer
             storedFileName: string
+            public_url: string
             mime_type: string
             original_filename: string
             file_size_bytes: number
@@ -83,11 +86,13 @@ export class BlogImagesStorage {
             }
 
             const ext = detected?.ext || 'jpg'
-            const storedFileName = `blog_${blogId}_${index}.${ext}`
+            const imageId = randomUUID()
+            const storedFileName = `${imageId}.${ext}`
 
             validatedFiles.push({
                 buffer: fileBuffer,
                 storedFileName,
+                public_url: `/api/v1/images/${imageId}`,
                 mime_type: detectedMimeType,
                 original_filename: safeName,
                 file_size_bytes: fileBuffer.length,
@@ -103,6 +108,7 @@ export class BlogImagesStorage {
                 await writeFile(fullPath, file.buffer)
                 persistedFiles.push({
                     file_path: fullPath,
+                    public_url: file.public_url,
                     mime_type: file.mime_type,
                     original_filename: file.original_filename,
                     file_size_bytes: file.file_size_bytes,
