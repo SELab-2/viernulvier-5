@@ -9,7 +9,7 @@ export class ProductionsController {
     private getBaseUrl(request: FastifyRequest) {
         // Use the Host header to include the port (important for local dev on :3001)
         const host = request.headers.host || request.hostname
-        return `${request.protocol}://${host}/api/v1/`
+        return `${request.protocol}://${host}/api/v1`
     }
 
     /**
