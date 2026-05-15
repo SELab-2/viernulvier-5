@@ -1,11 +1,13 @@
 import { useRef, useState } from 'react'
 import type { Messages } from '../../../i18n/types'
+import { BlogImageThumbnail } from './BlogImageThumbnail'
 
 type BlogBannerUploadSectionProps = {
     images: string[]
     thumbnailIndex: number | null
     onThumbnailIndexChange: (index: number | null) => void
     onPendingFilesChange: (files: File[]) => void
+    onDeleteImage?: (index: number) => void
     isUploading?: boolean
     messages: Messages
 }
@@ -17,6 +19,7 @@ export function BlogBannerUploadSection({
     thumbnailIndex,
     onThumbnailIndexChange,
     onPendingFilesChange,
+    onDeleteImage,
     isUploading = false,
     messages,
 }: BlogBannerUploadSectionProps) {
@@ -64,10 +67,14 @@ export function BlogBannerUploadSection({
         onPendingFilesChange(newFiles)
     }
 
-    const selectThumbnail = (index: number | null) => {
-        if (index === null){
-            return;
+    const deleteUploadedImage = (index: number) => {
+        if (thumbnailIndex === index) {
+            onThumbnailIndexChange(null)
         }
+        onDeleteImage?.(index)
+    }
+
+    const selectThumbnail = (index: number) => {
         onThumbnailIndexChange(index)
     }
 
@@ -104,66 +111,37 @@ export function BlogBannerUploadSection({
 
             {error && <p className="text-sm text-red-600">{error}</p>}
 
-            {/* Display uploaded images */}
-            {images.length > 0 && (
+            {/* Display all images (uploaded + pending) */}
+            {(images.length > 0 || selectedFiles.length > 0) && (
                 <div>
                     <p className="text-sm font-medium text-foreground mb-2">{messages.blogs.bannerUpload.uploadedImagesLabel}</p>
                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+                        {/* Display uploaded images */}
                         {images.map((imagePath, index) => (
-                            <div key={imagePath} className="relative group cursor-pointer">
-                                <div
-                                    onClick={() => selectThumbnail(thumbnailIndex === index ? null : index)}
-                                    className={`aspect-square overflow-hidden rounded-lg border-2 transition ${
-                                        thumbnailIndex === index
-                                            ? 'border-blue-500 ring-2 ring-blue-500/30'
-                                            : 'border-border hover:border-blue-400'
-                                    }`}
-                                >
-                                    <img
-                                        src={imagePath}
-                                        alt={`Blog image ${index + 1}`}
-                                        className="h-full w-full object-cover"
-                                    />
-                                </div>
-                                {thumbnailIndex === index && (
-                                    <div className="absolute top-1 right-1 text-xl">⭐</div>
-                                )}
-                            </div>
+                            <BlogImageThumbnail
+                                key={`uploaded-${imagePath}`}
+                                imagePath={imagePath}
+                                index={index}
+                                isSelected={thumbnailIndex === index}
+                                onSelect={selectThumbnail}
+                                onDelete={deleteUploadedImage}
+                                isUploading={isUploading}
+                                isPending={false}
+                            />
                         ))}
-                    </div>
-                </div>
-            )}
 
-            {/* Display pending files */}
-            {selectedFiles.length > 0 && (
-                <div>
-                    <p className="text-sm font-medium text-foreground mb-2">
-                        {messages.blogs.bannerUpload.pendingUploadLabel(selectedFiles.length)}
-                    </p>
-                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+                        {/* Display pending files */}
                         {selectedFiles.map((file, index) => (
-                            <div key={`${file.name}-${index}`} className="relative group">
-                                <div className="aspect-square overflow-hidden rounded-lg border border-dashed border-accent/50 bg-accent/5">
-                                    <img
-                                        src={previewUrls[index]}
-                                        alt={`Preview ${index + 1}`}
-                                        className="h-full w-full object-cover"
-                                    />
-                                </div>
-                                <div className="absolute inset-0 bg-black/60 transition rounded-lg flex flex-col items-center justify-center gap-1">
-                                    <p className="text-xs text-white font-medium text-center px-1 line-clamp-2">
-                                        {file.name}
-                                    </p>
-                                    <button
-                                        type="button"
-                                        onClick={() => removeFile(index)}
-                                        disabled={isUploading}
-                                        className="px-2 py-1 bg-red-500 text-white text-xs font-medium rounded hover:bg-red-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        {messages.blogs.bannerUpload.removeButton}
-                                    </button>
-                                </div>
-                            </div>
+                            <BlogImageThumbnail
+                                key={`pending-${file.name}-${index}`}
+                                imagePath={previewUrls[index] || ''}
+                                index={images.length + index}
+                                isSelected={thumbnailIndex === images.length + index}
+                                onSelect={selectThumbnail}
+                                onDelete={() => removeFile(index)}
+                                isUploading={isUploading}
+                                isPending={true}
+                            />
                         ))}
                     </div>
                 </div>

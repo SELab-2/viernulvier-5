@@ -517,6 +517,17 @@ function CreateBlogPage() {
         setIsProductionPopupOpen(true)
     }
 
+    const handleDeleteImage = (index: number) => {
+        setBlogImages((current) => current.filter((_, i) => i !== index))
+        // If the deleted image was the thumbnail, reset thumbnail to null
+        if (thumbnailIndex === index) {
+            setThumbnailIndex(null)
+        }
+        // If there are images after the deleted one, adjust their indices
+        else if (thumbnailIndex !== null && thumbnailIndex > index) {
+            setThumbnailIndex(thumbnailIndex - 1)
+        }
+    }
 
     if (isEditMode && isBlogNotFound) {
         return (
@@ -583,6 +594,7 @@ function CreateBlogPage() {
                                 thumbnailIndex={thumbnailIndex}
                                 onThumbnailIndexChange={setThumbnailIndex}
                                 onPendingFilesChange={setPendingImages}
+                                onDeleteImage={handleDeleteImage}
                                 isUploading={isUploadingImages}
                                 messages={messages}
                             />
