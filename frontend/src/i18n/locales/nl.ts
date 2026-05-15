@@ -424,7 +424,9 @@ const nl: Messages = {
           uploadedImagesLabel: "Geüploade afbeeldingen",
           setThumbnailButton: "Instellen",
           pendingUploadLabel: (count: number) => `Wacht op upload (${count})`,
-          removeButton: "Verwijderen"
+          removeButton: "Verwijderen",
+          coverLabel: "Voorkant",
+          deleteImageAriaLabel: "Afbeelding verwijderen"
       }
   }
 }

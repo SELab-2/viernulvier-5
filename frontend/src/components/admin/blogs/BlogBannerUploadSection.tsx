@@ -128,6 +128,7 @@ export function BlogBannerUploadSection({
                                 onDelete={deleteUploadedImage}
                                 isUploading={isUploading}
                                 isPending={false}
+                                messages={messages}
                             />
                         ))}
 
@@ -142,6 +143,7 @@ export function BlogBannerUploadSection({
                                 onDelete={() => removeFile(index)}
                                 isUploading={isUploading}
                                 isPending={true}
+                                messages={messages}
                             />
                         ))}
                     </div>

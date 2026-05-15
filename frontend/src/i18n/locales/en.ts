@@ -424,7 +424,9 @@ const en: Messages = {
           uploadedImagesLabel: 'Uploaded images',
           setThumbnailButton: 'Set',
           pendingUploadLabel: (count: number) => `Pending upload (${count})`,
-          removeButton: 'Remove'
+          removeButton: 'Remove',
+          coverLabel: 'Cover',
+          deleteImageAriaLabel: 'Delete image'
       }
   },
 }

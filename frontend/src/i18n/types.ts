@@ -392,6 +392,8 @@ export type Messages = {
       setThumbnailButton: string
       pendingUploadLabel: (count: number) => string
       removeButton: string
+      coverLabel: string
+      deleteImageAriaLabel: string
     }
   }
 }
