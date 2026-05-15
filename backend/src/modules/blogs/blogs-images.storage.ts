@@ -5,7 +5,7 @@ import { fileTypeFromBuffer } from 'file-type'
 import { env } from '../../config/env.js'
 
 const MAX_FILE_SIZE_BYTES = 15 * 1024 * 1024
-const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
+const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])
 
 type RawCreateBlogImageFile = {
     file_name: string
