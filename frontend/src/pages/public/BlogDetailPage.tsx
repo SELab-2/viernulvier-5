@@ -160,7 +160,7 @@ function BlogDetailPageContent() {
     return (
         <section className="site-container py-12">
             <div className="mb-8 flex items-center justify-between gap-4">
-                <PublicPillButton icon={<LeftArrowIcon className="h-5 w-5" />} label={message.detail.navBack} onClick={handleGoBack} />
+                <PublicPillButton icon={<LeftArrowIcon className="h-5 w-5" />} label={message.blogs.navBack} onClick={handleGoBack} />
             </div>
 
             {isLoading ? <p className="text-center text-muted">{message.blogs.loadingBlog}</p> : null}
