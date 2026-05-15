@@ -386,14 +386,13 @@ const en: Messages = {
   },
 
   editHeader: {
-    back: '← Back',
+    back: 'Back',
     publish: 'Publish',
     saveOnDraft: 'Save as draft'
   },
 
   blogs: {
       languageError:'Blog does not exist in this language',
-      detailPageBack:'← Back to Homepage',
       loadingBlog: 'Loading blog...',
       loadingProductions: 'Loading productions...',
       relatedProductions: 'Related productions',
