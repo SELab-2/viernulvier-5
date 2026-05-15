@@ -36,13 +36,7 @@ vi.mock('../../../pages/admin/CreateBlogPage', () => ({
 }))
 
 vi.mock('../../../i18n', async () => {
-  const actual = await vi.importActual<typeof import('../../../i18n')>('../../../i18n')
-  return {
-    ...actual,
-    getMessages: () => ({
-      common: { loading: 'Loading' },
-    }),
-  }
+  return await vi.importActual<typeof import('../../../i18n')>('../../../i18n')
 })
 
 function LoginPageProbe() {
@@ -179,7 +173,7 @@ describe('ProtectedAdminRoute', () => {
     expect(screen.queryByText('Create blog page')).not.toBeInTheDocument()
   })
 
-  it('redirects logged-out visits to unknown /admin/* paths to /admin/login', async () => {
+  it('renders the admin 404 page for unknown /admin/* paths', async () => {
     useAdminSessionMock.mockReturnValue({ isLoading: false, isAuthenticated: false })
     getAdminRouteConfigMock.mockReturnValue({
       isAdminHost: false,
@@ -198,8 +192,54 @@ describe('ProtectedAdminRoute', () => {
     )
 
     await waitFor(() => {
-      expect(screen.getByText('Login page from missing')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /(naar dashboard|back to dashboard)/i })).toBeInTheDocument()
     })
+
+    expect(screen.queryByText(/Login page from/i)).not.toBeInTheDocument()
+  })
+
+  it('renders the admin 404 page for unknown non-/admin paths on an admin-only host', async () => {
+    useAdminSessionMock.mockReturnValue({ isLoading: false, isAuthenticated: false })
+    getAdminRouteConfigMock.mockReturnValue({
+      isAdminHost: true,
+      isLocalDevHost: false,
+      canRenderAdminRoutes: true,
+      loginPath: '/login',
+      dashboardPath: '/dashboard',
+      legacyDashboardPaths: ['/'],
+      archiveEditPath: '/archive/:id/edit',
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/willekeurig']}>
+        <App />
+      </MemoryRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /(naar dashboard|back to dashboard)/i })).toBeInTheDocument()
+    })
+  })
+
+  it('does not render the admin 404 page for unknown non-/admin paths on localhost', () => {
+    useAdminSessionMock.mockReturnValue({ isLoading: false, isAuthenticated: false })
+    getAdminRouteConfigMock.mockReturnValue({
+      isAdminHost: false,
+      isLocalDevHost: true,
+      canRenderAdminRoutes: true,
+      loginPath: '/admin/login',
+      dashboardPath: '/admin/dashboard',
+      legacyDashboardPaths: ['/admin', '/dashboard', '/'],
+      archiveEditPath: '/admin/archive/:id/edit',
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/willekeurig']}>
+        <App />
+      </MemoryRouter>,
+    )
+
+    expect(screen.queryByRole('button', { name: /(naar dashboard|back to dashboard)/i })).not.toBeInTheDocument()
   })
 
   it('routes authenticated localhost admin entry visits to /admin/dashboard', async () => {

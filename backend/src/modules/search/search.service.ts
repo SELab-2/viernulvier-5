@@ -1,5 +1,6 @@
 import type { SearchRepository } from './search.repository.js'
 import type { ProductionsService } from '../productions/productions.service.js'
+import type { PostersService } from '../posters/posters.service.js'
 import type { SearchQuery, SearchResultItem } from './search.schema.js'
 import type { PaginatedResult } from '../../utils/pagination.js'
 import { calculateTotalPages, sanitizePage } from '../../utils/pagination.js'
@@ -8,6 +9,7 @@ export class SearchService {
     constructor(
         private readonly searchRepository: SearchRepository,
         private readonly productionsService: ProductionsService,
+        private readonly postersService: PostersService,
     ) {}
 
     async search(options: SearchQuery): Promise<PaginatedResult<SearchResultItem>> {
@@ -27,10 +29,24 @@ export class SearchService {
         // Get total count of matching productions first, then fetch all without an artificial ceiling
         const prodsPreview = await this.productionsService.getProductions({ ...commonProductionOptions, page: 1, limit: 1 })
 
-        const [blogResults, prodResults] = await Promise.all([
-            this.searchRepository.findAllBlogs({ search, yearFrom, yearTo }),
+        // Blogs and posters don't have genres/locations, so exclude them when these filters are active
+        const hasGenreOrLocationFilter = (genres && genres.length > 0) || (locations && locations.length > 0)
+
+        // Get total count of matching posters first, then fetch all of them
+        const postersPreviewOptions = { search, yearFrom, yearTo, page: 1, limit: 1, sort: 'recent' as const, lang: lang ?? 'nl' }
+        const postersPreview = !hasGenreOrLocationFilter
+            ? await this.postersService.getPosters(postersPreviewOptions)
+            : { total: 0 }
+
+        const [blogResults, prodResults, posterResults] = await Promise.all([
+            !hasGenreOrLocationFilter
+                ? this.searchRepository.findAllBlogs({ search, yearFrom, yearTo })
+                : Promise.resolve([]),
             prodsPreview.total > 0
                 ? this.productionsService.getProductions({ ...commonProductionOptions, page: 1, limit: prodsPreview.total })
+                : Promise.resolve({ items: [], total: 0, page: 1, limit: 1, totalPages: 0 }),
+            postersPreview.total > 0
+                ? this.postersService.getPosters({ search, yearFrom, yearTo, page: 1, limit: postersPreview.total, sort: 'recent', lang: lang ?? 'nl' })
                 : Promise.resolve({ items: [], total: 0, page: 1, limit: 1, totalPages: 0 }),
         ])
 
@@ -41,7 +57,7 @@ export class SearchService {
             title: blog.title ?? null,
             content: blog.content ?? null,
             productions: blog.productions,
-            created_at: blog.createdAt ? new Date(blog.createdAt).toISOString() : undefined,
+            created_at: blog.created_at ? new Date(blog.created_at).toISOString() : undefined,
         }))
 
         const prodItems: SearchResultItem[] = prodResults.items.map((prod) => ({
@@ -51,20 +67,53 @@ export class SearchService {
             teaser: prod.teaser ?? null,
             description_short: prod.description_short ?? null,
             description: prod.description ?? null,
-            image_url: null,
-            venue_name: null,
-            venue_names: [],
-            production_genres: [],
+            image_url: prod.image_url ?? null,
+            venue_name: prod.venue_name ?? null,
+            venue_names: prod.venue_names ?? [],
+            production_genres: prod.production_genres ?? [],
             performer_type: prod.performer_type ?? null,
             attendance_mode: prod.attendance_mode ?? null,
             created_at: prod.created_at ? new Date(prod.created_at).toISOString() : undefined,
         }))
 
+        const posterItems: SearchResultItem[] = posterResults.items.map((poster) => {
+            // Extract production title (JSONB) for venue name, respecting requested language
+            let venueName: string | null = null
+            const primaryProduction = Array.isArray(poster.productions) ? (poster.productions[0] ?? null) : null
+
+            if (primaryProduction?.title) {
+                const title = primaryProduction.title as Record<string, string> | string | null
+                if (typeof title === 'object' && title !== null) {
+                    // JSONB object, try to extract localized value with lang preference first
+                    const langPreferences = [options.lang, 'nl', 'en', 'fr'].filter(Boolean) as string[]
+                    venueName = langPreferences.reduce<string | null>((acc, lang) => acc || (title[lang] as string | undefined) || null, null)
+                    // Fallback to first available value if no lang matches
+                    if (!venueName && Object.keys(title).length > 0) {
+                        venueName = (Object.values(title)[0] as string | undefined) ?? null
+                    }
+                } else if (typeof title === 'string') {
+                    venueName = title
+                }
+            }
+
+            return {
+                id: poster.id,
+                type: 'poster' as const,
+                title: poster.title ?? null,
+                image_url: `/api/v1/archive/posters/${poster.id}/file`,
+                mime_type: poster.mime_type ?? null,
+                poster_file_count: Array.isArray(poster.files) && poster.files.length > 0 ? poster.files.length : undefined,
+                production_id: primaryProduction?.id ?? null,
+                venue_name: venueName,
+                created_at: poster.created_at ? new Date(poster.created_at).toISOString() : undefined,
+            }
+        })
+
         // --- merge sorted by date descending ---
         const getDate = (item: SearchResultItem) =>
             item.created_at ? new Date(item.created_at).getTime() : 0
 
-        const merged = [...blogItems, ...prodItems].sort((a, b) => {
+        const merged = [...blogItems, ...prodItems, ...posterItems].sort((a, b) => {
             if (sort === 'oldest') return getDate(a) - getDate(b)
             return getDate(b) - getDate(a)
         })
