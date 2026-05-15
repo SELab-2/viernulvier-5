@@ -7,6 +7,7 @@ import PublicLayout from '../../components/public/PublicLayout'
 import { NotFoundContent } from './NotFoundPage'
 import { usePublicMessages } from '../../components/public/PublicMessagesContext'
 import { getActiveLocale, withLocalePath } from '../../i18n'
+import { LeftArrowIcon } from '../../components/shared/icons'
 import ProductionCard from '../../components/blogs/ProductionCard'
 import {
     getLocalizedContent,

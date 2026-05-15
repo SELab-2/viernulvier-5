@@ -21,6 +21,7 @@ import { getHallById } from '../../api/halls'
 import { getSpaceById } from '../../api/spaces'
 import { getLocationById, type Location } from '../../api/locations'
 import { getPreviousStrippedPath } from '../../utils/navigationHistory'
+import { LeftArrowIcon } from '../../components/shared/icons'
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -219,6 +220,7 @@ function ArchiveDetailPageContent() {
             <div className="site-container mt-8">
                 <PublicPillButton
                     label={messages.detail.navBack}
+                    icon={<LeftArrowIcon className="h-3 w-3" />}
                     onClick={handleGoBack}
                 />
             </div>
