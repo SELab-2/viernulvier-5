@@ -340,6 +340,7 @@ export type Messages = {
   }
 
   blogs: {
+    placeholder: string
     languageError:string
     detailPageBack:string
     loadingBlog: string

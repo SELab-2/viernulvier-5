@@ -375,6 +375,7 @@ const nl: Messages = {
   },
 
   blogs: {
+      placeholder: 'Schrijf je content hier...',
       languageError:'Blog bestaat niet in deze taal',
       detailPageBack:'← terug naar hoofdpagina',
       loadingBlog: 'Blog wordt geladen...',

@@ -215,6 +215,15 @@ describe('CreateBlogPage', () => {
     expect(apiFetchMock).toHaveBeenCalledTimes(1)
   })
 
+  it('updates localStorage and document lang when switching the editor language tab', async () => {
+    renderCreatePage()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Engels' }))
+
+    expect(window.localStorage.getItem('locale')).toBe('en')
+    expect(document.documentElement.lang).toBe('en')
+  })
+
   it('shows an error when a language has content but no title', async () => {
     renderCreatePage()
 

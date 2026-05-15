@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { api, apiFetch } from '../../api/client'
-import { getActiveLocale, getMessages} from '../../i18n'
+import { getActiveLocale, getMessages, LOCALE_CHANGE_EVENT, setActiveLocale } from '../../i18n'
 
 import { useNavigate, useParams } from 'react-router-dom'
 import SectionHeading from '../../components/admin/SectionHeading'
@@ -106,7 +106,7 @@ function CreateBlogPage() {
     /*Edit mode if the blog already exists*/
     const isEditMode = Boolean(blogId)
 
-    const [languageTab, setLanguageTab] = useState<Locale>('nl')
+    const [languageTab, setLanguageTab] = useState<Locale>(() => getActiveLocale(window.location.pathname))
     const [form, setForm] = useState<BlogContent>(defaultForm)
     const [contentJson, setContentJson] = useState<Record<Locale, unknown | null>>({
         nl: null,
@@ -135,8 +135,20 @@ function CreateBlogPage() {
     const [isUploadingImages, setIsUploadingImages] = useState(false)
 
     const navigate = useNavigate()
-    const locale = getActiveLocale(window.location.pathname)
+    const [locale, setLocale] = useState<Locale>(() => getActiveLocale(window.location.pathname))
     const messages = getMessages(locale)
+
+    useEffect(() => {
+        const syncLocale = () => {
+            setLocale(getActiveLocale(window.location.pathname))
+        }
+
+        window.addEventListener(LOCALE_CHANGE_EVENT, syncLocale)
+
+        return () => {
+            window.removeEventListener(LOCALE_CHANGE_EVENT, syncLocale)
+        }
+    }, [])
 
     const languageOptions: { key: Language; label: string }[] = [
         { key: 'nl', label: messages.blogs.dutchOption },
@@ -306,6 +318,7 @@ function CreateBlogPage() {
 
     const setTab = (key: Locale) => {
         setLanguageTab(key)
+        setActiveLocale(key)
     }
 
     // this function changes a certain field in a language 
@@ -557,7 +570,7 @@ function CreateBlogPage() {
             <BlogsTab language={languageTab} options={languageOptions} setTab={setTab} />
             {/* Content editor for selected language */}
             <BlogsTabContent
-                key={languageTab}
+                key={`${languageTab}-${locale}`}
                 title={form[languageTab].title}
                 content={form[languageTab].content}
                 changeTitle={changeTitle}
@@ -565,6 +578,7 @@ function CreateBlogPage() {
                 onJsonChange={handleJsonChange}
                 titleLabel={messages.blogs.title}
                 contentLabel={messages.blogs.content}
+                quillPlaceholder={messages.blogs.placeholder}
             />
 
             <ProductionManagementSection
