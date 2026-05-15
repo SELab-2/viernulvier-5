@@ -1,22 +1,11 @@
-import type { LocalizedText } from "../../types/production"
-import type { TaxonomyItem } from "../../types/taxonomies"
 import FuzzyTagInput from "./FuzzyTagInput"
 import { useState } from "react"
+import type { useTagInput } from "./hooks/useTagInput"
 
 type ArchiveSidebarProps = {
-    genre: string
-    genres: TaxonomyItem[]
-    tag: string
-    tags: TaxonomyItem[]
-    onAddGenre: (id: string, text: LocalizedText) => void
-    onRemoveGenre: (id: string) => void
-    onChangeGenre: (id: string) => void
-    onAddTag: (id: string, text: LocalizedText) => void
-    onRemoveTag: (id: string) => void
-    onChangeTag: (id: string) => void
-
+    genre:  ReturnType<typeof useTagInput>
+    tag: ReturnType<typeof useTagInput>
     productionSettingsLabel: string,
-    // statusLabel: string,
     genreLabel: string,
     tagLabel: string,
     bannerLabel: string,
@@ -32,16 +21,7 @@ const images = <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" vi
 
 function ArchiveSidebar({
     genre,
-    genres,
     tag,
-    tags,
-    onAddGenre,
-    onRemoveGenre,
-    onChangeGenre,
-    onAddTag,
-    onRemoveTag,
-    onChangeTag,
-
     productionSettingsLabel,
     genreLabel,
     tagLabel,
@@ -69,12 +49,12 @@ function ArchiveSidebar({
                         </p>
                     </div>
                     <FuzzyTagInput
-                        tag={genre}
-                        tags={genres}
+                        tag={genre.input}
+                        tags={genre.items}
                         endpoint="/archive/genres"
-                        addTag={onAddGenre}
-                        onChange={onChangeGenre}
-                        onRemove={onRemoveGenre}
+                        addTag={genre.add}
+                        onChange={genre.setInput}
+                        onRemove={genre.remove}
                         placeholder={addGenrePlaceholder}
                     />
                 </div>
@@ -87,15 +67,16 @@ function ArchiveSidebar({
                         </p>
                     </div>
                     <FuzzyTagInput
-                        tag={tag}
-                        tags={tags}
+                        tag={tag.input}
+                        tags={tag.items}
                         endpoint="/archive/tags"
-                        addTag={onAddTag}
-                        onChange={onChangeTag}
-                        onRemove={onRemoveTag}
+                        addTag={tag.add}
+                        onChange={tag.setInput}
+                        onRemove={tag.remove}
                         placeholder={addTagPlaceholder}
                     />
                 </div>
+
                 {/* Banner upload */}
                 <div className="flex flex-col gap-2 mb-6">
                     <div className="flex gap-2 items-center">
@@ -104,7 +85,7 @@ function ArchiveSidebar({
                             {bannerLabel}
                         </p>
                     </div>
-                    <label className="flex h-12 items-center rounded-md bg-background px-4 text-muted border border-border cursor-pointer relative overflow-hidden">
+                    <label className="flex h-12 items-center rounded-md bg-surface px-4 text-muted border border-border cursor-pointer relative overflow-hidden">
                         <input
                             type="file"
                             accept="image/*"
@@ -120,6 +101,7 @@ function ArchiveSidebar({
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="ml-2 text-accent"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" /></svg>
                     </label>
                 </div>
+
                 {/* Extra foto's upload */}
                 <div className="flex flex-col gap-2">
                     <div className="flex gap-2 items-center">
@@ -128,7 +110,7 @@ function ArchiveSidebar({
                             {extraPicturesLabel}
                         </p>
                     </div>
-                    <label className="flex h-12 items-center rounded-md bg-background px-4 text-muted border border-border cursor-pointer relative overflow-hidden">
+                    <label className="flex h-12 items-center rounded-md bg-surface px-4 text-muted border border-border cursor-pointer relative overflow-hidden">
                         <input
                             type="file"
                             accept="image/*"

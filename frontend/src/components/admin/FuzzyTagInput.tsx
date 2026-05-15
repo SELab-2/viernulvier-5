@@ -7,10 +7,11 @@ import { useLocale } from './useLocale'
 type FuzzyTagInputProps = {
     tags: TaxonomyItem[]
     tag: string
-    endpoint: '/archive/genres' | '/archive/tags'
+    endpoint: '/archive/genres' | '/archive/tags' | '/archive/halls'
     addTag: (id: string, text: LocalizedText) => void
     onRemove: (id: string) => void
     onChange: (value: string) => void
+    amountOfTags?: number
     placeholder?: string
 }
 
@@ -22,7 +23,8 @@ function FuzzyTagInput({
     addTag,
     onRemove,
     onChange,
-    placeholder
+    placeholder,
+    amountOfTags
 }: FuzzyTagInputProps) {
     const { locale } = useLocale();
     const [suggestions, setSuggestions] = useState<TaxonomyItem[]>([]);
@@ -105,10 +107,11 @@ function FuzzyTagInput({
                     )
                 })}
             </div>
-            <div className="border border-border gap-2 flex h-12 items-center rounded-md bg-background px-4 text-muted">
+            <div className="border border-border gap-2 flex h-12 items-center rounded-md bg-surface px-4 text-muted">
                 <input
                     type="text"
                     value={tag}
+                    disabled={amountOfTags !== undefined ? tags.length >= amountOfTags : false }
                     onChange={e => {
                         onChange(e.target.value)
                         setIsOpen(true)
@@ -130,7 +133,7 @@ function FuzzyTagInput({
             </div>
 
             {isOpen && suggestions.length > 0 && (
-                <ul className="absolute z-10 w-full bg-background border border-border rounded-lg shadow-xl top-full mt-1 overflow-hidden">
+                <ul className="absolute z-10 w-full bg-surface border border-border rounded-lg shadow-xl top-full mt-1 overflow-hidden">
                     {suggestions.map((suggestion) => {
                         const suggestionName = suggestion.name?.[locale] || suggestion.name?.nl || suggestion.name?.en || ''
                         return (

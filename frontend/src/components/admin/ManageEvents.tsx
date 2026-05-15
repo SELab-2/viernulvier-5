@@ -1,4 +1,5 @@
 import type { Event } from "../../types/event"
+import { useLocale } from "./useLocale"
 
 type EventsProps = {
     events: Event[],
@@ -29,6 +30,7 @@ function EventsEdit({
     commentLabel, 
     actionsLabel
 }: EventsProps ){
+    const locale = useLocale().locale;
     return (
         <div className="flex-col">
             <div className="mb-8 mx-8 overflow-hidden">
@@ -47,16 +49,18 @@ function EventsEdit({
                             <tr className="h-12 bg-surface" key={event.key}>
                                 <td className="px-4 py-4">{event.starts_at?.split('T')[0] ?? ''}</td>
                                 <td className="px-4 py-4">{event.starts_at?.split('T')[1] ?? ''} - {event.ends_at?.split('T')[1] ?? ''}</td>
-                                <td className="px-4 py-4">{event.links?.hall}</td>
+                                <td className="px-4 py-4">{(event.hall_name?.[locale] ?? event.hall_name?.en ?? event.hall_name?.nl ?? '')}</td>
                                 <td className="px-4 py-4">
+                                {event.info &&
                                     <div className='flex flex-wrap gap-1'>
                                         <span
                                             key={event.info}
-                                            className='rounded-full bg-accent px-2 py-0.5 text-xs font-bold text-background whitespace-nowrap'
+                                            className='flex items-center gap-1 rounded-full bg-accent/25 border-accent border px-3 py-1 text-xs font-bold text-foreground'
                                         >
                                             {event.info}
                                         </span>
                                     </div>
+                                }
                                 </td>
                                 <td className="px-4 py-4">
                                     <div className="flex items-center gap-12">

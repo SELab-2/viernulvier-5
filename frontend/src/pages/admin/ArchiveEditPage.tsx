@@ -16,7 +16,7 @@ import EventPopup from '../../components/admin/EventPopup'
 import ArchiveSidebar from '../../components/admin/ArchiveSidebar'
 import ArchiveEditHeader from '../../components/admin/ArchiveEditHeader'
 import { useLocale } from '../../components/admin/useLocale'
-import type { TaxonomyItem } from '../../types/taxonomies'
+import { useTagInput } from '../../components/admin/hooks/useTagInput'
 
 const defaultLocalizedText: LocalizedText = {
     nl: '',
@@ -50,6 +50,8 @@ const defaultEvent : Event = {
     starts_at: '',
     ends_at: '',
     production_id: '',
+    hall_id: '',
+    hall_name: {},
     links: {
         production: '',
         hall: ''
@@ -82,12 +84,11 @@ function ArchiveEditPage() {
     // production state
     const [production, setProduction] = useState<ProductionPayload>(defaultProduciton);
     const [events, setEvents] = useState<Event[]>([]);
-    const [genres, setGenres] = useState<TaxonomyItem[]>([]);
-    const [genre, setGenre] = useState<string>('');
-    const [tags, setTags] = useState<TaxonomyItem[]>([]);
-    const [tag, setTag] = useState<string>('');
+    const genreState = useTagInput();
+    const tagState = useTagInput();
     const [editLanguage, setEditLanguage] = useState<Locale>('nl');
     const [editingEvent, setEditingEvent] = useState<Event>(defaultEvent) // currently selected event
+    const editingEventHallState = useTagInput();
 
     const [popupOpen, setPopupOpen] = useState(false)
 
@@ -158,17 +159,26 @@ function ArchiveEditPage() {
 
     // Add event to the event list
     const addEvent = () => {
-        if(editingEvent?.key) {
-            setEvents(events.map(e => e.key === editingEvent.key ?  {...editingEvent, key: e.key} : e));
+        const hallItem = editingEventHallState.items[0];
+        // Add hall Id and display name to Event
+        const savingEvent = !hallItem ? editingEvent : {
+            ...editingEvent,
+            hall_id: hallItem.id,
+            hall_name: hallItem.name
+        }
+
+        if(savingEvent?.key) {
+            setEvents(events.map(e => e.key === savingEvent.key ?  {...savingEvent, key: e.key} : e));
         } else {
             setEvents([
                 ...events,
                 {
-                    ...editingEvent,
+                    ...savingEvent,
                     key: crypto.randomUUID()
                 }
             ]);
         }
+        editingEventHallState.clear();
         setPopupOpen(false);
     }
 
@@ -180,7 +190,10 @@ function ArchiveEditPage() {
 
     // edit event
     const editEvent = (key: string) => {
-        setEditingEvent(events.find(e => e.key === key) ?? defaultEvent);
+        const event = events.find(e => e.key === key);
+        setEditingEvent(event ?? defaultEvent);
+        // if hall_id is defined then also the hall_name
+        if(event?.hall_id && event?.hall_name) editingEventHallState.add(event?.hall_id, event.hall_name);
         setPopupOpen(true);
     }
     
@@ -210,32 +223,6 @@ function ArchiveEditPage() {
                 [lang]: value
             }
         }))
-    }
-
-    const onAddGenre = (id: string, text: LocalizedText) => {
-        setGenres(prev => prev.some(t => t.id === id) ?  prev : [...prev, {id: id, name: text}]);
-        setGenre('');
-    }
-
-    const onRemoveGenre = (id: string) => {
-        setGenres(prev => prev.filter(g => g.id !== id))
-    }
-
-    const onChangeGenre = (input: string) => {
-        setGenre(input);
-    }
-
-    const onAddTag = (id: string, text: LocalizedText) => {
-        setTags(prev => prev.some(t => t.id === id) ? prev : [...prev, {id: id, name: text}]);
-        setTag('');
-    }
-
-    const onRemoveTag = (id : string) => {
-        setTags(prev => prev.filter(t => t.id !== id));
-    }
-
-    const onChangeTag = (input: string) => {
-        setTag(input);
     }
 
     return (
@@ -292,16 +279,8 @@ function ArchiveEditPage() {
                 </div>
 
                 <ArchiveSidebar
-                    genre={genre}
-                    genres={genres}
-                    onAddGenre={onAddGenre}
-                    onRemoveGenre={onRemoveGenre}
-                    onChangeGenre={onChangeGenre}
-                    tag={tag}
-                    tags={tags}
-                    onAddTag={onAddTag}
-                    onRemoveTag={onRemoveTag}
-                    onChangeTag={onChangeTag}
+                    genre={genreState}
+                    tag={tagState}
 
                     productionSettingsLabel={messages.production.productionSettingsLabel}
                     genreLabel={messages.production.genreLabel}
@@ -317,10 +296,13 @@ function ArchiveEditPage() {
             {popupOpen && (
                 <EventPopup
                     fields={editingEvent}
+                    hall={editingEventHallState}
                     isEdit={editingEvent !== undefined}
-                    locations={[]} // TODO: fetch these
                     onSave={addEvent}
-                    onClose={() => setPopupOpen(false)}
+                    onClose={() => {
+                        setPopupOpen(false);
+                        editingEventHallState.clear();
+                    }}
                     onChange={onChangeEditingEvent}
 
                     saveButtonLabel={messages.event.saveButtonLabel}
