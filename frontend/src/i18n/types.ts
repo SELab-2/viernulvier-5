@@ -358,7 +358,6 @@ export type Messages = {
 
   blogs: {
     languageError:string
-    detailPageBack:string
     loadingBlog: string
     loadingProductions: string
     relatedProductions: string

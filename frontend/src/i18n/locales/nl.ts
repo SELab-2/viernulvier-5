@@ -393,7 +393,6 @@ const nl: Messages = {
 
   blogs: {
       languageError:'Blog bestaat niet in deze taal',
-      detailPageBack: 'Terug naar hoofdpagina',
       loadingBlog: 'Blog wordt geladen...',
       loadingProductions: 'Producties laden...',
       relatedProductions: 'Gerelateerde producties',
