@@ -198,8 +198,8 @@ model blog {
   editor_blog      editor_blog[]
   draft            Boolean?
 
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamp(6)
+  created_at DateTime  @default(now()) @db.Timestamp(6)
+  updated_at DateTime  @default(now()) @db.Timestamp(6)
 }
 
 model blog_production {
@@ -303,8 +303,8 @@ model AdminUser {
   username     String    @unique @db.VarChar
   passwordHash String    @map("password_hash") @db.VarChar
   role         AdminRole @default(ADMIN)
-  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt    DateTime  @default(now()) @map("updated_at") @db.Timestamp(6)
+  created_at    DateTime  @default(now()) @db.Timestamp(6)
+  updated_at   DateTime  @default(now()) @db.Timestamp(6)
   editor_blog  editor_blog[]
   editor_production editor_production[]
 

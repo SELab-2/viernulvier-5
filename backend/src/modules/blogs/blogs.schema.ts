@@ -36,8 +36,8 @@ export const blogSchema = z.object({
     thumbnail_index: z.number().int().nonnegative().nullable().optional(),
     images: z.array(z.string()).optional(),
     productions: z.array(z.string().uuid()),
-    createdAt: z.coerce.date().optional(),
-    updatedAt: z.coerce.date().optional(),
+    created_at: z.coerce.date().optional(),
+    updated_at: z.coerce.date().optional(),
     links: blogLinksSchema.optional(),
 })
 

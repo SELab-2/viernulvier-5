@@ -243,6 +243,15 @@ const nl: Messages = {
     editorSaveError: 'Editor opslaan mislukt.',
     editorDeleteError: 'Editor verwijderen mislukt.',
   },
+  notFound: {
+    titleTop: 'Vier',
+    titleAccent: 'nul',
+    titleBottom: 'vier',
+    joke: 'Toeval? We dachten het niet. Onze naam is letterlijk een 404.',
+    description: 'Deze pagina staat niet in het archief. Misschien is ze nog niet gedigitaliseerd, misschien bestond ze nooit.\nIn de tussentijd: terug naar de start of duik het archief in.',
+    homeButton: 'naar home',
+    searchButton: 'doorzoek archief',
+  },
   footer: {
     brandLogoAlt: 'VIERNULVIER logo',
     organizationName: 'Kunstencentrum VIERNULVIER vzw.',
@@ -333,6 +342,14 @@ const nl: Messages = {
       pageTitle: 'Archief item bewerken',
       itemIdLabel: 'Item-ID:',
     },
+    notFound: {
+      titleTop: 'Vier',
+      titleAccent: 'nul',
+      titleBottom: 'vier',
+      joke: 'Toeval? We dachten het niet. Onze naam is letterlijk een 404.',
+      description: 'Deze admin-pagina bestaat niet.\nMisschien is de route verplaatst, of klopt de URL niet helemaal.',
+      dashboardButton: 'naar dashboard',
+    },
     posters: {
       pageTitle: 'Affiches',
       pageSubtitle: 'Voeg meerdere affiches of PDF-bestanden toe met titel en gekoppelde productie.',
@@ -369,7 +386,7 @@ const nl: Messages = {
   },
 
   editHeader: {
-    back: '← Terug',
+    back: 'Terug',
     publish: 'Publiceren',
     saveOnDraft: 'Opslaan als draft'
   },
@@ -377,7 +394,6 @@ const nl: Messages = {
   blogs: {
       placeholder: 'Schrijf je blog content hier...',
       languageError:'Blog bestaat niet in deze taal',
-      detailPageBack:'← terug naar hoofdpagina',
       loadingBlog: 'Blog wordt geladen...',
       loadingProductions: 'Producties laden...',
       relatedProductions: 'Gerelateerde producties',
