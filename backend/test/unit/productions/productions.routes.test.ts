@@ -244,7 +244,6 @@ describe('Productions Routes', () => {
             }
         })
     })
-})
 
     describe('POST /api/v1/archive/productions/:id/editors', () => {
         it('should assign an editor to a production and return 204', async () => {
