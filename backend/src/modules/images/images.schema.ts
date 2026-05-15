@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 export const imageParamsSchema = z.object({
-    uuid: z.string().min(1),
+    uuid: z.string().uuid(),
 })
 
 export type ImageParams = z.infer<typeof imageParamsSchema>
