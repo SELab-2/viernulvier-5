@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getVideoEmbedUrl } from '../../utils/youtube'
+import { getVideoEmbedUrl } from '../../utils/videos'
 
 describe('getVideoEmbedUrl', () => {
     it('converts a standard youtube.com watch url', () => {
