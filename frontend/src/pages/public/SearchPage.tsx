@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { getActiveLocale, withLocalePath } from '../../i18n'
 import type { Locale, Messages } from '../../i18n/types'
-import { apiFetch } from '../../api/client'
+import { apiFetch, normalizeApiAssetUrl } from '../../api/client'
 import { getLocalizedContent, getLocalizedTitle, normalizeContent } from './blogDetailPage.formatters'
 import PublicLayout from '../../components/public/PublicLayout'
 import { usePublicMessages } from '../../components/public/PublicMessagesContext'
@@ -13,7 +13,7 @@ type SearchEntry = SearchResultItem & {
     year: number
     genre: string
     location: string
-    type: 'production' | 'blog'
+    type: 'production' | 'blog' | 'poster'
 }
 
 const DEFAULT_PAGE_SIZE = 12
@@ -21,6 +21,7 @@ const PAGE_SIZE_OPTIONS = [12, 24, 48] as const
 const MIN_PERIOD_YEAR = 1982
 const MAX_PERIOD_YEAR = new Date().getFullYear()
 const SEARCH_INPUT_DEBOUNCE_MS = 250
+
 
 const CANONICAL_GENRE_VALUES = [
     'concert',
@@ -129,9 +130,33 @@ type PaginatedApiResponse<T> = {
     }
 }
 
+type PosterApiItem = {
+    id: string
+    title: string
+    file_url: string
+    mime_type: string | null
+    files?: Array<{
+        id: string
+        file_url: string
+        mime_type: string | null
+    }>
+    file_count?: number
+    created_at: string
+    production: {
+        id: string
+        title: string
+    } | null
+    productions?: Array<{
+        id: string
+        title: string
+    }>
+}
+
 type SearchSort = 'relevance' | 'recent' | 'oldest'
+type SearchTab = 'productions' | 'blogs' | 'all' | 'posters'
 
 type SearchFilterState = {
+    tab: SearchTab
     query: string
     yearFrom: number
     yearTo: number
@@ -140,10 +165,10 @@ type SearchFilterState = {
     sort: SearchSort
     page: number
     limit: number
-    tab: 'productions' | 'blogs' | 'all'
 }
 
 type SearchFilterOverrides = {
+    tab?: SearchTab
     query?: string
     yearFrom?: number
     yearTo?: number
@@ -152,7 +177,13 @@ type SearchFilterOverrides = {
     sort?: SearchSort
     page?: number
     limit?: number
-    tab?: 'productions' | 'blogs' | 'all'
+}
+
+function normalizeTab(value: string | null): SearchTab {
+    if (value === 'blogs') return 'blogs'
+    if (value === 'all') return 'all'
+    if (value === 'posters') return 'posters'
+    return 'productions'
 }
 
 function getLocalizedText(text: LocalizedText, locale: Locale): string {
@@ -189,6 +220,7 @@ function normalizePageSize(value: number): number {
 }
 
 function parseSearchFilterState(searchParams: URLSearchParams): SearchFilterState {
+    const tab = normalizeTab(searchParams.get('tab'))
     const query = (searchParams.get('q') ?? '').trim()
     const legacyYear = Number(searchParams.get('year') ?? String(MAX_PERIOD_YEAR))
     const yearFromParam = Number(searchParams.get('yearFrom') ?? String(MIN_PERIOD_YEAR))
@@ -204,10 +236,8 @@ function parseSearchFilterState(searchParams: URLSearchParams): SearchFilterStat
     const limitParam = Number(searchParams.get('limit') ?? String(DEFAULT_PAGE_SIZE))
     const limit = normalizePageSize(limitParam)
 
-    const tabParam = searchParams.get('tab')
-    const tab: 'productions' | 'blogs' | 'all' = tabParam === 'blogs' ? 'blogs' : tabParam === 'all' ? 'all' : 'productions'
-
     return {
+        tab,
         query,
         yearFrom,
         yearTo,
@@ -216,7 +246,6 @@ function parseSearchFilterState(searchParams: URLSearchParams): SearchFilterStat
         sort,
         page,
         limit,
-        tab,
     }
 }
 
@@ -224,6 +253,7 @@ function buildSearchParams(filters: SearchFilterOverrides): URLSearchParams {
     const params = new URLSearchParams()
     const trimmedQuery = filters.query?.trim() ?? ''
 
+    if (filters.tab && filters.tab !== 'productions') params.set('tab', filters.tab)
     if (trimmedQuery) params.set('q', trimmedQuery)
     if (filters.yearFrom && filters.yearFrom > MIN_PERIOD_YEAR) params.set('yearFrom', String(filters.yearFrom))
     if (filters.yearTo && filters.yearTo < MAX_PERIOD_YEAR) params.set('yearTo', String(filters.yearTo))
@@ -232,8 +262,6 @@ function buildSearchParams(filters: SearchFilterOverrides): URLSearchParams {
     if (filters.sort && filters.sort !== 'relevance') params.set('sort', filters.sort)
     if (filters.page && filters.page > 1) params.set('page', String(filters.page))
     if (filters.limit && filters.limit !== DEFAULT_PAGE_SIZE) params.set('limit', String(filters.limit))
-    if (filters.tab === 'blogs') params.set('tab', 'blogs')
-    if (filters.tab === 'all') params.set('tab', 'all')
 
     return params
 }
@@ -285,6 +313,50 @@ function normalizeGenreValue(value: string): string {
     }
 
     return GENRE_ALIASES[normalized] ?? normalized
+}
+
+function mapPosterToSearchEntry(item: PosterApiItem, locale: Locale, searchMessages: Messages['search']): SearchEntry {
+    const date = formatDate(item.created_at, locale)
+    const productionEntries = item.productions?.length
+        ? item.productions
+        : item.production
+            ? [item.production]
+            : []
+    const productionTitles = productionEntries
+        .map((production) => production.title.trim())
+        .filter((title) => title.length > 0)
+    const productionTitle = productionTitles.length > 0
+        ? productionTitles.join(' • ')
+        : ''
+    const posterFiles = Array.isArray(item.files) ? item.files : []
+    const previewUrls = posterFiles
+        .filter((file) => file.mime_type !== 'application/pdf')
+        .map((file) => normalizeApiAssetUrl(file.file_url))
+        .filter((url): url is string => Boolean(url))
+        .slice(0, 3)
+    const knownAssetCount = posterFiles.length > 0
+        ? posterFiles.length
+        : typeof item.file_count === 'number' && item.file_count > 0
+            ? item.file_count
+            : undefined
+
+    return {
+        id: item.id,
+        tag: searchMessages.postersTab,
+        date,
+        title: item.title,
+        excerpt: '',
+        venue: productionTitle,
+        imageUrl: normalizeApiAssetUrl(item.file_url),
+        mimeType: item.mime_type,
+        relatedAssetCount: knownAssetCount,
+        relatedAssetPreviewUrls: previewUrls.length > 0 ? previewUrls : undefined,
+        year: new Date(item.created_at).getFullYear() || MIN_PERIOD_YEAR,
+        genre: '',
+        location: '',
+        isProductionReference: true,
+        type: 'poster' as const,
+    }
 }
 
 function mapProductionToSearchEntry(item: ProductionApiItem, locale: Locale, searchMessages: Messages['search'], preferredGenre?: string): SearchEntry {
@@ -341,20 +413,23 @@ type BlogApiItem = {
     title?: unknown
     content?: unknown
     productions: string[]
-    createdAt: string
-    updatedAt: string
+    created_at: string
+    updated_at: string
     links?: { self: string }
 }
 
 type SearchApiItem = {
     id: string
-    type: 'production' | 'blog'
+    type: 'production' | 'blog' | 'poster'
     title?: unknown
     teaser?: unknown
     description_short?: unknown
     description?: unknown
     content?: unknown
     image_url?: string | null
+    mime_type?: string | null
+    poster_file_count?: number
+    production_id?: string | null
     venue_name?: string | null
     venue_names?: string[]
     production_genres?: string[]
@@ -362,6 +437,7 @@ type SearchApiItem = {
     attendance_mode?: string | null
     created_at?: string
     productions?: string[]
+    links?: ProductionApiItem['links']
 }
 
 function getBlogExcerpt(content: unknown, locale: Locale, fallback: string): string {
@@ -387,8 +463,8 @@ function getBlogExcerpt(content: unknown, locale: Locale, fallback: string): str
 
 function mapBlogToSearchEntry(item: BlogApiItem, locale: Locale, searchMessages: Messages['search']): SearchEntry {
     const title = getLocalizedTitle(item.title, locale) || searchMessages.fallbackUntitled
-    const date = item.createdAt ? formatDate(item.createdAt, locale) : '-'
-    const year = item.createdAt ? new Date(item.createdAt).getFullYear() : MIN_PERIOD_YEAR
+    const date = item.created_at ? formatDate(item.created_at, locale) : '-'
+    const year = item.created_at ? new Date(item.created_at).getFullYear() : MIN_PERIOD_YEAR
 
     return {
         id: item.id,
@@ -623,8 +699,8 @@ function useAllHalls(locale: Locale) {
     useEffect(() => {
         const fetchHalls = async () => {
             try {
-                // Fetch more halls to be sure
-                const res = await apiFetch<{ data: Array<{ name: LocalizedText }> }>('/archive/halls?limit=500')
+                // Fetch enough halls for autocomplete while keeping the request bounded.
+                const res = await apiFetch<{ data: Array<{ name: LocalizedText }> }>('/archive/halls?limit=100')
                 const names = (res.data || [])
                     .map(h => getLocalizedText(h.name, locale))
                     .filter(Boolean)
@@ -741,10 +817,17 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
     const [searchInput, setSearchInput] = useState(query)
     const [locationInput, setLocationInput] = useState('')
     const [isLocationSuggestionsOpen, setIsLocationSuggestionsOpen] = useState(false)
+    const [draftFromYear, setDraftFromYear] = useState(safeFromYear)
+    const [draftToYear, setDraftToYear] = useState(safeToYear)
 
     useEffect(() => {
         setSearchInput(query)
     }, [query])
+
+    useEffect(() => {
+        setDraftFromYear(safeFromYear)
+        setDraftToYear(safeToYear)
+    }, [safeFromYear, safeToYear])
 
     const pushFilters = useCallback((filters: SearchFilterOverrides) => {
         const params = buildSearchParams(filters)
@@ -763,8 +846,8 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
         const timerId = window.setTimeout(() => {
             pushFilters({
                 query: nextQuery || undefined,
-                yearFrom: safeFromYear,
-                yearTo: safeToYear,
+                yearFrom: draftFromYear,
+                yearTo: draftToYear,
                 genres: selectedGenres,
                 locations: selectedLocations,
                 sort,
@@ -776,16 +859,16 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
         return () => {
             window.clearTimeout(timerId)
         }
-    }, [searchInput, query, safeFromYear, safeToYear, selectedGenres, selectedLocations, sort, safeLimit, tab, pushFilters])
+    }, [searchInput, query, draftFromYear, draftToYear, selectedGenres, selectedLocations, sort, safeLimit, tab, pushFilters])
 
     const handleSearchSubmit = () => {
-        pushFilters({ query: searchInput.trim() || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: safeLimit, tab })
+        pushFilters({ query: searchInput.trim() || undefined, yearFrom: draftFromYear, yearTo: draftToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: safeLimit, tab })
     }
 
     const handleGenreChange = (next: string) => {
         const nextGenres = selectedGenres.includes(next) ? [] : [next]
 
-        pushFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: nextGenres, locations: selectedLocations, sort, limit: safeLimit, tab })
+        pushFilters({ query: query || undefined, yearFrom: draftFromYear, yearTo: draftToYear, genres: nextGenres, locations: selectedLocations, sort, limit: safeLimit, tab })
     }
 
     const handleLocationChange = (next: string) => {
@@ -793,7 +876,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
             ? selectedLocations.filter((value) => value !== next)
             : [...selectedLocations, next]
 
-        pushFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: selectedGenres, locations: nextLocations, sort, limit: safeLimit, tab })
+        pushFilters({ query: query || undefined, yearFrom: draftFromYear, yearTo: draftToYear, genres: selectedGenres, locations: nextLocations, sort, limit: safeLimit, tab })
     }
 
     const handleAddLocation = () => {
@@ -805,8 +888,8 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
 
         pushFilters({
             query: query || undefined,
-            yearFrom: safeFromYear,
-            yearTo: safeToYear,
+            yearFrom: draftFromYear,
+            yearTo: draftToYear,
             genres: selectedGenres,
             locations: [...selectedLocations, nextLocation],
             sort,
@@ -845,8 +928,8 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
 
         pushFilters({
             query: query || undefined,
-            yearFrom: safeFromYear,
-            yearTo: safeToYear,
+            yearFrom: draftFromYear,
+            yearTo: draftToYear,
             genres: selectedGenres,
             locations: [...selectedLocations, nextLocation],
             sort,
@@ -858,16 +941,39 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
     }
 
     const handleFromYearChange = (next: number) => {
-        const clampedNext = Math.min(next, safeToYear)
-        pushFilters({ query: query || undefined, yearFrom: clampedNext, yearTo: safeToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: safeLimit, tab })
+        setDraftFromYear(Math.min(next, draftToYear))
     }
 
     const handleToYearChange = (next: number) => {
-        const clampedNext = Math.max(next, safeFromYear)
-        pushFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: clampedNext, genres: selectedGenres, locations: selectedLocations, sort, limit: safeLimit, tab })
+        setDraftToYear(Math.max(next, draftFromYear))
+    }
+
+    const commitDraftYears = useCallback(() => {
+        if (draftFromYear === safeFromYear && draftToYear === safeToYear) {
+            return
+        }
+
+        pushFilters({
+            query: query || undefined,
+            yearFrom: draftFromYear,
+            yearTo: draftToYear,
+            genres: selectedGenres,
+            locations: selectedLocations,
+            sort,
+            limit: safeLimit,
+            tab,
+        })
+    }, [draftFromYear, draftToYear, safeFromYear, safeToYear, pushFilters, query, selectedGenres, selectedLocations, sort, safeLimit, tab])
+
+    const handleSliderKeyUp = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key.startsWith('Arrow') || event.key === 'Home' || event.key === 'End' || event.key === 'PageUp' || event.key === 'PageDown') {
+            commitDraftYears()
+        }
     }
 
     const handleReset = () => {
+        setDraftFromYear(MIN_PERIOD_YEAR)
+        setDraftToYear(MAX_PERIOD_YEAR)
         pushFilters({ yearFrom: MIN_PERIOD_YEAR, yearTo: MAX_PERIOD_YEAR, sort, limit: safeLimit, tab })
     }
 
@@ -885,21 +991,26 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
         const clickRatio = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width))
         const nextYear = Math.round(MIN_PERIOD_YEAR + clickRatio * yearRange)
 
-        if (Math.abs(nextYear - safeFromYear) <= Math.abs(nextYear - safeToYear)) {
-            handleFromYearChange(nextYear)
+        if (Math.abs(nextYear - draftFromYear) <= Math.abs(nextYear - draftToYear)) {
+            const nextFromYear = Math.min(nextYear, draftToYear)
+            setDraftFromYear(nextFromYear)
+            pushFilters({ query: query || undefined, yearFrom: nextFromYear, yearTo: draftToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: safeLimit, tab })
             return
         }
 
-        handleToYearChange(nextYear)
+        const nextToYear = Math.max(nextYear, draftFromYear)
+        setDraftToYear(nextToYear)
+        pushFilters({ query: query || undefined, yearFrom: draftFromYear, yearTo: nextToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: safeLimit, tab })
     }
 
     const yearRange = MAX_PERIOD_YEAR - MIN_PERIOD_YEAR
-    const fromPercent = ((safeFromYear - MIN_PERIOD_YEAR) / yearRange) * 100
-    const toPercent = ((safeToYear - MIN_PERIOD_YEAR) / yearRange) * 100
+    const fromPercent = ((draftFromYear - MIN_PERIOD_YEAR) / yearRange) * 100
+    const toPercent = ((draftToYear - MIN_PERIOD_YEAR) / yearRange) * 100
     const genreOptions = s.genres.map((label, index) => ({
         label,
         value: CANONICAL_GENRE_VALUES[index] ?? label.toLowerCase(),
     }))
+
     return (
         <aside className={`flex h-full flex-col ${className}`}>
             <h2 className="text-3xl text-foreground">{s.heading}</h2>
@@ -928,7 +1039,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
                 </form>
             ) : null}
 
-            {tab !== 'blogs' ? (
+            {tab !== 'blogs' && tab !== 'posters' ? (
             <div className="mt-8 border-t border-border pt-5">
                 <div className="mb-4 flex items-center justify-between">
                     <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground">{s.genreLabel}</h3>
@@ -961,8 +1072,10 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
                         type="range"
                         min={MIN_PERIOD_YEAR}
                         max={MAX_PERIOD_YEAR}
-                        value={safeFromYear}
+                        value={draftFromYear}
                         onChange={(event) => handleFromYearChange(Number(event.target.value))}
+                        onPointerUp={commitDraftYears}
+                        onKeyUp={handleSliderKeyUp}
                         className="range-input"
                         aria-label="Start year"
                     />
@@ -970,8 +1083,10 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
                         type="range"
                         min={MIN_PERIOD_YEAR}
                         max={MAX_PERIOD_YEAR}
-                        value={safeToYear}
+                        value={draftToYear}
                         onChange={(event) => handleToYearChange(Number(event.target.value))}
+                        onPointerUp={commitDraftYears}
+                        onKeyUp={handleSliderKeyUp}
                         className="range-input"
                         aria-label="End year"
                     />
@@ -979,13 +1094,13 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
                 <div className="mt-2 flex items-center justify-between text-xs text-muted">
                     <span>{MIN_PERIOD_YEAR}</span>
                     <span className="rounded-full bg-foreground px-2 py-0.5 font-semibold text-surface">
-                        {safeFromYear} - {safeToYear}
+                        {draftFromYear} - {draftToYear}
                     </span>
                     <span>{MAX_PERIOD_YEAR}</span>
                 </div>
             </div>
 
-            {tab !== 'blogs' ? (
+            {tab !== 'blogs' && tab !== 'posters' ? (
             <div className="mt-6 border-t border-border pt-5 pb-5">
                 <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground">{s.locationLabel}</h3>
                 <div className="mt-4 space-y-3 text-sm text-text-accent">
@@ -1058,7 +1173,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
             <div className="mt-auto space-y-3">
                 <button
                     type="button"
-                    className="h-10 w-full rounded-full border border-border bg-surface text-sm font-semibold text-foreground md:hidden transition-colors duration-200"
+                    className="h-10 w-full rounded-full border border-border bg-surface text-sm font-semibold text-foreground transition-colors duration-200 md:hidden"
                     onClick={() => {
                         onShare?.()
                     }}
@@ -1166,6 +1281,7 @@ function SearchPageContent() {
     const allAvailableHalls = useAllHalls(locale)
 
     const filterState = useMemo(() => parseSearchFilterState(searchParams), [searchParams])
+    const activeTab = filterState.tab
     const query = filterState.query
     const safeFromYear = filterState.yearFrom
     const safeToYear = filterState.yearTo
@@ -1235,32 +1351,47 @@ function SearchPageContent() {
                                     title: item.title,
                                     content: item.content,
                                     productions: item.productions ?? [],
-                                    createdAt: item.created_at ?? '',
-                                    updatedAt: item.created_at ?? '',
+                                    created_at: item.created_at ?? '',
+                                    updated_at: item.created_at ?? '',
                                 },
                                 locale,
                                 searchMessages,
                             )
                         }
-                        return mapProductionToSearchEntry(
-                            {
-                                id: item.id,
-                                title: toLocalizedText(item.title),
-                                teaser: toLocalizedText(item.teaser),
-                                description_short: toLocalizedText(item.description_short),
-                                description: toLocalizedText(item.description),
-                                image_url: item.image_url,
-                                venue_name: item.venue_name,
-                                venue_names: item.venue_names,
-                                production_genres: item.production_genres,
-                                performer_type: item.performer_type ?? null,
-                                attendance_mode: item.attendance_mode ?? null,
-                                created_at: item.created_at ?? '',
-                            },
-                            locale,
-                            searchMessages,
-                            preferredGenre,
-                        )
+                        if (item.type === 'poster') {
+                            return mapPosterToSearchEntry(
+                                {
+                                    id: item.id,
+                                    title: (item.title as string) || '',
+                                    file_url: item.image_url || '',
+                                    mime_type: item.mime_type ?? null,
+                                    file_count: item.poster_file_count,
+                                    created_at: item.created_at ?? '',
+                                    production: item.production_id
+                                        ? { id: item.production_id, title: item.venue_name ?? '' }
+                                        : (item.venue_name ? { id: '', title: item.venue_name } : null),
+                                },
+                                locale,
+                                searchMessages,
+                            )
+                        }
+                        const productionItem: ProductionApiItem = {
+                            id: item.id,
+                            title: toLocalizedText(item.title),
+                            teaser: toLocalizedText(item.teaser),
+                            description_short: toLocalizedText(item.description_short),
+                            description: toLocalizedText(item.description),
+                            image_url: item.image_url,
+                            venue_name: item.venue_name,
+                            venue_names: item.venue_names,
+                            production_genres: item.production_genres,
+                            performer_type: item.performer_type ?? null,
+                            attendance_mode: item.attendance_mode ?? null,
+                            created_at: item.created_at ?? '',
+                            links: item.links,
+                        }
+
+                        return mapProductionToSearchEntry(productionItem, locale, searchMessages, preferredGenre)
                     })
 
                     const productionItemsForTaxonomy: ProductionApiItem[] = response.data
@@ -1282,6 +1413,30 @@ function SearchPageContent() {
                         }))
 
                     setApiRawItems(productionItemsForTaxonomy)
+                    setApiEntries(mappedEntries)
+                    setTotalResults(response.meta?.total ?? mappedEntries.length)
+                    setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
+                } else if (tab === 'posters') {
+                    params.set('lang', locale)
+
+                    if (safeFromYear > MIN_PERIOD_YEAR) {
+                        params.set('yearFrom', String(safeFromYear))
+                    }
+
+                    if (safeToYear < MAX_PERIOD_YEAR) {
+                        params.set('yearTo', String(safeToYear))
+                    }
+
+                    if (sort === 'recent' || sort === 'oldest') {
+                        params.set('sort', sort)
+                    }
+
+                    const response = await apiFetch<PaginatedApiResponse<PosterApiItem>>(
+                        `/archive/posters?${params.toString()}`,
+                        { signal: abortController.signal }
+                    )
+
+                    const mappedEntries = response.data.map((item) => mapPosterToSearchEntry(item, locale, searchMessages))
                     setApiEntries(mappedEntries)
                     setTotalResults(response.meta?.total ?? mappedEntries.length)
                     setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
@@ -1504,7 +1659,9 @@ function SearchPageContent() {
         }, 1800)
     }
 
-    const filterChips: Array<{ key: string; label: string; onRemove: () => void }> = [
+    const filterChips: Array<{ key: string; label: string; onRemove: () => void }> = activeTab === 'posters'
+        ? []
+        : [
         ...selectedGenres.map((value) => ({
             key: `genre-${value}`,
             label: getGenreLabel(value, searchMessages.genres),
@@ -1529,6 +1686,10 @@ function SearchPageContent() {
     const locationSuggestions = useMemo(() => {
         const normalizedLocale = locale === 'en' ? 'en' : 'nl'
         const uniqueValues = new Set<string>()
+
+        if (activeTab === 'blogs' || activeTab === 'posters') {
+            return []
+        }
 
         // 1. Add predefined aliases
         Object.values(LOCATION_ALIASES).forEach(v => uniqueValues.add(v))
@@ -1555,7 +1716,7 @@ function SearchPageContent() {
         return Array.from(uniqueValues).sort((a, b) =>
             a.localeCompare(b, normalizedLocale === 'nl' ? 'nl-BE' : 'en-GB', { sensitivity: 'base' }),
         )
-    }, [allAvailableHalls, fetchedDetails, locale])
+    }, [activeTab, allAvailableHalls, fetchedDetails, locale])
 
     return (
         <section className="relative bg-surface-sunken">
@@ -1622,7 +1783,7 @@ function SearchPageContent() {
 
                             <div className="flex flex-wrap items-center justify-between gap-4">
                                 <div>
-                                    <h1 className="flex items-center gap-3 text-3xl leading-none text-foreground">
+                                    <h1 className="flex items-center gap-3 text-xl md:text-2xl leading-none text-foreground">
                                         <button
                                             type="button"
                                             onClick={() => navigateWithFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: pageSize, page: 1, tab: 'all' })}
@@ -1643,6 +1804,13 @@ function SearchPageContent() {
                                             className={tab === 'blogs' ? 'underline decoration-accent decoration-2 underline-offset-4' : 'text-muted transition-colors hover:text-foreground'}
                                         >
                                             {m.search.blogTab}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => navigateWithFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: [], locations: [], sort, limit: pageSize, page: 1, tab: 'posters' })}
+                                            className={tab === 'posters' ? 'underline decoration-accent decoration-2 underline-offset-4' : 'text-muted transition-colors hover:text-foreground'}
+                                        >
+                                            {m.search.postersTab}
                                         </button>
                                     </h1>
                                     <p className="mt-2 text-sm text-muted">
@@ -1700,7 +1868,7 @@ function SearchPageContent() {
                                                 <circle cx="18" cy="19" r="3" />
                                                 <path d="M8.59 13.51 15.42 17.49M15.41 6.51 8.59 10.49" strokeLinecap="round" />
                                             </svg>
-                                            <span>{shareCopied ? m.search.shareCopiedLabel : m.search.shareLabel}</span>
+                                            <span className="hidden lg:inline">{shareCopied ? m.search.shareCopiedLabel : m.search.shareLabel}</span>
                                         </button>
                                     </div>
                                 ) : null}
@@ -1758,6 +1926,8 @@ function SearchPageContent() {
                                         onTagClick={handleCardGenreClick}
                                         detailHref={ item.type === 'blog'
                                             ? withLocalePath('/blogs/' + item.id, locale)
+                                            : item.type === 'poster'
+                                                ? withLocalePath('/posters/' + item.id, locale)
                                             : withLocalePath('/archive/' + item.id, locale)
                                         }
                                     />
