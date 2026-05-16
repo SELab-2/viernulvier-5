@@ -2,8 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { getActiveLocale, withLocalePath } from '../../i18n'
 import type { Locale, Messages } from '../../i18n/types'
-import { apiFetch, normalizeApiAssetUrl } from '../../api/client'
-import { getLocalizedContent, getLocalizedTitle, normalizeContent } from './blogDetailPage.formatters'
+import { apiFetch } from '../../api/client'
 import PublicLayout from '../../components/public/PublicLayout'
 import { usePublicMessages } from '../../components/public/PublicMessagesContext'
 import SearchPagination from '../../components/public/search/SearchPagination'
@@ -105,28 +104,6 @@ type PaginatedApiResponse<T> = {
         limit: number
         totalPages: number
     }
-}
-
-type PosterApiItem = {
-    id: string
-    title: string
-    file_url: string
-    mime_type: string | null
-    files?: Array<{
-        id: string
-        file_url: string
-        mime_type: string | null
-    }>
-    file_count?: number
-    created_at: string
-    production: {
-        id: string
-        title: string
-    } | null
-    productions?: Array<{
-        id: string
-        title: string
-    }>
 }
 
 type SearchSort = 'relevance' | 'recent' | 'oldest'
@@ -1108,7 +1085,7 @@ function SearchPageContent() {
         return Array.from(uniqueValues).sort((a, b) =>
             a.localeCompare(b, normalizedLocale === 'nl' ? 'nl-BE' : 'en-GB', { sensitivity: 'base' }),
         )
-    }, [allAvailableHalls, apiEntries, locale])
+    }, [activeTab, allAvailableHalls, apiEntries, locale])
 
     const isBlogTab = tab === 'blogs'
 
