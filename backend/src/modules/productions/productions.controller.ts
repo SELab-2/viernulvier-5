@@ -17,9 +17,10 @@ export class ProductionsController {
      */
     private mapProductionLinks(production: any, baseUrl: string): ProductionResponse {
         const prodId = production.id
+        const { poster, poster_file_url, ...cleanProduction } = production
         
         return {
-            ...production,
+            ...cleanProduction,
             links: {
                 self: `${baseUrl}/productions/${prodId}`,
                 blogs: `${baseUrl}/blogs?productionId=${prodId}`,
@@ -29,7 +30,7 @@ export class ProductionsController {
                 media_gallery: production.media_gallery_id ? `${baseUrl}/media/galleries/${production.media_gallery_id}` : null,
                 review_gallery: production.review_gallery_id ? `${baseUrl}/media/galleries/${production.review_gallery_id}` : null,
                 poster_gallery: production.poster_gallery_id ? `${baseUrl}/media/galleries/${production.poster_gallery_id}` : null,
-                poster: production.poster?.id ? `${baseUrl}/posters/${production.poster.id}` : null,
+                poster: poster?.id ? `${baseUrl}/posters/${poster.id}` : null,
             }
         }
     }

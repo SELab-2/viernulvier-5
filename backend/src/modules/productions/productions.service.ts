@@ -203,8 +203,11 @@ export class ProductionsService {
             }
             : null
 
+        // Remove the embedded galleries from the final response to maintain RESTful integrity
+        const { media_gallery, poster_gallery, ...cleanProduction } = production
+
         return {
-            ...production,
+            ...cleanProduction,
             image_url: this.extractImageUrl(production),
             venue_name: this.extractVenueName(production),
             venue_names: this.extractVenueNames(production),
