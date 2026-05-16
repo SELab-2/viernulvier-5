@@ -149,4 +149,99 @@ describe('Productions Routes', () => {
             expect(response.statusCode).toBe(404)
         })
     })
+
+    describe('DELETE /api/v1/archive/productions/:id', () => {
+        it('should delete a production that has related events and event prices', async () => {
+            const token = app.jwt.sign({ sub: 'admin', username: 'admin', role: Role.ADMIN })
+
+            const production = await app.prisma.production.create({
+                data: {
+                    title: { nl: 'To delete with events' },
+                    events: {
+                        create: {
+                            starts_at: new Date('2020-01-01'),
+                            event_prices: {
+                                create: { amount: '10' },
+                            },
+                        },
+                    },
+                },
+                include: { events: true },
+            })
+
+            const response = await app.inject({
+                method: 'DELETE',
+                url: `/api/v1/archive/productions/${production.id}`,
+                headers: { authorization: `Bearer ${token}` },
+            })
+
+            expect(response.statusCode).toBe(204)
+
+            const remainingProduction = await app.prisma.production.findUnique({
+                where: { id: production.id },
+            })
+            expect(remainingProduction).toBeNull()
+
+            const remainingEvents = await app.prisma.event.findMany({
+                where: { production_id: production.id },
+            })
+            expect(remainingEvents).toHaveLength(0)
+
+            const remainingPrices = await app.prisma.event_price.findMany({
+                where: { event_id: { in: production.events.map((event) => event.id) } },
+            })
+            expect(remainingPrices).toHaveLength(0)
+        })
+
+        it('should delete a production that has related blog, genre, and tag join rows', async () => {
+            const token = app.jwt.sign({ sub: 'admin', username: 'admin', role: Role.ADMIN })
+
+            const genre = await app.prisma.genre.create({ data: { name: { nl: 'Test genre' } } })
+            const tag = await app.prisma.tag.create({ data: { name: { nl: 'Test tag' } } })
+            const blog = await app.prisma.blog.create({ data: { title: { nl: 'Linked blog' } } })
+
+            const production = await app.prisma.production.create({
+                data: {
+                    title: { nl: 'To delete with joins' },
+                    genre_production: { create: { genre_id: genre.id } },
+                    tag_production: { create: { tag_id: tag.id } },
+                    blog_production: { create: { blog_id: blog.id } },
+                },
+            })
+
+            try {
+                const response = await app.inject({
+                    method: 'DELETE',
+                    url: `/api/v1/archive/productions/${production.id}`,
+                    headers: { authorization: `Bearer ${token}` },
+                })
+
+                expect(response.statusCode).toBe(204)
+
+                const remainingProduction = await app.prisma.production.findUnique({
+                    where: { id: production.id },
+                })
+                expect(remainingProduction).toBeNull()
+
+                expect(
+                    await app.prisma.genre_production.findMany({ where: { production_id: production.id } }),
+                ).toHaveLength(0)
+                expect(
+                    await app.prisma.tag_production.findMany({ where: { production_id: production.id } }),
+                ).toHaveLength(0)
+                expect(
+                    await app.prisma.blog_production.findMany({ where: { production_id: production.id } }),
+                ).toHaveLength(0)
+
+                // The linked-to entities themselves must survive.
+                expect(await app.prisma.genre.findUnique({ where: { id: genre.id } })).not.toBeNull()
+                expect(await app.prisma.tag.findUnique({ where: { id: tag.id } })).not.toBeNull()
+                expect(await app.prisma.blog.findUnique({ where: { id: blog.id } })).not.toBeNull()
+            } finally {
+                await app.prisma.blog.delete({ where: { id: blog.id } })
+                await app.prisma.tag.delete({ where: { id: tag.id } })
+                await app.prisma.genre.delete({ where: { id: genre.id } })
+            }
+        })
+    })
 })
