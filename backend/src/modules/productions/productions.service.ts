@@ -204,7 +204,9 @@ export class ProductionsService {
             : null
 
         // Remove the embedded galleries from the final response to maintain RESTful integrity
-        const { media_gallery, poster_gallery, ...cleanProduction } = production
+        const cleanProduction = { ...production }
+        delete cleanProduction.media_gallery
+        delete cleanProduction.poster_gallery
 
         return {
             ...cleanProduction,

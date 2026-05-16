@@ -17,7 +17,8 @@ export class ProductionsController {
      */
     private mapProductionLinks(production: any, baseUrl: string): ProductionResponse {
         const prodId = production.id
-        const { poster, poster_file_url, ...cleanProduction } = production
+        const { poster, ...cleanProduction } = production
+        delete cleanProduction.poster_file_url
         
         return {
             ...cleanProduction,

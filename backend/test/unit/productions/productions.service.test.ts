@@ -93,7 +93,6 @@ describe('ProductionsService', () => {
 
         expect(result).not.toHaveProperty('media_gallery')
         expect(result).not.toHaveProperty('poster_gallery')
-        // poster and poster_file_url might still be there in the service output but will be filtered by controller
         expect(result.id).toBe(productionId)
     })
 })
