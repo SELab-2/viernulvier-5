@@ -8,9 +8,9 @@ import {
     blogListSchema,
     singleBlogSchema,
     createBlogSchema,
-    updateBlogSchema,
     blogIdSchema,
-    errorSchema, updateBlogParamsSchema
+    errorSchema,
+    updateBlogParamsSchema
 } from './blogs.schema.js'
 import { requirePermission } from '../../hooks/require-permission.js'
 import { Permission } from '../../domain/permissions.js'
@@ -68,7 +68,7 @@ const blogsRoutes: FastifyPluginAsync = async (fastify) => {
             tags: ['blogs'],
             summary: 'Update a blog',
             params: blogIdSchema,
-            body: updateBlogSchema,
+            body: blogIdSchema,
             response: {
                 200: singleBlogSchema,
                 404: errorSchema
