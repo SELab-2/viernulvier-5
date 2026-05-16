@@ -1,36 +1,43 @@
 import { describe, expect, it } from 'vitest'
-import { getYouTubeEmbedUrl } from '../../utils/youtube'
+import { getVideoEmbedUrl } from '../../utils/youtube'
 
-describe('getYouTubeEmbedUrl', () => {
+describe('getVideoEmbedUrl', () => {
     it('converts a standard youtube.com watch url', () => {
-        expect(getYouTubeEmbedUrl('https://www.youtube.com/watch?v=abc123'))
+        expect(getVideoEmbedUrl('https://www.youtube.com/watch?v=abc123'))
             .toBe('https://www.youtube.com/embed/abc123')
     })
 
     it('converts a youtu.be short url', () => {
-        expect(getYouTubeEmbedUrl('https://youtu.be/abc123'))
+        expect(getVideoEmbedUrl('https://youtu.be/abc123'))
             .toBe('https://www.youtube.com/embed/abc123')
     })
 
     it('handles a watch url with extra query params', () => {
-        expect(getYouTubeEmbedUrl('https://www.youtube.com/watch?v=abc123&t=30s'))
+        expect(getVideoEmbedUrl('https://www.youtube.com/watch?v=abc123&t=30s'))
             .toBe('https://www.youtube.com/embed/abc123')
     })
 
     it('handles a youtu.be url with query params', () => {
-        expect(getYouTubeEmbedUrl('https://youtu.be/abc123?t=30'))
+        expect(getVideoEmbedUrl('https://youtu.be/abc123?t=30'))
             .toBe('https://www.youtube.com/embed/abc123')
     })
 
-    it('returns null for a vimeo url', () => {
-        expect(getYouTubeEmbedUrl('https://vimeo.com/123456')).toBeNull()
+    it('converts a standard vimeo.com watch url', () => {
+        expect(getVideoEmbedUrl('https://www.vimeo.com/123456'))
+            .toBe('https://player.vimeo.com/video/123456')
+    })
+
+    it('handles a vimeo player url', () => {
+        expect(getVideoEmbedUrl('https://player.vimeo.com/video/123456'))
+            .toBe('https://player.vimeo.com/video/123456')
     })
 
     it('returns null for an empty string', () => {
-        expect(getYouTubeEmbedUrl('')).toBeNull()
+        expect(getVideoEmbedUrl('')).toBeNull()
     })
 
     it('returns null for a random string', () => {
-        expect(getYouTubeEmbedUrl('not a url')).toBeNull()
+        expect(getVideoEmbedUrl('not a url')).toBeNull()
     })
+
 })
