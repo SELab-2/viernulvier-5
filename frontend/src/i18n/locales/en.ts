@@ -441,6 +441,8 @@ const en: Messages = {
           invalidFileTypes: (fileNames: string) => `Invalid file types: ${fileNames}`,
           alreadyUploaded: (count: number) => ` ${count} image${count !== 1 ? 's' : ''} already uploaded.`,
           uploadedImagesLabel: 'Uploaded images',
+          uploadFailedRemoved: (errorMessage: string) => `Image upload failed and the created blog was removed: ${errorMessage}`,
+          uploadFailedCreatedEditUrl: (errorMessage: string, editUrl: string) => `Image upload failed (${errorMessage}). The blog was created — you can continue editing it at ${editUrl}`,
           setThumbnailButton: 'Set',
           pendingUploadLabel: (count: number) => `Pending upload (${count})`,
           removeButton: 'Remove',

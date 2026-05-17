@@ -415,6 +415,8 @@ export type Messages = {
       coverLabel: string
       deleteImageAriaLabel: string
       coverHint: string
+      uploadFailedRemoved: (errorMessage: string) => string
+      uploadFailedCreatedEditUrl: (errorMessage: string, editUrl: string) => string
     }
   }
 }

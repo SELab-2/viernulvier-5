@@ -441,6 +441,8 @@ const nl: Messages = {
           invalidFileTypes: (fileNames: string) => `Ongeldige bestandstypes: ${fileNames}`,
           alreadyUploaded: (count: number) => ` ${count} afbeelding${count !== 1 ? 'en' : ''} al geüpload.`,
           uploadedImagesLabel: "Geüploade afbeeldingen",
+          uploadFailedRemoved: (errorMessage: string) => `Upload van afbeeldingen mislukt en de nieuw aangemaakte blog werd verwijderd: ${errorMessage}`,
+          uploadFailedCreatedEditUrl: (errorMessage: string, editUrl: string) => `Upload van afbeeldingen mislukt (${errorMessage}). De blog is aangemaakt — je kunt verder bewerken op ${editUrl}`,
           setThumbnailButton: "Instellen",
           pendingUploadLabel: (count: number) => `Wacht op upload (${count})`,
           removeButton: "Verwijderen",

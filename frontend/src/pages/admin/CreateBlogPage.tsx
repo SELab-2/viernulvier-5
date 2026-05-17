@@ -408,21 +408,44 @@ function CreateBlogPage() {
                     }))
                 )
 
-                const imagesResponse = await apiFetch<{ data: { images: string[]; thumbnail_index: number | null } }>(
-                    `/archive/blogs/${createdBlogId}/images`,
-                    {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            files: filesPayload,
-                            thumbnail_index: thumbnailIndex,
-                        }),
-                    }
-                )
+                try {
+                    const imagesResponse = await apiFetch<{ data: { images: string[]; thumbnail_index: number | null } }>(
+                        `/archive/blogs/${createdBlogId}/images`,
+                        {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                files: filesPayload,
+                                thumbnail_index: thumbnailIndex,
+                            }),
+                        }
+                    )
 
-                setBlogImages(imagesResponse.data.images ?? [])
-                setThumbnailIndex(imagesResponse.data.thumbnail_index ?? null)
-                setPendingImages([])
-                setIsUploadingImages(false)
+                    setBlogImages(imagesResponse.data.images ?? [])
+                    setThumbnailIndex(imagesResponse.data.thumbnail_index ?? null)
+                    setPendingImages([])
+                    setIsUploadingImages(false)
+                } catch (uploadError) {
+                    // Try to roll back the created blog to avoid duplicates on retry
+                    try {
+                        await apiFetch(`/archive/blogs/${createdBlogId}`, { method: 'DELETE' })
+                        setIsUploadingImages(false)
+                        setError(
+                            messages.blogs.bannerUpload.uploadFailedRemoved(
+                                uploadError instanceof Error ? uploadError.message : ''
+                            )
+                        )
+                    } catch {
+                        // Could not roll back — surface edit URL so user can retry there
+                        setIsUploadingImages(false)
+                        const editUrl = `/${locale}/admin/blogs/${createdBlogId}/edit`
+                        setError(
+                            messages.blogs.bannerUpload.uploadFailedCreatedEditUrl(
+                                uploadError instanceof Error ? uploadError.message : '',
+                                editUrl
+                            )
+                        )
+                    }
+                }
             }
 
             //Delete the deleted images in the backend
