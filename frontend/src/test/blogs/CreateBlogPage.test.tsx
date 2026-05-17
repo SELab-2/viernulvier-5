@@ -529,45 +529,47 @@ describe('CreateBlogPage', () => {
       },
     })
 
-    const file = new File(['dummy'], 'test.png', { type: 'image/png' })
+    try {
+      const file = new File(['dummy'], 'test.png', { type: 'image/png' })
 
-    renderCreatePage()
+      renderCreatePage()
 
-    // Find the hidden file input and add a file
-    const input = document.querySelector('input[type="file"]') as HTMLInputElement
-    fireEvent.change(input, { target: { files: [file] } })
+      // Find the hidden file input and add a file
+      const input = document.querySelector('input[type="file"]') as HTMLInputElement
+      fireEvent.change(input, { target: { files: [file] } })
 
-    // Preview should show up
-    expect(await screen.findByAltText('Blog image 1')).toBeInTheDocument()
+      // Preview should show up
+      expect(await screen.findByAltText('Blog image 1')).toBeInTheDocument()
 
-    // Select as thumbnail
-    fireEvent.click(screen.getByAltText('Blog image 1'))
-    expect(screen.getByText(messages.blogs.bannerUpload.coverLabel)).toBeInTheDocument()
+      // Select as thumbnail
+      fireEvent.click(screen.getByAltText('Blog image 1'))
+      expect(screen.getByText(messages.blogs.bannerUpload.coverLabel)).toBeInTheDocument()
 
-    // Fill required fields and publish
-    fireEvent.change(screen.getByLabelText('blog title'), { target: { value: 'Nieuwe blogtitel' } })
-    fireEvent.change(screen.getByLabelText('blog content'), { target: { value: '<p>Nieuwe inhoud</p>' } })
-    fireEvent.click(screen.getAllByRole('button', { name: 'Publiceren' })[0])
+      // Fill required fields and publish
+      fireEvent.change(screen.getByLabelText('blog title'), { target: { value: 'Nieuwe blogtitel' } })
+      fireEvent.change(screen.getByLabelText('blog content'), { target: { value: '<p>Nieuwe inhoud</p>' } })
+      fireEvent.click(screen.getAllByRole('button', { name: 'Publiceren' })[0])
 
-    fireEvent.click(await screen.findByRole('button', { name: messages.blogs.publishConfirmProceed }))
+      fireEvent.click(await screen.findByRole('button', { name: messages.blogs.publishConfirmProceed }))
 
-    // Expect images upload call was made with files and thumbnail_index=0
-    await waitFor(() => {
-      const imagesCall = apiFetchMock.mock.calls.find(([endpoint]) => String(endpoint).endsWith('/images'))
-      expect(imagesCall).toBeDefined()
-      const options = imagesCall?.[1]
-      const body = JSON.parse(String(options?.body))
-      expect(body).toHaveProperty('files')
-      expect(Array.isArray(body.files)).toBe(true)
-      expect(body.files[0].file_name).toBe('test.png')
-      expect(body.thumbnail_index).toBe(0)
-    })
-
-    // Restore FileReader
-    if (origFileReaderDescriptor) {
-      Object.defineProperty(globalThis, 'FileReader', origFileReaderDescriptor)
-    } else {
-      delete (globalThis as unknown as { FileReader?: unknown }).FileReader
+      // Expect images upload call was made with files and thumbnail_index=0
+      await waitFor(() => {
+        const imagesCall = apiFetchMock.mock.calls.find(([endpoint]) => String(endpoint).endsWith('/images'))
+        expect(imagesCall).toBeDefined()
+        const options = imagesCall?.[1]
+        const body = JSON.parse(String(options?.body))
+        expect(body).toHaveProperty('files')
+        expect(Array.isArray(body.files)).toBe(true)
+        expect(body.files[0].file_name).toBe('test.png')
+        expect(body.thumbnail_index).toBe(0)
+      })
+    } finally {
+      // Restore FileReader
+      if (origFileReaderDescriptor) {
+        Object.defineProperty(globalThis, 'FileReader', origFileReaderDescriptor)
+      } else {
+        delete (globalThis as unknown as { FileReader?: unknown }).FileReader
+      }
     }
   })
 
