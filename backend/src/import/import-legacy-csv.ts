@@ -10,8 +10,8 @@
  * Both flags are optional — you can run only one if needed.
  */
 
-import * as fs from "fs";
-import * as path from "path";
+import * as fs from "node:fs";
+import * as path from "node:path";
 import { parse } from "csv-parse/sync";
 import { Prisma } from "@prisma/client";
 import { fromZonedTime } from "date-fns-tz";
