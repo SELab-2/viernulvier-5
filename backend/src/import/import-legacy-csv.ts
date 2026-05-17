@@ -128,8 +128,11 @@ async function importProductions(filePath: string) {
         const desc2 = nullN(row.Description2);
         const description2Json = desc2 ? { nl: desc2 } : null;
 
-        const vendorId = row["Planning ID"]?.trim()
-            ? `legacy-${row["Planning ID"].trim()}`
+        const rawPlanningId = row["Planning ID"]?.trim();
+        const vendorId = rawPlanningId
+            ? rawPlanningId.startsWith("legacy-")
+                ? rawPlanningId
+                : `legacy-${rawPlanningId}`
             : undefined;
 
         // Prisma requires Prisma.JsonNull (not plain null) for nullable Json fields.
