@@ -108,6 +108,8 @@ async function importProductions(filePath: string) {
             columns: true,
             skip_empty_lines: true,
             relax_quotes: true,
+            relax_column_count: true,
+            bom: true,
             trim: true,
         })
     );
@@ -295,6 +297,8 @@ async function importEvents(filePath: string) {
             columns: true,
             skip_empty_lines: true,
             relax_quotes: true,
+            relax_column_count: true,
+            bom: true,
             trim: true,
         })
     );
