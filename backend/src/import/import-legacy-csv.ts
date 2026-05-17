@@ -168,22 +168,25 @@ async function importProductions(filePath: string) {
             for (const genreName of genreNames) {
                 const genreApiId = `legacy-genre-${genreName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
 
-                // Find or create the genre record
+                // Find or create the genre record.
+                // First try an exact apiId match (fast path, covers reruns).
+                // If that misses, scan all genres with a case-insensitive JS
+                // comparison so e.g. "Theater" matches an existing "theater"
+                // row regardless of how Postgres stores the JSON value.
                 let dbGenre = await prisma.genre.findUnique({
                     where: { apiId: genreApiId },
                 });
 
                 if (!dbGenre) {
-                    // Check if a live genre with this name already exists (any language)
-                    dbGenre = await prisma.genre.findFirst({
-                        where: {
-                            OR: [
-                                { name: { path: ["nl"], equals: genreName } },
-                                { name: { path: ["en"], equals: genreName } },
-                                { name: { path: ["fr"], equals: genreName } },
-                            ],
-                        },
-                    });
+                    const genreNameLower = genreName.toLowerCase();
+                    const allGenres = await prisma.genre.findMany();
+                    dbGenre = allGenres.find((g) => {
+                        const n = g.name as Record<string, string> | null;
+                        if (!n) return false;
+                        return Object.values(n).some(
+                            (v) => v.toLowerCase() === genreNameLower
+                        );
+                    }) ?? null;
                 }
 
                 if (!dbGenre) {
