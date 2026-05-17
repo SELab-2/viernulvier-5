@@ -119,119 +119,123 @@ async function importProductions(filePath: string) {
     let skipped = 0;
     let failed = 0;
 
-    for await (const raw of parser) {
-        const parseResult = ProductionRowSchema.safeParse(raw);
-        if (!parseResult.success) {
-            const issues = parseResult.error.issues.map(i => `  ${i.path.join('.')}: ${i.message}`).join('\n');
-            log(`  ✖  Row failed schema validation, skipping:\n${issues}`);
-            failed++;
-            continue;
-        }
-        const row = parseResult.data;
-        try {
-            const numericId = row.ID?.trim();
-            if (!numericId) {
-                log(`  ⚠  Row missing ID, skipping: ${JSON.stringify(row)}`);
-                skipped++;
+    try {
+        for await (const raw of parser) {
+            const parseResult = ProductionRowSchema.safeParse(raw);
+            if (!parseResult.success) {
+                const issues = parseResult.error.issues.map(i => `  ${i.path.join('.')}: ${i.message}`).join('\n');
+                log(`  ✖  Row failed schema validation, skipping:\n${issues}`);
+                failed++;
                 continue;
             }
+            const row = parseResult.data;
+            try {
+                const numericId = row.ID?.trim();
+                if (!numericId) {
+                    log(`  ⚠  Row missing ID, skipping: ${JSON.stringify(row)}`);
+                    skipped++;
+                    continue;
+                }
 
-            const apiId = legacyApiId(numericId);
+                const apiId = legacyApiId(numericId);
 
-            const titel = nullN(row.Titel);
-            const titleJson = titel ? { nl: titel } : null;
-            const ondertitel = nullN(row.Ondertitel);
-            const taglineJson = ondertitel ? { nl: ondertitel } : null;
+                const titel = nullN(row.Titel);
+                const titleJson = titel ? { nl: titel } : null;
+                const ondertitel = nullN(row.Ondertitel);
+                const taglineJson = ondertitel ? { nl: ondertitel } : null;
 
-            const desc1 = nullN(row.Description1);
-            const descriptionJson = desc1 ? { nl: desc1 } : null;
-            const desc2 = nullN(row.Description2);
-            const description2Json = desc2 ? { nl: desc2 } : null;
+                const desc1 = nullN(row.Description1);
+                const descriptionJson = desc1 ? { nl: desc1 } : null;
+                const desc2 = nullN(row.Description2);
+                const description2Json = desc2 ? { nl: desc2 } : null;
 
-            const rawPlanningId = row["Planning ID"]?.trim();
-            const vendorId = rawPlanningId
-                ? rawPlanningId.startsWith("legacy-")
-                    ? rawPlanningId
-                    : `legacy-${rawPlanningId}`
-                : undefined;
+                const rawPlanningId = row["Planning ID"]?.trim();
+                const vendorId = rawPlanningId
+                    ? rawPlanningId.startsWith("legacy-")
+                        ? rawPlanningId
+                        : `legacy-${rawPlanningId}`
+                    : undefined;
 
-            // Prisma requires Prisma.JsonNull (not plain null) for nullable Json fields.
-            const toJson = (v: object | null) => v ?? Prisma.JsonNull;
+                // Prisma requires Prisma.JsonNull (not plain null) for nullable Json fields.
+                const toJson = (v: object | null) => v ?? Prisma.JsonNull;
 
-            const data = {
-                apiId,
-                title: toJson(titleJson),
-                tagline: toJson(taglineJson),
-                description: toJson(descriptionJson),
-                description_2: toJson(description2Json),
-                vendor_id: vendorId,
-            };
+                const data = {
+                    apiId,
+                    title: toJson(titleJson),
+                    tagline: toJson(taglineJson),
+                    description: toJson(descriptionJson),
+                    description_2: toJson(description2Json),
+                    vendor_id: vendorId,
+                };
 
-            const isNewProduction = !(await prisma.production.findUnique({ where: { apiId } }));
-            const result = await prisma.production.upsert({
-                where: { apiId },
-                update: data,
-                create: data,
-            });
-            if (isNewProduction) { created++; } else { updated++; }
+                const isNewProduction = !(await prisma.production.findUnique({ where: { apiId } }));
+                const result  = await prisma.production.upsert({
+                    where: { apiId },
+                    update: data,
+                    create: data,
+                });
+                if (isNewProduction) { created++; } else { updated++; }
 
-            if (row.Genre?.trim()) {
-                // Support comma-separated genres per production
-                const genreNames = row.Genre.trim().split(',').map(g => nullN(g.trim().replace(/^#+/, ''))).filter(Boolean);
+                if (row.Genre?.trim()) {
+                    // Support comma-separated genres per production
+                    const genreNames = row.Genre.trim().split(',').map(g => nullN(g.trim().replace(/^#+/, ''))).filter(Boolean);
 
-                for (const genreName of genreNames) {
-                    const genreApiId = `legacy-genre-${genreName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+                    for (const genreName of genreNames) {
+                        const genreApiId = `legacy-genre-${genreName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
 
-                    // Find or create the genre record.
-                    // First try an exact apiId match (fast path, covers reruns).
-                    // If that misses, scan all genres with a case-insensitive JS
-                    // comparison so e.g. "Theater" matches an existing "theater"
-                    // row regardless of how Postgres stores the JSON value.
-                    let dbGenre = await prisma.genre.findUnique({
-                        where: { apiId: genreApiId },
-                    });
-
-                    if (!dbGenre) {
-                        const genreNameLower = genreName.toLowerCase();
-                        const allGenres = await prisma.genre.findMany();
-                        dbGenre = allGenres.find((g) => {
-                            const n = g.name as Record<string, string> | null;
-                            if (!n) return false;
-                            return Object.values(n).some(
-                                (v) => v.toLowerCase() === genreNameLower
-                            );
-                        }) ?? null;
-                    }
-
-                    if (!dbGenre) {
-                        dbGenre = await prisma.genre.create({
-                            data: {
-                                apiId: genreApiId,
-                                name: { nl: genreName },
-                            },
+                        // Find or create the genre record.
+                        // First try an exact apiId match (fast path, covers reruns).
+                        // If that misses, scan all genres with a case-insensitive JS
+                        // comparison so e.g. "Theater" matches an existing "theater"
+                        // row regardless of how Postgres stores the JSON value.
+                        let dbGenre = await prisma.genre.findUnique({
+                            where: { apiId: genreApiId },
                         });
-                        log(`  ✚ Created genre "${genreName}" (${dbGenre.id})`);
-                    }
 
-                    await prisma.genre_production.upsert({
-                        where: {
-                            genre_id_production_id: {
+                        if (!dbGenre) {
+                            const genreNameLower = genreName.toLowerCase();
+                            const allGenres = await prisma.genre.findMany();
+                            dbGenre = allGenres.find((g) => {
+                                const n = g.name as Record<string, string> | null;
+                                if (!n) return false;
+                                return Object.values(n).some(
+                                    (v) => v.toLowerCase() === genreNameLower
+                                );
+                            }) ?? null;
+                        }
+
+                        if (!dbGenre) {
+                            dbGenre = await prisma.genre.create({
+                                data: {
+                                    apiId: genreApiId,
+                                    name: { nl: genreName },
+                                },
+                            });
+                            log(`  ✚ Created genre "${genreName}" (${dbGenre.id})`);
+                        }
+
+                        await prisma.genre_production.upsert({
+                            where: {
+                                genre_id_production_id: {
+                                    genre_id: dbGenre.id,
+                                    production_id: result.id,
+                                },
+                            },
+                            update: {},
+                            create: {
                                 genre_id: dbGenre.id,
                                 production_id: result.id,
                             },
-                        },
-                        update: {},
-                        create: {
-                            genre_id: dbGenre.id,
-                            production_id: result.id,
-                        },
-                    });
+                        });
+                    }
                 }
+            } catch (err) {
+                log(`  ✖  Failed to import production row (ID: ${row.ID ?? "unknown"}): ${err}`);
+                failed++;
             }
-        } catch (err) {
-            log(`  ✖  Failed to import production row (ID: ${row.ID ?? "unknown"}): ${err}`);
-            failed++;
         }
+    } catch (err) {
+        log(`  ✖  CSV parse error, import may be incomplete: ${err}`);
     }
 
     log(
@@ -310,78 +314,82 @@ async function importEvents(filePath: string) {
     // Tracks how many events per production lack a start time, so each gets a unique apiId
     const noStartCounters = new Map<string, number>();
 
-    for await (const raw of parser) {
-        const parseResult = EventRowSchema.safeParse(raw);
-        if (!parseResult.success) {
-            const issues = parseResult.error.issues.map(i => `  ${i.path.join('.')}: ${i.message}`).join('\n');
-            log(`  ✖  Row failed schema validation, skipping:\n${issues}`);
-            failed++;
-            continue;
-        }
-        const row = parseResult.data;
-        try {
-            const productionNumericId = row.Production?.trim();
-            if (!productionNumericId) {
-                log(`  ⚠  Event row missing Production ID, skipping`);
-                skipped++;
+    try {
+        for await (const raw of parser) {
+            const parseResult = EventRowSchema.safeParse(raw);
+            if (!parseResult.success) {
+                const issues = parseResult.error.issues.map(i => `  ${i.path.join('.')}: ${i.message}`).join('\n');
+                log(`  ✖  Row failed schema validation, skipping:\n${issues}`);
+                failed++;
                 continue;
             }
+            const row = parseResult.data;
+            try {
+                const productionNumericId = row.Production?.trim();
+                if (!productionNumericId) {
+                    log(`  ⚠  Event row missing Production ID, skipping`);
+                    skipped++;
+                    continue;
+                }
 
-            // Look up the production by its legacy apiId
-            const productionApiId = legacyApiId(productionNumericId);
-            const production = await prisma.production.findUnique({
-                where: { apiId: productionApiId },
-            });
+                // Look up the production by its legacy apiId
+                const productionApiId = legacyApiId(productionNumericId);
+                const production = await prisma.production.findUnique({
+                    where: { apiId: productionApiId },
+                });
 
-            if (!production) {
-                log(`  ⚠  Production "${productionApiId}" not found — skipping event (start: ${row.Starttime})`);
-                skipped++;
-                continue;
+                if (!production) {
+                    log(`  ⚠  Production "${productionApiId}" not found — skipping event (start: ${row.Starttime})`);
+                    skipped++;
+                    continue;
+                }
+
+                const starts_at = parseDate(row.Starttime);
+                const ends_at = parseDate(row.Endtime);
+
+                // Resolve / create hall
+                let hall_id: string | null = null;
+                if (row.Hall?.trim()) {
+                    hall_id = await findOrCreateHall(row.Hall);
+                }
+
+                // Build a stable apiId from production + start time so reruns are idempotent.
+                // For events with no parseable start time we still import them (the event
+                // existed, the time just wasn't recorded), but use a per-production counter
+                // to keep each apiId unique and avoid upsert collisions.
+                let startStr: string;
+                if (starts_at) {
+                    startStr = starts_at.toISOString().replace(/[^0-9T]/g, "");
+                } else {
+                    const count = (noStartCounters.get(productionNumericId) ?? 0) + 1;
+                    noStartCounters.set(productionNumericId, count);
+                    log(`  ⚠  Event for production "${productionApiId}" has no parseable start time (raw: ${row.Starttime}), storing as nostart-${count}`);
+                    startStr = `nostart-${count}`;
+                }
+                const eventApiId = `legacy-event-${productionNumericId}-${startStr}`;
+
+                const data = {
+                    apiId: eventApiId,
+                    starts_at,
+                    ends_at: ends_at ?? undefined,
+                    production_id: production.id,
+                    hall_id,
+                };
+
+                const isNewEvent = !(await prisma.event.findUnique({ where: { apiId: eventApiId } }));
+                await prisma.event.upsert({
+                    where: { apiId: eventApiId },
+                    update: data,
+                    create: data,
+                });
+                if (isNewEvent) { created++; } else { updated++; }
+            } catch (err) {
+                log(`  ✖  Failed to import event row (Production: ${row.Production ?? "unknown"}, Start: ${row.Starttime ?? "unknown"}): ${err}`);
+                failed++;
             }
-
-            const starts_at = parseDate(row.Starttime);
-            const ends_at = parseDate(row.Endtime);
-
-            // Resolve / create hall
-            let hall_id: string | null = null;
-            if (row.Hall?.trim()) {
-                hall_id = await findOrCreateHall(row.Hall);
-            }
-
-            // Build a stable apiId from production + start time so reruns are idempotent.
-            // For events with no parseable start time we still import them (the event
-            // existed, the time just wasn't recorded), but use a per-production counter
-            // to keep each apiId unique and avoid upsert collisions.
-            let startStr: string;
-            if (starts_at) {
-                startStr = starts_at.toISOString().replace(/[^0-9T]/g, "");
-            } else {
-                const count = (noStartCounters.get(productionNumericId) ?? 0) + 1;
-                noStartCounters.set(productionNumericId, count);
-                log(`  ⚠  Event for production "${productionApiId}" has no parseable start time (raw: ${row.Starttime}), storing as nostart-${count}`);
-                startStr = `nostart-${count}`;
-            }
-            const eventApiId = `legacy-event-${productionNumericId}-${startStr}`;
-
-            const data = {
-                apiId: eventApiId,
-                starts_at,
-                ends_at: ends_at ?? undefined,
-                production_id: production.id,
-                hall_id,
-            };
-
-            const isNewEvent = !(await prisma.event.findUnique({ where: { apiId: eventApiId } }));
-            await prisma.event.upsert({
-                where: { apiId: eventApiId },
-                update: data,
-                create: data,
-            });
-            if (isNewEvent) { created++; } else { updated++; }
-        } catch (err) {
-            log(`  ✖  Failed to import event row (Production: ${row.Production ?? "unknown"}, Start: ${row.Starttime ?? "unknown"}): ${err}`);
-            failed++;
         }
+    } catch (err) {
+        log(`  ✖  CSV parse error, import may be incomplete: ${err}`);
     }
 
     log(
