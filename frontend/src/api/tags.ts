@@ -7,6 +7,18 @@ const localizedTextSchema = z.object({
     en: z.string().optional(),
 }).nullable()
 
+type Meta = {
+    total: number
+    page: number
+    limit: number
+    totalPages: number
+}
+
+type PaginatedResponse<T> = {
+    data: T[]
+    meta: Meta
+}
+
 export const tagSchema = z.object({
     id: z.string().uuid(),
     apiId: z.string().nullable(),
@@ -15,9 +27,27 @@ export const tagSchema = z.object({
     name: localizedTextSchema,
     slug: localizedTextSchema,
     description: localizedTextSchema,
+    created_at: z.coerce.date(),
+    updated_at: z.coerce.date(),
+    links: z.object({
+        self: z.string(),
+        productions: z.string().nullable().optional(),
+    }).optional(),
 })
 
 export type Tag = z.infer<typeof tagSchema>
 
-export const getTagsByProductionId = (productionId: string) =>
-    api.get<{ data: Tag[] }>(`/archive/tags?productionId=${productionId}`)
+export const getTagsByProductionId = async (productionId: string) => {
+    const first = await api.get<PaginatedResponse<Tag>>(`/archive/tags?productionId=${productionId}&page=1`)
+    const { totalPages } = first.meta
+
+    if (totalPages <= 1) return { data: first.data }
+
+    const rest = await Promise.all(
+        Array.from({ length: totalPages - 1 }, (_, i) =>
+            api.get<PaginatedResponse<Tag>>(`/archive/tags?productionId=${productionId}&page=${i + 2}`)
+        )
+    )
+
+    return { data: [...first.data, ...rest.flatMap((r) => r.data)] }
+}
