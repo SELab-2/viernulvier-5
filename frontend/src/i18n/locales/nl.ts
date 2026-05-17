@@ -438,6 +438,7 @@ const nl: Messages = {
           label: "Blog banners / afbeeldingen",
           addButton: "+ Afbeeldingen toevoegen",
           allowedFormats: "Toegestane formaten: JPG, PNG, WEBP.",
+          invalidFileTypes: (fileNames: string) => `Ongeldige bestandstypes: ${fileNames}`,
           alreadyUploaded: (count: number) => ` ${count} afbeelding${count !== 1 ? 'en' : ''} al geüpload.`,
           uploadedImagesLabel: "Geüploade afbeeldingen",
           setThumbnailButton: "Instellen",

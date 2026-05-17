@@ -36,7 +36,7 @@ export function BlogBannerUploadSection({
 
         if (rejectedFiles.length > 0) {
             const rejectedNames = rejectedFiles.map((file) => file.name).join(', ')
-            setError(`Invalid file types: ${rejectedNames}`)
+            setError(messages.blogs.bannerUpload.invalidFileTypes(rejectedNames))
         } else {
             setError(null)
         }

@@ -406,6 +406,7 @@ export type Messages = {
       label: string
       addButton: string
       allowedFormats: string
+      invalidFileTypes: (fileNames: string) => string
       alreadyUploaded: (count: number) => string
       uploadedImagesLabel: string
       setThumbnailButton: string

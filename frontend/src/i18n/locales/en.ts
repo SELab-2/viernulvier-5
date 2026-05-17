@@ -438,6 +438,7 @@ const en: Messages = {
           label: 'Blog banners / images',
           addButton: '+ Add images',
           allowedFormats: 'Allowed formats: JPG, PNG, WEBP.',
+          invalidFileTypes: (fileNames: string) => `Invalid file types: ${fileNames}`,
           alreadyUploaded: (count: number) => ` ${count} image${count !== 1 ? 's' : ''} already uploaded.`,
           uploadedImagesLabel: 'Uploaded images',
           setThumbnailButton: 'Set',
