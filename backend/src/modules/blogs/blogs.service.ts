@@ -9,6 +9,7 @@ import type {
 } from './blogs.schema.js'
 import { PaginatedResult, calculateTotalPages, sanitizePage } from '../../utils/pagination.js'
 import { BlogImagesStorage } from './blogs-images.storage.js'
+import { AppError } from '../../errors/app-error.js'
 
 export class BlogsService {
     private readonly storage: BlogImagesStorage
@@ -46,11 +47,45 @@ export class BlogsService {
         return this.repository.findById(id)
     }
 
+    private normalizeThumbnailIndex(thumbnailIndex: number | null | undefined, imagesLength: number): number | null {
+        if (thumbnailIndex === null || thumbnailIndex === undefined) {
+            return null
+        }
+
+        return thumbnailIndex < imagesLength ? thumbnailIndex : null
+    }
+
+    private assertThumbnailIndexWithinBounds(thumbnailIndex: number | null | undefined, imagesLength: number) {
+        if (thumbnailIndex === null || thumbnailIndex === undefined) {
+            return
+        }
+
+        if (thumbnailIndex >= imagesLength) {
+            throw new AppError('thumbnail_index out of bounds for images array', 400)
+        }
+    }
+
     async createBlog(data: CreateBlogInput): Promise<BlogResponse> {
+        this.assertThumbnailIndexWithinBounds(data.thumbnail_index, (data.images ?? []).length)
         return this.repository.create(data)
     }
 
     async updateBlog(id: string, data: UpdateBlogInput): Promise<BlogResponse> {
+        if (data.thumbnail_index !== undefined || data.images !== undefined) {
+            const blog = await this.repository.findById(id)
+            if (!blog) {
+                throw new Error('Blog not found')
+            }
+
+            const nextImages = data.images ?? (blog.images ?? [])
+            const nextThumbnailIndex =
+                data.thumbnail_index !== undefined
+                    ? data.thumbnail_index
+                    : blog.thumbnail_index
+
+            this.assertThumbnailIndexWithinBounds(nextThumbnailIndex, nextImages.length)
+        }
+
         return this.repository.update(id, data)
     }
 
@@ -82,7 +117,7 @@ export class BlogsService {
         await this.storage.deleteBlogImages([imageToDelete])
 
         const remainingImages = images.filter((_, currentIndex) => currentIndex !== index)
-        const currentThumbnailIndex = blog.thumbnail_index ?? null
+        const currentThumbnailIndex = this.normalizeThumbnailIndex(blog.thumbnail_index ?? null, images.length)
         const thumbnailIndex =
             currentThumbnailIndex === null
                 ? null
@@ -121,6 +156,8 @@ export class BlogsService {
             data.thumbnail_index ??
             blog.thumbnail_index ??
             (mergedImages.length > 0 ? 0 : null)
+
+        this.assertThumbnailIndexWithinBounds(thumbnailIndex, mergedImages.length)
         
         await this.repository.update(id, {
             images: mergedImages,

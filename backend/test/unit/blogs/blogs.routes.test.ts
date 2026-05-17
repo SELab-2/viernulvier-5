@@ -179,6 +179,32 @@ describe('Blogs Routes', () => {
 
             expect(response.statusCode).toBe(401)
         })
+
+        it('should return 400 when thumbnail_index is out of bounds for images', async () => {
+            const token = app.jwt.sign({ sub: 'admin', username: 'admin', role: Role.ADMIN })
+            const production = await app.prisma.production.create({ data: {} })
+
+            try {
+                const response = await app.inject({
+                    method: 'POST',
+                    url: '/api/v1/archive/blogs',
+                    headers: { authorization: `Bearer ${token}` },
+                    payload: {
+                        title,
+                        content: { text: 'Invalid thumbnail index' },
+                        images: ['/api/v1/images/one'],
+                        thumbnail_index: 1,
+                        productionIds: [production.id],
+                    },
+                })
+
+                expect(response.statusCode).toBe(400)
+                expect(JSON.parse(response.payload).message).toBe('thumbnail_index out of bounds for images array')
+            } finally {
+                await app.prisma.blog_production.deleteMany({ where: { production_id: production.id } })
+                await app.prisma.production.delete({ where: { id: production.id } })
+            }
+        })
     })
 
     describe('GET /api/v1/archive/blogs/:id', () => {
@@ -272,6 +298,40 @@ describe('Blogs Routes', () => {
                     payload: { title: { nl: 'New Title', en: 'New Title' } }
             })
             expect(response.statusCode).toBe(404)
+        })
+
+        it('should return 400 when updating to out-of-bounds thumbnail_index', async () => {
+            const token = app.jwt.sign({ sub: 'admin', username: 'admin', role: Role.ADMIN })
+            const production = await app.prisma.production.create({ data: {} })
+
+            try {
+                const postResponse = await app.inject({
+                    method: 'POST',
+                    url: '/api/v1/archive/blogs',
+                    headers: { authorization: `Bearer ${token}` },
+                    payload: {
+                        title,
+                        content: { text: 'Has image' },
+                        images: ['/api/v1/images/one'],
+                        thumbnail_index: 0,
+                        productionIds: [production.id],
+                    },
+                })
+                const created = JSON.parse(postResponse.payload)
+
+                const response = await app.inject({
+                    method: 'PATCH',
+                    url: `/api/v1/archive/blogs/${created.data.id}`,
+                    headers: { authorization: `Bearer ${token}` },
+                    payload: { thumbnail_index: 1 },
+                })
+
+                expect(response.statusCode).toBe(400)
+                expect(JSON.parse(response.payload).message).toBe('thumbnail_index out of bounds for images array')
+            } finally {
+                await app.prisma.blog_production.deleteMany({ where: { production_id: production.id } })
+                await app.prisma.production.delete({ where: { id: production.id } })
+            }
         })
     })
 
