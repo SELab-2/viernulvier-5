@@ -358,6 +358,8 @@ export type Messages = {
 
   blogs: {
     placeholder: string
+    navBack: string
+
     languageError:string
     loadingBlog: string
     loadingProductions: string

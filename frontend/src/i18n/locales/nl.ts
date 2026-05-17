@@ -163,7 +163,7 @@ const nl: Messages = {
     logoutLabel: 'Uitloggen',
   },
   detail: {
-    navBack: '🡠 Terug',
+    navBack: 'Terug',
     events: 'Speelreeks Geschiedenis',
     noEvents: 'Geen verleden events.',
     loadError: 'Kon de productie niet laden.',
@@ -393,6 +393,7 @@ const nl: Messages = {
 
   blogs: {
       placeholder: 'Schrijf je blog content hier...',
+      navBack: 'Terug',
       languageError:'Blog bestaat niet in deze taal',
       loadingBlog: 'Blog wordt geladen...',
       loadingProductions: 'Producties laden...',
