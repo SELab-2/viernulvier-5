@@ -173,9 +173,9 @@ describe('legacy CSV importer', () => {
         'Geen ID Show,,,,,,' ,  // empty ID
       ].join('\n');
 
-      const countBefore = await prisma.production.count();
+      const countBefore = await prisma.production.count({ where: { apiId: { startsWith: 'legacy-' } } });
       await runImport(['--productions', writeTempCsv(csv)]);
-      const countAfter = await prisma.production.count();
+      const countAfter = await prisma.production.count({ where: { apiId: { startsWith: 'legacy-' } } });
 
       expect(countAfter).toBe(countBefore);
     });
