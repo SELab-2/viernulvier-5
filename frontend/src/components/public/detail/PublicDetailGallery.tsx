@@ -20,6 +20,27 @@ function ArchiveDetailGallery({ images }: ArchiveDetailGalleryProps) {
                     <img key={i} src={src} alt="" />
                 ))}
             </div>
+
+            {images.length > 1 && (
+                <div className="flex items-center justify-end gap-4 text-2xl text-foreground mb-2">
+                    <button
+                        onClick={prev}
+                        className="h-10 w-10 rounded-full border border-border transition-colors hover:bg-surface"
+                        aria-label={messages.detail.previousImage}
+                    >
+                        ‹
+                    </button>
+                    <span className="text-sm text-muted">{current + 1} / {images.length}</span>
+                    <button
+                        onClick={next}
+                        className="h-10 w-10 rounded-full border border-border transition-colors hover:bg-surface"
+                        aria-label={messages.detail.nextImage}
+                    >
+                        ›
+                    </button>
+                </div>
+            )}
+
             <div className="w-full rounded-xl overflow-hidden">
                 {images[current] && (
                     <img
@@ -29,35 +50,6 @@ function ArchiveDetailGallery({ images }: ArchiveDetailGalleryProps) {
                     />
                 )}
             </div>
-
-            {images.length > 1 && (
-                <>
-                    <button
-                        onClick={prev}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 
-                                    bg-black/70 text-white 
-                                    w-10 h-10 flex items-center justify-center 
-                                    rounded-full text-xl font-bold 
-                                    hover:bg-black transition"
-                        aria-label={messages.detail.previousImage}
-                    >
-                        ‹
-                    </button>
-                    <button
-                        onClick={next}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/70 text-white 
-                                    w-10 h-10 flex items-center justify-center 
-                                    rounded-full text-xl font-bold 
-                                    hover:bg-black transition"
-                        aria-label={messages.detail.nextImage}
-                    >
-                        ›
-                    </button>
-                    <div className="absolute bottom-4 right-4 bg-black/50 text-white text-sm px-3 py-1 rounded-full">
-                        {current + 1} / {images.length}
-                    </div>
-                </>
-            )}
         </div>
     )
 }

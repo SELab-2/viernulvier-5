@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState, useEffect } from 'react'
 import type { SessionUser } from '../../api/adminAuth'
 import { useOptionalAdminSession } from '../../auth/useAdminSessionContext'
 import { logoutAndRedirect } from '../../auth/adminLogout'
@@ -11,6 +11,8 @@ import SettingsModal from './SettingsModal'
 import { useFocusTrap } from './useFocusTrap'
 import { useLocale } from './useLocale'
 import { useTheme } from './useTheme'
+import { useLocation } from 'react-router-dom'
+import { trackNavigation } from '../../utils/navigationHistory'
 
 type AdminLayoutProps = {
   children: React.ReactNode
@@ -37,6 +39,7 @@ function AdminLayout({
 }: AdminLayoutProps) {
   const { locale, handleLocaleChange } = useLocale()
   const { theme, handleThemeChange } = useTheme()
+  const location = useLocation()
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const drawerRef = useRef<HTMLDivElement>(null)
@@ -46,6 +49,11 @@ function AdminLayout({
   const [sessionUser, setSessionUser] = useState<SessionUser | null>(contextUser)
   const [prevUser, setPrevUser] = useState<SessionUser | null>(contextUser)
   const messages = useMemo(() => getMessages(locale), [locale])
+
+  // Track navigation history for admin routes
+  useEffect(() => {
+    trackNavigation(location.pathname + location.search + location.hash)
+  }, [location.pathname, location.search, location.hash])
 
   if (prevUser !== contextUser) {
     setPrevUser(contextUser)

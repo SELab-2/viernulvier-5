@@ -9,11 +9,16 @@ import ProtectedAdminRoute, { AdminEntryRoute } from './pages/admin/ProtectedAdm
 import HomePage from './pages/public/HomePage'
 import ArchiveDetailPage from './pages/public/ArchiveDetailPage'
 import SearchPage from './pages/public/SearchPage'
+import NotFoundPage from './pages/public/NotFoundPage'
+import PosterDetailPage from './pages/public/PosterDetailPage'
+// Eager: NotFound must render instantly for unknown routes (no Suspense flash).
+import AdminNotFoundPage from './pages/admin/NotFoundPage'
 
 // Admin pages (lazy loaded — not included in public bundle)
 const LoginPage = lazy(() => import('./pages/admin/LoginPage'))
 const DashboardPage = lazy(() => import('./pages/admin/DashboardPage'))
 const ArchiveEditPage = lazy(() => import('./pages/admin/ArchiveEditPage'))
+const PostersPage = lazy(() => import('./pages/admin/PostersPage'))
 
 import CreateBlogPage from './pages/admin/CreateBlogPage'
 import BlogDetailPage from './pages/public/BlogDetailPage'
@@ -43,10 +48,15 @@ function App() {
                         <Route path="/archive/:id" element={<ArchiveDetailPage />} />
                         <Route path="/nl/archive/:id" element={<ArchiveDetailPage />} />
                         <Route path="/en/archive/:id" element={<ArchiveDetailPage />} />
+                        <Route path="/posters/:id" element={<PosterDetailPage />} />
+                        <Route path="/nl/posters/:id" element={<PosterDetailPage />} />
+                        <Route path="/en/posters/:id" element={<PosterDetailPage />} />
                         
                         <Route path="/blogs/:id" element={<BlogDetailPage />} />
                         <Route path="/nl/blogs/:id" element={<BlogDetailPage />} />
                         <Route path="/en/blogs/:id" element={<BlogDetailPage />} />
+
+                        <Route path="*" element={<NotFoundPage />} />
                     </>
                 ) : null}
 
@@ -86,6 +96,14 @@ function App() {
                             element={
                                 <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
                                     <ArchiveEditPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+                        <Route
+                            path={adminRoutes.postersPath}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <PostersPage />
                                 </ProtectedAdminRoute>
                             }
                         />
@@ -139,15 +157,10 @@ function App() {
                                 </ProtectedAdminRoute>
                             }
                         />
-                        <Route
-                            path="/admin/*"
-                            element={
-                                <AdminEntryRoute
-                                    loginPath={adminRoutes.loginPath}
-                                    dashboardPath={adminRoutes.dashboardPath}
-                                />
-                            }
-                        />
+                        <Route path="/admin/*" element={<AdminNotFoundPage />} />
+                        {adminRoutes.isAdminHost ? (
+                            <Route path="*" element={<AdminNotFoundPage />} />
+                        ) : null}
                     </>
                 ) : null}
             </Routes>

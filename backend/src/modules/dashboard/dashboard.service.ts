@@ -21,7 +21,7 @@ type DashboardRecentItem = {
         nl: 'complete' | 'attention'
         en: 'complete' | 'attention' | 'missing'
     }
-    updatedAt: Date
+    updated_at: Date
 }
 
 type DashboardSummary = {
@@ -115,7 +115,7 @@ function mapProduction(production: RawProduction): DashboardRecentItem {
         type: 'Productie',
         status: 'available',
         languageStatus: resolveLanguageStatus(production.title),
-        updatedAt: production.updated_at,
+        updated_at: production.updated_at,
     }
 }
 
@@ -126,7 +126,7 @@ function mapEvent(event: RawEvent): DashboardRecentItem {
         type: 'Event',
         status: 'available',
         languageStatus: resolveLanguageStatus(event.info),
-        updatedAt: event.updated_at,
+        updated_at: event.updated_at,
     }
 }
 
@@ -139,7 +139,7 @@ function mergeAndPaginate(
     const all = [
         ...productions.map(mapProduction),
         ...events.map(mapEvent),
-    ].sort((left, right) => right.updatedAt.getTime() - left.updatedAt.getTime())
+    ].sort((left, right) => right.updated_at.getTime() - left.updated_at.getTime())
 
     const offset = (page - 1) * limit
     return all.slice(offset, offset + limit)

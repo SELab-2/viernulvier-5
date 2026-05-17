@@ -59,6 +59,7 @@ export type Messages = {
     heading: string
     subtitle: string
     productionsTab: string
+    postersTab: string
     blogTab: string
     allTab: string
     resultsCount: string
@@ -182,6 +183,12 @@ export type Messages = {
     events: string
     noEvents: string
     loadError: string
+    posterNotFound: string
+    posterLoadError: string
+    loadingPoster: string
+    backToSearch: string
+    relatedProductions: string
+    noLinkedProduction: string
     date: string
     time: string
     location: string
@@ -193,6 +200,15 @@ export type Messages = {
     previousImage: string
     nextImage: string
     relatedBlogs: string
+  }
+  notFound: {
+    titleTop: string
+    titleAccent: string
+    titleBottom: string
+    joke: string
+    description: string
+    homeButton: string
+    searchButton: string
   }
   footer: {
     brandLogoAlt: string
@@ -290,11 +306,13 @@ export type Messages = {
     nav: {
       dashboard: string
       productions: string
+      posters: string
       gallery: string
       organisation: string
       settings: string
       dashboardIconAlt: string
       productionsIconAlt: string
+      postersIconAlt: string
       galleryIconAlt: string
       organisationIconAlt: string
       settingsIconAlt: string
@@ -307,11 +325,9 @@ export type Messages = {
       recentlyEdited: string
       tableColTitle: string
       tableColType: string
-      tableColStatus: string
       tableColLanguage: string
       tableColDate: string
       tableColActions: string
-      statusAvailable: string
       actionView: string
       actionEdit: string
       emptyRecent: string
@@ -342,6 +358,47 @@ export type Messages = {
       pageTitle: string
       itemIdLabel: string
     }
+    notFound: {
+      titleTop: string
+      titleAccent: string
+      titleBottom: string
+      joke: string
+      description: string
+      dashboardButton: string
+    }
+    posters: {
+      pageTitle: string
+      pageSubtitle: string
+      formTitleLabel: string
+      formProductionLabel: string
+      formFileLabel: string
+      formFileHint: string
+      addFileButton: string
+      submitButton: string
+      submittingButton: string
+      overviewHeading: string
+      searchPlaceholder: string
+      searchButton: string
+      loadingMessage: string
+      emptyMessage: string
+      noProductionsAvailable: string
+      searchProductionPlaceholder: string
+      noProductionsFound: string
+      deleteButton: string
+      deletingButton: string
+      deleteConfirm: string
+      deleteError: string
+      validationTitleRequired: string
+      validationProductionRequired: string
+      validationFileRequired: string
+      validationInvalidFileType: string
+      loadPostersError: string
+      loadProductionsError: string
+      noProductionAssigned: string
+      filesSelectedCount: (count: number) => string
+      filesCountLabel: (count: number) => string
+      pdfPreviewTitle: (title: string) => string
+    }
   }
 
   editHeader: {
@@ -352,7 +409,6 @@ export type Messages = {
 
   blogs: {
     languageError:string
-    detailPageBack:string
     loadingBlog: string
     loadingProductions: string
     relatedProductions: string
