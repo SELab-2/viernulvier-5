@@ -177,7 +177,7 @@ async function importProductions(filePath: string) {
 
             if (row.Genre?.trim()) {
                 // Support comma-separated genres per production
-                const genreNames = row.Genre.trim().split(',').map(g => g.trim().replace(/^#+/, '')).filter(Boolean);
+                const genreNames = row.Genre.trim().split(',').map(g => nullN(g.trim().replace(/^#+/, ''))).filter(Boolean);
 
                 for (const genreName of genreNames) {
                     const genreApiId = `legacy-genre-${genreName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
