@@ -62,10 +62,6 @@ export const updateBlogSchema = z.object({
     productionIds: z.array(z.string().uuid()).optional(),
 })
 
-export const updateBlogParamsSchema = z.object({
-    id: z.string().uuid(),
-})
-
 export const blogIdSchema = z.object({
     id: z.string().uuid(),
 })

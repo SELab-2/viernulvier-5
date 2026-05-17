@@ -8,9 +8,9 @@ import {
     blogListSchema,
     singleBlogSchema,
     createBlogSchema,
+    updateBlogSchema,
     blogIdSchema,
     errorSchema,
-    updateBlogParamsSchema
 } from './blogs.schema.js'
 import { requirePermission } from '../../hooks/require-permission.js'
 import { Permission } from '../../domain/permissions.js'
@@ -68,7 +68,7 @@ const blogsRoutes: FastifyPluginAsync = async (fastify) => {
             tags: ['blogs'],
             summary: 'Update a blog',
             params: blogIdSchema,
-            body: blogIdSchema,
+            body: updateBlogSchema,
             response: {
                 200: singleBlogSchema,
                 404: errorSchema
@@ -97,7 +97,7 @@ const blogsRoutes: FastifyPluginAsync = async (fastify) => {
         schema: {
             tags: ['blogs'],
             summary: 'Assign an editor to a blog',
-            params: updateBlogParamsSchema,
+            params: blogIdSchema,
             body: z.object({ editorId: z.string().uuid() }),
             response: { 204: z.null() },
         },
