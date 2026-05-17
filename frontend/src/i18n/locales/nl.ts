@@ -168,7 +168,8 @@ const nl: Messages = {
     eventsTimeLabel: 'Tijd',
     eventsLocationLabel: 'Locatie',
     eventsCommentLabel: 'Opmerking',
-    eventsActionsLabel: 'Acties'
+    eventsActionsLabel: 'Acties',
+    invalidProductionError: 'Vul alle verplichte velden van minstens één taal in'
   },
   event: {
     saveButtonLabel: 'Event opslaan',

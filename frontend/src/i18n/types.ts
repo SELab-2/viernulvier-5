@@ -165,6 +165,8 @@ export type Messages = {
     eventsLocationLabel: string
     eventsCommentLabel: string
     eventsActionsLabel: string
+    // UI messages
+    invalidProductionError: string
   },
   event: {
     // event edit-popup

@@ -1,4 +1,4 @@
-import type { EventLinks, Event } from "../../types/event"
+import type { Event } from "../../types/event"
 import FuzzyTagInput from "./FuzzyTagInput"
 import type { useTagInput } from "./hooks/useTagInput"
 
@@ -8,7 +8,7 @@ type EventPopupProps = {
     hall: ReturnType<typeof useTagInput>
     onClose: () => void
     onSave: () => void
-    onChange: (field: keyof Event | keyof EventLinks, value: string) => void
+    onChange: (field: keyof Event, value: string) => void
 
     saveButtonLabel: string
     editLabel: string
@@ -72,12 +72,16 @@ function EventPopup({
                             <input
                                 type="datetime-local"
                                 value={fields.starts_at ?? ''}
-                                onChange={e => onChange('starts_at', e.target.value)}
+                                onChange={e => {
+                                    // also change the ends_at most events happen on the same day
+                                    if(!fields.ends_at?.length) onChange('ends_at', e.target.value);
+                                    onChange('starts_at', e.target.value)
+                                }}
                                 className="w-full h-11 px-3 rounded-lg border border-border bg-surface text-foreground"
                             />
                             <input
                                 type="datetime-local"
-                                value={fields.ends_at?.length ? fields.ends_at : fields.starts_at}
+                                value={fields.ends_at}
                                 onChange={e => onChange('ends_at', e.target.value)}
                                 className="w-full h-11 px-3 rounded-lg border border-border bg-surface text-foreground"
                             />

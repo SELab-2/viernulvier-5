@@ -168,7 +168,8 @@ const en: Messages = {
     eventsTimeLabel: 'Time',
     eventsLocationLabel: 'Location',
     eventsCommentLabel: 'Comment',
-    eventsActionsLabel: 'Actions'
+    eventsActionsLabel: 'Actions',
+    invalidProductionError: 'Fill in all required fields in atleast one language'
   },
   event: {
     saveButtonLabel: 'Save event',

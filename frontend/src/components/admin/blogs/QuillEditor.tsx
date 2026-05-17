@@ -41,6 +41,16 @@ function fileToDataUrl(file: File): Promise<string> {
 function QuillEditor({ value, onChange, onJsonChange, placeholder, onImageUpload, showImages = true }: QuillEditorProps) {
     const containerRef = useRef<HTMLDivElement | null>(null)
     const quillRef = useRef<Quill | null>(null)
+    const onChangeRef = useRef(onChange);
+    const onJsonChangeRef = useRef(onJsonChange);
+
+    useEffect(() => {
+        onChangeRef.current = onChange;
+    }, [onChange]);
+
+    useEffect(() => {
+        onJsonChangeRef.current = onJsonChange;
+    }, [onJsonChange]);
 
     const handleImageUpload = useCallback(
         async (quill: Quill) => {
@@ -90,8 +100,8 @@ function QuillEditor({ value, onChange, onJsonChange, placeholder, onImageUpload
         })
 
         quill.on('text-change', () => {
-            onChange(quill.root.innerHTML)
-            onJsonChange?.(quill.getContents())
+            onChangeRef.current(quill.root.innerHTML)
+            onJsonChangeRef.current?.(quill.getContents())
         })
 
         if (value) {

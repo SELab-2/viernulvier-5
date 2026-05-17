@@ -31,6 +31,10 @@ function EventsEdit({
     actionsLabel
 }: EventsProps ){
     const locale = useLocale().locale;
+    const formatTime = (dateTime?: string) =>{
+        return dateTime ? dateTime.slice(11, 16): '';
+    };
+
     return (
         <div className="flex-col">
             <div className="mb-8 mx-8 overflow-hidden">
@@ -47,8 +51,8 @@ function EventsEdit({
                     <tbody>
                         {events.map((event) =>
                             <tr className="h-12 bg-surface" key={event.key}>
-                                <td className="px-4 py-4">{event.starts_at?.split('T')[0] ?? ''}</td>
-                                <td className="px-4 py-4">{event.starts_at?.split('T')[1] ?? ''} - {event.ends_at?.split('T')[1] ?? ''}</td>
+                                <td className="px-4 py-4">{ event.starts_at?.split('T')[0] ?? ''}</td>
+                                <td className="px-4 py-4">{formatTime(event.starts_at)} - {formatTime(event.ends_at)}</td>
                                 <td className="px-4 py-4">{(event.hall_name?.[locale] ?? event.hall_name?.en ?? event.hall_name?.nl ?? '')}</td>
                                 <td className="px-4 py-4">
                                 {event.info &&

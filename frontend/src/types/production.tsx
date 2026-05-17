@@ -26,6 +26,8 @@ export interface ProductionPayloadRespone {
         teaser?: LocalizedText, 
         description?: LocalizedText, 
         description_2?: LocalizedText, 
+        genre_ids?: string[]
+        tag_ids?: string[]
         // is_draft: boolean,
     }
 }
