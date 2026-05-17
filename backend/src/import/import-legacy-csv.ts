@@ -358,15 +358,31 @@ async function importEvents(filePath: string) {
 
 // main
 
+const HELP = `
+Usage:
+  npx tsx import-legacy-csv.ts [--productions <file>] [--events <file>]
+
+Flags:
+  --productions <file>   Path to productions.csv
+  --events <file>        Path to events.csv
+  --help                 Show this message
+
+Both flags are optional — you can run either or both in one go.
+
+Examples:
+  npx tsx import-legacy-csv.ts --productions ./productions.csv --events ./events.csv
+  npx tsx import-legacy-csv.ts --productions ./productions.csv
+  npx tsx import-legacy-csv.ts --events ./events.csv
+`;
+
 export async function main() {
     const PRODUCTIONS_FILE = getArg("--productions");
     const EVENTS_FILE = getArg("--events");
+    const WANT_HELP = process.argv.includes("--help") || process.argv.includes("-h");
 
-    if (!PRODUCTIONS_FILE && !EVENTS_FILE) {
-        console.error(
-            "Usage: npx tsx import-legacy-csv.ts [--productions <file>] [--events <file>]"
-        );
-        process.exit(1);
+    if (WANT_HELP || (!PRODUCTIONS_FILE && !EVENTS_FILE)) {
+        console.log(HELP);
+        process.exit(WANT_HELP ? 0 : 1);
     }
 
     try {
