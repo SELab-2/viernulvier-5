@@ -209,7 +209,7 @@ export class ProductionsRepository {
                 OR: [
                     { draft: true },
                     {
-                        draft: false,
+                        draft: {not: true},
                         events: {
                             some: { starts_at: { lt: now } }
                         }
