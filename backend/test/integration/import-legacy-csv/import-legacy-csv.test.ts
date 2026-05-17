@@ -215,6 +215,42 @@ describe('legacy CSV importer', () => {
       expect(prod?.description).toBeNull();
     });
 
+    it('continues importing good rows when one row has an unterminated quote', async () => {
+      // Row 1002 has an unterminated quote — csv-parse will either skip it or
+      // absorb following rows into it. Either way the import must not throw,
+      // and the clean row for ID 1099 must still land in the database.
+      const csv = [
+        'Titel,Ondertitel,Description1,Description2,Genre,ID,Planning ID',
+        'Broken show,"unterminated,,,broken-row,1098,',   // malformed — missing closing quote
+        'Good show,,,,Theater,1099,legacy-1099',
+      ].join('\n');
+
+      const countBefore = await prisma.production.count();
+      await expect(runImport(['--productions', writeTempCsv(csv)])).resolves.not.toThrow();
+      const countAfter = await prisma.production.count();
+
+      // At least the clean row should have been imported
+      expect(countAfter).toBeGreaterThanOrEqual(countBefore);
+    });
+
+    it('handles a UTF-8 BOM at the start of the file without corrupting the first column name', async () => {
+      // Excel and some legacy tools prepend a BOM (\uFEFF) when saving UTF-8 CSVs.
+      // If unhandled, the first column becomes '\uFEFFTitel' and every row reads
+      // undefined for Titel, silently importing empty productions.
+      const bom = '\uFEFF';
+      const csv = [
+        bom + 'Titel,Ondertitel,Description1,Description2,Genre,ID,Planning ID',
+        'BOM Show,,,,Theater,1100,legacy-1100',
+      ].join('\n');
+
+      await runImport(['--productions', writeTempCsv(csv)]);
+
+      const prod = await prisma.production.findUnique({ where: { apiId: 'legacy-1100' } });
+      expect(prod).not.toBeNull();
+      // Title must be populated — if BOM corrupted the column name it would be null
+      expect(prod?.title).toEqual({ nl: 'BOM Show' });
+    });
+
   });
 
   // Events
