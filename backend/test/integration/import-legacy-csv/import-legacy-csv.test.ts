@@ -408,6 +408,30 @@ describe('legacy CSV importer', () => {
       expect(event?.hall_id).toBeNull();
     });
 
+    it('imports multiple null-start events for the same production as distinct rows', async () => {
+      // Regression: before the fix, all null-start events for the same production
+      // shared the apiId 'legacy-event-{prodId}-nostart', so each upsert silently
+      // overwrote the previous one and only one row survived.
+      const csv = [
+        'Starttime,Endtime,Hall,Production',
+        `0000-00-00 00:00:00,,Zaal A,${PROD_ID}`,
+        `0000-00-00 00:00:00,,Zaal B,${PROD_ID}`,
+      ].join('\n');
+
+      await runImport(['--events', writeTempCsv(csv)]);
+
+      const prod = await prisma.production.findUnique({ where: { apiId: PROD_API_ID } });
+      const noStartEvents = await prisma.event.findMany({
+        where: {
+          production_id: prod!.id,
+          starts_at: null,
+          apiId: { startsWith: `legacy-event-${PROD_ID}-nostart` },
+        },
+      });
+
+      expect(noStartEvents.length).toBeGreaterThanOrEqual(2);
+    });
+
   });
 
   // Combined run
