@@ -62,6 +62,16 @@ export function BlogBannerUploadSection({
     }
 
     const removeFile = (index: number) => {
+        const removedGlobalIndex = images.length + index
+
+        if (thumbnailIndex !== null) {
+            if (thumbnailIndex === removedGlobalIndex) {
+                onThumbnailIndexChange(null)
+            } else if (thumbnailIndex > removedGlobalIndex) {
+                onThumbnailIndexChange(thumbnailIndex - 1)
+            }
+        }
+
         const newFiles = selectedFiles.filter((_, i) => i !== index)
         setSelectedFiles(newFiles)
         setPreviewUrls((current) => current.filter((_, i) => i !== index))

@@ -644,5 +644,124 @@ describe('CreateBlogPage', () => {
       expect(screen.queryByText(messages.blogs.bannerUpload.coverLabel)).not.toBeInTheDocument()
     })
   })
+
+  it('clears pending thumbnail index when the selected pending file is removed', async () => {
+    mockCreateSuccess()
+
+    const origFileReaderDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'FileReader')
+
+    Object.defineProperty(globalThis, 'FileReader', {
+      configurable: true,
+      writable: true,
+      value: class {
+        result = 'data:image/png;base64,FAKE'
+        onload: ((e?: unknown) => void) | null = null
+        onerror: ((e?: unknown) => void) | null = null
+        readAsDataURL() {
+          if (this.onload) {
+            this.onload({ target: { result: this.result } })
+          }
+        }
+      },
+    })
+
+    const fileA = new File(['a'], 'first.png', { type: 'image/png' })
+    const fileB = new File(['b'], 'second.png', { type: 'image/png' })
+
+    renderCreatePage()
+
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement
+    fireEvent.change(input, { target: { files: [fileA, fileB] } })
+
+    expect(await screen.findByAltText('Blog image 2')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByAltText('Blog image 2'))
+    expect(screen.getByText(messages.blogs.bannerUpload.coverLabel)).toBeInTheDocument()
+
+    const deleteButtons = screen.getAllByLabelText(messages.blogs.bannerUpload.deleteImageAriaLabel)
+    fireEvent.click(deleteButtons[1])
+
+    await waitFor(() => {
+      expect(screen.queryByText(messages.blogs.bannerUpload.coverLabel)).not.toBeInTheDocument()
+    })
+
+    fireEvent.change(screen.getByLabelText('blog title'), { target: { value: 'Nieuwe blogtitel' } })
+    fireEvent.change(screen.getByLabelText('blog content'), { target: { value: '<p>Nieuwe inhoud</p>' } })
+    fireEvent.click(screen.getAllByRole('button', { name: 'Publiceren' })[0])
+    fireEvent.click(await screen.findByRole('button', { name: messages.blogs.publishConfirmProceed }))
+
+    await waitFor(() => {
+      const imagesCall = apiFetchMock.mock.calls.find(([endpoint]) => String(endpoint).endsWith('/images'))
+      expect(imagesCall).toBeDefined()
+      const options = imagesCall?.[1]
+      const body = JSON.parse(String(options?.body))
+      expect(body.thumbnail_index).toBeNull()
+    })
+
+    if (origFileReaderDescriptor) {
+      Object.defineProperty(globalThis, 'FileReader', origFileReaderDescriptor)
+    } else {
+      delete (globalThis as unknown as { FileReader?: unknown }).FileReader
+    }
+  })
+
+  it('shifts pending thumbnail index when a preceding pending file is removed', async () => {
+    mockCreateSuccess()
+
+    const origFileReaderDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'FileReader')
+
+    Object.defineProperty(globalThis, 'FileReader', {
+      configurable: true,
+      writable: true,
+      value: class {
+        result = 'data:image/png;base64,FAKE'
+        onload: ((e?: unknown) => void) | null = null
+        onerror: ((e?: unknown) => void) | null = null
+        readAsDataURL() {
+          if (this.onload) {
+            this.onload({ target: { result: this.result } })
+          }
+        }
+      },
+    })
+
+    const fileA = new File(['a'], 'first.png', { type: 'image/png' })
+    const fileB = new File(['b'], 'second.png', { type: 'image/png' })
+
+    renderCreatePage()
+
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement
+    fireEvent.change(input, { target: { files: [fileA, fileB] } })
+
+    expect(await screen.findByAltText('Blog image 2')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByAltText('Blog image 2'))
+    expect(screen.getByText(messages.blogs.bannerUpload.coverLabel)).toBeInTheDocument()
+
+    const deleteButtons = screen.getAllByLabelText(messages.blogs.bannerUpload.deleteImageAriaLabel)
+    fireEvent.click(deleteButtons[0])
+
+    expect(await screen.findByAltText('Blog image 1')).toBeInTheDocument()
+    expect(screen.getByText(messages.blogs.bannerUpload.coverLabel)).toBeInTheDocument()
+
+    fireEvent.change(screen.getByLabelText('blog title'), { target: { value: 'Nieuwe blogtitel' } })
+    fireEvent.change(screen.getByLabelText('blog content'), { target: { value: '<p>Nieuwe inhoud</p>' } })
+    fireEvent.click(screen.getAllByRole('button', { name: 'Publiceren' })[0])
+    fireEvent.click(await screen.findByRole('button', { name: messages.blogs.publishConfirmProceed }))
+
+    await waitFor(() => {
+      const imagesCall = apiFetchMock.mock.calls.find(([endpoint]) => String(endpoint).endsWith('/images'))
+      expect(imagesCall).toBeDefined()
+      const options = imagesCall?.[1]
+      const body = JSON.parse(String(options?.body))
+      expect(body.thumbnail_index).toBe(0)
+    })
+
+    if (origFileReaderDescriptor) {
+      Object.defineProperty(globalThis, 'FileReader', origFileReaderDescriptor)
+    } else {
+      delete (globalThis as unknown as { FileReader?: unknown }).FileReader
+    }
+  })
   
 })
