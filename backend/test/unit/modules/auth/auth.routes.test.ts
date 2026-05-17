@@ -31,8 +31,8 @@ describe('auth routes', () => {
                     username,
                     passwordHash,
                     role: 'EDITOR',
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
+                    created_at: new Date(),
+                    updated_at: new Date(),
                 }
             }
 
@@ -45,8 +45,8 @@ describe('auth routes', () => {
                 username: username || (userId === '00000000-0000-0000-0000-000000000002' ? 'editor' : 'admin'),
                 passwordHash,
                 role: (username === 'editor' || userId === '00000000-0000-0000-0000-000000000002') ? 'EDITOR' : 'ADMIN',
-                createdAt: new Date(),
-                updatedAt: new Date(),
+                created_at: new Date(),
+                updated_at: new Date(),
             }
         })
 
@@ -54,8 +54,8 @@ describe('auth routes', () => {
             id,
             username: data.username ?? 'admin',
             role: 'ADMIN',
-            createdAt: new Date(),
-            updatedAt: new Date(),
+            created_at: new Date(),
+            updated_at: new Date(),
         }))
 
         app = Fastify({ logger: false })
