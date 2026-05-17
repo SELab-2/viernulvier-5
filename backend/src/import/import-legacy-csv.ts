@@ -147,19 +147,13 @@ async function importProductions(filePath: string) {
             vendor_id: vendorId,
         };
 
-        // Use upsert instead of findUnique + create/update to avoid race
-        // conditions when tests run in parallel and to make reruns idempotent.
+        const isNewProduction = !(await prisma.production.findUnique({ where: { apiId } }));
         const result = await prisma.production.upsert({
             where: { apiId },
             update: data,
             create: data,
         });
-
-        if (result.created_at.getTime() === result.updated_at.getTime()) {
-            created++;
-        } else {
-            updated++;
-        }
+        if (isNewProduction) { created++; } else { updated++; }
 
         if (row.Genre?.trim()) {
             // Support comma-separated genres per production
@@ -350,18 +344,13 @@ async function importEvents(filePath: string) {
             hall_id,
         };
 
-        // Use upsert to avoid race conditions and make reruns idempotent.
-        const result = await prisma.event.upsert({
+        const isNewEvent = !(await prisma.event.findUnique({ where: { apiId: eventApiId } }));
+        await prisma.event.upsert({
             where: { apiId: eventApiId },
             update: data,
             create: data,
         });
-
-        if (result.created_at.getTime() === result.updated_at.getTime()) {
-            created++;
-        } else {
-            updated++;
-        }
+        if (isNewEvent) { created++; } else { updated++; }
     }
 
     log(
