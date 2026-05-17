@@ -295,6 +295,8 @@ async function importEvents(filePath: string) {
     let created = 0;
     let updated = 0;
     let skipped = 0;
+    // Tracks how many events per production lack a start time, so each gets a unique apiId
+    const noStartCounters = new Map<string, number>();
 
     for (const row of rows) {
         const productionNumericId = row.Production?.trim();
@@ -325,15 +327,24 @@ async function importEvents(filePath: string) {
             hall_id = await findOrCreateHall(row.Hall);
         }
 
-        // Build a stable apiId from production + start time so reruns are idempotent
-        const startStr = starts_at
-            ? starts_at.toISOString().replace(/[^0-9T]/g, "")
-            : "nostart";
+        // Build a stable apiId from production + start time so reruns are idempotent.
+        // For events with no parseable start time we still import them (the event
+        // existed, the time just wasn't recorded), but use a per-production counter
+        // to keep each apiId unique and avoid upsert collisions.
+        let startStr: string;
+        if (starts_at) {
+            startStr = starts_at.toISOString().replace(/[^0-9T]/g, "");
+        } else {
+            const count = (noStartCounters.get(productionNumericId) ?? 0) + 1;
+            noStartCounters.set(productionNumericId, count);
+            log(`  ⚠  Event for production "${productionApiId}" has no parseable start time (raw: ${row.Starttime}), storing as nostart-${count}`);
+            startStr = `nostart-${count}`;
+        }
         const eventApiId = `legacy-event-${productionNumericId}-${startStr}`;
 
         const data = {
             apiId: eventApiId,
-            starts_at: starts_at ?? undefined,
+            starts_at,
             ends_at: ends_at ?? undefined,
             production_id: production.id,
             hall_id,
