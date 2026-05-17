@@ -188,20 +188,34 @@ export class ProductionsRepository {
         const andFilters: Prisma.productionWhereInput[] = []
         const now = new Date()
 
-        // Requirement: Only show productions that have at least one event in the past
-        if (draft !== true) {
-            andFilters.push({
-                events: {
-                    some: {
-                        starts_at: {
-                            lt: now
-                        }
-                    }
-                }
-            })
-        }
+
         if (draft !== undefined) {
             andFilters.push({ draft })
+            // Requirement: Only show productions that have at least one event in the past
+            if (!draft) {
+                andFilters.push({
+                    events: {
+                        some: {
+                            starts_at: {
+                                lt: now
+                            }
+                        }
+                    }
+                })
+            }
+        } else {
+            andFilters.push({
+                // filter the productions that aren't drafts to only show if they have past events
+                OR: [
+                    { draft: true },
+                    {
+                        draft: false,
+                        events: {
+                            some: { starts_at: { lt: now } }
+                        }
+                    }
+                ]
+            })
         }
 
 
