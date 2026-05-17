@@ -17,6 +17,7 @@ import { Prisma } from "@prisma/client";
 import { fromZonedTime } from "date-fns-tz";
 import { prisma } from "../scraper/prisma";
 import { log } from "../scraper/logger";
+import { z } from "zod";
 
 
 // helpers
@@ -79,17 +80,25 @@ function nullN(v: string | undefined | null): string {
     return v.trim() === '\\N' ? '' : v;
 }
 
-// Productions
+// Row schemas — validated on the first row of each file so a renamed column
+// fails loudly instead of silently importing empty fields.
 
-interface ProductionRow {
-    Titel: string;
-    Ondertitel: string;
-    Description1: string;
-    Description2: string;
-    Genre: string;
-    ID: string;
-    "Planning ID": string;
-}
+const ProductionRowSchema = z.object({
+    Titel:         z.string(),
+    Ondertitel:    z.string(),
+    Description1:  z.string(),
+    Description2:  z.string(),
+    Genre:         z.string(),
+    ID:            z.string(),
+    "Planning ID": z.string(),
+});
+
+const EventRowSchema = z.object({
+    Starttime:  z.string(),
+    Endtime:    z.string(),
+    Hall:       z.string(),
+    Production: z.string(),
+});
 
 async function importProductions(filePath: string) {
     log(`Reading productions from ${filePath}`);
@@ -108,7 +117,15 @@ async function importProductions(filePath: string) {
     let skipped = 0;
     let failed = 0;
 
-    for await (const row of parser as AsyncIterable<ProductionRow>) {
+    for await (const raw of parser) {
+        const parseResult = ProductionRowSchema.safeParse(raw);
+        if (!parseResult.success) {
+            const issues = parseResult.error.issues.map(i => `  ${i.path.join('.')}: ${i.message}`).join('\n');
+            log(`  ✖  Row failed schema validation, skipping:\n${issues}`);
+            failed++;
+            continue;
+        }
+        const row = parseResult.data;
         try {
             const numericId = row.ID?.trim();
             if (!numericId) {
@@ -270,13 +287,6 @@ async function findOrCreateHall(rawName: string): Promise<string> {
 
 // Events
 
-interface EventRow {
-    Starttime: string;
-    Endtime: string;
-    Hall: string;
-    Production: string;
-}
-
 async function importEvents(filePath: string) {
     log(`Reading events from ${filePath}`);
 
@@ -296,7 +306,15 @@ async function importEvents(filePath: string) {
     // Tracks how many events per production lack a start time, so each gets a unique apiId
     const noStartCounters = new Map<string, number>();
 
-    for await (const row of parser as AsyncIterable<EventRow>) {
+    for await (const raw of parser) {
+        const parseResult = EventRowSchema.safeParse(raw);
+        if (!parseResult.success) {
+            const issues = parseResult.error.issues.map(i => `  ${i.path.join('.')}: ${i.message}`).join('\n');
+            log(`  ✖  Row failed schema validation, skipping:\n${issues}`);
+            failed++;
+            continue;
+        }
+        const row = parseResult.data;
         try {
             const productionNumericId = row.Production?.trim();
             if (!productionNumericId) {
