@@ -23,24 +23,12 @@ function writeTempCsv(content: string): string {
   return filePath;
 }
 
-// Import main once at module level so the module is never re-imported.
-// Re-importing would either use the stale module cache (hallCache not reset)
-// or — if resetModules() is used — tear down the shared Prisma connection.
-import('../../../src/import/import-legacy-csv');
-let _main: (() => Promise<void>) | undefined;
-async function getMain() {
-  if (!_main) {
-    const mod = await import('../../../src/import/import-legacy-csv');
-    _main = mod.main;
-  }
-  return _main;
-}
+import { main } from '../../../src/import/import-legacy-csv';
 
 async function runImport(args: string[]) {
   const original = process.argv;
   process.argv = ['node', 'import-legacy-csv.ts', ...args];
 
-  const main = await getMain();
   await main();
 
   process.argv = original;
@@ -114,7 +102,7 @@ describe('legacy CSV importer', () => {
       expect(description2.nl).toBe('Tweede beschrijving');
 
       // vendor_id should contain the planning ID
-      expect(prod?.vendor_id).toBe('legacy-legacy-1001');
+      expect(prod?.vendor_id).toBe('legacy-1001');
     });
 
     it('creates and links a genre via genre_production', async () => {
