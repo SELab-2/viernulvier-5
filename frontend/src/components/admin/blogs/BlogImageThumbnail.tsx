@@ -21,12 +21,17 @@ export function BlogImageThumbnail({
     isUploading = false,
     messages,
 }: BlogImageThumbnailProps) {
+    const thumbnailSelectAriaLabel = `${messages.blogs.bannerUpload.coverLabel} ${index + 1}`
+
     return (
         <div className={`relative group`}>
-            {/* Image container - clickable to select as thumbnail */}
-            <div 
+            {/* Image container - selectable as thumbnail */}
+            <button
+                type="button"
                 onClick={() => onSelect(index)}
-                className={`aspect-square overflow-hidden rounded-lg transition cursor-pointer ${
+                aria-label={thumbnailSelectAriaLabel}
+                aria-pressed={isSelected}
+                className={`aspect-square w-full overflow-hidden rounded-lg transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
                     isSelected
                         ? 'border-4 border-blue-500'
                         : 'border-2 border-gray-300 hover:border-gray-400'
@@ -37,7 +42,7 @@ export function BlogImageThumbnail({
                     alt={`Blog image ${index + 1}`}
                     className="h-full w-full object-cover"
                 />
-            </div>
+            </button>
 
             {/* Cover label badge */}
             {isSelected ? (
