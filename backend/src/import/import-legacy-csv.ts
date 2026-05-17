@@ -12,7 +12,7 @@
 
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { parse } from "csv-parse/sync";
+import { parse } from "csv-parse";
 import { Prisma } from "@prisma/client";
 import { fromZonedTime } from "date-fns-tz";
 import { prisma } from "../scraper/prisma";
@@ -93,22 +93,21 @@ interface ProductionRow {
 
 async function importProductions(filePath: string) {
     log(`Reading productions from ${filePath}`);
-    const raw = fs.readFileSync(filePath, "utf-8");
 
-    const rows: ProductionRow[] = parse(raw, {
-        columns: true,
-        skip_empty_lines: true,
-        relax_quotes: true,
-        trim: true,
-    });
-
-    log(`Parsed ${rows.length} production rows`);
+    const parser = fs.createReadStream(filePath).pipe(
+        parse({
+            columns: true,
+            skip_empty_lines: true,
+            relax_quotes: true,
+            trim: true,
+        })
+    );
 
     let created = 0;
     let updated = 0;
     let skipped = 0;
 
-    for (const row of rows) {
+    for await (const row of parser as AsyncIterable<ProductionRow>) {
         const numericId = row.ID?.trim();
         if (!numericId) {
             log(`  ⚠  Row missing ID, skipping: ${JSON.stringify(row)}`);
@@ -226,39 +225,38 @@ async function findOrCreateHall(rawName: string): Promise<string> {
     if (hallCache.has(name)) return hallCache.get(name)!;
 
     const nameLower = name.toLowerCase();
+    const apiId = `legacy-hall-${nameLower.replace(/[^a-z0-9]+/g, "-")}`;
 
-    const allHalls = await prisma.hall.findMany({
-        select: { id: true, apiId: true, name: true },
-    });
+    // Fast path: look up by the deterministic legacy apiId.
+    let hall = await prisma.hall.findUnique({ where: { apiId } });
 
-    const existing = allHalls.find((hall) => {
-        const n = hall.name as Record<string, string> | null;
-        if (!n) return false;
-        return Object.values(n).some(
-            (v) => v.toLowerCase() === nameLower
-        );
-    });
+    if (!hall) {
+        // Slow path: scan for a live hall with a matching name (case-insensitive).
+        // Only reached on the first import of each distinct hall name.
+        const allHalls = await prisma.hall.findMany({
+            select: { id: true, apiId: true, name: true },
+        });
+        const existing = allHalls.find((h) => {
+            const n = h.name as Record<string, string> | null;
+            if (!n) return false;
+            return Object.values(n).some((v) => v.toLowerCase() === nameLower);
+        });
 
-    if (existing) {
-        log(`  ↩ Reusing existing hall "${name}" (${existing.id})`);
-        hallCache.set(name, existing.id);
-        return existing.id;
+        if (existing) {
+            log(`  ↩ Reusing existing hall "${name}" (${existing.id})`);
+            hallCache.set(name, existing.id);
+            return existing.id;
+        }
+
+        // Create a minimal legacy hall record.
+        hall = await prisma.hall.upsert({
+            where: { apiId },
+            update: {},
+            create: { apiId, name: { nl: name } },
+        });
+        log(`  ✚ Created hall "${name}" (${hall.id})`);
     }
 
-    // Create a minimal legacy hall record
-    const apiId = `legacy-hall-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
-
-    // upsert so concurrent runs / reruns are safe
-    const hall = await prisma.hall.upsert({
-        where: { apiId },
-        update: {},
-        create: {
-            apiId,
-            name: { nl: name },
-        },
-    });
-
-    log(`  ✚ Created hall "${name}" (${hall.id})`);
     hallCache.set(name, hall.id);
     return hall.id;
 }
@@ -275,16 +273,15 @@ interface EventRow {
 
 async function importEvents(filePath: string) {
     log(`Reading events from ${filePath}`);
-    const raw = fs.readFileSync(filePath, "utf-8");
 
-    const rows: EventRow[] = parse(raw, {
-        columns: true,
-        skip_empty_lines: true,
-        relax_quotes: true,
-        trim: true,
-    });
-
-    log(`Parsed ${rows.length} event rows`);
+    const parser = fs.createReadStream(filePath).pipe(
+        parse({
+            columns: true,
+            skip_empty_lines: true,
+            relax_quotes: true,
+            trim: true,
+        })
+    );
 
     let created = 0;
     let updated = 0;
@@ -292,7 +289,7 @@ async function importEvents(filePath: string) {
     // Tracks how many events per production lack a start time, so each gets a unique apiId
     const noStartCounters = new Map<string, number>();
 
-    for (const row of rows) {
+    for await (const row of parser as AsyncIterable<EventRow>) {
         const productionNumericId = row.Production?.trim();
         if (!productionNumericId) {
             log(`  ⚠  Event row missing Production ID, skipping`);
