@@ -89,17 +89,13 @@ describe('legacy CSV importer', () => {
       const prod = await prisma.production.findUnique({ where: { apiId: 'legacy-1001' } });
       expect(prod).not.toBeNull();
 
-      const title = prod?.title as { nl: string };
-      expect(title.nl).toBe('Mijn Voorstelling');
+      expect(prod?.title).toEqual({ nl: 'Mijn Voorstelling' });
 
-      const tagline = prod?.tagline as { nl: string };
-      expect(tagline.nl).toBe('Een ondertitel');
+      expect(prod?.tagline).toEqual({ nl: 'Een ondertitel' });
 
-      const description = prod?.description as { nl: string };
-      expect(description.nl).toBe('Eerste beschrijving');
+      expect(prod?.description).toEqual({ nl: 'Eerste beschrijving' });
 
-      const description2 = prod?.description_2 as { nl: string };
-      expect(description2.nl).toBe('Tweede beschrijving');
+      expect(prod?.description_2).toEqual({ nl: 'Tweede beschrijving' });
 
       // vendor_id should contain the planning ID
       expect(prod?.vendor_id).toBe('legacy-1001');
@@ -121,8 +117,7 @@ describe('legacy CSV importer', () => {
         where: { apiId: 'legacy-genre-legacytheater' },
       });
       expect(genre).not.toBeNull();
-      const genreName = genre?.name as { nl: string };
-      expect(genreName.nl).toBe('LegacyTheater');
+      expect(genre?.name).toEqual({ nl: 'LegacyTheater' });
 
       const link = await prisma.genre_production.findUnique({
         where: {
@@ -202,8 +197,7 @@ describe('legacy CSV importer', () => {
       expect(count).toBe(1);
 
       const prod = await prisma.production.findUnique({ where: { apiId: 'legacy-1006' } });
-      const title = prod?.title as { nl: string };
-      expect(title.nl).toBe('Gewijzigde Titel');
+      expect(prod?.title).toEqual({ nl: 'Gewijzigde Titel' });
     });
 
     it('handles null/empty optional fields without crashing', async () => {
@@ -268,8 +262,7 @@ describe('legacy CSV importer', () => {
         where: { apiId: 'legacy-hall-nieuwe-onbekende-zaal' },
       });
       expect(hall).not.toBeNull();
-      const name = hall?.name as { nl: string };
-      expect(name.nl).toBe('Nieuwe Onbekende Zaal');
+      expect(hall?.name).toEqual({ nl: 'Nieuwe Onbekende Zaal' });
     });
 
     it('reuses an existing hall for the same name', async () => {
