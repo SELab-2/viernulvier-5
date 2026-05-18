@@ -84,7 +84,7 @@ export class SearchRepository {
             ]
 
             if (dateRange) {
-                searchConditions.push({ createdAt: { gte: dateRange.from, lt: dateRange.to } })
+                searchConditions.push({ created_at: { gte: dateRange.from, lt: dateRange.to } })
             }
 
             conditions.push({ OR: searchConditions })
@@ -94,7 +94,7 @@ export class SearchRepository {
             const fromYear = Math.min(options.yearFrom ?? 1970, options.yearTo ?? 9999)
             const toYear = Math.max(options.yearFrom ?? 1970, options.yearTo ?? 9999)
             conditions.push({
-                createdAt: {
+                created_at: {
                     gte: new Date(Date.UTC(fromYear, 0, 1)),
                     lt: new Date(Date.UTC(toYear + 1, 0, 1)),
                 },
@@ -112,7 +112,7 @@ export class SearchRepository {
             include: {
                 blog_production: { select: { production_id: true } },
             },
-            orderBy: { createdAt: 'desc' },
+            orderBy: { created_at: 'desc' },
         })
 
         return blogs.map((blog) => ({
@@ -120,8 +120,8 @@ export class SearchRepository {
             title: this.normalizeBlogTitle(blog.title),
             content: blog.content,
             productions: blog.blog_production.map((r) => r.production_id),
-            createdAt: blog.createdAt,
-            updatedAt: blog.updatedAt,
+            createdAt: blog.created_at,
+            updatedAt: blog.updated_at,
         }))
     }
 }

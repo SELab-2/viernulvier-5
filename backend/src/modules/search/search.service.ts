@@ -29,7 +29,7 @@ export class SearchService {
         // Get total count of matching productions first, then fetch all without an artificial ceiling
         const prodsPreview = await this.productionsService.getProductions({ ...commonProductionOptions, page: 1, limit: 1 })
 
-        // Blogs and posters don't have genres/locations, so exclude them when these filters are active
+        // Posters don't have genres/locations, so exclude them when these filters are active
         const hasGenreOrLocationFilter = (genres && genres.length > 0) || (locations && locations.length > 0)
 
         // Get total count of matching posters first, then fetch all of them
@@ -38,10 +38,7 @@ export class SearchService {
             ? await this.postersService.getPosters(postersPreviewOptions)
             : { total: 0 }
 
-        const [blogResults, prodResults, posterResults] = await Promise.all([
-            !hasGenreOrLocationFilter
-                ? this.searchRepository.findAllBlogs({ search, yearFrom, yearTo })
-                : Promise.resolve([]),
+        const [prodResults, posterResults] = await Promise.all([
             prodsPreview.total > 0
                 ? this.productionsService.getProductions({ ...commonProductionOptions, page: 1, limit: prodsPreview.total })
                 : Promise.resolve({ items: [], total: 0, page: 1, limit: 1, totalPages: 0 }),
@@ -51,15 +48,6 @@ export class SearchService {
         ])
 
         // --- map to a common shape ---
-        const blogItems: SearchResultItem[] = blogResults.map((blog) => ({
-            id: blog.id,
-            type: 'blog' as const,
-            title: blog.title ?? null,
-            content: blog.content ?? null,
-            productions: blog.productions,
-            created_at: blog.createdAt ? new Date(blog.createdAt).toISOString() : undefined,
-        }))
-
         const prodItems: SearchResultItem[] = prodResults.items.map((prod) => ({
             id: prod.id,
             type: 'production' as const,
@@ -113,7 +101,7 @@ export class SearchService {
         const getDate = (item: SearchResultItem) =>
             item.created_at ? new Date(item.created_at).getTime() : 0
 
-        const merged = [...blogItems, ...prodItems, ...posterItems].sort((a, b) => {
+        const merged = [...prodItems, ...posterItems].sort((a, b) => {
             if (sort === 'oldest') return getDate(a) - getDate(b)
             return getDate(b) - getDate(a)
         })
