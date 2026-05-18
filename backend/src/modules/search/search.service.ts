@@ -13,123 +13,107 @@ export class SearchService {
     ) {}
 
     async search(options: SearchQuery): Promise<PaginatedResult<SearchResultItem>> {
-        const { page, limit, search, yearFrom, yearTo, genres, locations, sort, lang } = options
+        const { limit, page, tab, search, yearFrom, yearTo, sort, lang } = options
 
-        const commonProductionOptions = {
-            search,
-            genres,
-            locations,
-            yearFrom,
-            yearTo,
-            sort,
-            lang,
-            onThisDay: false as const,
-            pastOnly: true,
-            draft: false as const,
-        }
+        if (tab === 'blogs') {
+            const blogResults = await this.searchRepository.findAllBlogs({ search, yearFrom, yearTo, sort })
+            const blogItems: SearchResultItem[] = blogResults.map((blog) => {
+                const contentObj = blog.content as Record<string, string> | null
+                const langCode = lang === 'en' || lang === 'fr' ? lang : 'nl'
+                const rawContent = (contentObj?.[langCode] || contentObj?.['nl'] || '') as string
 
-        // Get total count of matching productions first, then fetch all without an artificial ceiling
-        const prodsPreview = await this.productionsService.getProductions({ ...commonProductionOptions, page: 1, limit: 1 })
-
-        // Blogs and posters don't have genres/locations, so exclude them when these filters are active
-        const hasGenreOrLocationFilter = (genres && genres.length > 0) || (locations && locations.length > 0)
-
-        // Get total count of matching posters first, then fetch all of them
-        const postersPreviewOptions = { search, yearFrom, yearTo, page: 1, limit: 1, sort: 'recent' as const, lang: lang ?? 'nl' }
-        const postersPreview = !hasGenreOrLocationFilter
-            ? await this.postersService.getPosters(postersPreviewOptions)
-            : { total: 0 }
-
-        const [blogResults, prodResults, posterResults] = await Promise.all([
-            !hasGenreOrLocationFilter
-                ? this.searchRepository.findAllBlogs({ search, yearFrom, yearTo })
-                : Promise.resolve([]),
-            prodsPreview.total > 0
-                ? this.productionsService.getProductions({ ...commonProductionOptions, page: 1, limit: prodsPreview.total })
-                : Promise.resolve({ items: [], total: 0, page: 1, limit: 1, totalPages: 0 }),
-            postersPreview.total > 0
-                ? this.postersService.getPosters({ search, yearFrom, yearTo, page: 1, limit: postersPreview.total, sort: 'recent', lang: lang ?? 'nl' })
-                : Promise.resolve({ items: [], total: 0, page: 1, limit: 1, totalPages: 0 }),
-        ])
-
-        // --- map to a common shape ---
-        const blogItems: SearchResultItem[] = blogResults.map((blog) => ({
-            id: blog.id,
-            type: 'blog' as const,
-            title: blog.title ?? null,
-            content: blog.content ?? null,
-            productions: blog.productions,
-            created_at: blog.created_at ? new Date(blog.created_at).toISOString() : undefined,
-        }))
-
-        const prodItems: SearchResultItem[] = prodResults.items.map((prod) => ({
-            id: prod.id,
-            type: 'production' as const,
-            title: prod.title ?? null,
-            teaser: prod.teaser ?? null,
-            description_short: prod.description_short ?? null,
-            description: prod.description ?? null,
-            image_url: prod.image_url ?? null,
-            venue_name: prod.venue_name ?? null,
-            venue_names: prod.venue_names ?? [],
-            production_genres: prod.production_genres ?? [],
-            performer_type: prod.performer_type ?? null,
-            attendance_mode: prod.attendance_mode ?? null,
-            created_at: prod.created_at ? new Date(prod.created_at).toISOString() : undefined,
-        }))
-
-        const posterItems: SearchResultItem[] = posterResults.items.map((poster) => {
-            // Extract production title (JSONB) for venue name, respecting requested language
-            let venueName: string | null = null
-            const primaryProduction = Array.isArray(poster.productions) ? (poster.productions[0] ?? null) : null
-
-            if (primaryProduction?.title) {
-                const title = primaryProduction.title as Record<string, string> | string | null
-                if (typeof title === 'object' && title !== null) {
-                    // JSONB object, try to extract localized value with lang preference first
-                    const langPreferences = [options.lang, 'nl', 'en', 'fr'].filter(Boolean) as string[]
-                    venueName = langPreferences.reduce<string | null>((acc, lang) => acc || (title[lang] as string | undefined) || null, null)
-                    // Fallback to first available value if no lang matches
-                    if (!venueName && Object.keys(title).length > 0) {
-                        venueName = (Object.values(title)[0] as string | undefined) ?? null
-                    }
-                } else if (typeof title === 'string') {
-                    venueName = title
+                return {
+                    id: blog.id,
+                    type: 'blog' as const,
+                    title: blog.title as any,
+                    excerpt: this.searchRepository.stripHtml(rawContent).substring(0, 200),
+                    image_url: null,
+                    date_label: blog.created_at ? new Date(blog.created_at).toLocaleDateString('nl-BE') : '',
+                    venue_label: '',
+                    genre_label: 'Blog',
+                    created_at: blog.created_at ? new Date(blog.created_at).toISOString() : undefined,
+                    // Legacy support
+                    content: blog.content ?? null,
+                    productions: blog.productions,
                 }
-            }
+            })
+
+            const total = blogItems.length
+            const totalPages = calculateTotalPages(total, limit)
+            const sanitizedPage = sanitizePage(page, totalPages)
+            const startIndex = (sanitizedPage - 1) * limit
+            const items = blogItems.slice(startIndex, startIndex + limit)
 
             return {
-                id: poster.id,
-                type: 'poster' as const,
-                title: poster.title ?? null,
-                image_url: `/api/v1/archive/posters/${poster.id}/file`,
-                mime_type: poster.mime_type ?? null,
-                poster_file_count: Array.isArray(poster.files) && poster.files.length > 0 ? poster.files.length : undefined,
-                production_id: primaryProduction?.id ?? null,
-                venue_name: venueName,
-                created_at: poster.created_at ? new Date(poster.created_at).toISOString() : undefined,
+                items,
+                total,
+                page: sanitizedPage,
+                limit,
+                totalPages,
             }
-        })
+        }
 
-        // --- merge sorted by date descending ---
-        const getDate = (item: SearchResultItem) =>
-            item.created_at ? new Date(item.created_at).getTime() : 0
+        if (tab === 'posters') {
+            const posterResults = await this.postersService.getPosters({
+                search,
+                yearFrom,
+                yearTo,
+                page,
+                limit,
+                sort: sort === 'oldest' ? 'oldest' : 'recent',
+                lang: options.lang ?? 'nl',
+            })
 
-        const merged = [...blogItems, ...prodItems, ...posterItems].sort((a, b) => {
-            if (sort === 'oldest') return getDate(a) - getDate(b)
-            return getDate(b) - getDate(a)
-        })
+            return {
+                items: posterResults.items.map((poster) => {
+                    const primaryProduction = Array.isArray(poster.productions) ? (poster.productions[0] ?? null) : null
+                    let venueName: string | null = null
+                    if (primaryProduction?.title) {
+                        const title = primaryProduction.title as Record<string, string> | string | null
+                        if (typeof title === 'object' && title !== null) {
+                            const langPreferences = [options.lang, 'nl', 'en', 'fr'].filter(Boolean) as string[]
+                            venueName = langPreferences.reduce<string | null>(
+                                (acc, l) => acc || (title[l] as string | undefined) || null,
+                                null,
+                            )
+                            if (!venueName && Object.keys(title).length > 0) {
+                                venueName = (Object.values(title)[0] as string | undefined) ?? null
+                            }
+                        } else if (typeof title === 'string') {
+                            venueName = title
+                        }
+                    }
 
-        // --- paginate ---
-        const total = merged.length
-        const totalPages = calculateTotalPages(total, limit)
-        const sanitizedPage = sanitizePage(page, totalPages)
-        const startIndex = (sanitizedPage - 1) * limit
-        const pageItems = merged.slice(startIndex, startIndex + limit)
+                    return {
+                        id: poster.id,
+                        type: 'poster' as const,
+                        title: poster.title ?? null,
+                        image_url: `/api/v1/archive/posters/${poster.id}/file`,
+                        mime_type: poster.mime_type ?? null,
+                        poster_file_count:
+                            Array.isArray(poster.files) && poster.files.length > 0 ? poster.files.length : undefined,
+                        production_id: primaryProduction?.id ?? null,
+                        venue_label: venueName,
+                        date_label: poster.created_at ? new Date(poster.created_at).toLocaleDateString('nl-BE') : '',
+                        genre_label: 'Poster',
+                        created_at: poster.created_at ? new Date(poster.created_at).toISOString() : undefined,
+                    }
+                }),
+                total: posterResults.total,
+                page: posterResults.page,
+                limit: posterResults.limit,
+                totalPages: posterResults.totalPages,
+            }
+        }
+
+        const result = await this.searchRepository.searchAll(options)
+
+        const totalPages = calculateTotalPages(result.total, limit)
+        const sanitizedPage = sanitizePage(options.page, totalPages)
 
         return {
-            items: pageItems,
-            total,
+            items: result.items,
+            total: result.total,
             page: sanitizedPage,
             limit,
             totalPages,

@@ -4,6 +4,8 @@ import { SearchService } from '../../../../src/modules/search/search.service.js'
 function createSearchRepositoryMock() {
     return {
         findAllBlogs: vi.fn(),
+        searchAll: vi.fn(),
+        stripHtml: vi.fn((html) => html.replace(/<[^>]*>?/gm, '')),
     }
 }
 
@@ -32,232 +34,111 @@ describe('SearchService', () => {
         service = new SearchService(searchRepository as any, productionsService as any, postersService as any)
     })
 
-    it('merges blogs, productions and posters and paginates sorted by recent first', async () => {
-        productionsService.getProductions
-            .mockResolvedValueOnce({
-                items: [{ id: 'prod-preview' }],
-                total: 2,
-                page: 1,
-                limit: 1,
-                totalPages: 2,
-            })
-            .mockResolvedValueOnce({
-                items: [
-                    {
-                        id: 'prod-1',
-                        title: { nl: 'Production 1' },
-                        created_at: '2025-06-10T00:00:00.000Z',
-                        teaser: null,
-                        description_short: null,
-                        description: null,
-                        image_url: null,
-                        venue_name: null,
-                        venue_names: [],
-                        production_genres: [],
-                        performer_type: null,
-                        attendance_mode: null,
-                    },
-                    {
-                        id: 'prod-2',
-                        title: { nl: 'Production 2' },
-                        created_at: '2024-02-01T00:00:00.000Z',
-                        teaser: null,
-                        description_short: null,
-                        description: null,
-                        image_url: null,
-                        venue_name: null,
-                        venue_names: [],
-                        production_genres: [],
-                        performer_type: null,
-                        attendance_mode: null,
-                    },
-                ],
-                total: 2,
-                page: 1,
-                limit: 2,
-                totalPages: 1,
-            })
+    it('delegates to searchRepository.searchAll for "all" tab', async () => {
+        const mockResult = {
+            items: [
+                { id: '1', type: 'production' as const, title: 'Prod 1' },
+                { id: '2', type: 'blog' as const, title: 'Blog 1' },
+            ],
+            total: 2,
+        }
+        searchRepository.searchAll.mockResolvedValue(mockResult)
 
+        const result = await service.search({
+            page: 1,
+            limit: 10,
+            tab: 'all',
+            search: 'term',
+            lang: 'nl',
+            genres: 'theater',
+            locations: 'hall-1'
+        })
+
+        expect(searchRepository.searchAll).toHaveBeenCalledWith({
+            page: 1,
+            limit: 10,
+            tab: 'all',
+            search: 'term',
+            lang: 'nl',
+            genres: 'theater',
+            locations: 'hall-1'
+        })
+        expect(result.items).toEqual(mockResult.items)
+        expect(result.total).toBe(2)
+    })
+
+    it('handles "blogs" tab with manual mapping and pagination', async () => {
         searchRepository.findAllBlogs.mockResolvedValue([
             {
                 id: 'blog-1',
                 title: { nl: 'Blog 1' },
-                content: { nl: 'Blog content' },
+                content: { nl: '<p>Content</p>' },
                 productions: [],
-                created_at: new Date('2025-10-01T00:00:00.000Z'),
-                updated_at: new Date('2025-10-01T00:00:00.000Z'),
+                created_at: new Date('2025-01-01T10:00:00Z'),
             },
         ])
 
+        const result = await service.search({
+            page: 1,
+            limit: 10,
+            tab: 'blogs',
+            lang: 'nl',
+        })
+
+        expect(searchRepository.findAllBlogs).toHaveBeenCalled()
+        expect(result.items).toHaveLength(1)
+        expect(result.items[0]).toMatchObject({
+            id: 'blog-1',
+            type: 'blog',
+            genre_label: 'Blog',
+            excerpt: 'Content',
+        })
+    })
+
+    it('handles "posters" tab by calling postersService', async () => {
         postersService.getPosters.mockResolvedValue({
             items: [
                 {
                     id: 'poster-1',
                     title: 'Poster 1',
-                    mime_type: 'image/jpeg',
-                    created_at: '2025-08-01T00:00:00.000Z',
-                    production: {
-                        id: 'prod-1',
-                        title: { nl: 'Venue via production' },
-                    },
+                    created_at: new Date('2025-01-01T10:00:00Z'),
+                    productions: [],
                 },
             ],
             total: 1,
             page: 1,
-            limit: 100,
+            limit: 10,
             totalPages: 1,
         })
 
         const result = await service.search({
             page: 1,
-            limit: 2,
-            search: 'term',
-            yearFrom: 2024,
-            yearTo: 2026,
-            sort: 'recent',
+            limit: 10,
+            tab: 'posters',
             lang: 'nl',
         })
 
-        expect(result.total).toBe(4)
-        expect(result.totalPages).toBe(2)
-        expect(result.page).toBe(1)
-        expect(result.items).toHaveLength(2)
-        expect(result.items.map((item) => item.id)).toEqual(['blog-1', 'poster-1'])
-
-        expect(productionsService.getProductions).toHaveBeenNthCalledWith(1, {
-            draft: false,
-            search: 'term',
-            genres: undefined,
-            locations: undefined,
-            yearFrom: 2024,
-            yearTo: 2026,
-            sort: 'recent',
-            lang: 'nl',
-            onThisDay: false,
-            pastOnly: true,
-            page: 1,
-            limit: 1,
-        })
-        expect(searchRepository.findAllBlogs).toHaveBeenCalledWith({
-            search: 'term',
-            yearFrom: 2024,
-            yearTo: 2026,
-        })
-        expect(postersService.getPosters).toHaveBeenNthCalledWith(1, {
-            search: 'term',
-            yearFrom: 2024,
-            yearTo: 2026,
-            page: 1,
-            limit: 1,
-            sort: 'recent',
-            lang: 'nl',
-        })
-
-        expect(postersService.getPosters).toHaveBeenNthCalledWith(2, {
-            search: 'term',
-            yearFrom: 2024,
-            yearTo: 2026,
-            page: 1,
-            limit: 1,
-            sort: 'recent',
-            lang: 'nl',
-        })
-    })
-
-    it('skips blogs and posters when genre/location filters are active', async () => {
-        productionsService.getProductions
-            .mockResolvedValueOnce({ items: [{ id: 'prod-preview' }], total: 1, page: 1, limit: 1, totalPages: 1 })
-            .mockResolvedValueOnce({
-                items: [
-                    {
-                        id: 'prod-1',
-                        title: { nl: 'Production 1' },
-                        created_at: '2025-06-10T00:00:00.000Z',
-                        teaser: null,
-                        description_short: null,
-                        description: null,
-                        image_url: null,
-                        venue_name: null,
-                        venue_names: [],
-                        production_genres: ['theater'],
-                        performer_type: null,
-                        attendance_mode: 'offline',
-                    },
-                ],
-                total: 1,
-                page: 1,
-                limit: 1,
-                totalPages: 1,
-            })
-
-        const result = await service.search({
-            page: 1,
-            limit: 20,
-            genres: 'theater',
-            locations: 'theaterzaal',
-            sort: 'relevance',
-            lang: 'nl',
-        })
-
-        expect(result.total).toBe(1)
+        expect(postersService.getPosters).toHaveBeenCalled()
         expect(result.items).toHaveLength(1)
-        expect(result.items[0]?.type).toBe('production')
-        expect(searchRepository.findAllBlogs).not.toHaveBeenCalled()
-        expect(postersService.getPosters).not.toHaveBeenCalled()
+        expect(result.items[0]).toMatchObject({
+            id: 'poster-1',
+            type: 'poster',
+            genre_label: 'Poster',
+        })
     })
 
-    it('sorts oldest first when requested', async () => {
-        productionsService.getProductions
-            .mockResolvedValueOnce({ items: [{ id: 'prod-preview' }], total: 1, page: 1, limit: 1, totalPages: 1 })
-            .mockResolvedValueOnce({
-                items: [
-                    {
-                        id: 'prod-newer',
-                        title: { nl: 'Production newer' },
-                        created_at: '2025-01-01T00:00:00.000Z',
-                        teaser: null,
-                        description_short: null,
-                        description: null,
-                        image_url: null,
-                        venue_name: null,
-                        venue_names: [],
-                        production_genres: [],
-                        performer_type: null,
-                        attendance_mode: null,
-                    },
-                ],
-                total: 1,
-                page: 1,
-                limit: 1,
-                totalPages: 1,
-            })
+    it('passes sort parameter to searchAll', async () => {
+        searchRepository.searchAll.mockResolvedValue({ items: [], total: 0 })
 
-        searchRepository.findAllBlogs.mockResolvedValue([
-            {
-                id: 'blog-older',
-                title: { nl: 'Older blog' },
-                content: { nl: 'Old content' },
-                productions: [],
-                created_at: new Date('2020-01-01T00:00:00.000Z'),
-                updated_at: new Date('2020-01-01T00:00:00.000Z'),
-            },
-        ])
-
-        postersService.getPosters.mockResolvedValue({
-            items: [],
-            total: 0,
-            page: 1,
-            limit: 100,
-            totalPages: 0,
-        })
-
-        const result = await service.search({
+        await service.search({
             page: 1,
             limit: 10,
-            sort: 'oldest',
-            lang: 'nl',
+            tab: 'all',
+            sort: 'oldest'
         })
 
-        expect(result.items.map((item) => item.id)).toEqual(['blog-older', 'prod-newer'])
+        expect(searchRepository.searchAll).toHaveBeenCalledWith(expect.objectContaining({
+            sort: 'oldest'
+        }))
     })
 })

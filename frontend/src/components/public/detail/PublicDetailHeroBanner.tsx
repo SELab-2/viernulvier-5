@@ -14,11 +14,16 @@ type ArchiveDetailHeroProps = {
 
 function ArchiveDetailHero({ imageUrl, title, superTitle, artist, genres, locale, shareLabel, onShare }: ArchiveDetailHeroProps) {
     return (
-        <div className="relative h-[360px] w-full overflow-hidden rounded-xl md:h-[430px]">
+        <div className="relative h-[360px] w-full overflow-hidden rounded-xl md:h-[430px] bg-muted">
+            <img
+                src="/fallback-hero.svg"
+                alt=""
+                className="absolute inset-0 h-full w-full object-cover opacity-50"
+            />
             <img
                 src={imageUrl}
                 alt={title || 'Production image'}
-                className="h-full w-full object-cover"
+                className="absolute inset-0 h-full w-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-black/25 to-black/65" />
             {onShare ? (
