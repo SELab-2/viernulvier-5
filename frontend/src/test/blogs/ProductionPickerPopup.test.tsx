@@ -106,8 +106,8 @@ describe('ProductionPickerPopup', () => {
     expect(onFiltersChange).toHaveBeenCalledWith(expect.objectContaining({ yearFrom: 2020 }))
     expect(onFiltersChange).toHaveBeenCalledWith(expect.objectContaining({ location: 'theater zaal' }))
     expect(onFiltersChange).toHaveBeenCalledWith(expect.objectContaining({ location: 'Theaterzaal' }))
-    expect(screen.getByText('Geselecteerde producties')).toBeInTheDocument()
-    expect(screen.getAllByText('Verkeerde locatie')).toHaveLength(2)
+    expect(screen.queryByText('Geselecteerde producties')).not.toBeInTheDocument()
+    expect(screen.getByText('Verkeerde locatie')).toBeInTheDocument()
 
     const resultTitles = screen.getAllByRole('heading', { level: 4 }).map((heading) => heading.textContent)
     expect(resultTitles).toEqual(['Binnen periode', 'Verkeerde locatie', 'Te oud'])
@@ -135,8 +135,8 @@ describe('ProductionPickerPopup', () => {
       />,
     )
 
-    expect(screen.getByText('Geselecteerde producties')).toBeInTheDocument()
-    expect(screen.getAllByText('Tweede productie')).toHaveLength(2)
+    expect(screen.queryByText('Geselecteerde producties')).not.toBeInTheDocument()
+    expect(screen.getByText('Tweede productie')).toBeInTheDocument()
   })
 
   it('loads more productions when scrolling near the bottom', () => {

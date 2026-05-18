@@ -542,8 +542,8 @@ describe('CreateBlogPage', () => {
       expect(apiFetchMock).toHaveBeenCalledWith(expect.stringContaining('search=eerste'), expect.any(Object))
     })
 
-    expect(screen.getByText('Geselecteerde producties')).toBeInTheDocument()
-    expect(screen.getAllByText('Tweede productie')).toHaveLength(2)
+    expect(screen.queryByText('Geselecteerde producties')).not.toBeInTheDocument()
+    expect(screen.getByText('Tweede productie')).toBeInTheDocument()
   })
 
   it('fetches the next production page when the picker scrolls to the bottom', async () => {

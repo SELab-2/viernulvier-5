@@ -205,7 +205,6 @@ function ProductionPickerPopup({
         updateFilters({ yearTo: Math.max(nextYear, filters.yearFrom) })
     }
 
-    const selectedProductions = productions.filter((production) => selectedProductionIds.includes(production.id))
     const hasOptions = productions.length > 0
 
     if (!isOpen) {
@@ -333,19 +332,6 @@ function ProductionPickerPopup({
                     onScroll={handleResultsScroll}
                     className="relative min-h-0 flex-1 overflow-y-auto p-4 sm:p-6"
                 >
-                    {selectedProductions.length > 0 ? (
-                        <div className="mb-5 rounded-2xl border border-[var(--color-accent)]/25 bg-surface p-4">
-                            <p className="text-xs font-semibold uppercase tracking-wide text-text-accent">{messages.blogs.productionPopUp.stagedLabel}</p>
-                            <div className="mt-3 flex gap-3 overflow-x-auto pb-1">
-                                {selectedProductions.map((production) => (
-                                    <div key={production.id} className="min-w-48 rounded-xl border border-border bg-background p-3">
-                                        <p className="line-clamp-2 text-sm font-semibold text-foreground">{getProductionDisplayTitle(production)}</p>
-                                        <p className="mt-1 text-xs text-text-accent">{getProductionDate(production)}</p>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    ) : null}
                     {isLoading && hasOptions ? (
                         <div className="absolute inset-x-4 top-4 z-10 rounded-2xl border border-[var(--color-accent)]/30 bg-background/95 px-4 py-3 text-sm font-semibold text-foreground shadow-lg backdrop-blur sm:inset-x-6">
                             {messages.blogs.productionPopUp.loading}
