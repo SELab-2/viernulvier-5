@@ -18,11 +18,14 @@ function DraftsDashboardPageContent() {
     const [tab, setTab] = useState<TabKey>('productions')
     const [onlyCurrent, setOnlyCurrent] = useState(false)
 
+    const [refetch, setRefetch] = useState(false)
+
     const productions = useProductionDrafts({
         page: 1,
         limit: 10,
         enabled: tab === 'productions',
         editorId: onlyCurrent ? currentUserId : undefined,
+        refetch,
     })
 
     const blogs = useBlogDrafts({
@@ -30,6 +33,7 @@ function DraftsDashboardPageContent() {
         limit: 10,
         enabled: tab === 'blogs',
         editorId: onlyCurrent ? currentUserId : undefined,
+        refetch,
     })
 
     const { items, isLoading, error } = tab === 'productions' ? productions : blogs
@@ -76,7 +80,7 @@ function DraftsDashboardPageContent() {
                     </p>
                 </div>
             ) : (
-                <DraftsTable items={items} isLoading={isLoading} tab={tab} currentUserId={currentUserId}/>
+                <DraftsTable items={items} isLoading={isLoading} tab={tab} currentUserId={currentUserId}  onDeleted={() => setRefetch((prev) => !prev)}/>
 
             )}
         </section>

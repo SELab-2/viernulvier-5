@@ -362,6 +362,8 @@ export type Messages = {
       languageStatusMissing: string
       emptyRecent: string
       loadingMessage: string
+      deleteTitle: string
+      deleteConfirm: (title: string) => string
     }
   }
 

@@ -374,6 +374,8 @@ const en: Messages = {
       languageStatusMissing: 'Translation missing',
       emptyRecent: 'No recent archive drafts found.',
       loadingMessage: 'Loading drafts...',
+      deleteTitle: 'Delete draft',
+      deleteConfirm: (title: string) => `Are you sure you want to delete "${title}"?`
     }
   },
 

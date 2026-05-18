@@ -22,9 +22,9 @@ function reducer(_state: State, action: Action): State {
     }
 }
 
-type Args = { page: number; limit: number; enabled?: boolean; editorId?: string }
+type Args = { page: number; limit: number; enabled?: boolean; editorId?: string, refetch?: boolean }
 
-export function useBlogDrafts({ page, limit, enabled = true, editorId }: Args): State {
+export function useBlogDrafts({ page, limit, enabled = true, editorId, refetch }: Args): State {
     const [state, dispatch] = useReducer(reducer, { items: [], isLoading: enabled, error: null })
 
     useEffect(() => {
@@ -68,7 +68,7 @@ export function useBlogDrafts({ page, limit, enabled = true, editorId }: Args): 
             })
 
         return () => { isActive = false }
-    }, [page, limit, enabled, editorId])
+    }, [page, limit, enabled, editorId, refetch])
 
     return state
 }

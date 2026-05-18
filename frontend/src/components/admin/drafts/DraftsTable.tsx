@@ -3,6 +3,7 @@ import { useDashboardFormatters } from '../hooks/useDashboardFormatters'
 import {useNavigate} from "react-router-dom";
 import {useState} from "react";
 import DeleteConfirmModal from "./DeleteConfirmModal.tsx";
+import {api} from "../../../api/client.ts";
 
 
 export type LocalizedString = {
@@ -22,6 +23,7 @@ type DraftsTableProps = {
     isLoading: boolean
     tab: 'productions' | 'blogs'
     currentUserId?: string
+    onDeleted: () => void
 }
 
 export type EditorItem = {
@@ -29,7 +31,7 @@ export type EditorItem = {
 }
 
 
-function DraftsTable({ items, isLoading, tab, currentUserId}: DraftsTableProps) {
+function DraftsTable({ items, isLoading, tab, currentUserId, onDeleted}: DraftsTableProps) {
     const [showDeleteModal, setShowDeleteModal] = useState(false)
     const [selectedDraft, setSelectedDraft] = useState<DraftItem | null>(null)
 
@@ -42,6 +44,29 @@ function DraftsTable({ items, isLoading, tab, currentUserId}: DraftsTableProps) 
         tab === "productions"
             ? "/admin/archive"
             : "/admin/blogs";
+
+    const [isDeleting, setIsDeleting] = useState(false)
+
+    const handleDelete = async () => {
+        if (!selectedDraft) return
+
+        setIsDeleting(true)
+
+        try {
+            const route = tab === 'productions'
+                ? `/archive/productions/${selectedDraft.id}`
+                : `/archive/blogs/${selectedDraft.id}`
+
+            await api.delete<unknown>(route)
+            setShowDeleteModal(false)
+            setSelectedDraft(null)
+            onDeleted()
+        } catch (error) {
+            console.error(error instanceof Error ? error.message : 'Verwijderen mislukt.')
+        } finally {
+            setIsDeleting(false)
+        }
+    }
 
     return (
         <div className="overflow-hidden rounded-[12px] border border-[var(--color-admin-card-border)] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.05)] dark:bg-[#111318]">
@@ -154,18 +179,14 @@ function DraftsTable({ items, isLoading, tab, currentUserId}: DraftsTableProps) 
             </div>
             <DeleteConfirmModal
                 isOpen={showDeleteModal}
-                title="Delete concept"
-                message="Are you sure you want to delete this concept?"
+                title={d.deleteTitle}
+                message={d.deleteConfirm(selectedDraft?.title?.[locale] ?? selectedDraft?.title?.nl ?? '')}
+                isDeleting={isDeleting}
                 onCancel={() => {
                     setShowDeleteModal(false)
                     setSelectedDraft(null)
                 }}
-                onConfirm={() => {
-                    console.log("Delete:", selectedDraft?.id)
-
-                    setShowDeleteModal(false)
-                    setSelectedDraft(null)
-                }}
+                onConfirm={handleDelete}
             />
         </div>
 

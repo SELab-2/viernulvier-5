@@ -374,6 +374,8 @@ const nl: Messages = {
       languageStatusMissing: 'Vertaling ontbreekt',
       emptyRecent: 'Nog geen recente archiefconcepten gevonden.',
       loadingMessage: 'Concepten worden geladen...',
+      deleteTitle: 'Concept verwijderen',
+      deleteConfirm: (title: string) => `Ben je zeker dat je "${title}" wilt verwijderen?`
     }
   },
 
