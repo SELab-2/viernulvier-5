@@ -734,9 +734,9 @@ async function sync_items(cutoff_timestamp: Date | undefined = undefined){
       for (const item of page) {
         // Map the apiIds of this specific item's crops to their internal database IDs
         const itemCropIds = item.crops
-          ? item.crops
+          ? Array.from(new Set(item.crops
               .map(crop => cropMap.get(crop["@id"]))
-              .filter((id): id is string => typeof id === 'string')
+              .filter((id): id is string => typeof id === 'string')))
           : [];
 
         await tx.item.upsert({
