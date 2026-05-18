@@ -7,42 +7,8 @@ import PublicPopularTags from '../../components/public/PublicPopularTags'
 import PublicCarousel from '../../components/public/PublicCarousel'
 import PublicLatestBlogPreview from '../../components/public/PublicLatestBlogPreview'
 import PublicRecentDigitized from '../../components/public/PublicRecentDigitized'
-import { getRecentProductions } from '../../api/productions'
-import { getLatestBlog } from '../../api/blogs'
-import { localize } from '../../utils/localize'
-import { toPlainText } from '../../utils/text'
-import { getLocalizedTitle, getLocalizedContent, normalizeContent } from './blogDetailPage.formatters'
-
-function formatArchiveDate(value: string, locale: 'nl' | 'en'): string {
-    const parsedDate = new Date(value)
-    if (Number.isNaN(parsedDate.getTime())) {
-        return '-'
-    }
-
-    return new Intl.DateTimeFormat(locale === 'nl' ? 'nl-BE' : 'en-GB', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-    }).format(parsedDate).toUpperCase()
-}
-
-function formatArchiveLabel(apiId: string | null): string | undefined {
-    if (!apiId) {
-        return undefined
-    }
-
-    const trimmed = apiId.trim()
-    if (!trimmed) {
-        return undefined
-    }
-
-    const lastSegment = trimmed.split('/').filter(Boolean).at(-1)
-    if (!lastSegment) {
-        return undefined
-    }
-
-    return /^\d+$/.test(lastSegment) ? `#${lastSegment}` : lastSegment
-}
+import { getRecentProductions, type Production } from '../../api/productions'
+import { getLatestBlog, type Blog } from '../../api/blogs'
 
 /**
  * Public home page — displays the archive listing.
@@ -53,14 +19,8 @@ function HomePage() {
     const locale = getActiveLocale(window.location.pathname)
     const homeMessages = getMessages(locale).home
     const fallbackUntitled = homeMessages.fallbackUntitled
-    const [latestBlog, setLatestBlog] = useState<{ id: string; title: string; excerpt: string } | null>(null)
-    const [recentItems, setRecentItems] = useState<Array<{
-        id: string
-        dateLabel: string
-        archiveLabel?: string
-        title: string
-        description: string
-    }>>([])
+    const [latestBlog, setLatestBlog] = useState<Blog | null>(null)
+    const [recentItems, setRecentItems] = useState<Production[]>([])
 
     const initialFilters = useMemo<HeroSearchFilters>(
         () => ({
@@ -108,25 +68,7 @@ function HomePage() {
                     return
                 }
 
-                if (!item) {
-                    setLatestBlog(null)
-                    return
-                }
-
-                const title = getLocalizedTitle(item.title, locale)
-                const localizedContent = getLocalizedContent(item.content, locale)
-                const delta = normalizeContent(localizedContent)
-                const excerptRaw = delta
-                    ? delta.ops
-                        .map((op) => (typeof op.insert === 'string' ? op.insert : ''))
-                        .join('')
-                        .replace(/\s+/g, ' ')
-                        .trim()
-                    : toPlainText(typeof localizedContent === 'string' ? localizedContent : '')
-
-                const excerpt = excerptRaw.length > 320 ? `${excerptRaw.slice(0, 317)}...` : excerptRaw
-
-                setLatestBlog({ id: item.id, title: title || fallbackUntitled, excerpt })
+                setLatestBlog(item ?? null)
             } catch {
                 if (!canceled) {
                     setLatestBlog(null)
@@ -154,25 +96,8 @@ function HomePage() {
             try {
                 const response = await getRecentProductions(locale, 4)
 
-                const mapped = response.data.map((item) => {
-                    const title = localize(item.title, locale)
-                    const descriptionRaw =
-                        localize(item.description_short, locale) ||
-                        localize(item.teaser, locale) ||
-                        localize(item.description, locale) ||
-                        title
-
-                    return {
-                        id: item.id,
-                        dateLabel: formatArchiveDate(item.created_at, locale),
-                        archiveLabel: formatArchiveLabel(item.apiId),
-                        title: title || fallbackUntitled,
-                        description: toPlainText(descriptionRaw) || title || fallbackUntitled,
-                    }
-                })
-
                 if (!canceled) {
-                    setRecentItems(mapped)
+                    setRecentItems(response.data)
                 }
             } catch {
                 if (!canceled) {
@@ -207,11 +132,15 @@ function HomePage() {
             <PublicCarousel />
             <PublicLatestBlogPreview
                 blog={latestBlog}
+                locale={locale}
+                fallbackUntitled={fallbackUntitled}
                 onReadMore={(id) => navigate(withLocalePath(`/blogs/${id}`, locale))}
-                onViewAll={() => navigate(withLocalePath('/zoeken?tab=blogs', locale))}
+                onViewAll={() => navigate(withLocalePath('/blogs', locale))}
             />
             <PublicRecentDigitized
                 items={recentItems}
+                locale={locale}
+                fallbackUntitled={fallbackUntitled}
                 onViewItem={handleRecentDigitizedItemClick}
                 onViewAll={handleRecentDigitizedViewAll}
             />

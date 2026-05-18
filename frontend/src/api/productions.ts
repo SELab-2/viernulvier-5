@@ -55,31 +55,7 @@ export const productionSchema = z.object({
  */
 export type Production = z.infer<typeof productionSchema>
 
-export type ProductionListItem = {
-    id: string
-    apiId: string | null
-    title: {
-        nl?: string
-        en?: string
-        fr?: string
-    } | null
-    description_short: {
-        nl?: string
-        en?: string
-        fr?: string
-    } | null
-    teaser: {
-        nl?: string
-        en?: string
-        fr?: string
-    } | null
-    description: {
-        nl?: string
-        en?: string
-        fr?: string
-    } | null
-    created_at: string
-}
+export type ProductionListItem = Production
 
 type PaginatedResponse<T> = {
     data: T[]

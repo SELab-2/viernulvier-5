@@ -1,6 +1,9 @@
 import SectionTitle from './SectionTitle'
 import PublicPillButton from './PublicPillButton'
 import { usePublicMessages } from './PublicMessagesContext'
+import { localize } from '../../utils/localize'
+import { toPlainText } from '../../utils/text'
+import type { Production } from '../../api/productions'
 
 function RightChevronIcon({ className }: { className: string }) {
     return (
@@ -10,33 +13,81 @@ function RightChevronIcon({ className }: { className: string }) {
     )
 }
 
-type RecentDigitizedItem = {
-    id: string
-    dateLabel: string
-    archiveLabel?: string
-    title: string
-    description: string
-}
-
 type PublicRecentDigitizedProps = {
-    items: RecentDigitizedItem[]
+    items: Production[]
+    locale: 'nl' | 'en'
+    fallbackUntitled: string
     onViewItem: (id: string) => void
     onViewAll: () => void
 }
 
+function formatArchiveDate(value: string | Date | null | undefined, locale: 'nl' | 'en'): string {
+    if (!value) {
+        return '-'
+    }
+
+    const parsedDate = value instanceof Date ? value : new Date(value)
+    if (Number.isNaN(parsedDate.getTime())) {
+        return '-'
+    }
+
+    return new Intl.DateTimeFormat(locale === 'nl' ? 'nl-BE' : 'en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+    }).format(parsedDate).toUpperCase()
+}
+
+function formatArchiveLabel(apiId: string | null | undefined): string | undefined {
+    if (!apiId) {
+        return undefined
+    }
+
+    const trimmed = apiId.trim()
+    if (!trimmed) {
+        return undefined
+    }
+
+    const lastSegment = trimmed.split('/').filter(Boolean).at(-1)
+    if (!lastSegment) {
+        return undefined
+    }
+
+    return /^\d+$/.test(lastSegment) ? `#${lastSegment}` : lastSegment
+}
+
 function PublicRecentDigitized({
     items,
+    locale,
+    fallbackUntitled,
     onViewItem,
     onViewAll,
 }: PublicRecentDigitizedProps) {
     const messages = usePublicMessages()
+
+    const renderedItems = items.map((item) => {
+        const title = localize(item.title, locale) || fallbackUntitled
+        const descriptionRaw =
+            localize(item.description_short, locale) ||
+            localize(item.teaser, locale) ||
+            localize(item.description, locale) ||
+            title
+
+        return {
+            id: item.id,
+            dateLabel: formatArchiveDate(item.created_at, locale),
+            archiveLabel: formatArchiveLabel(item.apiId),
+            title,
+            description: toPlainText(descriptionRaw) || title || fallbackUntitled,
+        }
+    })
 
     return (
         <section className="site-container mt-20 pb-10">
             <SectionTitle title={messages.home.recentDigitizedHeading} />
 
             <div className="mt-6">
-                {items.map((item) => (
+                {renderedItems.map((item) => (
                     <article
                         key={item.id}
                         className="grid grid-cols-[1fr_auto] items-center gap-x-4 border-t border-foreground/25 py-7"

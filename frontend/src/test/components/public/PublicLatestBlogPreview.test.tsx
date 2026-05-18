@@ -32,7 +32,15 @@ vi.mock('../../../components/public/PublicPillButton', () => ({
 
 describe('PublicLatestBlogPreview', () => {
     it('renders nothing when no blog is available', () => {
-        const { container } = render(<PublicLatestBlogPreview blog={null} onReadMore={vi.fn()} onViewAll={vi.fn()} />)
+        const { container } = render(
+            <PublicLatestBlogPreview
+                blog={null}
+                locale="nl"
+                fallbackUntitled="Zonder titel"
+                onReadMore={vi.fn()}
+                onViewAll={vi.fn()}
+            />
+        )
 
         expect(container).toBeEmptyDOMElement()
     })
@@ -43,7 +51,9 @@ describe('PublicLatestBlogPreview', () => {
 
         render(
             <PublicLatestBlogPreview
-                blog={{ id: 'blog-1', title: 'Test Blog', excerpt: 'Samenvatting' }}
+                blog={{ id: 'blog-1', title: { nl: 'Test Blog' }, content: { nl: 'Samenvatting' } }}
+                locale="nl"
+                fallbackUntitled="Zonder titel"
                 onReadMore={onReadMore}
                 onViewAll={onViewAll}
             />

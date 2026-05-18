@@ -1,15 +1,7 @@
 import { api } from './client'
 import { z } from 'zod'
 
-export type BlogListItem = {
-    id: string
-    title?: unknown
-    content?: unknown
-    productions: string[]
-    createdAt: string
-    updatedAt: string
-    links?: { self: string }
-}
+export type BlogListItem = z.infer<typeof blogSchema>
 
 type PaginatedResponse<T> = {
     data: T[]
@@ -37,9 +29,23 @@ export const getBlogById = (id: string) => {
 
 export const blogSchema = z.object({
     id: z.string().uuid(),
-    title: z.object({ nl: z.string().optional(), en: z.string().optional() }).nullable().optional(),
+    title: z
+        .object({
+            nl: z.string().optional(),
+            en: z.string().optional(),
+            fr: z.string().optional(),
+        })
+        .nullable()
+        .optional(),
     content: z.unknown().nullable().optional(),
+    productions: z.array(z.string()).optional(),
     createdAt: z.coerce.date().optional(),
+    updatedAt: z.coerce.date().optional(),
+    links: z
+        .object({
+            self: z.string(),
+        })
+        .optional(),
 })
 
 export type Blog = z.infer<typeof blogSchema>

@@ -113,57 +113,112 @@ vi.mock('../../../components/public/PublicCarousel', () => ({
 vi.mock('../../../components/public/PublicLatestBlogPreview', () => ({
     default: ({
         blog,
+        locale,
+        fallbackUntitled,
         onReadMore,
         onViewAll,
     }: {
-        blog: { id: string; title: string; excerpt: string } | null
+        blog: any | null
+        locale: 'nl' | 'en'
+        fallbackUntitled: string
         onReadMore: (id: string) => void
         onViewAll: () => void
-    }) => (
-        <div data-testid="latest-blog-preview">
-            {blog ? (
-                <>
-                    <span data-testid="blog-title">{blog.title}</span>
-                    <span data-testid="blog-excerpt">{blog.excerpt}</span>
-                    <button data-testid="read-more-btn" onClick={() => onReadMore(blog.id)}>
-                        lees meer
-                    </button>
-                    <button data-testid="view-all-blogs-btn" onClick={onViewAll}>
-                        alle blogs
-                    </button>
-                </>
-            ) : null}
-        </div>
-    ),
+    }) => {
+        const titleText = (() => {
+            if (!blog?.title) return fallbackUntitled
+            if (typeof blog.title === 'string') return blog.title.trim() || fallbackUntitled
+            return (blog.title[locale] ?? blog.title.nl ?? blog.title.en ?? blog.title.fr ?? '').trim() || fallbackUntitled
+        })()
+
+        const excerptText = (() => {
+            let rawContent: unknown = ''
+
+            if (blog?.content) {
+                if (typeof blog.content === 'string') {
+                    rawContent = blog.content
+                } else if (typeof blog.content === 'object') {
+                    rawContent = blog.content[locale] ?? blog.content.nl ?? blog.content.en ?? blog.content.fr ?? ''
+                }
+            }
+
+            if (typeof rawContent === 'object' && rawContent !== null && 'ops' in rawContent) {
+                rawContent = (rawContent as any).ops
+                    .map((op: any) => (typeof op.insert === 'string' ? op.insert : ''))
+                    .join('')
+            }
+
+            const normalized = typeof rawContent === 'string'
+                ? rawContent.replace(/\s+/g, ' ').trim()
+                : ''
+
+            return normalized.length > 320 ? `${normalized.slice(0, 317)}...` : normalized
+        })()
+
+        return (
+            <div data-testid="latest-blog-preview">
+                {blog ? (
+                    <>
+                        <span data-testid="blog-title">{titleText}</span>
+                        <span data-testid="blog-excerpt">{excerptText}</span>
+                        <button data-testid="read-more-btn" onClick={() => onReadMore(blog.id)}>
+                            lees meer
+                        </button>
+                        <button data-testid="view-all-blogs-btn" onClick={onViewAll}>
+                            alle blogs
+                        </button>
+                    </>
+                ) : null}
+            </div>
+        )
+    },
 }))
 
 vi.mock('../../../components/public/PublicRecentDigitized', () => ({
     default: ({
         items,
+        locale,
+        fallbackUntitled,
         onViewItem,
         onViewAll,
     }: {
-        items: Array<{ id: string; title: string; dateLabel: string; archiveLabel?: string; description: string }>
+        items: any[]
+        locale: 'nl' | 'en'
+        fallbackUntitled: string
         onViewItem: (id: string) => void
         onViewAll: () => void
-    }) => (
-        <div data-testid="recent-digitized">
-            {items.map((item) => (
-                <div key={item.id} data-testid={`recent-item-${item.id}`}>
-                    <span data-testid={`item-title-${item.id}`}>{item.title}</span>
-                    {item.archiveLabel ? (
-                        <span data-testid={`item-label-${item.id}`}>{item.archiveLabel}</span>
-                    ) : null}
-                    <button data-testid={`view-item-btn-${item.id}`} onClick={() => onViewItem(item.id)}>
-                        bekijk item
-                    </button>
-                </div>
-            ))}
-            <button data-testid="view-all-recent-btn" onClick={onViewAll}>
-                doorzoek archief
-            </button>
-        </div>
-    ),
+    }) => {
+        const getTitle = (title: any) => {
+            if (!title) return fallbackUntitled
+            if (typeof title === 'string') return title
+            return title[locale] ?? title.nl ?? title.en ?? title.fr ?? fallbackUntitled
+        }
+
+        const getArchiveLabel = (apiId: string | null | undefined) => {
+            if (!apiId) return undefined
+            const trimmed = apiId.trim()
+            const lastSegment = trimmed.split('/').filter(Boolean).at(-1)
+            return lastSegment && /^\d+$/.test(lastSegment) ? `#${lastSegment}` : lastSegment
+        }
+
+        return (
+            <div data-testid="recent-digitized">
+                {items.map((item) => (
+                    <div key={item.id} data-testid={`recent-item-${item.id}`}>
+                        <span data-testid={`item-title-${item.id}`}>{getTitle(item.title)}</span>
+                        {getArchiveLabel(item.apiId) ? (
+                            <span data-testid={`item-label-${item.id}`}>{getArchiveLabel(item.apiId)}</span>
+                        ) : null}
+                        <button data-testid={`view-item-btn-${item.id}`} onClick={() => onViewItem(item.id)}>
+                            bekijk item
+                        </button>
+                    </div>
+                ))}
+                <button data-testid="view-all-recent-btn" onClick={onViewAll}>
+                    doorzoek archief
+                </button>
+            </div>
+        )
+    },
 }))
 
 // ─── Test data ────────────────────────────────────────────────────────────────
@@ -315,26 +370,30 @@ describe('HomePage', () => {
         })
 
         it('falls back to "Zonder titel" when blog title is empty', async () => {
-            getLocalizedTitleMock.mockReturnValue('')
+            getLatestBlogMock.mockResolvedValue({
+                data: [{ ...baseBlogItem, title: { nl: '' } }],
+                meta: { total: 1, page: 1, limit: 1, totalPages: 1 },
+            })
             renderPage()
             expect(await screen.findByTestId('blog-title')).toHaveTextContent('Zonder titel')
         })
 
         it('truncates long excerpts to 320 characters with an ellipsis', async () => {
             const longContent = 'B'.repeat(400)
-            getLocalizedContentMock.mockReturnValue(longContent)
+            getLatestBlogMock.mockResolvedValue({
+                data: [{ ...baseBlogItem, content: { nl: longContent } }],
+                meta: { total: 1, page: 1, limit: 1, totalPages: 1 },
+            })
             renderPage()
             const excerptEl = await screen.findByTestId('blog-excerpt')
             expect(excerptEl.textContent).toHaveLength(320)
             expect(excerptEl.textContent).toMatch(/\.\.\.$/)
         })
 
-        it('builds excerpt from delta ops when normalizeContent returns a delta', async () => {
-            normalizeContentMock.mockReturnValue({
-                ops: [
-                    { insert: 'Eerste zin.' },
-                    { insert: ' Tweede zin.' },
-                ],
+        it('builds excerpt from delta ops when content is a delta object', async () => {
+            getLatestBlogMock.mockResolvedValue({
+                data: [{ ...baseBlogItem, content: { nl: { ops: [{ insert: 'Eerste zin.' }, { insert: ' Tweede zin.' }] } } }],
+                meta: { total: 1, page: 1, limit: 1, totalPages: 1 },
             })
             renderPage()
             expect(await screen.findByTestId('blog-excerpt')).toHaveTextContent('Eerste zin. Tweede zin.')
@@ -368,10 +427,10 @@ describe('HomePage', () => {
             expect(navigate).toHaveBeenCalledWith('/blogs/blog-uuid-1')
         })
 
-        it('navigates to the search page when view all blogs is clicked', async () => {
+        it('navigates to the blog listing page when view all blogs is clicked', async () => {
             renderPage()
             fireEvent.click(await screen.findByTestId('view-all-blogs-btn'))
-            expect(navigate).toHaveBeenCalledWith('/zoeken?tab=blogs')
+            expect(navigate).toHaveBeenCalledWith('/blogs')
         })
     })
 

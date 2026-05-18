@@ -98,8 +98,10 @@ function PublicPopularTags({ onTagClick }: PublicPopularTagsProps) {
 
     return (
         <section className="mt-14 bg-[var(--color-accent)] py-8">
-            <div className="site-container flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-6 sm:gap-y-3">
-                <p className="shrink-0 text-center text-xl text-white sm:text-left">{messages.home.popularTagsLabel}</p>
+            <div className="site-container flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:gap-x-6 sm:gap-y-3">
+                <div className="w-full sm:w-auto">
+                    <p className="text-center text-xl text-white sm:text-left">{messages.home.popularTagsLabel}</p>
+                </div>
 
                 {/* Ghost elements — off-screen, used only for measurement */}
                 <div
@@ -128,7 +130,7 @@ function PublicPopularTags({ onTagClick }: PublicPopularTagsProps) {
                 {/* Visible row — takes remaining width */}
                 <div
                     ref={rowRef}
-                    className={`flex min-w-0 flex-1 flex-wrap justify-center gap-3 sm:justify-start ${expanded ? '' : 'overflow-hidden sm:flex-nowrap'}`}
+                    className={`w-full flex min-w-0 flex-1 flex-wrap justify-center gap-3 sm:justify-start ${expanded ? '' : 'overflow-hidden sm:flex-nowrap'}`}
                 >
                     {displayTags.map((tag) => (
                         <button
