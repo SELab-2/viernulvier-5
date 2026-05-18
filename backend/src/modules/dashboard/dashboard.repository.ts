@@ -33,7 +33,7 @@ export class DashboardRepository {
         const [productions, events, blogs, mediaItems, editors] = await Promise.all([
             this.prisma.production.count(),
             this.prisma.event.count(),
-            this.blogsRepository.count({draft: 'all'}),
+            this.blogsRepository.count({}),
             this.prisma.item.count(),
             this.prisma.adminUser.count({ where: { role: Role.EDITOR } }),
         ])

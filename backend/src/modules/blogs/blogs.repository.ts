@@ -8,7 +8,9 @@ import type {
 } from './blogs.schema.js'
 import { AppError } from '../../errors/app-error.js'
 
-type BlogFilterOptions = Pick<BlogPaginationQuery, 'search' | 'yearFrom' | 'yearTo' | 'productionId' | 'draft' | 'editorId'>
+type BlogFilterOptions = Pick<BlogPaginationQuery, 'search' | 'yearFrom' | 'yearTo' | 'productionId' | 'editorId'> & {
+    draft?: boolean | 'all'
+}
 
 export class BlogsRepository {
     constructor(private readonly prisma: PrismaClient) {}
@@ -46,10 +48,10 @@ export class BlogsRepository {
     private buildWhere(options: BlogFilterOptions): Prisma.blogWhereInput {
         const conditions: Prisma.blogWhereInput[] = []
         const trimmedSearch = options.search?.trim()
-        console.log('draft filter:', options.draft, typeof options.draft)
+        const draft = options.draft ?? false
 
-        if (options.draft !== 'all') {
-            conditions.push({ draft: options.draft })
+        if (draft !== 'all') {
+            conditions.push({ draft: draft })
         }
         if (options.editorId){
             conditions.push({

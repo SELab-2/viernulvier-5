@@ -184,9 +184,10 @@ export class ProductionsRepository {
     }
 
     private async buildWhere(options: CountOptions): Promise<Prisma.productionWhereInput> {
-        const { search, searchIds, genres, locations, yearFrom, yearTo, onThisDayDate, lang = 'nl', draft, editorId} = options
+        const { search, searchIds, genres, locations, yearFrom, yearTo, onThisDayDate, lang = 'nl', draft = false, editorId} = options
         const andFilters: Prisma.productionWhereInput[] = []
         const now = new Date()
+
 
 
         if (draft !== 'all') {
