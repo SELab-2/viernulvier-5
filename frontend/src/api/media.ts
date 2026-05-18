@@ -168,16 +168,7 @@ async function uploadFile(
     // form.append('crop_id', crop.id);
     
     try {
-        console.log("cmon");
-        
-        await fetch(`/api/v1/archive/media/items/crops/${crop.id}/upload`, {
-            method: 'POST',
-            body: form
-        });
-
-        console.log("cmonnnn")
-
-        // await api.post(`/archive/media/items/crops/${crop.id}/upload`, form);
+        await api.post(`/archive/media/items/crops/${crop.id}/upload`, form);
     } catch (err) {
         await api.delete(`/archive/media/items/crops/${crop.id}`);
         await api.delete(`/archive/media/items/${item.id}`);

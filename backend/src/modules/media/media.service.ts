@@ -1,5 +1,7 @@
 import { MediaRepository } from './media.repository.js'
 import path  from 'path'
+import { AppError } from '../../errors/app-error.js'
+import { env } from '../../config/env.js'
 import type { 
     GalleryPaginationQuery,
     ItemPaginationQuery,
@@ -143,15 +145,25 @@ export class MediaService {
         ];
     
         if(!allowed.includes(data.mimetype)) {
-            throw new Error('Invalid file type')
+            throw new AppError('Invalid file type', 400)
         }
 
-        const ext = path.extname(data.filename)
-        const filename = `${id}.${ext}`;
-        const cropslocation = process.env.cropslocation!;
-        const filepath = path.join(cropslocation, filename);
+        const extensionByMime: Record<string, string> = {
+            'image/jpeg': 'jpg',
+            'image/png': 'png',
+            'image/webp': 'webp',
+        }
+
+        const ext = extensionByMime[data.mimetype] ?? path.extname(data.filename).replace(/^\./, '').toLowerCase()
+        const filename = ext ? `${id}.${ext}` : id
+        const filepath = path.resolve(env.CROP_LOCATION, filename)
 
         await this.repository.saveFile(filepath, data.file);
+
+        await this.repository.updateCrop(id, {
+            file_location: filepath,
+            url: `/api/v1/images/${id}`,
+        })
     }
 
     async deleteCrop(id: string): Promise<void> {
