@@ -392,6 +392,7 @@ const nl: Messages = {
   },
 
   blogs: {
+      placeholder: 'Schrijf je blog content hier...',
       navBack: 'Terug',
       languageError:'Blog bestaat niet in deze taal',
       loadingBlog: 'Blog wordt geladen...',
@@ -430,6 +431,24 @@ const nl: Messages = {
           close: "Sluiten",
           queryHint: "Zoek productie",
           noProductionFound: "Geen producties beschikbaar"
+      },
+      bannerUpload: {
+          title: "Blog banners",
+          subtitle: "Voeg bannerafbeeldingen toe.",
+          label: "Blog banners / afbeeldingen",
+          addButton: "+ Afbeeldingen toevoegen",
+          allowedFormats: "Toegestane formaten: JPG, PNG, WEBP.",
+          invalidFileTypes: (fileNames: string) => `Ongeldige bestandstypes: ${fileNames}`,
+          alreadyUploaded: (count: number) => ` ${count} afbeelding${count !== 1 ? 'en' : ''} al geüpload.`,
+          uploadedImagesLabel: "Geüploade afbeeldingen",
+          uploadFailedRemoved: (errorMessage: string) => `Upload van afbeeldingen mislukt en de nieuw aangemaakte blog werd verwijderd: ${errorMessage}`,
+          uploadFailedCreatedEditUrl: (errorMessage: string, editUrl: string) => `Upload van afbeeldingen mislukt (${errorMessage}). De blog is aangemaakt — je kunt verder bewerken op ${editUrl}`,
+          setThumbnailButton: "Instellen",
+          pendingUploadLabel: (count: number) => `Wacht op upload (${count})`,
+          removeButton: "Verwijderen",
+          coverLabel: "Voorkant",
+          deleteImageAriaLabel: "Afbeelding verwijderen",
+          coverHint: "Klik op een afbeelding om het als voorkant in te stellen. Klik opnieuw om het uit te schakelen."
       }
   }
 }
