@@ -16,6 +16,9 @@ const apiMock = vi.hoisted(() => ({
 
 const apiFetchMock = vi.hoisted(() => vi.fn())
 const messages = getMessages('nl')
+const currentYear = new Date().getFullYear()
+const productionFetchEndpoint = `/archive/productions?page=1&limit=100&sort=recent&lang=nl&pastOnly=false&draft=all&yearFrom=1982&yearTo=${currentYear}`
+const secondProductionFetchEndpoint = `/archive/productions?page=2&limit=100&sort=recent&lang=nl&pastOnly=false&draft=all&yearFrom=1982&yearTo=${currentYear}`
 
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom')
@@ -121,11 +124,13 @@ const productionList: ProductionItem[] = [
 function mockAvailableProductions() {
   apiFetchMock.mockImplementation(async (endpoint: string) => {
     if (endpoint.startsWith('/archive/productions?')) {
+      const page = Number(new URLSearchParams(endpoint.split('?')[1]).get('page') ?? '1')
+
       return {
-        data: productionList,
+        data: page === 1 ? productionList : [createProduction({ id: 'production-3', title: { nl: 'Derde productie', en: 'Third production' } })],
         meta: {
-          total: productionList.length,
-          page: 1,
+          total: page === 1 ? productionList.length : 3,
+          page,
           limit: 100,
           totalPages: 1,
         },
@@ -256,7 +261,7 @@ describe('CreateBlogPage', () => {
 
     await waitFor(() => {
       expect(apiFetchMock).toHaveBeenCalledWith(
-        '/archive/productions?page=1&limit=100&sort=relevance&lang=nl',
+        productionFetchEndpoint,
         expect.any(Object),
       )
     })
@@ -297,7 +302,7 @@ describe('CreateBlogPage', () => {
 
     await waitFor(() => {
       expect(apiFetchMock).toHaveBeenCalledWith(
-        '/archive/productions?page=1&limit=100&sort=relevance&lang=nl',
+        productionFetchEndpoint,
         expect.any(Object),
       )
     })
@@ -506,6 +511,78 @@ describe('CreateBlogPage', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Verwijder productie' }))
     expect(screen.queryByText('Eerste productie')).not.toBeInTheDocument()
+  })
+
+  it('keeps staged productions visible after changing the production search', async () => {
+    apiFetchMock.mockImplementation(async (endpoint: string) => {
+      if (endpoint === productionFetchEndpoint) {
+        return {
+          data: productionList,
+          meta: { total: 2, page: 1, limit: 100, totalPages: 1 },
+        }
+      }
+
+      if (endpoint.includes('search=eerste')) {
+        return {
+          data: [productionList[0]],
+          meta: { total: 1, page: 1, limit: 100, totalPages: 1 },
+        }
+      }
+
+      throw new Error(`Unexpected apiFetch endpoint: ${endpoint}`)
+    })
+
+    renderCreatePage()
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Producties beheren' }))
+    fireEvent.click(screen.getByRole('button', { name: /Tweede productie/i }))
+    fireEvent.change(screen.getByPlaceholderText('Zoek productie'), { target: { value: 'eerste' } })
+
+    await waitFor(() => {
+      expect(apiFetchMock).toHaveBeenCalledWith(expect.stringContaining('search=eerste'), expect.any(Object))
+    })
+
+    expect(screen.queryByText('Geselecteerde producties')).not.toBeInTheDocument()
+    expect(screen.getByText('Tweede productie')).toBeInTheDocument()
+  })
+
+  it('fetches the next production page when the picker scrolls to the bottom', async () => {
+    apiFetchMock.mockImplementation(async (endpoint: string) => {
+      if (endpoint === productionFetchEndpoint) {
+        return {
+          data: [productionList[0]],
+          meta: { total: 2, page: 1, limit: 100, totalPages: 2 },
+        }
+      }
+
+      if (endpoint === secondProductionFetchEndpoint) {
+        return {
+          data: [productionList[1]],
+          meta: { total: 2, page: 2, limit: 100, totalPages: 2 },
+        }
+      }
+
+      throw new Error(`Unexpected apiFetch endpoint: ${endpoint}`)
+    })
+
+    renderCreatePage()
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Producties beheren' }))
+    await screen.findByText('Eerste productie')
+
+    const resultsRegion = screen.getByText('Eerste productie').closest('.overflow-y-auto')
+    expect(resultsRegion).not.toBeNull()
+
+    Object.defineProperties(resultsRegion, {
+      scrollHeight: { configurable: true, value: 1000 },
+      scrollTop: { configurable: true, value: 850 },
+      clientHeight: { configurable: true, value: 100 },
+    })
+
+    fireEvent.scroll(resultsRegion as Element)
+
+    await screen.findByText('Tweede productie')
+    expect(apiFetchMock).toHaveBeenCalledWith(secondProductionFetchEndpoint, expect.any(Object))
   })
 
   it('allows uploading images, selecting a thumbnail and uploads them on publish', async () => {
@@ -765,5 +842,5 @@ describe('CreateBlogPage', () => {
       delete (globalThis as unknown as { FileReader?: unknown }).FileReader
     }
   })
-  
+
 })

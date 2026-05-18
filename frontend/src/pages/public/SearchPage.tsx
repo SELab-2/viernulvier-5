@@ -727,11 +727,12 @@ type FilterPanelProps = {
     onAfterChange?: () => void
     showSearch?: boolean
     shareLabel?: string
+    shareCopied?: boolean
     onShare?: () => void
     locationSuggestions?: string[]
 }
 
-function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, onShare, locationSuggestions = [] }: FilterPanelProps) {
+function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, shareCopied = false, onShare, locationSuggestions = [] }: FilterPanelProps) {
     const [searchParams] = useSearchParams()
     const navigate = useNavigate()
     const locale = getActiveLocale(window.location.pathname)
@@ -940,10 +941,30 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
     const yearRange = MAX_PERIOD_YEAR - MIN_PERIOD_YEAR
     const fromPercent = ((draftFromYear - MIN_PERIOD_YEAR) / yearRange) * 100
     const toPercent = ((draftToYear - MIN_PERIOD_YEAR) / yearRange) * 100
-    const genreOptions = s.genres.map((label, index) => ({
-        label,
-        value: CANONICAL_GENRE_VALUES[index] ?? label.toLowerCase(),
-    }))
+    // Group related genres together for two columns, no headers
+    const genreOptions = [
+        // Muziek/Nightlife/Feest
+        { label: s.genres[0], value: CANONICAL_GENRE_VALUES[0] }, // concert
+        { label: s.genres[1], value: CANONICAL_GENRE_VALUES[1] }, // nightlife
+        { label: s.genres[13], value: CANONICAL_GENRE_VALUES[13] }, // party
+        { label: s.genres[15], value: CANONICAL_GENRE_VALUES[15] }, // festival
+        // Podiumkunsten
+        { label: s.genres[4], value: CANONICAL_GENRE_VALUES[4] }, // theatre
+        { label: s.genres[5], value: CANONICAL_GENRE_VALUES[5] }, // performance
+        { label: s.genres[6], value: CANONICAL_GENRE_VALUES[6] }, // dance
+        { label: s.genres[7], value: CANONICAL_GENRE_VALUES[7] }, // comedy
+        { label: s.genres[8], value: CANONICAL_GENRE_VALUES[8] }, // film
+        { label: s.genres[9], value: CANONICAL_GENRE_VALUES[9] }, // spoken word
+        { label: s.genres[10], value: CANONICAL_GENRE_VALUES[10] }, // circus
+        // Kunst/Expo
+        { label: s.genres[3], value: CANONICAL_GENRE_VALUES[3] }, // installation
+        { label: s.genres[14], value: CANONICAL_GENRE_VALUES[14] }, // expo
+        // Overig
+        { label: s.genres[2], value: CANONICAL_GENRE_VALUES[2] }, // talks
+        { label: s.genres[11], value: CANONICAL_GENRE_VALUES[11] }, // food
+        { label: s.genres[12], value: CANONICAL_GENRE_VALUES[12] }, // monument
+        { label: s.genres[16], value: CANONICAL_GENRE_VALUES[16] }, // workshop
+    ];
 
     return (
         <aside className={`flex h-full flex-col ${className}`}>
@@ -978,20 +999,18 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
                 <div className="mb-4 flex items-center justify-between">
                     <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground">{s.genreLabel}</h3>
                 </div>
-                <div className="space-y-2 text-sm text-text-accent">
-                    {genreOptions.map(({ label, value }) => {
-                        return (
-                            <label key={value} className="flex items-center gap-2.5 text-foreground/90 transition-all duration-200 hover:translate-x-0.5 hover:text-foreground cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    checked={selectedGenres.includes(value)}
-                                    onChange={() => handleGenreChange(value)}
-                                    className="filter-checkbox cursor-pointer"
-                                />
-                                <span>{label}</span>
-                            </label>
-                        )
-                    })}
+                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-text-accent">
+                    {genreOptions.map(({ label, value }) => (
+                        <label key={value} className="flex items-center gap-2.5 text-foreground/90 transition-all duration-200 hover:translate-x-0.5 hover:text-foreground cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={selectedGenres.includes(value)}
+                                onChange={() => handleGenreChange(value)}
+                                className="filter-checkbox cursor-pointer"
+                            />
+                            <span>{label}</span>
+                        </label>
+                    ))}
                 </div>
             </div>
             ) : null}
@@ -1107,12 +1126,29 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
             <div className="mt-auto space-y-3">
                 <button
                     type="button"
-                    className="h-10 w-full rounded-full border border-border bg-surface text-sm font-semibold text-foreground transition-colors duration-200 md:hidden"
+                    className={`h-10 w-full rounded-full border text-sm font-semibold transition-colors duration-200 md:hidden flex items-center justify-center ${shareCopied ? 'border-violet-600 bg-violet-600 text-white' : 'border-border bg-surface text-foreground'}`}
+                    style={{ minWidth: 0 }}
                     onClick={() => {
                         onShare?.()
                     }}
                 >
-                    {shareLabel ?? s.shareLabel}
+                    <span className="flex items-center justify-center w-5 h-5">
+                        {shareCopied ? '✓' : (
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4" aria-hidden="true">
+                                <circle cx="18" cy="5" r="3" />
+                                <circle cx="6" cy="12" r="3" />
+                                <circle cx="18" cy="19" r="3" />
+                                <path d="M8.59 13.51 15.42 17.49M15.41 6.51 8.59 10.49" strokeLinecap="round" />
+                            </svg>
+                        )}
+                    </span>
+                    <span
+                        className={`ml-2 transition-all duration-200 ${shareCopied ? 'opacity-0 invisible w-0' : 'opacity-100 visible w-auto'}`}
+                        style={{ minWidth: '2.5rem', display: 'inline-block', textAlign: 'center' }}
+                        aria-hidden={shareCopied}
+                    >
+                        {shareLabel ?? s.shareLabel}
+                    </span>
                 </button>
                 <button
                     type="button"
@@ -1616,9 +1652,9 @@ function SearchPageContent() {
                         locationSuggestions={locationSuggestions}
                     />
 
-                    <div className="relative flex w-full items-start">
-                        <div className="w-full px-4 py-6 md:py-8 md:pl-0 md:pr-0">
-                            <div className="fixed right-4 bottom-4 z-50 md:hidden">
+                    <div className="flex w-full items-start py-6 md:py-8">
+                        <div className="z-30 flex w-12 shrink-0 self-stretch justify-center border-r border-border bg-surface-inset md:hidden">
+                            <div className="fixed top-[65px] left-1.5 z-40 flex items-start justify-center md:hidden">
                                 <button
                                     type="button"
                                     className="inline-flex items-center justify-center gap-2 rounded-full bg-accent px-3 py-3 text-sm font-semibold text-white shadow-xl shadow-accent/20 transition hover:bg-accent/90"
@@ -1629,6 +1665,9 @@ function SearchPageContent() {
                                     <span>Filters</span>
                                 </button>
                             </div>
+                        </div>
+
+                        <div className="w-full px-4 md:py-8 md:pr-0 md:pl-0">
                             <div className="search-main-rail">
                             {isMobileFiltersOpen ? (
                                 <>
@@ -1638,8 +1677,8 @@ function SearchPageContent() {
                                         aria-label={m.search.filterCloseOverlayLabel}
                                         onClick={() => setIsMobileFiltersOpen(false)}
                                     />
-                                    <div className="fixed left-0 top-0 z-50 h-full w-[min(84vw,21rem)] overflow-y-auto border-r border-border bg-surface-inset px-4 py-5 md:hidden">
-                                        <div className="mb-3 flex items-center justify-end">
+                                    <div className="fixed left-0 top-0 z-[9999] h-full w-[min(84vw,21rem)] border-r border-border bg-surface-inset px-4 py-5 md:hidden flex flex-col overflow-hidden">
+                                        <div className="mb-3 flex items-center justify-end shrink-0">
                                             <button
                                                 type="button"
                                                 className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border"
@@ -1650,15 +1689,16 @@ function SearchPageContent() {
                                             </button>
                                         </div>
 
-                                        <FilterPanel
-                                            className="pb-2"
-                                            showSearch={false}
-                                            shareLabel={shareCopied ? m.search.shareCopiedLabel : m.search.shareLabel}
-                                            locationSuggestions={locationSuggestions}
-                                            onShare={() => {
-                                                void handleShare()
-                                            }}
-                                        />
+                                        <div className="min-h-0 flex-1 overflow-y-auto">
+                                            <FilterPanel
+                                                showSearch={false}
+                                                shareLabel={shareCopied ? m.search.shareCopiedLabel : m.search.shareLabel}
+                                                locationSuggestions={locationSuggestions}
+                                                onShare={() => {
+                                                    void handleShare()
+                                                }}
+                                            />
+                                        </div>
                                     </div>
                                 </>
                             ) : null}
@@ -1740,18 +1780,30 @@ function SearchPageContent() {
                                         </select>
                                         <button
                                             type="button"
-                                            className="group hidden h-9 items-center gap-2 rounded-full border border-border bg-surface px-3 text-sm text-foreground transition-all cursor-pointer duration-200 hover:border-accent/45 hover:text-accent md:inline-flex"
+                                            className={`group relative hidden h-9 items-center gap-2 rounded-full border px-3 text-sm transition-all cursor-pointer duration-200 md:inline-flex ${shareCopied ? 'border-violet-600 bg-violet-600 text-white hover:bg-violet-600 hover:text-white' : 'border-border bg-surface text-foreground hover:border-accent/45 hover:text-accent'}`}
                                             onClick={() => {
                                                 void handleShare()
                                             }}
                                         >
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5" aria-hidden="true">
-                                                <circle cx="18" cy="5" r="3" />
-                                                <circle cx="6" cy="12" r="3" />
-                                                <circle cx="18" cy="19" r="3" />
-                                                <path d="M8.59 13.51 15.42 17.49M15.41 6.51 8.59 10.49" strokeLinecap="round" />
-                                            </svg>
-                                            <span className="hidden lg:inline">{shareCopied ? m.search.shareCopiedLabel : m.search.shareLabel}</span>
+                                            {shareCopied ? (
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" className="absolute left-1/2 h-3.5 w-3.5 -translate-x-1/2" aria-hidden="true">
+                                                    <path d="M5 12.5 9.2 16.7 19 7" strokeLinecap="round" strokeLinejoin="round" />
+                                                </svg>
+                                            ) : (
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5" aria-hidden="true">
+                                                    <circle cx="18" cy="5" r="3" />
+                                                    <circle cx="6" cy="12" r="3" />
+                                                    <circle cx="18" cy="19" r="3" />
+                                                    <path d="M8.59 13.51 15.42 17.49M15.41 6.51 8.59 10.49" strokeLinecap="round" />
+                                                </svg>
+                                            )}
+                                            {shareCopied ? (
+                                                <span className="hidden lg:inline invisible select-none" aria-hidden="true">
+                                                    {m.search.shareLabel}
+                                                </span>
+                                            ) : (
+                                                <span className="hidden lg:inline">{m.search.shareLabel}</span>
+                                            )}
                                         </button>
                                     </div>
                                 ) : null}

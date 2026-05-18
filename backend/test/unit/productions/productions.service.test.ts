@@ -80,6 +80,50 @@ describe('ProductionsService', () => {
         expect(result.items[0]).toHaveProperty('image_url')
     })
 
+    it('uses locally hosted preferred crop files for production images before remote URLs', async () => {
+        const mockProduction = {
+            id: productionId,
+            title: { nl: 'Test Productie' },
+            media_gallery: {
+                items: [
+                    {
+                        position: 1,
+                        link: 'https://remote.example/item.jpg',
+                        crops: [
+                            {
+                                id: 'crop-remote',
+                                name: 'fe3_grid',
+                                url: 'https://remote.example/grid.jpg',
+                                file_location: '/tmp/crops/grid.webp',
+                            },
+                            {
+                                id: 'crop-local',
+                                name: 'fe3_header',
+                                url: 'https://remote.example/header.jpg',
+                                file_location: '/tmp/crops/header.webp',
+                            },
+                        ],
+                    },
+                ],
+            },
+        }
+        repository.findById.mockResolvedValue(mockProduction)
+
+        const result = await service.getProduction(productionId)
+
+        expect(result?.image_url).toBe('/api/v1/images/crop-local')
+    })
+
+    it('passes pastOnly=false through to the repository', async () => {
+        repository.count.mockResolvedValue(0)
+        repository.findAll.mockResolvedValue([])
+
+        await service.getProductions({ page: 1, limit: 10, pastOnly: false })
+
+        expect(repository.count).toHaveBeenCalledWith(expect.objectContaining({ pastOnly: false }))
+        expect(repository.findAll).toHaveBeenCalledWith(expect.objectContaining({ pastOnly: false }))
+    })
+
     it('filters out internal fields from the response', async () => {
         const mockProductionWithGalleries = {
             id: productionId,

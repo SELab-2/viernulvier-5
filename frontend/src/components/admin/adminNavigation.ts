@@ -3,7 +3,6 @@ export type AdminNavItemId =
     | 'productions'
     | 'posters'
     | 'gallery'
-    | 'organisation'
     | 'settings'
 
 export type AdminNavigationItem = {
@@ -29,7 +28,6 @@ export function getNavLabel(id: AdminNavItemId, nav: AdminNavMessages): string {
         productions: nav.productions,
         posters: nav.posters,
         gallery: nav.gallery,
-        organisation: nav.organisation,
         settings: nav.settings,
     }
 
@@ -42,7 +40,6 @@ export function getNavIconAlt(id: AdminNavItemId, nav: AdminNavMessages): string
         productions: nav.productionsIconAlt,
         posters: nav.postersIconAlt,
         gallery: nav.galleryIconAlt,
-        organisation: nav.organisationIconAlt,
         settings: nav.settingsIconAlt,
     }
 
@@ -57,7 +54,6 @@ export function getAdminNavigationItems(hostname: string = window.location.hostn
             { id: 'dashboard', to: dashboardPath, iconSrc: '/admin/sidebar-dashboard.svg' },
             { id: 'productions', disabled: true, iconSrc: '/admin/sidebar-productions.svg' },
             { id: 'posters', to: postersPath, iconSrc: '/admin/sidebar-gallery.svg' },
-            { id: 'organisation', disabled: true, iconSrc: '/admin/sidebar-organization.svg' },
         ],
         secondary: [
             { id: 'settings', disabled: true, iconSrc: '/admin/sidebar-settings.svg' },
