@@ -85,7 +85,12 @@ function SearchResultCard({ item, detailHref, onTagClick, genreValue }: SearchRe
                     stampSvgPaths={searchMessages.stampSvgPaths}
                 />
             ) : null}
-            <div className="relative h-32 overflow-hidden rounded-md sm:h-36 bg-gradient-to-br from-accent to-accent/50">
+            <div className="relative h-32 overflow-hidden rounded-md sm:h-36 bg-muted">
+                <img
+                    src={FALLBACK_IMAGE}
+                    alt=""
+                    className="absolute inset-0 h-full w-full object-cover opacity-50"
+                />
                 {isPdf ? (
                     <iframe
                         src={getPdfPreviewUrl(imageUrl)}
