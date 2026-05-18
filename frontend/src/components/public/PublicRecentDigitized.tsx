@@ -1,14 +1,7 @@
 import SectionTitle from './SectionTitle'
 import PublicPillButton from './PublicPillButton'
 import { usePublicMessages } from './PublicMessagesContext'
-
-function RightChevronIcon({ className }: { className: string }) {
-    return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" className={className}>
-            <path d="M8 5l8 7-8 7" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-    )
-}
+import {RightChevronIcon} from '../shared/icons'
 
 type PublicRecentDigitizedProps = {
     onViewItem: (index: number) => void

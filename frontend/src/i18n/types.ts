@@ -357,6 +357,8 @@ export type Messages = {
   }
 
   blogs: {
+    navBack: string
+
     languageError:string
     loadingBlog: string
     loadingProductions: string
