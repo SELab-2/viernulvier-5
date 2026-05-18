@@ -107,7 +107,7 @@ async function importProductions(filePath: string) {
         parse({
             columns: true,
             skip_empty_lines: true,
-            relax_quotes: true,
+            quote: false,
             relax_column_count: true,
             bom: true,
             trim: true,
@@ -300,7 +300,7 @@ async function importEvents(filePath: string) {
         parse({
             columns: true,
             skip_empty_lines: true,
-            relax_quotes: true,
+            quote: false,
             relax_column_count: true,
             bom: true,
             trim: true,
