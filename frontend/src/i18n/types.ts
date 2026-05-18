@@ -357,6 +357,7 @@ export type Messages = {
   }
 
   blogs: {
+    placeholder: string
     navBack: string
 
     languageError:string
@@ -398,6 +399,24 @@ export type Messages = {
       close: string
       queryHint: string
       noProductionFound:string
+    }
+    bannerUpload: {
+      title: string
+      subtitle: string
+      label: string
+      addButton: string
+      allowedFormats: string
+      invalidFileTypes: (fileNames: string) => string
+      alreadyUploaded: (count: number) => string
+      uploadedImagesLabel: string
+      setThumbnailButton: string
+      pendingUploadLabel: (count: number) => string
+      removeButton: string
+      coverLabel: string
+      deleteImageAriaLabel: string
+      coverHint: string
+      uploadFailedRemoved: (errorMessage: string) => string
+      uploadFailedCreatedEditUrl: (errorMessage: string, editUrl: string) => string
     }
   }
 }
