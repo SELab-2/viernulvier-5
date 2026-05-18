@@ -295,6 +295,7 @@ async function findOrCreateHall(rawName: string): Promise<string> {
 
 async function importEvents(filePath: string) {
     log(`Reading events from ${filePath}`);
+    hallCache.clear();
 
     const parser = fs.createReadStream(filePath).pipe(
         parse({
