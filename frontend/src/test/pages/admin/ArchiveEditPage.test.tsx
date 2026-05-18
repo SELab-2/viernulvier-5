@@ -130,6 +130,8 @@ const mockMessages: Pick<Messages, 'admin'> = {
       emptyRecent: 'No recent archive drafts found.',
       loadingMessage: 'Loading drafts...',
       filterOnlyCurrent: 'Show my drafts',
+      deleteTitle: 'Delete draft',
+      deleteConfirm: (title: string) => `Are you sure you want to delete "${title}"?`
     }
   },
 }
