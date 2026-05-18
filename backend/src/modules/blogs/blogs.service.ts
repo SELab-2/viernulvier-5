@@ -6,7 +6,7 @@ import type {
     UpdateBlogInput
 } from './blogs.schema.js'
 import { PaginatedResult, calculateTotalPages, sanitizePage } from '../../utils/pagination.js'
-import {AppError} from "../../errors/app-error";
+import {AppError} from "../../errors/app-error.js";
 
 export class BlogsService {
     constructor(private readonly repository: BlogsRepository) {}

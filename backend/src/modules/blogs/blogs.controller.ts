@@ -59,7 +59,7 @@ export class BlogsController {
         return reply.status(200).send({
             data: dataWithLinks,
             links: {
-                self: `${baseUrl}archive/blogs/${id}`
+                self: `${baseUrl}/archive/blogs/${id}`
             }
         })
     }
