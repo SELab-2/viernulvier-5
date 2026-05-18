@@ -481,21 +481,27 @@ export class ProductionsRepository {
     }
 
     async create(data: any) {
+        const { genre_ids, tag_ids, ...rest} = data;
+
         return this.prisma.production.create({
-            data,
+            data: {
+                ...rest,
+                ...(genre_ids !== undefined && {
+                    genre_production: {
+                        create: genre_ids.map((genre_id: string) => ({genre_id}))
+                    }
+                }),
+                ...(tag_ids !== undefined && {
+                    tag_production: {
+                        create: tag_ids.map((tag_id: string) => ({tag_id}))
+                    }
+                })
+            },
         })
     }
 
-    // IMPORTANT: changed this
-    // async update(id: string, data: any) {
-    //     return this.prisma.production.update({
-    //         where: { id },
-    //         data,
-    //     })
-    // }
     async update(id: string, data: any) {
         const { genre_ids, tag_ids, ...rest } = data;
-        console.log(genre_ids);
         
         return this.prisma.production.update({
             where: { id },

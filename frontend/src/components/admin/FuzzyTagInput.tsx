@@ -45,6 +45,7 @@ function FuzzyTagInput({
             try {
                 // Search across all languages in backend now, but we still pass lang for potential prioritization
                 const response = await api.get<TaxonomyResponse>(`${endpoint}?search=${tag}&lang=${locale}&limit=5`)
+                
                 if (response && response.data) {
                     // Extract all possible names from existing tags for duplicate checking
                     const existingNamesLower = tags.flatMap(t => [

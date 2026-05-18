@@ -32,8 +32,6 @@ function ArchiveTabContent({
                             type="text"
                             value={(production[field] as LocalizedText)?.[editLanguage] ?? ""}
                             onChange={e => {
-                                console.log(editLanguage);
-                                
                                 onChange(field, editLanguage, e.target.value)
                             }
                                 }
@@ -49,7 +47,6 @@ function ArchiveTabContent({
                     <QuillEditor
                         value={(production[field] as LocalizedText)?.[editLanguage] ?? ""}
                         onChange={value => {
-                            console.log(field, editLanguage, value);
                             onChange(field, editLanguage, value)
                         }}
                         onJsonChange={onDescriptionJsonChange

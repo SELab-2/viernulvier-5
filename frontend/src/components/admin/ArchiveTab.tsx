@@ -18,9 +18,7 @@ function ArchiveTab({options, language, setTab}: ArchiveTabProps) {
                 ].join(' ')} // HACK: weird way to do this, maybe there is a better way?
                 key={key} onClick={() =>{
                     setTab(key)
-                    console.log(key)
                     } }>
-                
                 {label}
 
                 {language === key && 

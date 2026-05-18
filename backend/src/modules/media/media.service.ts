@@ -1,4 +1,5 @@
 import { MediaRepository } from './media.repository.js'
+import path  from 'path'
 import type { 
     GalleryPaginationQuery,
     ItemPaginationQuery,
@@ -14,6 +15,7 @@ import type {
     UpdateCropInput
 } from './media.schema.js'
 import { PaginatedResult, calculateTotalPages, sanitizePage } from '../../utils/pagination.js'
+import { MultipartFile } from '@fastify/multipart'
 
 export class MediaService {
     constructor(private readonly repository: MediaRepository) { }
@@ -131,6 +133,25 @@ export class MediaService {
 
     async updateCrop(id: string, data: UpdateCropInput): Promise<CropResponse> {
         return this.repository.updateCrop(id, data) as any
+    }
+
+    async uploadCrop(id: string, data: MultipartFile): Promise<void> {
+        const allowed = [
+            'image/jpeg',
+            'image/png',
+            'image/webp'
+        ];
+    
+        if(!allowed.includes(data.mimetype)) {
+            throw new Error('Invalid file type')
+        }
+
+        const ext = path.extname(data.filename)
+        const filename = `${id}.${ext}`;
+        const cropslocation = process.env.cropslocation!;
+        const filepath = path.join(cropslocation, filename);
+
+        await this.repository.saveFile(filepath, data.file);
     }
 
     async deleteCrop(id: string): Promise<void> {

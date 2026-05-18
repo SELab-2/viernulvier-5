@@ -26,8 +26,9 @@ export interface ProductionPayloadRespone {
         teaser?: LocalizedText, 
         description?: LocalizedText, 
         description_2?: LocalizedText, 
-        genre_ids?: string[]
-        tag_ids?: string[]
+        genre_ids?: string[],
+        tag_ids?: string[],
+        media_gallery_id?: string
         // is_draft: boolean,
     }
 }

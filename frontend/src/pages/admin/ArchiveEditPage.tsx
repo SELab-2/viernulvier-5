@@ -19,6 +19,7 @@ import { useLocale } from '../../components/admin/useLocale'
 import { useTagInput } from '../../components/admin/hooks/useTagInput'
 import { getGenresByProductionId } from '../../api/genres'
 import { getTagsByProductionId } from '../../api/tags'
+import { loadGallerySlots, saveGallerySlots, type ImageSlot } from '../../api/media'
 
 const defaultLocalizedText: LocalizedText = {
     nl: '',
@@ -39,10 +40,10 @@ const basicFields: (keyof ProductionPayload)[] = [
     "super_title",
     "title",
     "artist",
-    "teaser",
 ];
 
 const descriptionFields: (keyof ProductionPayload)[] = [
+    "teaser",
     "description",
     "description_2"
 ];
@@ -97,10 +98,13 @@ function ArchiveEditPage() {
     const [editingEvent, setEditingEvent] = useState<Event>(defaultEvent) // currently selected event
     const editingEventHallState = useTagInput();
     const [deletedEventsIds, setDeletedEventsIds] = useState<string[]>([]);
-    const [bannerFile, setBannerFile] = useState<File | null>(null)
-    const [extraFiles, setExtraFiles] = useState<File[]>([])
-
     const [popupOpen, setPopupOpen] = useState(false)
+
+    const [galleryId, setGalleryId] = useState<string | undefined>(undefined);
+    const [bannerSlot, setBannerSlot ] = useState<ImageSlot | null>(null);
+    const [extraSlots, setExtraSlots] = useState<ImageSlot[]>([]);
+    const [removedCropIds, setRemovedCropIds] = useState<string[]>([]);
+    const [removedItemIds, setRemovedItemIds] = useState<string[]>([]);
 
     // Visual indicators
     const [saving, setSaving] = useState(false);
@@ -131,6 +135,15 @@ function ArchiveEditPage() {
                 }
 
                 // TODO: fetch banner and pictures
+                const mediaGalleryId = (response.data as {media_gallery_id?: string}).media_gallery_id;
+                
+                if(mediaGalleryId) {
+                    setGalleryId(mediaGalleryId);
+                    const { banner, extras } = await loadGallerySlots(mediaGalleryId)
+
+                    if (banner) setBannerSlot(banner);
+                    setExtraSlots(extras)
+                }
             } catch (err) {
                 setError("Failed to load production: " + err)
             }
@@ -203,25 +216,6 @@ function ArchiveEditPage() {
         return Object.keys(errors).length === 0;
     }
 
-    // const uploadImages = async (productionId: string) => {
-    //     // TODO: ...
-    //     //
-    //     // How they are used:
-    //     // const galleryRes = await getGalleryItems(prod.media_gallery_id)
-    //     // const items = galleryRes.data
-    //     //
-    //     // if (items.length > 0) {
-    //     //     const firstCrops = await getItemCrops(items[0].id)
-    //     //     const heroUrl = getPreferredHeroCropUrl(firstCrops.data)
-    //     //     setImageUrl(heroUrl)
-    //     //
-    //     //     // First item is used as the hero banner above; remaining items go in the gallery
-    //     //     const remainingItems = items.slice(1)
-    //     //     const allCrops = await Promise.all(remainingItems.map((item) => getItemCrops(item.id)))
-    //     //     setGalleryImages(allCrops.map((res) => getPreferredMediaCropUrl(res.data)).filter(Boolean) as string[])
-    //     // }
-    // }
-
     const save = async () => {
         if (saving) return;
         setError(null);
@@ -238,6 +232,15 @@ function ArchiveEditPage() {
             const createdEventIds: string[] = [];
 
             if (!id){ 
+                const newGalleryId = await saveGallerySlots({
+                    galleryId: undefined,
+                    banner: bannerSlot,
+                    extras: extraSlots,
+                    removedCropIds: [],
+                    removedItemIds: []
+                });
+
+
                 // create production
                 const res: ProductionPayloadRespone = await api.post(`/archive/productions`, {
                     super_title: production.super_title,
@@ -246,7 +249,8 @@ function ArchiveEditPage() {
                     teaser: production.teaser,
                     description: production.description,
                     description_2:  production.description_2,
-                    genre_ids: genreState.items.map(g => g.id)
+                    genre_ids: genreState.items.map(g => g.id),
+                    media_gallery_id: newGalleryId,
                 });
 
                 const productionId = res.data.id;
@@ -272,8 +276,18 @@ function ArchiveEditPage() {
                     await api.delete(`/archive/productions/${productionId}`)
                     throw err;
                 }
-                navigate(`/archive/${productionId}/edit`);
+
+                navigate(`/archive/${productionId}`);
             } else { 
+                
+                const updateGalleryId = await saveGallerySlots({
+                    galleryId,
+                    banner: bannerSlot,
+                    extras: extraSlots,
+                    removedCropIds,
+                    removedItemIds
+                })
+
                 // saving production 
                 await api.patch(`/archive/productions/${id}`, {
                     super_title: production.super_title,
@@ -283,7 +297,8 @@ function ArchiveEditPage() {
                     description: production.description,
                     description_2:  production.description_2,
                     genre_ids: genreState.items.map(g => g.id),
-                    tag_ids: tagState.items.map(t => t.id)
+                    tag_ids: tagState.items.map(t => t.id),
+                    media_gallery_id: updateGalleryId
                 });
                 
                 // save events changes
@@ -313,6 +328,8 @@ function ArchiveEditPage() {
                             createdEventIds.push(eventRes.data.id);
                         }
                     }
+
+                    navigate(`/archive/${id}`);
                 } catch (err) {
                     // Rollback newly created events, keep the previous ones
                     await Promise.allSettled(createdEventIds.map(
@@ -321,14 +338,39 @@ function ArchiveEditPage() {
 
                     throw err;
                 }
-
-                navigate(`/archive/${id}`);
             }
+
         } catch (err){
             setError("Failed to create the production or events: " + err);
         } finally {
             setSaving(false);
         }
+    }
+
+    // ---- image slot manipulation functions ----
+
+    const handleBannerChange = (slot: ImageSlot | null) => {
+        if (bannerSlot?.kind === 'existing') {
+            setRemovedCropIds(prev => [...prev, bannerSlot.crop_id])
+            setRemovedItemIds(prev => [...prev, bannerSlot.item_id])
+        }
+
+        setBannerSlot(slot)
+    }
+
+    const handleExtraSlotsChange = (nextSlots: ImageSlot[]) => {
+        const removeSlots = extraSlots.filter(
+            s => s.kind === 'existing' && !nextSlots.some(
+                ns => ns.kind === 'existing' && ns.crop_id === s.crop_id
+            )
+        ) as Extract<ImageSlot, {kind: 'existing'}>[]
+
+        if (removeSlots.length) {
+            setRemovedCropIds(prev => [...prev, ...removeSlots.map(s => s.crop_id)])
+            setRemovedItemIds(prev => [...prev, ...removeSlots.map(s => s.item_id)])
+        }
+
+        setExtraSlots(nextSlots)
     }
 
     
@@ -484,11 +526,11 @@ function ArchiveEditPage() {
                 <ArchiveSidebar
                     genre={genreState}
                     tag={tagState}
-                    bannerFile={bannerFile}
-                    extraFiles={extraFiles}
-                    onBannerChange={setBannerFile}
-                    onExtraFilesChange={setExtraFiles}
-
+                    bannerSlot={bannerSlot}
+                    extraSlots={extraSlots}
+                    onBannerChange={handleBannerChange}
+                    onExtraSlotsChange={handleExtraSlotsChange}
+                    
                     productionSettingsLabel={messages.production.productionSettingsLabel}
                     genreLabel={messages.production.genreLabel}
                     tagLabel={messages.production.tagLabel}
