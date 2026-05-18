@@ -29,7 +29,7 @@ export class BlogsController {
     async getBlogs(request: FastifyRequest<{ Querystring: BlogPaginationQuery }>, reply: FastifyReply) {
         const blogs = await this.service.getBlogs(request.query)
         const baseUrl = this.getBaseUrl(request)
-        const currentUrl = baseUrl
+        const currentUrl =`${baseUrl}/archive/blogs`
 
         const dataWithLinks = blogs.items.map(b => this.mapBlogLinks(b, baseUrl))
 
@@ -67,7 +67,7 @@ export class BlogsController {
     async createBlog(request: FastifyRequest<{ Body: CreateBlogInput }>, reply: FastifyReply) {
         const blog = await this.service.createBlog(request.body)
         const baseUrl = this.getBaseUrl(request)
-        const selfUrl = `${baseUrl}/archive/blogs${blog.id}`
+        const selfUrl = `${baseUrl}/archive/blogs/${blog.id}`
         
         const dataWithLinks = this.mapBlogLinks(blog, baseUrl)
 
