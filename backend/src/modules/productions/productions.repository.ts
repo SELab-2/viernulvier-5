@@ -208,7 +208,7 @@ export class ProductionsRepository {
                     },
                 })
             }
-        } else {
+        } else if (requirePastEvents) {
             andFilters.push({
                 OR: [
                     { draft: true },

@@ -130,6 +130,7 @@ function PostersPageContent() {
       sort: trimmedSearchQuery ? 'relevance' : 'recent',
       lang: locale,
       pastOnly: 'false',
+      draft: 'all',
       yearFrom: String(filters.yearFrom),
       yearTo: String(filters.yearTo),
     })

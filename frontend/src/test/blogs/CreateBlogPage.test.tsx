@@ -17,8 +17,8 @@ const apiMock = vi.hoisted(() => ({
 const apiFetchMock = vi.hoisted(() => vi.fn())
 const messages = getMessages('nl')
 const currentYear = new Date().getFullYear()
-const productionFetchEndpoint = `/archive/productions?page=1&limit=100&sort=recent&lang=nl&pastOnly=false&yearFrom=1982&yearTo=${currentYear}`
-const secondProductionFetchEndpoint = `/archive/productions?page=2&limit=100&sort=recent&lang=nl&pastOnly=false&yearFrom=1982&yearTo=${currentYear}`
+const productionFetchEndpoint = `/archive/productions?page=1&limit=100&sort=recent&lang=nl&pastOnly=false&draft=all&yearFrom=1982&yearTo=${currentYear}`
+const secondProductionFetchEndpoint = `/archive/productions?page=2&limit=100&sort=recent&lang=nl&pastOnly=false&draft=all&yearFrom=1982&yearTo=${currentYear}`
 
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom')

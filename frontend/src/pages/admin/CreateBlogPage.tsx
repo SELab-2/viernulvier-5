@@ -242,6 +242,7 @@ function CreateBlogPage() {
                     sort: query ? 'relevance' : 'recent',
                     lang: locale,
                     pastOnly: 'false',
+                    draft: 'all',
                     yearFrom: String(productionFilters.yearFrom),
                     yearTo: String(productionFilters.yearTo),
                 })
