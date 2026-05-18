@@ -365,7 +365,44 @@ describe('CreateBlogPage', () => {
 
   it('deletes a blog after confirmation', async () => {
     vi.spyOn(window, 'confirm').mockReturnValue(true)
+
     apiMock.delete.mockResolvedValueOnce(undefined)
+
+    apiFetchMock.mockImplementation(async (endpoint: string, options?: RequestInit) => {
+      if (endpoint === '/api/v1/archive/blogs/blog-123/editors') {
+        return {
+          data: [
+            { id: 'editor-1' },
+            { id: 'editor-2' },
+          ],
+        }
+      }
+
+      if (
+          endpoint === '/api/v1/archive/blogs/blog-123/editors/editor-1' &&
+          options?.method === 'DELETE'
+      ) {
+        return {}
+      }
+
+      if (
+          endpoint === '/api/v1/archive/blogs/blog-123/editors/editor-2' &&
+          options?.method === 'DELETE'
+      ) {
+        return {}
+      }
+
+      return {
+        data: productionList,
+        meta: {
+          total: productionList.length,
+          page: 1,
+          limit: 100,
+          totalPages: 1,
+        },
+      }
+    })
+
     mockEditBlog()
 
     renderEditPage()
@@ -401,7 +438,34 @@ describe('CreateBlogPage', () => {
 
   it('shows a delete error when deleting fails with an unknown error', async () => {
     vi.spyOn(window, 'confirm').mockReturnValue(true)
+
     apiMock.delete.mockRejectedValueOnce('delete failed')
+
+    apiFetchMock.mockImplementation(async (endpoint: string, options?: RequestInit) => {
+      if (endpoint === '/api/v1/archive/blogs/blog-123/editors') {
+        return {
+          data: [{ id: 'editor-1' }],
+        }
+      }
+
+      if (
+          endpoint === '/api/v1/archive/blogs/blog-123/editors/editor-1' &&
+          options?.method === 'DELETE'
+      ) {
+        return {}
+      }
+
+      return {
+        data: productionList,
+        meta: {
+          total: productionList.length,
+          page: 1,
+          limit: 100,
+          totalPages: 1,
+        },
+      }
+    })
+
     mockEditBlog()
 
     renderEditPage()
