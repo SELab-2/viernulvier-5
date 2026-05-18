@@ -1763,7 +1763,7 @@ function SearchPageContent() {
                         locationSuggestions={locationSuggestions}
                     />
 
-                    <div className="flex w-full items-start">
+                    <div className="flex w-full items-start py-6 md:py-8">
                         <div className="z-30 flex w-12 shrink-0 self-stretch justify-center border-r border-border bg-surface-inset md:hidden">
                             <div className="fixed top-[65px] left-1.5 z-40 flex items-start justify-center md:hidden">
                                 <button
