@@ -125,6 +125,7 @@ describe('SearchService', () => {
         expect(result.items.map((item) => item.id)).toEqual(['blog-1', 'poster-1'])
 
         expect(productionsService.getProductions).toHaveBeenNthCalledWith(1, {
+            draft: false,
             search: 'term',
             genres: undefined,
             locations: undefined,

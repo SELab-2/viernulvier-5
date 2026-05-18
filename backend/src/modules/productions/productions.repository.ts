@@ -14,6 +14,8 @@ type FindAllOptions = {
     pastOnly?: boolean
     sort?: 'relevance' | 'recent' | 'oldest'
     lang?: string
+    draft?: boolean | 'all'
+    editorId?: string
 }
 
 type CountOptions = Omit<FindAllOptions, 'page' | 'limit' | 'sort'>
@@ -183,19 +185,51 @@ export class ProductionsRepository {
     }
 
     private async buildWhere(options: CountOptions): Promise<Prisma.productionWhereInput> {
-        const { search, searchIds, genres, locations, yearFrom, yearTo, onThisDayDate, pastOnly = true, lang = 'nl' } = options
+        const { search, searchIds, genres, locations, yearFrom, yearTo, onThisDayDate, pastOnly, lang = 'nl', draft = false, editorId } = options
         const andFilters: Prisma.productionWhereInput[] = []
         const now = new Date()
+        const requirePastEvents = pastOnly ?? (draft === false)
 
-        if (pastOnly) {
+        if (draft !== 'all') {
+            if (draft) {
+                andFilters.push({ OR: [{ draft: true }, { draft: null }] })
+            } else {
+                andFilters.push({ draft })
+            }
+
+            if (requirePastEvents) {
+                andFilters.push({
+                    events: {
+                        some: {
+                            starts_at: {
+                                lt: now,
+                            },
+                        },
+                    },
+                })
+            }
+        } else {
             andFilters.push({
-                events: {
+                OR: [
+                    { draft: true },
+                    { draft: null },
+                    {
+                        AND: [
+                            { draft: false },
+                            { events: { some: { starts_at: { lt: now } } } },
+                        ],
+                    },
+                ],
+            })
+        }
+
+        if (editorId) {
+            andFilters.push({
+                editor_production: {
                     some: {
-                        starts_at: {
-                            lt: now
-                        }
-                    }
-                }
+                        editor_id: editorId,
+                    },
+                },
             })
         }
 
@@ -241,13 +275,12 @@ export class ProductionsRepository {
             andFilters.push({
                 OR: [
                     { genre_production: { some: { OR: genreFilters } } },
-                    { tag_production: { some: { OR: tagFilters } } }
-                ]
+                    { tag_production: { some: { OR: tagFilters } } },
+                ],
             })
         }
 
         if (locations && locations.length > 0) {
-            // ... (keep existing locations logic)
             andFilters.push({
                 OR: locations.map((location) => ({
                     OR: [
@@ -313,12 +346,17 @@ export class ProductionsRepository {
 
             andFilters.push({
                 events: {
-                    some: {
-                        starts_at: pastOnly
-                            ? { ...eventDateFilter, lt: now }
-                            : eventDateFilter,
-                    }
-                }
+                    some: requirePastEvents
+                        ? {
+                            AND: [
+                                { starts_at: { lt: now } },
+                                { starts_at: eventDateFilter },
+                            ],
+                        }
+                        : {
+                            starts_at: eventDateFilter,
+                        },
+                },
             })
         }
 
@@ -504,5 +542,25 @@ export class ProductionsRepository {
             this.prisma.production.delete({ where: { id } }),
         ])
         return production
+    }
+
+    async addEditor(productionId: string, editorId: string) {
+        return this.prisma.editor_production.create({
+            data: {
+                production_id: productionId,
+                editor_id: editorId,
+            }
+        })
+    }
+
+    async removeEditor(productionId: string, editorId: string) {
+        return this.prisma.editor_production.delete({
+            where: {
+                editor_id_production_id: {
+                    editor_id: editorId,
+                    production_id: productionId,
+                }
+            }
+        })
     }
 }

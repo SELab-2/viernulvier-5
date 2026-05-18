@@ -6,6 +6,7 @@ import type {
     CreateProductionInput 
 } from './productions.schema.js'
 import { PaginatedResult, calculateTotalPages, sanitizePage } from '../../utils/pagination.js'
+import {AppError} from "../../errors/app-error.js";
 
 export class ProductionsService {
     constructor(private readonly repository: ProductionsRepository) { }
@@ -237,7 +238,7 @@ export class ProductionsService {
     }
 
     async getProductions(options: PaginationQuery): Promise<PaginatedResult<ProductionResponse>> {
-        const { page, limit, search, lang, genres, locations, yearFrom, yearTo, sort, onThisDay, referenceDate, pastOnly } = options
+        const { page, limit, search, lang, genres, locations, yearFrom, yearTo, sort, onThisDay, referenceDate, pastOnly, draft, editorId } = options
         const normalizedSearch = search?.trim() || undefined
 
         const normalizedGenres = genres
@@ -287,6 +288,8 @@ export class ProductionsService {
             yearTo: safeYearTo,
             onThisDayDate,
             pastOnly,
+            draft,
+            editorId,
         }
 
         const total = await this.repository.count(commonOptions)
@@ -341,5 +344,17 @@ export class ProductionsService {
 
     async deleteProduction(id: string): Promise<void> {
         await this.repository.delete(id)
+    }
+
+    async addEditor(productionId: string, editorId: string) {
+        const production = await this.repository.findById(productionId)
+        if (!production) throw new AppError('Production not found', 404)
+        return this.repository.addEditor(productionId, editorId)
+    }
+
+    async removeEditor(productionId: string, editorId: string) {
+        const production = await this.repository.findById(productionId)
+        if (!production) throw new AppError('Production not found', 404)
+        return this.repository.removeEditor(productionId, editorId)
     }
 }
