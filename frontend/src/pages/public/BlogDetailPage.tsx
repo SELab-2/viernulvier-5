@@ -192,6 +192,7 @@ function BlogDetailPageContent() {
                     icon={<LeftArrowIcon className="h-5 w-5" />}
                     label={message.blogs.navBack}
                     onClick={handleGoBack}
+                    
                 />
             </div>
 
