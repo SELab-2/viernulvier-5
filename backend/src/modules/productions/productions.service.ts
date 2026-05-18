@@ -41,6 +41,22 @@ export class ProductionsService {
         return [...items].sort((a, b) => this.getItemPosition(a) - this.getItemPosition(b))
     }
 
+    private extractHostedCropUrl(crop: any): string | undefined {
+        if (typeof crop?.file_location !== 'string' || crop.file_location.trim().length === 0) {
+            return undefined
+        }
+
+        if (typeof crop?.id !== 'string' || crop.id.trim().length === 0) {
+            return undefined
+        }
+
+        return `/api/v1/images/${crop.id}`
+    }
+
+    private extractCropImageUrl(crop: any): string | undefined {
+        return this.extractHostedCropUrl(crop) ?? this.extractUrlCandidate(crop?.url)
+    }
+
     private extractPreferredCropUrl(crops: any[]): string | undefined {
         const preferredCropNames = ['fe3_header', 'fe3_grid']
 
@@ -49,14 +65,14 @@ export class ProductionsService {
                 (crop) => typeof crop?.name === 'string' && crop.name.trim().toLowerCase() === cropName,
             )
 
-            const preferredUrl = this.extractUrlCandidate(preferredCrop?.url)
+            const preferredUrl = this.extractCropImageUrl(preferredCrop)
             if (preferredUrl) {
                 return preferredUrl
             }
         }
 
         for (const crop of crops) {
-            const fromCrop = this.extractUrlCandidate(crop?.url)
+            const fromCrop = this.extractCropImageUrl(crop)
             if (fromCrop) {
                 return fromCrop
             }
