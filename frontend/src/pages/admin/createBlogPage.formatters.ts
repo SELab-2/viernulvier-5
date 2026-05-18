@@ -22,6 +22,8 @@ export type BlogDetail = {
     title?: unknown
     content?: unknown
     productions?: string[]
+    images?: string[]
+    thumbnail_index?: number | null
 }
 
 export type BlogDetailResponse = {

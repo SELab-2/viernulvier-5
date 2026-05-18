@@ -4,7 +4,8 @@ import type {
     BlogPaginationQuery, 
     BlogResponse,
     CreateBlogInput, 
-    UpdateBlogInput 
+    UpdateBlogInput,
+    UploadBlogImageInput,
 } from './blogs.schema.js'
 import { buildPaginationLinks } from '../../utils/pagination.js'
 
@@ -107,6 +108,50 @@ export class BlogsController {
         try {
             await this.service.deleteBlog(id)
             return reply.status(204).send()
+        } catch (error: any) {
+            if (error.message === 'Blog not found') {
+                return reply.status(404).send({ message: 'Blog not found' })
+            }
+            throw error
+        }
+    }
+
+    async deleteBlogImage(
+        request: FastifyRequest<{ Params: { id: string; index: string } }>,
+        reply: FastifyReply,
+    ) {
+        const { id, index } = request.params
+        try {
+            const result = await this.service.deleteBlogImage(id, Number(index))
+            return reply.status(200).send({
+                data: result,
+                links: {
+                    self: `${this.getBaseUrl(request)}/${id}`,
+                },
+            })
+        } catch (error: any) {
+            if (error.message === 'Blog not found') {
+                return reply.status(404).send({ message: 'Blog not found' })
+            }
+
+            if (error.message === 'Image not found') {
+                return reply.status(404).send({ message: 'Image not found' })
+            }
+
+            throw error
+        }
+    }
+
+    async uploadBlogImages(request: FastifyRequest<{ Params: { id: string }, Body: UploadBlogImageInput }>, reply: FastifyReply) {
+        const { id } = request.params
+        try {
+            const result = await this.service.uploadBlogImages(id, request.body)
+            return reply.status(200).send({
+                data: result,
+                links: {
+                    self: `${this.getBaseUrl(request)}/${id}`,
+                }
+            })
         } catch (error: any) {
             if (error.message === 'Blog not found') {
                 return reply.status(404).send({ message: 'Blog not found' })
