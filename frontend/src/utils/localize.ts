@@ -1,7 +1,7 @@
 type LocalizedField = {
-    nl?: string
-    fr?: string
-    en?: string
+    nl?: string | null
+    fr?: string | null
+    en?: string | null
 } | null | undefined
 
 export function localize(field: LocalizedField, locale: string): string | null {
