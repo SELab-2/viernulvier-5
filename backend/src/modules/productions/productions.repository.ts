@@ -203,6 +203,8 @@ export class ProductionsRepository {
                         }
                     }
                 })
+            } else {
+                andFilters.push({   OR: [{draft: true}, {draft: null}]})
             }
         } else {
             andFilters.push({
