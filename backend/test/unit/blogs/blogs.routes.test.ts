@@ -421,7 +421,7 @@ describe('Blogs Routes', () => {
                 const body = JSON.parse(uploadResponse.payload)
                 expect(body.data.images).toHaveLength(2)
                 expect(body.data.images[0]).toBe('/api/v1/images/existing-image-id')
-                expect(body.data.images[1]).toMatch(/^\/api\/v1\/images\/[0-9a-f-]+$/)
+                expect(body.data.images[1]).toMatch(/^(https?:\/\/[^/]+)?\/api\/v1\/images\/[0-9a-f-]+$/)
                 expect(body.data.thumbnail_index).toBe(0)
 
                 const getResponse = await app.inject({
