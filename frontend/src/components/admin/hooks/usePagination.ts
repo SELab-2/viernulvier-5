@@ -1,52 +1,70 @@
-import { useEffect, useReducer } from 'react'
-import { api } from '../../../api/client'
-import type { DraftItem } from '../drafts/DraftsTable'
+export type PageItem = number | 'ellipsis-left' | 'ellipsis-right'
 
-type DraftState = {
-  items: DraftItem[]
-  isLoading: boolean
-  error: string | null
+type UsePaginationArgs = {
+  page: number
+  totalPages: number
+  siblings?: number
+  pageSize?: number
+  totalItems?: number
 }
 
-type Action =
-    | { type: 'fetch' }
-    | { type: 'success'; items: DraftItem[] }
-    | { type: 'error'; message: string }
-    | { type: 'disabled' }
+type PaginationWindow = {
+  items: PageItem[]
+  from: number
+  to: number
+}
 
-function reducer(_state: DraftState, action: Action): DraftState {
-  switch (action.type) {
-    case 'fetch': return { items: [], isLoading: true, error: null }
-    case 'success': return { items: action.items, isLoading: false, error: null }
-    case 'error': return { items: [], isLoading: false, error: action.message }
-    case 'disabled': return { items: [], isLoading: false, error: null }
+function getPaginationItems(current: number, totalPages: number, siblings = 1): PageItem[] {
+  const pageNeighbours = siblings * 2 + 3
+  const totalBlocks = pageNeighbours + 2
+
+  if (totalPages <= totalBlocks) {
+    return Array.from({ length: totalPages }, (_, i) => i + 1)
   }
+
+  const leftSibling = Math.max(current - siblings, 2)
+  const rightSibling = Math.min(current + siblings, totalPages - 1)
+  const hasLeftGap = leftSibling > 2
+  const hasRightGap = rightSibling < totalPages - 1
+
+  const items: PageItem[] = [1]
+
+  if (!hasLeftGap && hasRightGap) {
+    const leftRange = Array.from({ length: pageNeighbours - 1 }, (_, i) => i + 2)
+    items.push(...leftRange, 'ellipsis-right', totalPages)
+    return items
+  }
+
+  if (hasLeftGap && !hasRightGap) {
+    const rightRange = Array.from(
+      { length: pageNeighbours - 1 },
+      (_, i) => totalPages - (pageNeighbours - 2) + i,
+    )
+    items.push('ellipsis-left', ...rightRange)
+    return items
+  }
+
+  const middleRange = Array.from(
+    { length: rightSibling - leftSibling + 1 },
+    (_, i) => leftSibling + i,
+  )
+  items.push('ellipsis-left', ...middleRange, 'ellipsis-right', totalPages)
+  return items
 }
 
-type Args = { page: number; limit: number; enabled?: boolean }
+export function usePagination({
+  page,
+  totalPages,
+  siblings = 1,
+  pageSize = 0,
+  totalItems = 0,
+}: UsePaginationArgs): PaginationWindow {
+  const from = (page - 1) * pageSize + 1
+  const to = Math.min(page * pageSize, totalItems)
 
-export function useProductionDrafts({ page, limit, enabled = true }: Args): DraftState {
-  const [state, dispatch] = useReducer(reducer, { items: [], isLoading: enabled, error: null })
-
-  useEffect(() => {
-    if (!enabled) {
-      dispatch({ type: 'disabled' })
-      return
-    }
-
-    dispatch({ type: 'fetch' })
-    let isActive = true
-
-    api.get<{ data: DraftItem[] }>(`/archive/productions?draft=true&page=${page}&limit=${limit}`)
-        .then((response) => { if (isActive) dispatch({ type: 'success', items: response.data }) })
-        .catch((error: unknown) => {
-          if (!isActive) return
-          const message = error instanceof Error ? error.message : 'Productions konden niet geladen worden.'
-          dispatch({ type: 'error', message })
-        })
-
-    return () => { isActive = false }
-  }, [page, limit, enabled])
-
-  return state
+  return {
+    items: getPaginationItems(page, totalPages, siblings),
+    from,
+    to,
+  }
 }

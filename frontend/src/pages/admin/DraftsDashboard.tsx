@@ -5,12 +5,15 @@ import DraftsTab from '../../components/admin/drafts/DraftsTab'
 import DraftsTable from '../../components/admin/drafts/DraftsTable'
 import {useProductionDrafts} from "../../components/admin/hooks/useProductionDrafts.ts";
 import {useBlogDrafts} from "../../components/admin/hooks/useBlogsDrafts.ts";
+import { useOptionalAdminSession } from '../../auth/useAdminSessionContext';
 
 type TabKey = 'productions' | 'blogs'
 
 function DraftsDashboardPageContent() {
     const messages = useAdminMessages()
     const d = messages.admin.drafts
+    const session = useOptionalAdminSession()
+    const currentUserId = session?.user?.id
 
     const [tab, setTab] = useState<TabKey>('productions')
 
@@ -55,7 +58,7 @@ function DraftsDashboardPageContent() {
                     </p>
                 </div>
             ) : (
-                <DraftsTable items={items} isLoading={isLoading} tab={tab}/>
+                <DraftsTable items={items} isLoading={isLoading} tab={tab} currentUserId={currentUserId}/>
 
             )}
         </section>

@@ -18,12 +18,14 @@ export type DraftItem = {
         nl: 'complete' | 'attention' | 'missing'
         en: 'complete' | 'attention' | 'missing'
     }
+    editor_ids?: string[]
 }
 
 type DraftsTableProps = {
     items: DraftItem[]
     isLoading: boolean
     tab: 'productions' | 'blogs'
+    currentUserId?: string
 }
 
 
