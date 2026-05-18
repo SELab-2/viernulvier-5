@@ -51,7 +51,13 @@ export class BlogsRepository {
         const draft = options.draft ?? false
 
         if (draft !== 'all') {
-            conditions.push({ draft: draft })
+            if (draft) {
+                conditions.push({ draft: true })
+            } else {
+                conditions.push({
+                    OR: [{ draft: false }, { draft: null }],
+                })
+            }
         }
         if (options.editorId){
             conditions.push({
