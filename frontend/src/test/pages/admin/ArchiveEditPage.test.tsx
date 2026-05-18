@@ -23,7 +23,6 @@ const mockMessages: Pick<Messages, 'admin'> = {
       dashboardIconAlt: 'Dashboard icon',
       productionsIconAlt: 'Productions icon',
       postersIconAlt: 'Posters icon',
-      galleryIconAlt: 'Gallery icon',
       organisationIconAlt: 'Organisation icon',
       settingsIconAlt: 'Settings icon',
     },

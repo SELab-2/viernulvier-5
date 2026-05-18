@@ -78,7 +78,7 @@ export class DashboardRepository {
     }
 
     async getRecentPosters(limit: number): Promise<RawPoster[]> {
-        const posters = await this.postersRepository.findAll({ page: 1, limit, sort: 'recent' })
+        const posters = await this.postersRepository.findRecent(limit)
         return posters.map((poster) => ({
             id: poster.id,
             title: poster.title,

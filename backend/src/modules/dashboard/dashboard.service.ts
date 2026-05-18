@@ -127,7 +127,7 @@ function mapPoster(poster: RawPoster): DashboardRecentItem {
         title: poster.title,
         type: 'Poster',
         status: 'available',
-        languageStatus: { nl: 'complete', en: 'complete' },
+        languageStatus: { nl: 'attention', en: 'complete' },
         updated_at: poster.updated_at,
     }
 }

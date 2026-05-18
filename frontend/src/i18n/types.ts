@@ -254,7 +254,6 @@ export type Messages = {
       dashboardIconAlt: string
       productionsIconAlt: string
       postersIconAlt: string
-      galleryIconAlt: string
       organisationIconAlt: string
       settingsIconAlt: string
     }

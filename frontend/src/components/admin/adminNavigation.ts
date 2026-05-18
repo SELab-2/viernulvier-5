@@ -41,7 +41,7 @@ export function getNavIconAlt(id: AdminNavItemId, nav: AdminNavMessages): string
         dashboard: nav.dashboardIconAlt,
         productions: nav.productionsIconAlt,
         posters: nav.postersIconAlt,
-        gallery: nav.galleryIconAlt,
+        gallery: nav.gallery,
         organisation: nav.organisationIconAlt,
         settings: nav.settingsIconAlt,
     }

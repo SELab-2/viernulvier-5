@@ -267,7 +267,6 @@ const nl: Messages = {
       dashboardIconAlt: 'Dashboard icoon',
       productionsIconAlt: 'Producties icoon',
       postersIconAlt: 'Affiches icoon',
-      galleryIconAlt: 'Galerij icoon',
       organisationIconAlt: 'Organisatie icoon',
       settingsIconAlt: 'Instellingen icoon',
     },

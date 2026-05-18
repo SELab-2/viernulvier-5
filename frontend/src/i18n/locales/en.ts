@@ -267,7 +267,6 @@ const en: Messages = {
       dashboardIconAlt: 'Dashboard icon',
       productionsIconAlt: 'Productions icon',
       postersIconAlt: 'Posters icon',
-      galleryIconAlt: 'Gallery icon',
       organisationIconAlt: 'Organisation icon',
       settingsIconAlt: 'Settings icon',
     },

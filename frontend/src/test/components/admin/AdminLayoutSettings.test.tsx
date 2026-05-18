@@ -61,7 +61,6 @@ vi.mock('../../../i18n', () => ({
         settings: 'Instellingen',
         dashboardIconAlt: 'Dashboard',
         productionsIconAlt: 'Producties',
-        galleryIconAlt: 'Galerij',
         organisationIconAlt: 'Organisatie',
         settingsIconAlt: 'Instellingen',
       },
