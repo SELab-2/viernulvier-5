@@ -1654,7 +1654,7 @@ function SearchPageContent() {
 
                     <div className="flex w-full items-start py-6 md:py-8">
                         <div className="z-30 flex w-12 shrink-0 self-stretch justify-center border-r border-border bg-surface-inset md:hidden">
-                            <div className="fixed top-[65px] left-1.5 z-40 flex items-start justify-center md:hidden">
+                            <div className="fixed bottom-6 right-4 z-40 flex items-end justify-center md:hidden">
                                 <button
                                     type="button"
                                     className="inline-flex items-center justify-center gap-2 rounded-full bg-accent px-3 py-3 text-sm font-semibold text-white shadow-xl shadow-accent/20 transition hover:bg-accent/90"
