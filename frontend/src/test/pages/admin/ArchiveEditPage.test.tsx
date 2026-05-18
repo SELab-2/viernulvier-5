@@ -117,7 +117,7 @@ const mockMessages: Pick<Messages, 'admin'> = {
       tableColTitle: 'Title',
       tableColType: 'Type',
       tableColStatus: 'Status',
-      tableColLanguage: 'Language Status',
+      tableColEditor: 'Edited by me',
       tableColDate: 'Date',
       tableColActions: 'Actions',
       statusUnavailable: 'Not yet available in archive',
@@ -129,6 +129,7 @@ const mockMessages: Pick<Messages, 'admin'> = {
       languageStatusMissing: 'Translation missing',
       emptyRecent: 'No recent archive drafts found.',
       loadingMessage: 'Loading drafts...',
+      filterOnlyCurrent: 'Show my drafts',
     }
   },
 }
