@@ -20,6 +20,7 @@ import type { Language, BlogContent } from '../../types/blog'
 import type { Locale } from '../../i18n/types'
 
 import AdminLayout from '../../components/admin/AdminLayout'
+import {useOptionalAdminSession} from "../../auth/useAdminSessionContext.ts";
 
 /*
 With this page you can create or edit a blog, the blog will look like this:
@@ -101,6 +102,9 @@ const defaultForm: BlogContent = {
 }
 
 function CreateBlogPage() {
+    const session = useOptionalAdminSession()
+    const currentUser = session?.user
+
     const { id: blogId } = useParams<{ id: string }>()
 
     /*Edit mode if the blog already exists*/
@@ -135,6 +139,7 @@ function CreateBlogPage() {
     const [deletedBlogImageUrls, setDeletedBlogImageUrls] = useState<string[]>([])
     const [isUploadingImages, setIsUploadingImages] = useState(false)
     const initialBlogImagesRef = useRef<string[]>([])
+    const [saveAction, setSaveAction] = useState<'publish' | 'draft' | null>(null)
 
     const navigate = useNavigate()
     const [locale, setLocale] = useState<Locale>(() => getActiveLocale(window.location.pathname))
@@ -350,8 +355,135 @@ function CreateBlogPage() {
         }))
     }
 
-    const saveAsDraft = () => {
-        // TODO: save as draft impl.
+    const saveAsDraft = async () => {
+        setIsSaving(true)
+        setSaveAction('draft')
+        setError('')
+        setSuccess('')
+
+        try {
+            const combinedContent = {
+                nl: (contentJson.nl ?? form.nl.content) || null,
+                en: (contentJson.en ?? form.en.content) || null,
+            }
+
+            const blogTitle = {
+                nl: form.nl.title || null,
+                en: form.en.title || null,
+            }
+
+            const payload = {
+                title: blogTitle,
+                content: combinedContent,
+                productionIds: selectedProductionIds,
+                draft: true,
+            }
+
+            let createdBlogId: string
+
+            if (isEditMode && blogId) {
+                const response = await apiFetch<{ data: { id: string } }>(`/archive/blogs/${blogId}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify(payload),
+                })
+                createdBlogId = response.data.id
+            } else {
+                const response = await api.post<{ data: { id: string } }>('/archive/blogs', payload)
+                createdBlogId = response.data.id
+            }
+
+
+            try {
+                if (currentUser) {
+                    await apiFetch(`/archive/blogs/${createdBlogId}/editors`, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            editorId: currentUser.id,
+                        }),
+                    })
+                }
+
+            } catch (error) {
+                // Ignore "editor already linked"
+                if (
+                    error instanceof Error &&
+                    error.message.includes('409')
+                ) {
+                    // do nothing
+                } else {
+                    console.log(error)
+                }
+            }
+
+
+
+            // handle pending images the same way as publish
+            if (pendingImages.length > 0) {
+                setIsUploadingImages(true)
+                const filesPayload = await Promise.all(
+                    pendingImages.map(async (file) => ({
+                        file_name: file.name,
+                        file_base64: await fileToBase64(file),
+                    }))
+                )
+
+                try {
+                    const imagesResponse = await apiFetch<{ data: { images: string[]; thumbnail_index: number | null } }>(
+                        `/archive/blogs/${createdBlogId}/images`,
+                        {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                files: filesPayload,
+                                thumbnail_index: thumbnailIndex,
+                            }),
+                        }
+                    )
+                    setBlogImages(imagesResponse.data.images ?? [])
+                    setThumbnailIndex(imagesResponse.data.thumbnail_index ?? null)
+                    setPendingImages([])
+                } catch (uploadError) {
+                    setError(uploadError instanceof Error ? uploadError.message : 'Failed to upload images.')
+                } finally {
+                    setIsUploadingImages(false)
+                }
+            }
+
+            if (deletedBlogImageUrls.length > 0) {
+                const indicesToDelete = Array.from(
+                    new Set(
+                        deletedBlogImageUrls
+                            .map((imageUrl) => initialBlogImagesRef.current.indexOf(imageUrl))
+                            .filter((index) => index >= 0)
+                    )
+                ).sort((left, right) => right - left)
+
+                let latestImages = blogImages
+                let latestThumbnailIndex = thumbnailIndex
+
+                for (const imageIndex of indicesToDelete) {
+                    const response = await apiFetch<{ data: { images: string[]; thumbnail_index: number | null } }>(
+                        `/archive/blogs/${blogId}/images/${imageIndex}`,
+                        { method: 'DELETE' }
+                    )
+                    latestImages = response.data.images ?? latestImages
+                    latestThumbnailIndex = response.data.thumbnail_index ?? null
+                }
+
+                setBlogImages(latestImages)
+                setThumbnailIndex(latestThumbnailIndex)
+                setDeletedBlogImageUrls([])
+            }
+
+
+            // send to preview page
+            navigate(`/admin/blogs/${createdBlogId}`)
+        } catch (saveError) {
+            setError(saveError instanceof Error ? saveError.message : 'Failed to save draft.')
+            setIsUploadingImages(false)
+        } finally {
+            setIsSaving(false)
+            setSaveAction(null)
+        }
     }
 
     const isLocaleFilled = (localeValue: Locale) => {
@@ -375,6 +507,7 @@ function CreateBlogPage() {
         }
 
         setIsSaving(true)
+        setSaveAction('publish')
         setError('')
         setSuccess('')
 
@@ -396,6 +529,28 @@ function CreateBlogPage() {
             } else {
                 const response = await api.post<{ data: { id: string } }>('/archive/blogs', payload)
                 createdBlogId = response.data.id
+            }
+
+            try {
+                if (currentUser) {
+                    await apiFetch(`/archive/blogs/${createdBlogId}/editors`, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            editorId: currentUser.id,
+                        }),
+                    })
+                }
+
+            } catch (error) {
+                // Ignore "editor already linked"
+                if (
+                    error instanceof Error &&
+                    error.message.includes('409')
+                ) {
+                    // do nothing
+                } else {
+                    console.log(error)
+                }
             }
 
             // Upload images if there are any pending
@@ -484,6 +639,7 @@ function CreateBlogPage() {
             setIsUploadingImages(false)
         } finally {
             setIsSaving(false)
+            setSaveAction(null)
         }
     }
 
@@ -706,7 +862,7 @@ function CreateBlogPage() {
                             disabled={isSaving || isLoadingBlog || isDeleting}
                             className="rounded-full bg-accent px-6 py-3 text-sm font-regular tracking-wide text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                            {isSaving ? (messages.blogs.savingButton) : (messages.editHeader.publish)}
+                            {isSaving && saveAction === 'publish' ? (messages.blogs.savingButton) : (messages.editHeader.publish)}
                         </button>
 
                         <button
@@ -715,7 +871,7 @@ function CreateBlogPage() {
                             disabled={isSaving || isLoadingBlog || isDeleting}
                             className="rounded-full bg-accent px-6 py-3 text-sm font-regular tracking-wide text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                            {isSaving ? (messages.blogs.savingButton) : (messages.editHeader.saveOnDraft)}
+                            {isSaving && saveAction === 'draft' ? (messages.blogs.savingDraftButton) : (messages.editHeader.saveOnDraft)}
                         </button>
 
                         {isEditMode ? (
