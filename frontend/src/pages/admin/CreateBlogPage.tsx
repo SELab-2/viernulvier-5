@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { api, apiFetch } from '../../api/client'
-import { getActiveLocale, getMessages} from '../../i18n'
+import { getActiveLocale, getMessages, LOCALE_CHANGE_EVENT, setActiveLocale } from '../../i18n'
 
 import { useNavigate, useParams } from 'react-router-dom'
 import SectionHeading from '../../components/admin/SectionHeading'
 import BlogsTab from '../../components/admin/BlogsTab'
 import BlogsTabContent from '../../components/admin/BlogsTabContent'
 import ProductionManagementSection, { type ProductionItem } from '../../components/admin/blogs/ProductionManagementSection'
+import { BlogBannerUploadSection } from '../../components/admin/blogs/BlogBannerUploadSection'
 import type { ProductionPickerFilters } from '../../components/admin/blogs/ProductionPickerPopup'
 import {
     formatBlogDetailForForm,
@@ -21,17 +22,27 @@ import type { Locale } from '../../i18n/types'
 
 import AdminLayout from '../../components/admin/AdminLayout'
 
-
 /*
 With this page you can create or edit a blog, the blog will look like this:
 
 {
     title: { nl: '' , en: ''},
     content: { nl: '', en: ''},
-    productionIds: []
+    productionIds: [],
+    images: [],
+    thumbnail_index: null
 }
 
 */
+
+async function fileToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(String(reader.result ?? ''))
+        reader.onerror = () => reject(new Error('Could not read file'))
+        reader.readAsDataURL(file)
+    })
+}
 
 function mergeUniqueProductions(productionList: ProductionItem[]): ProductionItem[] {
     const byId = new Map<string, ProductionItem>()
@@ -96,7 +107,7 @@ function CreateBlogPage() {
     /*Edit mode if the blog already exists*/
     const isEditMode = Boolean(blogId)
 
-    const [languageTab, setLanguageTab] = useState<Locale>('nl')
+    const [languageTab, setLanguageTab] = useState<Locale>(() => getActiveLocale(window.location.pathname))
     const [form, setForm] = useState<BlogContent>(defaultForm)
     const [contentJson, setContentJson] = useState<Record<Locale, unknown | null>>({
         nl: null,
@@ -127,9 +138,28 @@ function CreateBlogPage() {
     const [productionsError, setProductionsError] = useState('')
     const isLoadingProductionsRef = useRef(false)
 
+    const [blogImages, setBlogImages] = useState<string[]>([])
+    const [thumbnailIndex, setThumbnailIndex] = useState<number | null>(null)
+    const [pendingImages, setPendingImages] = useState<File[]>([])
+    const [deletedBlogImageUrls, setDeletedBlogImageUrls] = useState<string[]>([])
+    const [isUploadingImages, setIsUploadingImages] = useState(false)
+    const initialBlogImagesRef = useRef<string[]>([])
+
     const navigate = useNavigate()
-    const locale = getActiveLocale(window.location.pathname)
+    const [locale, setLocale] = useState<Locale>(() => getActiveLocale(window.location.pathname))
     const messages = getMessages(locale)
+
+    useEffect(() => {
+        const syncLocale = () => {
+            setLocale(getActiveLocale(window.location.pathname))
+        }
+
+        window.addEventListener(LOCALE_CHANGE_EVENT, syncLocale)
+
+        return () => {
+            window.removeEventListener(LOCALE_CHANGE_EVENT, syncLocale)
+        }
+    }, [])
 
     const languageOptions: { key: Language; label: string }[] = [
         { key: 'nl', label: messages.blogs.dutchOption },
@@ -142,6 +172,8 @@ function CreateBlogPage() {
             setContentJson({ nl: null, en: null })
             setSelectedProductionIds([])
             setIsBlogNotFound(false)
+            setDeletedBlogImageUrls([])
+            initialBlogImagesRef.current = []
             return
         }
 
@@ -163,6 +195,10 @@ function CreateBlogPage() {
                 setContentJson(formattedContentJson)
 
                 setSelectedProductionIds(response.data.productions ?? [])
+                setBlogImages(response.data.images ?? [])
+                initialBlogImagesRef.current = response.data.images ?? []
+                setThumbnailIndex(response.data.thumbnail_index ?? null)
+                setDeletedBlogImageUrls([])
             } catch (loadError) {
                 if (isActive) {
                     if (isNotFoundError(loadError)) {
@@ -298,6 +334,7 @@ function CreateBlogPage() {
 
     const setTab = (key: Locale) => {
         setLanguageTab(key)
+        setActiveLocale(key)
     }
 
     // this function changes a certain field in a language 
@@ -358,18 +395,103 @@ function CreateBlogPage() {
                 productionIds: selectedProductionIds,
             }
 
+            let createdBlogId: string
+
             if (isEditMode && blogId) {
                 const response = await apiFetch<{ data: { id: string } }>(`/archive/blogs/${blogId}`, {
                     method: 'PATCH',
                     body: JSON.stringify(payload),
                 })
-                navigate(`/blogs/${response.data.id}`)
+                createdBlogId = response.data.id
             } else {
                 const response = await api.post<{ data: { id: string } }>('/archive/blogs', payload)
-                navigate(`/blogs/${response.data.id}`)
+                createdBlogId = response.data.id
             }
+
+            // Upload images if there are any pending
+            if (pendingImages.length > 0) {
+                setIsUploadingImages(true)
+                const filesPayload = await Promise.all(
+                    pendingImages.map(async (file) => ({
+                        file_name: file.name,
+                        file_base64: await fileToBase64(file),
+                    }))
+                )
+
+                try {
+                    const imagesResponse = await apiFetch<{ data: { images: string[]; thumbnail_index: number | null } }>(
+                        `/archive/blogs/${createdBlogId}/images`,
+                        {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                files: filesPayload,
+                                thumbnail_index: thumbnailIndex,
+                            }),
+                        }
+                    )
+
+                    setBlogImages(imagesResponse.data.images ?? [])
+                    setThumbnailIndex(imagesResponse.data.thumbnail_index ?? null)
+                    setPendingImages([])
+                    setIsUploadingImages(false)
+                } catch (uploadError) {
+                    // Try to roll back the created blog to avoid duplicates on retry
+                    try {
+                        await apiFetch(`/archive/blogs/${createdBlogId}`, { method: 'DELETE' })
+                        setIsUploadingImages(false)
+                        setError(
+                            messages.blogs.bannerUpload.uploadFailedRemoved(
+                                uploadError instanceof Error ? uploadError.message : ''
+                            )
+                        )
+                    } catch {
+                        // Could not roll back — surface edit URL so user can retry there
+                        setIsUploadingImages(false)
+                        const editUrl = `/${locale}/admin/blogs/${createdBlogId}/edit`
+                        setError(
+                            messages.blogs.bannerUpload.uploadFailedCreatedEditUrl(
+                                uploadError instanceof Error ? uploadError.message : '',
+                                editUrl
+                            )
+                        )
+                    }
+                }
+            }
+
+            //Delete the deleted images in the backend
+            if (deletedBlogImageUrls.length > 0) {
+                const indicesToDelete = Array.from(
+                    new Set(
+                        deletedBlogImageUrls
+                            .map((imageUrl) => initialBlogImagesRef.current.indexOf(imageUrl))
+                            .filter((index) => index >= 0)
+                    )
+                ).sort((left, right) => right - left)
+
+                let latestImages = blogImages
+                let latestThumbnailIndex = thumbnailIndex
+
+                for (const imageIndex of indicesToDelete) {
+                    const response = await apiFetch<{ data: { images: string[]; thumbnail_index: number | null } }>(
+                        `/archive/blogs/${blogId}/images/${imageIndex}`,
+                        {
+                            method: 'DELETE',
+                        },
+                    )
+
+                    latestImages = response.data.images ?? latestImages
+                    latestThumbnailIndex = response.data.thumbnail_index ?? null
+                }
+
+                setBlogImages(latestImages)
+                setThumbnailIndex(latestThumbnailIndex)
+                setDeletedBlogImageUrls([])
+            }
+
+            navigate(`/blogs/${createdBlogId}`)
         } catch (saveError) {
             setError(saveError instanceof Error ? saveError.message : 'Failed to save blog.')
+            setIsUploadingImages(false)
         } finally {
             setIsSaving(false)
         }
@@ -494,6 +616,38 @@ function CreateBlogPage() {
         setIsProductionPopupOpen(true)
     }
 
+    const handleDeleteImage = (index: number) => {
+        if (!isEditMode || !blogId) {
+            setBlogImages((current) => current.filter((_, i) => i !== index))
+            // If the deleted image was the thumbnail, reset thumbnail to null
+            if (thumbnailIndex === index) {
+                setThumbnailIndex(null)
+            }
+            // If there are images after the deleted one, adjust their indices
+            else if (thumbnailIndex !== null && thumbnailIndex > index) {
+                setThumbnailIndex(thumbnailIndex - 1)
+            }
+            return
+        }
+
+        const imageToDelete = blogImages[index]
+        if (typeof imageToDelete === 'undefined') {
+            return
+        }
+
+        setDeletedBlogImageUrls((current) => (current.includes(imageToDelete) ? current : [...current, imageToDelete]))
+        setBlogImages((current) => current.filter((_, i) => i !== index))
+
+        // If the deleted image was the thumbnail, reset thumbnail to null
+        if (thumbnailIndex === index) {
+            setThumbnailIndex(null)
+        }
+        // If there are images after the deleted one, adjust their indices
+        else if (thumbnailIndex !== null && thumbnailIndex > index) {
+            setThumbnailIndex(thumbnailIndex - 1)
+        }
+
+    }
 
     if (isEditMode && isBlogNotFound) {
         return (
@@ -523,7 +677,7 @@ function CreateBlogPage() {
             <BlogsTab language={languageTab} options={languageOptions} setTab={setTab} />
             {/* Content editor for selected language */}
             <BlogsTabContent
-                key={languageTab}
+                key={`${languageTab}-${locale}`}
                 title={form[languageTab].title}
                 content={form[languageTab].content}
                 changeTitle={changeTitle}
@@ -531,6 +685,7 @@ function CreateBlogPage() {
                 onJsonChange={handleJsonChange}
                 titleLabel={messages.blogs.title}
                 contentLabel={messages.blogs.content}
+                quillPlaceholder={messages.blogs.placeholder}
             />
 
             <ProductionManagementSection
@@ -552,6 +707,26 @@ function CreateBlogPage() {
                 onAddProduction={addProduction}
                 onRemoveProduction={removeProduction}
             />
+
+            <section className="relative px-4 py-4 overflow-hidden">
+                <div className="px-4 py-4 relative flex flex-col">
+                    <div className="min-w-0 max-w-full rounded-xl border border-border bg-background">
+                        <div className="bg-surface rounded-xl p-4">
+                            <h2 className="mb-4 text-lg font-semibold text-foreground">{messages.blogs.bannerUpload.title}</h2>
+                            <p className="mb-4 text-sm text-muted">{messages.blogs.bannerUpload.subtitle}</p>
+                            <BlogBannerUploadSection
+                                images={blogImages}
+                                thumbnailIndex={thumbnailIndex}
+                                onThumbnailIndexChange={setThumbnailIndex}
+                                onPendingFilesChange={setPendingImages}
+                                onDeleteImage={handleDeleteImage}
+                                isUploading={isUploadingImages}
+                                messages={messages}
+                            />
+                        </div>
+                    </div>
+                </div>
+            </section>
 
             <section className="relative px-4 py-4 overflow-hidden">
                 <div className="px-4 py-4 relative flex flex-col">
@@ -579,7 +754,7 @@ function CreateBlogPage() {
                                 type="button"
                                 onClick={removeBlog}
                                 disabled={isSaving || isLoadingBlog || isDeleting}
-                                className="rounded-full bg-accent px-4 py-2 text-sm font-regular tracking-wide text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                                className="rounded-full bg-accent px-6 py-3 text-sm font-regular tracking-wide text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                             >
                                 {isDeleting ? messages.blogs.deletingButton : messages.blogs.deleteButton}
                             </button>

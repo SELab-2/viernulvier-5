@@ -36,46 +36,16 @@ const nl: Messages = {
     onThisDayFallbackSubheading: 'Geen matches voor deze datum. Daarom tonen we recente producties.',
     popularTagsLabel: 'Verken per categorie:',
     popularTagsMore: '+ meer',
+    popularTagsLess: '- minder',
     popularTags: ['Concert', 'Nightlife', 'Talks', 'Installatie', 'Theater', 'Performance', 'Dans', 'Comedy', 'Film', 'Spoken Word', 'Circus', 'Food', 'Monument', 'Workshop', 'Feest', 'Expo', 'Festival'],
     latestBlogHeading: 'Recente blog post',
-    latestBlogSubheading: 'verhalen, achtergronden en nieuws uit ons kunstencentrum',
-    latestBlogTitle: 'Van speleologie naar cultuurtempel: de hergeboorte van 1982',
-    latestBlogParagraphOne:
-      'Wist je dat de vooruit in de jaren 70 bijna een ruïne was? In 1982 nam een bende enthousiaste jongeren het heft in eigen handen. Gewapend met zaklampen en speleologiehelmen leidden ze duizenden gentenaars door de vergeten gangen van ons gebouw.',
-    latestBlogParagraphTwoTitle: 'Eclectisch & complex gebouw',
-    latestBlogParagraphTwo:
-      'Het resultaat was een eclectisch en bijzonder complex gebouw met een cafe-restaurant, een winkel, een bibliotheek, vergader- en repetitielokalen en natuurlijk de twee grote zalen: de Concertzaal ...',
+    latestBlogSubheading: 'Verhalen, achtergronden en nieuws uit ons kunstencentrum.',
     latestBlogReadMore: 'lees meer',
     latestBlogViewAll: 'Bekijk alle blog posts',
     recentDigitizedHeading: 'Recent gedigitaliseerd',
     recentDigitizedViewItem: 'bekijk item',
     recentDigitizedViewAll: 'doorzoek het volledige archief >',
-    recentDigitizedItems: [
-      {
-        dateLabel: '23 SEP 2019',
-        archiveLabel: 'Archief #A92',
-        title: 'UITGELEZEN',
-        description: 'met Ruth Joos, Raf Njotea, Melissa Giardina, Marijke Pinoy en Kaat Van Stralen',
-      },
-      {
-        dateLabel: '23 SEP 2019',
-        archiveLabel: 'Archief #A92',
-        title: 'Eefje De Visser',
-        description: 'Het volledige concert "Nachtlicht", exclusief opgenomen in de Theaterzaal.',
-      },
-      {
-        dateLabel: '23 SEP 2019',
-        archiveLabel: 'Archief #A92',
-        title: 'Afra Tafri Creations / Abhishek Thapar',
-        description: 'Lacuna Kitchen - Een culinaire performance over herinnering en smaak.',
-      },
-      {
-        dateLabel: '23 SEP 2019',
-        archiveLabel: 'Archief #A92',
-        title: 'The Tender Ears',
-        description: 'Dampende bouillon, gefermenteerd lekkers en poezie.',
-      },
-    ],
+    fallbackUntitled: 'Zonder titel',
   },
   search: {
     heading: 'Archief',
@@ -392,6 +362,7 @@ const nl: Messages = {
   },
 
   blogs: {
+      placeholder: 'Schrijf je blog content hier...',
       navBack: 'Terug',
       languageError:'Blog bestaat niet in deze taal',
       loadingBlog: 'Blog wordt geladen...',
@@ -439,6 +410,24 @@ const nl: Messages = {
           loading: "Producties zoeken...",
           loadingMore: "Meer producties laden...",
           noProductionFound: "Geen producties beschikbaar"
+      },
+      bannerUpload: {
+          title: "Blog banners",
+          subtitle: "Voeg bannerafbeeldingen toe.",
+          label: "Blog banners / afbeeldingen",
+          addButton: "+ Afbeeldingen toevoegen",
+          allowedFormats: "Toegestane formaten: JPG, PNG, WEBP.",
+          invalidFileTypes: (fileNames: string) => `Ongeldige bestandstypes: ${fileNames}`,
+          alreadyUploaded: (count: number) => ` ${count} afbeelding${count !== 1 ? 'en' : ''} al geüpload.`,
+          uploadedImagesLabel: "Geüploade afbeeldingen",
+          uploadFailedRemoved: (errorMessage: string) => `Upload van afbeeldingen mislukt en de nieuw aangemaakte blog werd verwijderd: ${errorMessage}`,
+          uploadFailedCreatedEditUrl: (errorMessage: string, editUrl: string) => `Upload van afbeeldingen mislukt (${errorMessage}). De blog is aangemaakt — je kunt verder bewerken op ${editUrl}`,
+          setThumbnailButton: "Instellen",
+          pendingUploadLabel: (count: number) => `Wacht op upload (${count})`,
+          removeButton: "Verwijderen",
+          coverLabel: "Voorkant",
+          deleteImageAriaLabel: "Afbeelding verwijderen",
+          coverHint: "Klik op een afbeelding om het als voorkant in te stellen. Klik opnieuw om het uit te schakelen."
       }
   }
 }

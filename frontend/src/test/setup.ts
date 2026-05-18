@@ -19,3 +19,8 @@ if (!window.matchMedia) {
 
 window.localStorage.setItem('locale', 'nl')
 document.documentElement.lang = 'nl'
+
+Object.defineProperty(window, 'scrollTo', {
+	writable: true,
+	value: () => {},
+})

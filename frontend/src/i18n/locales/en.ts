@@ -36,46 +36,16 @@ const en: Messages = {
     onThisDayFallbackSubheading: 'No matches for this date, so we are showing recent productions.',
     popularTagsLabel: 'Explore by category:',
     popularTagsMore: '+ more',
+    popularTagsLess: '- less',
     popularTags: ['Concert', 'Nightlife', 'Talks', 'Installation', 'Theatre', 'Performance', 'Dance', 'Comedy', 'Film', 'Spoken Word', 'Circus', 'Food', 'Monument', 'Workshop', 'Party', 'Expo', 'Festival'],
     latestBlogHeading: 'Latest blog post',
-    latestBlogSubheading: 'stories, context and updates from our arts centre',
-    latestBlogTitle: 'Did you know De Vooruit was almost a ruin in the 70s?',
-    latestBlogParagraphOne:
-      'In 1982, a group of enthusiastic young people took matters into their own hands. Armed with flashlights and caving helmets, they guided thousands of Ghent residents through the forgotten hallways of our building.',
-    latestBlogParagraphTwoTitle: 'Eclectic & complex building',
-    latestBlogParagraphTwo:
-      'The result was an eclectic and highly complex building with a cafe-restaurant, a shop, a library, meeting and rehearsal rooms, and of course the two major halls: the Concert Hall ...',
+    latestBlogSubheading: 'Stories, context and updates from our arts centre.',
     latestBlogReadMore: 'read more',
     latestBlogViewAll: 'View all blog posts',
     recentDigitizedHeading: 'Recently digitized',
     recentDigitizedViewItem: 'view item',
     recentDigitizedViewAll: 'browse the full archive >',
-    recentDigitizedItems: [
-      {
-        dateLabel: '23 SEP 2019',
-        archiveLabel: 'Archive #A92',
-        title: 'UITGELEZEN',
-        description: 'with Ruth Joos, Raf Njotea, Melissa Giardina, Marijke Pinoy and Kaat Van Stralen',
-      },
-      {
-        dateLabel: '23 SEP 2019',
-        archiveLabel: 'Archive #A92',
-        title: 'Eefje De Visser',
-        description: 'The full "Nachtlicht" concert, recorded exclusively in the Theatre Hall.',
-      },
-      {
-        dateLabel: '23 SEP 2019',
-        archiveLabel: 'Archive #A92',
-        title: 'Afra Tafri Creations / Abhishek Thapar',
-        description: 'Lacuna Kitchen - A culinary performance about memory and taste.',
-      },
-      {
-        dateLabel: '23 SEP 2019',
-        archiveLabel: 'Archive #A92',
-        title: 'The Tender Ears',
-        description: 'Steaming broth, fermented delights and poetry.',
-      },
-    ],
+    fallbackUntitled: 'Untitled',
   },
   search: {
     heading: 'Archive',
@@ -392,6 +362,7 @@ const en: Messages = {
   },
 
   blogs: {
+      placeholder: 'Write your blog content here...',
       navBack: 'Go back',
       languageError:'Blog does not exist in this language',
       loadingBlog: 'Loading blog...',
@@ -440,6 +411,24 @@ const en: Messages = {
           loadingMore: 'Loading more productions...',
           noProductionFound: 'No production found'
       },
+      bannerUpload: {
+          title: 'Blog banners',
+          subtitle: 'Add banner images.',
+          label: 'Blog banners / images',
+          addButton: '+ Add images',
+          allowedFormats: 'Allowed formats: JPG, PNG, WEBP.',
+          invalidFileTypes: (fileNames: string) => `Invalid file types: ${fileNames}`,
+          alreadyUploaded: (count: number) => ` ${count} image${count !== 1 ? 's' : ''} already uploaded.`,
+          uploadedImagesLabel: 'Uploaded images',
+          uploadFailedRemoved: (errorMessage: string) => `Image upload failed and the created blog was removed: ${errorMessage}`,
+          uploadFailedCreatedEditUrl: (errorMessage: string, editUrl: string) => `Image upload failed (${errorMessage}). The blog was created — you can continue editing it at ${editUrl}`,
+          setThumbnailButton: 'Set',
+          pendingUploadLabel: (count: number) => `Pending upload (${count})`,
+          removeButton: 'Remove',
+          coverLabel: 'Cover',
+          deleteImageAriaLabel: 'Delete image',
+          coverHint: 'Click on an image to set it as cover. Click again to remove it.'
+      }
   },
 }
 
