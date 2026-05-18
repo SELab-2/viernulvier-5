@@ -24,6 +24,8 @@ import CreateBlogPage from './pages/admin/CreateBlogPage'
 import BlogDetailPage from './pages/public/BlogDetailPage'
 
 import DraftsDashboard from './pages/admin/DraftsDashboard.tsx'
+import ArchivePreviewPage from "./pages/admin/ArchivePreviewPage.tsx";
+import BlogPreviewPage from "./pages/admin/BlogPreviewPage.tsx";
 /**
  * Root App component.
  *
@@ -94,6 +96,22 @@ function App() {
                             }
                         />
                         <Route
+                            path={`/en${adminRoutes.draftsPath}`}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <DraftsDashboard />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+                        <Route
+                            path={`/nl${adminRoutes.draftsPath}`}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <DraftsDashboard />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+                        <Route
                             path={adminRoutes.archiveEditPath}
                             element={
                                 <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
@@ -106,6 +124,32 @@ function App() {
                             element={
                                 <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
                                     <PostersPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+                        <Route
+                            path={adminRoutes.archivePreviewPath}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.archivePreviewPath}>
+                                    <ArchivePreviewPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+
+                        <Route
+                            path={`/en${adminRoutes.archivePreviewPath}`}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.archivePreviewPath}>
+                                    <ArchivePreviewPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+
+                        <Route
+                            path={`/nl${adminRoutes.archivePreviewPath}`}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.archivePreviewPath}>
+                                    <ArchivePreviewPage />
                                 </ProtectedAdminRoute>
                             }
                         />
@@ -134,6 +178,35 @@ function App() {
                                 </ProtectedAdminRoute>
                             }
                         />
+
+                        <Route
+                            path={adminRoutes.blogPreviewPath}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.blogPreviewPath}>
+                                    <BlogPreviewPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+
+                        <Route
+                            path={`/en${adminRoutes.blogPreviewPath}`}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.blogPreviewPath}>
+                                    <BlogPreviewPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+
+                        <Route
+                            path={`/nl${adminRoutes.blogPreviewPath}`}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.blogPreviewPath}>
+                                    <BlogPreviewPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+
+
 
                         <Route
                             path="/admin/blogs/:id/edit"

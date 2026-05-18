@@ -40,11 +40,6 @@ function DraftsTable({ items, isLoading, tab}: DraftsTableProps) {
         tab === "productions"
             ? "/admin/archive"
             : "/admin/blogs";
-    const baseRoute =
-        tab === "productions"
-            ? "/archive"
-            : "/blogs"
-
 
     return (
         <div className="overflow-hidden rounded-[12px] border border-[var(--color-admin-card-border)] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.05)] dark:bg-[#111318]">
@@ -133,7 +128,7 @@ function DraftsTable({ items, isLoading, tab}: DraftsTableProps) {
                                 <td className="px-4 py-4">
                                     <div className="flex gap-1 -ml-2">
                                         <button
-                                            onClick={() => navigate(`${baseRoute}/${item.id}`)}
+                                            onClick={() => navigate(`${adminBaseRoute}/${item.id}`)}
                                             className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white">
                                             {d.actionView}
                                         </button>

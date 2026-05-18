@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useReducer } from 'react'
 import { api } from '../../../api/client'
-import type {DraftItem} from '../drafts/DraftsTable'
+import type { DraftItem } from '../drafts/DraftsTable'
 
 type DraftState = {
     items: DraftItem[]
@@ -8,33 +8,41 @@ type DraftState = {
     error: string | null
 }
 
-type Args = {
-    page: number
-    limit: number
-    enabled?: boolean
+type Action =
+    | { type: 'fetch' }
+    | { type: 'success'; items: DraftItem[] }
+    | { type: 'error'; message: string }
+    | { type: 'disabled' }
+
+function reducer(_state: DraftState, action: Action): DraftState {
+    switch (action.type) {
+        case 'fetch': return { items: [], isLoading: true, error: null }
+        case 'success': return { items: action.items, isLoading: false, error: null }
+        case 'error': return { items: [], isLoading: false, error: action.message }
+        case 'disabled': return { items: [], isLoading: false, error: null }
+    }
 }
 
+type Args = { page: number; limit: number; enabled?: boolean }
+
 export function useBlogDrafts({ page, limit, enabled = true }: Args): DraftState {
-    const [state, setState] = useState<DraftState>({
-        items: [],
-        isLoading: enabled,
-        error: null,
-    })
+    const [state, dispatch] = useReducer(reducer, { items: [], isLoading: enabled, error: null })
 
     useEffect(() => {
-        if (!enabled) return;
+        if (!enabled) {
+            dispatch({ type: 'disabled' })
+            return
+        }
+
+        dispatch({ type: 'fetch' })
         let isActive = true
 
-
         api.get<{ data: DraftItem[] }>(`/archive/blogs?draft=true&page=${page}&limit=${limit}`)
-            .then((response) => {
-                if (!isActive) return
-                setState({ items: response.data, isLoading: false, error: null })
-            })
+            .then((response) => { if (isActive) dispatch({ type: 'success', items: response.data }) })
             .catch((error: unknown) => {
                 if (!isActive) return
                 const message = error instanceof Error ? error.message : 'Blogs konden niet geladen worden.'
-                setState({ items: [], isLoading: false, error: message })
+                dispatch({ type: 'error', message })
             })
 
         return () => { isActive = false }
