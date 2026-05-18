@@ -16,6 +16,7 @@ const dashboardRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.get('/summary', {
         preHandler: [requirePermission(Permission.ARCHIVE_READ)],
         schema: {
+            hide: true,
             tags: ['dashboard'],
             summary: 'Get admin dashboard summary',
             querystring: dashboardSummaryQuerySchema,
