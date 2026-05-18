@@ -1,17 +1,15 @@
 import React from 'react'
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import type { Messages } from '../../../i18n/types'
 import { AdminMessagesContext } from '../../../components/admin/AdminMessagesContext'
-import DraftsDashboardPage from "../../../pages/admin/DraftsDashboard.tsx";
-import {MemoryRouter} from "react-router-dom";
+import DraftsDashboardPage from "../../../pages/admin/DraftsDashboard.tsx"
 
-// 1. Hoist Mock Functions so vi.mock can consume them securely
 const useProductionDraftsMock = vi.hoisted(() => vi.fn())
 const useBlogDraftsMock = vi.hoisted(() => vi.fn())
 const adminLayoutMock = vi.hoisted(() => vi.fn(({ children }: { children: React.ReactNode }) => <div>{children}</div>))
 
-// 2. Setup standard translated string mocks matching AdminMessagesContext expectations
 const mockMessages = vi.hoisted(() => ({
     admin: {
         drafts: {
@@ -36,12 +34,11 @@ const mockMessages = vi.hoisted(() => ({
             emptyRecent: 'No recent archive drafts found.',
             loadingMessage: 'Loading drafts...',
             deleteTitle: 'Delete draft',
-            deleteConfirm: (title: string) => `Are you sure you want to delete "${title}"?`,
-        },
+            deleteConfirm: (title: string) => `Are you sure you want to delete "${title}"?`
+        }
     },
 }))
 
-// 3. Mock Module Dependencies
 vi.mock('../../../components/admin/AdminLayout', () => ({
     default: (props: { children: React.ReactNode }) => {
         adminLayoutMock(props)
@@ -61,11 +58,15 @@ vi.mock('../../../components/admin/hooks/useBlogDrafts', () => ({
     useBlogDrafts: (args: { page: number; limit: number }) => useBlogDraftsMock(args),
 }))
 
+const renderPage = () => render(
+    <MemoryRouter>
+        <DraftsDashboardPage />
+    </MemoryRouter>
+)
+
 describe('DraftsDashboardPage', () => {
     beforeEach(() => {
         vi.clearAllMocks()
-
-        // Default safe initial values for non-active hooks to prevent component runtime exceptions
         useProductionDraftsMock.mockReturnValue({ items: [], isLoading: false, error: null })
         useBlogDraftsMock.mockReturnValue({ items: [], isLoading: false, error: null })
     })
@@ -82,10 +83,17 @@ describe('DraftsDashboardPage', () => {
         useProductionDraftsMock.mockReturnValue({
             isLoading: false,
             error: null,
-            items: [{ id: 'prod-1', title: { nl: 'SNOBS: Concept Archief', en: 'SNOBS: Draft Archive' }, updated_at: '2026-05-13T12:00:00.000Z', editors: [] }],
+            items: [
+                {
+                    id: 'prod-1',
+                    title: { nl: 'SNOBS: Concept Archief', en: 'SNOBS: Draft Archive' },
+                    updated_at: '2026-05-13T12:00:00.000Z',
+                    editors: [],
+                },
+            ],
         })
         renderPage()
-        expect(screen.getByText('SNOBS: Draft Archive')).toBeInTheDocument()
+        expect(screen.getByText('SNOBS: Concept Archief')).toBeInTheDocument()
         expect(screen.getByText('Not yet available in archive')).toBeInTheDocument()
     })
 
@@ -107,27 +115,37 @@ describe('DraftsDashboardPage', () => {
 
     it('switches safely to the Blog tab context and re-evaluates display outputs using the secondary hook', () => {
         useProductionDraftsMock.mockReturnValue({
-            isLoading: false, error: null,
-            items: [{ id: 'prod-1', title: { nl: 'Productie Concept', en: 'Production Draft' }, updated_at: '2026-05-13T12:00:00.000Z', editors: [] }],
+            isLoading: false,
+            error: null,
+            items: [
+                {
+                    id: 'prod-1',
+                    title: { nl: 'Productie Concept', en: 'Production Draft' },
+                    updated_at: '2026-05-13T12:00:00.000Z',
+                    editors: [],
+                },
+            ],
         })
         useBlogDraftsMock.mockReturnValue({
-            isLoading: false, error: null,
-            items: [{ id: 'blog-1', title: { nl: 'Blog Concept Tekst', en: 'Blog Draft Text' }, updated_at: '2026-05-14T12:00:00.000Z', editors: [] }],
+            isLoading: false,
+            error: null,
+            items: [
+                {
+                    id: 'blog-1',
+                    title: { nl: 'Blog Concept Tekst', en: 'Blog Draft Text' },
+                    updated_at: '2026-05-14T12:00:00.000Z',
+                    editors: [],
+                },
+            ],
         })
         renderPage()
-        expect(screen.getByText('Production Draft')).toBeInTheDocument()
-        expect(screen.queryByText('Blog Draft Text')).not.toBeInTheDocument()
+        expect(screen.getByText('Productie Concept')).toBeInTheDocument()
+        expect(screen.queryByText('Blog Concept Tekst')).not.toBeInTheDocument()
 
         fireEvent.click(screen.getByRole('button', { name: 'Blogs' }))
 
-        expect(screen.queryByText('Production Draft')).not.toBeInTheDocument()
-        expect(screen.getByText('Blog Draft Text')).toBeInTheDocument()
+        expect(screen.queryByText('Productie Concept')).not.toBeInTheDocument()
+        expect(screen.getByText('Blog Concept Tekst')).toBeInTheDocument()
         expect(useBlogDraftsMock).toHaveBeenCalledWith(expect.objectContaining({ page: 1, limit: 10 }))
     })
 })
-
-const renderPage = () => render(
-    <MemoryRouter>
-        <DraftsDashboardPage />
-    </MemoryRouter>
-)
