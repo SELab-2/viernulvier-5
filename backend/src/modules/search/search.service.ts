@@ -13,7 +13,7 @@ export class SearchService {
     ) {}
 
     async search(options: SearchQuery): Promise<PaginatedResult<SearchResultItem>> {
-        const { limit, page, tab, search, yearFrom, yearTo, sort, genres, locations, lang } = options
+        const { limit, page, tab, search, yearFrom, yearTo, sort, lang } = options
 
         if (tab === 'blogs') {
             const blogResults = await this.searchRepository.findAllBlogs({ search, yearFrom, yearTo, sort })
