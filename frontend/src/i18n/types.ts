@@ -76,6 +76,8 @@ export type Messages = {
     noResults: string
     loadErrorPrefix: string
     searchPlaceholder: string
+    blogPageSearchPlaceholder: string
+    blogPageSubtitle: string
     fallbackUntitled: string
     fallbackTag: string
     fallbackVenue: string

@@ -247,7 +247,17 @@ export class SearchRepository {
                         'blog' as type,
                         b.title as title_json,
                         COALESCE(b.content ->> CAST(${localizedLang} AS text), b.content ->> 'nl', '') as excerpt,
-                        NULL as image_url,
+                        CASE
+                            WHEN b.thumbnail_index IS NOT NULL
+                                AND b.images IS NOT NULL
+                                AND b.thumbnail_index >= 0
+                                AND b.thumbnail_index < COALESCE(array_length(b.images, 1), 0)
+                                THEN b.images[b.thumbnail_index + 1]
+                            WHEN b.images IS NOT NULL
+                                AND COALESCE(array_length(b.images, 1), 0) > 0
+                                THEN b.images[1]
+                            ELSE NULL
+                        END as image_url,
                         TO_CHAR(b.created_at, 'DD/MM/YYYY') as date_label,
                         '' as venue_label,
                         'Blog' as genre_label,
@@ -282,7 +292,15 @@ export class SearchRepository {
     }
 
 
-    public stripHtml(html: string): string {
+    public stripHtml(html: unknown): string {
+        if (html == null) {
+            return ''
+        }
+
+        if (typeof html !== 'string') {
+            return String(html)
+        }
+
         return html.replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, ' ').trim()
     }
 
@@ -394,6 +412,8 @@ export class SearchRepository {
             id: blog.id,
             title: this.normalizeBlogTitle(blog.title),
             content: blog.content,
+            thumbnail_index: blog.thumbnail_index,
+            images: blog.images ?? [],
             productions: blog.blog_production.map((r) => r.production_id),
             created_at: blog.created_at,
             updated_at: blog.updated_at,
