@@ -9,6 +9,7 @@ type BlogsTabContentProps = {
     onJsonChange: (value: unknown) => void
     changeTitle: (value: string) => void
     changeContent: (value: string) => void
+    quillPlaceholder: string
 }
 
 function BlogsTabContent({
@@ -19,6 +20,7 @@ function BlogsTabContent({
     changeTitle,
     changeContent,
     onJsonChange,
+    quillPlaceholder
 }: BlogsTabContentProps) {
     return (
         <section className="relative px-4 py-4 overflow-hidden">
@@ -41,7 +43,7 @@ function BlogsTabContent({
                         value={content}
                         onChange={changeContent}
                         onJsonChange={onJsonChange}
-                        placeholder="Schrijf je blog content hier..."
+                        placeholder={quillPlaceholder}
                     />
                 </form>
             </div>

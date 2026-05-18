@@ -1,6 +1,5 @@
 import { Routes, Route } from 'react-router-dom'
 import { lazy, Suspense } from 'react'
-import { getMessages } from './i18n'
 import { getAdminRouteConfig } from './admin/paths'
 import ProtectedAdminRoute, { AdminEntryRoute } from './pages/admin/ProtectedAdminRoute'
 
@@ -13,6 +12,7 @@ import NotFoundPage from './pages/public/NotFoundPage'
 import PosterDetailPage from './pages/public/PosterDetailPage'
 // Eager: NotFound must render instantly for unknown routes (no Suspense flash).
 import AdminNotFoundPage from './pages/admin/NotFoundPage'
+import LoadingPage from './pages/LoadingPage'
 
 // Admin pages (lazy loaded — not included in public bundle)
 const LoginPage = lazy(() => import('./pages/admin/LoginPage'))
@@ -21,8 +21,8 @@ const ProductionsPage = lazy(() => import('./pages/admin/ProductionsPage'))
 const BlogsPage = lazy(() => import('./pages/admin/BlogsPage'))
 const ArchiveEditPage = lazy(() => import('./pages/admin/ArchiveEditPage'))
 const PostersPage = lazy(() => import('./pages/admin/PostersPage'))
+const CreateBlogPage = lazy(() => import('./pages/admin/CreateBlogPage'))
 
-import CreateBlogPage from './pages/admin/CreateBlogPage'
 import BlogDetailPage from './pages/public/BlogDetailPage'
 /**
  * Root App component.
@@ -33,11 +33,10 @@ import BlogDetailPage from './pages/public/BlogDetailPage'
  * - localhost/127.0.0.1 → both available via /admin prefix
  */
 function App() {
-    const messages = getMessages()
     const adminRoutes = getAdminRouteConfig(window.location.hostname)
 
     return (
-        <Suspense fallback={<div>{messages.common.loading}</div>}>
+        <Suspense fallback={<LoadingPage />}>
             <Routes>
                 {!adminRoutes.isAdminHost ? (
                     <>

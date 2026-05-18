@@ -6,6 +6,7 @@ import { Role } from '../../../src/domain/role.js'
 describe('Blogs Routes', () => {
     let app: FastifyInstance
     const title = { nl: 'Test Blog', en: 'Test Blog' }
+    const tinyPngBase64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO7Z5WQAAAAASUVORK5CYII='
 
     beforeEach(async () => {
         app = await buildTestApp()
@@ -179,6 +180,32 @@ describe('Blogs Routes', () => {
 
             expect(response.statusCode).toBe(401)
         })
+
+        it('should return 400 when thumbnail_index is out of bounds for images', async () => {
+            const token = app.jwt.sign({ sub: 'admin', username: 'admin', role: Role.ADMIN })
+            const production = await app.prisma.production.create({ data: {} })
+
+            try {
+                const response = await app.inject({
+                    method: 'POST',
+                    url: '/api/v1/archive/blogs',
+                    headers: { authorization: `Bearer ${token}` },
+                    payload: {
+                        title,
+                        content: { text: 'Invalid thumbnail index' },
+                        images: ['/api/v1/images/one'],
+                        thumbnail_index: 1,
+                        productionIds: [production.id],
+                    },
+                })
+
+                expect(response.statusCode).toBe(400)
+                expect(JSON.parse(response.payload).message).toBe('thumbnail_index out of bounds for images array')
+            } finally {
+                await app.prisma.blog_production.deleteMany({ where: { production_id: production.id } })
+                await app.prisma.production.delete({ where: { id: production.id } })
+            }
+        })
     })
 
     describe('GET /api/v1/archive/blogs/:id', () => {
@@ -273,6 +300,40 @@ describe('Blogs Routes', () => {
             })
             expect(response.statusCode).toBe(404)
         })
+
+        it('should return 400 when updating to out-of-bounds thumbnail_index', async () => {
+            const token = app.jwt.sign({ sub: 'admin', username: 'admin', role: Role.ADMIN })
+            const production = await app.prisma.production.create({ data: {} })
+
+            try {
+                const postResponse = await app.inject({
+                    method: 'POST',
+                    url: '/api/v1/archive/blogs',
+                    headers: { authorization: `Bearer ${token}` },
+                    payload: {
+                        title,
+                        content: { text: 'Has image' },
+                        images: ['/api/v1/images/one'],
+                        thumbnail_index: 0,
+                        productionIds: [production.id],
+                    },
+                })
+                const created = JSON.parse(postResponse.payload)
+
+                const response = await app.inject({
+                    method: 'PATCH',
+                    url: `/api/v1/archive/blogs/${created.data.id}`,
+                    headers: { authorization: `Bearer ${token}` },
+                    payload: { thumbnail_index: 1 },
+                })
+
+                expect(response.statusCode).toBe(400)
+                expect(JSON.parse(response.payload).message).toBe('thumbnail_index out of bounds for images array')
+            } finally {
+                await app.prisma.blog_production.deleteMany({ where: { production_id: production.id } })
+                await app.prisma.production.delete({ where: { id: production.id } })
+            }
+        })
     })
 
     describe('DELETE /api/v1/archive/blogs/:id', () => {
@@ -320,6 +381,136 @@ describe('Blogs Routes', () => {
                 headers: { authorization: `Bearer ${token}` }
             })
             expect(response.statusCode).toBe(404)
+        })
+    })
+
+    describe('POST /api/v1/archive/blogs/:id/images', () => {
+        it('should upload images and preserve existing images', async () => {
+            const token = app.jwt.sign({ sub: 'admin', username: 'admin', role: Role.ADMIN })
+            const production = await app.prisma.production.create({ data: {} })
+
+            try {
+                const createResponse = await app.inject({
+                    method: 'POST',
+                    url: '/api/v1/archive/blogs',
+                    headers: { authorization: `Bearer ${token}` },
+                    payload: {
+                        title,
+                        productionIds: [production.id],
+                        images: ['/api/v1/images/existing-image-id'],
+                        thumbnail_index: 0,
+                    },
+                })
+                const created = JSON.parse(createResponse.payload)
+
+                const uploadResponse = await app.inject({
+                    method: 'POST',
+                    url: `/api/v1/archive/blogs/${created.data.id}/images`,
+                    headers: { authorization: `Bearer ${token}` },
+                    payload: {
+                        files: [
+                            {
+                                file_name: 'banner.png',
+                                file_base64: tinyPngBase64,
+                            },
+                        ],
+                    },
+                })
+
+                expect(uploadResponse.statusCode).toBe(200)
+                const body = JSON.parse(uploadResponse.payload)
+                expect(body.data.images).toHaveLength(2)
+                expect(body.data.images[0]).toBe('/api/v1/images/existing-image-id')
+                expect(body.data.images[1]).toMatch(/^(https?:\/\/[^/]+)?\/api\/v1\/images\/[0-9a-f-]+$/)
+                expect(body.data.thumbnail_index).toBe(0)
+
+                const getResponse = await app.inject({
+                    method: 'GET',
+                    url: `/api/v1/archive/blogs/${created.data.id}`,
+                })
+                const getBody = JSON.parse(getResponse.payload)
+                expect(getBody.data.images).toHaveLength(2)
+                expect(getBody.data.images[0]).toBe('/api/v1/images/existing-image-id')
+                expect(getBody.data.thumbnail_index).toBe(0)
+
+                await app.inject({
+                    method: 'DELETE',
+                    url: `/api/v1/archive/blogs/${created.data.id}`,
+                    headers: { authorization: `Bearer ${token}` },
+                })
+            } finally {
+                await app.prisma.blog_production.deleteMany({ where: { production_id: production.id } })
+                await app.prisma.production.delete({ where: { id: production.id } })
+            }
+        })
+
+        it('should return 400 when thumbnail_index is out of bounds after merge', async () => {
+            const token = app.jwt.sign({ sub: 'admin', username: 'admin', role: Role.ADMIN })
+            const production = await app.prisma.production.create({ data: {} })
+
+            try {
+                const createResponse = await app.inject({
+                    method: 'POST',
+                    url: '/api/v1/archive/blogs',
+                    headers: { authorization: `Bearer ${token}` },
+                    payload: {
+                        title,
+                        productionIds: [production.id],
+                        images: ['/api/v1/images/existing-image-id'],
+                        thumbnail_index: 0,
+                    },
+                })
+                const created = JSON.parse(createResponse.payload)
+
+                const response = await app.inject({
+                    method: 'POST',
+                    url: `/api/v1/archive/blogs/${created.data.id}/images`,
+                    headers: { authorization: `Bearer ${token}` },
+                    payload: {
+                        files: [],
+                        thumbnail_index: 1,
+                    },
+                })
+
+                expect(response.statusCode).toBe(400)
+                expect(JSON.parse(response.payload).message).toBe('thumbnail_index out of bounds for images array')
+
+                await app.inject({
+                    method: 'DELETE',
+                    url: `/api/v1/archive/blogs/${created.data.id}`,
+                    headers: { authorization: `Bearer ${token}` },
+                })
+            } finally {
+                await app.prisma.blog_production.deleteMany({ where: { production_id: production.id } })
+                await app.prisma.production.delete({ where: { id: production.id } })
+            }
+        })
+
+        it('should return 401 when no token is provided', async () => {
+            const response = await app.inject({
+                method: 'POST',
+                url: '/api/v1/archive/blogs/00000000-0000-0000-0000-000000000000/images',
+                payload: {
+                    files: [],
+                },
+            })
+
+            expect(response.statusCode).toBe(401)
+        })
+
+        it('should return 403 when token role has no archive update permission', async () => {
+            const token = app.jwt.sign({ sub: 'viewer', username: 'viewer', role: 'viewer' as unknown as Role })
+            const response = await app.inject({
+                method: 'POST',
+                url: '/api/v1/archive/blogs/00000000-0000-0000-0000-000000000000/images',
+                headers: { authorization: `Bearer ${token}` },
+                payload: {
+                    files: [],
+                },
+            })
+
+            expect(response.statusCode).toBe(403)
+            expect(JSON.parse(response.payload)).toEqual({ error: 'Forbidden' })
         })
     })
 })

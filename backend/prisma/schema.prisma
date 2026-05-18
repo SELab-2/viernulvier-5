@@ -189,12 +189,14 @@ model location {
 }
 
 model blog {
-  id              String            @id @db.Uuid @default(uuid())
-  title           Json?
-  content         Json?
-  blog_production blog_production[]
-  editor_blog     editor_blog[]
-  draft           Boolean?
+  id               String            @id @db.Uuid @default(uuid())
+  title            Json?
+  content          Json?
+  thumbnail_index  Int?
+  images           String[]          @default([])
+  blog_production  blog_production[]
+  editor_blog      editor_blog[]
+  draft            Boolean?
 
   created_at DateTime  @default(now()) @db.Timestamp(6)
   updated_at DateTime  @default(now()) @db.Timestamp(6)
