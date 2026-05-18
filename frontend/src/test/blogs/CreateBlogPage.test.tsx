@@ -513,6 +513,39 @@ describe('CreateBlogPage', () => {
     expect(screen.queryByText('Eerste productie')).not.toBeInTheDocument()
   })
 
+  it('keeps staged productions visible after changing the production search', async () => {
+    apiFetchMock.mockImplementation(async (endpoint: string) => {
+      if (endpoint === productionFetchEndpoint) {
+        return {
+          data: productionList,
+          meta: { total: 2, page: 1, limit: 100, totalPages: 1 },
+        }
+      }
+
+      if (endpoint.includes('search=eerste')) {
+        return {
+          data: [productionList[0]],
+          meta: { total: 1, page: 1, limit: 100, totalPages: 1 },
+        }
+      }
+
+      throw new Error(`Unexpected apiFetch endpoint: ${endpoint}`)
+    })
+
+    renderCreatePage()
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Producties beheren' }))
+    fireEvent.click(screen.getByRole('button', { name: /Tweede productie/i }))
+    fireEvent.change(screen.getByPlaceholderText('Zoek productie'), { target: { value: 'eerste' } })
+
+    await waitFor(() => {
+      expect(apiFetchMock).toHaveBeenCalledWith(expect.stringContaining('search=eerste'), expect.any(Object))
+    })
+
+    expect(screen.getByText('Geselecteerde producties')).toBeInTheDocument()
+    expect(screen.getAllByText('Tweede productie')).toHaveLength(2)
+  })
+
   it('fetches the next production page when the picker scrolls to the bottom', async () => {
     apiFetchMock.mockImplementation(async (endpoint: string) => {
       if (endpoint === productionFetchEndpoint) {

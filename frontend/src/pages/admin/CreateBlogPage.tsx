@@ -125,6 +125,7 @@ function CreateBlogPage() {
     const [productions, setProductions] = useState<ProductionItem[]>([])
     const [selectedProductionIds, setSelectedProductionIds] = useState<string[]>([])
     const [productionsToAdd, setProductionsToAdd] = useState<string[]>([])
+    const [stagedProductionsToAdd, setStagedProductionsToAdd] = useState<ProductionItem[]>([])
     const [productionSearchQuery, setProductionSearchQuery] = useState('')
     const [productionPage, setProductionPage] = useState(1)
     const [hasMoreProductions, setHasMoreProductions] = useState(false)
@@ -330,6 +331,14 @@ function CreateBlogPage() {
     const availableProductions = useMemo(
         () => productions.filter((production) => !selectedProductionIds.includes(production.id)),
         [productions, selectedProductionIds],
+    )
+
+    const pickerProductions = useMemo(
+        () => mergeUniqueProductions([
+            ...stagedProductionsToAdd.filter((production) => productionsToAdd.includes(production.id)),
+            ...availableProductions,
+        ]),
+        [availableProductions, productionsToAdd, stagedProductionsToAdd],
     )
 
     const setTab = (key: Locale) => {
@@ -580,6 +589,7 @@ function CreateBlogPage() {
         }
 
         setSelectedProductionIds((current) => [...current, ...productionIdsToAdd])
+        setStagedProductionsToAdd([])
         setProductionsToAdd([])
         setIsProductionPopupOpen(false)
     }
@@ -612,6 +622,7 @@ function CreateBlogPage() {
     }
 
     const openProductionPopup = () => {
+        setStagedProductionsToAdd([])
         setProductionsToAdd([])
         setIsProductionPopupOpen(true)
     }
@@ -690,7 +701,7 @@ function CreateBlogPage() {
 
             <ProductionManagementSection
                 selectedProductions={selectedProductions}
-                availableProductions={availableProductions}
+                availableProductions={pickerProductions}
                 productionsToAdd={productionsToAdd}
                 productionSearchQuery={productionSearchQuery}
                 productionFilters={productionFilters}
@@ -700,7 +711,13 @@ function CreateBlogPage() {
                 productionsError={productionsError}
                 onOpenPopup={openProductionPopup}
                 onClosePopup={() => setIsProductionPopupOpen(false)}
-                onSelectProductionsToAdd={setProductionsToAdd}
+                onSelectProductionsToAdd={(productionIds) => {
+                    setStagedProductionsToAdd((current) => mergeUniqueProductions([
+                        ...current,
+                        ...availableProductions.filter((production) => productionIds.includes(production.id)),
+                    ]))
+                    setProductionsToAdd(productionIds)
+                }}
                 onProductionSearchQueryChange={changeProductionSearchQuery}
                 onProductionFiltersChange={changeProductionFilters}
                 onLoadMoreProductions={loadMoreProductions}

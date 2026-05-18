@@ -78,6 +78,7 @@ function PostersPageContent() {
   const [title, setTitle] = useState('')
   const [selectedProductionIds, setSelectedProductionIds] = useState<string[]>([])
   const [productionsToAdd, setProductionsToAdd] = useState<string[]>([])
+  const [stagedProductionsToAdd, setStagedProductionsToAdd] = useState<ProductionItem[]>([])
   const [productionSearchQuery, setProductionSearchQuery] = useState('')
   const [productionPage, setProductionPage] = useState(1)
   const [hasMoreProductions, setHasMoreProductions] = useState(false)
@@ -110,6 +111,14 @@ function PostersPageContent() {
   const availableProductions = useMemo(
     () => productions.filter((p) => !selectedProductionIds.includes(p.id)),
     [productions, selectedProductionIds],
+  )
+
+  const pickerProductions = useMemo(
+    () => mergeUniqueProductions([
+      ...stagedProductionsToAdd.filter((production) => productionsToAdd.includes(production.id)),
+      ...availableProductions,
+    ]),
+    [availableProductions, productionsToAdd, stagedProductionsToAdd],
   )
 
   const fetchProductionsWithFallback = useCallback(async (searchQuery: string = '', filters: ProductionPickerFilters, page = 1) => {
@@ -242,6 +251,7 @@ function PostersPageContent() {
   }, [loadProductionsErrorMessage, productions, selectedProductionIds])
 
   const openProductionPopup = () => {
+    setStagedProductionsToAdd([])
     setProductionsToAdd([])
     setIsProductionPopupOpen(true)
   }
@@ -252,6 +262,7 @@ function PostersPageContent() {
       return
     }
     setSelectedProductionIds((current) => [...current, ...productionIdsToAdd])
+    setStagedProductionsToAdd([])
     setProductionsToAdd([])
     setIsProductionPopupOpen(false)
   }
@@ -321,6 +332,7 @@ function PostersPageContent() {
       setSelectedFiles([])
       setSelectedProductionIds([])
       setProductionSearchQuery('')
+      setStagedProductionsToAdd([])
       setProductionsToAdd([])
       setIsProductionPopupOpen(false)
       await loadData(search)
@@ -460,7 +472,7 @@ function PostersPageContent() {
           <ProductionManagementSection
             compact
             selectedProductions={selectedProductions}
-            availableProductions={availableProductions}
+            availableProductions={pickerProductions}
             productionsToAdd={productionsToAdd}
             productionSearchQuery={productionSearchQuery}
             productionFilters={productionFilters}
@@ -470,7 +482,13 @@ function PostersPageContent() {
             productionsError={productionError ?? ''}
             onOpenPopup={openProductionPopup}
             onClosePopup={() => setIsProductionPopupOpen(false)}
-            onSelectProductionsToAdd={setProductionsToAdd}
+            onSelectProductionsToAdd={(productionIds) => {
+              setStagedProductionsToAdd((current) => mergeUniqueProductions([
+                ...current,
+                ...availableProductions.filter((production) => productionIds.includes(production.id)),
+              ]))
+              setProductionsToAdd(productionIds)
+            }}
             onProductionSearchQueryChange={changeProductionSearchQuery}
             onProductionFiltersChange={changeProductionFilters}
             onLoadMoreProductions={loadMoreProductions}
