@@ -192,7 +192,7 @@ export class BlogsRepository {
             id: blog.id,
             title: this.normalizeBlogTitle(blog.title),
             content: blog.content,
-            draft: blog.draft,
+            draft: blog.draft ?? false,
             productions: blog.blog_production?.map((relation) => relation.production_id) ?? [],
             created_at: blog.created_at,
             updated_at: blog.updated_at,
