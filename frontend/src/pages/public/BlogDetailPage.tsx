@@ -12,6 +12,7 @@ import PublicPillButton from '../../components/public/PublicPillButton'
 import ProductionCard from '../../components/blogs/ProductionCard'
 import ArchiveDetailHero from '../../components/public/detail/PublicDetailHeroBanner'
 import ArchiveDetailGallery from '../../components/public/detail/PublicDetailGallery'
+import '../../styles/QuillEditor.css'
 import { getPreviousStrippedPath } from '../../utils/navigationHistory'
 import {
     getLocalizedContent,
@@ -56,7 +57,7 @@ function QuillReadOnly({ content }: { content: unknown }) {
         }
     }, [delta])
 
-    return <div ref={containerRef} className="overflow-hidden rounded-xl border border-border bg-surface" />
+    return <div ref={containerRef} className="quill-detail-wrapper overflow-hidden rounded-xl bg-surface" />
 }
 
 function BlogDetailPageContent() {
@@ -71,6 +72,7 @@ function BlogDetailPageContent() {
     const [error, setError] = useState('')
     const [notFound, setNotFound] = useState(false)
     const [previousId, setPreviousId] = useState(id)
+    const [shareCopied, setShareCopied] = useState(false)
 
     if (id !== previousId) {
         setPreviousId(id)
@@ -90,6 +92,29 @@ function BlogDetailPageContent() {
         }
         navigate(withLocalePath('/', locale))
     }
+
+    const handleShare = async () => {
+        const currentUrl = window.location.href
+
+        if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(currentUrl)
+        } else {
+            const textArea = document.createElement('textarea')
+            textArea.value = currentUrl
+            textArea.setAttribute('readonly', '')
+            textArea.style.position = 'absolute'
+            textArea.style.left = '-9999px'
+            document.body.appendChild(textArea)
+            textArea.select()
+            document.body.removeChild(textArea)
+        }
+
+        setShareCopied(true)
+        window.setTimeout(() => setShareCopied(false), 1800)
+    }
+
+    const shareLabel = message.search.shareLabel
+    const shareCopiedLabel = message.search.shareCopiedLabel
 
     // load productions or catch not existing production
     useEffect(() => {
@@ -161,6 +186,14 @@ function BlogDetailPageContent() {
 
     return (
         <>
+            <div className="site-container mt-8">
+                <PublicPillButton 
+                    icon={<LeftArrowIcon className="h-5 w-5" />} 
+                    label={message.blogs.navBack} 
+                    onClick={handleGoBack} 
+                />
+            </div>
+
             <div className="site-container mt-6">
                 {blog && (
                     <ArchiveDetailHero
@@ -175,28 +208,24 @@ function BlogDetailPageContent() {
                         artist={null}
                         genres={[]}
                         locale={locale}
+                        shareLabel={shareCopied ? shareCopiedLabel : shareLabel}
+                        onShare={() => {
+                            void handleShare()
+                        }}
                     />
                 )}
             </div>
 
-            <section className="site-container py-12">
-            <div className="mb-8 flex items-center justify-between gap-4">
-                <PublicPillButton 
-                    icon={<LeftArrowIcon className="h-5 w-5" />} 
-                    label={message.blogs.navBack} 
-                    onClick={handleGoBack} 
-                />
-            </div>
+            <section className="site-container space-y-12 py-8">
 
             {isLoading ? <p className="text-center text-muted">{message.blogs.loadingBlog}</p> : null}
             {error ? <p className="text-center text-red-500">{error}</p> : null}
 
             {!isLoading && !error && blog ? (
-                <article className="mx-auto max-w-4xl">
-                    <h1 className="mb-6 text-4xl font-semibold leading-tight text-foreground [overflow-wrap:anywhere]">
-                        {getLocalizedTitle(blog.title, locale) || message.blogs.untitledBlog}
-                    </h1>
-                    <QuillReadOnly content={getLocalizedContent(blog.content, locale)} />
+                <article className="space-y-8">
+                    <div className="quill-detail-wrapper prose max-w-none prose-neutral text-base leading-relaxed">
+                        <QuillReadOnly content={getLocalizedContent(blog.content, locale)} />
+                    </div>
 
                     {blog.images && blog.images.length > 0 && (
                         <div className="mt-6">
