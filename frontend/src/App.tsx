@@ -116,22 +116,6 @@ function App() {
                                 </ProtectedAdminRoute>
                             }
                         />
-                        <Route
-                            path="/admin/blogs"
-                            element={
-                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
-                                    <CreateBlogPage />
-                                </ProtectedAdminRoute>
-                            }
-                        />
-                        <Route
-                            path="/admin/productions"
-                            element={
-                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
-                                    <CreateBlogPage />
-                                </ProtectedAdminRoute>
-                            }
-                        />
 
                         <Route
                             path="/admin/blogs/create"
