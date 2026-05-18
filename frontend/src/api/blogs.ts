@@ -1,6 +1,7 @@
 import { api } from './client'
 import { z } from 'zod'
 
+export type BlogListItem = z.infer<typeof blogSchema>
 type Meta = {
     total: number
     page: number
@@ -15,20 +16,40 @@ type PaginatedResponse<T> = {
 
 export const blogSchema = z.object({
     id: z.string().uuid(),
-    title: z.object({
-        nl: z.string().nullable().optional(),
-        en: z.string().nullable().optional(),
-    }).nullable().optional(),
+    title: z
+        .object({
+            nl: z.string().nullable().optional(),
+            en: z.string().nullable().optional(),
+            fr: z.string().nullable().optional(),
+        })
+        .nullable()
+        .optional(),
     content: z.record(z.string(), z.unknown()).nullable().optional(),
-    productions: z.array(z.string().uuid()),
-    created_at: z.coerce.date(),
-    updated_at: z.coerce.date(),
-    links: z.object({
-        self: z.string(),
-    }).optional(),
+    productions: z.array(z.string()).optional(),
+    created_at: z.coerce.date().optional(),
+    updated_at: z.coerce.date().optional(),
+    links: z
+        .object({
+            self: z.string(),
+        })
+        .optional(),
 })
 
 export type Blog = z.infer<typeof blogSchema>
+
+export const getLatestBlog = (locale: 'nl' | 'en') => {
+    const params = new URLSearchParams({
+        page: '1',
+        limit: '1',
+        lang: locale,
+    })
+
+    return api.get<PaginatedResponse<BlogListItem>>(`/archive/blogs?${params.toString()}`)
+}
+
+export const getBlogById = (id: string) => {
+    return api.get<{ data: BlogListItem }>(`/archive/blogs/${id}`)
+}
 
 export const getBlogsByProductionId = async (productionId: string) => {
     const first = await api.get<PaginatedResponse<Blog>>(`/archive/blogs?productionId=${productionId}&page=1`)

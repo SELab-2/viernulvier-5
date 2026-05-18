@@ -36,24 +36,16 @@ export type Messages = {
     onThisDayFallbackSubheading: string
     popularTagsLabel: string
     popularTagsMore: string
+    popularTagsLess: string
     popularTags: string[]
     latestBlogHeading: string
     latestBlogSubheading: string
-    latestBlogTitle: string
-    latestBlogParagraphOne: string
-    latestBlogParagraphTwoTitle: string
-    latestBlogParagraphTwo: string
     latestBlogReadMore: string
     latestBlogViewAll: string
     recentDigitizedHeading: string
     recentDigitizedViewItem: string
     recentDigitizedViewAll: string
-    recentDigitizedItems: Array<{
-      dateLabel: string
-      archiveLabel: string
-      title: string
-      description: string
-    }>
+    fallbackUntitled: string
   }
   search: {
     heading: string
