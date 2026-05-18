@@ -6,12 +6,6 @@ import type { ProductionPickerFilters } from '../../components/admin/blogs/Produ
 import { useAdminMessages } from '../../components/admin/AdminMessagesContext'
 import { getActiveLocale } from '../../i18n'
 
-type LocalizedText = {
-  nl?: string
-  en?: string
-  fr?: string
-} | null
-
 type ProductionItem = ManagedProductionItem
 
 type PosterItem = {
@@ -68,15 +62,6 @@ function fileToBase64(file: File): Promise<string> {
   })
 }
 
-function getLocalizedTitle(value: LocalizedText): string {
-  if (!value) {
-    return ''
-  }
-
-  const candidates = [value.nl, value.en, value.fr]
-  return candidates.find((candidate) => typeof candidate === 'string' && candidate.trim().length > 0)?.trim() ?? ''
-}
-
 function getPdfPreviewUrl(fileUrl: string): string {
   const normalized = normalizeApiAssetUrl(fileUrl) ?? fileUrl
   const hash = '#page=1&view=FitH&toolbar=0&navpanes=0&scrollbar=0'
@@ -117,24 +102,14 @@ function PostersPageContent() {
   const loadPostersErrorMessage = i18n.admin.posters.loadPostersError
   const loadProductionsErrorMessage = i18n.admin.posters.loadProductionsError
 
-  const sortedProductions = useMemo(() => {
-    const sortLocale = locale === 'en' ? 'en-GB' : 'nl-BE'
-
-    return [...productions].sort((a, b) => {
-      const first = getLocalizedTitle(a.title)
-      const second = getLocalizedTitle(b.title)
-      return first.localeCompare(second, sortLocale, { sensitivity: 'base' })
-    })
-  }, [locale, productions])
-
   const selectedProductions = useMemo(
-    () => sortedProductions.filter((p) => selectedProductionIds.includes(p.id)),
-    [sortedProductions, selectedProductionIds],
+    () => productions.filter((p) => selectedProductionIds.includes(p.id)),
+    [productions, selectedProductionIds],
   )
 
   const availableProductions = useMemo(
-    () => sortedProductions.filter((p) => !selectedProductionIds.includes(p.id)),
-    [sortedProductions, selectedProductionIds],
+    () => productions.filter((p) => !selectedProductionIds.includes(p.id)),
+    [productions, selectedProductionIds],
   )
 
   const fetchProductionsWithFallback = useCallback(async (searchQuery: string = '', filters: ProductionPickerFilters, page = 1) => {
