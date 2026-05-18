@@ -53,7 +53,7 @@ vi.mock('../../../components/admin/hooks/useProductionDrafts', () => ({
     useProductionDrafts: (args: { page: number; limit: number }) => useProductionDraftsMock(args),
 }))
 
-vi.mock('../../../components/admin/hooks/useBlogsDrafts', () => ({
+vi.mock('../../../components/admin/hooks/useBlogDrafts', () => ({
     useBlogDrafts: (args: { page: number; limit: number }) => useBlogDraftsMock(args),
 }))
 

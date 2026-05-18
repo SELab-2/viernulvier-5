@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { useBlogDrafts } from '../../../components/admin/hooks/useBlogsDrafts'
+import { useBlogDrafts } from '../../../components/admin/hooks/useBlogDrafts'
 
 const apiGetMock = vi.hoisted(() => vi.fn())
 
