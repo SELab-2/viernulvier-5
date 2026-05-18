@@ -105,7 +105,7 @@ export class BlogImagesStorage {
             validatedFiles.push({
                 buffer: fileBuffer,
                 storedFileName,
-                public_url: `/api/v1/images/${imageId}`,
+                public_url: `http://localhost:${env.PORT}/api/v1/images/${imageId}`,
                 mime_type: detectedMimeType,
                 original_filename: safeName,
                 file_size_bytes: fileBuffer.length,
