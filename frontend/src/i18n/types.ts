@@ -357,9 +357,6 @@ export type Messages = {
       actionView: string
       actionEdit: string
       actionDelete: string
-      languageStatusComplete: string
-      languageStatusAttention: string
-      languageStatusMissing: string
       emptyRecent: string
       loadingMessage: string
       deleteTitle: string
