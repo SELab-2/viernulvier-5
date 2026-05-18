@@ -32,7 +32,7 @@ describe('SearchService', () => {
         service = new SearchService(searchRepository as any, productionsService as any, postersService as any)
     })
 
-    it('merges blogs, productions and posters and paginates sorted by recent first', async () => {
+    it('merges productions and posters and paginates sorted by recent first', async () => {
         productionsService.getProductions
             .mockResolvedValueOnce({
                 items: [{ id: 'prod-preview' }],
@@ -78,17 +78,6 @@ describe('SearchService', () => {
                 totalPages: 1,
             })
 
-        searchRepository.findAllBlogs.mockResolvedValue([
-            {
-                id: 'blog-1',
-                title: { nl: 'Blog 1' },
-                content: { nl: 'Blog content' },
-                productions: [],
-                created_at: new Date('2025-10-01T00:00:00.000Z'),
-                updated_at: new Date('2025-10-01T00:00:00.000Z'),
-            },
-        ])
-
         postersService.getPosters.mockResolvedValue({
             items: [
                 {
@@ -118,11 +107,11 @@ describe('SearchService', () => {
             lang: 'nl',
         })
 
-        expect(result.total).toBe(4)
+        expect(result.total).toBe(3)
         expect(result.totalPages).toBe(2)
         expect(result.page).toBe(1)
         expect(result.items).toHaveLength(2)
-        expect(result.items.map((item) => item.id)).toEqual(['blog-1', 'poster-1'])
+        expect(result.items.map((item) => item.id)).toEqual(['poster-1', 'prod-1'])
 
         expect(productionsService.getProductions).toHaveBeenNthCalledWith(1, {
             draft: false,
@@ -136,11 +125,6 @@ describe('SearchService', () => {
             onThisDay: false,
             page: 1,
             limit: 1,
-        })
-        expect(searchRepository.findAllBlogs).toHaveBeenCalledWith({
-            search: 'term',
-            yearFrom: 2024,
-            yearTo: 2026,
         })
         expect(postersService.getPosters).toHaveBeenNthCalledWith(1, {
             search: 'term',
@@ -201,7 +185,6 @@ describe('SearchService', () => {
         expect(result.total).toBe(1)
         expect(result.items).toHaveLength(1)
         expect(result.items[0]?.type).toBe('production')
-        expect(searchRepository.findAllBlogs).not.toHaveBeenCalled()
         expect(postersService.getPosters).not.toHaveBeenCalled()
     })
 
@@ -231,17 +214,6 @@ describe('SearchService', () => {
                 totalPages: 1,
             })
 
-        searchRepository.findAllBlogs.mockResolvedValue([
-            {
-                id: 'blog-older',
-                title: { nl: 'Older blog' },
-                content: { nl: 'Old content' },
-                productions: [],
-                created_at: new Date('2020-01-01T00:00:00.000Z'),
-                updated_at: new Date('2020-01-01T00:00:00.000Z'),
-            },
-        ])
-
         postersService.getPosters.mockResolvedValue({
             items: [],
             total: 0,
@@ -257,6 +229,6 @@ describe('SearchService', () => {
             lang: 'nl',
         })
 
-        expect(result.items.map((item) => item.id)).toEqual(['blog-older', 'prod-newer'])
+        expect(result.items.map((item) => item.id)).toEqual(['prod-newer'])
     })
 })

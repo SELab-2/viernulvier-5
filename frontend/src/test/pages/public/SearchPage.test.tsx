@@ -62,18 +62,6 @@ describe('SearchPage API routing by tab', () => {
         })
     })
 
-    it('uses blogs endpoint on blogs tab', async () => {
-        renderPage('/nl/zoeken?tab=blogs&q=test')
-
-        await waitFor(() => {
-            expect(
-                apiFetchMock.mock.calls.some(([endpoint]) =>
-                    typeof endpoint === 'string' && endpoint.startsWith('/archive/blogs?'),
-                ),
-            ).toBe(true)
-        })
-    })
-
     it('uses unified search endpoint on all tab and forwards filters', async () => {
         renderPage('/nl/zoeken?tab=all&q=test&genres=theater&locations=balzaal&sort=recent')
 
@@ -154,7 +142,7 @@ describe('SearchPage loading and error states', () => {
         })
     })
 
-    it('renders the four tab navigation buttons', async () => {
+    it('renders the three tab navigation buttons', async () => {
         apiFetchMock.mockImplementation(async (endpoint: string) => {
             if (endpoint.startsWith('/archive/halls?')) return { data: [] }
             return buildPaginatedEmpty()
@@ -164,7 +152,6 @@ describe('SearchPage loading and error states', () => {
 
         expect(await screen.findByRole('button', { name: 'Alles' })).toBeInTheDocument()
         expect(screen.getByRole('button', { name: 'Producties' })).toBeInTheDocument()
-        expect(screen.getByRole('button', { name: 'Blog' })).toBeInTheDocument()
         expect(screen.getByRole('button', { name: 'Affiches' })).toBeInTheDocument()
     })
 })
@@ -209,34 +196,6 @@ describe('SearchPage results rendering', () => {
         renderPage('/nl/zoeken')
 
         expect(await screen.findByRole('link', { name: /Unieke Productietitel/i })).toBeInTheDocument()
-    })
-
-    it('renders a blog result card with correct title on blogs tab', async () => {
-        apiFetchMock.mockImplementation(async (endpoint: string) => {
-            if (endpoint.startsWith('/archive/halls?')) return { data: [] }
-            if (endpoint.startsWith('/archive/blogs?')) {
-                return {
-                    data: [
-                        {
-                            id: 'blog-bbb-0000-0000-000000000001',
-                            title: JSON.stringify({ nl: 'Unieke Blogtitel' }),
-                            content: {
-                                nl: JSON.stringify({ ops: [{ insert: 'Blog excerpt tekst.' }] }),
-                            },
-                            productions: [],
-                            created_at: '2025-03-01T00:00:00.000Z',
-                            updated_at: '2025-03-01T00:00:00.000Z',
-                        },
-                    ],
-                    meta: { total: 1, page: 1, limit: 12, totalPages: 1 },
-                }
-            }
-            return buildPaginatedEmpty()
-        })
-
-        renderPage('/nl/zoeken?tab=blogs')
-
-        expect(await screen.findByRole('link', { name: /Unieke Blogtitel/i })).toBeInTheDocument()
     })
 
     it('renders a poster result card with correct title on posters tab', async () => {
@@ -417,19 +376,11 @@ describe('SearchPage sort and page size', () => {
         })
     })
 
-    it('shows sort dropdown and page-size selector for non-blog tabs', async () => {
+    it('shows sort dropdown and page-size selector', async () => {
         renderPage('/nl/zoeken')
 
         expect(await screen.findByText('Sorteer op')).toBeInTheDocument()
         expect(screen.getByRole('combobox', { name: 'Resultaten per pagina' })).toBeInTheDocument()
-    })
-
-    it('does not show sort dropdown on the blogs tab', async () => {
-        renderPage('/nl/zoeken?tab=blogs')
-
-        await waitFor(() => {
-            expect(screen.queryByText('Sorteer op')).not.toBeInTheDocument()
-        })
     })
 
     it('changing sort triggers a new fetch with updated sort param', async () => {
@@ -776,23 +727,6 @@ describe('SearchPage additional handler coverage', () => {
         })
     })
 
-    it('clicking the Blog tab button switches to blogs endpoint', async () => {
-        renderPage('/nl/zoeken')
-        await screen.findByText('Geen resultaten gevonden.')
-
-        const blogTabButton = screen.getByRole('button', { name: 'Blog' })
-        fireEvent.click(blogTabButton)
-
-        await waitFor(() => {
-            expect(
-                apiFetchMock.mock.calls.some(
-                    ([endpoint]) =>
-                        typeof endpoint === 'string' && endpoint.startsWith('/archive/blogs?'),
-                ),
-            ).toBe(true)
-        })
-    })
-
     it('clicking the Alles tab button switches to unified search endpoint', async () => {
         renderPage('/nl/zoeken')
         await screen.findByText('Geen resultaten gevonden.')
@@ -920,8 +854,7 @@ describe('SearchPage additional handler coverage', () => {
         const { container } = renderPage('/nl/zoeken')
         await screen.findByText('Geen resultaten gevonden.')
 
-        // MobileSearchForm has className="mb-5 md:hidden" on the form element
-        const mobileForm = container.querySelector('form.mb-5') as HTMLFormElement
+        const mobileForm = container.querySelector('form[name="mobile-search-form"]') as HTMLFormElement
         expect(mobileForm).not.toBeNull()
 
         const mobileInput = mobileForm.querySelector('input')!
