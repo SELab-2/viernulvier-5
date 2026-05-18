@@ -10,7 +10,6 @@ import { getActiveLocale, withLocalePath } from '../../i18n'
 import { LeftArrowIcon } from '../../components/shared/icons'
 import PublicPillButton from '../../components/public/PublicPillButton'
 import ProductionCard from '../../components/blogs/ProductionCard'
-import { getPreviousStrippedPath } from '../../utils/navigationHistory'
 import {
     getLocalizedContent,
     getLocalizedTitle,
@@ -79,14 +78,12 @@ function BlogDetailPageContent() {
     const idIsMalformed = typeof id === 'string' && !UUID_REGEX.test(id)
 
     const handleGoBack = () => {
-        const prev = getPreviousStrippedPath()
-        if (prev) {
-            // navigate directly to the previous page in the current locale
-            // this bypasses any locale-switch history entries entirely
-            navigate(withLocalePath(prev, locale))
-            return
+        const prev = document.referrer
+        if (prev && new URL(prev).origin === window.location.origin) {
+            navigate(-1)
+        } else {
+            navigate(withLocalePath('/', locale))
         }
-        navigate(withLocalePath('/', locale))
     }
 
     // load productions or catch not existing production
