@@ -10,6 +10,8 @@ import { getActiveLocale, withLocalePath } from '../../i18n'
 import { LeftArrowIcon } from '../../components/shared/icons'
 import PublicPillButton from '../../components/public/PublicPillButton'
 import ProductionCard from '../../components/blogs/ProductionCard'
+import ArchiveDetailHero from '../../components/public/detail/PublicDetailHeroBanner'
+import ArchiveDetailGallery from '../../components/public/detail/PublicDetailGallery'
 import { getPreviousStrippedPath } from '../../utils/navigationHistory'
 import {
     getLocalizedContent,
@@ -158,7 +160,26 @@ function BlogDetailPageContent() {
     }
 
     return (
-        <section className="site-container py-12">
+        <>
+            <div className="site-container mt-6">
+                {blog && (
+                    <ArchiveDetailHero
+                        imageUrl={
+                            // show cover image if thumbnail_index points to a valid image, otherwise fallback
+                            (blog.images && typeof blog.thumbnail_index === 'number' && blog.images[blog.thumbnail_index])
+                                ? blog.images[blog.thumbnail_index]!
+                                : '/fallback-hero.svg'
+                        }
+                        title={getLocalizedTitle(blog.title, locale)}
+                        superTitle={null}
+                        artist={null}
+                        genres={[]}
+                        locale={locale}
+                    />
+                )}
+            </div>
+
+            <section className="site-container py-12">
             <div className="mb-8 flex items-center justify-between gap-4">
                 <PublicPillButton 
                     icon={<LeftArrowIcon className="h-5 w-5" />} 
@@ -176,6 +197,12 @@ function BlogDetailPageContent() {
                         {getLocalizedTitle(blog.title, locale) || message.blogs.untitledBlog}
                     </h1>
                     <QuillReadOnly content={getLocalizedContent(blog.content, locale)} />
+
+                    {blog.images && blog.images.length > 0 && (
+                        <div className="mt-6">
+                            <ArchiveDetailGallery images={blog.images.filter((_, i) => i !== blog.thumbnail_index)} />
+                        </div>
+                    )}
 
                     {isLoadingProductions || productions.length > 0 ? (
                         <section className="mt-10">
@@ -201,7 +228,8 @@ function BlogDetailPageContent() {
                     ) : null}
                 </article>
             ) : null}
-        </section>
+            </section>
+        </>
     )
 }
 
