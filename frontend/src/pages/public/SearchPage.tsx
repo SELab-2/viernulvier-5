@@ -1126,17 +1126,32 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
     )
 }
 
-function MobileSearchForm({ className = 'mb-5 md:hidden px-4' }: { className?: string }) {
+type MobileSearchFormProps = {
+    className?: string
+    value: string
+    onChange: (value: string) => void
+    onSubmit: () => void
+}
+
+function MobileSearchForm({ className = 'mb-5 md:hidden px-4', value, onChange, onSubmit }: MobileSearchFormProps) {
     return (
-        <form className={className}>
-            {/* Adjusted padding for better alignment */}
+        <form
+            name="mobile-search-form"
+            className={className}
+            onSubmit={(event) => {
+                event.preventDefault()
+                onSubmit()
+            }}
+        >
             <input
                 type="text"
+                value={value}
+                onChange={(event) => onChange(event.target.value)}
                 className="w-full rounded-full border border-border bg-surface px-4 py-2 text-sm text-foreground"
                 placeholder="Search..."
             />
         </form>
-    );
+    )
 }
 
 function SearchPageContent() {
@@ -1170,6 +1185,11 @@ function SearchPageContent() {
     const page = filterState.page
     const pageSize = filterState.limit
     const tab = filterState.tab
+    const [mobileSearchInput, setMobileSearchInput] = useState(query)
+
+    useEffect(() => {
+        setMobileSearchInput(query)
+    }, [query])
 
     useEffect(() => {
         const abortController = new AbortController()
@@ -1356,6 +1376,20 @@ function SearchPageContent() {
         const path = withLocalePath('/zoeken', locale)
         const qs = params.toString()
         navigate(qs ? `${path}?${qs}` : path)
+    }
+
+    const handleMobileSearchSubmit = () => {
+        navigateWithFilters({
+            query: mobileSearchInput.trim() || undefined,
+            yearFrom: safeFromYear,
+            yearTo: safeToYear,
+            genres: selectedGenres,
+            locations: selectedLocations,
+            sort,
+            page: 1,
+            limit: pageSize,
+            tab,
+        })
     }
 
     const currentPage = Math.min(page, totalPages)
@@ -1629,7 +1663,13 @@ function SearchPageContent() {
                                 </>
                             ) : null}
 
-                            <MobileSearchForm key={searchParams.toString()} className="mb-5 md:hidden" />
+                            <MobileSearchForm
+                                key={searchParams.toString()}
+                                className="mb-5 md:hidden"
+                                value={mobileSearchInput}
+                                onChange={setMobileSearchInput}
+                                onSubmit={handleMobileSearchSubmit}
+                            />
 
                             <div className="flex flex-wrap items-center justify-between gap-4">
                                 <div>
