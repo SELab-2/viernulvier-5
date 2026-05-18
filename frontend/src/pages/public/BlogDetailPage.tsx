@@ -162,7 +162,7 @@ function BlogDetailPageContent() {
         return () => {
             isActive = false
         }
-    }, [id, idIsMalformed, locale])
+    }, [id, idIsMalformed, locale, isLoggedIn])
 
     if (notFound || !id || idIsMalformed) {
         return <NotFoundContent />

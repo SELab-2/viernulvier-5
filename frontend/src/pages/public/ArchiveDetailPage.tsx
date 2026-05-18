@@ -187,7 +187,7 @@ function ArchiveDetailPageContent() {
         }
 
         fetchData()
-    }, [id, idIsMalformed])
+    }, [id, idIsMalformed, isLoggedIn])
 
     if (loading) {
         return null
