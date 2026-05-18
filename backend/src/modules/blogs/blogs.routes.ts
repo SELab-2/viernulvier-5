@@ -10,7 +10,10 @@ import {
     createBlogSchema,
     updateBlogSchema,
     blogIdSchema,
-    errorSchema,
+    blogImageDeleteParamsSchema,
+    uploadBlogImageResponseSchema,
+    uploadBlogImageSchema,
+    errorSchema
 } from './blogs.schema.js'
 import { requirePermission } from '../../hooks/require-permission.js'
 import { Permission } from '../../domain/permissions.js'
@@ -90,6 +93,47 @@ const blogsRoutes: FastifyPluginAsync = async (fastify) => {
             },
         },
         handler: (request, reply) => controller.deleteBlog(request as any, reply),
+    })
+
+    // DELETE /api/v1/archive/blogs/:id/images/:index
+    fastify.delete('/:id/images/:index', {
+        preHandler: [requirePermission(Permission.ARCHIVE_UPDATE)],
+        schema: {
+            tags: ['blogs'],
+            summary: 'Delete a blog image',
+            params: blogImageDeleteParamsSchema,
+            response: {
+                200: z.object({
+                    data: uploadBlogImageResponseSchema,
+                    links: z.object({
+                        self: z.string().url(),
+                    }),
+                }),
+                404: errorSchema,
+            },
+        },
+        handler: (request, reply) => controller.deleteBlogImage(request as any, reply),
+    })
+
+    // POST /api/v1/archive/blogs/:id/images
+    fastify.post('/:id/images', {
+        preHandler: [requirePermission(Permission.ARCHIVE_UPDATE)],
+        schema: {
+            tags: ['blogs'],
+            summary: 'Upload images to a blog',
+            params: blogIdSchema,
+            body: uploadBlogImageSchema,
+            response: {
+                200: z.object({
+                    data: uploadBlogImageResponseSchema,
+                    links: z.object({
+                        self: z.string().url(),
+                    }),
+                }),
+                404: errorSchema,
+            },
+        },
+        handler: (request, reply) => controller.uploadBlogImages(request as any, reply),
     })
 
     fastify.post('/:id/editors', {

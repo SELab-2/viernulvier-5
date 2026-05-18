@@ -20,9 +20,12 @@ export const blogPaginationQuerySchema = paginationQuerySchema.extend({
     yearFrom: z.coerce.number().int().optional(),
     yearTo: z.coerce.number().int().optional(),
     productionId: z.string().uuid().optional(),
-    draft: z.enum(['true', 'false'])
-        .optional()
-        .transform((val) => (val ? val === 'true' : undefined)),
+    draft: z.enum(['true', 'false', 'all'])
+        .default('false')
+        .transform((val) => {
+            if (val === 'all') return 'all'
+            return val === 'true';
+        }),
     editorId: z.string().uuid().optional(),
 })
 
@@ -39,6 +42,8 @@ export const blogSchema = z.object({
     draft: z.boolean().nullable().optional(),
     title: blogTitleSchema.nullable().optional(),
     content: z.unknown().nullable().optional(),
+    thumbnail_index: z.number().int().nonnegative().nullable().optional(),
+    images: z.array(z.string()).optional(),
     productions: z.array(z.string().uuid()),
     created_at: z.coerce.date().optional(),
     updated_at: z.coerce.date().optional(),
@@ -52,6 +57,8 @@ export const createBlogSchema = z.object({
     draft: z.boolean().nullable().optional(),
     title: blogTitleSchema.optional(),
     content: z.unknown().optional(),
+    thumbnail_index: z.number().int().nonnegative().nullable().optional(),
+    images: z.array(z.string()).optional(),
     productionIds: z.array(z.string().uuid()),
 })
 
@@ -59,11 +66,38 @@ export const updateBlogSchema = z.object({
     draft: z.boolean().nullable().optional(),
     title: blogTitleSchema.optional(),
     content: z.unknown().optional(),
+    thumbnail_index: z.number().int().nonnegative().nullable().optional(),
+    images: z.array(z.string()).optional(),
     productionIds: z.array(z.string().uuid()).optional(),
 })
 
 export const blogIdSchema = z.object({
     id: z.string().uuid(),
+})
+
+export const blogImageDeleteParamsSchema = z.object({
+    id: z.string().uuid(),
+    index: z.coerce.number().int().nonnegative(),
+})
+
+export const uploadBlogImageSchema = z.object({
+    files: z.array(
+        z.object({
+            file_name: z.string(),
+            file_base64: z.string(),
+        })
+    ),
+    thumbnail_index: z.number().int().nonnegative().nullable().optional(),
+})
+
+export const uploadedBlogImageSchema = z.object({
+    file_path: z.string(),
+    mime_type: z.string(),
+})
+
+export const uploadBlogImageResponseSchema = z.object({
+    images: z.array(z.string()),
+    thumbnail_index: z.number().int().nonnegative().nullable(),
 })
 
 export const errorSchema = z.object({
@@ -76,4 +110,6 @@ export type BlogListResponse = z.infer<typeof blogListSchema>
 export type CreateBlogInput = z.infer<typeof createBlogSchema>
 export type UpdateBlogInput = z.infer<typeof updateBlogSchema>
 export type LocalizedBlogTitle = z.infer<typeof localizedBlogTitleSchema>
+export type UploadBlogImageInput = z.infer<typeof uploadBlogImageSchema>
+export type UploadBlogImageResponse = z.infer<typeof uploadBlogImageResponseSchema>
 

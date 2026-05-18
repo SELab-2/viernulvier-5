@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { getActiveLocale, withLocalePath } from '../../i18n'
 import { localize } from '../../utils/localize'
-import { getYouTubeEmbedUrl } from '../../utils/youtube'
+import { getVideoEmbedUrl } from '../../utils/videos'
 import PublicLayout from '../../components/public/PublicLayout'
 import PublicPillButton from '../../components/public/PublicPillButton'
 import { usePublicMessages } from '../../components/public/PublicMessagesContext'
@@ -197,7 +197,7 @@ function ArchiveDetailPageContent() {
                 localize(production?.video_2, locale),
             ]
                 .filter((url): url is string => Boolean(url))
-                .map(getYouTubeEmbedUrl)
+                .map(getVideoEmbedUrl)
                 .filter((url): url is string => Boolean(url))
         )
     )
