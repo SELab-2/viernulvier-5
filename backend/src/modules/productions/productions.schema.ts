@@ -31,9 +31,12 @@ export const productionPaginationQuerySchema = paginationQuerySchema.extend({
         .optional(),
     sort: z.enum(['relevance', 'recent', 'oldest']).optional().default('relevance'),
     lang: z.string().optional().default('nl'),
-    draft: z.enum(['true', 'false'])
-        .optional()
-        .transform((val) => (val ? val === 'true' : undefined)),
+    draft: z.enum(['true', 'false', 'all'])
+        .default('false')
+        .transform((val) => {
+            if (val === 'all') return 'all'
+            return val === 'true';
+        }),
     editorId: z.string().uuid().optional(),
 })
 

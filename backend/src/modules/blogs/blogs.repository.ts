@@ -46,8 +46,9 @@ export class BlogsRepository {
     private buildWhere(options: BlogFilterOptions): Prisma.blogWhereInput {
         const conditions: Prisma.blogWhereInput[] = []
         const trimmedSearch = options.search?.trim()
+        console.log('draft filter:', options.draft, typeof options.draft)
 
-        if (options.draft !== undefined) {
+        if (options.draft !== 'all') {
             conditions.push({ draft: options.draft })
         }
         if (options.editorId){
@@ -191,7 +192,7 @@ export class BlogsRepository {
             id: blog.id,
             title: this.normalizeBlogTitle(blog.title),
             content: blog.content,
-            draft: blog.draft ?? false,
+            draft: blog.draft,
             productions: blog.blog_production?.map((relation) => relation.production_id) ?? [],
             created_at: blog.created_at,
             updated_at: blog.updated_at,

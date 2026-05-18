@@ -13,7 +13,7 @@ type FindAllOptions = {
     onThisDayDate?: Date
     sort?: 'relevance' | 'recent' | 'oldest'
     lang?: string
-    draft?: boolean
+    draft?: boolean | 'all'
     editorId?: string
 }
 
@@ -189,7 +189,7 @@ export class ProductionsRepository {
         const now = new Date()
 
 
-        if (draft !== undefined) {
+        if (draft !== 'all') {
             andFilters.push({ draft })
             // Requirement: Only show productions that have at least one event in the past
             if (!draft) {
