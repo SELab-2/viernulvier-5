@@ -57,7 +57,7 @@ function mapBlogApiItem(item: BlogApiItem, locale: 'nl' | 'en'): BlogRow {
         },
         createdAt: item.created_at,
         updatedAt: item.updated_at,
-        detailHref: withLocalePath(`/archive/blogs/${item.id}`, locale),
+        detailHref: withLocalePath(`/blogs/${item.id}`, locale),
     }
 }
 
