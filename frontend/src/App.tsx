@@ -24,8 +24,6 @@ const CreateBlogPage = lazy(() => import('./pages/admin/CreateBlogPage'))
 import BlogDetailPage from './pages/public/BlogDetailPage'
 
 import DraftsDashboard from './pages/admin/DraftsDashboard.tsx'
-import ArchivePreviewPage from "./pages/admin/ArchivePreviewPage.tsx";
-import BlogPreviewPage from "./pages/admin/BlogPreviewPage.tsx";
 /**
  * Root App component.
  *
@@ -129,8 +127,8 @@ function App() {
                         <Route
                             path={adminRoutes.archivePreviewPath}
                             element={
-                                <ProtectedAdminRoute loginPath={adminRoutes.archivePreviewPath}>
-                                    <ArchivePreviewPage />
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <ArchiveDetailPage />
                                 </ProtectedAdminRoute>
                             }
                         />
@@ -138,8 +136,8 @@ function App() {
                         <Route
                             path={`/en${adminRoutes.archivePreviewPath}`}
                             element={
-                                <ProtectedAdminRoute loginPath={adminRoutes.archivePreviewPath}>
-                                    <ArchivePreviewPage />
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <ArchiveDetailPage />
                                 </ProtectedAdminRoute>
                             }
                         />
@@ -147,8 +145,8 @@ function App() {
                         <Route
                             path={`/nl${adminRoutes.archivePreviewPath}`}
                             element={
-                                <ProtectedAdminRoute loginPath={adminRoutes.archivePreviewPath}>
-                                    <ArchivePreviewPage />
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <ArchiveDetailPage />
                                 </ProtectedAdminRoute>
                             }
                         />
@@ -181,8 +179,8 @@ function App() {
                         <Route
                             path={adminRoutes.blogPreviewPath}
                             element={
-                                <ProtectedAdminRoute loginPath={adminRoutes.blogPreviewPath}>
-                                    <BlogPreviewPage />
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <BlogDetailPage />
                                 </ProtectedAdminRoute>
                             }
                         />
@@ -190,8 +188,8 @@ function App() {
                         <Route
                             path={`/en${adminRoutes.blogPreviewPath}`}
                             element={
-                                <ProtectedAdminRoute loginPath={adminRoutes.blogPreviewPath}>
-                                    <BlogPreviewPage />
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <BlogDetailPage />
                                 </ProtectedAdminRoute>
                             }
                         />
@@ -199,14 +197,11 @@ function App() {
                         <Route
                             path={`/nl${adminRoutes.blogPreviewPath}`}
                             element={
-                                <ProtectedAdminRoute loginPath={adminRoutes.blogPreviewPath}>
-                                    <BlogPreviewPage />
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <BlogDetailPage />
                                 </ProtectedAdminRoute>
                             }
                         />
-
-
-
                         <Route
                             path="/admin/blogs/:id/edit"
                             element={

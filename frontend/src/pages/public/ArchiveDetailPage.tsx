@@ -22,6 +22,7 @@ import { getSpaceById } from '../../api/spaces'
 import { getLocationById, type Location } from '../../api/locations'
 import { getPreviousStrippedPath } from '../../utils/navigationHistory'
 import { LeftArrowIcon } from '../../components/shared/icons'
+import {useOptionalAdminSession} from "../../auth/useAdminSessionContext.ts";
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -51,6 +52,9 @@ function ArchiveDetailPageContent() {
         setNotFound(false)
         setLoading(true)
     }
+
+    const session = useOptionalAdminSession()
+    const isLoggedIn = Boolean(session?.user)
 
     const handleGoBack = () => {
         const prev = getPreviousStrippedPath()
@@ -113,8 +117,11 @@ function ArchiveDetailPageContent() {
                     getBlogsByProductionId(id).catch(() => ({ data: [] })),
                 ])
 
+
                 const prod = prodRes.data
-                if (prod.draft) {
+                console.log("HALLO");
+                console.log(isLoggedIn);
+                if (prod.draft && !isLoggedIn) {
                     setNotFound(true)
                     return
                 }

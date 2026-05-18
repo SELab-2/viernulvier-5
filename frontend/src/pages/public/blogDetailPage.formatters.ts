@@ -7,6 +7,7 @@ export type BlogDetails = {
     title?: string | null
     content?: unknown
     productions?: string[]
+    draft?: boolean
 }
 
 export type BlogDetailResponse = {

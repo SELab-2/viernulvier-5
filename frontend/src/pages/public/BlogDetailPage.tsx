@@ -20,6 +20,7 @@ import {
     type BlogLinkedProduction,
     type ProductionDetailResponse,
 } from './blogDetailPage.formatters'
+import {useOptionalAdminSession} from "../../auth/useAdminSessionContext.ts";
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -70,6 +71,9 @@ function BlogDetailPageContent() {
     const [notFound, setNotFound] = useState(false)
     const [previousId, setPreviousId] = useState(id)
 
+    const session = useOptionalAdminSession()
+    const isLoggedIn = Boolean(session?.user)
+
     if (id !== previousId) {
         setPreviousId(id)
         setError('')
@@ -100,6 +104,7 @@ function BlogDetailPageContent() {
                 return
             }
 
+
             setIsLoading(true)
             setError('')
 
@@ -113,6 +118,12 @@ function BlogDetailPageContent() {
                 } else {
                     setError(loadError instanceof Error ? loadError.message : 'Failed to load blog.')
                 }
+                setIsLoading(false)
+                return
+            }
+
+            if (response.data.draft && !isLoggedIn) {
+                setNotFound(true)
                 setIsLoading(false)
                 return
             }
