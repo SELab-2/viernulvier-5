@@ -23,7 +23,7 @@ export type PersistedBlogImageFile = {
 function sanitizeFilename(fileName: string): string {
     return fileName
         .toLowerCase()
-        .replace(/[^a-z0-9.-]/g, '-')
+        .replace(/[^a-z0-9._-]/g, '-')
         .replace(/-+/g, '-')
         .replace(/^-|-$/g, '')
         .substring(0, 255)
