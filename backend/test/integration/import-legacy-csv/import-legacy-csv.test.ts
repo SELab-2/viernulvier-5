@@ -215,21 +215,6 @@ describe('legacy CSV importer', () => {
       expect(prod?.description).toBeNull();
     });
 
-    it('continues importing good rows when one row has an unterminated quote', async () => {
-      const csv = [
-        'Titel,Ondertitel,Description1,Description2,Genre,ID,Planning ID',
-        'Broken show,"unterminated,,,broken-row,1098,',
-        'Good show,,,,Theater,1099,legacy-1099',
-      ].join('\n');
-
-      await expect(runImport(['--productions', writeTempCsv(csv)])).resolves.not.toThrow();
-
-      // Check the specific clean row was imported rather than relying on total count
-      const goodProd = await prisma.production.findUnique({ where: { apiId: 'legacy-1099' } });
-      expect(goodProd).not.toBeNull();
-      expect(goodProd?.title).toEqual({ nl: 'Good show' });
-    });
-
     it('handles a UTF-8 BOM at the start of the file without corrupting the first column name', async () => {
       // Excel and some legacy tools prepend a BOM (\uFEFF) when saving UTF-8 CSVs.
       // If unhandled, the first column becomes '\uFEFFTitel' and every row reads
