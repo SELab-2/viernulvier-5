@@ -11,6 +11,7 @@ const MESSAGES: Record<Locale, Messages> = {
 
 const LOCALE_STORAGE_KEY = 'locale'
 const LOCALE_PATH_REGEX = /^\/(nl|en)(?=\/|$)/i
+export const LOCALE_CHANGE_EVENT = 'localechange'
 
 export function resolveLocale(rawLocale?: string): Locale {
   if (!rawLocale) {
@@ -79,6 +80,7 @@ export function setActiveLocale(locale: Locale) {
 
   window.localStorage.setItem(LOCALE_STORAGE_KEY, locale)
   document.documentElement.lang = locale
+  window.dispatchEvent(new CustomEvent<Locale>(LOCALE_CHANGE_EVENT, { detail: locale }))
 }
 
 export function getMessages(locale?: Locale): Messages {
