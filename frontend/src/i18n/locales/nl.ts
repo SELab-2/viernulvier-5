@@ -163,7 +163,7 @@ const nl: Messages = {
     logoutLabel: 'Uitloggen',
   },
   detail: {
-    navBack: '🡠 Terug',
+    navBack: 'Terug',
     events: 'Speelreeks Geschiedenis',
     noEvents: 'Geen verleden events.',
     loadError: 'Kon de productie niet laden.',
@@ -415,14 +415,14 @@ const nl: Messages = {
   },
 
   editHeader: {
-    back: '← Terug',
+    back: 'Terug',
     publish: 'Publiceren',
     saveOnDraft: 'Opslaan als draft'
   },
 
   blogs: {
+      navBack: 'Terug',
       languageError:'Blog bestaat niet in deze taal',
-      detailPageBack:'← terug naar hoofdpagina',
       loadingBlog: 'Blog wordt geladen...',
       loadingProductions: 'Producties laden...',
       relatedProductions: 'Gerelateerde producties',

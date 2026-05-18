@@ -163,7 +163,7 @@ const en: Messages = {
     logoutLabel: 'Log out',
   },
   detail: {
-    navBack: '🡠 Go Back',
+    navBack: 'Go back',
     events: 'Event History',
     noEvents: 'No past events.',
     loadError: 'Could not load the production.',
@@ -415,14 +415,14 @@ const en: Messages = {
   },
 
   editHeader: {
-    back: '← Back',
+    back: 'Back',
     publish: 'Publish',
     saveOnDraft: 'Save as draft'
   },
 
   blogs: {
+      navBack: 'Go back',
       languageError:'Blog does not exist in this language',
-      detailPageBack:'← Back to Homepage',
       loadingBlog: 'Loading blog...',
       loadingProductions: 'Loading productions...',
       relatedProductions: 'Related productions',

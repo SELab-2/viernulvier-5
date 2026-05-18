@@ -126,6 +126,8 @@ describe('ArchiveDetailHero', () => {
                         name: { nl: 'Concert', en: 'Concert' },
                         slug: { nl: 'muziek', en: 'music' },
                         description: null,
+                        created_at: new Date('2026-04-01T10:00:00.000Z'),
+                        updated_at: new Date('2026-04-01T10:00:00.000Z'),
                     },
                 ]}
             />
@@ -149,6 +151,8 @@ describe('ArchiveDetailHero', () => {
                         name: { nl: 'Concert', en: 'Concert' },
                         slug: { nl: 'muziek', en: 'music' },
                         description: null,
+                        created_at: new Date('2026-04-01T10:00:00.000Z'),
+                        updated_at: new Date('2026-04-01T10:00:00.000Z'),
                     },
                 ]}
             />
@@ -173,6 +177,8 @@ describe('ArchiveDetailHero', () => {
                         name: { nl: 'Concert', en: 'Concert' },
                         slug: { nl: 'muziek', en: 'music' },
                         description: null,
+                        created_at: new Date('2026-04-01T10:00:00.000Z'),
+                        updated_at: new Date('2026-04-01T10:00:00.000Z'),
                     },
                     {
                         id: '8edda54e-a1c4-486d-9fd4-c2e43cb2fe2f',
@@ -182,6 +188,8 @@ describe('ArchiveDetailHero', () => {
                         name: { nl: 'Performance', en: 'Performance' },
                         slug: { nl: 'performance', en: 'performance' },
                         description: null,
+                        created_at: new Date('2026-04-01T10:00:00.000Z'),
+                        updated_at: new Date('2026-04-01T10:00:00.000Z'),
                     },
                 ]}
             />
@@ -221,6 +229,8 @@ describe('ArchiveDetailHero', () => {
                         name: null,
                         slug: null,
                         description: null,
+                        created_at: new Date('2026-04-01T10:00:00.000Z'),
+                        updated_at: new Date('2026-04-01T10:00:00.000Z'),
                     },
                 ]}
             />
@@ -244,6 +254,8 @@ describe('ArchiveDetailHero', () => {
                         name: { nl: 'Concert', en: 'Concert EN' },
                         slug: null,
                         description: null,
+                        created_at: new Date('2026-04-01T10:00:00.000Z'),
+                        updated_at: new Date('2026-04-01T10:00:00.000Z'),
                     },
                 ]}
             />

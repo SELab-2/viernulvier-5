@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import Quill from 'quill'
 import 'quill/dist/quill.snow.css'
 import { api, ApiError } from '../../api/client'
@@ -7,7 +7,10 @@ import PublicLayout from '../../components/public/PublicLayout'
 import { NotFoundContent } from './NotFoundPage'
 import { usePublicMessages } from '../../components/public/PublicMessagesContext'
 import { getActiveLocale, withLocalePath } from '../../i18n'
+import { LeftArrowIcon } from '../../components/shared/icons'
+import PublicPillButton from '../../components/public/PublicPillButton'
 import ProductionCard from '../../components/blogs/ProductionCard'
+import { getPreviousStrippedPath } from '../../utils/navigationHistory'
 import {
     getLocalizedContent,
     getLocalizedTitle,
@@ -56,6 +59,7 @@ function QuillReadOnly({ content }: { content: unknown }) {
 
 function BlogDetailPageContent() {
     const { id } = useParams<{ id: string }>()
+    const navigate = useNavigate()
     const locale = getActiveLocale(window.location.pathname)
     const message = usePublicMessages()
     const [blog, setBlog] = useState<BlogDetails | null>(null)
@@ -73,6 +77,17 @@ function BlogDetailPageContent() {
     }
 
     const idIsMalformed = typeof id === 'string' && !UUID_REGEX.test(id)
+
+    const handleGoBack = () => {
+        const prev = getPreviousStrippedPath()
+        if (prev) {
+            // navigate directly to the previous page in the current locale
+            // this bypasses any locale-switch history entries entirely
+            navigate(withLocalePath(prev, locale))
+            return
+        }
+        navigate(withLocalePath('/', locale))
+    }
 
     // load productions or catch not existing production
     useEffect(() => {
@@ -145,12 +160,11 @@ function BlogDetailPageContent() {
     return (
         <section className="site-container py-12">
             <div className="mb-8 flex items-center justify-between gap-4">
-                <Link
-                    to={withLocalePath('/', locale)}
-                    className="text-sm font-medium text-[var(--color-accent)] transition hover:opacity-80"
-                >
-                    {message.blogs.detailPageBack}
-                </Link>
+                <PublicPillButton 
+                    icon={<LeftArrowIcon className="h-5 w-5" />} 
+                    label={message.blogs.navBack} 
+                    onClick={handleGoBack} 
+                />
             </div>
 
             {isLoading ? <p className="text-center text-muted">{message.blogs.loadingBlog}</p> : null}
