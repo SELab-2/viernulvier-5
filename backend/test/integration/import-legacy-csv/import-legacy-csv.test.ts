@@ -216,21 +216,18 @@ describe('legacy CSV importer', () => {
     });
 
     it('continues importing good rows when one row has an unterminated quote', async () => {
-      // Row 1002 has an unterminated quote — csv-parse will either skip it or
-      // absorb following rows into it. Either way the import must not throw,
-      // and the clean row for ID 1099 must still land in the database.
       const csv = [
         'Titel,Ondertitel,Description1,Description2,Genre,ID,Planning ID',
-        'Broken show,"unterminated,,,broken-row,1098,',   // malformed — missing closing quote
+        'Broken show,"unterminated,,,broken-row,1098,',
         'Good show,,,,Theater,1099,legacy-1099',
       ].join('\n');
 
-      const countBefore = await prisma.production.count();
       await expect(runImport(['--productions', writeTempCsv(csv)])).resolves.not.toThrow();
-      const countAfter = await prisma.production.count();
 
-      // At least the clean row should have been imported
-      expect(countAfter).toBeGreaterThanOrEqual(countBefore);
+      // Check the specific clean row was imported rather than relying on total count
+      const goodProd = await prisma.production.findUnique({ where: { apiId: 'legacy-1099' } });
+      expect(goodProd).not.toBeNull();
+      expect(goodProd?.title).toEqual({ nl: 'Good show' });
     });
 
     it('handles a UTF-8 BOM at the start of the file without corrupting the first column name', async () => {
