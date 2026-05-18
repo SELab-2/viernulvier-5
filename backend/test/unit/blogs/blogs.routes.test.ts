@@ -336,7 +336,7 @@ describe('Blogs Routes', () => {
 
             const editor = await app.prisma.adminUser.create({
                 data: {
-                    username: 'testeditor',
+                    username: crypto.randomUUID(),
                     passwordHash: 'hash',
                     role: Role.EDITOR,
                 }
@@ -395,7 +395,7 @@ describe('Blogs Routes', () => {
 
             const editor = await app.prisma.adminUser.create({
                 data: {
-                    username: 'testeditor2',
+                    username: crypto.randomUUID(),
                     passwordHash: 'hash',
                     role: Role.EDITOR,
                 }
