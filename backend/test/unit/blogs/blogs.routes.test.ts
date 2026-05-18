@@ -444,4 +444,138 @@ describe('Blogs Routes', () => {
             expect(response.statusCode).toBe(401)
         })
     })
+
+    describe('GET /api/v1/archive/blogs - draft filter', () => {
+        it('should return only non-draft blogs when draft=false', async () => {
+            const token = app.jwt.sign({ sub: 'admin', username: 'admin', role: Role.ADMIN })
+            const production = await app.prisma.production.create({ data: {} })
+
+            try {
+                const publishedResponse = await app.inject({
+                    method: 'POST',
+                    url: '/api/v1/archive/blogs',
+                    headers: { authorization: `Bearer ${token}` },
+                    payload: {
+                        title: { nl: 'Gepubliceerde blog', en: 'Published blog' },
+                        productionIds: [production.id],
+                        draft: false,
+                    },
+                })
+                const published = JSON.parse(publishedResponse.payload).data
+
+                const draftResponse = await app.inject({
+                    method: 'POST',
+                    url: '/api/v1/archive/blogs',
+                    headers: { authorization: `Bearer ${token}` },
+                    payload: {
+                        title: { nl: 'Conceptblog', en: 'Draft blog' },
+                        productionIds: [production.id],
+                        draft: true,
+                    },
+                })
+                const draft = JSON.parse(draftResponse.payload).data
+
+                const response = await app.inject({
+                    method: 'GET',
+                    url: '/api/v1/archive/blogs?draft=false',
+                })
+
+                expect(response.statusCode).toBe(200)
+                const ids = JSON.parse(response.payload).data.map((item: { id: string }) => item.id)
+                expect(ids).toContain(published.id)
+                expect(ids).not.toContain(draft.id)
+            } finally {
+                await app.prisma.blog_production.deleteMany({ where: { production_id: production.id } })
+                await app.prisma.production.delete({ where: { id: production.id } })
+            }
+        })
+
+        it('should return only draft blogs when draft=true', async () => {
+            const token = app.jwt.sign({ sub: 'admin', username: 'admin', role: Role.ADMIN })
+            const production = await app.prisma.production.create({ data: {} })
+
+            try {
+                const publishedResponse = await app.inject({
+                    method: 'POST',
+                    url: '/api/v1/archive/blogs',
+                    headers: { authorization: `Bearer ${token}` },
+                    payload: {
+                        title: { nl: 'Gepubliceerde blog', en: 'Published blog' },
+                        productionIds: [production.id],
+                        draft: false,
+                    },
+                })
+                const published = JSON.parse(publishedResponse.payload).data
+
+                const draftResponse = await app.inject({
+                    method: 'POST',
+                    url: '/api/v1/archive/blogs',
+                    headers: { authorization: `Bearer ${token}` },
+                    payload: {
+                        title: { nl: 'Conceptblog', en: 'Draft blog' },
+                        productionIds: [production.id],
+                        draft: true,
+                    },
+                })
+                const draft = JSON.parse(draftResponse.payload).data
+
+                const response = await app.inject({
+                    method: 'GET',
+                    url: '/api/v1/archive/blogs?draft=true',
+                })
+
+                expect(response.statusCode).toBe(200)
+                const ids = JSON.parse(response.payload).data.map((item: { id: string }) => item.id)
+                expect(ids).toContain(draft.id)
+                expect(ids).not.toContain(published.id)
+            } finally {
+                await app.prisma.blog_production.deleteMany({ where: { production_id: production.id } })
+                await app.prisma.production.delete({ where: { id: production.id } })
+            }
+        })
+
+        it('should return all blogs when no draft filter is applied', async () => {
+            const token = app.jwt.sign({ sub: 'admin', username: 'admin', role: Role.ADMIN })
+            const production = await app.prisma.production.create({ data: {} })
+
+            try {
+                const publishedResponse = await app.inject({
+                    method: 'POST',
+                    url: '/api/v1/archive/blogs',
+                    headers: { authorization: `Bearer ${token}` },
+                    payload: {
+                        title: { nl: 'Gepubliceerde blog', en: 'Published blog' },
+                        productionIds: [production.id],
+                        draft: false,
+                    },
+                })
+                const published = JSON.parse(publishedResponse.payload).data
+
+                const draftResponse = await app.inject({
+                    method: 'POST',
+                    url: '/api/v1/archive/blogs',
+                    headers: { authorization: `Bearer ${token}` },
+                    payload: {
+                        title: { nl: 'Conceptblog', en: 'Draft blog' },
+                        productionIds: [production.id],
+                        draft: true,
+                    },
+                })
+                const draft = JSON.parse(draftResponse.payload).data
+
+                const response = await app.inject({
+                    method: 'GET',
+                    url: '/api/v1/archive/blogs',
+                })
+
+                expect(response.statusCode).toBe(200)
+                const ids = JSON.parse(response.payload).data.map((item: { id: string }) => item.id)
+                expect(ids).toContain(published.id)
+                expect(ids).toContain(draft.id)
+            } finally {
+                await app.prisma.blog_production.deleteMany({ where: { production_id: production.id } })
+                await app.prisma.production.delete({ where: { id: production.id } })
+            }
+        })
+    })
 })
