@@ -417,6 +417,15 @@ export type Messages = {
       addButton: string
       close: string
       queryHint: string
+      filtersLabel: string
+      periodLabel: string
+      locationLabel: string
+      locationPlaceholder: string
+      stagedLabel: string
+      selectedCount: (count: number) => string
+      readyCount: (count: number) => string
+      loading: string
+      loadingMore: string
       noProductionFound:string
     }
     bannerUpload: {
