@@ -35,9 +35,9 @@ const MUTATION_ROUTES: MutationRoute[] = [
     { method: 'DELETE', url: `/api/v1/archive/blogs/${PLACEHOLDER_UUID}` },
 
     // editors
-    { method: 'POST', url: '/api/v1/editors', payload: { username: 'auth-sweep-user', password: 'sweep-pass' } },
-    { method: 'PATCH', url: `/api/v1/editors/${PLACEHOLDER_UUID}`, payload: {} },
-    { method: 'DELETE', url: `/api/v1/editors/${PLACEHOLDER_UUID}` },
+    { method: 'POST', url: '/api/v1/cms-users/editors', payload: { username: 'auth-sweep-user', password: 'sweep-pass' } },
+    { method: 'PATCH', url: `/api/v1/cms-users/editors/${PLACEHOLDER_UUID}`, payload: {} },
+    { method: 'DELETE', url: `/api/v1/cms-users/editors/${PLACEHOLDER_UUID}` },
 
     // events
     { method: 'POST', url: '/api/v1/archive/events', payload: {} },
