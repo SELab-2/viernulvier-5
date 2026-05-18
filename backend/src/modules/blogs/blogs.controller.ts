@@ -4,7 +4,8 @@ import type {
     BlogPaginationQuery, 
     BlogResponse,
     CreateBlogInput, 
-    UpdateBlogInput 
+    UpdateBlogInput,
+    UploadBlogImageInput,
 } from './blogs.schema.js'
 import { buildPaginationLinks } from '../../utils/pagination.js'
 
@@ -13,14 +14,15 @@ export class BlogsController {
 
     private getBaseUrl(request: FastifyRequest) {
         const host = request.headers.host || request.hostname
-        return `${request.protocol}://${host}/api/v1/archive/blogs`
+        return `${request.protocol}://${host}/api/v1`
     }
 
     private mapBlogLinks(blog: any, baseUrl: string): BlogResponse {
         return {
             ...blog,
             links: {
-                self: `${baseUrl}/${blog.id}`,
+                self: `${baseUrl}/archive/blogs/${blog.id}`,
+                editors: `${baseUrl}/cms-users?blogId=${blog.id}`,
             }
         }
     }
@@ -28,7 +30,7 @@ export class BlogsController {
     async getBlogs(request: FastifyRequest<{ Querystring: BlogPaginationQuery }>, reply: FastifyReply) {
         const blogs = await this.service.getBlogs(request.query)
         const baseUrl = this.getBaseUrl(request)
-        const currentUrl = baseUrl
+        const currentUrl =`${baseUrl}/archive/blogs`
 
         const dataWithLinks = blogs.items.map(b => this.mapBlogLinks(b, baseUrl))
 
@@ -58,7 +60,7 @@ export class BlogsController {
         return reply.status(200).send({
             data: dataWithLinks,
             links: {
-                self: `${baseUrl}/${id}`
+                self: `${baseUrl}/archive/blogs/${id}`
             }
         })
     }
@@ -66,7 +68,7 @@ export class BlogsController {
     async createBlog(request: FastifyRequest<{ Body: CreateBlogInput }>, reply: FastifyReply) {
         const blog = await this.service.createBlog(request.body)
         const baseUrl = this.getBaseUrl(request)
-        const selfUrl = `${baseUrl}/${blog.id}`
+        const selfUrl = `${baseUrl}/archive/blogs/${blog.id}`
         
         const dataWithLinks = this.mapBlogLinks(blog, baseUrl)
 
@@ -91,7 +93,7 @@ export class BlogsController {
             return reply.status(200).send({
                 data: dataWithLinks,
                 links: {
-                    self: `${baseUrl}/${id}`
+                    self: `${baseUrl}/archive/blogs/${id}`
                 }
             })
         } catch (error: any) {
@@ -107,6 +109,62 @@ export class BlogsController {
         try {
             await this.service.deleteBlog(id)
             return reply.status(204).send()
+        } catch (error: any) {
+            if (error.message === 'Blog not found') {
+                return reply.status(404).send({ message: 'Blog not found' })
+            }
+            throw error
+        }
+    }
+
+    async addEditor(request: FastifyRequest<{ Params: { id: string }, Body: { editorId: string } }>, reply: FastifyReply) {
+        const { id } = request.params
+        await this.service.addEditor(id, request.body.editorId)
+        return reply.status(204).send()
+    }
+
+    async removeEditor(request: FastifyRequest<{ Params: { id: string, editorId: string } }>, reply: FastifyReply) {
+        const { id, editorId } = request.params
+        await this.service.removeEditor(id, editorId)
+        return reply.status(204).send()
+    }
+
+    async deleteBlogImage(
+        request: FastifyRequest<{ Params: { id: string; index: string } }>,
+        reply: FastifyReply,
+    ) {
+        const { id, index } = request.params
+        try {
+            const result = await this.service.deleteBlogImage(id, Number(index))
+            return reply.status(200).send({
+                data: result,
+                links: {
+                    self: `${this.getBaseUrl(request)}/${id}`,
+                },
+            })
+        } catch (error: any) {
+            if (error.message === 'Blog not found') {
+                return reply.status(404).send({ message: 'Blog not found' })
+            }
+
+            if (error.message === 'Image not found') {
+                return reply.status(404).send({ message: 'Image not found' })
+            }
+
+            throw error
+        }
+    }
+
+    async uploadBlogImages(request: FastifyRequest<{ Params: { id: string }, Body: UploadBlogImageInput }>, reply: FastifyReply) {
+        const { id } = request.params
+        try {
+            const result = await this.service.uploadBlogImages(id, request.body)
+            return reply.status(200).send({
+                data: result,
+                links: {
+                    self: `${this.getBaseUrl(request)}/${id}`,
+                }
+            })
         } catch (error: any) {
             if (error.message === 'Blog not found') {
                 return reply.status(404).send({ message: 'Blog not found' })
