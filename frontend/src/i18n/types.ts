@@ -397,6 +397,9 @@ export type Messages = {
       addButton: string
       close: string
       queryHint: string
+      selectedCount: (count: number) => string
+      readyCount: (count: number) => string
+      loading: string
       noProductionFound:string
     }
   }

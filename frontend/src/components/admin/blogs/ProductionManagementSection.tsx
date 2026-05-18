@@ -1,9 +1,11 @@
+import { useEffect, useState } from 'react'
 import { getActiveLocale, getMessages } from '../../../i18n'
 import ProductionCard, { type ProductionCardItem } from '../../blogs/ProductionCard'
 import ProductionPickerPopup from './ProductionPickerPopup'
 
 export type ProductionItem = ProductionCardItem
 
+const PRODUCTION_SEARCH_DEBOUNCE_MS = 250
 
 /*
 This section will display selected productions, is able to remove production and select production (by starting a popup)
@@ -12,7 +14,7 @@ This section will display selected productions, is able to remove production and
 type ProductionManagementSectionProps = {
     selectedProductions: ProductionItem[]
     availableProductions: ProductionItem[]
-    productionToAdd: string
+    productionsToAdd: string[]
     productionSearchQuery: string
     isProductionPopupOpen: boolean
     isLoadingProductions: boolean
@@ -20,16 +22,16 @@ type ProductionManagementSectionProps = {
     compact?: boolean
     onOpenPopup: () => void
     onClosePopup: () => void
-    onSelectProductionToAdd: (productionId: string) => void
+    onSelectProductionsToAdd: (productionIds: string[]) => void
     onProductionSearchQueryChange: (query: string) => void
-    onAddProduction: () => void
+    onAddProduction: (productionIds: string[]) => void
     onRemoveProduction: (productionId: string) => void
 }
 
 function ProductionManagementSection({
     selectedProductions,
     availableProductions,
-    productionToAdd,
+    productionsToAdd,
     productionSearchQuery,
     isProductionPopupOpen,
     isLoadingProductions,
@@ -37,13 +39,33 @@ function ProductionManagementSection({
     compact = false,
     onOpenPopup,
     onClosePopup,
-    onSelectProductionToAdd,
+    onSelectProductionsToAdd,
     onProductionSearchQueryChange,
     onAddProduction,
     onRemoveProduction,
 }: ProductionManagementSectionProps) {
     const locale = getActiveLocale(window.location.pathname)
     const messages = getMessages(locale)
+    const [productionSearchInput, setProductionSearchInput] = useState(productionSearchQuery)
+
+    useEffect(() => {
+        setProductionSearchInput(productionSearchQuery)
+    }, [productionSearchQuery])
+
+    useEffect(() => {
+        const nextQuery = productionSearchInput.trim()
+        if (nextQuery === productionSearchQuery) {
+            return
+        }
+
+        const timerId = window.setTimeout(() => {
+            onProductionSearchQueryChange(nextQuery)
+        }, PRODUCTION_SEARCH_DEBOUNCE_MS)
+
+        return () => {
+            window.clearTimeout(timerId)
+        }
+    }, [onProductionSearchQueryChange, productionSearchInput, productionSearchQuery])
 
     const inner = (
         <div className="min-w-0 max-w-full rounded-xl border border-border bg-background">
@@ -131,12 +153,12 @@ function ProductionManagementSection({
             <ProductionPickerPopup
                 isOpen={isProductionPopupOpen}
                 productions={availableProductions}
-                selectedProductionId={productionToAdd}
-                searchQuery={productionSearchQuery}
+                selectedProductionIds={productionsToAdd}
+                searchQuery={productionSearchInput}
                 isLoading={isLoadingProductions}
                 onClose={onClosePopup}
-                onSelect={onSelectProductionToAdd}
-                onSearchQueryChange={onProductionSearchQueryChange}
+                onSelectedProductionIdsChange={onSelectProductionsToAdd}
+                onSearchQueryChange={setProductionSearchInput}
                 onAdd={onAddProduction}
             />
         </>

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import ProductionPickerPopup from '../../components/admin/blogs/ProductionPickerPopup'
@@ -18,25 +19,30 @@ const baseProduction = (overrides: Partial<ProductionItem>): ProductionItem => (
 })
 
 describe('ProductionPickerPopup', () => {
-  it('calls the popup actions and allows selecting a production', () => {
+  it('calls the popup actions and adds multiple selected productions at once', () => {
     const onClose = vi.fn()
-    const onSelect = vi.fn()
     const onSearchQueryChange = vi.fn()
     const onAdd = vi.fn()
 
-    render(
-      <ProductionPickerPopup
-        isOpen
-        productions={[baseProduction({ id: 'production-1' }), baseProduction({ id: 'production-2', title: { nl: 'Tweede productie', en: 'Second production' } })]}
-        selectedProductionId="production-1"
-        searchQuery=""
-        isLoading={false}
-        onClose={onClose}
-        onSelect={onSelect}
-        onSearchQueryChange={onSearchQueryChange}
-        onAdd={onAdd}
-      />,
-    )
+    function TestHarness() {
+      const [selectedProductionIds, setSelectedProductionIds] = useState(['production-1'])
+
+      return (
+        <ProductionPickerPopup
+          isOpen
+          productions={[baseProduction({ id: 'production-1' }), baseProduction({ id: 'production-2', title: { nl: 'Tweede productie', en: 'Second production' } })]}
+          selectedProductionIds={selectedProductionIds}
+          searchQuery=""
+          isLoading={false}
+          onClose={onClose}
+          onSelectedProductionIdsChange={setSelectedProductionIds}
+          onSearchQueryChange={onSearchQueryChange}
+          onAdd={onAdd}
+        />
+      )
+    }
+
+    render(<TestHarness />)
 
     expect(screen.getByText('Kies een productie')).toBeInTheDocument()
 
@@ -49,22 +55,38 @@ describe('ProductionPickerPopup', () => {
     expect(onClose).toHaveBeenCalledTimes(1)
 
     fireEvent.click(screen.getByRole('button', { name: /Tweede productie/i }))
-    expect(onSelect).toHaveBeenCalledWith('production-2')
 
     fireEvent.click(screen.getByRole('button', { name: 'Toevoegen' }))
-    expect(onAdd).toHaveBeenCalledTimes(1)
+    expect(onAdd).toHaveBeenCalledWith(['production-1', 'production-2'])
   })
 
-  it('shows the empty state when there are no productions', () => {
-    render(
+  it('shows loading feedback before the empty state while searching', () => {
+    const { rerender } = render(
       <ProductionPickerPopup
         isOpen
         productions={[]}
-        selectedProductionId=""
+        selectedProductionIds={[]}
+        searchQuery=""
+        isLoading
+        onClose={vi.fn()}
+        onSelectedProductionIdsChange={vi.fn()}
+        onSearchQueryChange={vi.fn()}
+        onAdd={vi.fn()}
+      />,
+    )
+
+    expect(screen.getAllByText('Producties zoeken...')).toHaveLength(2)
+    expect(screen.queryByText('Geen producties beschikbaar')).not.toBeInTheDocument()
+
+    rerender(
+      <ProductionPickerPopup
+        isOpen
+        productions={[]}
+        selectedProductionIds={[]}
         searchQuery=""
         isLoading={false}
         onClose={vi.fn()}
-        onSelect={vi.fn()}
+        onSelectedProductionIdsChange={vi.fn()}
         onSearchQueryChange={vi.fn()}
         onAdd={vi.fn()}
       />,

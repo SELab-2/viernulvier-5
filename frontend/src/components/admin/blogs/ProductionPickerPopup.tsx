@@ -25,23 +25,23 @@ type ProductionItem = {
 type ProductionPickerPopupProps = {
     isOpen: boolean
     productions: ProductionItem[]
-    selectedProductionId: string
+    selectedProductionIds: string[]
     searchQuery: string
     isLoading: boolean
     onClose: () => void
-    onSelect: (productionId: string) => void
+    onSelectedProductionIdsChange: (productionIds: string[]) => void
     onSearchQueryChange: (query: string) => void
-    onAdd: () => void
+    onAdd: (productionIds: string[]) => void
 }
 
 function ProductionPickerPopup({
     isOpen,
     productions,
-    selectedProductionId,
+    selectedProductionIds,
     searchQuery,
     isLoading,
     onClose,
-    onSelect,
+    onSelectedProductionIdsChange,
     onSearchQueryChange,
     onAdd,
 }: ProductionPickerPopupProps) {
@@ -53,6 +53,16 @@ function ProductionPickerPopup({
 
     const limitedProductions = productions.slice(0, 100)
     const hasOptions = limitedProductions.length > 0
+    const selectedCount = selectedProductionIds.length
+    const dialogTitleId = 'production-picker-title'
+
+    const toggleProduction = (productionId: string) => {
+        const nextSelection = selectedProductionIds.includes(productionId)
+            ? selectedProductionIds.filter((id) => id !== productionId)
+            : [...selectedProductionIds, productionId]
+
+        onSelectedProductionIdsChange(nextSelection)
+    }
 
     const getLocalizedText = (value: LocalizedText | undefined): string => {
         if (!value) {
@@ -109,89 +119,115 @@ function ProductionPickerPopup({
     }
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" onClick={onClose}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-3 py-4 sm:px-6" onClick={onClose}>
             <div
-                className="w-full max-w-lg rounded-2xl border border-border bg-background p-6"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby={dialogTitleId}
+                className="flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-2xl sm:max-w-3xl lg:max-w-5xl xl:max-w-6xl"
                 onClick={(event) => event.stopPropagation()}
             >
-                <div className="mb-5 flex items-center justify-between">
-                    <h3 className="text-xl font-bold tracking-wide text-foreground">{messages.blogs.productionPopUp.title}</h3>
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="text-sm text-muted transition hover:text-foreground"
-                    >
-                        {messages.blogs.productionPopUp.close}
-                    </button>
-                </div>
+                <div className="border-b border-border bg-surface px-4 py-4 sm:px-6">
+                    <div className="flex items-start justify-between gap-4">
+                        <div>
+                            <h3 id={dialogTitleId} className="text-xl font-bold tracking-wide text-foreground sm:text-2xl">{messages.blogs.productionPopUp.title}</h3>
+                            <p className="mt-1 text-sm text-muted">{messages.blogs.productionPopUp.selectedCount(selectedCount)}</p>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="rounded-full border border-border px-3 py-1.5 text-sm text-muted transition hover:bg-background hover:text-foreground"
+                        >
+                            {messages.blogs.productionPopUp.close}
+                        </button>
+                    </div>
 
-                <div className="mb-5">
                     <input
                         type="text"
                         value={searchQuery}
                         onChange={(event) => onSearchQueryChange(event.target.value)}
                         placeholder={messages.blogs.productionPopUp.queryHint}
-                        className="mb-3 w-full rounded-lg border border-border bg-transparent px-4 py-3 text-sm text-foreground outline-none transition focus:border-[var(--color-accent)]"
+                        className="mt-4 w-full rounded-full border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/20"
                     />
+                </div>
 
-                    <div className="max-h-[420px] space-y-3 overflow-y-auto pr-1">
-                        {hasOptions ? (
-                            limitedProductions.map((production) => {
-                                const isSelected = production.id === selectedProductionId
+                <div className="relative min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
+                    {isLoading ? (
+                        <div className="absolute inset-x-4 top-4 z-10 rounded-2xl border border-[var(--color-accent)]/30 bg-background/95 px-4 py-3 text-sm font-semibold text-foreground shadow-lg backdrop-blur sm:inset-x-6">
+                            {messages.blogs.productionPopUp.loading}
+                        </div>
+                    ) : null}
+                    {hasOptions ? (
+                        <div className={`grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 ${isLoading ? 'pt-16 opacity-70' : ''}`}>
+                            {limitedProductions.map((production) => {
+                                const isSelected = selectedProductionIds.includes(production.id)
 
                                 return (
                                     <button
                                         key={production.id}
                                         type="button"
-                                        onClick={() => onSelect(production.id)}
-                                        className={`w-full rounded-xl border text-left transition ${isSelected ? 'border-[var(--color-accent)] bg-surface' : 'border-border bg-background hover:border-[var(--color-accent)]/50'}`}
+                                        onClick={() => toggleProduction(production.id)}
+                                        aria-pressed={isSelected}
+                                        className={`group relative w-full overflow-hidden rounded-2xl border text-left transition duration-200 ${isSelected ? 'border-[var(--color-accent)] bg-surface shadow-lg shadow-black/10 ring-2 ring-[var(--color-accent)]/20' : 'border-border bg-background hover:-translate-y-0.5 hover:border-[var(--color-accent)]/50 hover:shadow-lg hover:shadow-black/10'}`}
                                     >
-                                        <article className="flex w-full flex-col p-3">
-                                            <div className="relative h-24 overflow-hidden rounded-md bg-gradient-to-br from-accent to-accent/50">
+                                        <article className="flex h-full w-full flex-col p-3">
+                                            <div className="relative h-32 overflow-hidden rounded-xl bg-gradient-to-br from-accent to-accent/50 sm:h-36">
                                                 {production.image_url ? (
                                                     <img
                                                         src={production.image_url}
                                                         alt={getProductionLabel(production)}
-                                                        className="absolute inset-0 h-full w-full object-cover"
+                                                        className="absolute inset-0 h-full w-full object-cover transition duration-300 group-hover:scale-105"
                                                         loading="lazy"
                                                         referrerPolicy="no-referrer"
                                                     />
                                                 ) : null}
-                                                <div className="absolute inset-0 bg-black/20" />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
+                                                {isSelected ? (
+                                                    <span className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full bg-accent text-sm font-bold text-white shadow-lg">
+                                                        ✓
+                                                    </span>
+                                                ) : null}
                                             </div>
-                                            <p className="mt-2 text-xs text-text-accent">{getProductionDate(production)}</p>
+                                            <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-text-accent">{getProductionDate(production)}</p>
                                             <h4 className="mt-1 line-clamp-2 text-lg leading-tight text-foreground [overflow-wrap:anywhere]">
                                                 {getProductionDisplayTitle(production)}
                                             </h4>
-                                            <p className="mt-1 line-clamp-2 text-sm text-text-accent">{getProductionExcerpt(production)}</p>
+                                            <p className="mt-2 line-clamp-3 text-sm text-text-accent">{getProductionExcerpt(production)}</p>
                                         </article>
                                     </button>
                                 )
-                            })
-                        ) : (
-                            <p className="rounded-lg border border-border px-3 py-2 text-sm text-muted">
-                                {messages.blogs.productionPopUp.noProductionFound}
-                            </p>
-                        )}
-                    </div>
+                            })}
+                        </div>
+                    ) : isLoading ? (
+                        <p className="rounded-2xl border border-dashed border-[var(--color-accent)]/30 bg-surface px-4 py-8 text-center text-sm font-semibold text-foreground">
+                            {messages.blogs.productionPopUp.loading}
+                        </p>
+                    ) : (
+                        <p className="rounded-2xl border border-dashed border-border bg-surface px-4 py-8 text-center text-sm text-muted">
+                            {messages.blogs.productionPopUp.noProductionFound}
+                        </p>
+                    )}
                 </div>
 
-                <div className="flex items-center justify-end gap-3">
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="rounded-full border border-border px-4 py-2 text-sm text-foreground transition hover:bg-surface"
-                    >
-                        {messages.blogs.productionPopUp.close}
-                    </button>
-                    <button
-                        type="button"
-                        onClick={onAdd}
-                        disabled={!selectedProductionId || !hasOptions || isLoading}
-                        className="rounded-full bg-accent px-4 py-2 text-sm text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                        {messages.blogs.productionPopUp.addButton}
-                    </button>
+                <div className="sticky bottom-0 flex flex-col gap-3 border-t border-border bg-background/95 px-4 py-4 backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                    <p className="text-sm text-muted">{messages.blogs.productionPopUp.readyCount(selectedCount)}</p>
+                    <div className="flex items-center justify-end gap-3">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="rounded-full border border-border px-4 py-2 text-sm text-foreground transition hover:bg-surface"
+                        >
+                            {messages.blogs.productionPopUp.close}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => onAdd(selectedProductionIds)}
+                            disabled={selectedCount === 0 || !hasOptions || isLoading}
+                            className="rounded-full bg-accent px-5 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            {messages.blogs.productionPopUp.addButton}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

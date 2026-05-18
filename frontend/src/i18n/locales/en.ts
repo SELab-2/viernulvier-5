@@ -429,6 +429,9 @@ const en: Messages = {
           addButton: 'Add',
           close: 'Close',
           queryHint: 'Search production',
+          selectedCount: (count: number) => `${count} selected`,
+          readyCount: (count: number) => `${count} ${count === 1 ? 'production' : 'productions'} ready to add`,
+          loading: 'Searching productions...',
           noProductionFound: 'No production found'
       },
   },

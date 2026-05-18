@@ -112,7 +112,7 @@ function CreateBlogPage() {
 
     const [productions, setProductions] = useState<ProductionItem[]>([])
     const [selectedProductionIds, setSelectedProductionIds] = useState<string[]>([])
-    const [productionToAdd, setProductionToAdd] = useState('')
+    const [productionsToAdd, setProductionsToAdd] = useState<string[]>([])
     const [productionSearchQuery, setProductionSearchQuery] = useState('')
     const [isProductionPopupOpen, setIsProductionPopupOpen] = useState(false)
     const [isLoadingProductions, setIsLoadingProductions] = useState(false)
@@ -206,18 +206,6 @@ function CreateBlogPage() {
                 })
 
                 setProductions(mergeUniqueProductions(response.data))
-
-                setProductionToAdd((current) => {
-                    if (response.data.length === 0) {
-                        return ''
-                    }
-
-                    if (response.data.some((production) => production.id === current)) {
-                        return current
-                    }
-
-                    return response.data[0].id
-                })
             } catch (loadError) {
                 if (abortController.signal.aborted) {
                     return
@@ -441,29 +429,23 @@ function CreateBlogPage() {
         requestPublish()
     }
 
-    const addProduction = () => {
-        if (!productionToAdd || selectedProductionIds.includes(productionToAdd)) {
+    const addProduction = (productionIds: string[]) => {
+        const productionIdsToAdd = productionIds.filter((id) => !selectedProductionIds.includes(id))
+        if (productionIdsToAdd.length === 0) {
             return
         }
 
-        setSelectedProductionIds((current) => [...current, productionToAdd])
-        const nextAvailable = availableProductions.find((production) => production.id !== productionToAdd)
-        setProductionToAdd(nextAvailable?.id ?? '')
+        setSelectedProductionIds((current) => [...current, ...productionIdsToAdd])
+        setProductionsToAdd([])
         setIsProductionPopupOpen(false)
     }
 
     const removeProduction = (productionId: string) => {
         setSelectedProductionIds((current) => current.filter((id) => id !== productionId))
-        const firstAvailable = productions.find((p) => !selectedProductionIds.includes(p.id))
-        if (firstAvailable && !productionToAdd) {
-            setProductionToAdd(firstAvailable.id)
-        }
     }
 
     const openProductionPopup = () => {
-        if (!productionToAdd && availableProductions.length > 0) {
-            setProductionToAdd(availableProductions[0].id)
-        }
+        setProductionsToAdd([])
         setIsProductionPopupOpen(true)
     }
 
@@ -509,14 +491,14 @@ function CreateBlogPage() {
             <ProductionManagementSection
                 selectedProductions={selectedProductions}
                 availableProductions={availableProductions}
-                productionToAdd={productionToAdd}
+                productionsToAdd={productionsToAdd}
                 productionSearchQuery={productionSearchQuery}
                 isProductionPopupOpen={isProductionPopupOpen}
                 isLoadingProductions={isLoadingProductions}
                 productionsError={productionsError}
                 onOpenPopup={openProductionPopup}
                 onClosePopup={() => setIsProductionPopupOpen(false)}
-                onSelectProductionToAdd={setProductionToAdd}
+                onSelectProductionsToAdd={setProductionsToAdd}
                 onProductionSearchQueryChange={setProductionSearchQuery}
                 onAddProduction={addProduction}
                 onRemoveProduction={removeProduction}

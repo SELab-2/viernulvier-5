@@ -429,6 +429,9 @@ const nl: Messages = {
           addButton: "Toevoegen",
           close: "Sluiten",
           queryHint: "Zoek productie",
+          selectedCount: (count: number) => `${count} geselecteerd`,
+          readyCount: (count: number) => `${count} ${count === 1 ? 'productie' : 'producties'} klaar om toe te voegen`,
+          loading: "Producties zoeken...",
           noProductionFound: "Geen producties beschikbaar"
       }
   }

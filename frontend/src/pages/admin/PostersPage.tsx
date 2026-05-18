@@ -91,7 +91,7 @@ function PostersPageContent() {
   const [productions, setProductions] = useState<ProductionItem[]>([])
   const [title, setTitle] = useState('')
   const [selectedProductionIds, setSelectedProductionIds] = useState<string[]>([])
-  const [productionToAdd, setProductionToAdd] = useState('')
+  const [productionsToAdd, setProductionsToAdd] = useState<string[]>([])
   const [productionSearchQuery, setProductionSearchQuery] = useState('')
   const [isProductionPopupOpen, setIsProductionPopupOpen] = useState(false)
   const [isLoadingProductions, setIsLoadingProductions] = useState(false)
@@ -200,18 +200,6 @@ function PostersPageContent() {
 
         // Keep the list scoped to the active query, like CreateBlogPage.
         setProductions(mergeUniqueProductions(results))
-
-        setProductionToAdd((current) => {
-          if (results.length === 0) {
-            return ''
-          }
-
-          if (results.some((production) => production.id === current)) {
-            return current
-          }
-
-          return results[0].id
-        })
       } catch (requestError) {
         if (!abortController.signal.aborted) {
           setProductionError(requestError instanceof Error ? requestError.message : loadProductionsErrorMessage)
@@ -265,19 +253,17 @@ function PostersPageContent() {
   }, [loadProductionsErrorMessage, productions, selectedProductionIds])
 
   const openProductionPopup = () => {
-    if (!productionToAdd && availableProductions.length > 0) {
-      setProductionToAdd(availableProductions[0].id)
-    }
+    setProductionsToAdd([])
     setIsProductionPopupOpen(true)
   }
 
-  const addProduction = () => {
-    if (!productionToAdd || selectedProductionIds.includes(productionToAdd)) {
+  const addProduction = (productionIds: string[]) => {
+    const productionIdsToAdd = productionIds.filter((id) => !selectedProductionIds.includes(id))
+    if (productionIdsToAdd.length === 0) {
       return
     }
-    setSelectedProductionIds((current) => [...current, productionToAdd])
-    const nextAvailable = availableProductions.find((p) => p.id !== productionToAdd)
-    setProductionToAdd(nextAvailable?.id ?? '')
+    setSelectedProductionIds((current) => [...current, ...productionIdsToAdd])
+    setProductionsToAdd([])
     setIsProductionPopupOpen(false)
   }
 
@@ -323,7 +309,7 @@ function PostersPageContent() {
       setSelectedFiles([])
       setSelectedProductionIds([])
       setProductionSearchQuery('')
-      setProductionToAdd('')
+      setProductionsToAdd([])
       setIsProductionPopupOpen(false)
       await loadData(search)
     } catch (submitError) {
@@ -463,14 +449,14 @@ function PostersPageContent() {
             compact
             selectedProductions={selectedProductions}
             availableProductions={availableProductions}
-            productionToAdd={productionToAdd}
+            productionsToAdd={productionsToAdd}
             productionSearchQuery={productionSearchQuery}
             isProductionPopupOpen={isProductionPopupOpen}
             isLoadingProductions={isLoadingProductions}
             productionsError={productionError ?? ''}
             onOpenPopup={openProductionPopup}
             onClosePopup={() => setIsProductionPopupOpen(false)}
-            onSelectProductionToAdd={setProductionToAdd}
+            onSelectProductionsToAdd={setProductionsToAdd}
             onProductionSearchQueryChange={setProductionSearchQuery}
             onAddProduction={addProduction}
             onRemoveProduction={removeProduction}
