@@ -1,9 +1,8 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type PointerEvent as ReactPointerEvent } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { getActiveLocale, withLocalePath } from '../../i18n'
 import type { Locale, Messages } from '../../i18n/types'
 import { apiFetch, normalizeApiAssetUrl } from '../../api/client'
-import { getLocalizedContent, getLocalizedTitle, normalizeContent } from './blogDetailPage.formatters'
 import PublicLayout from '../../components/public/PublicLayout'
 import { usePublicMessages } from '../../components/public/PublicMessagesContext'
 import SearchPagination from '../../components/public/search/SearchPagination'
@@ -13,7 +12,7 @@ type SearchEntry = SearchResultItem & {
     year: number
     genre: string
     location: string
-    type: 'production' | 'blog' | 'poster'
+    type: 'production' | 'poster'
 }
 
 const DEFAULT_PAGE_SIZE = 12
@@ -153,7 +152,7 @@ type PosterApiItem = {
 }
 
 type SearchSort = 'relevance' | 'recent' | 'oldest'
-type SearchTab = 'productions' | 'blogs' | 'all' | 'posters'
+type SearchTab = 'productions' | 'all' | 'posters'
 
 type SearchFilterState = {
     tab: SearchTab
@@ -180,7 +179,6 @@ type SearchFilterOverrides = {
 }
 
 function normalizeTab(value: string | null): SearchTab {
-    if (value === 'blogs') return 'blogs'
     if (value === 'all') return 'all'
     if (value === 'posters') return 'posters'
     return 'productions'
@@ -408,24 +406,13 @@ function mapProductionToSearchEntry(item: ProductionApiItem, locale: Locale, sea
     }
 }
 
-type BlogApiItem = {
-    id: string
-    title?: unknown
-    content?: unknown
-    productions: string[]
-    createdAt: string
-    updatedAt: string
-    links?: { self: string }
-}
-
 type SearchApiItem = {
     id: string
-    type: 'production' | 'blog' | 'poster'
+    type: 'production' | 'poster'
     title?: unknown
     teaser?: unknown
     description_short?: unknown
     description?: unknown
-    content?: unknown
     image_url?: string | null
     mime_type?: string | null
     poster_file_count?: number
@@ -436,49 +423,7 @@ type SearchApiItem = {
     performer_type?: string | null
     attendance_mode?: string | null
     created_at?: string
-    productions?: string[]
     links?: ProductionApiItem['links']
-}
-
-function getBlogExcerpt(content: unknown, locale: Locale, fallback: string): string {
-    const localizedContent = getLocalizedContent(content, locale)
-
-    if (!localizedContent) {
-        return fallback
-    }
-
-    const delta = normalizeContent(localizedContent)
-    if (delta) {
-        const plain = delta.ops
-            .map((operation) => (typeof operation.insert === 'string' ? operation.insert : ''))
-            .join('')
-            .replace(/\s+/g, ' ')
-            .trim()
-
-        return plain || fallback
-    }
-
-    return toPlainText(localizedContent) || fallback
-}
-
-function mapBlogToSearchEntry(item: BlogApiItem, locale: Locale, searchMessages: Messages['search']): SearchEntry {
-    const title = getLocalizedTitle(item.title, locale) || searchMessages.fallbackUntitled
-    const date = item.createdAt ? formatDate(item.createdAt, locale) : '-'
-    const year = item.createdAt ? new Date(item.createdAt).getFullYear() : MIN_PERIOD_YEAR
-
-    return {
-        id: item.id,
-        tag: searchMessages.blogTab,
-        date,
-        title,
-        excerpt: getBlogExcerpt(item.content, locale, title),
-        venue: '',
-        imageUrl: undefined,
-        year,
-        genre: '',
-        location: '',
-        type: 'blog' as const,
-    }
 }
 
 function getRelativePath(url: string | null | undefined): string | null {
@@ -769,14 +714,6 @@ function getLocationLabel(value: string): string {
     return value
 }
 
-function HamburgerIcon({ className }: { className: string }) {
-    return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
-            <path d="M4 7h16M4 12h16M4 17h16" strokeLinecap="round" />
-        </svg>
-    )
-}
-
 function CloseIcon({ className }: { className: string }) {
     return (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
@@ -1036,7 +973,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
                 </form>
             ) : null}
 
-            {tab !== 'blogs' && tab !== 'posters' ? (
+            {tab !== 'posters' ? (
             <div className="mt-8 border-t border-border pt-5">
                 <div className="mb-4 flex items-center justify-between">
                     <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground">{s.genreLabel}</h3>
@@ -1097,7 +1034,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
                 </div>
             </div>
 
-            {tab !== 'blogs' && tab !== 'posters' ? (
+            {tab !== 'posters' ? (
             <div className="mt-6 border-t border-border pt-5 pb-5">
                 <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground">{s.locationLabel}</h3>
                 <div className="mt-4 space-y-3 text-sm text-text-accent">
@@ -1189,72 +1126,17 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
     )
 }
 
-function MobileSearchForm({ className = 'mb-5 md:hidden' }: { className?: string }) {
-    const [searchParams] = useSearchParams()
-    const navigate = useNavigate()
-    const locale = getActiveLocale(window.location.pathname)
-    const { search: s } = usePublicMessages()
-    const filterState = useMemo(() => parseSearchFilterState(searchParams), [searchParams])
-    const query = filterState.query
-    const [searchInput, setSearchInput] = useState(query)
-
-    useEffect(() => {
-        setSearchInput(query)
-    }, [query])
-
-    const pushQuery = useCallback((nextQuery: string) => {
-        const filterState = parseSearchFilterState(searchParams)
-        const params = buildSearchParams({
-            query: nextQuery,
-            yearFrom: filterState.yearFrom,
-            yearTo: filterState.yearTo,
-            genres: filterState.genres,
-            locations: filterState.locations,
-            sort: filterState.sort,
-            limit: filterState.limit,
-            tab: filterState.tab,
-        })
-        const path = withLocalePath('/zoeken', locale)
-        const qs = params.toString()
-        navigate(qs ? `${path}?${qs}` : path)
-    }, [searchParams, locale, navigate])
-
-    useEffect(() => {
-        const nextQuery = searchInput.trim()
-        if (nextQuery === query) {
-            return
-        }
-
-        const timerId = window.setTimeout(() => {
-            pushQuery(nextQuery)
-        }, SEARCH_INPUT_DEBOUNCE_MS)
-
-        return () => {
-            window.clearTimeout(timerId)
-        }
-    }, [searchInput, query, pushQuery])
-
-    const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault()
-        pushQuery(searchInput.trim())
-    }
-
+function MobileSearchForm({ className = 'mb-5 md:hidden px-4' }: { className?: string }) {
     return (
-        <form className={className} onSubmit={handleSubmit}>
-            <div className="relative">
-                <input
-                    type="text"
-                    value={searchInput}
-                    onChange={(event) => setSearchInput(event.target.value)}
-                    placeholder={s.searchPlaceholder}
-                    className="h-10 w-full rounded-full border border-border bg-surface px-4 pr-10 text-sm text-foreground"
-                />
-                <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted" aria-label="search">
-                    ⌕
-                </button>
-            </div>
+        <form className={className}>
+            {/* Adjusted padding for better alignment */}
+            <input
+                type="text"
+                className="w-full rounded-full border border-border bg-surface px-4 py-2 text-sm text-foreground"
+                placeholder="Search..."
+            />
         </form>
-    )
+    );
 }
 
 function SearchPageContent() {
@@ -1288,7 +1170,6 @@ function SearchPageContent() {
     const page = filterState.page
     const pageSize = filterState.limit
     const tab = filterState.tab
-    const isBlogTab = tab === 'blogs'
 
     useEffect(() => {
         const abortController = new AbortController()
@@ -1308,19 +1189,7 @@ function SearchPageContent() {
                     params.set('search', query)
                 }
 
-                if (tab === 'blogs') {
-                    params.set('yearFrom', String(safeFromYear))
-                    params.set('yearTo', String(safeToYear))
-
-                    const response = await apiFetch<PaginatedApiResponse<BlogApiItem>>(
-                        `/archive/blogs?${params.toString()}`,
-                        { signal: abortController.signal }
-                    )
-                    const mappedEntries = response.data.map((item) => mapBlogToSearchEntry(item, locale, searchMessages))
-                    setApiEntries(mappedEntries)
-                    setTotalResults(response.meta?.total ?? mappedEntries.length)
-                    setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
-                } else if (tab === 'all') {
+                if (tab === 'all') {
                     // Single RESTful call to the unified search endpoint
                     const searchParams = new URLSearchParams({
                         page: String(page),
@@ -1341,20 +1210,6 @@ function SearchPageContent() {
 
                     const preferredGenre = selectedGenres.length === 1 ? selectedGenres[0] : undefined
                     const mappedEntries = response.data.map((item): SearchEntry => {
-                        if (item.type === 'blog') {
-                            return mapBlogToSearchEntry(
-                                {
-                                    id: item.id,
-                                    title: item.title,
-                                    content: item.content,
-                                    productions: item.productions ?? [],
-                                    createdAt: item.created_at ?? '',
-                                    updatedAt: item.created_at ?? '',
-                                },
-                                locale,
-                                searchMessages,
-                            )
-                        }
                         if (item.type === 'poster') {
                             return mapPosterToSearchEntry(
                                 {
@@ -1684,7 +1539,7 @@ function SearchPageContent() {
         const normalizedLocale = locale === 'en' ? 'en' : 'nl'
         const uniqueValues = new Set<string>()
 
-        if (activeTab === 'blogs' || activeTab === 'posters') {
+        if (activeTab === 'posters') {
             return []
         }
 
@@ -1727,21 +1582,19 @@ function SearchPageContent() {
                         locationSuggestions={locationSuggestions}
                     />
 
-                    <div className="flex w-full items-start">
-                        <div className="z-30 flex w-12 shrink-0 self-stretch justify-center border-r border-border bg-surface-inset md:hidden">
-                            <div className="fixed top-[65px] left-1.5 z-40 flex items-start justify-center md:hidden">
+                    <div className="relative flex w-full items-start">
+                        <div className="w-full px-4 py-6 md:py-8 md:pl-0 md:pr-0">
+                            <div className="fixed right-4 bottom-4 z-50 md:hidden">
                                 <button
                                     type="button"
-                                    className="inline-flex h-9 w-9 items-center justify-center text-foreground"
+                                    className="inline-flex items-center justify-center gap-2 rounded-full bg-accent px-3 py-3 text-sm font-semibold text-white shadow-xl shadow-accent/20 transition hover:bg-accent/90"
                                     aria-label={m.search.filterOpenLabel}
                                     onClick={() => setIsMobileFiltersOpen((open) => !open)}
                                 >
-                                    <HamburgerIcon className="h-5 w-5" />
+                                    <img src="/filter.svg" alt="" className="h-4 w-4 filter invert" />
+                                    <span>Filters</span>
                                 </button>
                             </div>
-                        </div>
-
-                        <div className="w-full px-4 py-6 md:py-8 md:pr-0 md:pl-0">
                             <div className="search-main-rail">
                             {isMobileFiltersOpen ? (
                                 <>
@@ -1797,14 +1650,7 @@ function SearchPageContent() {
                                         </button>
                                         <button
                                             type="button"
-                                            onClick={() => navigateWithFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: pageSize, page: 1, tab: 'blogs' })}
-                                            className={tab === 'blogs' ? 'underline decoration-accent decoration-2 underline-offset-4' : 'text-muted transition-colors hover:text-foreground'}
-                                        >
-                                            {m.search.blogTab}
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => navigateWithFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: [], locations: [], sort, limit: pageSize, page: 1, tab: 'posters' })}
+                                            onClick={() => navigateWithFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: pageSize, page: 1, tab: 'posters' })}
                                             className={tab === 'posters' ? 'underline decoration-accent decoration-2 underline-offset-4' : 'text-muted transition-colors hover:text-foreground'}
                                         >
                                             {m.search.postersTab}
@@ -1815,7 +1661,7 @@ function SearchPageContent() {
                                     </p>
                                 </div>
 
-                                {!isBlogTab ? (
+                                {tab !== 'posters' ? (
                                     <div className="flex items-center gap-3">
                                         <label className="text-sm text-muted">{m.search.sortLabel}</label>
                                         <select
@@ -1871,9 +1717,9 @@ function SearchPageContent() {
                                 ) : null}
                             </div>
 
-                        {(isBlogTab ? filterChips.filter((chip) => chip.key === 'period') : filterChips).length > 0 ? (
+                        {filterChips.length > 0 ? (
                             <div className="mt-5 flex flex-wrap items-center gap-2">
-                                {(isBlogTab ? filterChips.filter((chip) => chip.key === 'period') : filterChips).map((chip) => (
+                                {filterChips.map((chip) => (
                                     <button
                                         key={chip.key}
                                         type="button"
@@ -1921,10 +1767,8 @@ function SearchPageContent() {
                                         item={item}
                                         genreValue={item.genre}
                                         onTagClick={handleCardGenreClick}
-                                        detailHref={ item.type === 'blog'
-                                            ? withLocalePath('/blogs/' + item.id, locale)
-                                            : item.type === 'poster'
-                                                ? withLocalePath('/posters/' + item.id, locale)
+                                        detailHref={ item.type === 'poster'
+                                            ? withLocalePath('/posters/' + item.id, locale)
                                             : withLocalePath('/archive/' + item.id, locale)
                                         }
                                     />
