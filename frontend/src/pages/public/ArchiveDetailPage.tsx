@@ -50,12 +50,7 @@ function ArchiveDetailPageContent() {
     }
 
     const handleGoBack = () => {
-        const prev = document.referrer
-        if (prev && new URL(prev).origin === window.location.origin) {
-            navigate(-1)
-        } else {
-            navigate(withLocalePath('/', locale))
-        }
+        navigate(-1)
     }
 
     const formatHtml = (html: string) => {
