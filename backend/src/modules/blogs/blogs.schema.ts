@@ -20,6 +20,13 @@ export const blogPaginationQuerySchema = paginationQuerySchema.extend({
     yearFrom: z.coerce.number().int().optional(),
     yearTo: z.coerce.number().int().optional(),
     productionId: z.string().uuid().optional(),
+    draft: z.enum(['true', 'false', 'all'])
+        .default('false')
+        .transform((val) => {
+            if (val === 'all') return 'all'
+            return val === 'true';
+        }),
+    editorId: z.string().uuid().optional(),
 })
 
 /**
@@ -27,10 +34,12 @@ export const blogPaginationQuerySchema = paginationQuerySchema.extend({
  */
 export const blogLinksSchema = z.object({
     self: z.string().url().default('https://example.com/'),
+    editors: z.string().url().optional().nullable().default('https://example.com/'),
 })
 
 export const blogSchema = z.object({
     id: z.string().uuid(),
+    draft: z.boolean().nullable().optional(),
     title: blogTitleSchema.nullable().optional(),
     content: z.unknown().nullable().optional(),
     thumbnail_index: z.number().int().nonnegative().nullable().optional(),
@@ -45,6 +54,7 @@ export const blogListSchema = createPaginatedResponseSchema(blogSchema)
 export const singleBlogSchema = createSingleResponseSchema(blogSchema)
 
 export const createBlogSchema = z.object({
+    draft: z.boolean().nullable().optional(),
     title: blogTitleSchema.optional(),
     content: z.unknown().optional(),
     thumbnail_index: z.number().int().nonnegative().nullable().optional(),
@@ -53,6 +63,7 @@ export const createBlogSchema = z.object({
 })
 
 export const updateBlogSchema = z.object({
+    draft: z.boolean().nullable().optional(),
     title: blogTitleSchema.optional(),
     content: z.unknown().optional(),
     thumbnail_index: z.number().int().nonnegative().nullable().optional(),
@@ -101,3 +112,4 @@ export type UpdateBlogInput = z.infer<typeof updateBlogSchema>
 export type LocalizedBlogTitle = z.infer<typeof localizedBlogTitleSchema>
 export type UploadBlogImageInput = z.infer<typeof uploadBlogImageSchema>
 export type UploadBlogImageResponse = z.infer<typeof uploadBlogImageResponseSchema>
+

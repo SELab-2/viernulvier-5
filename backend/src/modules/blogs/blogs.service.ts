@@ -8,8 +8,8 @@ import type {
     UploadBlogImageResponse
 } from './blogs.schema.js'
 import { PaginatedResult, calculateTotalPages, sanitizePage } from '../../utils/pagination.js'
+import {AppError} from "../../errors/app-error.js";
 import { BlogImagesStorage } from './blogs-images.storage.js'
-import { AppError } from '../../errors/app-error.js'
 
 export class BlogsService {
     private readonly storage: BlogImagesStorage
@@ -19,19 +19,21 @@ export class BlogsService {
     }
 
     async getBlogs(options: BlogPaginationQuery): Promise<PaginatedResult<BlogResponse>> {
-        const { page, limit, search, yearFrom, yearTo, productionId } = options
+        const { page, limit, search, yearFrom, yearTo, productionId, draft, editorId} = options
 
-        const total = await this.repository.count({ search, yearFrom, yearTo, productionId })
+        const total = await this.repository.count({ search, yearFrom, yearTo, productionId, draft, editorId})
         const totalPages = calculateTotalPages(total, limit)
         const sanitizedPage = sanitizePage(page, totalPages)
 
-        const items = await this.repository.findAll({ 
-            page: sanitizedPage, 
-            limit, 
+        const items = await this.repository.findAll({
+            page: sanitizedPage,
+            limit,
             search,
             yearFrom,
             yearTo,
             productionId,
+            draft,
+            editorId,
         })
 
         return {
@@ -102,6 +104,18 @@ export class BlogsService {
         await this.repository.delete(id)
     }
 
+    async addEditor(blogId: string, editorId: string) {
+        const blog = await this.repository.findById(blogId)
+        if (!blog) throw new AppError('blog not found', 404)
+        return this.repository.addEditor(blogId, editorId)
+    }
+
+    async removeEditor(blogId: string, editorId: string) {
+        const blog = await this.repository.findById(blogId)
+        if (!blog) throw new AppError('blog not found', 404)
+        return this.repository.removeEditor(blogId, editorId)
+    }
+
     async deleteBlogImage(id: string, index: number): Promise<UploadBlogImageResponse> {
         const blog = await this.repository.findById(id)
         if (!blog) {
@@ -158,7 +172,7 @@ export class BlogsService {
             (mergedImages.length > 0 ? 0 : null)
 
         this.assertThumbnailIndexWithinBounds(thumbnailIndex, mergedImages.length)
-        
+
         await this.repository.update(id, {
             images: mergedImages,
             thumbnail_index: thumbnailIndex,
