@@ -47,7 +47,7 @@ export class BlogsRepository {
         const conditions: Prisma.blogWhereInput[] = []
         const trimmedSearch = options.search?.trim()
 
-        if (options.draft) {
+        if (options.draft !== undefined) {
             conditions.push({ draft: options.draft })
         }
         if (options.editorId){
