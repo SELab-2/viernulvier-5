@@ -25,9 +25,9 @@ export class BlogsService {
         const totalPages = calculateTotalPages(total, limit)
         const sanitizedPage = sanitizePage(page, totalPages)
 
-        const items = await this.repository.findAll({ 
-            page: sanitizedPage, 
-            limit, 
+        const items = await this.repository.findAll({
+            page: sanitizedPage,
+            limit,
             search,
             yearFrom,
             yearTo,
@@ -115,7 +115,6 @@ export class BlogsService {
         if (!blog) throw new AppError('blog not found', 404)
         return this.repository.removeEditor(blogId, editorId)
     }
-}
 
     async deleteBlogImage(id: string, index: number): Promise<UploadBlogImageResponse> {
         const blog = await this.repository.findById(id)
