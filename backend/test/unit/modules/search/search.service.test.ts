@@ -84,8 +84,8 @@ describe('SearchService', () => {
                 title: { nl: 'Blog 1' },
                 content: { nl: 'Blog content' },
                 productions: [],
-                createdAt: new Date('2025-10-01T00:00:00.000Z'),
-                updatedAt: new Date('2025-10-01T00:00:00.000Z'),
+                created_at: new Date('2025-10-01T00:00:00.000Z'),
+                updated_at: new Date('2025-10-01T00:00:00.000Z'),
             },
         ])
 
@@ -125,6 +125,7 @@ describe('SearchService', () => {
         expect(result.items.map((item) => item.id)).toEqual(['blog-1', 'poster-1'])
 
         expect(productionsService.getProductions).toHaveBeenNthCalledWith(1, {
+            draft: false,
             search: 'term',
             genres: undefined,
             locations: undefined,
@@ -236,8 +237,8 @@ describe('SearchService', () => {
                 title: { nl: 'Older blog' },
                 content: { nl: 'Old content' },
                 productions: [],
-                createdAt: new Date('2020-01-01T00:00:00.000Z'),
-                updatedAt: new Date('2020-01-01T00:00:00.000Z'),
+                created_at: new Date('2020-01-01T00:00:00.000Z'),
+                updated_at: new Date('2020-01-01T00:00:00.000Z'),
             },
         ])
 

@@ -1,6 +1,5 @@
 import { Routes, Route } from 'react-router-dom'
 import { lazy, Suspense } from 'react'
-import { getMessages } from './i18n'
 import { getAdminRouteConfig } from './admin/paths'
 import ProtectedAdminRoute, { AdminEntryRoute } from './pages/admin/ProtectedAdminRoute'
 
@@ -9,15 +8,19 @@ import ProtectedAdminRoute, { AdminEntryRoute } from './pages/admin/ProtectedAdm
 import HomePage from './pages/public/HomePage'
 import ArchiveDetailPage from './pages/public/ArchiveDetailPage'
 import SearchPage from './pages/public/SearchPage'
+import NotFoundPage from './pages/public/NotFoundPage'
 import PosterDetailPage from './pages/public/PosterDetailPage'
+// Eager: NotFound must render instantly for unknown routes (no Suspense flash).
+import AdminNotFoundPage from './pages/admin/NotFoundPage'
+import LoadingPage from './pages/LoadingPage'
 
 // Admin pages (lazy loaded — not included in public bundle)
 const LoginPage = lazy(() => import('./pages/admin/LoginPage'))
 const DashboardPage = lazy(() => import('./pages/admin/DashboardPage'))
 const ArchiveEditPage = lazy(() => import('./pages/admin/ArchiveEditPage'))
 const PostersPage = lazy(() => import('./pages/admin/PostersPage'))
+const CreateBlogPage = lazy(() => import('./pages/admin/CreateBlogPage'))
 
-import CreateBlogPage from './pages/admin/CreateBlogPage'
 import BlogDetailPage from './pages/public/BlogDetailPage'
 /**
  * Root App component.
@@ -28,11 +31,10 @@ import BlogDetailPage from './pages/public/BlogDetailPage'
  * - localhost/127.0.0.1 → both available via /admin prefix
  */
 function App() {
-    const messages = getMessages()
     const adminRoutes = getAdminRouteConfig(window.location.hostname)
 
     return (
-        <Suspense fallback={<div>{messages.common.loading}</div>}>
+        <Suspense fallback={<LoadingPage />}>
             <Routes>
                 {!adminRoutes.isAdminHost ? (
                     <>
@@ -53,6 +55,7 @@ function App() {
                         <Route path="/nl/blogs/:id" element={<BlogDetailPage />} />
                         <Route path="/en/blogs/:id" element={<BlogDetailPage />} />
 
+                        <Route path="*" element={<NotFoundPage />} />
                     </>
                 ) : null}
 
@@ -145,15 +148,10 @@ function App() {
                                 </ProtectedAdminRoute>
                             }
                         />
-                        <Route
-                            path="/admin/*"
-                            element={
-                                <AdminEntryRoute
-                                    loginPath={adminRoutes.loginPath}
-                                    dashboardPath={adminRoutes.dashboardPath}
-                                />
-                            }
-                        />
+                        <Route path="/admin/*" element={<AdminNotFoundPage />} />
+                        {adminRoutes.isAdminHost ? (
+                            <Route path="*" element={<AdminNotFoundPage />} />
+                        ) : null}
                     </>
                 ) : null}
             </Routes>

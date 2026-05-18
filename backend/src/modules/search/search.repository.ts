@@ -120,8 +120,8 @@ export class SearchRepository {
             title: this.normalizeBlogTitle(blog.title),
             content: blog.content,
             productions: blog.blog_production.map((r) => r.production_id),
-            createdAt: blog.created_at,
-            updatedAt: blog.updated_at,
+            created_at: blog.created_at,
+            updated_at: blog.updated_at,
         }))
     }
 }

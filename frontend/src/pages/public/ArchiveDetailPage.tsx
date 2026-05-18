@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { getActiveLocale, withLocalePath } from '../../i18n'
 import { localize } from '../../utils/localize'
-import { getYouTubeEmbedUrl } from '../../utils/youtube'
+import { getVideoEmbedUrl } from '../../utils/videos'
 import PublicLayout from '../../components/public/PublicLayout'
 import PublicPillButton from '../../components/public/PublicPillButton'
 import { usePublicMessages } from '../../components/public/PublicMessagesContext'
+import { NotFoundContent } from './NotFoundPage'
+import { ApiError } from '../../api/client'
 import ArchiveDetailHero from '../../components/public/detail/PublicDetailHeroBanner'
 import ArchiveDetailEventsList from '../../components/public/detail/PublicDetailEventsList'
 import ArchiveDetailGallery from '../../components/public/detail/PublicDetailGallery'
@@ -19,6 +21,9 @@ import { getHallById } from '../../api/halls'
 import { getSpaceById } from '../../api/spaces'
 import { getLocationById, type Location } from '../../api/locations'
 import { getPreviousStrippedPath } from '../../utils/navigationHistory'
+import { LeftArrowIcon } from '../../components/shared/icons'
+
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 function ArchiveDetailPageContent() {
     const navigate = useNavigate()
@@ -36,6 +41,14 @@ function ArchiveDetailPageContent() {
     const [locationsByEvent, setLocationsByEvent] = useState<Record<string, Location>>({})
     const [shareCopied, setShareCopied] = useState(false)
     const [loadError, setLoadError] = useState(false)
+    const [notFound, setNotFound] = useState(false)
+    const [previousId, setPreviousId] = useState(id)
+
+    if (id !== previousId) {
+        setPreviousId(id)
+        setLoadError(false)
+        setNotFound(false)
+    }
 
     const handleGoBack = () => {
         const prev = getPreviousStrippedPath()
@@ -83,8 +96,10 @@ function ArchiveDetailPageContent() {
         window.setTimeout(() => setShareCopied(false), 1800)
     }
 
+    const idIsMalformed = typeof id === 'string' && !UUID_REGEX.test(id)
+
     useEffect(() => {
-        if (!id) return
+        if (!id || idIsMalformed) return
 
         const fetchData = async () => {
             try {
@@ -147,13 +162,17 @@ function ArchiveDetailPageContent() {
                     if (res) locationMap[res.eventId] = res.location
                 })
                 setLocationsByEvent(locationMap)
-            } catch {
-                setLoadError(true)
+            } catch (error) {
+                if (error instanceof ApiError && (error.status === 404 || error.status === 400)) {
+                    setNotFound(true)
+                } else {
+                    setLoadError(true)
+                }
             }
         }
 
         fetchData()
-    }, [id])
+    }, [id, idIsMalformed])
 
     const title = localize(production?.title, locale)
     const superTitle = localize(production?.super_title, locale)
@@ -178,11 +197,15 @@ function ArchiveDetailPageContent() {
                 localize(production?.video_2, locale),
             ]
                 .filter((url): url is string => Boolean(url))
-                .map(getYouTubeEmbedUrl)
+                .map(getVideoEmbedUrl)
                 .filter((url): url is string => Boolean(url))
         )
     )
         
+
+    if (notFound || idIsMalformed) {
+        return <NotFoundContent />
+    }
 
     if (loadError) {
         return (
@@ -197,6 +220,7 @@ function ArchiveDetailPageContent() {
             <div className="site-container mt-8">
                 <PublicPillButton
                     label={messages.detail.navBack}
+                    icon={<LeftArrowIcon className="h-5 w-5" />}
                     onClick={handleGoBack}
                 />
             </div>
