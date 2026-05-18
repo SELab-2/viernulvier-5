@@ -23,6 +23,7 @@ export const blogPaginationQuerySchema = paginationQuerySchema.extend({
     draft: z.enum(['true', 'false'])
         .optional()
         .transform((val) => (val ? val === 'true' : undefined)),
+    editorId: z.string().uuid().optional(),
 })
 
 /**
@@ -30,6 +31,7 @@ export const blogPaginationQuerySchema = paginationQuerySchema.extend({
  */
 export const blogLinksSchema = z.object({
     self: z.string().url().default('https://example.com/'),
+    editors: z.string().url().optional().nullable().default('https://example.com/'),
 })
 
 export const blogSchema = z.object({
@@ -74,3 +76,4 @@ export type BlogListResponse = z.infer<typeof blogListSchema>
 export type CreateBlogInput = z.infer<typeof createBlogSchema>
 export type UpdateBlogInput = z.infer<typeof updateBlogSchema>
 export type LocalizedBlogTitle = z.infer<typeof localizedBlogTitleSchema>
+

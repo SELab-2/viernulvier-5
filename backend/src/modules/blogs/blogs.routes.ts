@@ -3,14 +3,14 @@ import { BlogsRepository } from './blogs.repository.js'
 import { BlogsService } from './blogs.service.js'
 import { BlogsController } from './blogs.controller.js'
 import { z } from 'zod'
-import { 
+import {
     blogPaginationQuerySchema,
     blogListSchema,
     singleBlogSchema,
-    createBlogSchema, 
-    updateBlogSchema, 
+    createBlogSchema,
+    updateBlogSchema,
     blogIdSchema,
-    errorSchema
+    errorSchema,
 } from './blogs.schema.js'
 import { requirePermission } from '../../hooks/require-permission.js'
 import { Permission } from '../../domain/permissions.js'
@@ -91,6 +91,30 @@ const blogsRoutes: FastifyPluginAsync = async (fastify) => {
         },
         handler: (request, reply) => controller.deleteBlog(request as any, reply),
     })
+
+    fastify.post('/:id/editors', {
+        preHandler: [requirePermission(Permission.ARCHIVE_UPDATE)],
+        schema: {
+            tags: ['blogs'],
+            summary: 'Assign an editor to a blog',
+            params: blogIdSchema,
+            body: z.object({ editorId: z.string().uuid() }),
+            response: { 204: z.null() },
+        },
+        handler: (request, reply) => controller.addEditor(request as any, reply),
+    })
+
+    fastify.delete('/:id/editors/:editorId', {
+        preHandler: [requirePermission(Permission.ARCHIVE_UPDATE)],
+        schema: {
+            tags: ['blogs'],
+            summary: 'Remove an editor from a blog',
+            params: z.object({ id: z.string().uuid(), editorId: z.string().uuid() }),
+            response: { 204: z.null() },
+        },
+        handler: (request, reply) => controller.removeEditor(request as any, reply),
+    })
 }
+
 
 export default blogsRoutes

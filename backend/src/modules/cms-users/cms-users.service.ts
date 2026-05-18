@@ -13,16 +13,18 @@ export class CmsUsersService {
     constructor(private readonly repository: CmsUsersRepository) { }
 
     async getCmsUsers(options: CmsUserPaginationQuery): Promise<PaginatedResult<CmsUserResponse>> {
-        const { page, limit, search } = options
+        const { page, limit, search, blogId, productionId} = options
 
-        const total = await this.repository.countCmsUsers({ search })
+        const total = await this.repository.countCmsUsers({ search, blogId, productionId })
         const totalPages = calculateTotalPages(total, limit)
         const sanitizedPage = sanitizePage(page, totalPages)
 
         const items = await this.repository.listCmsUsers({
             page: sanitizedPage,
             limit,
-            search
+            search,
+            blogId,
+            productionId
         })
 
         return {
@@ -39,16 +41,18 @@ export class CmsUsersService {
     }
 
     async getEditors(options: CmsUserPaginationQuery): Promise<PaginatedResult<CmsUserResponse>> {
-        const { page, limit, search } = options
+        const { page, limit, search, blogId, productionId } = options
 
-        const total = await this.repository.countEditors({ search })
+        const total = await this.repository.countEditors({ search, blogId, productionId })
         const totalPages = calculateTotalPages(total, limit)
         const sanitizedPage = sanitizePage(page, totalPages)
 
         const items = await this.repository.listEditors({
             page: sanitizedPage,
             limit,
-            search
+            search,
+            blogId,
+            productionId
         })
 
         return {

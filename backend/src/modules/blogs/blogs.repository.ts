@@ -8,7 +8,7 @@ import type {
 } from './blogs.schema.js'
 import { AppError } from '../../errors/app-error.js'
 
-type BlogFilterOptions = Pick<BlogPaginationQuery, 'search' | 'yearFrom' | 'yearTo' | 'productionId' | 'draft'>
+type BlogFilterOptions = Pick<BlogPaginationQuery, 'search' | 'yearFrom' | 'yearTo' | 'productionId' | 'draft' | 'editorId'>
 
 export class BlogsRepository {
     constructor(private readonly prisma: PrismaClient) {}
@@ -47,8 +47,17 @@ export class BlogsRepository {
         const conditions: Prisma.blogWhereInput[] = []
         const trimmedSearch = options.search?.trim()
 
-        if (options.draft !== undefined) {
+        if (options.draft) {
             conditions.push({ draft: options.draft })
+        }
+        if (options.editorId){
+            conditions.push({
+                editor_blog: {
+                    some: {
+                        editor_id: options.editorId,
+                    },
+                },
+            })
         }
 
         if (trimmedSearch) {
@@ -293,5 +302,25 @@ export class BlogsRepository {
             this.prisma.blog.delete({ where: { id } }),
         ])
 
+    }
+
+    async addEditor(blogId: string, editorId: string) {
+        return this.prisma.editor_blog.create({
+            data: {
+                blog_id: blogId,
+                editor_id: editorId,
+            }
+        })
+    }
+
+    async removeEditor(blogId: string, editorId: string) {
+        return this.prisma.editor_blog.delete({
+            where: {
+                editor_id_blog_id: {
+                    editor_id: editorId,
+                    blog_id: blogId,
+                }
+            }
+        })
     }
 }

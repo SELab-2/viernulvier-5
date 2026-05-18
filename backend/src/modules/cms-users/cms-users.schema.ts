@@ -7,6 +7,8 @@ import {
 
 export const cmsUserPaginationQuerySchema = paginationQuerySchema.extend({
     search: z.string().optional(),
+    blogId: z.string().optional(),
+    productionId: z.string().optional(),
 })
 
 export const cmsUserLinksSchema = z.object({
