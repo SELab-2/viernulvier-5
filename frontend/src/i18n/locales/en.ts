@@ -398,6 +398,15 @@ const en: Messages = {
           addButton: 'Add',
           close: 'Close',
           queryHint: 'Search production',
+          filtersLabel: 'Filters',
+          periodLabel: 'Period',
+          locationLabel: 'Location',
+          locationPlaceholder: 'Search location',
+          stagedLabel: 'Selected productions',
+          selectedCount: (count: number) => `${count} selected`,
+          readyCount: (count: number) => `${count} ${count === 1 ? 'production' : 'productions'} ready to add`,
+          loading: 'Searching productions...',
+          loadingMore: 'Loading more productions...',
           noProductionFound: 'No production found'
       },
       bannerUpload: {

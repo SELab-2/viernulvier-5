@@ -2,14 +2,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import AdminLayout from '../../components/admin/AdminLayout'
 import { apiFetch, normalizeApiAssetUrl } from '../../api/client'
 import ProductionManagementSection, { type ProductionItem as ManagedProductionItem } from '../../components/admin/blogs/ProductionManagementSection'
+import type { ProductionPickerFilters } from '../../components/admin/blogs/ProductionPickerPopup'
 import { useAdminMessages } from '../../components/admin/AdminMessagesContext'
 import { getActiveLocale } from '../../i18n'
-
-type LocalizedText = {
-  nl?: string
-  en?: string
-  fr?: string
-} | null
 
 type ProductionItem = ManagedProductionItem
 
@@ -67,15 +62,6 @@ function fileToBase64(file: File): Promise<string> {
   })
 }
 
-function getLocalizedTitle(value: LocalizedText): string {
-  if (!value) {
-    return ''
-  }
-
-  const candidates = [value.nl, value.en, value.fr]
-  return candidates.find((candidate) => typeof candidate === 'string' && candidate.trim().length > 0)?.trim() ?? ''
-}
-
 function getPdfPreviewUrl(fileUrl: string): string {
   const normalized = normalizeApiAssetUrl(fileUrl) ?? fileUrl
   const hash = '#page=1&view=FitH&toolbar=0&navpanes=0&scrollbar=0'
@@ -91,10 +77,19 @@ function PostersPageContent() {
   const [productions, setProductions] = useState<ProductionItem[]>([])
   const [title, setTitle] = useState('')
   const [selectedProductionIds, setSelectedProductionIds] = useState<string[]>([])
-  const [productionToAdd, setProductionToAdd] = useState('')
+  const [productionsToAdd, setProductionsToAdd] = useState<string[]>([])
+  const [stagedProductionsToAdd, setStagedProductionsToAdd] = useState<ProductionItem[]>([])
   const [productionSearchQuery, setProductionSearchQuery] = useState('')
+  const [productionPage, setProductionPage] = useState(1)
+  const [hasMoreProductions, setHasMoreProductions] = useState(false)
+  const [productionFilters, setProductionFilters] = useState<ProductionPickerFilters>({
+    yearFrom: 1982,
+    yearTo: new Date().getFullYear(),
+    location: '',
+  })
   const [isProductionPopupOpen, setIsProductionPopupOpen] = useState(false)
   const [isLoadingProductions, setIsLoadingProductions] = useState(false)
+  const isLoadingProductionsRef = useRef(false)
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [search, setSearch] = useState('')
   const [isLoading, setIsLoading] = useState(true)
@@ -108,48 +103,48 @@ function PostersPageContent() {
   const loadPostersErrorMessage = i18n.admin.posters.loadPostersError
   const loadProductionsErrorMessage = i18n.admin.posters.loadProductionsError
 
-  const sortedProductions = useMemo(() => {
-    const sortLocale = locale === 'en' ? 'en-GB' : 'nl-BE'
-
-    return [...productions].sort((a, b) => {
-      const first = getLocalizedTitle(a.title)
-      const second = getLocalizedTitle(b.title)
-      return first.localeCompare(second, sortLocale, { sensitivity: 'base' })
-    })
-  }, [locale, productions])
-
   const selectedProductions = useMemo(
-    () => sortedProductions.filter((p) => selectedProductionIds.includes(p.id)),
-    [sortedProductions, selectedProductionIds],
+    () => productions.filter((p) => selectedProductionIds.includes(p.id)),
+    [productions, selectedProductionIds],
   )
 
   const availableProductions = useMemo(
-    () => sortedProductions.filter((p) => !selectedProductionIds.includes(p.id)),
-    [sortedProductions, selectedProductionIds],
+    () => productions.filter((p) => !selectedProductionIds.includes(p.id)),
+    [productions, selectedProductionIds],
   )
 
-  const fetchProductionsWithFallback = useCallback(async (searchQuery: string = '') => {
+  const pickerProductions = useMemo(
+    () => mergeUniqueProductions([
+      ...stagedProductionsToAdd.filter((production) => productionsToAdd.includes(production.id)),
+      ...availableProductions,
+    ]),
+    [availableProductions, productionsToAdd, stagedProductionsToAdd],
+  )
+
+  const fetchProductionsWithFallback = useCallback(async (searchQuery: string = '', filters: ProductionPickerFilters, page = 1) => {
     const trimmedSearchQuery = searchQuery.trim()
-    const searchParam = trimmedSearchQuery ? `&search=${encodeURIComponent(trimmedSearchQuery)}` : ''
-    const urls = [
-      `/archive/productions?page=1&limit=100&sort=${trimmedSearchQuery ? 'relevance' : 'recent'}${searchParam}`,
-      `/archive/productions?page=1&limit=100${searchParam}`,
-      `/archive/productions?page=1&limit=100&lang=nl${searchParam}`,
-    ]
+    const trimmedLocation = filters.location.trim()
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: '100',
+      sort: trimmedSearchQuery ? 'relevance' : 'recent',
+      lang: locale,
+      pastOnly: 'false',
+      draft: 'all',
+      yearFrom: String(filters.yearFrom),
+      yearTo: String(filters.yearTo),
+    })
 
-    let lastError: unknown = null
-
-    for (const url of urls) {
-      try {
-        const response = await apiFetch<PaginatedApiResponse<ProductionItem>>(url)
-        return response.data
-      } catch (requestError) {
-        lastError = requestError
-      }
+    if (trimmedSearchQuery) {
+      params.set('search', trimmedSearchQuery)
     }
 
-    throw lastError instanceof Error ? lastError : new Error('Could not load productions')
-  }, [])
+    if (trimmedLocation) {
+      params.set('locations', trimmedLocation)
+    }
+
+    return apiFetch<PaginatedApiResponse<ProductionItem>>(`/archive/productions?${params.toString()}`)
+  }, [locale])
 
   const loadData = useCallback(async (searchQuery: string = '') => {
     setIsLoading(true)
@@ -188,36 +183,28 @@ function PostersPageContent() {
     const abortController = new AbortController()
 
     const loadProductions = async () => {
+      isLoadingProductionsRef.current = true
       setIsLoadingProductions(true)
       setProductionError(null)
 
       try {
-        const results = await fetchProductionsWithFallback(productionSearchQuery)
+        const response = await fetchProductionsWithFallback(productionSearchQuery, productionFilters, productionPage)
 
         if (abortController.signal.aborted) {
           return
         }
 
-        // Keep the list scoped to the active query, like CreateBlogPage.
-        setProductions(mergeUniqueProductions(results))
-
-        setProductionToAdd((current) => {
-          if (results.length === 0) {
-            return ''
-          }
-
-          if (results.some((production) => production.id === current)) {
-            return current
-          }
-
-          return results[0].id
-        })
+        setProductions((current) => productionPage === 1
+          ? response.data
+          : mergeUniqueProductions([...current, ...response.data]))
+        setHasMoreProductions((response.meta?.page ?? productionPage) < (response.meta?.totalPages ?? productionPage))
       } catch (requestError) {
         if (!abortController.signal.aborted) {
           setProductionError(requestError instanceof Error ? requestError.message : loadProductionsErrorMessage)
         }
       } finally {
         if (!abortController.signal.aborted) {
+          isLoadingProductionsRef.current = false
           setIsLoadingProductions(false)
         }
       }
@@ -228,7 +215,7 @@ function PostersPageContent() {
     return () => {
       abortController.abort()
     }
-  }, [fetchProductionsWithFallback, loadProductionsErrorMessage, productionSearchQuery])
+  }, [fetchProductionsWithFallback, loadProductionsErrorMessage, productionFilters, productionSearchQuery, productionPage])
 
   useEffect(() => {
     const missingIds = selectedProductionIds.filter((id) => !productions.some((production) => production.id === id))
@@ -265,20 +252,43 @@ function PostersPageContent() {
   }, [loadProductionsErrorMessage, productions, selectedProductionIds])
 
   const openProductionPopup = () => {
-    if (!productionToAdd && availableProductions.length > 0) {
-      setProductionToAdd(availableProductions[0].id)
-    }
+    setStagedProductionsToAdd([])
+    setProductionsToAdd([])
     setIsProductionPopupOpen(true)
   }
 
-  const addProduction = () => {
-    if (!productionToAdd || selectedProductionIds.includes(productionToAdd)) {
+  const addProduction = (productionIds: string[]) => {
+    const productionIdsToAdd = productionIds.filter((id) => !selectedProductionIds.includes(id))
+    if (productionIdsToAdd.length === 0) {
       return
     }
-    setSelectedProductionIds((current) => [...current, productionToAdd])
-    const nextAvailable = availableProductions.find((p) => p.id !== productionToAdd)
-    setProductionToAdd(nextAvailable?.id ?? '')
+    setSelectedProductionIds((current) => [...current, ...productionIdsToAdd])
+    setStagedProductionsToAdd([])
+    setProductionsToAdd([])
     setIsProductionPopupOpen(false)
+  }
+
+  const changeProductionSearchQuery = (query: string) => {
+    isLoadingProductionsRef.current = false
+    setProductionSearchQuery(query)
+    setProductionPage(1)
+    setHasMoreProductions(false)
+  }
+
+  const changeProductionFilters = (filters: ProductionPickerFilters) => {
+    isLoadingProductionsRef.current = false
+    setProductionFilters(filters)
+    setProductionPage(1)
+    setHasMoreProductions(false)
+  }
+
+  const loadMoreProductions = () => {
+    if (isLoadingProductionsRef.current || !hasMoreProductions) {
+      return
+    }
+
+    isLoadingProductionsRef.current = true
+    setProductionPage((current) => current + 1)
   }
 
   const removeProduction = (id: string) => {
@@ -323,7 +333,8 @@ function PostersPageContent() {
       setSelectedFiles([])
       setSelectedProductionIds([])
       setProductionSearchQuery('')
-      setProductionToAdd('')
+      setStagedProductionsToAdd([])
+      setProductionsToAdd([])
       setIsProductionPopupOpen(false)
       await loadData(search)
     } catch (submitError) {
@@ -462,16 +473,26 @@ function PostersPageContent() {
           <ProductionManagementSection
             compact
             selectedProductions={selectedProductions}
-            availableProductions={availableProductions}
-            productionToAdd={productionToAdd}
+            availableProductions={pickerProductions}
+            productionsToAdd={productionsToAdd}
             productionSearchQuery={productionSearchQuery}
+            productionFilters={productionFilters}
             isProductionPopupOpen={isProductionPopupOpen}
             isLoadingProductions={isLoadingProductions}
+            hasMoreProductions={hasMoreProductions}
             productionsError={productionError ?? ''}
             onOpenPopup={openProductionPopup}
             onClosePopup={() => setIsProductionPopupOpen(false)}
-            onSelectProductionToAdd={setProductionToAdd}
-            onProductionSearchQueryChange={setProductionSearchQuery}
+            onSelectProductionsToAdd={(productionIds) => {
+              setStagedProductionsToAdd((current) => mergeUniqueProductions([
+                ...current,
+                ...availableProductions.filter((production) => productionIds.includes(production.id)),
+              ]))
+              setProductionsToAdd(productionIds)
+            }}
+            onProductionSearchQueryChange={changeProductionSearchQuery}
+            onProductionFiltersChange={changeProductionFilters}
+            onLoadMoreProductions={loadMoreProductions}
             onAddProduction={addProduction}
             onRemoveProduction={removeProduction}
           />

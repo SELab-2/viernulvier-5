@@ -398,6 +398,15 @@ const nl: Messages = {
           addButton: "Toevoegen",
           close: "Sluiten",
           queryHint: "Zoek productie",
+          filtersLabel: "Filters",
+          periodLabel: "Periode",
+          locationLabel: "Locatie",
+          locationPlaceholder: "Zoek locatie",
+          stagedLabel: "Geselecteerde producties",
+          selectedCount: (count: number) => `${count} geselecteerd`,
+          readyCount: (count: number) => `${count} ${count === 1 ? 'productie' : 'producties'} klaar om toe te voegen`,
+          loading: "Producties zoeken...",
+          loadingMore: "Meer producties laden...",
           noProductionFound: "Geen producties beschikbaar"
       },
       bannerUpload: {
