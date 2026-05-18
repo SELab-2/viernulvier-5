@@ -346,10 +346,11 @@ export type Messages = {
       pageSubtitle: string,
       productions: string,
       blogs: string,
+      filterOnlyCurrent: string,
       tableColTitle: string
       tableColType: string
       tableColStatus: string
-      tableColLanguage: string
+      tableColEditor: string
       tableColDate: string
       tableColActions: string
       statusUnavailable: string

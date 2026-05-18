@@ -24,7 +24,7 @@ function reducer(_state: State, action: Action): State {
 
 type Args = { page: number; limit: number; enabled?: boolean; editorId?: string }
 
-export function useProductionDrafts({ page, limit, enabled = true, editorId }: Args): State {
+export function useBlogDrafts({ page, limit, enabled = true, editorId }: Args): State {
     const [state, dispatch] = useReducer(reducer, { items: [], isLoading: enabled, error: null })
 
     useEffect(() => {
@@ -38,12 +38,13 @@ export function useProductionDrafts({ page, limit, enabled = true, editorId }: A
 
         const editorParam = editorId ? `&editorId=${editorId}` : ''
 
-        api.get<{ data: DraftItem[] }>(`/archive/productions?draft=true&page=${page}&limit=${limit}${editorParam}`)
+        api.get<{ data: DraftItem[] }>(`/archive/blogs?draft=true&page=${page}&limit=${limit}${editorParam}`)
             .then((response) => {
                 if (!isActive) return
                 const items = response.data
 
-                // no need to fetch the list of editors of the productions if we already know the editor edited it
+
+                // no need to fetch the list of editors of the blogs if we already know the editor edited it
                 if (editorId) {
                     dispatch({ type: 'success', items: items.map((item) => ({ ...item, editors: [{ id: editorId }] })) })
                     return
@@ -52,7 +53,7 @@ export function useProductionDrafts({ page, limit, enabled = true, editorId }: A
                 return Promise.all(
                     items.map((item) =>
                         api
-                            .get<{ data: EditorItem[] }>(`/cms-users/?productionId=${item.id}`)
+                            .get<{ data: EditorItem[] }>(`/cms-users/?blogId=${item.id}`)
                             .then((res) => ({ ...item, editors: res.data ?? [] }))
                     )
                 ).then((items) => {
@@ -62,7 +63,7 @@ export function useProductionDrafts({ page, limit, enabled = true, editorId }: A
             })
             .catch((error: unknown) => {
                 if (!isActive) return
-                const message = error instanceof Error ? error.message : 'Producties konden niet geladen worden.'
+                const message = error instanceof Error ? error.message : 'Blogs konden niet geladen worden.'
                 dispatch({ type: 'error', message })
             })
 

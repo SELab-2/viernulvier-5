@@ -14,11 +14,7 @@ export type DraftItem = {
     id: string
     title: LocalizedString
     updated_at: string
-    languageStatus: {
-        nl: 'complete' | 'attention' | 'missing'
-        en: 'complete' | 'attention' | 'missing'
-    }
-    editor_ids?: string[]
+    editors: EditorItem[]
 }
 
 type DraftsTableProps = {
@@ -28,8 +24,12 @@ type DraftsTableProps = {
     currentUserId?: string
 }
 
+export type EditorItem = {
+    id: string
+}
 
-function DraftsTable({ items, isLoading, tab}: DraftsTableProps) {
+
+function DraftsTable({ items, isLoading, tab, currentUserId}: DraftsTableProps) {
     const [showDeleteModal, setShowDeleteModal] = useState(false)
     const [selectedDraft, setSelectedDraft] = useState<DraftItem | null>(null)
 
@@ -59,7 +59,7 @@ function DraftsTable({ items, isLoading, tab}: DraftsTableProps) {
                         {[
                             d.tableColTitle,
                             d.tableColStatus,
-                            d.tableColLanguage,
+                            d.tableColEditor,
                             d.tableColDate,
                             d.tableColActions,
                         ].map((heading) => (
@@ -98,32 +98,20 @@ function DraftsTable({ items, isLoading, tab}: DraftsTableProps) {
                                     </span>
                                 </td>
                                 <td className="px-4 py-4">
-                                    {/*<div className="flex gap-3 text-[9px] uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">*/}
-                                    {/*    {(['nl', 'en'] as const).map((loc) => {*/}
-                                    {/*        const state = item.languageStatus[loc]*/}
-                                    {/*        const dotClass =*/}
-                                    {/*            state === 'complete' ? 'bg-[#10b981]'*/}
-                                    {/*                : state === 'attention' ? 'bg-[#f59e0b]'*/}
-                                    {/*                    : 'bg-[#cbd5e1]'*/}
-                                    {/*        const tooltip =*/}
-                                    {/*            state === 'complete' ? d.languageStatusComplete*/}
-                                    {/*                : state === 'attention' ? d.languageStatusAttention*/}
-                                    {/*                    : d.languageStatusMissing*/}
-
-                                    {/*        return (*/}
-                                    {/*            <span*/}
-                                    {/*                key={loc}*/}
-                                    {/*                className={`inline-block cursor-help rounded-sm focus:outline-none focus:ring-2 focus:ring-accent/40 ${state === 'missing' ? 'opacity-40' : ''}`}*/}
-                                    {/*                title={tooltip}*/}
-                                    {/*                aria-label={`${loc.toUpperCase()}: ${tooltip}`}*/}
-                                    {/*                tabIndex={0}*/}
-                                    {/*            >*/}
-                                    {/*                    <span className="block">{loc}</span>*/}
-                                    {/*                    <span aria-hidden="true" className={`mt-1 block h-2 w-2 rounded-full ${dotClass}`} />*/}
-                                    {/*                </span>*/}
-                                    {/*        )*/}
-                                    {/*    })}*/}
-                                    {/*</div>*/}
+                                    {item.editors.some((editor) => editor.id === currentUserId) ? (
+                                        <span className="inline-flex items-center gap-2 whitespace-nowrap text-xs text-emerald-600 dark:text-emerald-400">
+                                            <svg className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z"
+                                                      clipRule="evenodd"/>
+                                            </svg>
+                                        </span>
+                                    ) : (
+                                        <span className="inline-flex items-center gap-2 whitespace-nowrap text-xs text-slate-400 dark:text-slate-500">
+                                            <svg className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                                                <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z"/>
+                                            </svg>
+                                        </span>
+                                    )}
                                 </td>
                                 <td className="px-4 py-4 text-sm text-[#475569] dark:text-slate-300">
                                     {formatDate(item.updated_at)}</td>
@@ -155,7 +143,8 @@ function DraftsTable({ items, isLoading, tab}: DraftsTableProps) {
 
                     {!isLoading && items.length === 0 && (
                         <tr className="h-[72px]">
-                            <td colSpan={6} className="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+                            <td colSpan={6}
+                                className="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
                                 {d.emptyRecent}
                             </td>
                         </tr>

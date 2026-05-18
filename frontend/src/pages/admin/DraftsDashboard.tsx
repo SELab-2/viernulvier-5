@@ -4,7 +4,7 @@ import AdminLayout from '../../components/admin/AdminLayout'
 import DraftsTab from '../../components/admin/drafts/DraftsTab'
 import DraftsTable from '../../components/admin/drafts/DraftsTable'
 import {useProductionDrafts} from "../../components/admin/hooks/useProductionDrafts.ts";
-import {useBlogDrafts} from "../../components/admin/hooks/useBlogsDrafts.ts";
+import {useBlogDrafts} from "../../components/admin/hooks/useBlogDrafts.ts";
 import { useOptionalAdminSession } from '../../auth/useAdminSessionContext';
 
 type TabKey = 'productions' | 'blogs'
@@ -16,17 +16,20 @@ function DraftsDashboardPageContent() {
     const currentUserId = session?.user?.id
 
     const [tab, setTab] = useState<TabKey>('productions')
+    const [onlyCurrent, setOnlyCurrent] = useState(false)
 
     const productions = useProductionDrafts({
         page: 1,
         limit: 10,
-        enabled: tab === 'productions'
+        enabled: tab === 'productions',
+        editorId: onlyCurrent ? currentUserId : undefined,
     })
 
     const blogs = useBlogDrafts({
         page: 1,
         limit: 10,
-        enabled: tab === 'blogs'
+        enabled: tab === 'blogs',
+        editorId: onlyCurrent ? currentUserId : undefined,
     })
 
     const { items, isLoading, error } = tab === 'productions' ? productions : blogs
@@ -42,12 +45,27 @@ function DraftsDashboardPageContent() {
                 </p>
             </header>
             {error && (
-                <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-200">
+                <div
+                    className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-200">
                     {error}
                 </div>
             )}
 
-            <DraftsTab tab={tab} setTab={setTab} />
+
+            <div className="flex items-center justify-between">
+                <DraftsTab tab={tab} setTab={setTab}/>
+                <button
+                    onClick={() => setOnlyCurrent((prev) => !prev)}
+                    className={[
+                        'rounded-lg px-4 py-2 text-sm font-medium transition',
+                        onlyCurrent
+                            ? 'bg-accent text-white'
+                            : 'border border-[var(--color-admin-card-border)] bg-white text-slate-500 hover:bg-slate-50 dark:bg-[#111318] dark:text-slate-400 dark:hover:bg-slate-800',
+                    ].join(' ')}
+                >
+                    {d.filterOnlyCurrent}
+                </button>
+            </div>
             {isLoading ? (
                 <div
                     className="flex h-[200px] w-full flex-col items-center justify-center gap-4 rounded-[12px] border border-[var(--color-admin-card-border)] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.05)] dark:bg-[#111318]">
