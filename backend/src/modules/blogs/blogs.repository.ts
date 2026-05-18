@@ -50,6 +50,7 @@ export class BlogsRepository {
         const trimmedSearch = options.search?.trim()
         const draft = options.draft ?? false
 
+
         if (draft !== 'all') {
             if (draft) {
                 conditions.push({
@@ -204,7 +205,7 @@ export class BlogsRepository {
             content: blog.content,
             thumbnail_index: blog.thumbnail_index,
             images: blog.images,
-            draft: blog.draft ?? false,
+            draft: blog.draft,
             productions: blog.blog_production?.map((relation) => relation.production_id) ?? [],
             created_at: blog.created_at,
             updated_at: blog.updated_at,
