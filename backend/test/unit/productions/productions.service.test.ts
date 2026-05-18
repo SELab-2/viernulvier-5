@@ -79,4 +79,20 @@ describe('ProductionsService', () => {
         expect(result.total).toBe(2)
         expect(result.items[0]).toHaveProperty('image_url')
     })
+
+    it('filters out internal fields from the response', async () => {
+        const mockProductionWithGalleries = {
+            id: productionId,
+            title: { nl: 'Test Productie' },
+            media_gallery: { id: 'gallery-1', items: [] },
+            poster_gallery: { id: 'poster-gallery-1', other_files: [] },
+        }
+        repository.findById.mockResolvedValue(mockProductionWithGalleries)
+
+        const result = await service.getProduction(productionId)
+
+        expect(result).not.toHaveProperty('media_gallery')
+        expect(result).not.toHaveProperty('poster_gallery')
+        expect(result.id).toBe(productionId)
+    })
 })
