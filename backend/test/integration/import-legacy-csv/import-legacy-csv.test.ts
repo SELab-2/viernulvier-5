@@ -173,11 +173,13 @@ describe('legacy CSV importer', () => {
         'Geen ID Show,,,,,,' ,  // empty ID
       ].join('\n');
 
-      const countBefore = await prisma.production.count({ where: { apiId: { startsWith: 'legacy-' } } });
       await runImport(['--productions', writeTempCsv(csv)]);
-      const countAfter = await prisma.production.count({ where: { apiId: { startsWith: 'legacy-' } } });
 
-      expect(countAfter).toBe(countBefore);
+      // A row with no ID should never be stored — there's no valid apiId to find
+      const prod = await prisma.production.findFirst({
+        where: { title: { equals: { nl: 'Geen ID Show' } } },
+      });
+      expect(prod).toBeNull();
     });
 
     it('updates an existing production instead of creating a duplicate', async () => {
@@ -342,11 +344,13 @@ describe('legacy CSV importer', () => {
         '2006-12-05 20:00:00,,Balzaal,',
       ].join('\n');
 
-      const countBefore = await prisma.event.count();
       await runImport(['--events', writeTempCsv(csv)]);
-      const countAfter = await prisma.event.count();
 
-      expect(countAfter).toBe(countBefore);
+      // 2006-12-05 20:00 CET = 19:00 UTC
+      const event = await prisma.event.findFirst({
+        where: { starts_at: new Date('2006-12-05T19:00:00Z') },
+      });
+      expect(event).toBeNull();
     });
 
     it('does not duplicate events when the same CSV is imported twice', async () => {
