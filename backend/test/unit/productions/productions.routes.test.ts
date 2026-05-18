@@ -55,6 +55,7 @@ describe('Productions Routes', () => {
                     title: { nl: 'Pen' },
                     description_short: { nl: 'Korte intro' },
                     events: pastEvent,
+                    draft: false,
                 },
             })
 
@@ -478,7 +479,7 @@ describe('Productions Routes', () => {
                 expect(response.statusCode).toBe(200)
                 const ids = JSON.parse(response.payload).data.map((item: { id: string }) => item.id)
                 expect(ids).toContain(published.id)
-                expect(ids).toContain(draftProduction.id)
+                expect(ids).not.toContain(draftProduction.id)
                 expect(ids).not.toContain(publishedFutureOnly.id)
             } finally {
                 await app.prisma.event.deleteMany({

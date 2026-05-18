@@ -571,7 +571,7 @@ describe('Blogs Routes', () => {
                 expect(response.statusCode).toBe(200)
                 const ids = JSON.parse(response.payload).data.map((item: { id: string }) => item.id)
                 expect(ids).toContain(published.id)
-                expect(ids).toContain(draft.id)
+                expect(ids).not.toContain(draft.id)
             } finally {
                 await app.prisma.blog_production.deleteMany({ where: { production_id: production.id } })
                 await app.prisma.production.delete({ where: { id: production.id } })
