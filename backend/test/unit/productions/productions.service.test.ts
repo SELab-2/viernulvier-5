@@ -80,6 +80,16 @@ describe('ProductionsService', () => {
         expect(result.items[0]).toHaveProperty('image_url')
     })
 
+    it('passes pastOnly=false through to the repository', async () => {
+        repository.count.mockResolvedValue(0)
+        repository.findAll.mockResolvedValue([])
+
+        await service.getProductions({ page: 1, limit: 10, pastOnly: false })
+
+        expect(repository.count).toHaveBeenCalledWith(expect.objectContaining({ pastOnly: false }))
+        expect(repository.findAll).toHaveBeenCalledWith(expect.objectContaining({ pastOnly: false }))
+    })
+
     it('filters out internal fields from the response', async () => {
         const mockProductionWithGalleries = {
             id: productionId,

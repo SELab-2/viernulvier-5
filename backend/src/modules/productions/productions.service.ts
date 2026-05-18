@@ -221,7 +221,7 @@ export class ProductionsService {
     }
 
     async getProductions(options: PaginationQuery): Promise<PaginatedResult<ProductionResponse>> {
-        const { page, limit, search, lang, genres, locations, yearFrom, yearTo, sort, onThisDay, referenceDate } = options
+        const { page, limit, search, lang, genres, locations, yearFrom, yearTo, sort, onThisDay, referenceDate, pastOnly } = options
         const normalizedSearch = search?.trim() || undefined
 
         const normalizedGenres = genres
@@ -270,6 +270,7 @@ export class ProductionsService {
             yearFrom: safeYearFrom,
             yearTo: safeYearTo,
             onThisDayDate,
+            pastOnly,
         }
 
         const total = await this.repository.count(commonOptions)

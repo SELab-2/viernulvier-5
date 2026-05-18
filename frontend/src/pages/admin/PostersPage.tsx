@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import AdminLayout from '../../components/admin/AdminLayout'
 import { apiFetch, normalizeApiAssetUrl } from '../../api/client'
 import ProductionManagementSection, { type ProductionItem as ManagedProductionItem } from '../../components/admin/blogs/ProductionManagementSection'
+import type { ProductionPickerFilters } from '../../components/admin/blogs/ProductionPickerPopup'
 import { useAdminMessages } from '../../components/admin/AdminMessagesContext'
 import { getActiveLocale } from '../../i18n'
 
@@ -93,6 +94,13 @@ function PostersPageContent() {
   const [selectedProductionIds, setSelectedProductionIds] = useState<string[]>([])
   const [productionsToAdd, setProductionsToAdd] = useState<string[]>([])
   const [productionSearchQuery, setProductionSearchQuery] = useState('')
+  const [productionPage, setProductionPage] = useState(1)
+  const [hasMoreProductions, setHasMoreProductions] = useState(false)
+  const [productionFilters, setProductionFilters] = useState<ProductionPickerFilters>({
+    yearFrom: 1982,
+    yearTo: new Date().getFullYear(),
+    location: '',
+  })
   const [isProductionPopupOpen, setIsProductionPopupOpen] = useState(false)
   const [isLoadingProductions, setIsLoadingProductions] = useState(false)
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
@@ -128,28 +136,29 @@ function PostersPageContent() {
     [sortedProductions, selectedProductionIds],
   )
 
-  const fetchProductionsWithFallback = useCallback(async (searchQuery: string = '') => {
+  const fetchProductionsWithFallback = useCallback(async (searchQuery: string = '', filters: ProductionPickerFilters, page = 1) => {
     const trimmedSearchQuery = searchQuery.trim()
-    const searchParam = trimmedSearchQuery ? `&search=${encodeURIComponent(trimmedSearchQuery)}` : ''
-    const urls = [
-      `/archive/productions?page=1&limit=100&sort=${trimmedSearchQuery ? 'relevance' : 'recent'}${searchParam}`,
-      `/archive/productions?page=1&limit=100${searchParam}`,
-      `/archive/productions?page=1&limit=100&lang=nl${searchParam}`,
-    ]
+    const trimmedLocation = filters.location.trim()
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: '100',
+      sort: trimmedSearchQuery ? 'relevance' : 'recent',
+      lang: locale,
+      pastOnly: 'false',
+      yearFrom: String(filters.yearFrom),
+      yearTo: String(filters.yearTo),
+    })
 
-    let lastError: unknown = null
-
-    for (const url of urls) {
-      try {
-        const response = await apiFetch<PaginatedApiResponse<ProductionItem>>(url)
-        return response.data
-      } catch (requestError) {
-        lastError = requestError
-      }
+    if (trimmedSearchQuery) {
+      params.set('search', trimmedSearchQuery)
     }
 
-    throw lastError instanceof Error ? lastError : new Error('Could not load productions')
-  }, [])
+    if (trimmedLocation) {
+      params.set('locations', trimmedLocation)
+    }
+
+    return apiFetch<PaginatedApiResponse<ProductionItem>>(`/archive/productions?${params.toString()}`)
+  }, [locale])
 
   const loadData = useCallback(async (searchQuery: string = '') => {
     setIsLoading(true)
@@ -192,14 +201,16 @@ function PostersPageContent() {
       setProductionError(null)
 
       try {
-        const results = await fetchProductionsWithFallback(productionSearchQuery)
+        const response = await fetchProductionsWithFallback(productionSearchQuery, productionFilters, productionPage)
 
         if (abortController.signal.aborted) {
           return
         }
 
-        // Keep the list scoped to the active query, like CreateBlogPage.
-        setProductions(mergeUniqueProductions(results))
+        setProductions((current) => productionPage === 1
+          ? response.data
+          : mergeUniqueProductions([...current, ...response.data]))
+        setHasMoreProductions((response.meta?.page ?? productionPage) < (response.meta?.totalPages ?? productionPage))
       } catch (requestError) {
         if (!abortController.signal.aborted) {
           setProductionError(requestError instanceof Error ? requestError.message : loadProductionsErrorMessage)
@@ -216,7 +227,7 @@ function PostersPageContent() {
     return () => {
       abortController.abort()
     }
-  }, [fetchProductionsWithFallback, loadProductionsErrorMessage, productionSearchQuery])
+  }, [fetchProductionsWithFallback, loadProductionsErrorMessage, productionFilters, productionSearchQuery, productionPage])
 
   useEffect(() => {
     const missingIds = selectedProductionIds.filter((id) => !productions.some((production) => production.id === id))
@@ -265,6 +276,26 @@ function PostersPageContent() {
     setSelectedProductionIds((current) => [...current, ...productionIdsToAdd])
     setProductionsToAdd([])
     setIsProductionPopupOpen(false)
+  }
+
+  const changeProductionSearchQuery = (query: string) => {
+    setProductionSearchQuery(query)
+    setProductionPage(1)
+    setHasMoreProductions(false)
+  }
+
+  const changeProductionFilters = (filters: ProductionPickerFilters) => {
+    setProductionFilters(filters)
+    setProductionPage(1)
+    setHasMoreProductions(false)
+  }
+
+  const loadMoreProductions = () => {
+    if (isLoadingProductions || !hasMoreProductions) {
+      return
+    }
+
+    setProductionPage((current) => current + 1)
   }
 
   const removeProduction = (id: string) => {
@@ -451,13 +482,17 @@ function PostersPageContent() {
             availableProductions={availableProductions}
             productionsToAdd={productionsToAdd}
             productionSearchQuery={productionSearchQuery}
+            productionFilters={productionFilters}
             isProductionPopupOpen={isProductionPopupOpen}
             isLoadingProductions={isLoadingProductions}
+            hasMoreProductions={hasMoreProductions}
             productionsError={productionError ?? ''}
             onOpenPopup={openProductionPopup}
             onClosePopup={() => setIsProductionPopupOpen(false)}
             onSelectProductionsToAdd={setProductionsToAdd}
-            onProductionSearchQueryChange={setProductionSearchQuery}
+            onProductionSearchQueryChange={changeProductionSearchQuery}
+            onProductionFiltersChange={changeProductionFilters}
+            onLoadMoreProductions={loadMoreProductions}
             onAddProduction={addProduction}
             onRemoveProduction={removeProduction}
           />

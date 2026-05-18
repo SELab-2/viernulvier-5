@@ -24,6 +24,7 @@ export class SearchService {
             sort,
             lang,
             onThisDay: false as const,
+            pastOnly: true,
         }
 
         // Get total count of matching productions first, then fetch all without an artificial ceiling

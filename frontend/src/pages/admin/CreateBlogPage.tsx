@@ -7,6 +7,7 @@ import SectionHeading from '../../components/admin/SectionHeading'
 import BlogsTab from '../../components/admin/BlogsTab'
 import BlogsTabContent from '../../components/admin/BlogsTabContent'
 import ProductionManagementSection, { type ProductionItem } from '../../components/admin/blogs/ProductionManagementSection'
+import type { ProductionPickerFilters } from '../../components/admin/blogs/ProductionPickerPopup'
 import {
     formatBlogDetailForForm,
     validateBlogPublishInput,
@@ -114,6 +115,13 @@ function CreateBlogPage() {
     const [selectedProductionIds, setSelectedProductionIds] = useState<string[]>([])
     const [productionsToAdd, setProductionsToAdd] = useState<string[]>([])
     const [productionSearchQuery, setProductionSearchQuery] = useState('')
+    const [productionPage, setProductionPage] = useState(1)
+    const [hasMoreProductions, setHasMoreProductions] = useState(false)
+    const [productionFilters, setProductionFilters] = useState<ProductionPickerFilters>({
+        yearFrom: 1982,
+        yearTo: new Date().getFullYear(),
+        location: '',
+    })
     const [isProductionPopupOpen, setIsProductionPopupOpen] = useState(false)
     const [isLoadingProductions, setIsLoadingProductions] = useState(false)
     const [productionsError, setProductionsError] = useState('')
@@ -188,15 +196,23 @@ function CreateBlogPage() {
 
             try {
                 const query = productionSearchQuery.trim()
+                const location = productionFilters.location.trim()
                 const params = new URLSearchParams({
-                    page: '1',
+                    page: String(productionPage),
                     limit: '100',
-                    sort: 'relevance',
+                    sort: query ? 'relevance' : 'recent',
                     lang: locale,
+                    pastOnly: 'false',
+                    yearFrom: String(productionFilters.yearFrom),
+                    yearTo: String(productionFilters.yearTo),
                 })
 
                 if (query) {
                     params.set('search', query)
+                }
+
+                if (location) {
+                    params.set('locations', location)
                 }
 
                 const endpoint = `/archive/productions?${params.toString()}`
@@ -205,7 +221,10 @@ function CreateBlogPage() {
                     signal: abortController.signal,
                 })
 
-                setProductions(mergeUniqueProductions(response.data))
+                setProductions((current) => productionPage === 1
+                    ? response.data
+                    : mergeUniqueProductions([...current, ...response.data]))
+                setHasMoreProductions((response.meta?.page ?? productionPage) < (response.meta?.totalPages ?? productionPage))
             } catch (loadError) {
                 if (abortController.signal.aborted) {
                     return
@@ -224,7 +243,7 @@ function CreateBlogPage() {
         return () => {
             abortController.abort()
         }
-    }, [productionSearchQuery, locale])
+    }, [productionFilters, productionSearchQuery, locale, productionPage])
 
     useEffect(() => {
         const missingIds = selectedProductionIds.filter((id) => !productions.some((production) => production.id === id))
@@ -444,6 +463,26 @@ function CreateBlogPage() {
         setSelectedProductionIds((current) => current.filter((id) => id !== productionId))
     }
 
+    const changeProductionSearchQuery = (query: string) => {
+        setProductionSearchQuery(query)
+        setProductionPage(1)
+        setHasMoreProductions(false)
+    }
+
+    const changeProductionFilters = (filters: ProductionPickerFilters) => {
+        setProductionFilters(filters)
+        setProductionPage(1)
+        setHasMoreProductions(false)
+    }
+
+    const loadMoreProductions = () => {
+        if (isLoadingProductions || !hasMoreProductions) {
+            return
+        }
+
+        setProductionPage((current) => current + 1)
+    }
+
     const openProductionPopup = () => {
         setProductionsToAdd([])
         setIsProductionPopupOpen(true)
@@ -493,13 +532,17 @@ function CreateBlogPage() {
                 availableProductions={availableProductions}
                 productionsToAdd={productionsToAdd}
                 productionSearchQuery={productionSearchQuery}
+                productionFilters={productionFilters}
                 isProductionPopupOpen={isProductionPopupOpen}
                 isLoadingProductions={isLoadingProductions}
+                hasMoreProductions={hasMoreProductions}
                 productionsError={productionsError}
                 onOpenPopup={openProductionPopup}
                 onClosePopup={() => setIsProductionPopupOpen(false)}
                 onSelectProductionsToAdd={setProductionsToAdd}
-                onProductionSearchQueryChange={setProductionSearchQuery}
+                onProductionSearchQueryChange={changeProductionSearchQuery}
+                onProductionFiltersChange={changeProductionFilters}
+                onLoadMoreProductions={loadMoreProductions}
                 onAddProduction={addProduction}
                 onRemoveProduction={removeProduction}
             />

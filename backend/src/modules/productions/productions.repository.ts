@@ -11,6 +11,7 @@ type FindAllOptions = {
     yearFrom?: number
     yearTo?: number
     onThisDayDate?: Date
+    pastOnly?: boolean
     sort?: 'relevance' | 'recent' | 'oldest'
     lang?: string
 }
@@ -182,20 +183,21 @@ export class ProductionsRepository {
     }
 
     private async buildWhere(options: CountOptions): Promise<Prisma.productionWhereInput> {
-        const { search, searchIds, genres, locations, yearFrom, yearTo, onThisDayDate, lang = 'nl' } = options
+        const { search, searchIds, genres, locations, yearFrom, yearTo, onThisDayDate, pastOnly = true, lang = 'nl' } = options
         const andFilters: Prisma.productionWhereInput[] = []
         const now = new Date()
 
-        // Requirement: Only show productions that have at least one event in the past
-        andFilters.push({
-            events: {
-                some: {
-                    starts_at: {
-                        lt: now
+        if (pastOnly) {
+            andFilters.push({
+                events: {
+                    some: {
+                        starts_at: {
+                            lt: now
+                        }
                     }
                 }
-            }
-        })
+            })
+        }
 
         if (onThisDayDate) {
             const matchingProductionIds = await this.findProductionIdsOnMonthDay(onThisDayDate)
@@ -309,14 +311,12 @@ export class ProductionsRepository {
                 eventDateFilter.lte = new Date(Date.UTC(yearTo, 11, 31, 23, 59, 59, 999))
             }
 
-            // Filter productions where at least one PAST event is within the year range
             andFilters.push({
                 events: {
                     some: {
-                        AND: [
-                            { starts_at: { lt: now } },
-                            { starts_at: eventDateFilter }
-                        ]
+                        starts_at: pastOnly
+                            ? { ...eventDateFilter, lt: now }
+                            : eventDateFilter,
                     }
                 }
             })

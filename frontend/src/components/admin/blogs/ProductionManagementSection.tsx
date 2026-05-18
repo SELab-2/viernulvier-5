@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getActiveLocale, getMessages } from '../../../i18n'
 import ProductionCard, { type ProductionCardItem } from '../../blogs/ProductionCard'
-import ProductionPickerPopup from './ProductionPickerPopup'
+import ProductionPickerPopup, { type ProductionPickerFilters } from './ProductionPickerPopup'
 
 export type ProductionItem = ProductionCardItem
 
@@ -16,14 +16,18 @@ type ProductionManagementSectionProps = {
     availableProductions: ProductionItem[]
     productionsToAdd: string[]
     productionSearchQuery: string
+    productionFilters: ProductionPickerFilters
     isProductionPopupOpen: boolean
     isLoadingProductions: boolean
+    hasMoreProductions: boolean
     productionsError: string
     compact?: boolean
     onOpenPopup: () => void
     onClosePopup: () => void
     onSelectProductionsToAdd: (productionIds: string[]) => void
     onProductionSearchQueryChange: (query: string) => void
+    onProductionFiltersChange: (filters: ProductionPickerFilters) => void
+    onLoadMoreProductions: () => void
     onAddProduction: (productionIds: string[]) => void
     onRemoveProduction: (productionId: string) => void
 }
@@ -33,14 +37,18 @@ function ProductionManagementSection({
     availableProductions,
     productionsToAdd,
     productionSearchQuery,
+    productionFilters,
     isProductionPopupOpen,
     isLoadingProductions,
+    hasMoreProductions,
     productionsError,
     compact = false,
     onOpenPopup,
     onClosePopup,
     onSelectProductionsToAdd,
     onProductionSearchQueryChange,
+    onProductionFiltersChange,
+    onLoadMoreProductions,
     onAddProduction,
     onRemoveProduction,
 }: ProductionManagementSectionProps) {
@@ -155,10 +163,14 @@ function ProductionManagementSection({
                 productions={availableProductions}
                 selectedProductionIds={productionsToAdd}
                 searchQuery={productionSearchInput}
+                filters={productionFilters}
                 isLoading={isLoadingProductions}
+                hasMoreProductions={hasMoreProductions}
+                onLoadMoreProductions={onLoadMoreProductions}
                 onClose={onClosePopup}
                 onSelectedProductionIdsChange={onSelectProductionsToAdd}
                 onSearchQueryChange={setProductionSearchInput}
+                onFiltersChange={onProductionFiltersChange}
                 onAdd={onAddProduction}
             />
         </>

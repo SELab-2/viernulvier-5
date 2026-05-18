@@ -6,6 +6,10 @@ import type { ProductionItem } from '../../components/admin/blogs/ProductionMana
 
 export type ProductionListResponse = {
     data: ProductionItem[]
+    meta?: {
+        page: number
+        totalPages: number
+    }
 }
 
 export type ProductionDetailResponse = {

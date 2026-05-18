@@ -20,6 +20,7 @@ export const productionPaginationQuerySchema = paginationQuerySchema.extend({
     yearFrom: z.coerce.number().int().optional(),
     yearTo: z.coerce.number().int().optional(),
     onThisDay: z.coerce.boolean().optional().default(false),
+    pastOnly: z.coerce.boolean().optional().default(true),
     referenceDate: z
         .string()
         .regex(/^\d{4}-\d{2}-\d{2}$/)
