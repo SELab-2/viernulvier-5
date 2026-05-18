@@ -103,6 +103,7 @@ function PostersPageContent() {
   })
   const [isProductionPopupOpen, setIsProductionPopupOpen] = useState(false)
   const [isLoadingProductions, setIsLoadingProductions] = useState(false)
+  const isLoadingProductionsRef = useRef(false)
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [search, setSearch] = useState('')
   const [isLoading, setIsLoading] = useState(true)
@@ -197,6 +198,7 @@ function PostersPageContent() {
     const abortController = new AbortController()
 
     const loadProductions = async () => {
+      isLoadingProductionsRef.current = true
       setIsLoadingProductions(true)
       setProductionError(null)
 
@@ -217,6 +219,7 @@ function PostersPageContent() {
         }
       } finally {
         if (!abortController.signal.aborted) {
+          isLoadingProductionsRef.current = false
           setIsLoadingProductions(false)
         }
       }
@@ -279,22 +282,25 @@ function PostersPageContent() {
   }
 
   const changeProductionSearchQuery = (query: string) => {
+    isLoadingProductionsRef.current = false
     setProductionSearchQuery(query)
     setProductionPage(1)
     setHasMoreProductions(false)
   }
 
   const changeProductionFilters = (filters: ProductionPickerFilters) => {
+    isLoadingProductionsRef.current = false
     setProductionFilters(filters)
     setProductionPage(1)
     setHasMoreProductions(false)
   }
 
   const loadMoreProductions = () => {
-    if (isLoadingProductions || !hasMoreProductions) {
+    if (isLoadingProductionsRef.current || !hasMoreProductions) {
       return
     }
 
+    isLoadingProductionsRef.current = true
     setProductionPage((current) => current + 1)
   }
 

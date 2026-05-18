@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { api, apiFetch } from '../../api/client'
 import { getActiveLocale, getMessages} from '../../i18n'
 
@@ -125,6 +125,7 @@ function CreateBlogPage() {
     const [isProductionPopupOpen, setIsProductionPopupOpen] = useState(false)
     const [isLoadingProductions, setIsLoadingProductions] = useState(false)
     const [productionsError, setProductionsError] = useState('')
+    const isLoadingProductionsRef = useRef(false)
 
     const navigate = useNavigate()
     const locale = getActiveLocale(window.location.pathname)
@@ -191,6 +192,7 @@ function CreateBlogPage() {
         const abortController = new AbortController()
 
         const fetchProductions = async () => {
+            isLoadingProductionsRef.current = true
             setIsLoadingProductions(true)
             setProductionsError('')
 
@@ -233,6 +235,7 @@ function CreateBlogPage() {
                 setProductionsError(loadError instanceof Error ? loadError.message : 'Failed to load productions.')
             } finally {
                 if (!abortController.signal.aborted) {
+                    isLoadingProductionsRef.current = false
                     setIsLoadingProductions(false)
                 }
             }
@@ -464,22 +467,25 @@ function CreateBlogPage() {
     }
 
     const changeProductionSearchQuery = (query: string) => {
+        isLoadingProductionsRef.current = false
         setProductionSearchQuery(query)
         setProductionPage(1)
         setHasMoreProductions(false)
     }
 
     const changeProductionFilters = (filters: ProductionPickerFilters) => {
+        isLoadingProductionsRef.current = false
         setProductionFilters(filters)
         setProductionPage(1)
         setHasMoreProductions(false)
     }
 
     const loadMoreProductions = () => {
-        if (isLoadingProductions || !hasMoreProductions) {
+        if (isLoadingProductionsRef.current || !hasMoreProductions) {
             return
         }
 
+        isLoadingProductionsRef.current = true
         setProductionPage((current) => current + 1)
     }
 
