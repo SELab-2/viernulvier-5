@@ -705,6 +705,22 @@ function CreateBlogPage() {
         setSuccess('')
 
         try {
+            //fetch editors
+            const editorsResponse = await apiFetch<{
+                data: { id: string }[]
+            }>(`/cms-users?blogId=${blogId}`)
+
+            // delete all editors from editor_blog table
+            await Promise.all(
+                editorsResponse.data.map((editor) =>
+                    apiFetch(
+                        `/archive/blogs/${blogId}/editors/${editor.id}`,
+                        {
+                            method: 'DELETE',
+                        }
+                    )
+                )
+            )
             await api.delete<unknown>(`/archive/blogs/${blogId}`)
             navigate('/admin/dashboard')
         } catch (deleteError) {
