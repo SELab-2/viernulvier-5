@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { apiFetch } from '../../api/client'
+import { apiFetch, normalizeApiAssetUrl } from '../../api/client'
 import { getActiveLocale, withLocalePath } from '../../i18n'
 import type { Locale, Messages } from '../../i18n/types'
 import { usePublicMessages } from './PublicMessagesContext'
@@ -115,7 +115,7 @@ function mapProductionToCarouselItem(item: ProductionApiItem, locale: Locale, se
         title,
         excerpt,
         venue,
-        imageUrl: undefined,
+        imageUrl: normalizeApiAssetUrl(item.image_url),
     }
 }
 
@@ -341,7 +341,7 @@ function PublicCarousel() {
                                     key={item.id}
                                     className={`relative flex flex-col w-[280px] shrink-0 snap-start border border-border bg-surface p-4 transition-transform duration-300 hover:rotate-0 hover:shadow-lg sm:w-[310px] ${index % 2 === 0 ? '-rotate-3' : 'rotate-3'}`}
                                 >
-                                    <SearchResultCard item={item} detailHref={withLocalePath(`/archive/${item.id}`, locale)} />
+                                    <SearchResultCard item={{ ...item, detailHref: withLocalePath(`/archive/${item.id}`, locale) }} />
                                 </div>
                             ))}
                         </div>

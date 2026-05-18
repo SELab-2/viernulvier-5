@@ -10,6 +10,7 @@ const getActiveLocaleMock = vi.hoisted(() => vi.fn<() => 'nl' | 'en'>())
 
 vi.mock('../../../api/client', () => ({
     apiFetch: apiFetchMock,
+    normalizeApiAssetUrl: (url: string | null | undefined) => url ?? null,
 }))
 
 vi.mock('../../../i18n', () => ({

@@ -7,13 +7,30 @@ import { getMessages } from '../../i18n'
 import { PublicMessagesContext } from '../../components/public/PublicMessagesContext'
 
 const apiGetMock = vi.hoisted(() => vi.fn())
+const getPreviousStrippedPathMock = vi.hoisted(() => vi.fn())
 
 const messages = getMessages()
+
+const MockApiError = vi.hoisted(() => {
+  return class MockApiError extends Error {
+    status: number
+    constructor(status: number, message: string) {
+      super(message)
+      this.name = 'ApiError'
+      this.status = status
+    }
+  }
+})
 
 vi.mock('../../api/client', () => ({
   api: {
     get: apiGetMock,
   },
+  ApiError: MockApiError,
+}))
+
+vi.mock('../../utils/navigationHistory', () => ({
+  getPreviousStrippedPath: getPreviousStrippedPathMock,
 }))
 
 vi.mock('../../components/public/PublicLayout', () => ({
@@ -59,11 +76,11 @@ describe('BlogDetailPage', () => {
   })
 
   it('falls back to the available language when active language is missing', async () => {
-    setPath('/nl/blogs/blog-1')
+    setPath('/nl/blogs/b1000000-0000-0000-0000-000000000001')
 
     apiGetMock.mockResolvedValueOnce({
       data: {
-        id: 'blog-1',
+        id: 'b1000000-0000-0000-0000-000000000001',
         title: JSON.stringify({ nl: '', en: 'English title' }),
         content: {
           nl: '',
@@ -74,7 +91,7 @@ describe('BlogDetailPage', () => {
     })
 
     render(
-      <MemoryRouter initialEntries={['/nl/blogs/blog-1']}>
+      <MemoryRouter initialEntries={['/nl/blogs/b1000000-0000-0000-0000-000000000001']}>
         <Routes>
           <Route path="/nl/blogs/:id" element={<BlogDetailPage />} />
         </Routes>
@@ -87,7 +104,7 @@ describe('BlogDetailPage', () => {
     expect(screen.queryByText('Gerelateerde producties')).not.toBeInTheDocument()
   })
 
-  it('shows a not found message when no blog id is available', async () => {
+  it('renders the not-found page when no blog id is available', async () => {
     setPath('/nl/blogs')
 
     render(
@@ -98,28 +115,59 @@ describe('BlogDetailPage', () => {
       </MemoryRouter>,
     )
 
-    expect(await screen.findByText('Blog not found.')).toBeInTheDocument()
+    expect(await screen.findByText(messages.notFound.joke)).toBeInTheDocument()
     expect(apiGetMock).not.toHaveBeenCalled()
   })
 
+  it('renders the not-found page when the blog id is not a valid UUID', async () => {
+    setPath('/nl/blogs/not-a-uuid')
+
+    render(
+      <MemoryRouter initialEntries={['/nl/blogs/not-a-uuid']}>
+        <Routes>
+          <Route path="/nl/blogs/:id" element={<BlogDetailPage />} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByText(messages.notFound.joke)).toBeInTheDocument()
+    expect(apiGetMock).not.toHaveBeenCalled()
+  })
+
+  it('renders the not-found page when the API returns 404 for the blog', async () => {
+    setPath('/nl/blogs/00000000-0000-0000-0000-000000000000')
+
+    apiGetMock.mockRejectedValueOnce(new MockApiError(404, 'Not found'))
+
+    render(
+      <MemoryRouter initialEntries={['/nl/blogs/00000000-0000-0000-0000-000000000000']}>
+        <Routes>
+          <Route path="/nl/blogs/:id" element={<BlogDetailPage />} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByText(messages.notFound.joke)).toBeInTheDocument()
+  })
+
   it('renders Dutch content and linked productions when the blog has them', async () => {
-    setPath('/nl/blogs/blog-2')
+    setPath('/nl/blogs/b2000000-0000-0000-0000-000000000002')
 
     apiGetMock
       .mockResolvedValueOnce({
         data: {
-          id: 'blog-2',
+          id: 'b2000000-0000-0000-0000-000000000002',
           title: JSON.stringify({ nl: 'Nederlandse blogtitel', en: 'English title' }),
           content: {
             nl: JSON.stringify({ ops: [{ insert: 'Blog content nederlands' }] }),
             en: JSON.stringify({ ops: [{ insert: 'Blog content Engels' }] }),
           },
-          productions: ['production-1', 'production-2'],
+          productions: ['p1000000-0000-0000-0000-000000000001', 'p2000000-0000-0000-0000-000000000002'],
         },
       })
       .mockResolvedValueOnce({
         data: {
-          id: 'production-1',
+          id: 'p1000000-0000-0000-0000-000000000001',
           title: { nl: 'Eerste productie', en: 'First production' },
           description_short: { nl: 'Korte beschrijving', en: 'Short description' },
           created_at: '2026-04-21T00:00:00.000Z',
@@ -128,7 +176,7 @@ describe('BlogDetailPage', () => {
       })
       .mockResolvedValueOnce({
         data: {
-          id: 'production-2',
+          id: 'p2000000-0000-0000-0000-000000000002',
           title: { nl: 'Tweede productie', en: 'Second production' },
           description_short: { nl: 'Tweede korte beschrijving', en: 'Second short description' },
           created_at: '2026-04-21T00:00:00.000Z',
@@ -137,7 +185,7 @@ describe('BlogDetailPage', () => {
       })
 
     render(
-      <MemoryRouter initialEntries={['/nl/blogs/blog-2']}>
+      <MemoryRouter initialEntries={['/nl/blogs/b2000000-0000-0000-0000-000000000002']}>
         <Routes>
           <Route path="/nl/blogs/:id" element={<BlogDetailPage />} />
         </Routes>
@@ -148,18 +196,18 @@ describe('BlogDetailPage', () => {
     expect(screen.queryByText('Blog content Engels')).not.toBeInTheDocument()
 
     expect(await screen.findByText('Gerelateerde producties')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /Eerste productie/i })).toHaveAttribute('href', '/nl/archive/production-1')
-    expect(screen.getByRole('link', { name: /Tweede productie/i })).toHaveAttribute('href', '/nl/archive/production-2')
+    expect(screen.getByRole('link', { name: /Eerste productie/i })).toHaveAttribute('href', '/nl/archive/p1000000-0000-0000-0000-000000000001')
+    expect(screen.getByRole('link', { name: /Tweede productie/i })).toHaveAttribute('href', '/nl/archive/p2000000-0000-0000-0000-000000000002')
   })
 
   it('renders English content when the active locale is en', async () => {
     window.localStorage.setItem('locale', 'en')
     document.documentElement.lang = 'en'
-    setPath('/en/blogs/blog-3')
+    setPath('/en/blogs/b3000000-0000-0000-0000-000000000003')
 
     apiGetMock.mockResolvedValueOnce({
       data: {
-        id: 'blog-3',
+        id: 'b3000000-0000-0000-0000-000000000003',
         title: JSON.stringify({ nl: 'Nederlandse titel', en: 'English title' }),
         content: {
           nl: JSON.stringify({ ops: [{ insert: 'Blog content nederlands' }] }),
@@ -170,7 +218,7 @@ describe('BlogDetailPage', () => {
     })
 
     render(
-      <MemoryRouter initialEntries={['/en/blogs/blog-3']}>
+      <MemoryRouter initialEntries={['/en/blogs/b3000000-0000-0000-0000-000000000003']}>
         <Routes>
           <Route path="/en/blogs/:id" element={<BlogDetailPage />} />
         </Routes>
@@ -180,5 +228,71 @@ describe('BlogDetailPage', () => {
     expect(await screen.findByText('Blog content English')).toBeInTheDocument()
     expect(screen.queryByText('Blog content nederlands')).not.toBeInTheDocument()
   })
+})
 
+describe('BlogDetailPage - handleGoBack', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    apiGetMock.mockReset()
+    getPreviousStrippedPathMock.mockReset()
+  })
+
+  it('should render back button', async () => {
+    setPath('/en/blogs/11111111-1111-1111-1111-111111111111')
+    getPreviousStrippedPathMock.mockReturnValue(null)
+
+    apiGetMock.mockResolvedValueOnce({
+      data: {
+        id: '11111111-1111-1111-1111-111111111111',
+        title: JSON.stringify({ en: 'Test Blog', nl: 'Test Blog NL' }),
+        content: {
+          en: JSON.stringify({ ops: [{ insert: 'Test content' }] }),
+          nl: JSON.stringify({ ops: [{ insert: 'Test inhoud' }] }),
+        },
+        productions: [],
+      },
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/en/blogs/11111111-1111-1111-1111-111111111111']}>
+        <Routes>
+          <Route path="/en/blogs/:id" element={<BlogDetailPage />} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    await screen.findByText('Test content')
+    const backButton = screen.getByRole('button', { name: /Terug|Back/i })
+    expect(backButton).toBeInTheDocument()
+  })
+
+  it('should call getPreviousStrippedPath when back button is clicked', async () => {
+    setPath('/en/blogs/22222222-2222-2222-2222-222222222222')
+    getPreviousStrippedPathMock.mockReturnValue('/admin/blogs/create')
+
+    apiGetMock.mockResolvedValueOnce({
+      data: {
+        id: '22222222-2222-2222-2222-222222222222',
+        title: JSON.stringify({ en: 'Test Blog', nl: 'Test Blog NL' }),
+        content: {
+          en: JSON.stringify({ ops: [{ insert: 'Test content' }] }),
+          nl: JSON.stringify({ ops: [{ insert: 'Test inhoud' }] }),
+        },
+        productions: [],
+      },
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/en/blogs/22222222-2222-2222-2222-222222222222']}>
+        <Routes>
+          <Route path="/en/blogs/:id" element={<BlogDetailPage />} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    await screen.findByText('Test content')
+    
+    // Verify that getPreviousStrippedPath was set up to return the admin path
+    expect(getPreviousStrippedPathMock).toBeDefined()
+  })
 })

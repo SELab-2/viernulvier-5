@@ -38,7 +38,12 @@ function PublicLatestBlogPreview({ blog, locale, fallbackUntitled, onReadMore, o
             <SectionTitle title={messages.home.latestBlogHeading} subtitle={messages.home.latestBlogSubheading} />
 
             <article className="site-container grid items-stretch gap-12 lg:grid-cols-[1fr_auto_1.1fr]">
-                <div className="relative h-[420px] overflow-hidden border border-border bg-foreground sm:h-[560px]">
+                <div className="relative h-[420px] overflow-hidden border border-border bg-surface sm:h-[560px]" aria-hidden="true">
+                    <img
+                        src="/fallback-hero.svg"
+                        alt=""
+                        className="h-full w-full object-cover opacity-70"
+                    />
                 </div>
                 <div aria-hidden className="hidden w-px self-stretch bg-foreground/25 lg:block" />
 

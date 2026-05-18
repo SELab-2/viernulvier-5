@@ -4,14 +4,7 @@ import { usePublicMessages } from './PublicMessagesContext'
 import { localize } from '../../utils/localize'
 import { toPlainText } from '../../utils/text'
 import type { Production } from '../../api/productions'
-
-function RightChevronIcon({ className }: { className: string }) {
-    return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" className={className}>
-            <path d="M8 5l8 7-8 7" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-    )
-}
+import {RightChevronIcon} from '../shared/icons'
 
 type PublicRecentDigitizedProps = {
     items: Production[]
@@ -19,23 +12,6 @@ type PublicRecentDigitizedProps = {
     fallbackUntitled: string
     onViewItem: (id: string) => void
     onViewAll: () => void
-}
-
-function formatArchiveDate(value: string | Date | null | undefined, locale: 'nl' | 'en'): string {
-    if (!value) {
-        return '-'
-    }
-
-    const parsedDate = value instanceof Date ? value : new Date(value)
-    if (Number.isNaN(parsedDate.getTime())) {
-        return '-'
-    }
-
-    return new Intl.DateTimeFormat(locale === 'nl' ? 'nl-BE' : 'en-GB', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-    }).format(parsedDate).toUpperCase()
 }
 
 function formatArchiveLabel(apiId: string | null | undefined): string | undefined {
@@ -75,7 +51,6 @@ function PublicRecentDigitized({
 
         return {
             id: item.id,
-            dateLabel: formatArchiveDate(item.created_at, locale),
             archiveLabel: formatArchiveLabel(item.apiId),
             title,
             description: toPlainText(descriptionRaw) || title || fallbackUntitled,
@@ -94,8 +69,9 @@ function PublicRecentDigitized({
                     >
                         <div className="grid gap-4 pr-2 md:grid-cols-[160px_1fr] md:items-center md:gap-6">
                             <div>
-                                <p className="text-sm font-semibold uppercase tracking-wide text-foreground">{item.dateLabel}</p>
-                                {item.archiveLabel ? <p className="mt-1 text-sm text-text-accent hidden md:block">{item.archiveLabel}</p> : null}
+                                {item.archiveLabel ? (
+                                    <p className="text-sm font-semibold uppercase tracking-wide text-foreground">{item.archiveLabel}</p>
+                                ) : null}
                             </div>
 
                             <div>

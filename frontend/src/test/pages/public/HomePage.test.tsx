@@ -2,6 +2,8 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import HomePage from '../../../pages/public/HomePage'
+import type { Blog } from '../../../api/blogs'
+import type { Production } from '../../../api/productions'
 
 // ─── Mocks ───────────────────────────────────────────────────────────────────
 
@@ -12,6 +14,10 @@ const getLatestBlogMock = vi.hoisted(() => vi.fn())
 const getLocalizedTitleMock = vi.hoisted(() => vi.fn(() => 'Test Blog Titel'))
 const getLocalizedContentMock = vi.hoisted(() => vi.fn(() => 'Blog inhoud hier.'))
 const normalizeContentMock = vi.hoisted(() => vi.fn<() => unknown>())
+
+type BlogDelta = {
+    ops: Array<{ insert?: unknown }>
+}
 
 vi.mock('react-router-dom', async () => {
     const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom')
@@ -118,7 +124,7 @@ vi.mock('../../../components/public/PublicLatestBlogPreview', () => ({
         onReadMore,
         onViewAll,
     }: {
-        blog: any | null
+        blog: Blog | null
         locale: 'nl' | 'en'
         fallbackUntitled: string
         onReadMore: (id: string) => void
@@ -126,7 +132,6 @@ vi.mock('../../../components/public/PublicLatestBlogPreview', () => ({
     }) => {
         const titleText = (() => {
             if (!blog?.title) return fallbackUntitled
-            if (typeof blog.title === 'string') return blog.title.trim() || fallbackUntitled
             return (blog.title[locale] ?? blog.title.nl ?? blog.title.en ?? blog.title.fr ?? '').trim() || fallbackUntitled
         })()
 
@@ -137,13 +142,14 @@ vi.mock('../../../components/public/PublicLatestBlogPreview', () => ({
                 if (typeof blog.content === 'string') {
                     rawContent = blog.content
                 } else if (typeof blog.content === 'object') {
-                    rawContent = blog.content[locale] ?? blog.content.nl ?? blog.content.en ?? blog.content.fr ?? ''
+                    const localizedContent = blog.content as Partial<Record<'nl' | 'en' | 'fr', unknown>>
+                    rawContent = localizedContent[locale] ?? localizedContent.nl ?? localizedContent.en ?? localizedContent.fr ?? ''
                 }
             }
 
             if (typeof rawContent === 'object' && rawContent !== null && 'ops' in rawContent) {
-                rawContent = (rawContent as any).ops
-                    .map((op: any) => (typeof op.insert === 'string' ? op.insert : ''))
+                rawContent = (rawContent as BlogDelta).ops
+                    .map((op) => (typeof op.insert === 'string' ? op.insert : ''))
                     .join('')
             }
 
@@ -181,15 +187,14 @@ vi.mock('../../../components/public/PublicRecentDigitized', () => ({
         onViewItem,
         onViewAll,
     }: {
-        items: any[]
+        items: Production[]
         locale: 'nl' | 'en'
         fallbackUntitled: string
         onViewItem: (id: string) => void
         onViewAll: () => void
     }) => {
-        const getTitle = (title: any) => {
+        const getTitle = (title: Production['title']) => {
             if (!title) return fallbackUntitled
-            if (typeof title === 'string') return title
             return title[locale] ?? title.nl ?? title.en ?? title.fr ?? fallbackUntitled
         }
 
@@ -238,8 +243,8 @@ const baseBlogItem = {
     title: { nl: 'Test Blog Titel' },
     content: { nl: 'Blog inhoud hier.' },
     productions: [],
-    createdAt: '2024-03-15T12:00:00.000Z',
-    updatedAt: '2024-03-15T12:00:00.000Z',
+    created_at: '2024-03-15T12:00:00.000Z',
+    updated_at: '2024-03-15T12:00:00.000Z',
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

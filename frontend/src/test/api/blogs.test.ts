@@ -8,7 +8,7 @@ const baseBlog = {
     id: 'b1000000-0000-0000-0000-000000000001',
     title: { nl: 'Test blog', en: 'Test blog' },
     content: { nl: 'Inhoud' },
-    createdAt: '2026-04-01T10:00:00.000Z',
+    created_at: '2026-04-01T10:00:00.000Z',
 }
 
 describe('blogs api', () => {
@@ -29,7 +29,7 @@ describe('blogs api', () => {
         const result = await getBlogsByProductionId('dab70000-0000-0000-0000-000000000001')
 
         expect(fetchMock).toHaveBeenCalledWith(
-            '/api/v1/archive/blogs?productionId=dab70000-0000-0000-0000-000000000001',
+            '/api/v1/archive/blogs?productionId=dab70000-0000-0000-0000-000000000001&page=1',
             expect.objectContaining({ credentials: 'include' }),
         )
         expect(result.data).toHaveLength(1)
