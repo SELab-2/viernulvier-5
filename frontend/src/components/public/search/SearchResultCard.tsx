@@ -138,7 +138,7 @@ function SearchResultCard({ item, detailHref, onTagClick, genreValue }: SearchRe
             </div>
             <div className="flex flex-1 flex-col">
                 <p className="mt-3 text-sm font-semibold text-accent">{item.date}</p>
-                <h3 className="mt-1 line-clamp-3 text-2xl leading-none text-foreground [overflow-wrap:anywhere]">{displayTitle}</h3>
+                <h3 className="mt-1 line-clamp-3 text-2xl leading-tight text-foreground [overflow-wrap:anywhere]">{displayTitle}</h3>
                 <p className={`mt-2 line-clamp-2 text-sm leading-relaxed ${showExcerpt ? 'text-text-accent' : 'invisible'}`}>
                     {showExcerpt ? item.excerpt : '\u00a0'}
                 </p>
