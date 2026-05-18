@@ -9,7 +9,7 @@ type Delta = {
 export type DashboardSummary = {
     counts: {
         productions: number
-        events: number
+        posters: number
         blogs: number
         mediaItems: number
         editors: number
@@ -30,6 +30,7 @@ export type DashboardSummary = {
     deltas: {
         productions: Delta
         blogs: Delta
+        posters: Delta
     }
 }
 

@@ -228,6 +228,28 @@ export class PostersRepository {
         return groups.size
     }
 
+
+
+    async countInRange({ from, to }: { from: Date; to: Date }) {
+        const records = await this.prisma.file.findMany({
+            where: {
+                ...this.buildWhere({}),
+                created_at: {
+                    gte: from,
+                    lt: to,
+                },
+            },
+            select: {
+                id: true,
+                gallery_id: true,
+                name: true,
+            },
+        })
+
+        const groups = new Set(records.map((record) => `${record.gallery_id ?? ''}::${(record.name ?? '').trim().toLowerCase()}`))
+        return groups.size
+    }
+
     async findById(id: string) {
         const record = await this.prisma.file.findFirst({
             where: {

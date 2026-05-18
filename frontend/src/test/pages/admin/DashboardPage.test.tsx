@@ -1,7 +1,8 @@
 import { describe, expect, it, vi } from 'vitest'
-import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent, within } from '@testing-library/react'
 import type { Messages } from '../../../i18n/types'
 import { AdminMessagesContext } from '../../../components/admin/AdminMessagesContext'
+import { MemoryRouter } from 'react-router-dom'
 import DashboardPage from '../../../pages/admin/DashboardPage'
 
 const useDashboardSummaryMock = vi.hoisted(() => vi.fn())
@@ -35,6 +36,7 @@ const mockMessages = vi.hoisted(() => ({
       statProductions: 'Productions',
       statBlogConcepts: 'Blog Concepts',
       statVisitors: 'Visitors',
+      statPosters: 'Posters',
       statMediaItems: 'Media Items',
       deltaVsLastMonth: 'vs last month',
       statLastSync: 'last sync',
@@ -67,12 +69,12 @@ describe('DashboardPage', () => {
       error: null,
     })
 
-    render(<DashboardPage />)
+    render(<MemoryRouter><DashboardPage /></MemoryRouter>)
 
     expect(screen.getByText('Dashboard')).toBeInTheDocument()
     expect(screen.getByText('Overview of archive activity.')).toBeInTheDocument()
     expect(screen.getByText('Loading dashboard...')).toBeInTheDocument()
-    expect(screen.getByText('Visitors')).toBeInTheDocument()
+    expect(screen.getByText('Posters')).toBeInTheDocument()
   })
 
   it('renders live summary data', async () => {
@@ -82,7 +84,7 @@ describe('DashboardPage', () => {
       summary: {
         counts: {
           productions: 1284,
-          events: 42,
+          posters: 42,
           blogs: 7,
           mediaItems: 8492,
           editors: 3,
@@ -105,7 +107,7 @@ describe('DashboardPage', () => {
       },
     })
 
-    render(<DashboardPage />)
+    render(<MemoryRouter><DashboardPage /></MemoryRouter>)
 
     expect(screen.getByText('1.284')).toBeInTheDocument()
     expect(screen.getByText('SNOBS: Editie #11')).toBeInTheDocument()
@@ -118,6 +120,91 @@ describe('DashboardPage', () => {
     })
   })
 
+
+  it('renders poster stat from summary data with delta', () => {
+    useDashboardSummaryMock.mockReturnValue({
+      isLoading: false,
+      error: null,
+      summary: {
+        counts: { productions: 10, posters: 12, blogs: 3, mediaItems: 100, editors: 2 },
+        totalRecentItems: 0,
+        lastScrapedAt: null,
+        recentItems: [],
+        deltas: {
+          productions: { changePct: null, direction: 'flat' },
+          blogs: { changePct: null, direction: 'flat' },
+          posters: { changePct: 50, direction: 'up' },
+        },
+      },
+    })
+
+    render(<MemoryRouter><DashboardPage /></MemoryRouter>)
+
+    expect(screen.getByText('Posters')).toBeInTheDocument()
+    expect(screen.getAllByText('12').some((element) => element.tagName.toLowerCase() === 'p')).toBe(true)
+    expect(screen.getByText('+50%')).toBeInTheDocument()
+    expect(screen.queryByText('Visitors')).not.toBeInTheDocument()
+  })
+
+  it('links dashboard item actions to the matching view and edit routes', () => {
+    useDashboardSummaryMock.mockReturnValue({
+      isLoading: false,
+      error: null,
+      summary: {
+        counts: { productions: 1, posters: 1, blogs: 1, mediaItems: 0, editors: 0 },
+        totalRecentItems: 3,
+        lastScrapedAt: null,
+        recentItems: [
+          {
+            id: 'production-1',
+            title: 'Production row',
+            type: 'Productie',
+            status: 'available',
+            languageStatus: { nl: 'complete', en: 'complete' },
+            updated_at: '2026-01-03T00:00:00.000Z',
+          },
+          {
+            id: 'blog-1',
+            title: 'Blog row',
+            type: 'Blog',
+            status: 'available',
+            languageStatus: { nl: 'complete', en: 'complete' },
+            updated_at: '2026-01-02T00:00:00.000Z',
+          },
+          {
+            id: 'poster-1',
+            title: 'Poster row',
+            type: 'Poster',
+            status: 'available',
+            languageStatus: { nl: 'complete', en: 'complete' },
+            updated_at: '2026-01-01T00:00:00.000Z',
+          },
+        ],
+        deltas: {
+          productions: { changePct: null, direction: 'flat' },
+          blogs: { changePct: null, direction: 'flat' },
+          posters: { changePct: null, direction: 'flat' },
+        },
+      },
+    })
+
+    render(<MemoryRouter><DashboardPage /></MemoryRouter>)
+
+    const productionRow = screen.getByText('Production row').closest('tr')
+    const blogRow = screen.getByText('Blog row').closest('tr')
+    const posterRow = screen.getByText('Poster row').closest('tr')
+
+    expect(productionRow).not.toBeNull()
+    expect(blogRow).not.toBeNull()
+    expect(posterRow).not.toBeNull()
+    expect(within(productionRow as HTMLElement).getByRole('link', { name: 'View' })).toHaveAttribute('href', '/archive/production-1')
+    expect(within(productionRow as HTMLElement).getByRole('link', { name: 'Edit' })).toHaveAttribute('href', '/admin/archive/production-1/edit')
+    expect(within(blogRow as HTMLElement).getByRole('link', { name: 'View' })).toHaveAttribute('href', '/blogs/blog-1')
+    expect(within(blogRow as HTMLElement).getByRole('link', { name: 'Edit' })).toHaveAttribute('href', '/admin/blogs/blog-1/edit')
+    expect(within(posterRow as HTMLElement).getByRole('link', { name: 'View' })).toHaveAttribute('href', '/posters/poster-1')
+    expect(within(posterRow as HTMLElement).getByRole('link', { name: 'Edit' })).toHaveAttribute('href', '/admin/posters')
+  })
+
   it('renders empty state when no recent items exist', () => {
     useDashboardSummaryMock.mockReturnValue({
       isLoading: false,
@@ -125,7 +212,7 @@ describe('DashboardPage', () => {
       summary: {
         counts: {
           productions: 0,
-          events: 0,
+          posters: 0,
           blogs: 0,
           mediaItems: 0,
           editors: 0,
@@ -136,7 +223,7 @@ describe('DashboardPage', () => {
       },
     })
 
-    render(<DashboardPage />)
+    render(<MemoryRouter><DashboardPage /></MemoryRouter>)
 
     expect(screen.getByText('No recent archive items found.')).toBeInTheDocument()
   })
@@ -148,7 +235,7 @@ describe('DashboardPage', () => {
       error: 'Dashboard kon niet geladen worden.',
     })
 
-    render(<DashboardPage />)
+    render(<MemoryRouter><DashboardPage /></MemoryRouter>)
 
     expect(screen.getByText('Dashboard kon niet geladen worden.')).toBeInTheDocument()
   })
@@ -160,7 +247,7 @@ describe('DashboardPage', () => {
       summary: {
         counts: {
           productions: 10,
-          events: 5,
+          posters: 5,
           blogs: 3,
           mediaItems: 100,
           editors: 2,
@@ -175,7 +262,7 @@ describe('DashboardPage', () => {
       },
     })
 
-    render(<DashboardPage />)
+    render(<MemoryRouter><DashboardPage /></MemoryRouter>)
 
     expect(screen.getByText('Blog Concepts')).toBeInTheDocument()
   })
@@ -185,7 +272,7 @@ describe('DashboardPage', () => {
       isLoading: false,
       error: null,
       summary: {
-        counts: { productions: 10, events: 5, blogs: 3, mediaItems: 100, editors: 2 },
+        counts: { productions: 10, posters: 5, blogs: 3, mediaItems: 100, editors: 2 },
         totalRecentItems: 0,
         lastScrapedAt: null,
         recentItems: [],
@@ -196,7 +283,7 @@ describe('DashboardPage', () => {
       },
     })
 
-    render(<DashboardPage />)
+    render(<MemoryRouter><DashboardPage /></MemoryRouter>)
 
     const pill = screen.getByText('+12%')
     expect(pill).toBeInTheDocument()
@@ -208,7 +295,7 @@ describe('DashboardPage', () => {
       isLoading: false,
       error: null,
       summary: {
-        counts: { productions: 10, events: 5, blogs: 3, mediaItems: 100, editors: 2 },
+        counts: { productions: 10, posters: 5, blogs: 3, mediaItems: 100, editors: 2 },
         totalRecentItems: 0,
         lastScrapedAt: null,
         recentItems: [],
@@ -219,7 +306,7 @@ describe('DashboardPage', () => {
       },
     })
 
-    render(<DashboardPage />)
+    render(<MemoryRouter><DashboardPage /></MemoryRouter>)
 
     expect(screen.getByText('-5%')).toBeInTheDocument()
   })
@@ -229,7 +316,7 @@ describe('DashboardPage', () => {
       isLoading: false,
       error: null,
       summary: {
-        counts: { productions: 10, events: 5, blogs: 3, mediaItems: 100, editors: 2 },
+        counts: { productions: 10, posters: 5, blogs: 3, mediaItems: 100, editors: 2 },
         totalRecentItems: 0,
         lastScrapedAt: null,
         recentItems: [],
@@ -240,7 +327,7 @@ describe('DashboardPage', () => {
       },
     })
 
-    render(<DashboardPage />)
+    render(<MemoryRouter><DashboardPage /></MemoryRouter>)
 
     expect(screen.getAllByText('—').length).toBeGreaterThan(0)
     expect(screen.queryByText('vs last month')).not.toBeInTheDocument()
@@ -251,7 +338,7 @@ describe('DashboardPage', () => {
       isLoading: false,
       error: null,
       summary: {
-        counts: { productions: 10, events: 5, blogs: 3, mediaItems: 100, editors: 2 },
+        counts: { productions: 10, posters: 5, blogs: 3, mediaItems: 100, editors: 2 },
         totalRecentItems: 0,
         lastScrapedAt: null,
         recentItems: [],
@@ -262,7 +349,7 @@ describe('DashboardPage', () => {
       },
     })
 
-    render(<DashboardPage />)
+    render(<MemoryRouter><DashboardPage /></MemoryRouter>)
 
     expect(screen.getByText('0%')).toBeInTheDocument()
   })
@@ -274,7 +361,7 @@ describe('DashboardPage', () => {
       summary: {
         counts: {
           productions: 10,
-          events: 5,
+          posters: 5,
           blogs: 3,
           mediaItems: 100,
           editors: 2,
@@ -310,7 +397,7 @@ describe('DashboardPage', () => {
       },
     })
 
-    render(<DashboardPage />)
+    render(<MemoryRouter><DashboardPage /></MemoryRouter>)
 
     expect(screen.getByText('Showing 1-3 of 7 results')).toBeInTheDocument()
   })
@@ -322,7 +409,7 @@ describe('DashboardPage', () => {
       summary: {
         counts: {
           productions: 0,
-          events: 0,
+          posters: 0,
           blogs: 0,
           mediaItems: 0,
           editors: 0,
@@ -333,7 +420,7 @@ describe('DashboardPage', () => {
       },
     })
 
-    render(<DashboardPage />)
+    render(<MemoryRouter><DashboardPage /></MemoryRouter>)
 
     expect(screen.queryByText(/of \d+ results/)).not.toBeInTheDocument()
   })
@@ -345,7 +432,7 @@ describe('DashboardPage', () => {
       summary: {
         counts: {
           productions: 10,
-          events: 5,
+          posters: 5,
           blogs: 3,
           mediaItems: 100,
           editors: 2,
@@ -356,7 +443,7 @@ describe('DashboardPage', () => {
       },
     })
 
-    render(<DashboardPage />)
+    render(<MemoryRouter><DashboardPage /></MemoryRouter>)
 
     expect(screen.getByRole('button', { name: 'Previous page' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Next page' })).toBeInTheDocument()
@@ -370,7 +457,7 @@ describe('DashboardPage', () => {
       summary: {
         counts: {
           productions: 10,
-          events: 5,
+          posters: 5,
           blogs: 3,
           mediaItems: 100,
           editors: 2,
@@ -381,7 +468,7 @@ describe('DashboardPage', () => {
       },
     })
 
-    render(<DashboardPage />)
+    render(<MemoryRouter><DashboardPage /></MemoryRouter>)
 
     const page2Button = screen.getByRole('button', { name: '2' })
     fireEvent.click(page2Button)
@@ -394,7 +481,7 @@ describe('DashboardPage', () => {
       isLoading: false,
       error: null,
       summary: {
-        counts: { productions: 10, events: 5, blogs: 3, mediaItems: 100, editors: 2 },
+        counts: { productions: 10, posters: 5, blogs: 3, mediaItems: 100, editors: 2 },
         totalRecentItems: 30,
         lastScrapedAt: null,
         recentItems: [],
@@ -403,7 +490,7 @@ describe('DashboardPage', () => {
 
     useDashboardSummaryMock.mockClear()
 
-    render(<DashboardPage />)
+    render(<MemoryRouter><DashboardPage /></MemoryRouter>)
 
     const initialCalls = useDashboardSummaryMock.mock.calls.length
     const select = screen.getByLabelText('Per page') as HTMLSelectElement
@@ -423,7 +510,7 @@ describe('DashboardPage', () => {
       isLoading: false,
       error: null,
       summary: {
-        counts: { productions: 10, events: 5, blogs: 3, mediaItems: 100, editors: 2 },
+        counts: { productions: 10, posters: 5, blogs: 3, mediaItems: 100, editors: 2 },
         totalRecentItems: 30,
         lastScrapedAt: null,
         recentItems: [],
@@ -433,7 +520,7 @@ describe('DashboardPage', () => {
     useDashboardSummaryMock.mockClear()
 
     try {
-      render(<DashboardPage />)
+      render(<MemoryRouter><DashboardPage /></MemoryRouter>)
 
       const firstCall = useDashboardSummaryMock.mock.calls[0]?.[0]
       expect(firstCall?.limit).toBeGreaterThanOrEqual(9)
@@ -448,14 +535,14 @@ describe('DashboardPage', () => {
       isLoading: false,
       error: null,
       summary: {
-        counts: { productions: 10, events: 5, blogs: 3, mediaItems: 100, editors: 2 },
+        counts: { productions: 10, posters: 5, blogs: 3, mediaItems: 100, editors: 2 },
         totalRecentItems: 7,
         lastScrapedAt: null,
         recentItems: [],
       },
     })
 
-    render(<DashboardPage />)
+    render(<MemoryRouter><DashboardPage /></MemoryRouter>)
 
     expect(screen.getByRole('button', { name: 'Previous page' })).toBeDisabled()
   })

@@ -293,6 +293,7 @@ export type Messages = {
       statProductions: string
       statBlogConcepts: string
       statVisitors: string
+      statPosters: string
       statMediaItems: string
       deltaVsLastMonth: string
       statLastSync: string

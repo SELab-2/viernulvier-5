@@ -304,7 +304,7 @@ const en: Messages = {
     dashboard: {
       pageTitle: 'Dashboard',
       pageSubtitle: 'Here is an overview of the latest archive activity and metadata status.',
-      pageNote: 'Visitor insights are a styled placeholder until the analytics integration is ready.',
+      pageNote: 'Recent CMS activity focuses on productions, blogs and posters.',
       loadingMessage: 'Loading dashboard...',
       recentlyEdited: 'Recently edited',
       tableColTitle: 'Title',
@@ -328,6 +328,7 @@ const en: Messages = {
       statProductions: 'Productions',
       statBlogConcepts: 'Blog Concepts',
       statVisitors: 'Visitors',
+      statPosters: 'Posters',
       statMediaItems: 'Media Items',
       deltaVsLastMonth: 'vs last month',
       statLastSync: 'last sync',

@@ -304,7 +304,7 @@ const nl: Messages = {
     dashboard: {
       pageTitle: 'Dashboard',
       pageSubtitle: 'Hier is een overzicht van laatste archiefactiviteit en metadata status.',
-      pageNote: 'Bezoekersinzichten blijven voorlopig een gestileerde placeholder tot de analytics-koppeling klaar is.',
+      pageNote: 'Recente CMS-activiteit focust op producties, blogs en posters.',
       loadingMessage: 'Dashboard wordt geladen...',
       recentlyEdited: 'Recent bewerkt',
       tableColTitle: 'Titel',
@@ -328,6 +328,7 @@ const nl: Messages = {
       statProductions: 'Producties',
       statBlogConcepts: 'Blog Concepten',
       statVisitors: 'Bezoekers',
+      statPosters: 'Posters',
       statMediaItems: 'Media-items',
       deltaVsLastMonth: 'vs vorige maand',
       statLastSync: 'laatste sync',

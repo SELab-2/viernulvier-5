@@ -54,6 +54,7 @@ const mockMessages: Pick<Messages, 'admin'> = {
       statProductions: 'Productions',
       statBlogConcepts: 'Blog Concepts',
       statVisitors: 'Visitors',
+      statPosters: 'Posters',
       statMediaItems: 'Media Items',
       deltaVsLastMonth: 'vs last month',
       statLastSync: 'last sync',

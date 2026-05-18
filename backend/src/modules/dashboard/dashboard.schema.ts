@@ -22,7 +22,7 @@ const recentItemSchema = z.object({
 
 const countsSchema = z.object({
     productions: z.number().int().nonnegative(),
-    events: z.number().int().nonnegative(),
+    posters: z.number().int().nonnegative(),
     blogs: z.number().int().nonnegative(),
     mediaItems: z.number().int().nonnegative(),
     editors: z.number().int().nonnegative(),
@@ -41,6 +41,7 @@ export const dashboardSummarySchema = z.object({
         deltas: z.object({
             productions: deltaSchema,
             blogs: deltaSchema,
+            posters: deltaSchema,
         }),
     }),
 })
