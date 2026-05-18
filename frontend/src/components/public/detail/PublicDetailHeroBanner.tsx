@@ -10,9 +10,10 @@ type ArchiveDetailHeroProps = {
     locale: string
     shareLabel?: string
     onShare?: () => void
+    isBlog?: boolean
 }
 
-function ArchiveDetailHero({ imageUrl, title, superTitle, artist, genres, locale, shareLabel, onShare }: ArchiveDetailHeroProps) {
+function ArchiveDetailHero({ imageUrl, title, superTitle, artist, genres, locale, shareLabel, onShare, isBlog = false }: ArchiveDetailHeroProps) {
     return (
         <div className="relative h-[360px] w-full overflow-hidden rounded-xl md:h-[430px]">
             <img
@@ -55,6 +56,14 @@ function ArchiveDetailHero({ imageUrl, title, superTitle, artist, genres, locale
                         })}
                     </div>
                 )}
+                {isBlog && (
+                    <div className="mb-3 flex flex-wrap gap-2">
+                                <span className="rounded-full bg-accent px-2.5 py-1 text-xs font-semibold text-white">
+                                    {"Blog"}
+                                </span>   
+                    </div>
+                    )
+                }
                 {superTitle && (
                     <p className="text-lg text-white/90">{superTitle}</p>
                 )}

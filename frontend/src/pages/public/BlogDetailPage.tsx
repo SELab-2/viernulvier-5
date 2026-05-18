@@ -30,6 +30,7 @@ const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12
 This page shows the content of a blog in both english and dutch (/en or /nl). You can also click on the productions that are related to this blog
 */
 
+
 function QuillReadOnly({ content }: { content: unknown }) {
     const containerRef = useRef<HTMLDivElement | null>(null)
     const delta = useMemo(() => normalizeContent(content), [content])
@@ -187,10 +188,10 @@ function BlogDetailPageContent() {
     return (
         <>
             <div className="site-container mt-8">
-                <PublicPillButton 
-                    icon={<LeftArrowIcon className="h-5 w-5" />} 
-                    label={message.blogs.navBack} 
-                    onClick={handleGoBack} 
+                <PublicPillButton
+                    icon={<LeftArrowIcon className="h-5 w-5" />}
+                    label={message.blogs.navBack}
+                    onClick={handleGoBack}
                 />
             </div>
 
@@ -212,51 +213,52 @@ function BlogDetailPageContent() {
                         onShare={() => {
                             void handleShare()
                         }}
+                        isBlog={true}
                     />
                 )}
             </div>
 
             <section className="site-container space-y-12 py-8">
 
-            {isLoading ? <p className="text-center text-muted">{message.blogs.loadingBlog}</p> : null}
-            {error ? <p className="text-center text-red-500">{error}</p> : null}
+                {isLoading ? <p className="text-center text-muted">{message.blogs.loadingBlog}</p> : null}
+                {error ? <p className="text-center text-red-500">{error}</p> : null}
 
-            {!isLoading && !error && blog ? (
-                <article className="space-y-8">
-                    <div className="quill-detail-wrapper prose max-w-none prose-neutral text-base leading-relaxed">
-                        <QuillReadOnly content={getLocalizedContent(blog.content, locale)} />
-                    </div>
-
-                    {blog.images && blog.images.length > 0 && (
-                        <div className="mt-6">
-                            <ArchiveDetailGallery images={blog.images.filter((_, i) => i !== blog.thumbnail_index)} />
+                {!isLoading && !error && blog ? (
+                    <article className="space-y-8">
+                        <div className="quill-detail-wrapper prose max-w-none prose-neutral text-base leading-relaxed">
+                            <QuillReadOnly content={getLocalizedContent(blog.content, locale)} />
                         </div>
-                    )}
 
-                    {isLoadingProductions || productions.length > 0 ? (
-                        <section className="mt-10">
-                            <h2 className="mb-4 text-2xl font-semibold text-foreground">
-                                {message.blogs.relatedProductions}
-                            </h2>
+                        {blog.images && blog.images.length > 0 && (
+                            <div className="mt-6">
+                                <ArchiveDetailGallery images={blog.images.filter((_, i) => i !== blog.thumbnail_index)} />
+                            </div>
+                        )}
 
-                            {isLoadingProductions ? <p className="text-sm text-muted">{message.blogs.loadingProductions}</p> : null}
+                        {isLoadingProductions || productions.length > 0 ? (
+                            <section className="mt-10">
+                                <h2 className="mb-4 text-2xl font-semibold text-foreground">
+                                    {message.blogs.relatedProductions}
+                                </h2>
 
-                            {!isLoadingProductions && productions.length > 0 ? (
-                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                    {productions.map((production) => (
-                                        <ProductionCard
-                                            key={production.id}
-                                            production={production}
-                                            locale={locale}
-                                            href={withLocalePath(`/archive/${production.id}`, locale)}
-                                        />
-                                    ))}
-                                </div>
-                            ) : null}
-                        </section>
-                    ) : null}
-                </article>
-            ) : null}
+                                {isLoadingProductions ? <p className="text-sm text-muted">{message.blogs.loadingProductions}</p> : null}
+
+                                {!isLoadingProductions && productions.length > 0 ? (
+                                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                        {productions.map((production) => (
+                                            <ProductionCard
+                                                key={production.id}
+                                                production={production}
+                                                locale={locale}
+                                                href={withLocalePath(`/archive/${production.id}`, locale)}
+                                            />
+                                        ))}
+                                    </div>
+                                ) : null}
+                            </section>
+                        ) : null}
+                    </article>
+                ) : null}
             </section>
         </>
     )
