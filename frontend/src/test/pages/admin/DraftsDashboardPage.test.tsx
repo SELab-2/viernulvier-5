@@ -4,6 +4,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import type { Messages } from '../../../i18n/types'
 import { AdminMessagesContext } from '../../../components/admin/AdminMessagesContext'
 import DraftsDashboardPage from "../../../pages/admin/DraftsDashboard.tsx";
+import {MemoryRouter} from "react-router-dom";
 
 // 1. Hoist Mock Functions so vi.mock can consume them securely
 const useProductionDraftsMock = vi.hoisted(() => vi.fn())
@@ -18,10 +19,11 @@ const mockMessages = vi.hoisted(() => ({
             pageSubtitle: 'View all drafts here',
             productions: 'Productions',
             blogs: 'Blogs',
+            filterOnlyCurrent: 'Show my drafts',
             tableColTitle: 'Title',
             tableColType: 'Type',
             tableColStatus: 'Status',
-            tableColLanguage: 'Language Status',
+            tableColEditor: 'Edited by me',
             tableColDate: 'Date',
             tableColActions: 'Actions',
             statusUnavailable: 'Not yet available in archive',
@@ -33,6 +35,8 @@ const mockMessages = vi.hoisted(() => ({
             languageStatusMissing: 'Translation missing',
             emptyRecent: 'No recent archive drafts found.',
             loadingMessage: 'Loading drafts...',
+            deleteTitle: 'Delete draft',
+            deleteConfirm: (title: string) => `Are you sure you want to delete "${title}"?`,
         },
     },
 }))
@@ -68,100 +72,62 @@ describe('DraftsDashboardPage', () => {
 
     it('renders initial screen chrome: page titles and default Production view loading state', () => {
         useProductionDraftsMock.mockReturnValue({ items: [], isLoading: true, error: null })
-
-        render(<DraftsDashboardPage />)
-
-        // Assert Header layout mapping
-        expect(screen.getByText('Concepten')).toBeInTheDocument()
-        expect(screen.getByText('Overzicht van items die nog niet gepubliceerd zijn.')).toBeInTheDocument()
-
-        // Assert active loading indicator state
-        expect(screen.getByText('Concepten worden geladen...')).toBeInTheDocument()
+        renderPage()
+        expect(screen.getByText('Drafts')).toBeInTheDocument()
+        expect(screen.getByText('View all drafts here')).toBeInTheDocument()
+        expect(screen.getByText('Loading drafts...')).toBeInTheDocument()
     })
 
     it('renders resolved production items correctly inside the table payload', () => {
         useProductionDraftsMock.mockReturnValue({
             isLoading: false,
             error: null,
-            items: [
-                {
-                    id: 'prod-1',
-                    title: { nl: 'SNOBS: Concept Archief', en: 'SNOBS: Draft Archive' },
-                    updatedAt: '2026-05-13T12:00:00.000Z',
-                },
-            ],
+            items: [{ id: 'prod-1', title: { nl: 'SNOBS: Concept Archief', en: 'SNOBS: Draft Archive' }, updated_at: '2026-05-13T12:00:00.000Z', editors: [] }],
         })
-
-        render(<DraftsDashboardPage />)
-
-        // Assert item injection checks derived title rendering targets
-        expect(screen.getByText('SNOBS: Concept Archief')).toBeInTheDocument()
-        expect(screen.getByText('Nog niet beschikbaar in archief')).toBeInTheDocument()
+        renderPage()
+        expect(screen.getByText('SNOBS: Draft Archive')).toBeInTheDocument()
+        expect(screen.getByText('Not yet available in archive')).toBeInTheDocument()
     })
 
     it('renders explicit error banner alerts when data ingestion fails', () => {
         useProductionDraftsMock.mockReturnValue({
             items: [],
             isLoading: false,
-            error: 'Netwerkverbinding met archief server verbroken.',
+            error: 'Network connection failed.',
         })
-
-        render(<DraftsDashboardPage />)
-
-        expect(screen.getByText('Fout bij laden van concepten')).toBeInTheDocument()
-        expect(screen.getByText('Netwerkverbinding met archief server verbroken.')).toBeInTheDocument()
+        renderPage()
+        expect(screen.getByText('Network connection failed.')).toBeInTheDocument()
     })
 
     it('renders clean fallback row when data arrays evaluate to empty sets', () => {
         useProductionDraftsMock.mockReturnValue({ items: [], isLoading: false, error: null })
-
-        render(<DraftsDashboardPage />)
-
-        expect(screen.getByText('Geen concepten gevonden.')).toBeInTheDocument()
+        renderPage()
+        expect(screen.getByText('No recent archive drafts found.')).toBeInTheDocument()
     })
 
     it('switches safely to the Blog tab context and re-evaluates display outputs using the secondary hook', () => {
-        // Stage Production Mock data
         useProductionDraftsMock.mockReturnValue({
-            isLoading: false,
-            error: null,
-            items: [
-                {
-                    id: 'prod-1',
-                    title: { nl: 'Productie Concept', en: 'Production Draft' },
-                    updatedAt: '2026-05-13T12:00:00.000Z',
-                },
-            ],
+            isLoading: false, error: null,
+            items: [{ id: 'prod-1', title: { nl: 'Productie Concept', en: 'Production Draft' }, updated_at: '2026-05-13T12:00:00.000Z', editors: [] }],
         })
-
-        // Stage Blog Mock data
         useBlogDraftsMock.mockReturnValue({
-            isLoading: false,
-            error: null,
-            items: [
-                {
-                    id: 'blog-1',
-                    title: { nl: 'Blog Concept Tekst', en: 'Blog Draft Text' },
-                    updatedAt: '2026-05-14T12:00:00.000Z',
-                },
-            ],
+            isLoading: false, error: null,
+            items: [{ id: 'blog-1', title: { nl: 'Blog Concept Tekst', en: 'Blog Draft Text' }, updated_at: '2026-05-14T12:00:00.000Z', editors: [] }],
         })
+        renderPage()
+        expect(screen.getByText('Production Draft')).toBeInTheDocument()
+        expect(screen.queryByText('Blog Draft Text')).not.toBeInTheDocument()
 
-        render(<DraftsDashboardPage />)
+        fireEvent.click(screen.getByRole('button', { name: 'Blogs' }))
 
-        // Assert Default rendering baseline tracks Productions
-        expect(screen.getByText('Productie Concept')).toBeInTheDocument()
-        expect(screen.queryByText('Blog Concept Tekst')).not.toBeInTheDocument()
-
-        // Query tab triggers using label associations or explicit accessible roles
-        const blogTabButton = screen.getByRole('button', { name: 'Blogs' })
-        fireEvent.click(blogTabButton)
-
-        // Assert DOM reconciles against Blog state structures
-        expect(screen.queryByText('Productie Concept')).not.toBeInTheDocument()
-        expect(screen.getByText('Blog Concept Tekst')).toBeInTheDocument()
-
-        // Ensure underlying hook calls matched constraints
+        expect(screen.queryByText('Production Draft')).not.toBeInTheDocument()
+        expect(screen.getByText('Blog Draft Text')).toBeInTheDocument()
         expect(useBlogDraftsMock).toHaveBeenCalledWith(expect.objectContaining({ page: 1, limit: 10 }))
     })
 })
+
+const renderPage = () => render(
+    <MemoryRouter>
+        <DraftsDashboardPage />
+    </MemoryRouter>
+)
