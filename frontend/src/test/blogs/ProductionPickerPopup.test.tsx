@@ -116,6 +116,111 @@ describe('ProductionPickerPopup', () => {
     expect(onAdd).toHaveBeenCalledWith(['production-2'])
   })
 
+  it('keeps selected productions staged when the current results change', () => {
+    const { rerender } = render(
+      <ProductionPickerPopup
+        isOpen
+        productions={[baseProduction({ id: 'production-1' }), baseProduction({ id: 'production-2', title: { nl: 'Tweede productie', en: 'Second production' } })]}
+        selectedProductionIds={['production-2']}
+        searchQuery=""
+        filters={defaultFilters}
+        isLoading={false}
+        hasMoreProductions={false}
+        onLoadMoreProductions={vi.fn()}
+        onClose={vi.fn()}
+        onSelectedProductionIdsChange={vi.fn()}
+        onSearchQueryChange={vi.fn()}
+        onFiltersChange={vi.fn()}
+        onAdd={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByText('Geselecteerde producties')).toBeInTheDocument()
+    expect(screen.getAllByText('Tweede productie')).toHaveLength(2)
+
+    rerender(
+      <ProductionPickerPopup
+        isOpen
+        productions={[baseProduction({ id: 'production-1' })]}
+        selectedProductionIds={['production-2']}
+        searchQuery="eerste"
+        filters={defaultFilters}
+        isLoading={false}
+        hasMoreProductions={false}
+        onLoadMoreProductions={vi.fn()}
+        onClose={vi.fn()}
+        onSelectedProductionIdsChange={vi.fn()}
+        onSearchQueryChange={vi.fn()}
+        onFiltersChange={vi.fn()}
+        onAdd={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByText('Geselecteerde producties')).toBeInTheDocument()
+    expect(screen.getByText('Tweede productie')).toBeInTheDocument()
+  })
+
+  it('keeps selected productions staged after closing and reopening with different results', () => {
+    const { rerender } = render(
+      <ProductionPickerPopup
+        isOpen
+        productions={[baseProduction({ id: 'production-1' }), baseProduction({ id: 'production-2', title: { nl: 'Tweede productie', en: 'Second production' } })]}
+        selectedProductionIds={['production-2']}
+        searchQuery=""
+        filters={defaultFilters}
+        isLoading={false}
+        hasMoreProductions={false}
+        onLoadMoreProductions={vi.fn()}
+        onClose={vi.fn()}
+        onSelectedProductionIdsChange={vi.fn()}
+        onSearchQueryChange={vi.fn()}
+        onFiltersChange={vi.fn()}
+        onAdd={vi.fn()}
+      />,
+    )
+
+    expect(screen.getAllByText('Tweede productie')).toHaveLength(2)
+
+    rerender(
+      <ProductionPickerPopup
+        isOpen={false}
+        productions={[baseProduction({ id: 'production-1' })]}
+        selectedProductionIds={['production-2']}
+        searchQuery="eerste"
+        filters={defaultFilters}
+        isLoading={false}
+        hasMoreProductions={false}
+        onLoadMoreProductions={vi.fn()}
+        onClose={vi.fn()}
+        onSelectedProductionIdsChange={vi.fn()}
+        onSearchQueryChange={vi.fn()}
+        onFiltersChange={vi.fn()}
+        onAdd={vi.fn()}
+      />,
+    )
+
+    rerender(
+      <ProductionPickerPopup
+        isOpen
+        productions={[baseProduction({ id: 'production-1' })]}
+        selectedProductionIds={['production-2']}
+        searchQuery="eerste"
+        filters={defaultFilters}
+        isLoading={false}
+        hasMoreProductions={false}
+        onLoadMoreProductions={vi.fn()}
+        onClose={vi.fn()}
+        onSelectedProductionIdsChange={vi.fn()}
+        onSearchQueryChange={vi.fn()}
+        onFiltersChange={vi.fn()}
+        onAdd={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByText('Geselecteerde producties')).toBeInTheDocument()
+    expect(screen.getByText('Tweede productie')).toBeInTheDocument()
+  })
+
   it('loads more productions when scrolling near the bottom', () => {
     const onLoadMoreProductions = vi.fn()
 

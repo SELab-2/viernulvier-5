@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { getMessages } from '../../../i18n'
 import { toPlainText } from '../../../utils/text'
 
@@ -67,10 +67,24 @@ function ProductionPickerPopup({
 
     const [areFiltersOpen, setAreFiltersOpen] = useState(false)
     const [isLocationSuggestionsOpen, setIsLocationSuggestionsOpen] = useState(false)
+    const [stagedProductionsById, setStagedProductionsById] = useState<Record<string, ProductionItem>>({})
     const selectedCount = selectedProductionIds.length
     const dialogTitleId = 'production-picker-title'
     const sliderRef = useRef<HTMLDivElement | null>(null)
     const scrollContainerRef = useRef<HTMLDivElement | null>(null)
+
+    useEffect(() => {
+        setStagedProductionsById((current) => {
+            const nextEntries = selectedProductionIds
+                .map((id) => {
+                    const production = productions.find((item) => item.id === id) ?? current[id]
+                    return production ? [id, production] as const : null
+                })
+                .filter((entry): entry is readonly [string, ProductionItem] => Boolean(entry))
+
+            return Object.fromEntries(nextEntries)
+        })
+    }, [productions, selectedProductionIds])
 
     const updateFilters = (nextFilters: Partial<ProductionPickerFilters>) => {
         onFiltersChange({ ...filters, ...nextFilters })
@@ -205,7 +219,9 @@ function ProductionPickerPopup({
         updateFilters({ yearTo: Math.max(nextYear, filters.yearFrom) })
     }
 
-    const selectedProductions = productions.filter((production) => selectedProductionIds.includes(production.id))
+    const selectedProductions = selectedProductionIds
+        .map((id) => stagedProductionsById[id] ?? productions.find((production) => production.id === id))
+        .filter((production): production is ProductionItem => Boolean(production))
     const hasOptions = productions.length > 0
 
     if (!isOpen) {
