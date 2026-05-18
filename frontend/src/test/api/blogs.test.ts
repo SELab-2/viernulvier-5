@@ -29,7 +29,7 @@ describe('blogs api', () => {
         const result = await getBlogsByProductionId('dab70000-0000-0000-0000-000000000001')
 
         expect(fetchMock).toHaveBeenCalledWith(
-            '/api/v1/archive/blogs?productionId=dab70000-0000-0000-0000-000000000001',
+            '/api/v1/archive/blogs?productionId=dab70000-0000-0000-0000-000000000001&page=1',
             expect.objectContaining({ credentials: 'include' }),
         )
         expect(result.data).toHaveLength(1)
