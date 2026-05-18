@@ -133,6 +133,7 @@ describe('SearchService', () => {
             sort: 'recent',
             lang: 'nl',
             onThisDay: false,
+            pastOnly: true,
             page: 1,
             limit: 1,
         })
