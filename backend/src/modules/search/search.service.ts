@@ -13,14 +13,14 @@ export class SearchService {
     ) {}
 
     async search(options: SearchQuery): Promise<PaginatedResult<SearchResultItem>> {
-        const { limit, page, tab, search, yearFrom, yearTo, sort } = options
+        const { limit, page, tab, search, yearFrom, yearTo, sort, genres, locations, lang } = options
 
         if (tab === 'blogs') {
             const blogResults = await this.searchRepository.findAllBlogs({ search, yearFrom, yearTo, sort })
             const blogItems: SearchResultItem[] = blogResults.map((blog) => {
                 const contentObj = blog.content as Record<string, string> | null
-                const lang = options.lang === 'en' || options.lang === 'fr' ? options.lang : 'nl'
-                const rawContent = (contentObj?.[lang] || contentObj?.['nl'] || '') as string
+                const langCode = lang === 'en' || lang === 'fr' ? lang : 'nl'
+                const rawContent = (contentObj?.[langCode] || contentObj?.['nl'] || '') as string
 
                 return {
                     id: blog.id,
