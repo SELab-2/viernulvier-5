@@ -111,6 +111,10 @@ function ArchiveDetailPageContent() {
                 ])
 
                 const prod = prodRes.data
+                if (prod.draft) {
+                    setNotFound(true)
+                    return
+                }
                 const now = Date.now()
                 const pastEvents = eventsRes.data.filter((event) => {
                     if (!event.starts_at) return false
