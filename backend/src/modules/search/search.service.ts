@@ -49,15 +49,6 @@ export class SearchService {
         ])
 
         // --- map to a common shape ---
-        const blogItems: SearchResultItem[] = blogResults.map((blog) => ({
-            id: blog.id,
-            type: 'blog' as const,
-            title: blog.title ?? null,
-            content: blog.content ?? null,
-            productions: blog.productions,
-            created_at: blog.created_at ? new Date(blog.created_at).toISOString() : undefined,
-        }))
-
         const prodItems: SearchResultItem[] = prodResults.items.map((prod) => ({
             id: prod.id,
             type: 'production' as const,

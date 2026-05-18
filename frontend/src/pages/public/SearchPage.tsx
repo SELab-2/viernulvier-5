@@ -406,16 +406,6 @@ function mapProductionToSearchEntry(item: ProductionApiItem, locale: Locale, sea
     }
 }
 
-type BlogApiItem = {
-    id: string
-    title?: unknown
-    content?: unknown
-    productions: string[]
-    created_at: string
-    updated_at: string
-    links?: { self: string }
-}
-
 type SearchApiItem = {
     id: string
     type: 'production' | 'poster'
@@ -434,47 +424,6 @@ type SearchApiItem = {
     attendance_mode?: string | null
     created_at?: string
     links?: ProductionApiItem['links']
-}
-
-function getBlogExcerpt(content: unknown, locale: Locale, fallback: string): string {
-    const localizedContent = getLocalizedContent(content, locale)
-
-    if (!localizedContent) {
-        return fallback
-    }
-
-    const delta = normalizeContent(localizedContent)
-    if (delta) {
-        const plain = delta.ops
-            .map((operation) => (typeof operation.insert === 'string' ? operation.insert : ''))
-            .join('')
-            .replace(/\s+/g, ' ')
-            .trim()
-
-        return plain || fallback
-    }
-
-    return toPlainText(localizedContent) || fallback
-}
-
-function mapBlogToSearchEntry(item: BlogApiItem, locale: Locale, searchMessages: Messages['search']): SearchEntry {
-    const title = getLocalizedTitle(item.title, locale) || searchMessages.fallbackUntitled
-    const date = item.created_at ? formatDate(item.created_at, locale) : '-'
-    const year = item.created_at ? new Date(item.created_at).getFullYear() : MIN_PERIOD_YEAR
-
-    return {
-        id: item.id,
-        tag: searchMessages.blogTab,
-        date,
-        title,
-        excerpt: getBlogExcerpt(item.content, locale, title),
-        venue: '',
-        imageUrl: undefined,
-        year,
-        genre: '',
-        location: '',
-        type: 'blog' as const,
-    }
 }
 
 function getRelativePath(url: string | null | undefined): string | null {
@@ -1261,20 +1210,6 @@ function SearchPageContent() {
 
                     const preferredGenre = selectedGenres.length === 1 ? selectedGenres[0] : undefined
                     const mappedEntries = response.data.map((item): SearchEntry => {
-                        if (item.type === 'blog') {
-                            return mapBlogToSearchEntry(
-                                {
-                                    id: item.id,
-                                    title: item.title,
-                                    content: item.content,
-                                    productions: item.productions ?? [],
-                                    created_at: item.created_at ?? '',
-                                    updated_at: item.created_at ?? '',
-                                },
-                                locale,
-                                searchMessages,
-                            )
-                        }
                         if (item.type === 'poster') {
                             return mapPosterToSearchEntry(
                                 {
