@@ -55,6 +55,7 @@ describe('Productions Routes', () => {
                     title: { nl: 'Pen' },
                     description_short: { nl: 'Korte intro' },
                     events: pastEvent,
+                    draft: false,
                 },
             })
 
@@ -258,7 +259,7 @@ describe('Productions Routes', () => {
 
             const editor = await app.prisma.adminUser.create({
                 data: {
-                    username: 'testeditor',
+                    username: crypto.randomUUID(),
                     passwordHash: 'hash',
                     role: Role.EDITOR,
                 }
@@ -315,7 +316,7 @@ describe('Productions Routes', () => {
 
             const editor = await app.prisma.adminUser.create({
                 data: {
-                    username: 'testeditor2',
+                    username: crypto.randomUUID(),
                     passwordHash: 'hash',
                     role: Role.EDITOR,
                 }
@@ -361,6 +362,133 @@ describe('Productions Routes', () => {
             })
 
             expect(response.statusCode).toBe(401)
+        })
+    })
+
+    describe('GET /api/v1/archive/productions - draft filter', () => {
+        const pastEvent = { create: { starts_at: new Date('2020-01-01') } }
+        const futureEvent = { create: { starts_at: new Date('2099-01-01') } }
+
+        it('should return only productions with past events when draft=false', async () => {
+            const token = app.jwt.sign({ sub: 'admin', username: 'admin', role: Role.ADMIN })
+
+            const published = await app.prisma.production.create({
+                data: { title: { nl: 'Gepubliceerd' }, draft: false, events: pastEvent },
+            })
+            const draftProduction = await app.prisma.production.create({
+                data: { title: { nl: 'Concept' }, draft: true, events: pastEvent },
+            })
+
+            try {
+                const response = await app.inject({
+                    method: 'GET',
+                    url: '/api/v1/archive/productions?draft=false',
+                })
+
+                expect(response.statusCode).toBe(200)
+                const ids = JSON.parse(response.payload).data.map((item: { id: string }) => item.id)
+                expect(ids).toContain(published.id)
+                expect(ids).not.toContain(draftProduction.id)
+            } finally {
+                await app.prisma.event.deleteMany({
+                    where: { production_id: { in: [published.id, draftProduction.id] } },
+                })
+                await app.prisma.production.deleteMany({
+                    where: { id: { in: [published.id, draftProduction.id] } },
+                })
+            }
+        })
+
+        it('should exclude non-draft productions that only have future events when draft=false', async () => {
+            const publishedFutureOnly = await app.prisma.production.create({
+                data: { title: { nl: 'Toekomstige voorstelling' }, draft: false, events: futureEvent },
+            })
+            const publishedWithPast = await app.prisma.production.create({
+                data: { title: { nl: 'Voorbije voorstelling' }, draft: false, events: pastEvent },
+            })
+
+            try {
+                const response = await app.inject({
+                    method: 'GET',
+                    url: '/api/v1/archive/productions?draft=false',
+                })
+
+                expect(response.statusCode).toBe(200)
+                const ids = JSON.parse(response.payload).data.map((item: { id: string }) => item.id)
+                expect(ids).toContain(publishedWithPast.id)
+                expect(ids).not.toContain(publishedFutureOnly.id)
+            } finally {
+                await app.prisma.event.deleteMany({
+                    where: { production_id: { in: [publishedFutureOnly.id, publishedWithPast.id] } },
+                })
+                await app.prisma.production.deleteMany({
+                    where: { id: { in: [publishedFutureOnly.id, publishedWithPast.id] } },
+                })
+            }
+        })
+
+        it('should return draft productions regardless of event timing when draft=true', async () => {
+            const draftWithPast = await app.prisma.production.create({
+                data: { title: { nl: 'Concept met verleden' }, draft: true, events: pastEvent },
+            })
+            const draftWithFuture = await app.prisma.production.create({
+                data: { title: { nl: 'Concept met toekomst' }, draft: true, events: futureEvent },
+            })
+            const published = await app.prisma.production.create({
+                data: { title: { nl: 'Gepubliceerd' }, draft: false, events: pastEvent },
+            })
+
+            try {
+                const response = await app.inject({
+                    method: 'GET',
+                    url: '/api/v1/archive/productions?draft=true',
+                })
+
+                expect(response.statusCode).toBe(200)
+                const ids = JSON.parse(response.payload).data.map((item: { id: string }) => item.id)
+                expect(ids).toContain(draftWithPast.id)
+                expect(ids).toContain(draftWithFuture.id)
+                expect(ids).not.toContain(published.id)
+            } finally {
+                await app.prisma.event.deleteMany({
+                    where: { production_id: { in: [draftWithPast.id, draftWithFuture.id, published.id] } },
+                })
+                await app.prisma.production.deleteMany({
+                    where: { id: { in: [draftWithPast.id, draftWithFuture.id, published.id] } },
+                })
+            }
+        })
+
+        it('should return drafts and non-drafts with past events when no draft filter is applied', async () => {
+            const published = await app.prisma.production.create({
+                data: { title: { nl: 'Gepubliceerd' }, draft: false, events: pastEvent },
+            })
+            const draftProduction = await app.prisma.production.create({
+                data: { title: { nl: 'Concept' }, draft: true, events: futureEvent },
+            })
+            const publishedFutureOnly = await app.prisma.production.create({
+                data: { title: { nl: 'Toekomstig gepubliceerd' }, draft: false, events: futureEvent },
+            })
+
+            try {
+                const response = await app.inject({
+                    method: 'GET',
+                    url: '/api/v1/archive/productions',
+                })
+
+                expect(response.statusCode).toBe(200)
+                const ids = JSON.parse(response.payload).data.map((item: { id: string }) => item.id)
+                expect(ids).toContain(published.id)
+                expect(ids).not.toContain(draftProduction.id)
+                expect(ids).not.toContain(publishedFutureOnly.id)
+            } finally {
+                await app.prisma.event.deleteMany({
+                    where: { production_id: { in: [published.id, draftProduction.id, publishedFutureOnly.id] } },
+                })
+                await app.prisma.production.deleteMany({
+                    where: { id: { in: [published.id, draftProduction.id, publishedFutureOnly.id] } },
+                })
+            }
         })
     })
 })

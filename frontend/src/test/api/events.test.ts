@@ -25,13 +25,19 @@ describe('events api', () => {
                         hall_id: '214a0000-0000-0000-0000-000000000001',
                     },
                 ],
+                meta: {
+                    total: 1,
+                    page: 1,
+                    limit: 20,
+                    totalPages: 1,
+                },
             }),
         } as unknown as Response)
 
         const result = await getEventsByProductionId('dab70000-0000-0000-0000-000000000001')
 
         expect(fetchMock).toHaveBeenCalledWith(
-            '/api/v1/archive/events?productionId=dab70000-0000-0000-0000-000000000001',
+            '/api/v1/archive/events?productionId=dab70000-0000-0000-0000-000000000001&page=1',
             expect.objectContaining({ credentials: 'include' }),
         )
         expect(result.data).toHaveLength(1)
@@ -43,7 +49,7 @@ describe('events api', () => {
         fetchMock.mockResolvedValueOnce({
             ok: true,
             status: 200,
-            json: vi.fn().mockResolvedValueOnce({ data: [] }),
+            json: vi.fn().mockResolvedValueOnce({ data: [], meta: { total: 0, page: 1, limit: 20, totalPages: 1 } }),
         } as unknown as Response)
 
         const result = await getEventsByProductionId('dab70000-0000-0000-0000-000000000001')

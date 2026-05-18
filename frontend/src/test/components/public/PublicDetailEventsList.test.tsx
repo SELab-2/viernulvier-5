@@ -21,12 +21,25 @@ vi.mock('../../../components/public/PublicMessagesContext', () => ({
 function makeEvent(overrides: Partial<Event> = {}): Event {
     return {
         id: crypto.randomUUID(),
+        apiId: null,
         starts_at: new Date('2027-03-06T13:00:00.000Z'),
         ends_at: new Date('2027-03-06T14:15:00.000Z'),
+        intermission_at: null,
         doors_at: null,
+        box_office_id: null,
+        vendor_id: null,
+        max_tickets_per_order: null,
+        secure: null,
+        sms_verification: null,
         info: null,
+        eticket_info: null,
+        external_order_url: null,
+        order_url: null,
         production_id: 'dab70000-0000-0000-0000-000000000001',
+        status_id: null,
         hall_id: '214a0000-0000-0000-0000-000000000001',
+        created_at: new Date('2026-04-01T10:00:00.000Z'),
+        updated_at: new Date('2026-04-01T10:00:00.000Z'),
         ...overrides,
     }
 }

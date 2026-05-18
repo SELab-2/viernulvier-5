@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { getActiveLocale, withLocalePath } from '../../i18n'
 import { localize } from '../../utils/localize'
-import { getYouTubeEmbedUrl } from '../../utils/youtube'
+import { getVideoEmbedUrl } from '../../utils/videos'
 import PublicLayout from '../../components/public/PublicLayout'
 import PublicPillButton from '../../components/public/PublicPillButton'
 import { usePublicMessages } from '../../components/public/PublicMessagesContext'
@@ -21,6 +21,7 @@ import { getHallById } from '../../api/halls'
 import { getSpaceById } from '../../api/spaces'
 import { getLocationById, type Location } from '../../api/locations'
 import { getPreviousStrippedPath } from '../../utils/navigationHistory'
+import { LeftArrowIcon } from '../../components/shared/icons'
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -220,7 +221,7 @@ function ArchiveDetailPageContent() {
                 localize(production?.video_2, locale),
             ]
                 .filter((url): url is string => Boolean(url))
-                .map(getYouTubeEmbedUrl)
+                .map(getVideoEmbedUrl)
                 .filter((url): url is string => Boolean(url))
         )
     )
@@ -230,6 +231,7 @@ function ArchiveDetailPageContent() {
             <div className="site-container mt-8">
                 <PublicPillButton
                     label={messages.detail.navBack}
+                    icon={<LeftArrowIcon className="h-5 w-5" />}
                     onClick={handleGoBack}
                 />
             </div>

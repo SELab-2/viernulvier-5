@@ -13,7 +13,7 @@ type FindAllOptions = {
     onThisDayDate?: Date
     sort?: 'relevance' | 'recent' | 'oldest'
     lang?: string
-    draft?: boolean
+    draft?: boolean | 'all'
     editorId?: string
 }
 
@@ -184,12 +184,13 @@ export class ProductionsRepository {
     }
 
     private async buildWhere(options: CountOptions): Promise<Prisma.productionWhereInput> {
-        const { search, searchIds, genres, locations, yearFrom, yearTo, onThisDayDate, lang = 'nl', draft, editorId} = options
+        const { search, searchIds, genres, locations, yearFrom, yearTo, onThisDayDate, lang = 'nl', draft = false, editorId} = options
         const andFilters: Prisma.productionWhereInput[] = []
         const now = new Date()
 
 
-        if (draft !== undefined) {
+
+        if (draft !== 'all') {
             andFilters.push({ draft })
             // Requirement: Only show productions that have at least one event in the past
             if (!draft) {
@@ -202,15 +203,18 @@ export class ProductionsRepository {
                         }
                     }
                 })
+            } else {
+                andFilters.push({   OR: [{draft: true}, {draft: null}]})
             }
         } else {
             andFilters.push({
                 // filter the productions that aren't drafts to only show if they have past events
                 OR: [
-                    { draft: true },
+                    { draft: true},
+                    { draft: null},
                     {
                         AND: [
-                            { OR: [{ draft: false }, { draft: null }] },
+                            { draft: false },
                             { events: { some: { starts_at: { lt: now } } } }
                         ]
                     }
