@@ -250,14 +250,12 @@ export type Messages = {
       blogs: string
       posters: string
       gallery: string
-      organisation: string
       settings: string
       dashboardIconAlt: string
       productionsIconAlt: string
       blogsIconAlt: string
       postersIconAlt: string
       galleryIconAlt: string
-      organisationIconAlt: string
       settingsIconAlt: string
     }
     dashboard: {
@@ -419,6 +417,15 @@ export type Messages = {
       addButton: string
       close: string
       queryHint: string
+      filtersLabel: string
+      periodLabel: string
+      locationLabel: string
+      locationPlaceholder: string
+      stagedLabel: string
+      selectedCount: (count: number) => string
+      readyCount: (count: number) => string
+      loading: string
+      loadingMore: string
       noProductionFound:string
     }
     bannerUpload: {

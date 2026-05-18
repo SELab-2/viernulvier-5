@@ -56,7 +56,7 @@ function ProductionStamp({
         : stampSvgPaths[info.kind].plural
 
     return (
-        <div className="absolute -top-6 -right-6 z-10 h-22 w-22 select-none rounded-full bg-surface-sunken rotate-12" aria-hidden="true">
+        <div className="absolute -top-6 -right-5 z-10 h-22 w-22 select-none rounded-full bg-surface-sunken rotate-12" aria-hidden="true">
             <img src={stampSrc} alt="" className="h-full w-full brightness-50 dark:brightness-0 dark:invert" />
             <span className="absolute inset-0 flex items-center justify-center text-xl font-bold leading-none text-black dark:text-white">
                 {info.count}
@@ -85,7 +85,12 @@ function SearchResultCard({ item, detailHref, onTagClick, genreValue }: SearchRe
                     stampSvgPaths={searchMessages.stampSvgPaths}
                 />
             ) : null}
-            <div className="relative h-32 overflow-hidden rounded-md sm:h-36 bg-gradient-to-br from-accent to-accent/50">
+            <div className="relative h-32 overflow-hidden rounded-md sm:h-36 bg-muted">
+                <img
+                    src={FALLBACK_IMAGE}
+                    alt=""
+                    className="absolute inset-0 h-full w-full object-cover opacity-50"
+                />
                 {isPdf ? (
                     <iframe
                         src={getPdfPreviewUrl(imageUrl)}
@@ -138,7 +143,7 @@ function SearchResultCard({ item, detailHref, onTagClick, genreValue }: SearchRe
             </div>
             <div className="flex flex-1 flex-col">
                 <p className="mt-3 text-sm font-semibold text-accent">{item.date}</p>
-                <h3 className="mt-1 line-clamp-3 text-2xl leading-none text-foreground [overflow-wrap:anywhere]">{displayTitle}</h3>
+                <h3 className="mt-1 line-clamp-3 text-2xl leading-tight text-foreground [overflow-wrap:anywhere]">{displayTitle}</h3>
                 <p className={`mt-2 line-clamp-2 text-sm leading-relaxed ${showExcerpt ? 'text-text-accent' : 'invisible'}`}>
                     {showExcerpt ? item.excerpt : '\u00a0'}
                 </p>
