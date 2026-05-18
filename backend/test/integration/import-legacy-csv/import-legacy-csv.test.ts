@@ -328,11 +328,12 @@ describe('legacy CSV importer', () => {
         '2006-12-01 20:00:00,,Balzaal,99999', // production 99999 does not exist
       ].join('\n');
 
-      const countBefore = await prisma.event.count();
       await runImport(['--events', writeTempCsv(csv)]);
-      const countAfter = await prisma.event.count();
 
-      expect(countAfter).toBe(countBefore);
+      const event = await prisma.event.findFirst({
+        where: { apiId: { startsWith: 'legacy-event-99999-' } },
+      });
+      expect(event).toBeNull();
     });
 
     it('skips event rows with missing production ID', async () => {
