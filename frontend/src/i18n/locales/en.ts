@@ -163,7 +163,7 @@ const en: Messages = {
     logoutLabel: 'Log out',
   },
   detail: {
-    navBack: '🡠 Go Back',
+    navBack: 'Go back',
     events: 'Event History',
     noEvents: 'No past events.',
     loadError: 'Could not load the production.',
@@ -392,6 +392,7 @@ const en: Messages = {
   },
 
   blogs: {
+      navBack: 'Go back',
       languageError:'Blog does not exist in this language',
       loadingBlog: 'Loading blog...',
       loadingProductions: 'Loading productions...',
