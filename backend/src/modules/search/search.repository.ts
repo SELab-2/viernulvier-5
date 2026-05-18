@@ -208,7 +208,7 @@ export class SearchRepository {
                             JOIN "item" i ON i.id = c.item_id
                             JOIN "gallery" g ON g.id = i.gallery_id
                             WHERE g.id = p.media_gallery_id
-                            ORDER BY CASE WHEN c.name = 'FE3_header' THEN 1 WHEN c.name = 'FEA_boxed' THEN 2 ELSE 3 END, i.position ASC, c.created_at DESC
+                            ORDER BY CASE WHEN c.name = 'FE3_header' THEN 1 WHEN c.name = 'FE3_boxed' THEN 2 ELSE 3 END, i.position ASC, c.created_at DESC
                             LIMIT 1
                         ) as image_url,
                         (

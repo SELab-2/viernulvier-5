@@ -50,6 +50,8 @@ describe('SearchService', () => {
             tab: 'all',
             search: 'term',
             lang: 'nl',
+            genres: 'theater',
+            locations: 'hall-1'
         })
 
         expect(searchRepository.searchAll).toHaveBeenCalledWith({
@@ -58,6 +60,8 @@ describe('SearchService', () => {
             tab: 'all',
             search: 'term',
             lang: 'nl',
+            genres: 'theater',
+            locations: 'hall-1'
         })
         expect(result.items).toEqual(mockResult.items)
         expect(result.total).toBe(2)
@@ -121,5 +125,20 @@ describe('SearchService', () => {
             type: 'poster',
             genre_label: 'Poster',
         })
+    })
+
+    it('passes sort parameter to searchAll', async () => {
+        searchRepository.searchAll.mockResolvedValue({ items: [], total: 0 })
+
+        await service.search({
+            page: 1,
+            limit: 10,
+            tab: 'all',
+            sort: 'oldest'
+        })
+
+        expect(searchRepository.searchAll).toHaveBeenCalledWith(expect.objectContaining({
+            sort: 'oldest'
+        }))
     })
 })

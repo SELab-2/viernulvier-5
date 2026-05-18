@@ -23,7 +23,7 @@ export type PersistedBlogImageFile = {
 function sanitizeFilename(fileName: string): string {
     return fileName
         .toLowerCase()
-        .replace(/[^a-z0-9.-]/g, '-')
+        .replace(/[^a-z0-9._-]/g, '-')
         .replace(/-+/g, '-')
         .replace(/^-|-$/g, '')
         .substring(0, 255)
@@ -105,7 +105,7 @@ export class BlogImagesStorage {
             validatedFiles.push({
                 buffer: fileBuffer,
                 storedFileName,
-                public_url: `/api/v1/images/${imageId}`,
+                public_url: `http://localhost:${env.PORT}/api/v1/images/${imageId}`,
                 mime_type: detectedMimeType,
                 original_filename: safeName,
                 file_size_bytes: fileBuffer.length,

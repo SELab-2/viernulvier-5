@@ -9,28 +9,43 @@ const cmsUserSelect = {
     updated_at: true,
 } as const
 
-function buildCmsUserWhere(search?: string) {
-    return search
-        ? { username: { contains: search, mode: 'insensitive' as const } }
-        : {}
+function buildCmsUserWhere(search?: string, blogId?: string, productionId?: string) {
+    return {
+        ...(search ? {username: {contains: search, mode: 'insensitive' as const}} : {}),
+        ...(blogId ? {
+            editor_blog: {
+                some: {
+                    blog_id: blogId,
+                }
+            }
+        } : {}),
+        ...(productionId ? {
+            editor_production: {
+                some: {
+                    production_id: productionId,
+                }
+            }
+        } : {}),
+    }
 }
 
-function buildEditorWhere(search?: string) {
+function buildEditorWhere(search?: string, blog?: string, production?: string) {
     return {
         role: Role.EDITOR,
-        ...buildCmsUserWhere(search),
+        ...buildCmsUserWhere(search, blog, production),
     }
 }
 
 export class CmsUsersRepository {
     constructor(private readonly prisma: PrismaClient) { }
 
-    async listCmsUsers(options: { page: number; limit: number; search?: string }) {
-        const { page, limit, search } = options
+    async listCmsUsers(options: { page: number; limit: number; search?: string, blogId?: string, productionId?: string }) {
+        const { page, limit, search, blogId, productionId } = options
         const skip = (page - 1) * limit
 
+
         return this.prisma.adminUser.findMany({
-            where: buildCmsUserWhere(search),
+            where: buildCmsUserWhere(search, blogId, productionId),
             select: cmsUserSelect,
             skip,
             take: limit,
@@ -38,8 +53,14 @@ export class CmsUsersRepository {
         })
     }
 
-    async countCmsUsers(options: { search?: string }) {
-        return this.prisma.adminUser.count({ where: buildCmsUserWhere(options.search) })
+    async countCmsUsers(options: {
+        search: string | undefined;
+        productionId: string | undefined;
+        blogId: string | undefined
+    }) {
+        return this.prisma.adminUser.count({
+            where: buildCmsUserWhere(options.search, options.blogId, options.productionId)
+        })
     }
 
     async findCmsUserById(id: string) {
@@ -49,12 +70,12 @@ export class CmsUsersRepository {
         })
     }
 
-    async listEditors(options: { page: number; limit: number; search?: string }) {
-        const { page, limit, search } = options
+    async listEditors(options: { page: number; limit: number; search?: string; blogId?: string, productionId?: string }) {
+        const { page, limit, search, blogId, productionId } = options
         const skip = (page - 1) * limit
 
         return this.prisma.adminUser.findMany({
-            where: buildEditorWhere(search),
+            where: buildEditorWhere(search, blogId, productionId),
             select: cmsUserSelect,
             skip,
             take: limit,
@@ -62,8 +83,9 @@ export class CmsUsersRepository {
         })
     }
 
-    async countEditors(options: { search?: string }) {
-        return this.prisma.adminUser.count({ where: buildEditorWhere(options.search) })
+
+    async countEditors(options: {search?: string; blogId?: string, productionId?: string }) {
+        return this.prisma.adminUser.count({ where: buildEditorWhere(options.search, options.blogId, options.productionId) })
     }
 
     async findEditorById(id: string) {

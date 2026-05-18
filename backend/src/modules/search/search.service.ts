@@ -55,13 +55,13 @@ export class SearchService {
     }
 
     async search(options: SearchQuery): Promise<PaginatedResult<SearchResultItem>> {
-        const { limit, page, tab, search, yearFrom, yearTo, sort } = options
+        const { limit, page, tab, search, yearFrom, yearTo, sort, lang } = options
 
         if (tab === 'blogs') {
             const blogResults = await this.searchRepository.findAllBlogs({ search, yearFrom, yearTo, sort })
             const blogItems: SearchResultItem[] = blogResults.map((blog) => {
-                const lang = options.lang === 'en' || options.lang === 'fr' ? options.lang : 'nl'
-                const localizedContent = this.resolveLocalizedContent(blog.content, lang)
+                const langCode = lang === 'en' || lang === 'fr' ? lang : 'nl'
+                const localizedContent = this.resolveLocalizedContent(blog.content, langCode)
                 const rawExcerpt = this.extractPlainText(localizedContent)
                 const blogImages = blog.images ?? []
                 const thumbnailIndex = blog.thumbnail_index ?? null
