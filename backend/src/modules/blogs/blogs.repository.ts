@@ -52,11 +52,11 @@ export class BlogsRepository {
 
         if (draft !== 'all') {
             if (draft) {
-                conditions.push({ draft: true })
-            } else {
                 conditions.push({
-                    OR: [{ draft: false }, { draft: null }],
+                    OR: [{draft: true}, {draft: null}]
                 })
+            } else {
+                conditions.push({draft: false})
             }
         }
         if (options.editorId){
