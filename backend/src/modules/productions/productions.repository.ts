@@ -207,10 +207,11 @@ export class ProductionsRepository {
             andFilters.push({
                 // filter the productions that aren't drafts to only show if they have past events
                 OR: [
-                    { draft: true },
+                    { draft: true},
+                    { draft: null},
                     {
                         AND: [
-                            { OR: [{ draft: false }, { draft: null }] },
+                            { draft: false },
                             { events: { some: { starts_at: { lt: now } } } }
                         ]
                     }

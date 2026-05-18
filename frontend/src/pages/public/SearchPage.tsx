@@ -1439,6 +1439,7 @@ function SearchPageContent() {
                     setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
                 } else {
                     params.set('lang', locale)
+                    params.set('draft', 'false')
 
                     if (selectedGenres.length > 0) {
                         params.set('genres', selectedGenres.join(','))
