@@ -20,8 +20,8 @@ type BlogApiItem = {
     id: string
     title?: LocalizedText
     productions: string[]
-    createdAt: string
-    updatedAt: string
+    created_at: string
+    updated_at: string
 }
 
 function getLocalizedTitle(text: LocalizedText | undefined, locale: 'nl' | 'en'): string {
@@ -55,8 +55,8 @@ function mapBlogApiItem(item: BlogApiItem, locale: 'nl' | 'en'): BlogRow {
             nl: getLanguageState(item.title, 'nl'),
             en: getLanguageState(item.title, 'en'),
         },
-        createdAt: item.createdAt,
-        updatedAt: item.updatedAt,
+        createdAt: item.created_at,
+        updatedAt: item.updated_at,
         detailHref: withLocalePath(`/archive/blogs/${item.id}`, locale),
     }
 }
