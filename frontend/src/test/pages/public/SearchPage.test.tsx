@@ -164,7 +164,7 @@ describe('SearchPage loading and error states', () => {
 
         expect(await screen.findByRole('button', { name: 'Alles' })).toBeInTheDocument()
         expect(screen.getByRole('button', { name: 'Producties' })).toBeInTheDocument()
-        expect(screen.getByRole('button', { name: 'Blog' })).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: 'Blogs' })).toBeInTheDocument()
         expect(screen.getByRole('button', { name: 'Affiches' })).toBeInTheDocument()
     })
 })
