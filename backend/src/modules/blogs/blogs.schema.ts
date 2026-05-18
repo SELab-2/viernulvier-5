@@ -22,6 +22,7 @@ export const blogPaginationQuerySchema = paginationQuerySchema.extend({
     productionId: z.string().uuid().optional(),
     draft: z.enum(['true', 'false', 'all'])
         .default('false')
+        .optional()
         .transform((val) => {
             if (val === 'all') return 'all'
             return val === 'true';

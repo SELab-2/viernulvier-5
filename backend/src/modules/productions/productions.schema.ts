@@ -33,6 +33,7 @@ export const productionPaginationQuerySchema = paginationQuerySchema.extend({
     lang: z.string().optional().default('nl'),
     draft: z.enum(['true', 'false', 'all'])
         .default('false')
+        .optional()
         .transform((val) => {
             if (val === 'all') return 'all'
             return val === 'true';
