@@ -36,24 +36,16 @@ export type Messages = {
     onThisDayFallbackSubheading: string
     popularTagsLabel: string
     popularTagsMore: string
+    popularTagsLess: string
     popularTags: string[]
     latestBlogHeading: string
     latestBlogSubheading: string
-    latestBlogTitle: string
-    latestBlogParagraphOne: string
-    latestBlogParagraphTwoTitle: string
-    latestBlogParagraphTwo: string
     latestBlogReadMore: string
     latestBlogViewAll: string
     recentDigitizedHeading: string
     recentDigitizedViewItem: string
     recentDigitizedViewAll: string
-    recentDigitizedItems: Array<{
-      dateLabel: string
-      archiveLabel: string
-      title: string
-      description: string
-    }>
+    fallbackUntitled: string
   }
   search: {
     heading: string
@@ -308,13 +300,11 @@ export type Messages = {
       productions: string
       posters: string
       gallery: string
-      organisation: string
       settings: string
       dashboardIconAlt: string
       productionsIconAlt: string
       postersIconAlt: string
       galleryIconAlt: string
-      organisationIconAlt: string
       settingsIconAlt: string
     }
     dashboard: {
@@ -408,6 +398,9 @@ export type Messages = {
   }
 
   blogs: {
+    placeholder: string
+    navBack: string
+
     languageError:string
     loadingBlog: string
     loadingProductions: string
@@ -446,7 +439,34 @@ export type Messages = {
       addButton: string
       close: string
       queryHint: string
+      filtersLabel: string
+      periodLabel: string
+      locationLabel: string
+      locationPlaceholder: string
+      stagedLabel: string
+      selectedCount: (count: number) => string
+      readyCount: (count: number) => string
+      loading: string
+      loadingMore: string
       noProductionFound:string
+    }
+    bannerUpload: {
+      title: string
+      subtitle: string
+      label: string
+      addButton: string
+      allowedFormats: string
+      invalidFileTypes: (fileNames: string) => string
+      alreadyUploaded: (count: number) => string
+      uploadedImagesLabel: string
+      setThumbnailButton: string
+      pendingUploadLabel: (count: number) => string
+      removeButton: string
+      coverLabel: string
+      deleteImageAriaLabel: string
+      coverHint: string
+      uploadFailedRemoved: (errorMessage: string) => string
+      uploadFailedCreatedEditUrl: (errorMessage: string, editUrl: string) => string
     }
   }
 }

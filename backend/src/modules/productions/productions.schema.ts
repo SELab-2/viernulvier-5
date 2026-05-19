@@ -19,7 +19,12 @@ export const productionPaginationQuerySchema = paginationQuerySchema.extend({
     locations: z.string().optional(),
     yearFrom: z.coerce.number().int().optional(),
     yearTo: z.coerce.number().int().optional(),
-    onThisDay: z.coerce.boolean().optional().default(false),
+    onThisDay: z.enum(['true', 'false'])
+        .optional().default('false')
+        .transform((val) => val === 'true'),
+    pastOnly: z.enum(['true', 'false'])
+        .optional()
+        .transform((val) => val === undefined ? undefined : val === 'true'),
     referenceDate: z
         .string()
         .regex(/^\d{4}-\d{2}-\d{2}$/)
@@ -29,6 +34,13 @@ export const productionPaginationQuerySchema = paginationQuerySchema.extend({
         .optional(),
     sort: z.enum(['relevance', 'recent', 'oldest']).optional().default('relevance'),
     lang: z.string().optional().default('nl'),
+    draft: z.enum(['true', 'false', 'all'])
+        .default('false')
+        .transform((val) => {
+            if (val === 'all') return 'all'
+            return val === 'true';
+        }),
+    editorId: z.string().uuid().optional(),
 })
 
 /**
@@ -40,6 +52,7 @@ export const productionLinksSchema = z.object({
     events: z.string().url().optional().nullable().default('https://example.com/'),
     genres: z.string().url().optional().nullable().default('https://example.com/'),
     tags: z.string().url().optional().nullable().default('https://example.com/'),
+    editors: z.string().url().optional().nullable().default('https://example.com/'),
     media_gallery: z.string().url().optional().nullable().default('https://example.com/'),
     review_gallery: z.string().url().optional().nullable().default('https://example.com/'),
     poster_gallery: z.string().url().optional().nullable().default('https://example.com/'),
@@ -55,21 +68,6 @@ const genreSchema = z.object({
 const tagSchema = z.object({
     id: z.string().uuid().optional(),
 }).passthrough();
-
-const posterResourceSchema = z.object({
-    id: z.string().uuid(),
-    title: z.string(),
-    mime_type: z.string().nullable(),
-    original_filename: z.string().nullable(),
-    file_size_bytes: z.number().int().nullable(),
-    created_at: z.coerce.date(),
-    updated_at: z.coerce.date(),
-})
-
-const gallerySchema = z.object({
-    id: z.string().uuid().optional(),
-    items: z.array(z.unknown()).optional(),
-}).passthrough()
 
 export const productionSchema = z.object({
     id: z.string().uuid(),
@@ -103,12 +101,9 @@ export const productionSchema = z.object({
     venue_names: z.array(z.string()).optional(),
     production_genres: z.array(z.string()).optional(),
     on_this_day_event_date: z.coerce.date().nullable().optional(),
-    poster: posterResourceSchema.nullable().optional(),
-    poster_file_url: z.string().nullable().optional(),
-    media_gallery: gallerySchema.nullable().optional(),
-    poster_gallery: gallerySchema.nullable().optional(),
     genres: z.array(genreSchema).optional(),
     tags: z.array(tagSchema).optional(),
+    draft: z.boolean().nullable(),
     media_gallery_id: z.string().uuid().nullable(),
     review_gallery_id: z.string().uuid().nullable(),
     poster_gallery_id: z.string().uuid().nullable(),
@@ -149,6 +144,7 @@ export const updateProductionSchema = z.object({
     custom_data: customDataSchema.optional(),
     genre_ids: z.array(z.string().uuid()).optional(),
     tag_ids: z.array(z.string().uuid()).optional(),
+    draft: z.boolean().nullable().optional(),
     media_gallery_id: z.string().uuid().nullable().optional(),
     review_gallery_id: z.string().uuid().nullable().optional(),
     poster_gallery_id: z.string().uuid().nullable().optional(),

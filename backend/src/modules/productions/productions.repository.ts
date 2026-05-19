@@ -11,8 +11,11 @@ type FindAllOptions = {
     yearFrom?: number
     yearTo?: number
     onThisDayDate?: Date
+    pastOnly?: boolean
     sort?: 'relevance' | 'recent' | 'oldest'
     lang?: string
+    draft?: boolean | 'all'
+    editorId?: string
 }
 
 type CountOptions = Omit<FindAllOptions, 'page' | 'limit' | 'sort'>
@@ -182,20 +185,48 @@ export class ProductionsRepository {
     }
 
     private async buildWhere(options: CountOptions): Promise<Prisma.productionWhereInput> {
-        const { search, searchIds, genres, locations, yearFrom, yearTo, onThisDayDate, lang = 'nl' } = options
+        const { search, searchIds, genres, locations, yearFrom, yearTo, onThisDayDate, pastOnly, lang = 'nl', draft = false, editorId } = options
         const andFilters: Prisma.productionWhereInput[] = []
         const now = new Date()
+        const requirePastEvents = pastOnly ?? (draft === false)
 
-        // Requirement: Only show productions that have at least one event in the past
-        andFilters.push({
-            events: {
-                some: {
-                    starts_at: {
-                        lt: now
-                    }
-                }
+        if (draft !== 'all') {
+            andFilters.push(draft ? { draft: true } : { OR: [{ draft: false }, { draft: null }] })
+
+            if (requirePastEvents) {
+                andFilters.push({
+                    events: {
+                        some: {
+                            starts_at: {
+                                lt: now,
+                            },
+                        },
+                    },
+                })
             }
-        })
+        } else if (requirePastEvents) {
+            andFilters.push({
+                OR: [
+                    { draft: true },
+                    {
+                        AND: [
+                            { OR: [{ draft: false }, { draft: null }] },
+                            { events: { some: { starts_at: { lt: now } } } },
+                        ],
+                    },
+                ],
+            })
+        }
+
+        if (editorId) {
+            andFilters.push({
+                editor_production: {
+                    some: {
+                        editor_id: editorId,
+                    },
+                },
+            })
+        }
 
         if (onThisDayDate) {
             const matchingProductionIds = await this.findProductionIdsOnMonthDay(onThisDayDate)
@@ -239,13 +270,12 @@ export class ProductionsRepository {
             andFilters.push({
                 OR: [
                     { genre_production: { some: { OR: genreFilters } } },
-                    { tag_production: { some: { OR: tagFilters } } }
-                ]
+                    { tag_production: { some: { OR: tagFilters } } },
+                ],
             })
         }
 
         if (locations && locations.length > 0) {
-            // ... (keep existing locations logic)
             andFilters.push({
                 OR: locations.map((location) => ({
                     OR: [
@@ -309,16 +339,19 @@ export class ProductionsRepository {
                 eventDateFilter.lte = new Date(Date.UTC(yearTo, 11, 31, 23, 59, 59, 999))
             }
 
-            // Filter productions where at least one PAST event is within the year range
             andFilters.push({
                 events: {
-                    some: {
-                        AND: [
-                            { starts_at: { lt: now } },
-                            { starts_at: eventDateFilter }
-                        ]
-                    }
-                }
+                    some: requirePastEvents
+                        ? {
+                            AND: [
+                                { starts_at: { lt: now } },
+                                { starts_at: eventDateFilter },
+                            ],
+                        }
+                        : {
+                            starts_at: eventDateFilter,
+                        },
+                },
             })
         }
 
@@ -534,5 +567,25 @@ export class ProductionsRepository {
             this.prisma.production.delete({ where: { id } }),
         ])
         return production
+    }
+
+    async addEditor(productionId: string, editorId: string) {
+        return this.prisma.editor_production.create({
+            data: {
+                production_id: productionId,
+                editor_id: editorId,
+            }
+        })
+    }
+
+    async removeEditor(productionId: string, editorId: string) {
+        return this.prisma.editor_production.delete({
+            where: {
+                editor_id_production_id: {
+                    editor_id: editorId,
+                    production_id: productionId,
+                }
+            }
+        })
     }
 }

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { getActiveLocale, withLocalePath } from '../../i18n'
 import { localize } from '../../utils/localize'
-import { getYouTubeEmbedUrl } from '../../utils/youtube'
+import { getVideoEmbedUrl } from '../../utils/videos'
 import PublicLayout from '../../components/public/PublicLayout'
 import PublicPillButton from '../../components/public/PublicPillButton'
 import { usePublicMessages } from '../../components/public/PublicMessagesContext'
@@ -21,6 +21,7 @@ import { getHallById } from '../../api/halls'
 import { getSpaceById } from '../../api/spaces'
 import { getLocationById, type Location } from '../../api/locations'
 import { getPreviousStrippedPath } from '../../utils/navigationHistory'
+import { LeftArrowIcon } from '../../components/shared/icons'
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -40,6 +41,7 @@ function ArchiveDetailPageContent() {
     const [locationsByEvent, setLocationsByEvent] = useState<Record<string, Location>>({})
     const [shareCopied, setShareCopied] = useState(false)
     const [loadError, setLoadError] = useState(false)
+    const [loading, setLoading] = useState(true)
     const [notFound, setNotFound] = useState(false)
     const [previousId, setPreviousId] = useState(id)
 
@@ -47,6 +49,7 @@ function ArchiveDetailPageContent() {
         setPreviousId(id)
         setLoadError(false)
         setNotFound(false)
+        setLoading(true)
     }
 
     const handleGoBack = () => {
@@ -111,6 +114,10 @@ function ArchiveDetailPageContent() {
                 ])
 
                 const prod = prodRes.data
+                if (prod.draft) {
+                    setNotFound(true)
+                    return
+                }
                 const now = Date.now()
                 const pastEvents = eventsRes.data.filter((event) => {
                     if (!event.starts_at) return false
@@ -183,11 +190,29 @@ function ArchiveDetailPageContent() {
                 } else {
                     setLoadError(true)
                 }
+            } finally {
+                setLoading(false)
             }
         }
 
         fetchData()
     }, [id, idIsMalformed])
+
+    if (loading) {
+        return null
+    }
+
+    if (notFound || idIsMalformed) {
+        return <NotFoundContent />
+    }
+
+    if (loadError) {
+        return (
+            <div className="site-container mt-8">
+                <p className="text-sm text-text-accent">{messages.detail.loadError}</p>
+            </div>
+        )
+    }
 
     const title = localize(production?.title, locale)
     const superTitle = localize(production?.super_title, locale)
@@ -212,29 +237,17 @@ function ArchiveDetailPageContent() {
                 localize(production?.video_2, locale),
             ]
                 .filter((url): url is string => Boolean(url))
-                .map(getYouTubeEmbedUrl)
+                .map(getVideoEmbedUrl)
                 .filter((url): url is string => Boolean(url))
         )
     )
-        
-
-    if (notFound || idIsMalformed) {
-        return <NotFoundContent />
-    }
-
-    if (loadError) {
-        return (
-            <div className="site-container mt-8">
-                <p className="text-sm text-text-accent">{messages.detail.loadError}</p>
-            </div>
-        )
-    }
 
     return (
         <>
             <div className="site-container mt-8">
                 <PublicPillButton
                     label={messages.detail.navBack}
+                    icon={<LeftArrowIcon className="h-5 w-5" />}
                     onClick={handleGoBack}
                 />
             </div>

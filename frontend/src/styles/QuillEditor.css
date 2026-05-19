@@ -37,6 +37,9 @@
 
 .quill-editor-wrapper .ql-editor {
     min-height: 16rem;
+    font-family: inherit;
+    font-size: 1rem;
+    line-height: 1.75;
     color: var(--color-text);
     background: var(--color-surface);
 }
@@ -53,5 +56,25 @@
 
 .quill-editor-wrapper .ql-toolbar.ql-snow .ql-fill {
     fill: var(--color-text-accent);
+}
+
+.quill-detail-wrapper {
+    background: transparent;
+    color: var(--color-text);
+}
+
+.quill-detail-wrapper .ql-container.ql-snow {
+    border: 0;
+    background: transparent;
+}
+
+.quill-detail-wrapper .ql-editor {
+    padding: 0;
+    min-height: 0;
+    font-family: inherit;
+    font-size: 1rem;
+    line-height: 1.75;
+    background: transparent;
+    color: var(--color-text);
 }
 
