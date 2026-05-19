@@ -646,6 +646,7 @@ function CreateBlogPage() {
                         content: combinedContent,
                         productionIds: selectedProductionIds,
                         thumbnail_index: latestThumbnailIndex,
+                        draft: false,
                     }),
                 })
                 createdBlogId = response.data.id
