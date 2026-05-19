@@ -9,12 +9,12 @@ export const searchQuerySchema = paginationQuerySchema.extend({
     locations: z.string().optional(),
     sort: z.enum(['relevance', 'recent', 'oldest']).optional().default('relevance'),
     lang: z.string().optional().default('nl'),
-    tab: z.enum(['all', 'productions', 'blogs', 'posters']).optional().default('all'),
+    tab: z.enum(['all', 'productions', 'posters']).optional().default('all'),
 })
 
 export const searchResultItemSchema = z.object({
     id: z.string().uuid(),
-    type: z.enum(['production', 'blog', 'poster']),
+    type: z.enum(['production', 'poster']),
     title: z.union([
         z.string(),
         z.record(z.string(), z.string().nullable()),

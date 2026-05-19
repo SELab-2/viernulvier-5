@@ -191,7 +191,7 @@ export class ProductionsRepository {
         const requirePastEvents = pastOnly ?? (draft === false)
 
         if (draft !== 'all') {
-            andFilters.push(draft ? { draft: true } : { OR: [{ draft: false }, { draft: null }] })
+            andFilters.push(draft ? { draft: true } : { draft: false })
 
             if (requirePastEvents) {
                 andFilters.push({
@@ -210,7 +210,7 @@ export class ProductionsRepository {
                     { draft: true },
                     {
                         AND: [
-                            { OR: [{ draft: false }, { draft: null }] },
+                            { draft: false },
                             { events: { some: { starts_at: { lt: now } } } },
                         ],
                     },
@@ -436,6 +436,17 @@ export class ProductionsRepository {
                     { id: { in: rankedIds } },
                 ],
             },
+            select: { id: true },
+        })
+
+        return rows.map((row) => row.id)
+    }
+
+    async findAllIds(options: CountOptions): Promise<string[]> {
+        const where = await this.buildWhere(options)
+
+        const rows = await this.prisma.production.findMany({
+            where,
             select: { id: true },
         })
 
