@@ -142,7 +142,7 @@ export const updateProductionSchema = z.object({
     description_short: localizedTextSchema.optional(),
     eticket_info: localizedTextSchema.optional(),
     custom_data: customDataSchema.optional(),
-    draft: z.boolean().nullable().optional(),
+    draft: z.boolean().nullable().default(false).optional(),
     media_gallery_id: z.string().uuid().nullable().optional(),
     review_gallery_id: z.string().uuid().nullable().optional(),
     poster_gallery_id: z.string().uuid().nullable().optional(),
