@@ -1,180 +1,20 @@
 import type { SearchRepository } from './search.repository.js'
-import type { ProductionsService } from '../productions/productions.service.js'
-import type { PostersService } from '../posters/posters.service.js'
 import type { SearchQuery, SearchResultItem } from './search.schema.js'
 import type { PaginatedResult } from '../../utils/pagination.js'
-import { calculateTotalPages, sanitizePage } from '../../utils/pagination.js'
+import { calculateTotalPages } from '../../utils/pagination.js'
 
 export class SearchService {
-    constructor(
-        private readonly searchRepository: SearchRepository,
-        private readonly productionsService: ProductionsService,
-        private readonly postersService: PostersService,
-    ) {}
-
-    private resolveLocalizedContent(content: unknown, lang: 'nl' | 'en' | 'fr'): unknown {
-        if (!content || typeof content !== 'object' || Array.isArray(content)) {
-            return content
-        }
-
-        const record = content as Record<string, unknown>
-        if (lang in record || 'nl' in record) {
-            return record[lang] ?? record.nl ?? ''
-        }
-
-        return content
-    }
-
-    private extractPlainText(value: unknown): string {
-        if (value == null) {
-            return ''
-        }
-
-        if (typeof value === 'string') {
-            return this.searchRepository.stripHtml(value)
-        }
-
-        if (typeof value !== 'object') {
-            return this.searchRepository.stripHtml(String(value))
-        }
-
-        const record = value as Record<string, unknown>
-        const ops = Array.isArray(record.ops) ? record.ops : null
-        if (ops) {
-            const text = ops
-                .map((op) => {
-                    if (!op || typeof op !== 'object') return ''
-                    const insert = (op as Record<string, unknown>).insert
-                    return typeof insert === 'string' ? insert : ''
-                })
-                .join(' ')
-            return this.searchRepository.stripHtml(text)
-        }
-
-        return ''
-    }
+    constructor(private readonly searchRepository: SearchRepository) {}
 
     async search(options: SearchQuery): Promise<PaginatedResult<SearchResultItem>> {
-        const { page, limit, search, yearFrom, yearTo, genres, locations, sort, lang } = options
-
-        if (tab === 'blogs') {
-            const blogResults = await this.searchRepository.findAllBlogs({ search, yearFrom, yearTo, sort })
-            const blogItems: SearchResultItem[] = blogResults.map((blog) => {
-                const langCode = lang === 'en' || lang === 'fr' ? lang : 'nl'
-                const localizedContent = this.resolveLocalizedContent(blog.content, langCode)
-                const rawExcerpt = this.extractPlainText(localizedContent)
-                const blogImages = blog.images ?? []
-                const thumbnailIndex = blog.thumbnail_index ?? null
-                const thumbnailImage =
-                    thumbnailIndex !== null && thumbnailIndex >= 0 && thumbnailIndex < blogImages.length
-                        ? blogImages[thumbnailIndex]
-                        : blogImages[0] ?? null
-
-                return {
-                    id: blog.id,
-                    type: 'blog' as const,
-                    title: blog.title as any,
-                    excerpt: rawExcerpt.substring(0, 200),
-                    image_url: thumbnailImage,
-                    date_label: blog.created_at ? new Date(blog.created_at).toLocaleDateString('nl-BE') : '',
-                    venue_label: '',
-                    genre_label: 'Blog',
-                    created_at: blog.created_at ? new Date(blog.created_at).toISOString() : undefined,
-                    // Legacy support
-                    content: blog.content ?? null,
-                    productions: blog.productions,
-                }
-            })
-
-        // Posters don't have genres/locations, so exclude them when these filters are active
-        const hasGenreOrLocationFilter = (genres && genres.length > 0) || (locations && locations.length > 0)
-
-        // Get total count of matching posters first, then fetch all of them
-        const postersPreviewOptions = { search, yearFrom, yearTo, page: 1, limit: 1, sort: 'recent' as const, lang: lang ?? 'nl' }
-        const postersPreview = !hasGenreOrLocationFilter
-            ? await this.postersService.getPosters(postersPreviewOptions)
-            : { total: 0 }
-
-        const [prodResults, posterResults] = await Promise.all([
-            prodsPreview.total > 0
-                ? this.productionsService.getProductions({ ...commonProductionOptions, page: 1, limit: prodsPreview.total })
-                : Promise.resolve({ items: [], total: 0, page: 1, limit: 1, totalPages: 0 }),
-            postersPreview.total > 0
-                ? this.postersService.getPosters({ search, yearFrom, yearTo, page: 1, limit: postersPreview.total, sort: 'recent', lang: lang ?? 'nl' })
-                : Promise.resolve({ items: [], total: 0, page: 1, limit: 1, totalPages: 0 }),
-        ])
-
-        // --- map to a common shape ---
-        const prodItems: SearchResultItem[] = prodResults.items.map((prod) => ({
-            id: prod.id,
-            type: 'production' as const,
-            title: prod.title ?? null,
-            teaser: prod.teaser ?? null,
-            description_short: prod.description_short ?? null,
-            description: prod.description ?? null,
-            image_url: prod.image_url ?? null,
-            venue_name: prod.venue_name ?? null,
-            venue_names: prod.venue_names ?? [],
-            production_genres: prod.production_genres ?? [],
-            performer_type: prod.performer_type ?? null,
-            attendance_mode: prod.attendance_mode ?? null,
-            created_at: prod.created_at ? new Date(prod.created_at).toISOString() : undefined,
-        }))
-
-        const posterItems: SearchResultItem[] = posterResults.items.map((poster) => {
-            // Extract production title (JSONB) for venue name, respecting requested language
-            let venueName: string | null = null
-            const primaryProduction = Array.isArray(poster.productions) ? (poster.productions[0] ?? null) : null
-
-            if (primaryProduction?.title) {
-                const title = primaryProduction.title as Record<string, string> | string | null
-                if (typeof title === 'object' && title !== null) {
-                    // JSONB object, try to extract localized value with lang preference first
-                    const langPreferences = [options.lang, 'nl', 'en', 'fr'].filter(Boolean) as string[]
-                    venueName = langPreferences.reduce<string | null>((acc, lang) => acc || (title[lang] as string | undefined) || null, null)
-                    // Fallback to first available value if no lang matches
-                    if (!venueName && Object.keys(title).length > 0) {
-                        venueName = (Object.values(title)[0] as string | undefined) ?? null
-                    }
-                } else if (typeof title === 'string') {
-                    venueName = title
-                }
-            }
-
-            return {
-                id: poster.id,
-                type: 'poster' as const,
-                title: poster.title ?? null,
-                image_url: `/api/v1/archive/posters/${poster.id}/file`,
-                mime_type: poster.mime_type ?? null,
-                poster_file_count: Array.isArray(poster.files) && poster.files.length > 0 ? poster.files.length : undefined,
-                production_id: primaryProduction?.id ?? null,
-                venue_name: venueName,
-                created_at: poster.created_at ? new Date(poster.created_at).toISOString() : undefined,
-            }
-        })
-
-        // --- merge sorted by date descending ---
-        const getDate = (item: SearchResultItem) =>
-            item.created_at ? new Date(item.created_at).getTime() : 0
-
-        const merged = [...prodItems, ...posterItems].sort((a, b) => {
-            if (sort === 'oldest') return getDate(a) - getDate(b)
-            return getDate(b) - getDate(a)
-        })
-
-        // --- paginate ---
-        const total = merged.length
-        const totalPages = calculateTotalPages(total, limit)
-        const sanitizedPage = sanitizePage(page, totalPages)
-        const startIndex = (sanitizedPage - 1) * limit
-        const pageItems = merged.slice(startIndex, startIndex + limit)
+        const result = await this.searchRepository.searchAll(options)
+        const totalPages = calculateTotalPages(result.total, options.limit)
 
         return {
-            items: pageItems,
-            total,
-            page: sanitizedPage,
-            limit,
+            items: result.items,
+            total: result.total,
+            page: options.page,
+            limit: options.limit,
             totalPages,
         }
     }

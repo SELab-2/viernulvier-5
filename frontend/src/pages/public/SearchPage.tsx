@@ -410,6 +410,10 @@ type SearchApiItem = {
     id: string
     type: 'production' | 'poster'
     title?: unknown
+    excerpt?: string | null
+    date_label?: string | null
+    venue_label?: string | null
+    genre_label?: string | null
     teaser?: unknown
     description_short?: unknown
     description?: unknown
@@ -477,7 +481,7 @@ function useProductionImages(items: ProductionApiItem[]) {
                             
                             // 5. Find target crop
                             const targetCrop = crops.find((c) => c.name === 'FE3_header') || 
-                                             crops.find((c) => c.name === 'FEA_boxed') || 
+                                             crops.find((c) => c.name === 'FE3_boxed') || 
                                              crops[0]
                             
                             if (targetCrop?.url) {
@@ -1264,42 +1268,54 @@ function SearchPageContent() {
                         { signal: abortController.signal }
                     )
 
-                    const preferredGenre = selectedGenres.length === 1 ? selectedGenres[0] : undefined
                     const mappedEntries = response.data.map((item): SearchEntry => {
                         if (item.type === 'poster') {
+                            const localizedTitle = getLocalizedText(toLocalizedText(item.title), locale).trim()
+                            const fallbackTitle = typeof item.title === 'string' ? item.title.trim() : ''
+                            const posterTitle = localizedTitle || fallbackTitle
+
                             return mapPosterToSearchEntry(
                                 {
                                     id: item.id,
-                                    title: (item.title as string) || '',
+                                    title: posterTitle,
                                     file_url: item.image_url || '',
                                     mime_type: item.mime_type ?? null,
                                     file_count: item.poster_file_count,
                                     created_at: item.created_at ?? '',
                                     production: item.production_id
-                                        ? { id: item.production_id, title: item.venue_name ?? '' }
-                                        : (item.venue_name ? { id: '', title: item.venue_name } : null),
+                                        ? { id: item.production_id, title: item.venue_label ?? '' }
+                                        : (item.venue_label ? { id: '', title: item.venue_label } : null),
                                 },
                                 locale,
                                 searchMessages,
                             )
                         }
-                        const productionItem: ProductionApiItem = {
-                            id: item.id,
-                            title: toLocalizedText(item.title),
-                            teaser: toLocalizedText(item.teaser),
-                            description_short: toLocalizedText(item.description_short),
-                            description: toLocalizedText(item.description),
-                            image_url: item.image_url,
-                            venue_name: item.venue_name,
-                            venue_names: item.venue_names,
-                            production_genres: item.production_genres,
-                            performer_type: item.performer_type ?? null,
-                            attendance_mode: item.attendance_mode ?? null,
-                            created_at: item.created_at ?? '',
-                            links: item.links,
-                        }
 
-                        return mapProductionToSearchEntry(productionItem, locale, searchMessages, preferredGenre)
+                        const title = getLocalizedText(toLocalizedText(item.title), locale) || searchMessages.fallbackUntitled
+                        const normalizedGenre = normalizeGenreValue(item.genre_label ?? '')
+                        const genreTag = normalizedGenre
+                            ? getGenreLabel(normalizedGenre, searchMessages.genres)
+                            : (item.genre_label?.trim() || searchMessages.fallbackTag)
+
+                        const createdDate = item.created_at ?? ''
+                        const parsedCreatedAt = createdDate ? new Date(createdDate) : null
+                        const year = parsedCreatedAt && !Number.isNaN(parsedCreatedAt.getTime())
+                            ? parsedCreatedAt.getFullYear()
+                            : MIN_PERIOD_YEAR
+
+                        return {
+                            id: item.id,
+                            tag: genreTag,
+                            date: item.date_label?.trim() || (createdDate ? formatDate(createdDate, locale) : '-'),
+                            title,
+                            excerpt: item.excerpt?.trim() || '',
+                            venue: item.venue_label?.trim() || searchMessages.fallbackVenue,
+                            imageUrl: item.image_url ?? undefined,
+                            year,
+                            genre: normalizedGenre,
+                            location: '',
+                            type: 'production' as const,
+                        }
                     })
 
                     const productionItemsForTaxonomy: ProductionApiItem[] = response.data
