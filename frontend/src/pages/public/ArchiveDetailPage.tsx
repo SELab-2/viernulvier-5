@@ -52,11 +52,7 @@ function ArchiveDetailPageContent() {
     }
 
     const handleGoBack = () => {
-        const hasInternalReferrer =
-            document.referrer &&
-            new URL(document.referrer).origin === window.location.origin
-
-        if (hasInternalReferrer || window.history.length > 1) {
+        if (window.history.state?.idx > 0) {
             navigate(-1)
         } else {
             navigate(withLocalePath('/', locale))
