@@ -269,8 +269,7 @@ function ArchiveEditPage() {
                 try {
                     if (currentUser) {
                         await api.post(`/archive/productions/${productionId}/editors`, {
-                            method: 'POST',
-                            body: JSON.stringify({ editorId: currentUser.id }),
+                            editorId: currentUser.id,
                         })
                     }
                 } catch (error) {
@@ -330,8 +329,7 @@ function ArchiveEditPage() {
                 try {
                     if (currentUser) {
                         await api.post(`/archive/productions/${id}/editors`, {
-                            method: 'POST',
-                            body: JSON.stringify({ editorId: currentUser.id }),
+                            editorId: currentUser.id,
                         })
                     }
                 } catch (error) {
