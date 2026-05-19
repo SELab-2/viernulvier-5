@@ -31,6 +31,7 @@ const cmsUsersRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.get('/', {
         preHandler: [requireAuthenticated],
         schema: {
+            hide: true,
             tags: ['cms-users'],
             summary: 'Get all CMS users',
             querystring: cmsUserPaginationQuerySchema,
@@ -44,6 +45,7 @@ const cmsUsersRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.get('/editors', {
         preHandler: [requirePermission(Permission.EDITORS_MANAGE)],
         schema: {
+            hide: true,
             tags: ['cms-users'],
             summary: 'Get all editors',
             querystring: cmsUserPaginationQuerySchema,
@@ -57,6 +59,7 @@ const cmsUsersRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.get('/editors/:id', {
         preHandler: [requirePermission(Permission.EDITORS_MANAGE)],
         schema: {
+            hide: true,
             tags: ['cms-users'],
             summary: 'Get an editor by ID',
             params: cmsUserIdSchema,
@@ -71,6 +74,7 @@ const cmsUsersRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.post('/editors', {
         preHandler: [requirePermission(Permission.EDITORS_MANAGE)],
         schema: {
+            hide: true,
             tags: ['cms-users'],
             summary: 'Create a new editor',
             body: createEditorSchema,
@@ -84,6 +88,7 @@ const cmsUsersRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.patch('/editors/:id', {
         preHandler: [requirePermission(Permission.EDITORS_MANAGE)],
         schema: {
+            hide: true,
             tags: ['cms-users'],
             summary: 'Update an editor',
             params: cmsUserIdSchema,
@@ -99,6 +104,7 @@ const cmsUsersRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.delete('/editors/:id', {
         preHandler: [requirePermission(Permission.EDITORS_MANAGE)],
         schema: {
+            hide: true,
             tags: ['cms-users'],
             summary: 'Delete an editor',
             params: cmsUserIdSchema,
@@ -114,6 +120,7 @@ const cmsUsersRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.get('/:id', {
         preHandler: [requirePermission(Permission.EDITORS_MANAGE)],
         schema: {
+            hide: true,
             tags: ['cms-users'],
             summary: 'Get a CMS user by ID',
             params: cmsUserIdSchema,

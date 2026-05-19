@@ -8,6 +8,7 @@ import BlogsTab from '../../components/admin/BlogsTab'
 import BlogsTabContent from '../../components/admin/BlogsTabContent'
 import ProductionManagementSection, { type ProductionItem } from '../../components/admin/blogs/ProductionManagementSection'
 import { BlogBannerUploadSection } from '../../components/admin/blogs/BlogBannerUploadSection'
+import type { ProductionPickerFilters } from '../../components/admin/blogs/ProductionPickerPopup'
 import {
     formatBlogDetailForForm,
     validateBlogPublishInput,
@@ -123,11 +124,20 @@ function CreateBlogPage() {
 
     const [productions, setProductions] = useState<ProductionItem[]>([])
     const [selectedProductionIds, setSelectedProductionIds] = useState<string[]>([])
-    const [productionToAdd, setProductionToAdd] = useState('')
+    const [productionsToAdd, setProductionsToAdd] = useState<string[]>([])
+    const [stagedProductionsToAdd, setStagedProductionsToAdd] = useState<ProductionItem[]>([])
     const [productionSearchQuery, setProductionSearchQuery] = useState('')
+    const [productionPage, setProductionPage] = useState(1)
+    const [hasMoreProductions, setHasMoreProductions] = useState(false)
+    const [productionFilters, setProductionFilters] = useState<ProductionPickerFilters>({
+        yearFrom: 1982,
+        yearTo: new Date().getFullYear(),
+        location: '',
+    })
     const [isProductionPopupOpen, setIsProductionPopupOpen] = useState(false)
     const [isLoadingProductions, setIsLoadingProductions] = useState(false)
     const [productionsError, setProductionsError] = useState('')
+    const isLoadingProductionsRef = useRef(false)
 
     const [blogImages, setBlogImages] = useState<string[]>([])
     const [thumbnailIndex, setThumbnailIndex] = useState<number | null>(null)
@@ -219,20 +229,30 @@ function CreateBlogPage() {
         const abortController = new AbortController()
 
         const fetchProductions = async () => {
+            isLoadingProductionsRef.current = true
             setIsLoadingProductions(true)
             setProductionsError('')
 
             try {
                 const query = productionSearchQuery.trim()
+                const location = productionFilters.location.trim()
                 const params = new URLSearchParams({
-                    page: '1',
+                    page: String(productionPage),
                     limit: '100',
-                    sort: 'relevance',
+                    sort: query ? 'relevance' : 'recent',
                     lang: locale,
+                    pastOnly: 'false',
+                    draft: 'all',
+                    yearFrom: String(productionFilters.yearFrom),
+                    yearTo: String(productionFilters.yearTo),
                 })
 
                 if (query) {
                     params.set('search', query)
+                }
+
+                if (location) {
+                    params.set('locations', location)
                 }
 
                 const endpoint = `/archive/productions?${params.toString()}`
@@ -241,19 +261,10 @@ function CreateBlogPage() {
                     signal: abortController.signal,
                 })
 
-                setProductions(mergeUniqueProductions(response.data))
-
-                setProductionToAdd((current) => {
-                    if (response.data.length === 0) {
-                        return ''
-                    }
-
-                    if (response.data.some((production) => production.id === current)) {
-                        return current
-                    }
-
-                    return response.data[0].id
-                })
+                setProductions((current) => productionPage === 1
+                    ? response.data
+                    : mergeUniqueProductions([...current, ...response.data]))
+                setHasMoreProductions((response.meta?.page ?? productionPage) < (response.meta?.totalPages ?? productionPage))
             } catch (loadError) {
                 if (abortController.signal.aborted) {
                     return
@@ -262,6 +273,7 @@ function CreateBlogPage() {
                 setProductionsError(loadError instanceof Error ? loadError.message : 'Failed to load productions.')
             } finally {
                 if (!abortController.signal.aborted) {
+                    isLoadingProductionsRef.current = false
                     setIsLoadingProductions(false)
                 }
             }
@@ -272,7 +284,7 @@ function CreateBlogPage() {
         return () => {
             abortController.abort()
         }
-    }, [productionSearchQuery, locale])
+    }, [productionFilters, productionSearchQuery, locale, productionPage])
 
     useEffect(() => {
         const missingIds = selectedProductionIds.filter((id) => !productions.some((production) => production.id === id))
@@ -320,6 +332,14 @@ function CreateBlogPage() {
     const availableProductions = useMemo(
         () => productions.filter((production) => !selectedProductionIds.includes(production.id)),
         [productions, selectedProductionIds],
+    )
+
+    const pickerProductions = useMemo(
+        () => mergeUniqueProductions([
+            ...stagedProductionsToAdd.filter((production) => productionsToAdd.includes(production.id)),
+            ...availableProductions,
+        ]),
+        [availableProductions, productionsToAdd, stagedProductionsToAdd],
     )
 
     const setTab = (key: Locale) => {
@@ -569,29 +589,48 @@ function CreateBlogPage() {
         requestPublish()
     }
 
-    const addProduction = () => {
-        if (!productionToAdd || selectedProductionIds.includes(productionToAdd)) {
+    const addProduction = (productionIds: string[]) => {
+        const productionIdsToAdd = productionIds.filter((id) => !selectedProductionIds.includes(id))
+        if (productionIdsToAdd.length === 0) {
             return
         }
 
-        setSelectedProductionIds((current) => [...current, productionToAdd])
-        const nextAvailable = availableProductions.find((production) => production.id !== productionToAdd)
-        setProductionToAdd(nextAvailable?.id ?? '')
+        setSelectedProductionIds((current) => [...current, ...productionIdsToAdd])
+        setStagedProductionsToAdd([])
+        setProductionsToAdd([])
         setIsProductionPopupOpen(false)
     }
 
     const removeProduction = (productionId: string) => {
         setSelectedProductionIds((current) => current.filter((id) => id !== productionId))
-        const firstAvailable = productions.find((p) => !selectedProductionIds.includes(p.id))
-        if (firstAvailable && !productionToAdd) {
-            setProductionToAdd(firstAvailable.id)
+    }
+
+    const changeProductionSearchQuery = (query: string) => {
+        isLoadingProductionsRef.current = false
+        setProductionSearchQuery(query)
+        setProductionPage(1)
+        setHasMoreProductions(false)
+    }
+
+    const changeProductionFilters = (filters: ProductionPickerFilters) => {
+        isLoadingProductionsRef.current = false
+        setProductionFilters(filters)
+        setProductionPage(1)
+        setHasMoreProductions(false)
+    }
+
+    const loadMoreProductions = () => {
+        if (isLoadingProductionsRef.current || !hasMoreProductions) {
+            return
         }
+
+        isLoadingProductionsRef.current = true
+        setProductionPage((current) => current + 1)
     }
 
     const openProductionPopup = () => {
-        if (!productionToAdd && availableProductions.length > 0) {
-            setProductionToAdd(availableProductions[0].id)
-        }
+        setStagedProductionsToAdd([])
+        setProductionsToAdd([])
         setIsProductionPopupOpen(true)
     }
 
@@ -669,16 +708,26 @@ function CreateBlogPage() {
 
             <ProductionManagementSection
                 selectedProductions={selectedProductions}
-                availableProductions={availableProductions}
-                productionToAdd={productionToAdd}
+                availableProductions={pickerProductions}
+                productionsToAdd={productionsToAdd}
                 productionSearchQuery={productionSearchQuery}
+                productionFilters={productionFilters}
                 isProductionPopupOpen={isProductionPopupOpen}
                 isLoadingProductions={isLoadingProductions}
+                hasMoreProductions={hasMoreProductions}
                 productionsError={productionsError}
                 onOpenPopup={openProductionPopup}
                 onClosePopup={() => setIsProductionPopupOpen(false)}
-                onSelectProductionToAdd={setProductionToAdd}
-                onProductionSearchQueryChange={setProductionSearchQuery}
+                onSelectProductionsToAdd={(productionIds) => {
+                    setStagedProductionsToAdd((current) => mergeUniqueProductions([
+                        ...current,
+                        ...availableProductions.filter((production) => productionIds.includes(production.id)),
+                    ]))
+                    setProductionsToAdd(productionIds)
+                }}
+                onProductionSearchQueryChange={changeProductionSearchQuery}
+                onProductionFiltersChange={changeProductionFilters}
+                onLoadMoreProductions={loadMoreProductions}
                 onAddProduction={addProduction}
                 onRemoveProduction={removeProduction}
             />

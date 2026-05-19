@@ -425,6 +425,18 @@ button:disabled {
 	cursor: pointer;
 }
 
+.production-picker-range .range-track-active {
+	background: #8224e3;
+}
+
+.production-picker-range .range-input::-webkit-slider-thumb {
+	background: #8224e3;
+}
+
+.production-picker-range .range-input::-moz-range-thumb {
+	background: #8224e3;
+}
+
 @media (min-width: 1024px) {
 	.search-main-rail {
 		width: auto;
