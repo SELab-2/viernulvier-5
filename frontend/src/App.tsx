@@ -80,6 +80,24 @@ function App() {
                             />
                         ))}
                         <Route
+                            path="/nl/admin"
+                            element={
+                                <AdminEntryRoute
+                                    loginPath={adminRoutes.loginPath}
+                                    dashboardPath={`/nl${adminRoutes.dashboardPath}`}
+                                />
+                            }
+                        />
+                        <Route
+                            path="/en/admin"
+                            element={
+                                <AdminEntryRoute
+                                    loginPath={adminRoutes.loginPath}
+                                    dashboardPath={`/en${adminRoutes.dashboardPath}`}
+                                />
+                            }
+                        />
+                        <Route
                             path={adminRoutes.dashboardPath}
                             element={
                                 <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
