@@ -16,13 +16,13 @@ const recentItemSchema = z.object({
     title: z.string(),
     type: z.string(),
     status: z.enum(['available']),
-    languageStatus: languageStatusSchema,
+    languageStatus: languageStatusSchema.optional(),
     updated_at: z.date(),
 })
 
 const countsSchema = z.object({
     productions: z.number().int().nonnegative(),
-    events: z.number().int().nonnegative(),
+    posters: z.number().int().nonnegative(),
     blogs: z.number().int().nonnegative(),
     mediaItems: z.number().int().nonnegative(),
     editors: z.number().int().nonnegative(),
@@ -41,6 +41,7 @@ export const dashboardSummarySchema = z.object({
         deltas: z.object({
             productions: deltaSchema,
             blogs: deltaSchema,
+            posters: deltaSchema,
         }),
     }),
 })
