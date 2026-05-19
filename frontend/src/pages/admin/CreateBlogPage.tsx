@@ -487,7 +487,7 @@ function CreateBlogPage() {
                 createdBlogId = response.data.id
             }
 
-            navigate(`/admin/blogs/${createdBlogId}`)
+            navigate(`/admin/drafts/blogs`)
         } catch (saveError) {
             setError(saveError instanceof Error ? saveError.message : 'Failed to save draft.')
             setIsUploadingImages(false)
