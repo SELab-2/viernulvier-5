@@ -268,7 +268,7 @@ describe('Media Routes', () => {
                 method: 'POST',
                 url: '/api/v1/archive/media/items/crops',
                 headers: { authorization: `Bearer ${token}` },
-                payload: { name: 'New Crop', url: 'http://test.com/new.jpg' }
+                payload: { name: 'New Crop', url: 'http://test.com/new.jpg'}
             })
             expect(response.statusCode).toBe(201)
             const body = JSON.parse(response.payload)
