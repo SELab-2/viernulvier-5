@@ -6,16 +6,19 @@ import { dashboardSummarySchema, dashboardSummaryQuerySchema } from './dashboard
 import { requirePermission } from '../../hooks/require-permission.js'
 import { Permission } from '../../domain/permissions.js'
 import { BlogsRepository } from '../blogs/blogs.repository.js'
+import { PostersRepository } from '../posters/posters.repository.js'
 
 const dashboardRoutes: FastifyPluginAsync = async (fastify) => {
     const blogsRepository = new BlogsRepository(fastify.prisma)
-    const repository = new DashboardRepository(fastify.prisma, blogsRepository)
+    const postersRepository = new PostersRepository(fastify.prisma)
+    const repository = new DashboardRepository(fastify.prisma, blogsRepository, postersRepository)
     const service = new DashboardService(repository)
     const controller = new DashboardController(service)
 
     fastify.get('/summary', {
         preHandler: [requirePermission(Permission.ARCHIVE_READ)],
         schema: {
+            hide: true,
             tags: ['dashboard'],
             summary: 'Get admin dashboard summary',
             querystring: dashboardSummaryQuerySchema,

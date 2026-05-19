@@ -20,7 +20,7 @@ describe('useDashboardSummary', () => {
       data: {
         counts: {
           productions: 1,
-          events: 2,
+          posters: 2,
           blogs: 0,
           mediaItems: 3,
           editors: 4,

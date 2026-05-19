@@ -68,6 +68,8 @@ export type Messages = {
     noResults: string
     loadErrorPrefix: string
     searchPlaceholder: string
+    blogPageSearchPlaceholder: string
+    blogPageSubtitle: string
     fallbackUntitled: string
     fallbackTag: string
     fallbackVenue: string
@@ -254,7 +256,6 @@ export type Messages = {
       dashboardIconAlt: string
       productionsIconAlt: string
       postersIconAlt: string
-      galleryIconAlt: string
       organisationIconAlt: string
       settingsIconAlt: string
     }
@@ -285,6 +286,7 @@ export type Messages = {
       statProductions: string
       statBlogConcepts: string
       statVisitors: string
+      statPosters: string
       statMediaItems: string
       deltaVsLastMonth: string
       statLastSync: string
@@ -390,6 +392,15 @@ export type Messages = {
       addButton: string
       close: string
       queryHint: string
+      filtersLabel: string
+      periodLabel: string
+      locationLabel: string
+      locationPlaceholder: string
+      stagedLabel: string
+      selectedCount: (count: number) => string
+      readyCount: (count: number) => string
+      loading: string
+      loadingMore: string
       noProductionFound:string
     }
     bannerUpload: {
