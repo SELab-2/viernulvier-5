@@ -153,6 +153,8 @@ function mockEditBlog(overrides?: {
   title?: string
   content?: { nl?: string | null; en?: string | null }
   productions?: string[]
+  images?: string[]
+  thumbnail_index?: number | null
 }) {
   apiMock.get.mockImplementation(async (endpoint: string) => {
     if (endpoint === '/archive/blogs/blog-123') {
@@ -165,6 +167,8 @@ function mockEditBlog(overrides?: {
             en: 'Existing content',
           },
           productions: overrides?.productions ?? [],
+          images: overrides?.images ?? [],
+          thumbnail_index: overrides?.thumbnail_index ?? null,
         },
       }
     }
@@ -361,6 +365,73 @@ describe('CreateBlogPage', () => {
 
     const body = JSON.parse(String(patchCall?.[1]?.body))
     expect(body.title).toEqual({ nl: 'Aangepaste titel', en: 'Existing title' })
+  })
+
+  it('keeps a shifted thumbnail when deleting an earlier image before publish', async () => {
+    mockEditBlog({
+      images: ['a.jpg', 'b.jpg', 'c.jpg', 'd.jpg'],
+      thumbnail_index: 3,
+    })
+
+    renderEditPage()
+
+    await waitFor(() => {
+      expect(apiMock.get).toHaveBeenCalledWith('/archive/blogs/blog-123')
+    })
+
+    const deleteButtons = screen.getAllByLabelText(messages.blogs.bannerUpload.deleteImageAriaLabel)
+    fireEvent.click(deleteButtons[2])
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'Publiceren' })[0])
+
+    await waitFor(() => {
+      const deleteCallIndex = apiFetchMock.mock.calls.findIndex(
+        ([endpoint, options]) => endpoint === '/archive/blogs/blog-123/images/2' && options?.method === 'DELETE',
+      )
+      const patchCallIndex = apiFetchMock.mock.calls.findIndex(
+        ([endpoint, options]) => endpoint === '/archive/blogs/blog-123' && options?.method === 'PATCH',
+      )
+
+      expect(deleteCallIndex).toBeGreaterThan(-1)
+      expect(patchCallIndex).toBeGreaterThan(deleteCallIndex)
+    })
+
+    const patchCall = apiFetchMock.mock.calls.find(([endpoint, options]) => endpoint === '/archive/blogs/blog-123' && options?.method === 'PATCH')
+    expect(patchCall).toBeDefined()
+
+    const body = JSON.parse(String(patchCall?.[1]?.body))
+    expect(body.thumbnail_index).toBe(2)
+  })
+
+  it('saves a thumbnail selection for existing images on publish', async () => {
+    mockEditBlog({
+      images: ['a.jpg', 'b.jpg'],
+      thumbnail_index: 1,
+    })
+
+    renderEditPage()
+
+    await waitFor(() => {
+      expect(apiMock.get).toHaveBeenCalledWith('/archive/blogs/blog-123')
+    })
+
+    fireEvent.click(screen.getByAltText('Blog image 1'))
+    expect(screen.getByText(messages.blogs.bannerUpload.coverLabel)).toBeInTheDocument()
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'Publiceren' })[0])
+
+    await waitFor(() => {
+      expect(apiFetchMock).toHaveBeenCalledWith(
+        '/archive/blogs/blog-123',
+        expect.objectContaining({ method: 'PATCH', body: expect.any(String) }),
+      )
+    })
+
+    const patchCall = apiFetchMock.mock.calls.find(([endpoint, options]) => endpoint === '/archive/blogs/blog-123' && options?.method === 'PATCH')
+    expect(patchCall).toBeDefined()
+
+    const body = JSON.parse(String(patchCall?.[1]?.body))
+    expect(body.thumbnail_index).toBe(0)
   })
 
   it('deletes a blog after confirmation', async () => {
@@ -640,6 +711,11 @@ describe('CreateBlogPage', () => {
         expect(body.files[0].file_name).toBe('test.png')
         expect(body.thumbnail_index).toBe(0)
       })
+
+      expect(apiMock.post).toHaveBeenCalledWith(
+        '/archive/blogs',
+        expect.not.objectContaining({ thumbnail_index: expect.anything() }),
+      )
     } finally {
       // Restore FileReader
       if (origFileReaderDescriptor) {
