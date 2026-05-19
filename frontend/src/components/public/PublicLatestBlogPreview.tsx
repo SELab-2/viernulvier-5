@@ -37,7 +37,7 @@ function PublicLatestBlogPreview({ blog, locale, fallbackUntitled, onReadMore, o
     let previewImageClassName = 'h-full w-full object-cover'
     
     // If no valid thumbnail, select fallback image
-    if (blog.images.length > 0 && blog.thumbnail_index >= 0 && blog.thumbnail_index < blog.images.length) {
+    if (blog.images && blog.images.length > 0 && blog.thumbnail_index >= 0 && blog.thumbnail_index < blog.images.length) {
         previewImageSrc = blog.images[blog.thumbnail_index]
     } else {
         previewImageSrc = '/fallback-hero.svg'
