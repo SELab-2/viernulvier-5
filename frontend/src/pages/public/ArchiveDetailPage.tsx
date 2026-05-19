@@ -52,7 +52,11 @@ function ArchiveDetailPageContent() {
     }
 
     const handleGoBack = () => {
-        navigate(-1)
+        if (window.history.state?.idx > 0) {
+            navigate(-1)
+        } else {
+            navigate(withLocalePath('/', locale))
+        }
     }
 
     const formatHtml = (html: string) => {
