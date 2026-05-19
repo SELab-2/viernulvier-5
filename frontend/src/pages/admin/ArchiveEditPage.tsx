@@ -20,6 +20,9 @@ import { useTagInput } from '../../components/admin/hooks/useTagInput'
 import { getGenresByProductionId } from '../../api/genres'
 import { getTagsByProductionId } from '../../api/tags'
 import { loadGallerySlots, saveGallerySlots, type ImageSlot } from '../../api/media'
+import { createLocation } from '../../api/locations'
+import { createSpace } from '../../api/spaces'
+import { createHall } from '../../api/halls'
 
 const defaultLocalizedText: LocalizedText = {
     nl: '',
@@ -438,6 +441,31 @@ function ArchiveEditPage() {
             [field]: value
         }))
     }
+
+    const createEventLocation = async (name: string, address: string) => {
+        const trimmedName = name.trim()
+        const trimmedAddress = address.trim()
+
+        const localizedName = { nl: trimmedName }
+
+        const locationRes = await createLocation({
+            name: localizedName,
+            street: trimmedAddress,
+        })
+
+        const spaceRes = await createSpace({
+            name: localizedName,
+            location_id: locationRes.data.id,
+        })
+
+        const hallRes = await createHall({
+            name: localizedName,
+            space_id: spaceRes.data.id,
+        })
+
+        editingEventHallState.clear()
+        editingEventHallState.add(hallRes.data.id, hallRes.data.name)
+    }
     
 
     // ---- Production manipulation functions ----
@@ -551,6 +579,7 @@ function ArchiveEditPage() {
                     hall={editingEventHallState}
                     isEdit={editingEvent !== undefined}
                     onSave={addEvent}
+                    onCreateLocation={createEventLocation}
                     onClose={() => {
                         setPopupOpen(false);
                         editingEventHallState.clear();

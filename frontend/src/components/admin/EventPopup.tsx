@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import type { Event } from "../../types/event"
 import FuzzyTagInput from "./FuzzyTagInput"
 import type { useTagInput } from "./hooks/useTagInput"
@@ -9,6 +10,7 @@ type EventPopupProps = {
     onClose: () => void
     onSave: () => void
     onChange: (field: keyof Event, value: string) => void
+    onCreateLocation: (name: string, address: string) => Promise<void>
 
     saveButtonLabel: string
     editLabel: string
@@ -30,6 +32,7 @@ function EventPopup({
     onClose,
     onSave,
     onChange,
+    onCreateLocation,
 
     saveButtonLabel,
     editLabel,
@@ -38,6 +41,44 @@ function EventPopup({
     locationLabel,
     commentLabel,
 }: EventPopupProps) {
+    const [isCreatingLocation, setIsCreatingLocation] = useState(false)
+    const [showCreateLocationForm, setShowCreateLocationForm] = useState(false)
+    const [newLocationName, setNewLocationName] = useState('')
+    const [newLocationAddress, setNewLocationAddress] = useState('')
+    const [createLocationError, setCreateLocationError] = useState<string | null>(null)
+    const hasSelectedHall = hall.items.length > 0
+
+    useEffect(() => {
+        // Once a hall is selected (also after creating a new one), hide the create form.
+        if (hasSelectedHall) {
+            setShowCreateLocationForm(false)
+            setCreateLocationError(null)
+        }
+    }, [hasSelectedHall])
+
+    const handleCreateLocation = async () => {
+        const trimmedName = newLocationName.trim()
+        const trimmedAddress = newLocationAddress.trim()
+
+        if (!trimmedName || !trimmedAddress) {
+            setCreateLocationError('Naam en adres zijn verplicht.')
+            return
+        }
+
+        setIsCreatingLocation(true)
+        setCreateLocationError(null)
+
+        try {
+            await onCreateLocation(trimmedName, trimmedAddress)
+            setNewLocationName('')
+            setNewLocationAddress('')
+            setShowCreateLocationForm(false)
+        } catch (error) {
+            setCreateLocationError(error instanceof Error ? error.message : 'Aanmaken van locatie is mislukt.')
+        } finally {
+            setIsCreatingLocation(false)
+        }
+    }
 
     return (
         <div
@@ -106,6 +147,53 @@ function EventPopup({
                                 onChange={hall.setInput}
                                 amountOfTags={1}
                             />
+
+                            {!hasSelectedHall ? (
+                                <button
+                                    type="button"
+                                    className="text-xs text-accent hover:underline"
+                                    onClick={() => {
+                                        setShowCreateLocationForm((prev) => !prev)
+                                        setCreateLocationError(null)
+                                    }}
+                                >
+                                    + nieuwe locatie
+                                </button>
+                            ) : null}
+
+                            {!hasSelectedHall && showCreateLocationForm ? (
+                                <div className="space-y-2 rounded-md border border-border bg-surface p-3">
+                                    <input
+                                        type="text"
+                                        value={newLocationName}
+                                        onChange={(e) => setNewLocationName(e.target.value)}
+                                        placeholder="Naam"
+                                        className="w-full h-10 px-3 rounded-lg border border-border bg-background text-foreground"
+                                    />
+                                    <input
+                                        type="text"
+                                        value={newLocationAddress}
+                                        onChange={(e) => setNewLocationAddress(e.target.value)}
+                                        placeholder="Adres"
+                                        className="w-full h-10 px-3 rounded-lg border border-border bg-background text-foreground"
+                                    />
+                                    {createLocationError ? (
+                                        <p className="text-xs text-red-500">{createLocationError}</p>
+                                    ) : null}
+                                    <div className="flex justify-end">
+                                        <button
+                                            type="button"
+                                            className="rounded-full bg-accent px-3 py-1.5 text-xs font-medium text-white disabled:opacity-50"
+                                            onClick={() => {
+                                                void handleCreateLocation()
+                                            }}
+                                            disabled={isCreatingLocation}
+                                        >
+                                            {isCreatingLocation ? 'Bezig...' : 'Locatie toevoegen'}
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : null}
                         </div>
 
                         {/* TAGS */}
