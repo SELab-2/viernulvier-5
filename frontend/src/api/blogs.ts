@@ -26,6 +26,8 @@ export const blogSchema = z.object({
         .optional(),
     content: z.record(z.string(), z.unknown()).nullable().optional(),
     productions: z.array(z.string()).optional(),
+    images: z.array(z.string().nullable()).optional(),
+    thumbnail_index: z.number().nullable().optional(),
     created_at: z.coerce.date().optional(),
     updated_at: z.coerce.date().optional(),
     links: z
