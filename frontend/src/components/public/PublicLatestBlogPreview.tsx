@@ -40,9 +40,13 @@ function PublicLatestBlogPreview({ blog, locale, fallbackUntitled, onReadMore, o
             <article className="site-container grid items-stretch gap-12 lg:grid-cols-[1fr_auto_1.1fr]">
                 <div className="relative h-[420px] overflow-hidden border border-border bg-surface sm:h-[560px]" aria-hidden="true">
                     <img
-                        src="/fallback-hero.svg"
+                        src={
+                            Array.isArray(blog.images) && typeof blog.thumbnail_index === 'number' && blog.images[blog.thumbnail_index]
+                                ? blog.images[blog.thumbnail_index] || '/fallback-hero.svg'
+                                : '/fallback-hero.svg'
+                        }
                         alt=""
-                        className="h-full w-full object-cover opacity-70"
+                        className="h-full w-full object-cover rounded-lg"
                     />
                 </div>
                 <div aria-hidden className="hidden w-px self-stretch bg-foreground/25 lg:block" />
