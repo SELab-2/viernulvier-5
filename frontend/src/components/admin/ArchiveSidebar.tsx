@@ -1,7 +1,7 @@
 import FuzzyTagInput from "./FuzzyTagInput"
 import { useState, useEffect } from "react"
 import type { useTagInput } from "./hooks/useTagInput"
-import { getItemCrops, resolveCropUrl, type ImageSlot } from "../../api/media"
+import { type ImageSlot } from "../../api/media"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -54,18 +54,8 @@ function ImageSlotChip({ slot, onRemove }: { slot: ImageSlot; onRemove: () => vo
         }
 
         if (slot.kind === 'existing') {
-            // fetch crops for the item and find the specific crop by id,
-            // then resolve the crop.url to a usable image src
-            ;(async () => {
-                try {
-                    const res = await getItemCrops(slot.item_id)
-                    const crop = res.data.find(c => c.id === slot.crop_id)
-                    const src = resolveCropUrl(crop?.url ?? null)
-                    safeSet(src)
-                } catch {
-                    safeSet(null)
-                }
-            })()
+            // Use stable image endpoint so previews work across admin/public hosts.
+            safeSet(`/api/v1/images/${slot.crop_id}`)
         } else {
             // Pending: create a temporary object URL and set state asynchronously
             const url = URL.createObjectURL(slot.file)

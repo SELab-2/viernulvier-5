@@ -108,31 +108,34 @@ export async function loadGallerySlots(galleryId: string): Promise<{
     const items = galleryRes.data
  
     if (items.length === 0) return { banner: null, extras: [] }
- 
-    // First item → banner
-    const firstCrops = await getItemCrops(items[0].id)
-    const bannerCrop = firstCrops.data.find(c => c.name === 'FE3_header')
-        ?? firstCrops.data.find(c => c.name === 'FE3_boxed')
-        ?? null
- 
+
+    const itemsWithCrops = await Promise.all(
+        items.map(async (item) => ({
+            item,
+            crops: (await getItemCrops(item.id)).data,
+        }))
+    )
+
+    // Only FE3_header represents the banner crop.
+    const bannerEntry = itemsWithCrops.find(({ crops }) => crops.some((c) => c.name === 'FE3_header'))
+    const bannerCrop = bannerEntry?.crops.find((c) => c.name === 'FE3_header') ?? null
+
     const banner: ImageSlot | null = bannerCrop
-        ? { kind: 'existing', crop_id: bannerCrop.id, item_id: items[0].id }
+        ? { kind: 'existing', crop_id: bannerCrop.id, item_id: bannerEntry!.item.id }
         : null
- 
-    // Remaining items → extras
-    const remainingItems = items.slice(1)
-    const extrasCrops = await Promise.all(remainingItems.map(item => getItemCrops(item.id)))
- 
-    const extras: ImageSlot[] = extrasCrops
-        .map<ImageSlot | null>((res, i) => {
-            const crop = res.data.find(c => c.name === 'FE3_boxed')
-                ?? res.data.find(c => c.name === 'FE3_header')
+
+    // All non-banner items are extras.
+    const extras: ImageSlot[] = itemsWithCrops
+        .filter(({ item }) => item.id !== bannerEntry?.item.id)
+        .map<ImageSlot | null>(({ item, crops }) => {
+            const crop = crops.find(c => c.name === 'FE3_boxed')
+                ?? crops.find(c => c.name === 'FE3_header')
                 ?? null
             if (!crop) return null
             return {
                 kind: 'existing' as const,
                 crop_id: crop.id,
-                item_id: remainingItems[i].id,
+                item_id: item.id,
             }
         })
         .filter((s): s is ImageSlot => s !== null)
