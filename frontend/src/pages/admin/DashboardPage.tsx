@@ -1,13 +1,11 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useAdminMessages } from '../../components/admin/AdminMessagesContext'
 import AdminLayout from '../../components/admin/AdminLayout'
 import { buildStatCards, pillClasses } from '../../components/admin/hooks/dashboardStatCards'
 import { useDashboardFormatters } from '../../components/admin/hooks/useDashboardFormatters'
 import { useDashboardSummary } from '../../components/admin/hooks/useDashboardSummary'
 import { usePagination } from '../../components/admin/hooks/usePagination'
-import { ProductionsTable } from '../../components/admin/ProductionsTable.tsx'
-import {getAdminRouteConfig} from "../../admin/paths.ts";
+import { getAdminRouteConfig } from '../../admin/paths'
 
 const PAGE_SIZE_OPTIONS = [3, 6, 9, 12, 15, 18] as const
 type FixedPageSize = (typeof PAGE_SIZE_OPTIONS)[number]
@@ -19,6 +17,23 @@ const ROW_HEIGHT_PX = 72
 const CHROME_HEIGHT_PX = 520
 const MIN_AUTO_ROWS: FixedPageSize = 3
 const MAX_AUTO_ROWS: FixedPageSize = 18
+
+type DashboardActionRoutes = {
+  viewPath: string
+  editPath: string
+}
+
+function getDashboardActionRoutes(item: { id: string; type: string }, publicPath: (path: string) => string): DashboardActionRoutes {
+  if (item.type === 'Blog') {
+    return { viewPath: publicPath(`/blogs/${item.id}`), editPath: `/admin/blogs/${item.id}/edit` }
+  }
+
+  if (item.type === 'Poster') {
+    return { viewPath: publicPath(`/posters/${item.id}`), editPath: '/admin/posters' }
+  }
+
+  return { viewPath: publicPath(`/archive/${item.id}`), editPath: `/admin/archive/${item.id}/edit` }
+}
 
 function readStoredPageSize(): PageSizeSetting {
   if (typeof window === 'undefined') {
@@ -32,8 +47,8 @@ function readStoredPageSize(): PageSizeSetting {
 
   const parsed = raw === null ? NaN : Number(raw)
   return (PAGE_SIZE_OPTIONS as readonly number[]).includes(parsed)
-      ? (parsed as FixedPageSize)
-      : DEFAULT_PAGE_SIZE_SETTING
+    ? (parsed as FixedPageSize)
+    : DEFAULT_PAGE_SIZE_SETTING
 }
 
 function computeAutoPageSize(viewportHeightPx: number): FixedPageSize {
@@ -55,8 +70,6 @@ type DashboardPageContentProps = {
 }
 
 function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
-  const navigate = useNavigate()
-  const {archiveEditPath} = getAdminRouteConfig(window.location.hostname)
   const messages = useAdminMessages()
   const d = messages.admin.dashboard
   const [pageSizeSetting, setPageSizeSetting] = useState<PageSizeSetting>(readStoredPageSize)
@@ -86,6 +99,7 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
     }
   }
 
+  const { publicPath } = getAdminRouteConfig(window.location.hostname)
   const { summary, isLoading, error } = useDashboardSummary({ page, limit: pageSize })
 
   useEffect(() => {
@@ -102,10 +116,6 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
   })
 
   const recentItems = summary?.recentItems ?? []
-  const recentItemsWithDetail = recentItems.map((item) => ({
-    ...item,
-    detailHref: `/archive/${item.id}`,
-  }))
   const total = summary?.totalRecentItems ?? 0
   const totalPages = Math.max(1, Math.ceil(total / pageSize))
   const { items: paginationItems, from, to } = usePagination({
@@ -172,15 +182,130 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
           <h2 className="text-2xl leading-9 font-normal tracking-[-0.04em] text-[#0f172a] dark:text-white">{d.recentlyEdited}</h2>
         </div>
 
-          <div className="overflow-hidden rounded-[12px] border border-[var(--color-admin-card-border)] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.05)] dark:bg-[#111318]">
-            <ProductionsTable
-              items={recentItemsWithDetail}
-                isLoading={isLoading}
-                pageSize={pageSize}
-                onEdit={(id) => navigate(archiveEditPath.replace(':id', id))}
-            />
-          </div>
+        <div className="overflow-hidden rounded-[12px] border border-[var(--color-admin-card-border)] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.05)] dark:bg-[#111318]">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[560px] table-fixed border-collapse">
+              <colgroup>
+                <col className="w-[36%]" />
+                <col className="w-[14%]" />
+                <col className="w-[12%]" />
+                <col className="w-[18%]" />
+                <col className="w-[20%]" />
+              </colgroup>
+              <thead className="bg-[rgba(248,250,252,0.7)] dark:bg-slate-900/60">
+                <tr>
+                  {[
+                    d.tableColTitle,
+                    d.tableColType,
+                    d.tableColLanguage,
+                    d.tableColDate,
+                    d.tableColActions,
+                  ].map((heading) => (
+                    <th
+                      key={heading}
+                      className="border-b border-[var(--color-admin-card-border)] px-4 py-4 text-left text-[11px] font-medium uppercase tracking-[0.1em] text-[#475569] dark:text-slate-400"
+                    >
+                      {heading}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {recentItems.map((item) => (
+                  <tr key={item.id} className="h-[72px] border-t border-slate-100 dark:border-slate-800">
+                    <td className="px-4 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-slate-100 text-xs font-semibold text-slate-500 dark:bg-slate-800 dark:text-slate-300">
+                          {item.title.slice(0, 2).toUpperCase()}
+                        </div>
+                        <span
+                          className="block min-w-0 flex-1 truncate text-base text-[#0f172a] dark:text-white"
+                          title={item.title}
+                        >
+                          {item.title}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-4">
+                      <span className="inline-block whitespace-nowrap rounded-full bg-slate-100 px-3 py-1 text-xs text-[#475569] dark:bg-slate-800 dark:text-[color:var(--color-text-muted)]">
+                        {item.type}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4">
+                      {item.languageStatus ? (
+                        <div className="flex gap-3 text-[9px] uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
+                          {(['nl', 'en'] as const).map((loc) => {
+                            const state = item.languageStatus?.[loc]
+                            const dotClass = state === 'complete'
+                              ? 'bg-[#10b981]'
+                              : state === 'attention'
+                                ? 'bg-[#f59e0b]'
+                                : 'bg-[#cbd5e1]'
+                            const tooltip = state === 'complete'
+                              ? d.languageStatusComplete
+                              : state === 'attention'
+                                ? d.languageStatusAttention
+                                : d.languageStatusMissing
 
+                            return (
+                              <span
+                                key={loc}
+                                className={`inline-block cursor-help rounded-sm focus:outline-none focus:ring-2 focus:ring-accent/40 ${state === 'missing' ? 'opacity-40' : ''}`}
+                                title={tooltip}
+                                aria-label={`${loc.toUpperCase()}: ${tooltip}`}
+                                tabIndex={0}
+                              >
+                                <span className="block">{loc}</span>
+                                <span
+                                  aria-hidden="true"
+                                  className={`mt-1 block h-2 w-2 rounded-full ${dotClass}`}
+                                />
+                              </span>
+                            )
+                          })}
+                        </div>
+                      ) : null}
+                    </td>
+                    <td className="px-4 py-4 text-sm text-[#475569] dark:text-slate-300">{formatDate(item.updated_at)}</td>
+                    <td className="px-2 py-4">
+                      <div className="flex flex-wrap gap-1">
+                        {(() => {
+                          const routes = getDashboardActionRoutes(item, publicPath)
+
+                          return (
+                            <>
+                              <a href={routes.viewPath} className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white">
+                                {d.actionView}
+                              </a>
+                              <a href={routes.editPath} className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white">
+                                {d.actionEdit}
+                              </a>
+                            </>
+                          )
+                        })()}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {!isLoading && recentItems.length === 0 ? (
+                  <tr className="h-[72px]">
+                    <td colSpan={6} className="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+
+                      {d.emptyRecent}
+                    </td>
+                  </tr>
+                ) : null}
+                {!isLoading && recentItems.length > 0 && recentItems.length < pageSize
+                  ? Array.from({ length: pageSize - recentItems.length }).map((_, i) => (
+                      <tr key={`placeholder-${i}`} className="h-[72px] border-t border-slate-100 dark:border-slate-800" aria-hidden>
+                        <td colSpan={6} />
+                      </tr>
+                    ))
+                  : null}
+              </tbody>
+            </table>
+          </div>
+        </div>
 
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-4">

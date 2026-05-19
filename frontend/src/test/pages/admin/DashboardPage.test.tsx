@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent, within } from '@testing-library/react'
 import type { Messages } from '../../../i18n/types'
 import { AdminMessagesContext } from '../../../components/admin/AdminMessagesContext'
 import DashboardPage from '../../../pages/admin/DashboardPage'
@@ -35,8 +35,9 @@ const mockMessages = vi.hoisted(() => ({
       visitorsChange: 'placeholder',
       editorsActive: (count: number) => `${count} editors active`,
       statProductions: 'Productions',
-      statBlogConcepts: 'Blog Concepts',
+      statBlogConcepts: 'Blogs',
       statVisitors: 'Visitors',
+      statPosters: 'Posters',
       statMediaItems: 'Media Items',
       deltaVsLastMonth: 'vs last month',
       statLastSync: 'last sync',
@@ -81,7 +82,7 @@ describe('DashboardPage', () => {
     expect(screen.getByText('Dashboard')).toBeInTheDocument()
     expect(screen.getByText('Overview of archive activity.')).toBeInTheDocument()
     expect(screen.getByText('Loading dashboard...')).toBeInTheDocument()
-    expect(screen.getByText('Visitors')).toBeInTheDocument()
+    expect(screen.getByText('Posters')).toBeInTheDocument()
   })
 
   it('renders live summary data', async () => {
@@ -91,7 +92,7 @@ describe('DashboardPage', () => {
       summary: {
         counts: {
           productions: 1284,
-          events: 42,
+          posters: 42,
           blogs: 7,
           mediaItems: 8492,
           editors: 3,
@@ -127,6 +128,92 @@ describe('DashboardPage', () => {
     })
   })
 
+
+  it('renders poster stat from summary data with delta', () => {
+    useDashboardSummaryMock.mockReturnValue({
+      isLoading: false,
+      error: null,
+      summary: {
+        counts: { productions: 10, posters: 12, blogs: 3, mediaItems: 100, editors: 2 },
+        totalRecentItems: 0,
+        lastScrapedAt: null,
+        recentItems: [],
+        deltas: {
+          productions: { changePct: null, direction: 'flat' },
+          blogs: { changePct: null, direction: 'flat' },
+          posters: { changePct: 50, direction: 'up' },
+        },
+      },
+    })
+
+    render(<MemoryRouter><DashboardPage /></MemoryRouter>)
+
+    expect(screen.getByText('Posters')).toBeInTheDocument()
+    expect(screen.getAllByText('12').some((element) => element.tagName.toLowerCase() === 'p')).toBe(true)
+    expect(screen.getByText('+50%')).toBeInTheDocument()
+    expect(screen.queryByText('Visitors')).not.toBeInTheDocument()
+  })
+
+  it('links dashboard item actions to the matching view and edit routes', () => {
+    useDashboardSummaryMock.mockReturnValue({
+      isLoading: false,
+      error: null,
+      summary: {
+        counts: { productions: 1, posters: 1, blogs: 1, mediaItems: 0, editors: 0 },
+        totalRecentItems: 3,
+        lastScrapedAt: null,
+        recentItems: [
+          {
+            id: 'production-1',
+            title: 'Production row',
+            type: 'Productie',
+            status: 'available',
+            languageStatus: { nl: 'complete', en: 'complete' },
+            updated_at: '2026-01-03T00:00:00.000Z',
+          },
+          {
+            id: 'blog-1',
+            title: 'Blog row',
+            type: 'Blog',
+            status: 'available',
+            languageStatus: { nl: 'complete', en: 'complete' },
+            updated_at: '2026-01-02T00:00:00.000Z',
+          },
+          {
+            id: 'poster-1',
+            title: 'Poster row',
+            type: 'Poster',
+            status: 'available',
+            updated_at: '2026-01-01T00:00:00.000Z',
+          },
+        ],
+        deltas: {
+          productions: { changePct: null, direction: 'flat' },
+          blogs: { changePct: null, direction: 'flat' },
+          posters: { changePct: null, direction: 'flat' },
+        },
+      },
+    })
+
+    render(<MemoryRouter><DashboardPage /></MemoryRouter>)
+
+    const productionRow = screen.getByText('Production row').closest('tr')
+    const blogRow = screen.getByText('Blog row').closest('tr')
+    const posterRow = screen.getByText('Poster row').closest('tr')
+
+    expect(productionRow).not.toBeNull()
+    expect(blogRow).not.toBeNull()
+    expect(posterRow).not.toBeNull()
+    expect(within(productionRow as HTMLElement).getByRole('link', { name: 'View' })).toHaveAttribute('href', '/archive/production-1')
+    expect(within(productionRow as HTMLElement).getByRole('link', { name: 'Edit' })).toHaveAttribute('href', '/admin/archive/production-1/edit')
+    expect(within(blogRow as HTMLElement).getByRole('link', { name: 'View' })).toHaveAttribute('href', '/blogs/blog-1')
+    expect(within(blogRow as HTMLElement).getByRole('link', { name: 'Edit' })).toHaveAttribute('href', '/admin/blogs/blog-1/edit')
+    expect(within(posterRow as HTMLElement).queryByLabelText(/NL:/)).not.toBeInTheDocument()
+    expect(within(posterRow as HTMLElement).queryByLabelText(/EN:/)).not.toBeInTheDocument()
+    expect(within(posterRow as HTMLElement).getByRole('link', { name: 'View' })).toHaveAttribute('href', '/posters/poster-1')
+    expect(within(posterRow as HTMLElement).getByRole('link', { name: 'Edit' })).toHaveAttribute('href', '/admin/posters')
+  })
+
   it('renders empty state when no recent items exist', () => {
     useDashboardSummaryMock.mockReturnValue({
       isLoading: false,
@@ -134,7 +221,7 @@ describe('DashboardPage', () => {
       summary: {
         counts: {
           productions: 0,
-          events: 0,
+          posters: 0,
           blogs: 0,
           mediaItems: 0,
           editors: 0,
@@ -162,14 +249,14 @@ describe('DashboardPage', () => {
     expect(screen.getByText('Dashboard kon niet geladen worden.')).toBeInTheDocument()
   })
 
-  it('renders Blog Concepts label', () => {
+  it('renders Blogs label', () => {
     useDashboardSummaryMock.mockReturnValue({
       isLoading: false,
       error: null,
       summary: {
         counts: {
           productions: 10,
-          events: 5,
+          posters: 5,
           blogs: 3,
           mediaItems: 100,
           editors: 2,
@@ -186,7 +273,7 @@ describe('DashboardPage', () => {
 
     renderDashboard()
 
-    expect(screen.getByText('Blog Concepts')).toBeInTheDocument()
+    expect(screen.getByText('Blogs')).toBeInTheDocument()
   })
 
   it('productions pill shows +12% with green class when changePct=12 direction=up', () => {
@@ -194,7 +281,7 @@ describe('DashboardPage', () => {
       isLoading: false,
       error: null,
       summary: {
-        counts: { productions: 10, events: 5, blogs: 3, mediaItems: 100, editors: 2 },
+        counts: { productions: 10, posters: 5, blogs: 3, mediaItems: 100, editors: 2 },
         totalRecentItems: 0,
         lastScrapedAt: null,
         recentItems: [],
@@ -217,7 +304,7 @@ describe('DashboardPage', () => {
       isLoading: false,
       error: null,
       summary: {
-        counts: { productions: 10, events: 5, blogs: 3, mediaItems: 100, editors: 2 },
+        counts: { productions: 10, posters: 5, blogs: 3, mediaItems: 100, editors: 2 },
         totalRecentItems: 0,
         lastScrapedAt: null,
         recentItems: [],
@@ -238,7 +325,7 @@ describe('DashboardPage', () => {
       isLoading: false,
       error: null,
       summary: {
-        counts: { productions: 10, events: 5, blogs: 3, mediaItems: 100, editors: 2 },
+        counts: { productions: 10, posters: 5, blogs: 3, mediaItems: 100, editors: 2 },
         totalRecentItems: 0,
         lastScrapedAt: null,
         recentItems: [],
@@ -260,7 +347,7 @@ describe('DashboardPage', () => {
       isLoading: false,
       error: null,
       summary: {
-        counts: { productions: 10, events: 5, blogs: 3, mediaItems: 100, editors: 2 },
+        counts: { productions: 10, posters: 5, blogs: 3, mediaItems: 100, editors: 2 },
         totalRecentItems: 0,
         lastScrapedAt: null,
         recentItems: [],
@@ -283,7 +370,7 @@ describe('DashboardPage', () => {
       summary: {
         counts: {
           productions: 10,
-          events: 5,
+          posters: 5,
           blogs: 3,
           mediaItems: 100,
           editors: 2,
@@ -331,7 +418,7 @@ describe('DashboardPage', () => {
       summary: {
         counts: {
           productions: 0,
-          events: 0,
+          posters: 0,
           blogs: 0,
           mediaItems: 0,
           editors: 0,
@@ -354,7 +441,7 @@ describe('DashboardPage', () => {
       summary: {
         counts: {
           productions: 10,
-          events: 5,
+          posters: 5,
           blogs: 3,
           mediaItems: 100,
           editors: 2,
@@ -379,7 +466,7 @@ describe('DashboardPage', () => {
       summary: {
         counts: {
           productions: 10,
-          events: 5,
+          posters: 5,
           blogs: 3,
           mediaItems: 100,
           editors: 2,
@@ -403,7 +490,7 @@ describe('DashboardPage', () => {
       isLoading: false,
       error: null,
       summary: {
-        counts: { productions: 10, events: 5, blogs: 3, mediaItems: 100, editors: 2 },
+        counts: { productions: 10, posters: 5, blogs: 3, mediaItems: 100, editors: 2 },
         totalRecentItems: 30,
         lastScrapedAt: null,
         recentItems: [],
@@ -432,7 +519,7 @@ describe('DashboardPage', () => {
       isLoading: false,
       error: null,
       summary: {
-        counts: { productions: 10, events: 5, blogs: 3, mediaItems: 100, editors: 2 },
+        counts: { productions: 10, posters: 5, blogs: 3, mediaItems: 100, editors: 2 },
         totalRecentItems: 30,
         lastScrapedAt: null,
         recentItems: [],
@@ -457,7 +544,7 @@ describe('DashboardPage', () => {
       isLoading: false,
       error: null,
       summary: {
-        counts: { productions: 10, events: 5, blogs: 3, mediaItems: 100, editors: 2 },
+        counts: { productions: 10, posters: 5, blogs: 3, mediaItems: 100, editors: 2 },
         totalRecentItems: 7,
         lastScrapedAt: null,
         recentItems: [],

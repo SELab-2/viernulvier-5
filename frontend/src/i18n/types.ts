@@ -250,12 +250,13 @@ export type Messages = {
       blogs: string
       posters: string
       gallery: string
+      organisation: string
       settings: string
       dashboardIconAlt: string
       productionsIconAlt: string
       blogsIconAlt: string
       postersIconAlt: string
-      galleryIconAlt: string
+      organisationIconAlt: string
       settingsIconAlt: string
     }
     dashboard: {
@@ -285,6 +286,7 @@ export type Messages = {
       statProductions: string
       statBlogConcepts: string
       statVisitors: string
+      statPosters: string
       statMediaItems: string
       deltaVsLastMonth: string
       statLastSync: string
