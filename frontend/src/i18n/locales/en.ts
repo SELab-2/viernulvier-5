@@ -263,11 +263,13 @@ const en: Messages = {
       posters: 'Posters',
       gallery: 'Gallery',
       settings: 'Settings',
+      drafts: 'Drafts',
       dashboardIconAlt: 'Dashboard icon',
       productionsIconAlt: 'Productions icon',
       postersIconAlt: 'Posters icon',
       galleryIconAlt: 'Gallery icon',
       settingsIconAlt: 'Settings icon',
+      draftsIconAlt: 'Drafts icon',
     },
     dashboard: {
       pageTitle: 'Dashboard',

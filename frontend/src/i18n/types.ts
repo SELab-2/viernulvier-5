@@ -250,11 +250,13 @@ export type Messages = {
       posters: string
       gallery: string
       settings: string
+      drafts: string
       dashboardIconAlt: string
       productionsIconAlt: string
       postersIconAlt: string
       galleryIconAlt: string
       settingsIconAlt: string
+      draftsIconAlt: string
     }
     dashboard: {
       pageTitle: string
