@@ -1,22 +1,20 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { apiFetch } from '../../api/client'
+import { apiFetch, ApiError } from '../../api/client'
 import PublicLayout from '../../components/public/PublicLayout'
 import SearchPagination from '../../components/public/search/SearchPagination'
 import SearchResultCard, { type SearchResultItem } from '../../components/public/search/SearchResultCard'
 import { getActiveLocale, withLocalePath } from '../../i18n'
 import { usePublicMessages } from '../../components/public/PublicMessagesContext'
+import { getLocalizedContent, getLocalizedTitle } from './blogDetailPage.formatters'
 
-type LocalizedText = { nl?: string; en?: string; fr?: string } | string | null | undefined
-
-type SearchApiItem = {
+type BlogApiItem = {
     id: string
-    title?: LocalizedText
-    excerpt?: string
-    image_url?: string | null
-    date_label?: string | null
-    venue_label?: string | null
-    genre_label?: string | null
+    title: unknown
+    content: unknown
+    images?: string[]
+    thumbnail_index?: number | null
+    created_at: string
 }
 
 type PaginatedApiResponse<T> = {
@@ -34,14 +32,6 @@ type SearchSort = 'relevance' | 'recent' | 'oldest'
 const DEFAULT_PAGE_SIZE = 12
 const PAGE_SIZE_OPTIONS = [12, 24, 48] as const
 
-function getLocalizedText(text: LocalizedText, locale: string): string {
-    if (!text) return ''
-    if (typeof text === 'string') return text
-
-    const values = locale === 'en' ? [text.en, text.nl, text.fr] : [text.nl, text.en, text.fr]
-    return values.find((value) => typeof value === 'string' && value.trim().length > 0)?.trim() ?? ''
-}
-
 function normalizeSort(value: string): SearchSort {
     const normalized = value.trim().toLowerCase()
     return normalized === 'recent' || normalized === 'oldest' || normalized === 'relevance' ? normalized : 'recent'
@@ -51,6 +41,62 @@ function normalizePageSize(value: number): number {
     return PAGE_SIZE_OPTIONS.includes(value as (typeof PAGE_SIZE_OPTIONS)[number]) ? value : DEFAULT_PAGE_SIZE
 }
 
+function formatDate(value: string, locale: string): string {
+    const date = new Date(value)
+    if (Number.isNaN(date.getTime())) {
+        return ''
+    }
+
+    return new Intl.DateTimeFormat(locale === 'nl' ? 'nl-BE' : 'en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+    }).format(date)
+}
+
+function toPlainText(value: unknown): string {
+    if (value == null) {
+        return ''
+    }
+
+    if (typeof value === 'string') {
+        return value
+            .replace(/<[^>]*>/g, ' ')
+            .replace(/&nbsp;/gi, ' ')
+            .replace(/&amp;/gi, '&')
+            .replace(/&quot;/gi, '"')
+            .replace(/&#39;|&apos;/gi, "'")
+            .replace(/&lt;/gi, '<')
+            .replace(/&gt;/gi, '>')
+            .replace(/\s+/g, ' ')
+            .trim()
+    }
+
+    if (typeof value === 'object') {
+        const record = value as Record<string, unknown>
+        if (Array.isArray(record.ops)) {
+            const text = record.ops
+                .map((op) => {
+                    if (!op || typeof op !== 'object') {
+                        return ''
+                    }
+
+                    const insert = (op as Record<string, unknown>).insert
+                    return typeof insert === 'string' ? insert : ''
+                })
+                .join(' ')
+
+            return toPlainText(text)
+        }
+
+        if (typeof record.text === 'string') {
+            return toPlainText(record.text)
+        }
+    }
+
+    return String(value)
+}
+
 function buildQueryParams(filters: { query: string; sort: SearchSort; page: number; limit: number }) {
     const params = new URLSearchParams()
 
@@ -58,7 +104,6 @@ function buildQueryParams(filters: { query: string; sort: SearchSort; page: numb
         params.set('search', filters.query.trim())
     }
 
-    params.set('tab', 'blogs')
     params.set('sort', filters.sort)
     params.set('page', String(filters.page))
     params.set('limit', String(filters.limit))
@@ -119,22 +164,34 @@ function BlogsPageContent() {
             try {
                 const params = buildQueryParams({ query, sort, page, limit })
                 params.set('lang', locale)
-                const response = await apiFetch<PaginatedApiResponse<SearchApiItem>>(
-                    `/archive/search?${params.toString()}`,
-                    { signal: abortController.signal }
+
+                const response = await apiFetch<PaginatedApiResponse<BlogApiItem>>(
+                    `/archive/blogs?${params.toString()}`,
+                    { signal: abortController.signal },
                 )
 
-                const mapped = response.data.map((item) => ({
-                    id: item.id,
-                    type: 'blog' as const,
-                    title: getLocalizedText(item.title, locale) || searchMessages.fallbackUntitled,
-                    excerpt: item.excerpt ?? '',
-                    imageUrl: item.image_url ?? undefined,
-                    date: item.date_label || '',
-                    venue: item.venue_label || '',
-                    tag: item.genre_label || searchMessages.fallbackTag,
-                    detailHref: withLocalePath(`/blogs/${item.id}`, locale),
-                }))
+                const mapped = response.data.map((item) => {
+                    const localizedTitle = getLocalizedTitle(item.title, locale) || searchMessages.fallbackUntitled
+                    const localizedContent = getLocalizedContent(item.content, locale) || ''
+                    const blogImages = item.images ?? []
+                    const thumbnailIndex = typeof item.thumbnail_index === 'number' ? item.thumbnail_index : null
+                    const thumbnailImage =
+                        thumbnailIndex !== null && thumbnailIndex >= 0 && thumbnailIndex < blogImages.length
+                            ? blogImages[thumbnailIndex]
+                            : blogImages[0] ?? null
+
+                    return {
+                        id: item.id,
+                        type: 'blog' as const,
+                        title: localizedTitle,
+                        excerpt: toPlainText(localizedContent).substring(0, 200),
+                        imageUrl: thumbnailImage ?? undefined,
+                        date: formatDate(item.created_at, locale),
+                        venue: '',
+                        tag: searchMessages.blogTab,
+                        detailHref: withLocalePath(`/blogs/${item.id}`, locale),
+                    }
+                })
 
                 setEntries(mapped)
                 setTotalResults(response.meta.total)
@@ -143,7 +200,13 @@ function BlogsPageContent() {
                 if (abortController.signal.aborted) {
                     return
                 }
-                setError(loadError instanceof Error ? loadError.message : 'Failed to load blogs.')
+
+                if (loadError instanceof ApiError) {
+                    setError(loadError.message)
+                } else {
+                    setError(loadError instanceof Error ? loadError.message : 'Failed to load blogs.')
+                }
+
                 setEntries([])
                 setTotalResults(0)
                 setTotalPages(1)
@@ -159,7 +222,7 @@ function BlogsPageContent() {
         return () => {
             abortController.abort()
         }
-    }, [query, sort, page, limit, locale, searchMessages.fallbackTag, searchMessages.fallbackUntitled])
+    }, [query, sort, page, limit, locale, searchMessages.blogTab, searchMessages.fallbackUntitled])
 
     const pushFilters = useCallback(
         (nextFilters: { query?: string; sort?: SearchSort; page?: number; limit?: number }) => {
