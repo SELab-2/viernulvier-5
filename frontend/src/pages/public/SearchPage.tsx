@@ -1673,7 +1673,6 @@ function SearchPageContent() {
                     />
 
                     <div className="flex w-full items-start py-6 md:py-8">
-                        <div className="z-30 flex w-12 shrink-0 self-stretch justify-center border-r border-border bg-surface-inset md:hidden">
                             <div className="fixed bottom-6 right-4 z-40 flex items-end justify-center md:hidden">
                                 <button
                                     type="button"
@@ -1685,7 +1684,6 @@ function SearchPageContent() {
                                     <span>{m.search.filterOpenLabel}</span>
                                 </button>
                             </div>
-                        </div>
 
                         <div className="w-full px-4 md:py-8 md:pr-0 md:pl-0">
                             <div className="search-main-rail">
