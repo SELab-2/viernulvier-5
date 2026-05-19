@@ -31,7 +31,7 @@ export function getAdminRouteConfig(hostname: string): AdminRouteConfig {
       canRenderAdminRoutes: true,
       loginPath: '/admin/login',
       dashboardPath: '/admin/dashboard',
-      legacyDashboardPaths: ['/admin', '/dashboard', '/'],
+      legacyDashboardPaths: ['/admin', '/dashboard', '/', '/nl/admin', '/en/admin'],
       productionsPath: '/admin/productions',
       blogsPath: '/admin/blogs',
       archiveEditPath: '/admin/archive/:id/edit',
