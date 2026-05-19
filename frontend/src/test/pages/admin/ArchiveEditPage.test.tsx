@@ -182,6 +182,14 @@ const mockMessages: Pick<Messages, 'admin' | 'production' | 'event'> = {
     timeLabel: 'Time (start - end)',
     locationLabel: 'Location',
     commentLabel: 'Comment',
+    cancelLabel: 'Cancel',
+    newLocationButton: '+ new location',
+    newLocationNamePlaceholder: 'Name',
+    newLocationAddressPlaceholder: 'Address',
+    newLocationValidationError: 'Name and address are required.',
+    newLocationCreateError: 'Failed to create location.',
+    newLocationCreatingLabel: 'Creating...',
+    newLocationAddLabel: 'Add location',
   },
 }
 

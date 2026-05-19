@@ -171,6 +171,14 @@ export type Messages = {
     timeLabel: string
     locationLabel: string
     commentLabel: string
+    cancelLabel: string
+    newLocationButton: string
+    newLocationNamePlaceholder: string
+    newLocationAddressPlaceholder: string
+    newLocationValidationError: string
+    newLocationCreateError: string
+    newLocationCreatingLabel: string
+    newLocationAddLabel: string
   },
   detail: {
     navBack: string
