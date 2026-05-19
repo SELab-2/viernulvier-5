@@ -250,6 +250,7 @@ function ArchiveEditPage() {
                     description: production.description,
                     description_2:  production.description_2,
                     genre_ids: genreState.items.map(g => g.id),
+                    tag_ids: tagState.items.map(t => t.id),
                     media_gallery_id: newGalleryId,
                 });
 
