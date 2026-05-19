@@ -122,7 +122,7 @@ function EventPopup({
                             />
                             <input
                                 type="datetime-local"
-                                value={fields.ends_at}
+                                value={fields.ends_at ?? ''}
                                 onChange={e => onChange('ends_at', e.target.value)}
                                 className="w-full h-11 px-3 rounded-lg border border-border bg-surface text-foreground"
                             />
