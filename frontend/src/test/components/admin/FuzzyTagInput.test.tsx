@@ -38,8 +38,8 @@ interface TagListResponse {
     links: unknown
 }
 
-const createMockTag = (name: string): TagResponse => ({
-    id: 'mock-uuid',
+const createMockTag = (id: string, name: string): TagResponse => ({
+    id,
     apiId: null,
     type: null,
     vendor_id: null,
@@ -84,8 +84,8 @@ describe('FuzzyTagInput', () => {
     it('fetches and displays suggestions when typing', async () => {
         const mockSuggestions: TagListResponse = {
             data: [
-                createMockTag('Suggestion 1'),
-                createMockTag('Suggestion 2')
+                createMockTag('mock-1', 'Suggestion 1'),
+                createMockTag('mock-2', 'Suggestion 2')
             ],
             meta: { total: 2, page: 1, limit: 5, totalPages: 1 },
             links: { self: '', next: null, prev: null, first: '', last: '' }
@@ -109,8 +109,8 @@ describe('FuzzyTagInput', () => {
     it('filters out existing tags from suggestions case-insensitively', async () => {
         const mockSuggestions: TagListResponse = {
             data: [
-                createMockTag('ExistingTag'),
-                createMockTag('NewTag')
+                createMockTag('mock-ex', 'ExistingTag'),
+                createMockTag('mock-new', 'NewTag')
             ],
             meta: { total: 2, page: 1, limit: 5, totalPages: 1 },
             links: { self: '', next: null, prev: null, first: '', last: '' }
@@ -123,14 +123,15 @@ describe('FuzzyTagInput', () => {
 
         await waitFor(() => {
             const suggestions = screen.queryAllByRole('listitem')
-            const suggestionTexts = suggestions.map(s => s.textContent)
-            expect(suggestionTexts).not.toContain('ExistingTag')
-            expect(suggestionTexts).toContain('NewTag')
+            const suggestionTexts = suggestions.map(s => s.textContent || '')
+            // ensure no suggestion contains the existing tag name, and one contains NewTag
+            expect(suggestionTexts.some(t => t.includes('ExistingTag'))).toBe(false)
+            expect(suggestionTexts.some(t => t.includes('NewTag'))).toBe(true)
         })
     })
 
     it('calls addTag when clicking a suggestion', async () => {
-        const mockTag = createMockTag('Suggestion 1')
+        const mockTag = createMockTag('mock-uuid', 'Suggestion 1')
         const mockSuggestions: TagListResponse = {
             data: [mockTag],
             meta: { total: 1, page: 1, limit: 5, totalPages: 1 },
@@ -147,20 +148,67 @@ describe('FuzzyTagInput', () => {
             fireEvent.click(suggestion)
         })
 
-        expect(defaultProps.addTag).toHaveBeenCalledWith(mockTag.name)
+        expect(defaultProps.addTag).toHaveBeenCalledWith(mockTag.id, mockTag.name)
     })
 
-    it('calls addTag when pressing Enter', () => {
+    it('calls addTag when pressing Enter with a visible suggestion', async () => {
+        const enterTag = createMockTag('enter-uuid', 'New Manual Tag')
+        const mockSuggestions: TagListResponse = {
+            data: [enterTag],
+            meta: { total: 1, page: 1, limit: 5, totalPages: 1 },
+            links: { self: '', next: null, prev: null, first: '', last: '' }
+        };
+        vi.mocked(api.get).mockResolvedValue(mockSuggestions)
+
         render(<FuzzyTagInput {...defaultProps} tag="New Manual Tag" />)
         const input = screen.getByPlaceholderText('Add tag...')
+        fireEvent.focus(input)
+
+        // wait for suggestion to appear
+        await waitFor(() => {
+            expect(screen.getByText('New Manual Tag')).toBeInTheDocument()
+        })
+
         fireEvent.keyDown(input, { key: 'Enter' })
-        expect(defaultProps.addTag).toHaveBeenCalledWith({ nl: 'New Manual Tag' })
+
+        expect(defaultProps.addTag).toHaveBeenCalledWith(enterTag.id, enterTag.name)
     })
 
-    it('calls onRemove when clicking the remove button on a tag', () => {
+    it('disables input when amountOfTags reached', () => {
+        const props = { ...defaultProps, amountOfTags: 1, tags: [existingTag] }
+        render(<FuzzyTagInput {...props} />)
+        const input = screen.getByPlaceholderText('Add tag...')
+        expect((input as HTMLInputElement).disabled).toBe(true)
+    })
+
+    it('closes suggestions when clicking outside', async () => {
+        const mockSuggestions: TagListResponse = {
+            data: [createMockTag('mock-1', 'Suggestion Outside')],
+            meta: { total: 1, page: 1, limit: 5, totalPages: 1 },
+            links: { self: '', next: null, prev: null, first: '', last: '' }
+        };
+        vi.mocked(api.get).mockResolvedValue(mockSuggestions)
+
+        render(<FuzzyTagInput {...defaultProps} tag="sug" />)
+        const input = screen.getByPlaceholderText('Add tag...')
+        fireEvent.focus(input)
+
+        await waitFor(() => {
+            expect(screen.getByText('Suggestion Outside')).toBeInTheDocument()
+        })
+
+        // click outside
+        fireEvent.mouseDown(document.body)
+
+        await waitFor(() => {
+            expect(screen.queryByText('Suggestion Outside')).toBeNull()
+        })
+    })
+
+    it('calls onRemove with id when clicking the remove button on a tag', () => {
         render(<FuzzyTagInput {...defaultProps} />)
         const removeButton = screen.getByText('×')
         fireEvent.click(removeButton)
-        expect(defaultProps.onRemove).toHaveBeenCalledWith(existingTag)
+        expect(defaultProps.onRemove).toHaveBeenCalledWith('TagID')
     })
 })
