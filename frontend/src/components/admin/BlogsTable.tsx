@@ -7,8 +7,8 @@ export type BlogRow = {
     title: string
     productionCount: number
     languageStatus: { nl: LanguageState; en: LanguageState }
-    createdAt: string
-    updatedAt: string
+    created_at: string
+    updated_at: string
     detailHref: string
 }
 
@@ -123,7 +123,7 @@ export function BlogsTable({
 
                         {/* Datum */}
                         <td className="px-4 py-4 text-sm text-[#475569] dark:text-slate-300">
-                            {formatDate(item.updatedAt)}
+                            {formatDate(item.updated_at)}
                         </td>
 
                         {/* Acties */}

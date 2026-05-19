@@ -7,7 +7,7 @@ export type ProductionRow = {
     id: string
     title: string
     languageStatus: { nl: LanguageState; en: LanguageState }
-    updatedAt: string
+    updated_at: string
     detailHref: string
 }
 
@@ -108,7 +108,7 @@ export function ProductionsTable({
                                 })}
                             </div>
                         </td>
-                        <td className="px-4 py-4 text-sm text-[#475569] dark:text-slate-300">{formatDate(item.updatedAt)}</td>
+                        <td className="px-4 py-4 text-sm text-[#475569] dark:text-slate-300">{formatDate(item.updated_at)}</td>
                         <td className="px-4 py-4 whitespace-nowrap">
                             <div className="flex items-center gap-0.5">
                                 <a

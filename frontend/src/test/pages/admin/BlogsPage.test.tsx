@@ -80,24 +80,24 @@ const blogA = {
     id: 'blog-1',
     title: { nl: 'Eerste Blog', en: null, fr: null },
     productions: ['prod-1', 'prod-2'],
-    createdAt: '2024-03-01T09:00:00Z',
-    updatedAt: '2024-03-15T10:00:00Z',
+    created_at: '2024-03-01T09:00:00Z',
+    updated_at: '2024-03-15T10:00:00Z',
 }
 
 const blogB = {
     id: 'blog-2',
     title: { nl: null, en: 'Second Blog', fr: null },
     productions: [],
-    createdAt: '2024-04-01T08:00:00Z',
-    updatedAt: '2024-04-02T08:00:00Z',
+    created_at: '2024-04-01T08:00:00Z',
+    updated_at: '2024-04-02T08:00:00Z',
 }
 
 const blogWithoutTitle = {
     id: 'blog-3',
     title: null,
     productions: ['prod-1'],
-    createdAt: '2024-05-01T00:00:00Z',
-    updatedAt: '2024-05-01T00:00:00Z',
+    created_at: '2024-05-01T00:00:00Z',
+    updated_at: '2024-05-01T00:00:00Z',
 }
 
 function renderPage() {

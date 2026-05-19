@@ -48,8 +48,8 @@ const baseItem: BlogRow = {
     title: 'Een Interessante Blog',
     productionCount: 3,
     languageStatus: { nl: 'complete', en: 'attention' },
-    createdAt: '2024-03-01T09:00:00Z',
-    updatedAt: '2024-03-15T10:00:00Z',
+    created_at: '2024-03-01T09:00:00Z',
+    updated_at: '2024-03-15T10:00:00Z',
     detailHref: '/nl/archive/blogs/blog-1',
 }
 
@@ -58,8 +58,8 @@ const secondItem: BlogRow = {
     title: 'Nog Een Blog',
     productionCount: 1,
     languageStatus: { nl: 'missing', en: 'complete' },
-    createdAt: '2024-04-01T08:00:00Z',
-    updatedAt: '2024-04-02T08:00:00Z',
+    created_at: '2024-04-01T08:00:00Z',
+    updated_at: '2024-04-02T08:00:00Z',
     detailHref: '/nl/archive/blogs/blog-2',
 }
 
@@ -68,8 +68,8 @@ const itemWithNoProductions: BlogRow = {
     title: 'Blog Zonder Producties',
     productionCount: 0,
     languageStatus: { nl: 'missing', en: 'missing' },
-    createdAt: '2024-05-01T00:00:00Z',
-    updatedAt: '2024-05-01T00:00:00Z',
+    created_at: '2024-05-01T00:00:00Z',
+    updated_at: '2024-05-01T00:00:00Z',
     detailHref: '/nl/archive/blogs/blog-3',
 }
 

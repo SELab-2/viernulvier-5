@@ -44,7 +44,7 @@ const baseItem: ProductionRow = {
     title: 'De Grote Voorstelling',
     detailHref: '/archive/prod-1',
     languageStatus: { nl: 'complete', en: 'attention' },
-    updatedAt: '2024-03-15T10:00:00Z',
+    updated_at: '2024-03-15T10:00:00Z',
 }
 
 const secondItem: ProductionRow = {
@@ -52,7 +52,7 @@ const secondItem: ProductionRow = {
     title: 'Kleine Voorstelling',
     detailHref: '/archive/prod-2',
     languageStatus: { nl: 'missing', en: 'complete' },
-    updatedAt: '2024-04-01T08:00:00Z',
+    updated_at: '2024-04-01T08:00:00Z',
 }
 
 

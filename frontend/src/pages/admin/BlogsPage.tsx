@@ -55,8 +55,8 @@ function mapBlogApiItem(item: BlogApiItem, locale: 'nl' | 'en'): BlogRow {
             nl: getLanguageState(item.title, 'nl'),
             en: getLanguageState(item.title, 'en'),
         },
-        createdAt: item.created_at,
-        updatedAt: item.updated_at,
+        created_at: item.created_at,
+        updated_at: item.updated_at,
         detailHref: withLocalePath(`/blogs/${item.id}`, locale),
     }
 }

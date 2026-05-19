@@ -58,7 +58,7 @@ function mapProductionApiItem(item: ProductionApiItem, locale: 'nl' | 'en'): Pro
             nl: hasLocalizedText(item.title, 'nl') ? 'complete' : 'missing',
             en: hasLocalizedText(item.title, 'en') ? 'complete' : 'missing',
         },
-        updatedAt: item.updated_at,
+        updated_at: item.updated_at,
         detailHref: withLocalePath(`/archive/${item.id}`, locale),
     }
 }

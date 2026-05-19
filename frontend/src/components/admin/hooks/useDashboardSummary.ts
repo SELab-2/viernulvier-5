@@ -22,7 +22,7 @@ export type DashboardSummary = {
             nl: 'complete' | 'attention'
             en: 'complete' | 'attention' | 'missing'
         }
-        updatedAt: string
+        updated_at: string
     }>
     totalRecentItems: number
     lastScrapedAt: string | null
