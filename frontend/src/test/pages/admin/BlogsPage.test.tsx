@@ -8,7 +8,6 @@ import BlogsPage from '../../../pages/admin/BlogsPage'
 
 const navigate = vi.fn()
 const apiFetchMock = vi.hoisted(() => vi.fn())
-const getAdminRouteConfigMock = vi.hoisted(() => vi.fn())
 const confirmMock = vi.hoisted(() => vi.fn())
 
 vi.mock('react-router-dom', async () => {
@@ -20,23 +19,21 @@ vi.mock('../../../api/client', () => ({
     apiFetch: apiFetchMock,
 }))
 
-vi.mock('../../../admin/paths', async () => {
-    const actual = await vi.importActual<typeof import('../../../admin/paths')>('../../../admin/paths')
-    return { ...actual, getAdminRouteConfig: getAdminRouteConfigMock }
-})
-
 const mockMessages = {
+    blogs: {
+        deleteConfirm: 'Weet je zeker dat je deze blog wilt verwijderen?',
+    },
     admin: {
         dashboard: {
             tableColTitle: 'Titel',
             tableColDate: 'Datum',
+            tableColLanguage: 'Taal',
             tableColActions: 'Acties',
-            tableColLanguage: '',
+            actionView: 'Bekijk',
             actionEdit: 'Bewerk',
             actionDelete: 'Verwijder',
-            actionView: '',
             emptyRecent: 'Geen blogs gevonden.',
-            languageStatusComplete: 'Compleet',
+            languageStatusComplete: 'Volledig',
             languageStatusAttention: 'Aandacht vereist',
             languageStatusMissing: 'Ontbreekt',
             paginationPrev: 'Vorige pagina',
@@ -48,17 +45,12 @@ const mockMessages = {
             searchPlaceholder: 'Zoek op titel...',
             newButton: 'Nieuwe Blog',
             deleteError: 'Verwijderen mislukt. Probeer opnieuw.',
-            loadError: 'Kon blogs niet laden',
+            loadError: 'Kon blogs niet laden.',
+            untitledLabel: '(Zonder titel)',
             paginationShowing: (from: number, to: number, total: number) => `Toont ${from}–${to} van ${total} resultaten`,
             paginationPageLabel: (page: number) => `Pagina ${page}`,
             tableColLinkedProductions: 'Gekoppelde producties',
-            untitledLabel: '(Zonder titel)',
-            productionCountSingular: '1 productie',
-            productionCountPlural: (count: number) => `${count} producties`,
         },
-    },
-    blogs: {
-        deleteConfirm: 'Weet je zeker dat je deze blog wilt verwijderen?',
     },
 } as unknown as Messages
 
@@ -120,11 +112,6 @@ function renderPage() {
 beforeEach(() => {
     navigate.mockReset()
     apiFetchMock.mockReset()
-    getAdminRouteConfigMock.mockReset()
-    getAdminRouteConfigMock.mockReturnValue({
-        blogCreatePath: '/admin/blogs/new',
-        blogEditPath: '/admin/blogs/:id/edit',
-    })
     vi.stubGlobal('confirm', confirmMock)
     confirmMock.mockReturnValue(true)
     window.history.replaceState(window.history.state, '', '/admin/blogs')
@@ -238,7 +225,7 @@ describe('BlogsPage', () => {
         renderPage()
 
         await waitFor(() => {
-            expect(screen.getByText('Kon blogs niet laden')).toBeInTheDocument()
+            expect(screen.getByText('Kon blogs niet laden.')).toBeInTheDocument()
         })
     })
 
