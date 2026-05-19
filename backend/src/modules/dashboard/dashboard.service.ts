@@ -146,7 +146,9 @@ function mergeAndPaginate(
         ...productions.map(mapProduction),
         ...blogs.map(mapBlog),
         ...posters.map(mapPoster),
-    ].sort((left, right) => right.updated_at.getTime() - left.updated_at.getTime())
+    ]
+        .sort((left, right) => right.updated_at.getTime() - left.updated_at.getTime())
+        .slice(0, RECENT_ITEMS_CAP)
 
     const offset = (page - 1) * limit
     return all.slice(offset, offset + limit)
@@ -185,10 +187,11 @@ export class DashboardService {
             this.repository.getPosterCountInRange(startOfLastMonth, startOfThisMonth),
         ])
 
+        const totalRecentItems = Math.min(
+            counts.productions + counts.blogs + counts.posters,
+            RECENT_ITEMS_CAP,
+        )
         const recentItems = mergeAndPaginate(recentProductions, recentBlogs, recentPosters, page, limit)
-        const totalRecentItems = recentItems.length === limit
-            ? Math.min(counts.productions + counts.blogs + counts.posters, RECENT_ITEMS_CAP)
-            : (page - 1) * limit + recentItems.length
 
         return {
             counts,
