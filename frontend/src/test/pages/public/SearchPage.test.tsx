@@ -723,7 +723,7 @@ describe('SearchPage additional handler coverage', () => {
                 ([endpoint]) =>
                     typeof endpoint === 'string' && endpoint.startsWith('/archive/productions?'),
             )
-            expect(searchCalls.some(([ep]) => String(ep).includes('locations=theaterzaal'))).toBe(true)
+            expect(productionCalls.some((call) => String(call[0]).includes('locations=theaterzaal'))).toBe(true)
         })
     })
 
