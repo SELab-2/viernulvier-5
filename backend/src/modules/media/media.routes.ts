@@ -208,6 +208,21 @@ const mediaRoutes: FastifyPluginAsync = async (fastify) => {
         handler: (request, reply) => controller.updateCrop(request as any, reply),
     })
 
+    fastify.post('/items/crops/:id/upload', {
+        preHandler: [requirePermission(Permission.ARCHIVE_CREATE)],
+        schema: {
+            tags: ['media'],
+            summary: 'Upload a crop file',
+            params: idParamSchema,
+            consumes: ['multipart/form-data'],
+            response: { 
+                200: singleCropSchema,
+                404: errorSchema
+            },
+        },
+        handler: (request, reply) => controller.uploadCrop(request as any, reply)
+    })
+
     fastify.delete('/items/crops/:id', {
         preHandler: [requirePermission(Permission.ARCHIVE_DELETE)],
         schema: {

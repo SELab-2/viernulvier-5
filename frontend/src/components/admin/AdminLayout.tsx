@@ -119,9 +119,8 @@ function AdminLayout({
             </>
           ) : null}
 
-          <main className={getMainClassName(mainClassName)}>{children}</main>
+          <main className={`${getMainClassName(mainClassName)}`}>{children}</main>
         </div>
-
         {showFooter ? <AdminFooter /> : null}
 
         {settingsOpen ? (

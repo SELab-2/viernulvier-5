@@ -1,11 +1,11 @@
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { AdminMessagesContext } from '../../../components/admin/AdminMessagesContext'
 import ArchiveEditPage from '../../../pages/admin/ArchiveEditPage'
 import type { Messages } from '../../../i18n/types'
 
-const mockMessages: Pick<Messages, 'admin'> = {
+const mockMessages: Pick<Messages, 'admin' | 'production' | 'event'> = {
   admin: {
     themeToggleDark: 'Dark mode',
     themeToggleLight: 'Light mode',
@@ -69,7 +69,7 @@ const mockMessages: Pick<Messages, 'admin'> = {
     },
     archiveEdit: {
       pageTitle: 'Edit archive item',
-      itemIdLabel: 'Item ID:',
+      itemIdLabel: 'Item-ID:',
     },
     blogsPage: {
       pageTitle: 'Blogs',
@@ -163,9 +163,66 @@ const mockMessages: Pick<Messages, 'admin'> = {
       pageSizeLabel: 'Per page',
       paginationPrev: 'Previous page',
       paginationNext: 'Next page',
-    }
-  }
+    },
+  },
+  production: {
+    productionSettingsLabel: 'Production Settings',
+    statusLabel: 'Status',
+    genreLabel: 'Genres',
+    tagLabel: 'Tags',
+    bannerLabel: 'Banner',
+    extraPicturesLabel: 'Extra pictures',
+    addGenrePlaceholder: 'Add genre...',
+    addTagPlaceholder: 'Add tag...',
+    chooseFilePlaceholder: 'Choose file',
+    artistLabel: 'Artist',
+    dutchOption: 'Dutch',
+    englishOption: 'English',
+    productionEditTitle: 'Edit production',
+    productionEditSubTitle: 'Manage archive details and translation for this event',
+    contentLabels: {
+      super_title: 'Super title',
+      title: 'Title',
+      artist: 'Artist',
+      teaser: 'Teaser',
+      description: 'Description',
+      description_2: 'Second Description',
+    },
+    back: '← Back to overview',
+    saveOnDraft: 'Save as draft',
+    publish: 'Publish',
+    eventsEditTitle: 'Manage events',
+    eventsEditSubTitle: 'Manage events for this production',
+    makeEventsLabel: 'Add event',
+    eventsDateLabel: 'Date',
+    eventsTimeLabel: 'Time',
+    eventsLocationLabel: 'Location',
+    eventsCommentLabel: 'Comment',
+    eventsActionsLabel: 'Actions',
+    invalidProductionError: 'Fill in all required fields in atleast one language',
+  },
+  event: {
+    saveButtonLabel: 'Save event',
+    editLabel: 'Edit event',
+    addLabel: 'Add event',
+    timeLabel: 'Time (start - end)',
+    locationLabel: 'Location',
+    commentLabel: 'Comment',
+    cancelLabel: 'Cancel',
+    newLocationButton: '+ new location',
+    newLocationNamePlaceholder: 'Name',
+    newLocationAddressPlaceholder: 'Address',
+    newLocationValidationError: 'Name and address are required.',
+    newLocationCreateError: 'Failed to create location.',
+    newLocationCreatingLabel: 'Creating...',
+    newLocationAddLabel: 'Add location',
+  },
 }
+
+vi.mock('../../../i18n', () => ({
+    getMessages: () => mockMessages,
+    getActiveLocale: () => 'en',
+}))
 
 vi.mock('../../../components/admin/AdminLayout', () => ({
   default: ({ children }: { children: React.ReactNode }) => (
@@ -176,25 +233,24 @@ vi.mock('../../../components/admin/AdminLayout', () => ({
 }))
 
 describe('ArchiveEditPage', () => {
-  it('shows the archive id', () => {
-    window.history.replaceState(window.history.state, '', '/admin/archive/42/edit')
-
+  it('Shows create page', () => {
     render(
-      <MemoryRouter initialEntries={['/admin/archive/42/edit']}>
-        <ArchiveEditPage />
+      <MemoryRouter initialEntries={['/admin/productions/new']}>
+        <Routes>
+          <Route path="/admin/productions/new" element={<ArchiveEditPage />} />
+        </Routes>
       </MemoryRouter>,
     )
 
-    expect(screen.getByText(/Item ID:/)).toBeInTheDocument()
-  })
-
-  it('renders the page title via i18n', () => {
-    render(
-      <MemoryRouter initialEntries={['/admin/archive/99/edit']}>
-        <ArchiveEditPage />
-      </MemoryRouter>,
-    )
-
-    expect(screen.getByRole('heading', { name: 'Edit archive item' })).toBeInTheDocument()
+    expect(screen.getByText(mockMessages.production.contentLabels.super_title)).toBeInTheDocument()
+    expect(screen.getByText(mockMessages.production.contentLabels.title)).toBeInTheDocument()
+    expect(screen.getByText(mockMessages.production.contentLabels.artist)).toBeInTheDocument()
+    expect(screen.getByText(mockMessages.production.contentLabels.teaser)).toBeInTheDocument()
+    expect(screen.getByText(mockMessages.production.contentLabels.description)).toBeInTheDocument()
+    expect(screen.getByText(mockMessages.production.contentLabels.description_2)).toBeInTheDocument()
+    expect(screen.getByText(mockMessages.production.genreLabel)).toBeInTheDocument()
+    expect(screen.getByText(mockMessages.production.tagLabel)).toBeInTheDocument()
+    expect(screen.getByText(mockMessages.production.bannerLabel)).toBeInTheDocument()
+    expect(screen.getByText(mockMessages.production.extraPicturesLabel)).toBeInTheDocument()
   })
 })

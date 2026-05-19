@@ -1,4 +1,8 @@
 import type { PrismaClient } from '@prisma/client'
+import { createWriteStream } from 'fs';
+import fs from 'fs/promises'
+import path from 'path';
+import { pipeline } from 'stream/promises';
 
 export class MediaRepository {
     constructor(private readonly prisma: PrismaClient) { }
@@ -149,6 +153,11 @@ export class MediaRepository {
             where: { id },
             data
         })
+    }
+
+    async saveFile(filepath: string, stream: NodeJS.ReadableStream): Promise<void> {
+        await fs.mkdir(path.dirname(filepath), { recursive: true })
+        await pipeline(stream, createWriteStream(filepath))
     }
 
     async deleteCrop(id: string) {

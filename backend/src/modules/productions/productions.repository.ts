@@ -191,7 +191,7 @@ export class ProductionsRepository {
         const requirePastEvents = pastOnly ?? (draft === false)
 
         if (draft !== 'all') {
-            andFilters.push(draft ? { draft: true } : { draft: false })
+            andFilters.push(draft ? { OR: [{ draft: true }, { draft: null }] } : { draft: false })
 
             if (requirePastEvents) {
                 andFilters.push({
@@ -207,7 +207,7 @@ export class ProductionsRepository {
         } else if (requirePastEvents) {
             andFilters.push({
                 OR: [
-                    { draft: true },
+                    { OR: [{ draft: true }, { draft: null }] },
                     {
                         AND: [
                             { draft: false },
@@ -525,15 +525,46 @@ export class ProductionsRepository {
     }
 
     async create(data: any) {
+        const { genre_ids, tag_ids, ...rest} = data;
+
         return this.prisma.production.create({
-            data,
+            data: {
+                ...rest,
+                ...(genre_ids !== undefined && {
+                    genre_production: {
+                        create: genre_ids.map((genre_id: string) => ({genre_id}))
+                    }
+                }),
+                ...(tag_ids !== undefined && {
+                    tag_production: {
+                        create: tag_ids.map((tag_id: string) => ({tag_id}))
+                    }
+                })
+            },
         })
     }
 
     async update(id: string, data: any) {
+        const { genre_ids, tag_ids, ...rest } = data;
+        
         return this.prisma.production.update({
             where: { id },
-            data,
+            data : {
+                ...rest,
+                updated_at: new Date(),
+                ...(genre_ids !== undefined && {
+                    genre_production: {
+                        deleteMany: {},
+                        create: genre_ids.map((genre_id: string) => ({genre_id}))
+                    }
+                }),
+                ...(tag_ids !== undefined && {
+                    tag_production: {
+                        deleteMany: {},
+                        create: tag_ids.map((tag_id: string) => ({tag_id}))
+                    }
+                })
+            },
         })
     }
 
