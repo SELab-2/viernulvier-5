@@ -20,11 +20,13 @@ const mockMessages: Pick<Messages, 'admin'> = {
       gallery: 'Gallery',
       organisation: 'Organisation',
       settings: 'Settings',
+      drafts: 'Drafts',
       dashboardIconAlt: 'Dashboard icon',
       productionsIconAlt: 'Productions icon',
       postersIconAlt: 'Posters icon',
       organisationIconAlt: 'Organisation icon',
       settingsIconAlt: 'Settings icon',
+      draftsIconAlt: 'Drafts icon',
     },
     dashboard: {
       pageTitle: 'Dashboard',
@@ -114,6 +116,7 @@ const mockMessages: Pick<Messages, 'admin'> = {
       pageSubtitle: 'View all drafts here',
       productions: 'Productions',
       blogs: 'Blogs',
+      filterOnlyCurrent: 'Show my drafts',
       tableColTitle: 'Title',
       tableColType: 'Type',
       tableColStatus: 'Status',
@@ -126,11 +129,14 @@ const mockMessages: Pick<Messages, 'admin'> = {
       actionDelete: 'Delete',
       emptyRecent: 'No recent archive drafts found.',
       loadingMessage: 'Loading drafts...',
-      filterOnlyCurrent: 'Show my drafts',
       deleteTitle: 'Delete draft',
-      deleteConfirm: (title: string) => `Are you sure you want to delete "${title}"?`
+      deleteConfirm: (title: string) => `Are you sure you want to delete "${title}"?`,
+      paginationShowing: (from: number, to: number, total: number) => `Showing ${from}-${to} of ${total} results`,
+      pageSizeLabel: 'Per page',
+      paginationPrev: 'Previous page',
+      paginationNext: 'Next page',
     }
-  },
+  }
 }
 
 vi.mock('../../../components/admin/AdminLayout', () => ({

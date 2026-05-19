@@ -60,9 +60,23 @@ const mockMessages = {
             loadingMessage: 'Loading drafts...',
             deleteTitle: 'Delete draft',
             deleteConfirm: (title: string) => `Are you sure you want to delete "${title}"?`,
-        },
+            paginationShowing: (from: number, to: number, total: number) => `Showing ${from}-${to} of ${total} results`,
+            pageSizeLabel: 'Per page',
+            paginationPrev: 'Previous page',
+            paginationNext: 'Next page',
+        }
     },
 }
+vi.mock('../../../components/admin/hooks/usePagination', () => ({
+    usePagination: () => ({ items: [1] }),
+}))
+
+vi.mock('../../../components/admin/hooks/useDashboardFormatters', () => ({
+    useDashboardFormatters: () => ({
+        formatDate: (d: string) => d,
+        locale: 'nl' as const,
+    }),
+}))
 
 const mockItem: DraftItem = {
     id: 'prod-1',
@@ -79,6 +93,12 @@ const defaultProps = () => ({
     tab: 'productions' as 'productions' | 'blogs',
     currentUserId: 'user-1',
     onDeleted,
+    pageSize: 6,
+    page: 1,
+    totalItems: 1,
+    onPageChange: vi.fn(),
+    pageSizeOptions: [3, 6, 9, 12, 15, 18] as const,
+    onPageSizeChange: vi.fn(),
 })
 
 const renderTable = (props = defaultProps()) =>
