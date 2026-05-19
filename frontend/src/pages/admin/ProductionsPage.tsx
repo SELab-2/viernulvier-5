@@ -69,8 +69,8 @@ function ProductionsPageContent() {
     const { archiveEditPath, productionCreatePath } = getAdminRouteConfig(window.location.hostname)
     const t = useAdminMessages()
     const locale = getActiveLocale(window.location.pathname)
-    const paginationPrevLabel = t.admin.dashboard.paginationPrev ?? 'Vorige pagina'
-    const paginationNextLabel = t.admin.dashboard.paginationNext ?? 'Volgende pagina'
+    const paginationPrevLabel = t.admin.dashboard.paginationPrev
+    const paginationNextLabel = t.admin.dashboard.paginationNext
 
 
     const [query, setQuery] = useState('')

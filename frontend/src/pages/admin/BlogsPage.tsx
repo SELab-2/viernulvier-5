@@ -68,8 +68,8 @@ function BlogsPageContent() {
     const b = messages.admin.blogsPage
     const d = messages.admin.dashboard
     const locale = getActiveLocale(window.location.pathname)
-    const paginationPrevLabel = d.paginationPrev ?? 'Vorige pagina'
-    const paginationNextLabel = d.paginationNext ?? 'Volgende pagina'
+    const paginationPrevLabel = d.paginationPrev
+    const paginationNextLabel = d.paginationNext
 
     const [query, setQuery] = useState('')
     const [debouncedQuery, setDebouncedQuery] = useState('')
