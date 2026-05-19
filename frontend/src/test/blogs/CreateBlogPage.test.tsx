@@ -20,6 +20,8 @@ const currentYear = new Date().getFullYear()
 const productionFetchEndpoint = `/archive/productions?page=1&limit=100&sort=recent&lang=nl&pastOnly=false&draft=all&yearFrom=1982&yearTo=${currentYear}`
 const secondProductionFetchEndpoint = `/archive/productions?page=2&limit=100&sort=recent&lang=nl&pastOnly=false&draft=all&yearFrom=1982&yearTo=${currentYear}`
 
+const BLOGS_PATH = '/blogs'
+
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom')
   return {
@@ -41,29 +43,35 @@ vi.mock('../../api/client', () => ({
   apiFetch: apiFetchMock,
 }))
 
+vi.mock('../../admin/paths', () => ({
+  getAdminRouteConfig: () => ({
+    blogsPath: BLOGS_PATH,
+  }),
+}))
+
 vi.mock('../../components/public/PublicNavbar', () => ({
   default: () => <div>Public navbar</div>,
 }))
 
 vi.mock('../../components/admin/SectionHeading', () => ({
   default: ({ title, subTitle }: { title: string; subTitle: string }) => (
-    <section>
-      <h1>{title}</h1>
-      <p>{subTitle}</p>
-    </section>
+      <section>
+        <h1>{title}</h1>
+        <p>{subTitle}</p>
+      </section>
   ),
 }))
 
 vi.mock('../../components/admin/BlogsTabContent', () => ({
   default: ({
-    title,
-    content,
-    changeTitle,
-    changeContent,
-    onJsonChange,
-    titleLabel,
-    contentLabel,
-  }: {
+              title,
+              content,
+              changeTitle,
+              changeContent,
+              onJsonChange,
+              titleLabel,
+              contentLabel,
+            }: {
     title: string
     content: string
     changeTitle: (value: string) => void
@@ -72,27 +80,27 @@ vi.mock('../../components/admin/BlogsTabContent', () => ({
     titleLabel: string
     contentLabel: string
   }) => (
-    <section>
-      <label>
-        {titleLabel}
-        <input
-          aria-label="blog title"
-          value={title}
-          onChange={(event) => changeTitle(event.target.value)}
-        />
-      </label>
-      <label>
-        {contentLabel}
-        <textarea
-          aria-label="blog content"
-          value={content}
-          onChange={(event) => changeContent(event.target.value)}
-        />
-      </label>
-      <button type="button" onClick={() => onJsonChange({ ops: [{ insert: content || 'rich content' }] })}>
-        set json content
-      </button>
-    </section>
+      <section>
+        <label>
+          {titleLabel}
+          <input
+              aria-label="blog title"
+              value={title}
+              onChange={(event) => changeTitle(event.target.value)}
+          />
+        </label>
+        <label>
+          {contentLabel}
+          <textarea
+              aria-label="blog content"
+              value={content}
+              onChange={(event) => changeContent(event.target.value)}
+          />
+        </label>
+        <button type="button" onClick={() => onJsonChange({ ops: [{ insert: content || 'rich content' }] })}>
+          set json content
+        </button>
+      </section>
   ),
 }))
 
@@ -181,9 +189,9 @@ function renderCreatePage() {
   setPath('/nl/admin/blogs/create')
   params = {}
   return render(
-    <MemoryRouter initialEntries={[window.location.pathname]}>
-      <CreateBlogPage />
-    </MemoryRouter>,
+      <MemoryRouter initialEntries={[window.location.pathname]}>
+        <CreateBlogPage />
+      </MemoryRouter>,
   )
 }
 
@@ -191,9 +199,9 @@ function renderEditPage() {
   setPath('/nl/admin/blogs/blog-123/edit')
   params = { id: 'blog-123' }
   return render(
-    <MemoryRouter initialEntries={[window.location.pathname]}>
-      <CreateBlogPage />
-    </MemoryRouter>,
+      <MemoryRouter initialEntries={[window.location.pathname]}>
+        <CreateBlogPage />
+      </MemoryRouter>,
   )
 }
 
@@ -265,8 +273,8 @@ describe('CreateBlogPage', () => {
 
     await waitFor(() => {
       expect(apiFetchMock).toHaveBeenCalledWith(
-        productionFetchEndpoint,
-        expect.any(Object),
+          productionFetchEndpoint,
+          expect.any(Object),
       )
     })
 
@@ -286,17 +294,17 @@ describe('CreateBlogPage', () => {
     await waitFor(() => {
       expect(apiMock.post).toHaveBeenCalledTimes(1)
       expect(apiMock.post).toHaveBeenCalledWith(
-        '/archive/blogs',
-        expect.objectContaining({
-          title: { nl: 'Nieuwe blogtitel', en: null },
-          content: {
-            nl: '<p>Nieuwe inhoud</p>',
-            en: null,
-          },
-          productionIds: [],
-        }),
+          '/archive/blogs',
+          expect.objectContaining({
+            title: { nl: 'Nieuwe blogtitel', en: null },
+            content: {
+              nl: '<p>Nieuwe inhoud</p>',
+              en: null,
+            },
+            productionIds: [],
+          }),
       )
-      expect(navigate).toHaveBeenCalledWith('/blogs/blog-created')
+      expect(navigate).toHaveBeenCalledWith(BLOGS_PATH)
     })
   })
 
@@ -306,8 +314,8 @@ describe('CreateBlogPage', () => {
 
     await waitFor(() => {
       expect(apiFetchMock).toHaveBeenCalledWith(
-        productionFetchEndpoint,
-        expect.any(Object),
+          productionFetchEndpoint,
+          expect.any(Object),
       )
     })
 
@@ -351,13 +359,13 @@ describe('CreateBlogPage', () => {
     await waitFor(() => {
       expect(apiMock.post).not.toHaveBeenCalled()
       expect(apiFetchMock).toHaveBeenCalledWith(
-        '/archive/blogs/blog-123',
-        expect.objectContaining({
-          method: 'PATCH',
-          body: expect.any(String),
-        }),
+          '/archive/blogs/blog-123',
+          expect.objectContaining({
+            method: 'PATCH',
+            body: expect.any(String),
+          }),
       )
-      expect(navigate).toHaveBeenCalledWith('/blogs/blog-123')
+      expect(navigate).toHaveBeenCalledWith(BLOGS_PATH)
     })
 
     const patchCall = apiFetchMock.mock.calls.find(([endpoint, options]) => endpoint === '/archive/blogs/blog-123' && options?.method === 'PATCH')
@@ -386,10 +394,10 @@ describe('CreateBlogPage', () => {
 
     await waitFor(() => {
       const deleteCallIndex = apiFetchMock.mock.calls.findIndex(
-        ([endpoint, options]) => endpoint === '/archive/blogs/blog-123/images/2' && options?.method === 'DELETE',
+          ([endpoint, options]) => endpoint === '/archive/blogs/blog-123/images/2' && options?.method === 'DELETE',
       )
       const patchCallIndex = apiFetchMock.mock.calls.findIndex(
-        ([endpoint, options]) => endpoint === '/archive/blogs/blog-123' && options?.method === 'PATCH',
+          ([endpoint, options]) => endpoint === '/archive/blogs/blog-123' && options?.method === 'PATCH',
       )
 
       expect(deleteCallIndex).toBeGreaterThan(-1)
@@ -422,8 +430,8 @@ describe('CreateBlogPage', () => {
 
     await waitFor(() => {
       expect(apiFetchMock).toHaveBeenCalledWith(
-        '/archive/blogs/blog-123',
-        expect.objectContaining({ method: 'PATCH', body: expect.any(String) }),
+          '/archive/blogs/blog-123',
+          expect.objectContaining({ method: 'PATCH', body: expect.any(String) }),
       )
     })
 
@@ -545,13 +553,13 @@ describe('CreateBlogPage', () => {
     await waitFor(() => {
       expect(apiMock.post).not.toHaveBeenCalled()
       expect(apiFetchMock).toHaveBeenCalledWith(
-        '/archive/blogs/blog-123',
-        expect.objectContaining({ method: 'PATCH', body: expect.any(String) }),
+          '/archive/blogs/blog-123',
+          expect.objectContaining({ method: 'PATCH', body: expect.any(String) }),
       )
     })
 
     const patchCall = apiFetchMock.mock.calls.find(
-      ([endpoint, options]) => endpoint === '/archive/blogs/blog-123' && options?.method === 'PATCH',
+        ([endpoint, options]) => endpoint === '/archive/blogs/blog-123' && options?.method === 'PATCH',
     )
 
     expect(patchCall).toBeDefined()
@@ -713,8 +721,8 @@ describe('CreateBlogPage', () => {
       })
 
       expect(apiMock.post).toHaveBeenCalledWith(
-        '/archive/blogs',
-        expect.not.objectContaining({ thumbnail_index: expect.anything() }),
+          '/archive/blogs',
+          expect.not.objectContaining({ thumbnail_index: expect.anything() }),
       )
     } finally {
       // Restore FileReader
