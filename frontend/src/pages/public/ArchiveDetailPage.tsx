@@ -20,7 +20,6 @@ import { getTagsByProductionId, type Tag } from '../../api/tags'
 import { getHallById } from '../../api/halls'
 import { getSpaceById } from '../../api/spaces'
 import { getLocationById, type Location } from '../../api/locations'
-import { getPreviousStrippedPath } from '../../utils/navigationHistory'
 import { LeftArrowIcon } from '../../components/shared/icons'
 import {useOptionalAdminSession} from "../../auth/useAdminSessionContext.ts";
 
@@ -57,14 +56,7 @@ function ArchiveDetailPageContent() {
     const isLoggedIn = Boolean(session?.user)
 
     const handleGoBack = () => {
-        const prev = getPreviousStrippedPath()
-        if (prev) {
-            // navigate directly to the previous page in the current locale
-            // this bypasses any locale-switch history entries entirely
-            navigate(withLocalePath(prev, locale))
-            return
-        }
-        navigate(withLocalePath('/', locale))
+        navigate(-1)
     }
 
     const formatHtml = (html: string) => {
