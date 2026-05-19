@@ -13,7 +13,6 @@ import ProductionCard from '../../components/blogs/ProductionCard'
 import ArchiveDetailHero from '../../components/public/detail/PublicDetailHeroBanner'
 import ArchiveDetailGallery from '../../components/public/detail/PublicDetailGallery'
 import '../../styles/QuillEditor.css'
-import { getPreviousStrippedPath } from '../../utils/navigationHistory'
 import {
     getLocalizedContent,
     getLocalizedTitle,
@@ -84,14 +83,7 @@ function BlogDetailPageContent() {
     const idIsMalformed = typeof id === 'string' && !UUID_REGEX.test(id)
 
     const handleGoBack = () => {
-        const prev = getPreviousStrippedPath()
-        if (prev) {
-            // navigate directly to the previous page in the current locale
-            // this bypasses any locale-switch history entries entirely
-            navigate(withLocalePath(prev, locale))
-            return
-        }
-        navigate(withLocalePath('/', locale))
+        navigate(-1)
     }
 
     const handleShare = async () => {

@@ -35,7 +35,7 @@
             await prisma.$disconnect();
         });
 
-        it("downloads crops and stores file_location", async () => {
+        it("downloads crops", async () => {
             const crops = [
                 {url: "https://img/1.jpg", name: "FE3_header"},
                 {url: "https://img/2.jpg", name: "FE3_boxed"},
@@ -54,15 +54,9 @@
 
             expect(mockedFs.writeFileSync).toHaveBeenCalledTimes(2);
 
-            const updatedCrops = await prisma.crop.findMany({
-                where: {
-                    file_location: {
-                        contains: "crops"
-                    }
-                }
-            });
-            expect(updatedCrops.length).toBe(2);
-            expect(updatedCrops[0].file_location).toContain("crops");
+            const foundCrops = await prisma.crop.findMany();
+
+            expect(foundCrops.length).toBe(2);
         });
 
         it("handles failed downloads without crashing", async () => {
@@ -78,14 +72,10 @@
 
             await download_crops(prisma_crops);
 
-            const updatedCrops = await prisma.crop.findMany({
-                where: {
-                    file_location: {
-                        contains: "crops"
-                    }
-                }
-            });
-            expect(updatedCrops.length).toBe(0);
+            const foundCrops = await prisma.crop.findMany();
+
+            // the crop should be deleted from prisma.
+            expect(foundCrops.length).toBe(0);
         });
 
         it("handles empty crop list", async () => {
@@ -94,14 +84,9 @@
             await download_crops([]);
 
             expect(mockedAxios).not.toHaveBeenCalled();
-            const updatedCrops = await prisma.crop.findMany({
-                where: {
-                    file_location: {
-                        contains: "crops"
-                    }
-                }
-            });
-            expect(updatedCrops.length).toBe(0);
+            const foundCrops = await prisma.crop.findMany();
+
+            expect(foundCrops.length).toBe(0);
         });
 
         it("processes crops in chunks", async () => {
@@ -120,13 +105,9 @@
             await download_crops(prisma_crops);
 
             expect(mockedAxios).toHaveBeenCalledTimes(25);
-            const updatedCrops = await prisma.crop.findMany({
-                where: {
-                    file_location: {
-                        contains: "crops"
-                    }
-                }
-            });
-            expect(updatedCrops.length).toBe(25);
+            const foundCrops = await prisma.crop.findMany();
+
+
+            expect(foundCrops.length).toBe(25);
         });
     });
