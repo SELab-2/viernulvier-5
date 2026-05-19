@@ -56,7 +56,7 @@ describe('SearchPage API routing by tab', () => {
         await waitFor(() => {
             expect(
                 apiFetchMock.mock.calls.some(([endpoint]) =>
-                    typeof endpoint === 'string' && endpoint.startsWith('/archive/search?') && endpoint.includes('tab=productions'),
+                    typeof endpoint === 'string' && endpoint.startsWith('/archive/productions?'),
                 ),
             ).toBe(true)
         })
