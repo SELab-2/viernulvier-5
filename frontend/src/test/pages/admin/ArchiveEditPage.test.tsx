@@ -20,11 +20,13 @@ const mockMessages: Pick<Messages, 'admin' | 'production' | 'event'> = {
       posters: 'Posters',
       gallery: 'Gallery',
       settings: 'Settings',
+      drafts: 'Drafts',
       dashboardIconAlt: 'Dashboard icon',
       productionsIconAlt: 'Productions icon',
       blogsIconAlt: 'Blogs icon',
       postersIconAlt: 'Posters icon',
       settingsIconAlt: 'Settings icon',
+      draftsIconAlt: 'Drafts icon',
     },
     dashboard: {
       pageTitle: 'Dashboard',
@@ -137,8 +139,6 @@ const mockMessages: Pick<Messages, 'admin' | 'production' | 'event'> = {
       filesCountLabel: (count: number) => `${count} file${count === 1 ? '' : 's'}`,
       pdfPreviewTitle: (title: string) => `${title} PDF preview`,
     },
-  },
-
   production: {
     productionSettingsLabel: 'Production Settings',
     statusLabel: 'Status',
@@ -191,6 +191,32 @@ const mockMessages: Pick<Messages, 'admin' | 'production' | 'event'> = {
     newLocationCreatingLabel: 'Creating...',
     newLocationAddLabel: 'Add location',
   },
+    drafts: {
+      pageTitle: 'Drafts',
+      pageSubtitle: 'View all drafts here',
+      productions: 'Productions',
+      blogs: 'Blogs',
+      filterOnlyCurrent: 'Show my drafts',
+      tableColTitle: 'Title',
+      tableColType: 'Type',
+      tableColStatus: 'Status',
+      tableColEditor: 'Edited by me',
+      tableColDate: 'Date',
+      tableColActions: 'Actions',
+      statusUnavailable: 'Not yet available in archive',
+      actionView: 'View',
+      actionEdit: 'Edit',
+      actionDelete: 'Delete',
+      emptyRecent: 'No recent archive drafts found.',
+      loadingMessage: 'Loading drafts...',
+      deleteTitle: 'Delete draft',
+      deleteConfirm: (title: string) => `Are you sure you want to delete "${title}"?`,
+      paginationShowing: (from: number, to: number, total: number) => `Showing ${from}-${to} of ${total} results`,
+      pageSizeLabel: 'Per page',
+      paginationPrev: 'Previous page',
+      paginationNext: 'Next page',
+    }
+  }
 }
 
 vi.mock('../../../i18n', () => ({

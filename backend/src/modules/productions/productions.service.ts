@@ -43,10 +43,6 @@ export class ProductionsService {
     }
 
     private extractHostedCropUrl(crop: any): string | undefined {
-        if (typeof crop?.file_location !== 'string' || crop.file_location.trim().length === 0) {
-            return undefined
-        }
-
         if (typeof crop?.id !== 'string' || crop.id.trim().length === 0) {
             return undefined
         }
