@@ -22,7 +22,7 @@ const PostersPage = lazy(() => import('./pages/admin/PostersPage'))
 const CreateBlogPage = lazy(() => import('./pages/admin/CreateBlogPage'))
 
 import BlogDetailPage from './pages/public/BlogDetailPage'
-
+import BlogsPage from './pages/public/BlogsPage'
 import DraftsDashboard from './pages/admin/DraftsDashboard.tsx'
 /**
  * Root App component.
@@ -52,7 +52,9 @@ function App() {
                         <Route path="/posters/:id" element={<PosterDetailPage />} />
                         <Route path="/nl/posters/:id" element={<PosterDetailPage />} />
                         <Route path="/en/posters/:id" element={<PosterDetailPage />} />
-
+                        <Route path="/blogs" element={<BlogsPage />} />
+                        <Route path="/nl/blogs" element={<BlogsPage />} />
+                        <Route path="/en/blogs" element={<BlogsPage />} />
                         <Route path="/blogs/:id" element={<BlogDetailPage />} />
                         <Route path="/nl/blogs/:id" element={<BlogDetailPage />} />
                         <Route path="/en/blogs/:id" element={<BlogDetailPage />} />
