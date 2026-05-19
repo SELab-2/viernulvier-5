@@ -5,6 +5,7 @@ import { buildStatCards, pillClasses } from '../../components/admin/hooks/dashbo
 import { useDashboardFormatters } from '../../components/admin/hooks/useDashboardFormatters'
 import { useDashboardSummary } from '../../components/admin/hooks/useDashboardSummary'
 import { usePagination } from '../../components/admin/hooks/usePagination'
+import { getAdminRouteConfig } from '../../admin/paths'
 
 const PAGE_SIZE_OPTIONS = [3, 6, 9, 12, 15, 18] as const
 type FixedPageSize = (typeof PAGE_SIZE_OPTIONS)[number]
@@ -16,6 +17,23 @@ const ROW_HEIGHT_PX = 72
 const CHROME_HEIGHT_PX = 520
 const MIN_AUTO_ROWS: FixedPageSize = 3
 const MAX_AUTO_ROWS: FixedPageSize = 18
+
+type DashboardActionRoutes = {
+  viewPath: string
+  editPath: string
+}
+
+function getDashboardActionRoutes(item: { id: string; type: string }, publicPath: (path: string) => string): DashboardActionRoutes {
+  if (item.type === 'Blog') {
+    return { viewPath: publicPath(`/blogs/${item.id}`), editPath: `/admin/blogs/${item.id}/edit` }
+  }
+
+  if (item.type === 'Poster') {
+    return { viewPath: publicPath(`/posters/${item.id}`), editPath: '/admin/posters' }
+  }
+
+  return { viewPath: publicPath(`/archive/${item.id}`), editPath: `/admin/archive/${item.id}/edit` }
+}
 
 function readStoredPageSize(): PageSizeSetting {
   if (typeof window === 'undefined') {
@@ -81,6 +99,7 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
     }
   }
 
+  const { publicPath } = getAdminRouteConfig(window.location.hostname)
   const { summary, isLoading, error } = useDashboardSummary({ page, limit: pageSize })
 
   useEffect(() => {
@@ -213,47 +232,57 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
                       </span>
                     </td>
                     <td className="px-4 py-4">
-                      <div className="flex gap-3 text-[9px] uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
-                        {(['nl', 'en'] as const).map((loc) => {
-                          const state = item.languageStatus[loc]
-                          const dotClass = state === 'complete'
-                            ? 'bg-[#10b981]'
-                            : state === 'attention'
-                              ? 'bg-[#f59e0b]'
-                              : 'bg-[#cbd5e1]'
-                          const tooltip = state === 'complete'
-                            ? d.languageStatusComplete
-                            : state === 'attention'
-                              ? d.languageStatusAttention
-                              : d.languageStatusMissing
+                      {item.languageStatus ? (
+                        <div className="flex gap-3 text-[9px] uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
+                          {(['nl', 'en'] as const).map((loc) => {
+                            const state = item.languageStatus?.[loc]
+                            const dotClass = state === 'complete'
+                              ? 'bg-[#10b981]'
+                              : state === 'attention'
+                                ? 'bg-[#f59e0b]'
+                                : 'bg-[#cbd5e1]'
+                            const tooltip = state === 'complete'
+                              ? d.languageStatusComplete
+                              : state === 'attention'
+                                ? d.languageStatusAttention
+                                : d.languageStatusMissing
 
-                          return (
-                            <span
-                              key={loc}
-                              className={`inline-block cursor-help rounded-sm focus:outline-none focus:ring-2 focus:ring-accent/40 ${state === 'missing' ? 'opacity-40' : ''}`}
-                              title={tooltip}
-                              aria-label={`${loc.toUpperCase()}: ${tooltip}`}
-                              tabIndex={0}
-                            >
-                              <span className="block">{loc}</span>
+                            return (
                               <span
-                                aria-hidden="true"
-                                className={`mt-1 block h-2 w-2 rounded-full ${dotClass}`}
-                              />
-                            </span>
-                          )
-                        })}
-                      </div>
+                                key={loc}
+                                className={`inline-block cursor-help rounded-sm focus:outline-none focus:ring-2 focus:ring-accent/40 ${state === 'missing' ? 'opacity-40' : ''}`}
+                                title={tooltip}
+                                aria-label={`${loc.toUpperCase()}: ${tooltip}`}
+                                tabIndex={0}
+                              >
+                                <span className="block">{loc}</span>
+                                <span
+                                  aria-hidden="true"
+                                  className={`mt-1 block h-2 w-2 rounded-full ${dotClass}`}
+                                />
+                              </span>
+                            )
+                          })}
+                        </div>
+                      ) : null}
                     </td>
                     <td className="px-4 py-4 text-sm text-[#475569] dark:text-slate-300">{formatDate(item.updated_at)}</td>
                     <td className="px-2 py-4">
                       <div className="flex flex-wrap gap-1">
-                        <button className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white">
-                          {d.actionView}
-                        </button>
-                        <button className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white">
-                          {d.actionEdit}
-                        </button>
+                        {(() => {
+                          const routes = getDashboardActionRoutes(item, publicPath)
+
+                          return (
+                            <>
+                              <a href={routes.viewPath} className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white">
+                                {d.actionView}
+                              </a>
+                              <a href={routes.editPath} className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white">
+                                {d.actionEdit}
+                              </a>
+                            </>
+                          )
+                        })()}
                       </div>
                     </td>
                   </tr>

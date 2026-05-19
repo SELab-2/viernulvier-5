@@ -44,6 +44,7 @@ export function buildStatCards(
 ): StatCard[] {
   const productionsDelta = summary?.deltas?.productions
   const blogsDelta = summary?.deltas?.blogs
+  const postersDelta = summary?.deltas?.posters
 
   return [
     {
@@ -67,14 +68,14 @@ export function buildStatCards(
       iconAlt: messages.statBlogConcepts,
     },
     {
-      label: messages.statVisitors,
-      value: messages.visitorsPlaceholder,
-      change: messages.visitorsChange,
-      note: messages.visitorsNote,
+      label: messages.statPosters,
+      value: summary ? formatCount(summary.counts.posters) : '—',
+      change: formatDelta(postersDelta),
+      note: postersDelta?.changePct !== null && postersDelta !== undefined ? messages.deltaVsLastMonth : null,
       accent: 'bg-[rgba(59,130,246,0.1)] text-[#2563eb]',
-      pill: 'bg-[rgba(59,130,246,0.08)] text-[#2563eb]',
+      pill: resolvePillClasses(postersDelta),
       iconSrc: '/admin/dashboard/visitors-icon.svg',
-      iconAlt: messages.statVisitors,
+      iconAlt: messages.statPosters,
     },
     {
       label: messages.statMediaItems,

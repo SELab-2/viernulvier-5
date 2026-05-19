@@ -8,6 +8,7 @@ export type AdminRouteConfig = {
   productionEditPath: string
   productionCreatePath: string
   postersPath: string
+  publicPath: (path: string) => string
 }
 
 export function getAdminRouteConfig(hostname: string): AdminRouteConfig {
@@ -16,6 +17,8 @@ export function getAdminRouteConfig(hostname: string): AdminRouteConfig {
   const isLocalDevHost = normalizedHostname === 'localhost' || normalizedHostname === '127.0.0.1'
   const isPublicAdminHost = normalizedHostname === 'sel2-5.ugent.be'
   const canRenderAdminRoutes = isAdminHost || isLocalDevHost || isPublicAdminHost
+  const publicHostname = isAdminHost ? normalizedHostname.replace(/^admin\./, '') : normalizedHostname
+  const publicPath = (path: string) => isAdminHost && publicHostname ? `https://${publicHostname}${path}` : path
 
   if (isAdminHost || isLocalDevHost) {
     return {
@@ -28,6 +31,7 @@ export function getAdminRouteConfig(hostname: string): AdminRouteConfig {
       productionEditPath: '/admin/archive/:id/edit',
       productionCreatePath: '/admin/archive/create',
       postersPath: '/admin/posters',
+      publicPath,
     }
   }
 
@@ -41,5 +45,6 @@ export function getAdminRouteConfig(hostname: string): AdminRouteConfig {
     productionEditPath: '/admin/archive/:id/edit',
     productionCreatePath: '/admin/archive/create',
     postersPath: '/admin/posters',
+    publicPath,
   }
 }
