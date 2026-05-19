@@ -41,6 +41,8 @@ const mockMessages = {
             languageStatusComplete: 'Volledig',
             languageStatusAttention: 'Aandacht vereist',
             languageStatusMissing: 'Ontbreekt',
+            paginationPrev: 'Vorige pagina',
+            paginationNext: 'Volgende pagina',
         },
         productions: {
             pageTitle: 'Producties',
