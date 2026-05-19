@@ -181,6 +181,19 @@ describe('BlogsPage', () => {
         })
     })
 
+    it('sends draft=false to exclude draft items', async () => {
+        apiFetchMock.mockResolvedValue(makePaginatedResponse([]))
+
+        renderPage()
+
+        await waitFor(() => {
+            expect(apiFetchMock).toHaveBeenCalledWith(
+                expect.stringContaining('draft=false'),
+                expect.any(Object),
+            )
+        })
+    })
+
     it('shows "(Zonder titel)" when title is null', async () => {
         apiFetchMock.mockResolvedValue(makePaginatedResponse([blogWithoutTitle]))
 
