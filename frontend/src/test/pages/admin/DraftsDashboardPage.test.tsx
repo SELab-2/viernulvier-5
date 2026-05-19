@@ -143,6 +143,6 @@ describe('DraftsDashboardPage', () => {
 
         expect(screen.queryByText('Productie Concept')).not.toBeInTheDocument()
         expect(screen.getByText('Blog Concept Tekst')).toBeInTheDocument()
-        expect(useBlogDraftsMock).toHaveBeenCalledWith(expect.objectContaining({ page: 1, limit: 10 }))
+        expect(useBlogDraftsMock).toHaveBeenCalledWith(expect.objectContaining({ page: 1, limit: 6 }))
     })
 })
