@@ -87,7 +87,11 @@ function BlogDetailPageContent() {
     const idIsMalformed = typeof id === 'string' && !UUID_REGEX.test(id)
 
     const handleGoBack = () => {
-        navigate(-1)
+        if (window.history.state?.idx > 0) {
+            navigate(-1)
+        } else {
+            navigate(withLocalePath('/', locale))
+        }
     }
 
     const handleShare = async () => {

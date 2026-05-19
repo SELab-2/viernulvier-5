@@ -274,7 +274,7 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
 
                           return (
                             <>
-                              <a href={routes.viewPath} className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white">
+                              <a href={routes.viewPath} target="_blank" className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white">
                                 {d.actionView}
                               </a>
                               <a href={routes.editPath} className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white">
