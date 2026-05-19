@@ -249,12 +249,13 @@ export type Messages = {
       productions: string
       posters: string
       gallery: string
+      organisation: string
       settings: string
       drafts: string
       dashboardIconAlt: string
       productionsIconAlt: string
       postersIconAlt: string
-      galleryIconAlt: string
+      organisationIconAlt: string
       settingsIconAlt: string
       draftsIconAlt: string
     }
@@ -285,6 +286,7 @@ export type Messages = {
       statProductions: string
       statBlogConcepts: string
       statVisitors: string
+      statPosters: string
       statMediaItems: string
       deltaVsLastMonth: string
       statLastSync: string

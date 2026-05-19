@@ -7,6 +7,8 @@ export type BlogDetails = {
     title?: string | null
     content?: unknown
     productions?: string[]
+    images?: (string | null)[]
+    thumbnail_index?: number | null
     draft?: boolean
 }
 

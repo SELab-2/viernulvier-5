@@ -3,7 +3,7 @@ import { getAdminRouteConfig } from '../../admin/paths'
 
 describe('getAdminRouteConfig', () => {
   it('uses /admin-prefixed paths on admin subdomains', () => {
-    expect(getAdminRouteConfig('admin.archief.viernulvier.be')).toMatchObject({
+    expect(getAdminRouteConfig('admin.example.test')).toMatchObject({
       canRenderAdminRoutes: true,
       isAdminHost: true,
       isLocalDevHost: false,
@@ -36,10 +36,30 @@ describe('getAdminRouteConfig', () => {
   })
 
   it('disables admin routes on public hosts', () => {
-    expect(getAdminRouteConfig('archief.viernulvier.be')).toMatchObject({
+    expect(getAdminRouteConfig('example.test')).toMatchObject({
       canRenderAdminRoutes: false,
       isAdminHost: false,
       isLocalDevHost: false,
     })
   })
+
+  it('builds public archive URLs for admin subdomains', () => {
+    const config = getAdminRouteConfig('admin.example.test')
+
+    expect(config.publicPath('/posters/poster-1')).toBe('https://example.test/posters/poster-1')
+  })
+
+  it('keeps public archive paths relative outside admin subdomains', () => {
+    const config = getAdminRouteConfig('localhost')
+
+    expect(config.publicPath('/posters/poster-1')).toBe('/posters/poster-1')
+  })
+
+
+  it('keeps public archive paths relative when admin host has no public counterpart', () => {
+    const config = getAdminRouteConfig('admin.')
+
+    expect(config.publicPath('/posters/poster-1')).toBe('/posters/poster-1')
+  })
+
 })

@@ -10,6 +10,9 @@ import { getActiveLocale, withLocalePath } from '../../i18n'
 import { LeftArrowIcon } from '../../components/shared/icons'
 import PublicPillButton from '../../components/public/PublicPillButton'
 import ProductionCard from '../../components/blogs/ProductionCard'
+import ArchiveDetailHero from '../../components/public/detail/PublicDetailHeroBanner'
+import ArchiveDetailGallery from '../../components/public/detail/PublicDetailGallery'
+import '../../styles/QuillEditor.css'
 import { getPreviousStrippedPath } from '../../utils/navigationHistory'
 import {
     getLocalizedContent,
@@ -27,6 +30,7 @@ const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12
 /*
 This page shows the content of a blog in both english and dutch (/en or /nl). You can also click on the productions that are related to this blog
 */
+
 
 function QuillReadOnly({ content }: { content: unknown }) {
     const containerRef = useRef<HTMLDivElement | null>(null)
@@ -55,7 +59,7 @@ function QuillReadOnly({ content }: { content: unknown }) {
         }
     }, [delta])
 
-    return <div ref={containerRef} className="overflow-hidden rounded-xl border border-border bg-surface" />
+    return <div ref={containerRef} className="quill-detail-wrapper overflow-hidden rounded-xl bg-surface" />
 }
 
 function BlogDetailPageContent() {
@@ -70,6 +74,7 @@ function BlogDetailPageContent() {
     const [error, setError] = useState('')
     const [notFound, setNotFound] = useState(false)
     const [previousId, setPreviousId] = useState(id)
+    const [shareCopied, setShareCopied] = useState(false)
 
     const session = useOptionalAdminSession()
     const isLoggedIn = Boolean(session?.user)
@@ -92,6 +97,29 @@ function BlogDetailPageContent() {
         }
         navigate(withLocalePath('/', locale))
     }
+
+    const handleShare = async () => {
+        const currentUrl = window.location.href
+
+        if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(currentUrl)
+        } else {
+            const textArea = document.createElement('textarea')
+            textArea.value = currentUrl
+            textArea.setAttribute('readonly', '')
+            textArea.style.position = 'absolute'
+            textArea.style.left = '-9999px'
+            document.body.appendChild(textArea)
+            textArea.select()
+            document.body.removeChild(textArea)
+        }
+
+        setShareCopied(true)
+        window.setTimeout(() => setShareCopied(false), 1800)
+    }
+
+    const shareLabel = message.search.shareLabel
+    const shareCopiedLabel = message.search.shareCopiedLabel
 
     // load productions or catch not existing production
     useEffect(() => {
@@ -169,50 +197,82 @@ function BlogDetailPageContent() {
     }
 
     return (
-        <section className="site-container py-12">
-            <div className="mb-8 flex items-center justify-between gap-4">
-                <PublicPillButton 
-                    icon={<LeftArrowIcon className="h-5 w-5" />} 
-                    label={message.blogs.navBack} 
-                    onClick={handleGoBack} 
+        <>
+            <div className="site-container mt-8">
+                <PublicPillButton
+                    icon={<LeftArrowIcon className="h-5 w-5" />}
+                    label={message.blogs.navBack}
+                    onClick={handleGoBack}
+                    
                 />
             </div>
 
-            {isLoading ? <p className="text-center text-muted">{message.blogs.loadingBlog}</p> : null}
-            {error ? <p className="text-center text-red-500">{error}</p> : null}
+            <div className="site-container mt-6">
+                {blog && (
+                    <ArchiveDetailHero
+                        imageUrl={
+                            // show cover image if thumbnail_index points to a valid image, otherwise fallback
+                            (blog.images && typeof blog.thumbnail_index === 'number' && blog.images[blog.thumbnail_index])
+                                ? blog.images[blog.thumbnail_index]!
+                                : '/fallback-hero.svg'
+                        }
+                        title={getLocalizedTitle(blog.title, locale)}
+                        superTitle={null}
+                        artist={null}
+                        genres={[]}
+                        locale={locale}
+                        shareLabel={shareCopied ? shareCopiedLabel : shareLabel}
+                        onShare={() => {
+                            void handleShare()
+                        }}
+                        isBlog={true}
+                    />
+                )}
+            </div>
 
-            {!isLoading && !error && blog ? (
-                <article className="mx-auto max-w-4xl">
-                    <h1 className="mb-6 text-4xl font-semibold leading-tight text-foreground [overflow-wrap:anywhere]">
-                        {getLocalizedTitle(blog.title, locale) || message.blogs.untitledBlog}
-                    </h1>
-                    <QuillReadOnly content={getLocalizedContent(blog.content, locale)} />
+            <section className="site-container space-y-12 py-8">
 
-                    {isLoadingProductions || productions.length > 0 ? (
-                        <section className="mt-10">
-                            <h2 className="mb-4 text-2xl font-semibold text-foreground">
-                                {message.blogs.relatedProductions}
-                            </h2>
+                {isLoading ? <p className="text-center text-muted">{message.blogs.loadingBlog}</p> : null}
+                {error ? <p className="text-center text-red-500">{error}</p> : null}
 
-                            {isLoadingProductions ? <p className="text-sm text-muted">{message.blogs.loadingProductions}</p> : null}
+                {!isLoading && !error && blog ? (
+                    <article className="space-y-8">
+                        <div className="quill-detail-wrapper prose max-w-none prose-neutral text-base leading-relaxed">
+                            <QuillReadOnly content={getLocalizedContent(blog.content, locale)} />
+                        </div>
 
-                            {!isLoadingProductions && productions.length > 0 ? (
-                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                    {productions.map((production) => (
-                                        <ProductionCard
-                                            key={production.id}
-                                            production={production}
-                                            locale={locale}
-                                            href={withLocalePath(`/archive/${production.id}`, locale)}
-                                        />
-                                    ))}
-                                </div>
-                            ) : null}
-                        </section>
-                    ) : null}
-                </article>
-            ) : null}
-        </section>
+                        {blog.images && blog.images.length > 0 && (
+                            <div className="mt-6">
+                                <ArchiveDetailGallery images={blog.images.filter((_, i) => i !== blog.thumbnail_index)} />
+                            </div>
+                        )}
+
+                        {isLoadingProductions || productions.length > 0 ? (
+                            <section className="mt-10">
+                                <h2 className="mb-4 text-2xl font-semibold text-foreground">
+                                    {message.blogs.relatedProductions}
+                                </h2>
+
+                                {isLoadingProductions ? <p className="text-sm text-muted">{message.blogs.loadingProductions}</p> : null}
+
+                                {!isLoadingProductions && productions.length > 0 ? (
+                                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                        {productions.map((production) => (
+                                            <ProductionCard
+                                                key={production.id}
+                                                production={production}
+                                                locale={locale}
+                                                href={withLocalePath(`/archive/${production.id}`, locale)}
+                                            />
+                                        ))}
+                                    </div>
+                                ) : null}
+                            </section>
+                        ) : null}
+                    </article>
+                ) : null}
+            </section>
+        </>
     )
 }
 
