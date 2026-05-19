@@ -345,6 +345,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
     }
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setDraftFromYear(safeFromYear)
         setDraftToYear(safeToYear)
     }, [safeFromYear, safeToYear])
