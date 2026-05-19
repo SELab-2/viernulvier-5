@@ -51,7 +51,7 @@ const mockMessages: Pick<Messages, 'admin'> = {
       visitorsChange: 'placeholder',
       editorsActive: (count: number) => `${count} editors active`,
       statProductions: 'Productions',
-      statBlogConcepts: 'Blog Concepts',
+      statBlogConcepts: 'Blogs',
       statVisitors: 'Visitors',
       statPosters: 'Posters',
       statMediaItems: 'Media Items',

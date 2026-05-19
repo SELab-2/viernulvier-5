@@ -295,7 +295,7 @@ const nl: Messages = {
       visitorsChange: 'tijdelijk',
       editorsActive: (count: number) => `${count} editors actief`,
       statProductions: 'Producties',
-      statBlogConcepts: 'Blog Concepten',
+      statBlogConcepts: 'Blogs',
       statVisitors: 'Bezoekers',
       statPosters: 'Posters',
       statMediaItems: 'Media-items',

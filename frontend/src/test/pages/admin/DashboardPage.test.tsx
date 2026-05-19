@@ -34,7 +34,7 @@ const mockMessages = vi.hoisted(() => ({
       visitorsChange: 'placeholder',
       editorsActive: (count: number) => `${count} editors active`,
       statProductions: 'Productions',
-      statBlogConcepts: 'Blog Concepts',
+      statBlogConcepts: 'Blogs',
       statVisitors: 'Visitors',
       statPosters: 'Posters',
       statMediaItems: 'Media Items',
@@ -241,7 +241,7 @@ describe('DashboardPage', () => {
     expect(screen.getByText('Dashboard kon niet geladen worden.')).toBeInTheDocument()
   })
 
-  it('renders Blog Concepts label', () => {
+  it('renders Blogs label', () => {
     useDashboardSummaryMock.mockReturnValue({
       isLoading: false,
       error: null,
@@ -265,7 +265,7 @@ describe('DashboardPage', () => {
 
     render(<MemoryRouter><DashboardPage /></MemoryRouter>)
 
-    expect(screen.getByText('Blog Concepts')).toBeInTheDocument()
+    expect(screen.getByText('Blogs')).toBeInTheDocument()
   })
 
   it('productions pill shows +12% with green class when changePct=12 direction=up', () => {
