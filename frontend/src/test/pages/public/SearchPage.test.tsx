@@ -392,12 +392,13 @@ describe('SearchPage sort and page size', () => {
         fireEvent.change(sortSelect, { target: { value: 'recent' } })
 
         await waitFor(() => {
-            const productionCalls = apiFetchMock.mock.calls.filter(
+            const searchCalls = apiFetchMock.mock.calls.filter(
                 ([endpoint]) =>
-                    typeof endpoint === 'string' && endpoint.startsWith('/archive/productions?'),
+                    typeof endpoint === 'string' && endpoint.startsWith('/archive/search?'),
             )
-            const latestCall = productionCalls[productionCalls.length - 1]?.[0] ?? ''
-            expect(String(latestCall)).toContain('sort=recent')
+            const latestCall = String(searchCalls[searchCalls.length - 1]?.[0] ?? '')
+            expect(latestCall).toContain('sort=recent')
+            expect(latestCall).toContain('tab=productions')
         })
     })
 
