@@ -22,6 +22,9 @@ export const productionPaginationQuerySchema = paginationQuerySchema.extend({
     onThisDay: z.enum(['true', 'false'])
         .optional().default('false')
         .transform((val) => val === 'true'),
+    pastOnly: z.enum(['true', 'false'])
+        .optional()
+        .transform((val) => val === undefined ? undefined : val === 'true'),
     referenceDate: z
         .string()
         .regex(/^\d{4}-\d{2}-\d{2}$/)
