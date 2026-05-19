@@ -153,7 +153,10 @@ function BlogDetailPageContent() {
                     linkedProductionIds.map((productionId) => api.get<ProductionDetailResponse>(`/archive/productions/${productionId}`)),
                 )
                 if (isActive) {
-                    setProductions(linkedProductionResponses.map((entry) => entry.data))
+                    setProductions(linkedProductionResponses
+                        .map((entry) => entry.data)
+                        .filter((production) => !production.draft)
+                    )
                 }
             } catch {
                 // a missing or broken linked production shouldn't 404 the blog itself
