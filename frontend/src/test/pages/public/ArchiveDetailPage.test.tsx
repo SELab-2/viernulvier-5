@@ -18,6 +18,7 @@ vi.mock('react-router-dom', async () => {
 vi.mock('../../../i18n', () => ({
     getActiveLocale: getActiveLocaleMock,
     getMessages: (locale: string) => ({
+        common: { loading: 'Laden...' },
         nav: { archive: 'Archief', searchAriaLabel: 'Zoeken', searchPlaceholder: 'Zoek...' },
         home: { title: 'Home' },
         search: { shareLabel: 'Deel', shareCopiedLabel: 'Gekopieerd naar klembord' },

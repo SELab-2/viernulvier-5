@@ -21,6 +21,7 @@ import { getHallById } from '../../api/halls'
 import { getSpaceById } from '../../api/spaces'
 import { getLocationById, type Location } from '../../api/locations'
 import { LeftArrowIcon } from '../../components/shared/icons'
+import { LoadingContent } from '../LoadingPage'
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -179,7 +180,7 @@ function ArchiveDetailPageContent() {
     }, [id, idIsMalformed])
 
     if (loading) {
-        return null
+        return <LoadingContent />
     }
 
     if (notFound || idIsMalformed) {
