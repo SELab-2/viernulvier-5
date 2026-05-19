@@ -56,7 +56,7 @@ function ArchiveDetailPageContent() {
             document.referrer &&
             new URL(document.referrer).origin === window.location.origin
 
-        if (hasInternalReferrer || window.history.length > 2) {
+        if (hasInternalReferrer || window.history.length > 1) {
             navigate(-1)
         } else {
             navigate(withLocalePath('/', locale))
