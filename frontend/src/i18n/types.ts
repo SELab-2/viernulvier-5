@@ -249,12 +249,14 @@ export type Messages = {
     nav: {
       dashboard: string
       productions: string
+      blogs: string
       posters: string
       gallery: string
       organisation: string
       settings: string
       dashboardIconAlt: string
       productionsIconAlt: string
+      blogsIconAlt: string
       postersIconAlt: string
       organisationIconAlt: string
       settingsIconAlt: string
@@ -266,12 +268,13 @@ export type Messages = {
       loadingMessage: string
       recentlyEdited: string
       tableColTitle: string
-      tableColType: string
       tableColLanguage: string
+      tableColType: string
       tableColDate: string
       tableColActions: string
       actionView: string
       actionEdit: string
+      actionDelete: string
       emptyRecent: string
       paginationShowing: (from: number, to: number, total: number) => string
       paginationPrev: string
@@ -300,6 +303,33 @@ export type Messages = {
     archiveEdit: {
       pageTitle: string
       itemIdLabel: string
+    }
+    blogsPage: {
+      pageTitle: string
+      pageSubtitle: string
+      searchPlaceholder: string
+      newButton: string
+      deleteError: string
+      loadError: string
+      paginationShowing: (from: number, to: number, total: number) => string
+      paginationPageLabel: (page: number) => string
+      tableColLinkedProductions: string
+      untitledLabel: string
+      productionCountSingular: string
+      productionCountPlural: (count: number) => string
+    }
+    productions: {
+      pageTitle: string
+      pageSubtitle: string
+      searchPlaceholder: string
+      newButton: string
+      deleteConfirm: string
+      deleteError: string
+      tabAriaLabel: string
+      untitledLabel: string
+      paginationShowing: (from: number, to: number, total: number) => string
+      paginationPageLabel: (page: number) => string
+      loadError: string
     }
     notFound: {
       titleTop: string

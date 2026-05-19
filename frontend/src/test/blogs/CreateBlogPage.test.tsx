@@ -20,6 +20,8 @@ const currentYear = new Date().getFullYear()
 const productionFetchEndpoint = `/archive/productions?page=1&limit=100&sort=recent&lang=nl&pastOnly=false&draft=all&yearFrom=1982&yearTo=${currentYear}`
 const secondProductionFetchEndpoint = `/archive/productions?page=2&limit=100&sort=recent&lang=nl&pastOnly=false&draft=all&yearFrom=1982&yearTo=${currentYear}`
 
+const BLOGS_PATH = '/blogs'
+
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom')
   return {
@@ -39,6 +41,12 @@ vi.mock('react-router-dom', async () => {
 vi.mock('../../api/client', () => ({
   api: apiMock,
   apiFetch: apiFetchMock,
+}))
+
+vi.mock('../../admin/paths', () => ({
+  getAdminRouteConfig: () => ({
+    blogsPath: BLOGS_PATH,
+  }),
 }))
 
 vi.mock('../../components/public/PublicNavbar', () => ({
@@ -296,7 +304,7 @@ describe('CreateBlogPage', () => {
           productionIds: [],
         }),
       )
-      expect(navigate).toHaveBeenCalledWith('/blogs/blog-created')
+      expect(navigate).toHaveBeenCalledWith(BLOGS_PATH)
     })
   })
 
@@ -357,7 +365,7 @@ describe('CreateBlogPage', () => {
           body: expect.any(String),
         }),
       )
-      expect(navigate).toHaveBeenCalledWith('/blogs/blog-123')
+      expect(navigate).toHaveBeenCalledWith(BLOGS_PATH)
     })
 
     const patchCall = apiFetchMock.mock.calls.find(([endpoint, options]) => endpoint === '/archive/blogs/blog-123' && options?.method === 'PATCH')
@@ -713,8 +721,8 @@ describe('CreateBlogPage', () => {
       })
 
       expect(apiMock.post).toHaveBeenCalledWith(
-        '/archive/blogs',
-        expect.not.objectContaining({ thumbnail_index: expect.anything() }),
+          '/archive/blogs',
+          expect.not.objectContaining({ thumbnail_index: expect.anything() }),
       )
     } finally {
       // Restore FileReader
