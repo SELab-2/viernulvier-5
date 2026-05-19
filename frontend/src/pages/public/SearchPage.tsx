@@ -1452,7 +1452,8 @@ function SearchPageContent() {
     const currentPage = Math.min(page, totalPages)
     const pageItems = useMemo(() => {
         if (!apiEntries) return []
-        // Voeg eventDateSortKey toe voor sortering
+
+        // Voeg eventDateSortKey toe voor sortering (meest recente eventdatum)
         const mapped = apiEntries
             .map(item => {
                 const detail = fetchedDetails[item.id]
@@ -1461,14 +1462,16 @@ function SearchPageContent() {
                 const mappedFetchedGenreLabel = normalizedFetchedGenre ? getGenreLabel(normalizedFetchedGenre, searchMessages.genres) : ''
                 const nextTag = mappedFetchedGenreLabel || fetchedTaxonomy || item.tag
 
-                // Probeer een sorteerbare event-datum te pakken (eerste datum in detail.date)
+                // Pak de meest recente eventdatum uit detail.date
                 let eventDateSortKey: number | null = null
                 if (detail?.date) {
                     // detail.date kan bv. '15/05/2024 - 16/05/2024' zijn of '2024 - 2025'
-                    // Pak eerste datum die lijkt op dd/mm/yyyy of yyyy
-                    const match = detail.date.match(/(\d{2}\/\d{2}\/\d{4})|(\d{4})/)
-                    if (match) {
-                        const dateStr = match[1] || match[2]
+                    // Zoek ALLE datums (dd/mm/yyyy of yyyy)
+                    const matches = Array.from(detail.date.matchAll(/(\d{2}\/\d{2}\/\d{4})|(\d{4})/g))
+                    if (matches.length > 0) {
+                        // Pak de laatste match (meest recent)
+                        const lastMatch = matches[matches.length - 1]
+                        const dateStr = lastMatch[1] || lastMatch[2]
                         let parsed: Date | null = null
                         if (dateStr && dateStr.length === 10) {
                             // dd/mm/yyyy
