@@ -47,6 +47,11 @@ function ImageSlotChip({ slot, onRemove }: { slot: ImageSlot; onRemove: () => vo
 
     useEffect(() => {
         let cancelled = false
+        let pendingUrl: string | null = null
+
+        const safeSet = (src: string | null) => {
+            if (!cancelled) setPreviewUrl(src)
+        }
 
         if (slot.kind === 'existing') {
             // fetch crops for the item and find the specific crop by id,
@@ -56,20 +61,28 @@ function ImageSlotChip({ slot, onRemove }: { slot: ImageSlot; onRemove: () => vo
                     const res = await getItemCrops(slot.item_id)
                     const crop = res.data.find(c => c.id === slot.crop_id)
                     const src = resolveCropUrl(crop?.url ?? null)
-                    if (!cancelled) setPreviewUrl(src)
+                    safeSet(src)
                 } catch {
-                    if (!cancelled) setPreviewUrl(null)
+                    safeSet(null)
                 }
             })()
-
-            return () => { cancelled = true }
+        } else {
+            // Pending: create a temporary object URL and set state asynchronously
+            const url = URL.createObjectURL(slot.file)
+            pendingUrl = url
+            // schedule update to avoid synchronous setState inside the effect
+            const t = window.setTimeout(() => safeSet(url), 0)
+            // ensure we clear the timeout if effect cleans up early
+            return () => {
+                cancelled = true
+                clearTimeout(t)
+                if (pendingUrl) URL.revokeObjectURL(pendingUrl)
+            }
         }
 
-        // Pending: create a temporary object URL
-        const url = URL.createObjectURL(slot.file)
-        setPreviewUrl(url)
         return () => {
-            URL.revokeObjectURL(url)
+            cancelled = true
+            if (pendingUrl) URL.revokeObjectURL(pendingUrl)
         }
     }, [slot])
 

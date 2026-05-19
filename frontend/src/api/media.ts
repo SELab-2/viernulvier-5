@@ -88,12 +88,9 @@ export const getPreferredMediaCropUrl = (crops: Crop[]): string | null => {
 export const resolveCropUrl = (url?: string | null): string | null => {
     if (!url) return null
     if (/^https?:\/\//i.test(url)) return url
-    // use api.defaults.baseURL if configured, otherwise fallback to current origin
-    // @ts-expect-error api.defaults may not be typed
-    const base = (api.defaults && (api.defaults as any).baseURL) || window.location.origin
-    return `${base.replace(/\/$/, '')}/${url.replace(/^\//, '')}`
+    const base = window.location.origin
+    return `${base}/${url.replace(/^\//, '')}`
 }
-
 
 // load galary slots
 
@@ -206,9 +203,6 @@ export async function saveGallerySlots(opts: {
     removedItemIds: string[]
 }): Promise<string> {
     const { banner, extras, removedCropIds, removedItemIds } = opts
-    console.log(banner);
-    console.log(extras);
-    
  
     // 1. Ensure a gallery exists
     let galleryId = opts.galleryId
