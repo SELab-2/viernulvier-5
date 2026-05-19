@@ -32,6 +32,20 @@ function capitalizeFirst(value: string): string {
     return value.charAt(0).toUpperCase() + value.slice(1)
 }
 
+function normalizeTitle(value: unknown): string {
+    if (typeof value === 'string') {
+        return value.trim()
+    }
+
+    if (value && typeof value === 'object') {
+        const entries = Object.values(value as Record<string, unknown>)
+        const firstText = entries.find((entry) => typeof entry === 'string' && entry.trim().length > 0)
+        return typeof firstText === 'string' ? firstText.trim() : ''
+    }
+
+    return ''
+}
+
 function getPdfPreviewUrl(url: string): string {
     const hash = '#page=1&view=FitH&toolbar=0&navpanes=0&scrollbar=0'
     return url.includes('#') ? url : `${url}${hash}`
@@ -56,7 +70,7 @@ function ProductionStamp({
         : stampSvgPaths[info.kind].plural
 
     return (
-        <div className="absolute -top-6 -right-5 z-10 h-22 w-22 select-none rounded-full bg-surface-sunken rotate-12" aria-hidden="true">
+        <div className="absolute -top-6 -right-4 z-10 h-22 w-22 select-none rounded-full bg-surface-sunken rotate-12" aria-hidden="true">
             <img src={stampSrc} alt="" className="h-full w-full brightness-50 dark:brightness-0 dark:invert" />
             <span className="absolute inset-0 flex items-center justify-center text-xl font-bold leading-none text-black dark:text-white">
                 {info.count}
@@ -67,7 +81,8 @@ function ProductionStamp({
 
 function SearchResultCard({ item, detailHref, onTagClick, genreValue }: SearchResultCardProps) {
     const searchMessages = getMessages(getActiveLocale(window.location.pathname)).search
-    const normalizedTitle = capitalizeFirst(item.title.trim())
+    const safeTitle = normalizeTitle(item.title)
+    const normalizedTitle = capitalizeFirst(safeTitle)
     const displayTitle = normalizedTitle.length > 110 ? `${normalizedTitle.slice(0, 107)}...` : normalizedTitle
     const showExcerpt = Boolean(item.excerpt) && !item.isProductionReference
     const imageUrl = item.imageUrl ?? FALLBACK_IMAGE
@@ -94,14 +109,14 @@ function SearchResultCard({ item, detailHref, onTagClick, genreValue }: SearchRe
                 {isPdf ? (
                     <iframe
                         src={getPdfPreviewUrl(imageUrl)}
-                        title={`${item.title} PDF preview`}
+                        title={`${displayTitle} PDF preview`}
                         className="absolute inset-0 h-full w-full border-0 pointer-events-none"
                         loading="lazy"
                     />
                 ) : (
                     <img
                         src={imageUrl}
-                        alt={item.title}
+                        alt={displayTitle}
                         className="absolute inset-0 h-full w-full object-cover"
                         loading="lazy"
                         referrerPolicy="no-referrer"
@@ -159,7 +174,7 @@ function SearchResultCard({ item, detailHref, onTagClick, genreValue }: SearchRe
     const finalHref = item.detailHref ?? detailHref
     if (finalHref) {
         return (
-            <Link to={finalHref} className="block h-full" aria-label={item.title}>
+            <Link to={finalHref} className="block h-full" aria-label={displayTitle}>
                 {card}
             </Link>
         )
