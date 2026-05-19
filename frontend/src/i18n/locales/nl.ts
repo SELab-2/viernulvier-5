@@ -280,6 +280,7 @@ const nl: Messages = {
       recentlyEdited: 'Recent bewerkt',
       tableColTitle: 'Titel',
       tableColLanguage: 'Taal Status',
+      tableColType: 'Type',
       tableColDate: 'Datum',
       tableColActions: 'Acties',
       actionView: 'Bekijk',

@@ -267,6 +267,7 @@ export type Messages = {
       recentlyEdited: string
       tableColTitle: string
       tableColLanguage: string
+      tableColType: string
       tableColDate: string
       tableColActions: string
       actionView: string

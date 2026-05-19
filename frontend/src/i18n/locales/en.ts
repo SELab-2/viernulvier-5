@@ -280,6 +280,7 @@ const en: Messages = {
       recentlyEdited: 'Recently edited',
       tableColTitle: 'Title',
       tableColLanguage: 'Language Status',
+      tableColType: 'Type',
       tableColDate: 'Date',
       tableColActions: 'Actions',
       actionView: 'View',
