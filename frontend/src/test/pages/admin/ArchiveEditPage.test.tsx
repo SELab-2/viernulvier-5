@@ -108,22 +108,31 @@ const mockMessages: Pick<Messages, 'admin' | 'production' | 'event'> = {
       pdfPreviewTitle: (title: string) => `${title} PDF preview`,
     },
   },
+
   production: {
-    dutchOption: 'Dutch',
-    englishOption: 'English',
-    productionSettingsLabel: 'Production settings',
+    productionSettingsLabel: 'Production Settings',
     statusLabel: 'Status',
     genreLabel: 'Genres',
     tagLabel: 'Tags',
     bannerLabel: 'Banner',
     extraPicturesLabel: 'Extra pictures',
+    addGenrePlaceholder: 'Add genre...',
+    addTagPlaceholder: 'Add tag...',
+    chooseFilePlaceholder: 'Choose file',
     artistLabel: 'Artist',
+    dutchOption: 'Dutch',
+    englishOption: 'English',
     productionEditTitle: 'Edit production',
-    productionEditSubTitle: 'Manage details',
-    title: 'Title',
-    slug: 'Slug',
-    content: 'Content',
-    back: 'Back',
+    productionEditSubTitle: 'Manage archive details and translation for this event',
+    contentLabels: {
+      super_title: 'Super title',
+      title: 'Title',
+      artist: 'Artist',
+      teaser: 'Teaser',
+      description: 'Description',
+      description_2: 'Second Description'
+    },
+    back: '← Back to overview',
     saveOnDraft: 'Save as draft',
     publish: 'Publish',
     eventsEditTitle: 'Manage events',
@@ -133,16 +142,17 @@ const mockMessages: Pick<Messages, 'admin' | 'production' | 'event'> = {
     eventsTimeLabel: 'Time',
     eventsLocationLabel: 'Location',
     eventsCommentLabel: 'Comment',
-    eventsActionsLabel: 'Actions'
+    eventsActionsLabel: 'Actions',
+    invalidProductionError: 'Fill in all required fields in atleast one language'
   },
   event: {
     saveButtonLabel: 'Save event',
     editLabel: 'Edit event',
     addLabel: 'Add event',
-    timeLabel: 'Time',
+    timeLabel: 'Time (start - end)',
     locationLabel: 'Location',
-    tagsLabel: 'Tags',
-  }
+    commentLabel: 'Comment',
+  },
 }
 
 vi.mock('../../../i18n', () => ({
@@ -168,12 +178,14 @@ describe('ArchiveEditPage', () => {
       </MemoryRouter>,
     )
 
-    expect(screen.getByText(mockMessages.production.title)).toBeInTheDocument()
-    expect(screen.getByText(mockMessages.production.slug)).toBeInTheDocument()
-    expect(screen.getByText(mockMessages.production.content)).toBeInTheDocument()
+    expect(screen.getByText(mockMessages.production.contentLabels.super_title)).toBeInTheDocument()
+    expect(screen.getByText(mockMessages.production.contentLabels.title)).toBeInTheDocument()
+    expect(screen.getByText(mockMessages.production.contentLabels.artist)).toBeInTheDocument()
+    expect(screen.getByText(mockMessages.production.contentLabels.teaser)).toBeInTheDocument()
+    expect(screen.getByText(mockMessages.production.contentLabels.description)).toBeInTheDocument()
+    expect(screen.getByText(mockMessages.production.contentLabels.description_2)).toBeInTheDocument()
     expect(screen.getByText(mockMessages.production.genreLabel)).toBeInTheDocument()
     expect(screen.getByText(mockMessages.production.tagLabel)).toBeInTheDocument()
-    expect(screen.getByText(mockMessages.production.artistLabel)).toBeInTheDocument()
     expect(screen.getByText(mockMessages.production.bannerLabel)).toBeInTheDocument()
     expect(screen.getByText(mockMessages.production.extraPicturesLabel)).toBeInTheDocument()
   })

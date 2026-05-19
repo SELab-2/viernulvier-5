@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import FuzzyTagInput from '../../../components/admin/FuzzyTagInput'
 import { api } from '../../../api/client'
 import type { LocalizedText } from '../../../types/production'
+import type { TaxonomyItem } from '../../../types/taxonomies'
 
 // Mock the API client
 vi.mock('../../../api/client', () => ({
@@ -50,7 +51,7 @@ const createMockTag = (name: string): TagResponse => ({
 })
 
 describe('FuzzyTagInput', () => {
-    const existingTag: LocalizedText = { nl: 'ExistingTag', en: 'ExistingTag' }
+    const existingTag: TaxonomyItem = { id: 'TagID', name: { nl: 'ExistingTag', en: 'ExistingTag' } }
     
     const defaultProps = {
         tags: [existingTag],
