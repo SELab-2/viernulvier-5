@@ -12,23 +12,79 @@ export class SearchService {
         private readonly postersService: PostersService,
     ) {}
 
+    private resolveLocalizedContent(content: unknown, lang: 'nl' | 'en' | 'fr'): unknown {
+        if (!content || typeof content !== 'object' || Array.isArray(content)) {
+            return content
+        }
+
+        const record = content as Record<string, unknown>
+        if (lang in record || 'nl' in record) {
+            return record[lang] ?? record.nl ?? ''
+        }
+
+        return content
+    }
+
+    private extractPlainText(value: unknown): string {
+        if (value == null) {
+            return ''
+        }
+
+        if (typeof value === 'string') {
+            return this.searchRepository.stripHtml(value)
+        }
+
+        if (typeof value !== 'object') {
+            return this.searchRepository.stripHtml(String(value))
+        }
+
+        const record = value as Record<string, unknown>
+        const ops = Array.isArray(record.ops) ? record.ops : null
+        if (ops) {
+            const text = ops
+                .map((op) => {
+                    if (!op || typeof op !== 'object') return ''
+                    const insert = (op as Record<string, unknown>).insert
+                    return typeof insert === 'string' ? insert : ''
+                })
+                .join(' ')
+            return this.searchRepository.stripHtml(text)
+        }
+
+        return ''
+    }
+
     async search(options: SearchQuery): Promise<PaginatedResult<SearchResultItem>> {
         const { page, limit, search, yearFrom, yearTo, genres, locations, sort, lang } = options
 
-        const commonProductionOptions = {
-            search,
-            genres,
-            locations,
-            yearFrom,
-            yearTo,
-            sort,
-            lang,
-            onThisDay: false as const,
-            draft: false as const,
-        }
+        if (tab === 'blogs') {
+            const blogResults = await this.searchRepository.findAllBlogs({ search, yearFrom, yearTo, sort })
+            const blogItems: SearchResultItem[] = blogResults.map((blog) => {
+                const langCode = lang === 'en' || lang === 'fr' ? lang : 'nl'
+                const localizedContent = this.resolveLocalizedContent(blog.content, langCode)
+                const rawExcerpt = this.extractPlainText(localizedContent)
+                const blogImages = blog.images ?? []
+                const thumbnailIndex = blog.thumbnail_index ?? null
+                const thumbnailImage =
+                    thumbnailIndex !== null && thumbnailIndex >= 0 && thumbnailIndex < blogImages.length
+                        ? blogImages[thumbnailIndex]
+                        : blogImages[0] ?? null
 
-        // Get total count of matching productions first, then fetch all without an artificial ceiling
-        const prodsPreview = await this.productionsService.getProductions({ ...commonProductionOptions, page: 1, limit: 1 })
+                return {
+                    id: blog.id,
+                    type: 'blog' as const,
+                    title: blog.title as any,
+                    excerpt: rawExcerpt.substring(0, 200),
+                    image_url: thumbnailImage,
+                    date_label: blog.created_at ? new Date(blog.created_at).toLocaleDateString('nl-BE') : '',
+                    venue_label: '',
+                    genre_label: 'Blog',
+                    created_at: blog.created_at ? new Date(blog.created_at).toISOString() : undefined,
+                    // Legacy support
+                    content: blog.content ?? null,
+                    productions: blog.productions,
+                }
+            })
 
         // Posters don't have genres/locations, so exclude them when these filters are active
         const hasGenreOrLocationFilter = (genres && genres.length > 0) || (locations && locations.length > 0)

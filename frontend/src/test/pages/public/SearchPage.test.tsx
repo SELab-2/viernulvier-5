@@ -56,7 +56,7 @@ describe('SearchPage API routing by tab', () => {
         await waitFor(() => {
             expect(
                 apiFetchMock.mock.calls.some(([endpoint]) =>
-                    typeof endpoint === 'string' && endpoint.startsWith('/archive/productions?'),
+                    typeof endpoint === 'string' && endpoint.startsWith('/archive/search?') && endpoint.includes('tab=productions'),
                 ),
             ).toBe(true)
         })
@@ -142,7 +142,7 @@ describe('SearchPage loading and error states', () => {
         })
     })
 
-    it('renders the three tab navigation buttons', async () => {
+    it('renders tab navigation buttons', async () => {
         apiFetchMock.mockImplementation(async (endpoint: string) => {
             if (endpoint.startsWith('/archive/halls?')) return { data: [] }
             return buildPaginatedEmpty()
@@ -723,7 +723,7 @@ describe('SearchPage additional handler coverage', () => {
                 ([endpoint]) =>
                     typeof endpoint === 'string' && endpoint.startsWith('/archive/productions?'),
             )
-            expect(productionCalls.some(([ep]) => String(ep).includes('locations=theaterzaal'))).toBe(true)
+            expect(searchCalls.some(([ep]) => String(ep).includes('locations=theaterzaal'))).toBe(true)
         })
     })
 
