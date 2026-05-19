@@ -9,6 +9,7 @@ export type BlogDetails = {
     productions?: string[]
     images?: (string | null)[]
     thumbnail_index?: number | null
+    draft?: boolean
 }
 
 export type BlogDetailResponse = {

@@ -253,11 +253,13 @@ export type Messages = {
       posters: string
       gallery: string
       settings: string
+      drafts: string
       dashboardIconAlt: string
       productionsIconAlt: string
       blogsIconAlt: string
       postersIconAlt: string
       settingsIconAlt: string
+      draftsIconAlt: string
     }
     dashboard: {
       pageTitle: string
@@ -370,6 +372,32 @@ export type Messages = {
       filesCountLabel: (count: number) => string
       pdfPreviewTitle: (title: string) => string
     }
+
+    drafts: {
+      pageTitle: string,
+      pageSubtitle: string,
+      productions: string,
+      blogs: string,
+      filterOnlyCurrent: string,
+      tableColTitle: string
+      tableColType: string
+      tableColStatus: string
+      tableColEditor: string
+      tableColDate: string
+      tableColActions: string
+      statusUnavailable: string
+      actionView: string
+      actionEdit: string
+      actionDelete: string
+      emptyRecent: string
+      loadingMessage: string
+      deleteTitle: string
+      deleteConfirm: (title: string) => string
+      paginationShowing: (from: number, to: number, total: number) => string
+      pageSizeLabel: string
+      paginationPrev: string
+      paginationNext: string
+    }
   }
 
   editHeader: {
@@ -400,6 +428,7 @@ export type Messages = {
     manageProductionButton: string
     removeProductionAriaLabel: string
     savingButton: string
+    savingDraftButton: string
     deletingButton: string
     deleteButton: string
     deleteConfirm: string
