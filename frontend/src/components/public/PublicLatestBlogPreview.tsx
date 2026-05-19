@@ -46,7 +46,7 @@ function PublicLatestBlogPreview({ blog, locale, fallbackUntitled, onReadMore, o
                                 : '/fallback-hero.svg'
                         }
                         alt=""
-                        className="h-full w-full object-cover opacity-70"
+                        className="h-full w-full object-cover"
                     />
                 </div>
                 <div aria-hidden className="hidden w-px self-stretch bg-foreground/25 lg:block" />
