@@ -33,17 +33,24 @@ function PublicLatestBlogPreview({ blog, locale, fallbackUntitled, onReadMore, o
 
     const excerpt = excerptRaw.length > 320 ? `${excerptRaw.slice(0, 317)}...` : excerptRaw
 
+    let previewImageSrc = ''
+    let previewImageClassName = 'h-full w-full object-cover'
+    
+    // If no valid thumbnail, select fallback image
+    if (blog.images.length > 0 && blog.thumbnail_index >= 0 && blog.thumbnail_index < blog.images.length) {
+        previewImageSrc = blog.images[blog.thumbnail_index]
+    } else {
+        previewImageSrc = '/fallback-hero.svg'
+        previewImageClassName = 'h-full w-full object-cover opacity-70'
+    }
+
     return (
         <section className="py-16 bg-foreground/3">
             <SectionTitle title={messages.home.latestBlogHeading} subtitle={messages.home.latestBlogSubheading} />
 
             <article className="site-container grid items-stretch gap-12 lg:grid-cols-[1fr_auto_1.1fr]">
                 <div className="relative h-[420px] overflow-hidden border border-border bg-surface sm:h-[560px]" aria-hidden="true">
-                    <img
-                        src={blog.images[blog.thumbnail_index]}
-                        alt=""
-                        className="h-full w-full object-cover"
-                    />
+                    <img src={previewImageSrc} alt="" className={previewImageClassName} />
                 </div>
                 <div aria-hidden className="hidden w-px self-stretch bg-foreground/25 lg:block" />
 
