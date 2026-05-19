@@ -16,6 +16,9 @@ const apiMock = vi.hoisted(() => ({
 
 const apiFetchMock = vi.hoisted(() => vi.fn())
 const messages = getMessages('nl')
+const currentYear = new Date().getFullYear()
+const productionFetchEndpoint = `/archive/productions?page=1&limit=100&sort=recent&lang=nl&pastOnly=false&draft=all&yearFrom=1982&yearTo=${currentYear}`
+const secondProductionFetchEndpoint = `/archive/productions?page=2&limit=100&sort=recent&lang=nl&pastOnly=false&draft=all&yearFrom=1982&yearTo=${currentYear}`
 
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom')
@@ -121,11 +124,13 @@ const productionList: ProductionItem[] = [
 function mockAvailableProductions() {
   apiFetchMock.mockImplementation(async (endpoint: string) => {
     if (endpoint.startsWith('/archive/productions?')) {
+      const page = Number(new URLSearchParams(endpoint.split('?')[1]).get('page') ?? '1')
+
       return {
-        data: productionList,
+        data: page === 1 ? productionList : [createProduction({ id: 'production-3', title: { nl: 'Derde productie', en: 'Third production' } })],
         meta: {
-          total: productionList.length,
-          page: 1,
+          total: page === 1 ? productionList.length : 3,
+          page,
           limit: 100,
           totalPages: 1,
         },
@@ -148,6 +153,8 @@ function mockEditBlog(overrides?: {
   title?: string
   content?: { nl?: string | null; en?: string | null }
   productions?: string[]
+  images?: string[]
+  thumbnail_index?: number | null
 }) {
   apiMock.get.mockImplementation(async (endpoint: string) => {
     if (endpoint === '/archive/blogs/blog-123') {
@@ -160,6 +167,8 @@ function mockEditBlog(overrides?: {
             en: 'Existing content',
           },
           productions: overrides?.productions ?? [],
+          images: overrides?.images ?? [],
+          thumbnail_index: overrides?.thumbnail_index ?? null,
         },
       }
     }
@@ -256,7 +265,7 @@ describe('CreateBlogPage', () => {
 
     await waitFor(() => {
       expect(apiFetchMock).toHaveBeenCalledWith(
-        '/archive/productions?page=1&limit=100&sort=relevance&lang=nl',
+        productionFetchEndpoint,
         expect.any(Object),
       )
     })
@@ -297,7 +306,7 @@ describe('CreateBlogPage', () => {
 
     await waitFor(() => {
       expect(apiFetchMock).toHaveBeenCalledWith(
-        '/archive/productions?page=1&limit=100&sort=relevance&lang=nl',
+        productionFetchEndpoint,
         expect.any(Object),
       )
     })
@@ -356,6 +365,73 @@ describe('CreateBlogPage', () => {
 
     const body = JSON.parse(String(patchCall?.[1]?.body))
     expect(body.title).toEqual({ nl: 'Aangepaste titel', en: 'Existing title' })
+  })
+
+  it('keeps a shifted thumbnail when deleting an earlier image before publish', async () => {
+    mockEditBlog({
+      images: ['a.jpg', 'b.jpg', 'c.jpg', 'd.jpg'],
+      thumbnail_index: 3,
+    })
+
+    renderEditPage()
+
+    await waitFor(() => {
+      expect(apiMock.get).toHaveBeenCalledWith('/archive/blogs/blog-123')
+    })
+
+    const deleteButtons = screen.getAllByLabelText(messages.blogs.bannerUpload.deleteImageAriaLabel)
+    fireEvent.click(deleteButtons[2])
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'Publiceren' })[0])
+
+    await waitFor(() => {
+      const deleteCallIndex = apiFetchMock.mock.calls.findIndex(
+        ([endpoint, options]) => endpoint === '/archive/blogs/blog-123/images/2' && options?.method === 'DELETE',
+      )
+      const patchCallIndex = apiFetchMock.mock.calls.findIndex(
+        ([endpoint, options]) => endpoint === '/archive/blogs/blog-123' && options?.method === 'PATCH',
+      )
+
+      expect(deleteCallIndex).toBeGreaterThan(-1)
+      expect(patchCallIndex).toBeGreaterThan(deleteCallIndex)
+    })
+
+    const patchCall = apiFetchMock.mock.calls.find(([endpoint, options]) => endpoint === '/archive/blogs/blog-123' && options?.method === 'PATCH')
+    expect(patchCall).toBeDefined()
+
+    const body = JSON.parse(String(patchCall?.[1]?.body))
+    expect(body.thumbnail_index).toBe(2)
+  })
+
+  it('saves a thumbnail selection for existing images on publish', async () => {
+    mockEditBlog({
+      images: ['a.jpg', 'b.jpg'],
+      thumbnail_index: 1,
+    })
+
+    renderEditPage()
+
+    await waitFor(() => {
+      expect(apiMock.get).toHaveBeenCalledWith('/archive/blogs/blog-123')
+    })
+
+    fireEvent.click(screen.getByAltText('Blog image 1'))
+    expect(screen.getByText(messages.blogs.bannerUpload.coverLabel)).toBeInTheDocument()
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'Publiceren' })[0])
+
+    await waitFor(() => {
+      expect(apiFetchMock).toHaveBeenCalledWith(
+        '/archive/blogs/blog-123',
+        expect.objectContaining({ method: 'PATCH', body: expect.any(String) }),
+      )
+    })
+
+    const patchCall = apiFetchMock.mock.calls.find(([endpoint, options]) => endpoint === '/archive/blogs/blog-123' && options?.method === 'PATCH')
+    expect(patchCall).toBeDefined()
+
+    const body = JSON.parse(String(patchCall?.[1]?.body))
+    expect(body.thumbnail_index).toBe(0)
   })
 
   it('deletes a blog after confirmation', async () => {
@@ -508,6 +584,78 @@ describe('CreateBlogPage', () => {
     expect(screen.queryByText('Eerste productie')).not.toBeInTheDocument()
   })
 
+  it('keeps staged productions visible after changing the production search', async () => {
+    apiFetchMock.mockImplementation(async (endpoint: string) => {
+      if (endpoint === productionFetchEndpoint) {
+        return {
+          data: productionList,
+          meta: { total: 2, page: 1, limit: 100, totalPages: 1 },
+        }
+      }
+
+      if (endpoint.includes('search=eerste')) {
+        return {
+          data: [productionList[0]],
+          meta: { total: 1, page: 1, limit: 100, totalPages: 1 },
+        }
+      }
+
+      throw new Error(`Unexpected apiFetch endpoint: ${endpoint}`)
+    })
+
+    renderCreatePage()
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Producties beheren' }))
+    fireEvent.click(screen.getByRole('button', { name: /Tweede productie/i }))
+    fireEvent.change(screen.getByPlaceholderText('Zoek productie'), { target: { value: 'eerste' } })
+
+    await waitFor(() => {
+      expect(apiFetchMock).toHaveBeenCalledWith(expect.stringContaining('search=eerste'), expect.any(Object))
+    })
+
+    expect(screen.queryByText('Geselecteerde producties')).not.toBeInTheDocument()
+    expect(screen.getByText('Tweede productie')).toBeInTheDocument()
+  })
+
+  it('fetches the next production page when the picker scrolls to the bottom', async () => {
+    apiFetchMock.mockImplementation(async (endpoint: string) => {
+      if (endpoint === productionFetchEndpoint) {
+        return {
+          data: [productionList[0]],
+          meta: { total: 2, page: 1, limit: 100, totalPages: 2 },
+        }
+      }
+
+      if (endpoint === secondProductionFetchEndpoint) {
+        return {
+          data: [productionList[1]],
+          meta: { total: 2, page: 2, limit: 100, totalPages: 2 },
+        }
+      }
+
+      throw new Error(`Unexpected apiFetch endpoint: ${endpoint}`)
+    })
+
+    renderCreatePage()
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Producties beheren' }))
+    await screen.findByText('Eerste productie')
+
+    const resultsRegion = screen.getByText('Eerste productie').closest('.overflow-y-auto')
+    expect(resultsRegion).not.toBeNull()
+
+    Object.defineProperties(resultsRegion, {
+      scrollHeight: { configurable: true, value: 1000 },
+      scrollTop: { configurable: true, value: 850 },
+      clientHeight: { configurable: true, value: 100 },
+    })
+
+    fireEvent.scroll(resultsRegion as Element)
+
+    await screen.findByText('Tweede productie')
+    expect(apiFetchMock).toHaveBeenCalledWith(secondProductionFetchEndpoint, expect.any(Object))
+  })
+
   it('allows uploading images, selecting a thumbnail and uploads them on publish', async () => {
     mockCreateSuccess()
 
@@ -563,6 +711,11 @@ describe('CreateBlogPage', () => {
         expect(body.files[0].file_name).toBe('test.png')
         expect(body.thumbnail_index).toBe(0)
       })
+
+      expect(apiMock.post).toHaveBeenCalledWith(
+        '/archive/blogs',
+        expect.not.objectContaining({ thumbnail_index: expect.anything() }),
+      )
     } finally {
       // Restore FileReader
       if (origFileReaderDescriptor) {
@@ -765,5 +918,5 @@ describe('CreateBlogPage', () => {
       delete (globalThis as unknown as { FileReader?: unknown }).FileReader
     }
   })
-  
+
 })
