@@ -350,7 +350,7 @@ describe('BlogsPage', () => {
 
         fireEvent.click(screen.getByRole('button', { name: /Nieuwe Blog/i }))
 
-        expect(navigate).toHaveBeenCalledWith('/admin/blogs/new')
+        expect(navigate).toHaveBeenCalledWith('/admin/blogs/create')
     })
 
     // Verwijderen
