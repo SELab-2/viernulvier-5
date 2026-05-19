@@ -174,6 +174,19 @@ describe('ProductionsPage', () => {
         })
     })
 
+    it('sends draft=false to exclude draft items', async () => {
+        apiFetchMock.mockResolvedValue(makePaginatedResponse([]))
+
+        renderPage()
+
+        await waitFor(() => {
+            expect(apiFetchMock).toHaveBeenCalledWith(
+                expect.stringContaining('draft=false'),
+                expect.any(Object),
+            )
+        })
+    })
+
     it('shows empty state when API returns no items', async () => {
         apiFetchMock.mockResolvedValue(makePaginatedResponse([]))
 
