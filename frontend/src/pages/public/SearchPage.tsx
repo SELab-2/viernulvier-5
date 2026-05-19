@@ -1370,39 +1370,90 @@ function SearchPageContent() {
                     setTotalResults(response.meta?.total ?? mappedEntries.length)
                     setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
                 } else {
-                    params.set('lang', locale)
-
-                    if (selectedGenres.length > 0) {
-                        params.set('genres', selectedGenres.join(','))
-                    }
-
-                    if (selectedLocations.length > 0) {
-                        params.set('locations', selectedLocations.join(','))
-                    }
-
-                    if (safeFromYear > MIN_PERIOD_YEAR) {
-                        params.set('yearFrom', String(safeFromYear))
-                    }
-
-                    if (safeToYear < MAX_PERIOD_YEAR) {
-                        params.set('yearTo', String(safeToYear))
-                    }
-
+                    // For chronological sorts, use unified search endpoint so sorting is global before pagination.
                     if (sort === 'recent' || sort === 'oldest') {
-                        params.set('sort', sort)
+                        const productionSearchParams = new URLSearchParams({
+                            page: String(page),
+                            limit: String(pageSize),
+                            lang: locale,
+                            tab: 'productions',
+                        })
+
+                        if (query) productionSearchParams.set('search', query)
+                        if (safeFromYear > MIN_PERIOD_YEAR) productionSearchParams.set('yearFrom', String(safeFromYear))
+                        if (safeToYear < MAX_PERIOD_YEAR) productionSearchParams.set('yearTo', String(safeToYear))
+                        if (selectedGenres.length > 0) productionSearchParams.set('genres', selectedGenres.join(','))
+                        if (selectedLocations.length > 0) productionSearchParams.set('locations', selectedLocations.join(','))
+                        productionSearchParams.set('sort', sort)
+
+                        const response = await apiFetch<PaginatedApiResponse<SearchApiItem>>(
+                            `/archive/search?${productionSearchParams.toString()}`,
+                            { signal: abortController.signal }
+                        )
+
+                        const mappedEntries = response.data.map((item): SearchEntry => {
+                            const title = getLocalizedText(toLocalizedText(item.title), locale) || searchMessages.fallbackUntitled
+                            const normalizedGenre = normalizeGenreValue(item.genre_label ?? '')
+                            const genreTag = normalizedGenre
+                                ? getGenreLabel(normalizedGenre, searchMessages.genres)
+                                : (item.genre_label?.trim() || searchMessages.fallbackTag)
+
+                            const createdDate = item.created_at ?? ''
+                            const parsedCreatedAt = createdDate ? new Date(createdDate) : null
+                            const year = parsedCreatedAt && !Number.isNaN(parsedCreatedAt.getTime())
+                                ? parsedCreatedAt.getFullYear()
+                                : MIN_PERIOD_YEAR
+
+                            return {
+                                id: item.id,
+                                tag: genreTag,
+                                date: item.date_label?.trim() || (createdDate ? formatDate(createdDate, locale) : '-'),
+                                title,
+                                excerpt: item.excerpt?.trim() || '',
+                                venue: item.venue_label?.trim() || searchMessages.fallbackVenue,
+                                imageUrl: item.image_url ?? undefined,
+                                year,
+                                genre: normalizedGenre,
+                                location: '',
+                                type: 'production' as const,
+                            }
+                        })
+
+                        setApiRawItems([])
+                        setApiEntries(mappedEntries)
+                        setTotalResults(response.meta?.total ?? mappedEntries.length)
+                        setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
+                    } else {
+                        params.set('lang', locale)
+
+                        if (selectedGenres.length > 0) {
+                            params.set('genres', selectedGenres.join(','))
+                        }
+
+                        if (selectedLocations.length > 0) {
+                            params.set('locations', selectedLocations.join(','))
+                        }
+
+                        if (safeFromYear > MIN_PERIOD_YEAR) {
+                            params.set('yearFrom', String(safeFromYear))
+                        }
+
+                        if (safeToYear < MAX_PERIOD_YEAR) {
+                            params.set('yearTo', String(safeToYear))
+                        }
+
+                        const response = await apiFetch<PaginatedApiResponse<ProductionApiItem>>(
+                            `/archive/productions?${params.toString()}`,
+                            { signal: abortController.signal }
+                        )
+
+                        const preferredGenre = selectedGenres.length === 1 ? selectedGenres[0] : undefined
+                        const mappedEntries = response.data.map((item) => mapProductionToSearchEntry(item, locale, searchMessages, preferredGenre))
+                        setApiRawItems(response.data)
+                        setApiEntries(mappedEntries)
+                        setTotalResults(response.meta?.total ?? mappedEntries.length)
+                        setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
                     }
-
-                    const response = await apiFetch<PaginatedApiResponse<ProductionApiItem>>(
-                        `/archive/productions?${params.toString()}`,
-                        { signal: abortController.signal }
-                    )
-
-                    const preferredGenre = selectedGenres.length === 1 ? selectedGenres[0] : undefined
-                    const mappedEntries = response.data.map((item) => mapProductionToSearchEntry(item, locale, searchMessages, preferredGenre))
-                    setApiRawItems(response.data)
-                    setApiEntries(mappedEntries)
-                    setTotalResults(response.meta?.total ?? mappedEntries.length)
-                    setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
                 }
             } catch (error) {
                 if (abortController.signal.aborted) {
