@@ -1,4 +1,4 @@
-import type { DashboardRepository, RawProduction, RawEvent } from './dashboard.repository.js'
+import type { DashboardRepository, RawBlog, RawPoster, RawProduction } from './dashboard.repository.js'
 
 type DeltaDirection = 'up' | 'down' | 'flat'
 
@@ -10,6 +10,12 @@ type Delta = {
 type DashboardDeltas = {
     productions: Delta
     blogs: Delta
+    posters: Delta
+}
+
+type DashboardLanguageStatus = {
+    nl: 'complete' | 'attention'
+    en: 'complete' | 'attention' | 'missing'
 }
 
 type DashboardRecentItem = {
@@ -17,17 +23,14 @@ type DashboardRecentItem = {
     title: string
     type: string
     status: 'available'
-    languageStatus: {
-        nl: 'complete' | 'attention'
-        en: 'complete' | 'attention' | 'missing'
-    }
+    languageStatus?: DashboardLanguageStatus
     updated_at: Date
 }
 
 type DashboardSummary = {
     counts: {
         productions: number
-        events: number
+        posters: number
         blogs: number
         mediaItems: number
         editors: number
@@ -83,7 +86,7 @@ function hasValue(value: unknown): boolean {
     return typeof value === 'string' && value.trim().length > 0
 }
 
-function resolveLanguageStatus(value: unknown): DashboardRecentItem['languageStatus'] {
+function resolveLanguageStatus(value: unknown): DashboardLanguageStatus {
     const localized = asLocalizedRecord(value)
     const nl = hasValue(localized.nl) ? 'complete' : 'attention'
     const en = hasValue(localized.en) ? 'complete' : 'missing'
@@ -91,27 +94,17 @@ function resolveLanguageStatus(value: unknown): DashboardRecentItem['languageSta
     return { nl, en }
 }
 
-function resolveProductionTitle(value: unknown): string {
+function resolveLocalizedTitle(value: unknown, fallback: string): string {
     const localized = asLocalizedRecord(value)
     const title = localized.nl ?? localized.en
 
-    return hasValue(title) ? String(title) : 'Ongetitelde productie'
-}
-
-function resolveEventTitle(info: unknown, productionTitle: unknown): string {
-    const localizedInfo = asLocalizedRecord(info)
-    const infoTitle = localizedInfo.nl ?? localizedInfo.en
-    if (hasValue(infoTitle)) {
-        return String(infoTitle)
-    }
-
-    return resolveProductionTitle(productionTitle)
+    return hasValue(title) ? String(title) : fallback
 }
 
 function mapProduction(production: RawProduction): DashboardRecentItem {
     return {
         id: production.id,
-        title: resolveProductionTitle(production.title),
+        title: resolveLocalizedTitle(production.title, 'Ongetitelde productie'),
         type: 'Productie',
         status: 'available',
         languageStatus: resolveLanguageStatus(production.title),
@@ -119,26 +112,38 @@ function mapProduction(production: RawProduction): DashboardRecentItem {
     }
 }
 
-function mapEvent(event: RawEvent): DashboardRecentItem {
+function mapBlog(blog: RawBlog): DashboardRecentItem {
     return {
-        id: event.id,
-        title: resolveEventTitle(event.info, event.production?.title),
-        type: 'Event',
+        id: blog.id,
+        title: resolveLocalizedTitle(blog.title, 'Ongetitelde blog'),
+        type: 'Blog',
         status: 'available',
-        languageStatus: resolveLanguageStatus(event.info),
-        updated_at: event.updated_at,
+        languageStatus: resolveLanguageStatus(blog.title),
+        updated_at: blog.updated_at,
+    }
+}
+
+function mapPoster(poster: RawPoster): DashboardRecentItem {
+    return {
+        id: poster.id,
+        title: poster.title,
+        type: 'Poster',
+        status: 'available',
+        updated_at: poster.updated_at,
     }
 }
 
 function mergeAndPaginate(
     productions: RawProduction[],
-    events: RawEvent[],
+    blogs: RawBlog[],
+    posters: RawPoster[],
     page: number,
     limit: number,
 ): DashboardRecentItem[] {
     const all = [
         ...productions.map(mapProduction),
-        ...events.map(mapEvent),
+        ...blogs.map(mapBlog),
+        ...posters.map(mapPoster),
     ].sort((left, right) => right.updated_at.getTime() - left.updated_at.getTime())
 
     const offset = (page - 1) * limit
@@ -157,24 +162,30 @@ export class DashboardService {
             counts,
             lastScrapedAt,
             recentProductions,
-            recentEvents,
+            recentBlogs,
+            recentPosters,
             productionsThisMonth,
             productionsLastMonth,
             blogsThisMonth,
             blogsLastMonth,
+            postersThisMonth,
+            postersLastMonth,
         ] = await Promise.all([
             this.repository.getCounts(),
             this.repository.getLastScraped(),
             this.repository.getRecentProductions(fetchCount),
-            this.repository.getRecentEvents(fetchCount),
+            this.repository.getRecentBlogs(fetchCount),
+            this.repository.getRecentPosters(fetchCount),
             this.repository.getProductionCountInRange(startOfThisMonth, now),
             this.repository.getProductionCountInRange(startOfLastMonth, startOfThisMonth),
             this.repository.getBlogCountInRange(startOfThisMonth, now),
             this.repository.getBlogCountInRange(startOfLastMonth, startOfThisMonth),
+            this.repository.getPosterCountInRange(startOfThisMonth, now),
+            this.repository.getPosterCountInRange(startOfLastMonth, startOfThisMonth),
         ])
 
-        const totalRecentItems = counts.productions + counts.events
-        const recentItems = mergeAndPaginate(recentProductions, recentEvents, page, limit)
+        const totalRecentItems = counts.productions + counts.blogs + counts.posters
+        const recentItems = mergeAndPaginate(recentProductions, recentBlogs, recentPosters, page, limit)
 
         return {
             counts,
@@ -184,6 +195,7 @@ export class DashboardService {
             deltas: {
                 productions: computeDelta(productionsThisMonth, productionsLastMonth),
                 blogs: computeDelta(blogsThisMonth, blogsLastMonth),
+                posters: computeDelta(postersThisMonth, postersLastMonth),
             },
         }
     }
