@@ -23,6 +23,7 @@ import { loadGallerySlots, saveGallerySlots, type ImageSlot } from '../../api/me
 import { createLocation } from '../../api/locations'
 import { createSpace } from '../../api/spaces'
 import { createHall } from '../../api/halls'
+import {useOptionalAdminSession} from "../../auth/useAdminSessionContext.ts";
 
 const defaultLocalizedText: LocalizedText = {
     nl: '',
@@ -84,6 +85,8 @@ function ArchiveEditPage() {
     const messages = getMessages(locale);
     const navigate = useNavigate();
     const { id } = useParams() // current production id
+    const session = useOptionalAdminSession()
+    const currentUser = session?.user
 
     const languageOptions: { key: Language, label: string}[] = [
         { key: 'nl', label: messages.production.dutchOption},
@@ -111,6 +114,7 @@ function ArchiveEditPage() {
 
     // Visual indicators
     const [saving, setSaving] = useState(false);
+    const [saveAction, setSaveAction] = useState<'publish' | 'draft' | null>(null)
     const [error, setError] = useState<string | null>(null);
 
 
@@ -229,6 +233,7 @@ function ArchiveEditPage() {
         }
 
         setSaving(true);
+        setSaveAction(asDraft ? 'draft' : 'publish')
 
         try {
             // in case anything fails rollback changes
@@ -259,6 +264,19 @@ function ArchiveEditPage() {
                 });
 
                 const productionId = res.data.id;
+
+                // add editor
+                try {
+                    if (currentUser) {
+                        await api.post(`/archive/productions/${productionId}/editors`, {
+                            editorId: currentUser.id,
+                        })
+                    }
+                } catch (error) {
+                    if (!(error instanceof Error && error.message.includes('409'))) {
+                        console.log(error)
+                    }
+                }
                 
                 try {
                     for (const e of events) {
@@ -282,7 +300,7 @@ function ArchiveEditPage() {
                     throw err;
                 }
 
-                navigate(`/archive/${productionId}`);
+                navigate(asDraft ? '/admin/drafts/productions' : `/archive/${productionId}`)
             } else { 
                 
                 const updateGalleryId = await saveGallerySlots({
@@ -306,6 +324,19 @@ function ArchiveEditPage() {
                     draft: asDraft,
                     media_gallery_id: updateGalleryId
                 });
+
+                // add editor
+                try {
+                    if (currentUser) {
+                        await api.post(`/archive/productions/${id}/editors`, {
+                            editorId: currentUser.id,
+                        })
+                    }
+                } catch (error) {
+                    if (!(error instanceof Error && error.message.includes('409'))) {
+                        console.log(error)
+                    }
+                }
                 
                 // save events changes
                 await Promise.all(deletedEventsIds.map(id => api.delete(`/archive/events/${id}`)));
@@ -335,7 +366,7 @@ function ArchiveEditPage() {
                         }
                     }
 
-                    navigate(`/archive/${id}`);
+                    navigate(asDraft ? '/admin/drafts/productions' : `/archive/${id}`)
                 } catch (err) {
                     // Rollback newly created events, keep the previous ones
                     await Promise.allSettled(createdEventIds.map(
@@ -350,6 +381,7 @@ function ArchiveEditPage() {
             setError("Failed to create the production or events: " + err);
         } finally {
             setSaving(false);
+            setSaveAction(null);
         }
     }
 
@@ -489,8 +521,11 @@ function ArchiveEditPage() {
         <AdminLayout showSidebar>   
             <ArchiveEditHeader
                 publish={save}
+                saveAsDraft={() => save(true)}
                 saveAsDraftLabel={messages.production.saveOnDraft}
                 publishLabel={messages.production.publish}
+                saving={saving}
+                saveAction={saveAction}
             />
 
             <div className='flex'>
