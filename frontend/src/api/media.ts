@@ -72,7 +72,10 @@ const MEDIA_CROP_FALLBACK_ORDER = ['FE3_boxed', 'FE3_header']
 export const getPreferredHeroCropUrl = (crops: Crop[]): string | null => {
     for (const name of HERO_CROP_FALLBACK_ORDER) {
         const crop = crops.find((c) => c.name === name)
-        if (crop) return crop.url
+        if (crop) {
+            const cropId = crop.id;
+            return `/api/v1/images/${cropId}`
+        }
     }
     return null
 }
@@ -80,7 +83,10 @@ export const getPreferredHeroCropUrl = (crops: Crop[]): string | null => {
 export const getPreferredMediaCropUrl = (crops: Crop[]): string | null => {
     for (const name of MEDIA_CROP_FALLBACK_ORDER) {
         const crop = crops.find((c) => c.name === name)
-        if (crop) return crop.url
+        if (crop) {
+            const cropId = crop.id;
+            return `/api/v1/images/${cropId}`
+        }
     }
     return null
 }
