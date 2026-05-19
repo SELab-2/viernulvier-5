@@ -50,25 +50,13 @@ describe('SearchPage API routing by tab', () => {
         })
     })
 
-    it('uses productions endpoint by default', async () => {
+    it('uses search endpoint by default', async () => {
         renderPage('/nl/zoeken?q=test')
 
         await waitFor(() => {
             expect(
                 apiFetchMock.mock.calls.some(([endpoint]) =>
-                    typeof endpoint === 'string' && endpoint.startsWith('/archive/productions?'),
-                ),
-            ).toBe(true)
-        })
-    })
-
-    it('uses blogs endpoint on blogs tab', async () => {
-        renderPage('/nl/zoeken?tab=blogs&q=test')
-
-        await waitFor(() => {
-            expect(
-                apiFetchMock.mock.calls.some(([endpoint]) =>
-                    typeof endpoint === 'string' && endpoint.startsWith('/archive/blogs?'),
+                    typeof endpoint === 'string' && endpoint.startsWith('/archive/search?') && endpoint.includes('tab=productions'),
                 ),
             ).toBe(true)
         })
@@ -79,7 +67,7 @@ describe('SearchPage API routing by tab', () => {
 
         await waitFor(() => {
             const searchCall = apiFetchMock.mock.calls.find(([endpoint]) =>
-                typeof endpoint === 'string' && endpoint.startsWith('/archive/search?'),
+                typeof endpoint === 'string' && endpoint.startsWith('/archive/search?') && endpoint.includes('tab=all'),
             )
 
             expect(searchCall).toBeDefined()
@@ -91,12 +79,12 @@ describe('SearchPage API routing by tab', () => {
         })
     })
 
-    it('uses posters endpoint on posters tab and forwards sort', async () => {
+    it('uses search endpoint with tab=posters on posters tab and forwards sort', async () => {
         renderPage('/nl/zoeken?tab=posters&q=test&sort=oldest')
 
         await waitFor(() => {
             const postersCall = apiFetchMock.mock.calls.find(([endpoint]) =>
-                typeof endpoint === 'string' && endpoint.startsWith('/archive/posters?'),
+                typeof endpoint === 'string' && endpoint.startsWith('/archive/search?') && endpoint.includes('tab=posters'),
             )
 
             expect(postersCall).toBeDefined()
@@ -154,7 +142,7 @@ describe('SearchPage loading and error states', () => {
         })
     })
 
-    it('renders the four tab navigation buttons', async () => {
+    it('renders tab navigation buttons', async () => {
         apiFetchMock.mockImplementation(async (endpoint: string) => {
             if (endpoint.startsWith('/archive/halls?')) return { data: [] }
             return buildPaginatedEmpty()
@@ -164,7 +152,6 @@ describe('SearchPage loading and error states', () => {
 
         expect(await screen.findByRole('button', { name: 'Alles' })).toBeInTheDocument()
         expect(screen.getByRole('button', { name: 'Producties' })).toBeInTheDocument()
-        expect(screen.getByRole('button', { name: 'Blog' })).toBeInTheDocument()
         expect(screen.getByRole('button', { name: 'Affiches' })).toBeInTheDocument()
     })
 })
@@ -181,23 +168,18 @@ describe('SearchPage results rendering', () => {
     it('renders a production result card with correct title', async () => {
         apiFetchMock.mockImplementation(async (endpoint: string) => {
             if (endpoint.startsWith('/archive/halls?')) return { data: [] }
-            if (endpoint.startsWith('/archive/productions?')) {
+            if (endpoint.startsWith('/archive/search?')) {
                 return {
                     data: [
                         {
                             id: 'prod-aaa-0000-0000-000000000001',
+                            type: 'production',
                             title: { nl: 'Unieke Productietitel' },
-                            teaser: null,
-                            description_short: { nl: 'Korte beschrijving van de productie.' },
-                            description: null,
+                            excerpt: 'Korte beschrijving van de productie.',
                             image_url: null,
-                            venue_name: null,
-                            venue_names: [],
-                            production_genres: ['theater'],
-                            performer_type: 'group',
-                            attendance_mode: 'offline',
+                            venue_label: null,
+                            genre_label: 'Theater',
                             created_at: '2024-04-01T00:00:00.000Z',
-                            links: undefined,
                         },
                     ],
                     meta: { total: 1, page: 1, limit: 12, totalPages: 1 },
@@ -211,47 +193,18 @@ describe('SearchPage results rendering', () => {
         expect(await screen.findByRole('link', { name: /Unieke Productietitel/i })).toBeInTheDocument()
     })
 
-    it('renders a blog result card with correct title on blogs tab', async () => {
-        apiFetchMock.mockImplementation(async (endpoint: string) => {
-            if (endpoint.startsWith('/archive/halls?')) return { data: [] }
-            if (endpoint.startsWith('/archive/blogs?')) {
-                return {
-                    data: [
-                        {
-                            id: 'blog-bbb-0000-0000-000000000001',
-                            title: JSON.stringify({ nl: 'Unieke Blogtitel' }),
-                            content: {
-                                nl: JSON.stringify({ ops: [{ insert: 'Blog excerpt tekst.' }] }),
-                            },
-                            productions: [],
-                            created_at: '2025-03-01T00:00:00.000Z',
-                            updated_at: '2025-03-01T00:00:00.000Z',
-                        },
-                    ],
-                    meta: { total: 1, page: 1, limit: 12, totalPages: 1 },
-                }
-            }
-            return buildPaginatedEmpty()
-        })
-
-        renderPage('/nl/zoeken?tab=blogs')
-
-        expect(await screen.findByRole('link', { name: /Unieke Blogtitel/i })).toBeInTheDocument()
-    })
-
     it('renders a poster result card with correct title on posters tab', async () => {
         apiFetchMock.mockImplementation(async (endpoint: string) => {
             if (endpoint.startsWith('/archive/halls?')) return { data: [] }
-            if (endpoint.startsWith('/archive/posters?')) {
+            if (endpoint.startsWith('/archive/search?')) {
                 return {
                     data: [
                         {
                             id: 'poster-ccc-0000-0000-000000000001',
-                            title: 'Test Affiche Titel',
-                            file_url: 'https://example.com/poster.jpg',
-                            mime_type: 'image/jpeg',
+                            type: 'poster',
+                            title: { nl: 'Test Affiche Titel' },
+                            image_url: 'https://example.com/poster.jpg',
                             created_at: '2023-06-15T00:00:00.000Z',
-                            productions: [],
                         },
                     ],
                     meta: { total: 1, page: 1, limit: 12, totalPages: 1 },
@@ -275,15 +228,10 @@ describe('SearchPage results rendering', () => {
                             id: 'prod-ddd-0000-0000-000000000001',
                             type: 'production',
                             title: { nl: 'All-tab Productie' },
-                            description_short: { nl: 'Beschrijving.' },
-                            description: null,
-                            teaser: null,
+                            excerpt: 'Beschrijving.',
                             image_url: null,
-                            venue_name: null,
-                            venue_names: [],
-                            production_genres: ['dans'],
-                            performer_type: null,
-                            attendance_mode: null,
+                            venue_label: null,
+                            genre_label: 'Dans',
                             created_at: '2022-01-01T00:00:00.000Z',
                         },
                     ],
@@ -417,19 +365,11 @@ describe('SearchPage sort and page size', () => {
         })
     })
 
-    it('shows sort dropdown and page-size selector for non-blog tabs', async () => {
+    it('shows sort dropdown and page-size selector', async () => {
         renderPage('/nl/zoeken')
 
         expect(await screen.findByText('Sorteer op')).toBeInTheDocument()
         expect(screen.getByRole('combobox', { name: 'Resultaten per pagina' })).toBeInTheDocument()
-    })
-
-    it('does not show sort dropdown on the blogs tab', async () => {
-        renderPage('/nl/zoeken?tab=blogs')
-
-        await waitFor(() => {
-            expect(screen.queryByText('Sorteer op')).not.toBeInTheDocument()
-        })
     })
 
     it('changing sort triggers a new fetch with updated sort param', async () => {
@@ -441,11 +381,11 @@ describe('SearchPage sort and page size', () => {
         fireEvent.change(sortSelect, { target: { value: 'recent' } })
 
         await waitFor(() => {
-            const productionCalls = apiFetchMock.mock.calls.filter(
+            const searchCalls = apiFetchMock.mock.calls.filter(
                 ([endpoint]) =>
-                    typeof endpoint === 'string' && endpoint.startsWith('/archive/productions?'),
+                    typeof endpoint === 'string' && endpoint.startsWith('/archive/search?'),
             )
-            const latestCall = productionCalls[productionCalls.length - 1]?.[0] ?? ''
+            const latestCall = searchCalls[searchCalls.length - 1]?.[0] ?? ''
             expect(String(latestCall)).toContain('sort=recent')
         })
     })
@@ -459,11 +399,11 @@ describe('SearchPage sort and page size', () => {
         fireEvent.change(pageSizeSelect, { target: { value: '24' } })
 
         await waitFor(() => {
-            const productionCalls = apiFetchMock.mock.calls.filter(
+            const searchCalls = apiFetchMock.mock.calls.filter(
                 ([endpoint]) =>
-                    typeof endpoint === 'string' && endpoint.startsWith('/archive/productions?'),
+                    typeof endpoint === 'string' && endpoint.startsWith('/archive/search?'),
             )
-            const latestEndpoint = String(productionCalls[productionCalls.length - 1]?.[0] ?? '')
+            const latestEndpoint = String(searchCalls[searchCalls.length - 1]?.[0] ?? '')
             expect(latestEndpoint).toContain('limit=24')
         })
     })
@@ -524,11 +464,11 @@ describe('SearchPage pagination', () => {
         fireEvent.click(nextButton)
 
         await waitFor(() => {
-            const productionCalls = apiFetchMock.mock.calls.filter(
+            const searchCalls = apiFetchMock.mock.calls.filter(
                 ([endpoint]) =>
-                    typeof endpoint === 'string' && endpoint.startsWith('/archive/productions?'),
+                    typeof endpoint === 'string' && endpoint.startsWith('/archive/search?'),
             )
-            const latestEndpoint = String(productionCalls[productionCalls.length - 1]?.[0] ?? '')
+            const latestEndpoint = String(searchCalls[searchCalls.length - 1]?.[0] ?? '')
             expect(latestEndpoint).toContain('page=2')
         })
     })
@@ -556,11 +496,11 @@ describe('SearchPage FilterPanel interactions', () => {
         fireEvent.click(theaterCheckbox)
     
         await waitFor(() => {
-            const productionCalls = apiFetchMock.mock.calls.filter(
+            const searchCalls = apiFetchMock.mock.calls.filter(
                 ([endpoint]) =>
-                    typeof endpoint === 'string' && endpoint.startsWith('/archive/productions?'),
+                    typeof endpoint === 'string' && endpoint.startsWith('/archive/search?'),
             )
-            const latestEndpoint = String(productionCalls[productionCalls.length - 1]?.[0] ?? '')
+            const latestEndpoint = String(searchCalls[searchCalls.length - 1]?.[0] ?? '')
             expect(latestEndpoint).toContain('genres=theatre')
         })
     })
@@ -574,11 +514,11 @@ describe('SearchPage FilterPanel interactions', () => {
         fireEvent.click(resetButtons[0])
 
         await waitFor(() => {
-            const productionCalls = apiFetchMock.mock.calls.filter(
+            const searchCalls = apiFetchMock.mock.calls.filter(
                 ([endpoint]) =>
-                    typeof endpoint === 'string' && endpoint.startsWith('/archive/productions?'),
+                    typeof endpoint === 'string' && endpoint.startsWith('/archive/search?'),
             )
-            const latestEndpoint = String(productionCalls[productionCalls.length - 1]?.[0] ?? '')
+            const latestEndpoint = String(searchCalls[searchCalls.length - 1]?.[0] ?? '')
             expect(latestEndpoint).not.toContain('genres=')
         })
     })
@@ -593,11 +533,11 @@ describe('SearchPage FilterPanel interactions', () => {
         fireEvent.pointerUp(startYearSlider)
 
         await waitFor(() => {
-            const productionCalls = apiFetchMock.mock.calls.filter(
+            const searchCalls = apiFetchMock.mock.calls.filter(
                 ([endpoint]) =>
-                    typeof endpoint === 'string' && endpoint.startsWith('/archive/productions?'),
+                    typeof endpoint === 'string' && endpoint.startsWith('/archive/search?'),
             )
-            const latestEndpoint = String(productionCalls[productionCalls.length - 1]?.[0] ?? '')
+            const latestEndpoint = String(searchCalls[searchCalls.length - 1]?.[0] ?? '')
             expect(latestEndpoint).toContain('yearFrom=2010')
         })
     })
@@ -612,11 +552,11 @@ describe('SearchPage FilterPanel interactions', () => {
         fireEvent.pointerUp(endYearSlider)
 
         await waitFor(() => {
-            const productionCalls = apiFetchMock.mock.calls.filter(
+            const searchCalls = apiFetchMock.mock.calls.filter(
                 ([endpoint]) =>
-                    typeof endpoint === 'string' && endpoint.startsWith('/archive/productions?'),
+                    typeof endpoint === 'string' && endpoint.startsWith('/archive/search?'),
             )
-            const latestEndpoint = String(productionCalls[productionCalls.length - 1]?.[0] ?? '')
+            const latestEndpoint = String(searchCalls[searchCalls.length - 1]?.[0] ?? '')
             expect(latestEndpoint).toContain('yearTo=2020')
         })
     })
@@ -633,11 +573,11 @@ describe('SearchPage FilterPanel interactions', () => {
         fireEvent.click(addButtons[0])
 
         await waitFor(() => {
-            const productionCalls = apiFetchMock.mock.calls.filter(
+            const searchCalls = apiFetchMock.mock.calls.filter(
                 ([endpoint]) =>
-                    typeof endpoint === 'string' && endpoint.startsWith('/archive/productions?'),
+                    typeof endpoint === 'string' && endpoint.startsWith('/archive/search?'),
             )
-            const latestEndpoint = String(productionCalls[productionCalls.length - 1]?.[0] ?? '')
+            const latestEndpoint = String(searchCalls[searchCalls.length - 1]?.[0] ?? '')
             expect(latestEndpoint).toContain('locations=balzaal')
         })
     })
@@ -654,11 +594,11 @@ describe('SearchPage FilterPanel interactions', () => {
         fireEvent.click(removeLocationChip)
 
         await waitFor(() => {
-            const productionCalls = apiFetchMock.mock.calls.filter(
+            const searchCalls = apiFetchMock.mock.calls.filter(
                 ([endpoint]) =>
-                    typeof endpoint === 'string' && endpoint.startsWith('/archive/productions?'),
+                    typeof endpoint === 'string' && endpoint.startsWith('/archive/search?'),
             )
-            const latestEndpoint = String(productionCalls[productionCalls.length - 1]?.[0] ?? '')
+            const latestEndpoint = String(searchCalls[searchCalls.length - 1]?.[0] ?? '')
             expect(latestEndpoint).not.toContain('locations=')
         })
     })
@@ -743,11 +683,11 @@ describe('SearchPage additional handler coverage', () => {
         fireEvent.keyDown(locationInputs[0], { key: 'Enter', code: 'Enter' })
 
         await waitFor(() => {
-            const productionCalls = apiFetchMock.mock.calls.filter(
+            const searchCalls = apiFetchMock.mock.calls.filter(
                 ([endpoint]) =>
-                    typeof endpoint === 'string' && endpoint.startsWith('/archive/productions?'),
+                    typeof endpoint === 'string' && endpoint.startsWith('/archive/search?'),
             )
-            expect(productionCalls.some(([ep]) => String(ep).includes('locations=balzaal'))).toBe(true)
+            expect(searchCalls.some(([ep]) => String(ep).includes('locations=balzaal'))).toBe(true)
         })
     })
 
@@ -768,28 +708,11 @@ describe('SearchPage additional handler coverage', () => {
         fireEvent.click(suggestionButton)
 
         await waitFor(() => {
-            const productionCalls = apiFetchMock.mock.calls.filter(
+            const searchCalls = apiFetchMock.mock.calls.filter(
                 ([endpoint]) =>
-                    typeof endpoint === 'string' && endpoint.startsWith('/archive/productions?'),
+                    typeof endpoint === 'string' && endpoint.startsWith('/archive/search?'),
             )
-            expect(productionCalls.some(([ep]) => String(ep).includes('locations=theaterzaal'))).toBe(true)
-        })
-    })
-
-    it('clicking the Blog tab button switches to blogs endpoint', async () => {
-        renderPage('/nl/zoeken')
-        await screen.findByText('Geen resultaten gevonden.')
-
-        const blogTabButton = screen.getByRole('button', { name: 'Blog' })
-        fireEvent.click(blogTabButton)
-
-        await waitFor(() => {
-            expect(
-                apiFetchMock.mock.calls.some(
-                    ([endpoint]) =>
-                        typeof endpoint === 'string' && endpoint.startsWith('/archive/blogs?'),
-                ),
-            ).toBe(true)
+            expect(searchCalls.some(([ep]) => String(ep).includes('locations=theaterzaal'))).toBe(true)
         })
     })
 
@@ -804,7 +727,7 @@ describe('SearchPage additional handler coverage', () => {
             expect(
                 apiFetchMock.mock.calls.some(
                     ([endpoint]) =>
-                        typeof endpoint === 'string' && endpoint.startsWith('/archive/search?'),
+                        typeof endpoint === 'string' && endpoint.startsWith('/archive/search?') && endpoint.includes('tab=all'),
                 ),
             ).toBe(true)
         })
@@ -821,7 +744,7 @@ describe('SearchPage additional handler coverage', () => {
             expect(
                 apiFetchMock.mock.calls.some(
                     ([endpoint]) =>
-                        typeof endpoint === 'string' && endpoint.startsWith('/archive/posters?'),
+                        typeof endpoint === 'string' && endpoint.startsWith('/archive/search?') && endpoint.includes('tab=posters'),
                 ),
             ).toBe(true)
         })
@@ -843,11 +766,11 @@ describe('SearchPage additional handler coverage', () => {
         fireEvent.click(prevButton)
 
         await waitFor(() => {
-            const productionCalls = apiFetchMock.mock.calls.filter(
+            const searchCalls = apiFetchMock.mock.calls.filter(
                 ([endpoint]) =>
-                    typeof endpoint === 'string' && endpoint.startsWith('/archive/productions?'),
+                    typeof endpoint === 'string' && endpoint.startsWith('/archive/search?'),
             )
-            const latestEndpoint = String(productionCalls[productionCalls.length - 1]?.[0] ?? '')
+            const latestEndpoint = String(searchCalls[searchCalls.length - 1]?.[0] ?? '')
             expect(latestEndpoint).toContain('page=1')
         })
     })
@@ -931,11 +854,11 @@ describe('SearchPage additional handler coverage', () => {
         fireEvent.submit(mobileForm)
 
         await waitFor(() => {
-            const productionCalls = apiFetchMock.mock.calls.filter(
+            const searchCalls = apiFetchMock.mock.calls.filter(
                 ([endpoint]) =>
-                    typeof endpoint === 'string' && endpoint.startsWith('/archive/productions?'),
+                    typeof endpoint === 'string' && endpoint.startsWith('/archive/search?'),
             )
-            expect(productionCalls.some(([ep]) => String(ep).includes('search=concert'))).toBe(true)
+            expect(searchCalls.some(([ep]) => String(ep).includes('search=concert'))).toBe(true)
         })
     })
 

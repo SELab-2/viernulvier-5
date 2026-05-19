@@ -154,7 +154,7 @@ function useProductionImages(items: ProductionApiItem[]) {
                             const cropsPath = getRelativePath(galleryItem.links.crops)
                             const cropsRes = await apiFetch<{ data: Array<{
                                     id: string, name: string, url: string}> }>(cropsPath!)
-                            const target = cropsRes.data.find(c => c.name === 'FE3_header') || cropsRes.data.find(c => c.name === 'FEA_boxed') || cropsRes.data[0]
+                            const target = cropsRes.data.find(c => c.name === 'FE3_header') || cropsRes.data.find(c => c.name === 'FE3_boxed') || cropsRes.data[0]
                             if (target) {
                                 const fileId = target.id;
                                 return {id: item.id, url: `/api/v1/images/${fileId}`}
@@ -325,8 +325,8 @@ function PublicCarousel() {
 
     return (
         <section className="bg-foreground/3 py-16">
-            <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 text-left">
-                <div className="relative flex flex-col items-start sm:block">
+            <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div className="relative flex flex-col items-start md:block">
                     <SectionTitle title={heading} subtitle={messages.home.onThisDaySubheading} />
                     <Link to={withLocalePath('/zoeken', locale)} className="mt-2 text-lg font-semibold text-foreground transition-opacity hover:opacity-70 sm:absolute sm:right-0 sm:top-1/2 sm:-translate-y-1/2 sm:mt-0">
                         {messages.home.onThisDayViewAll} →

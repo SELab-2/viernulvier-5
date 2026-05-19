@@ -284,7 +284,7 @@ describe('ArchiveDetailPage', () => {
         const backButton = await screen.findByText('Terug')
         fireEvent.click(backButton)
 
-        expect(navigate).toHaveBeenCalledWith('/')
+        expect(navigate).toHaveBeenCalledWith(-1)
     })
 
     it('fetches both production and events in parallel on mount', async () => {
@@ -556,8 +556,7 @@ describe('ArchiveDetailPage', () => {
 
         renderPage()
 
-        expect(await screen.findByText('Speeldata')).toBeInTheDocument() // wait for load
-        expect(screen.getByText('Credits')).toBeInTheDocument()
+        expect(await screen.findByText('Credits')).toBeInTheDocument()
         expect(screen.getByText('Regie: Jan Janssen')).toBeInTheDocument()
     })
 

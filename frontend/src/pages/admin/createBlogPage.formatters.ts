@@ -6,6 +6,10 @@ import type { ProductionItem } from '../../components/admin/blogs/ProductionMana
 
 export type ProductionListResponse = {
     data: ProductionItem[]
+    meta?: {
+        page: number
+        totalPages: number
+    }
 }
 
 export type ProductionDetailResponse = {
@@ -22,6 +26,8 @@ export type BlogDetail = {
     title?: unknown
     content?: unknown
     productions?: string[]
+    images?: string[]
+    thumbnail_index?: number | null
 }
 
 export type BlogDetailResponse = {

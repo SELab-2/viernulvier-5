@@ -19,7 +19,12 @@ export const productionPaginationQuerySchema = paginationQuerySchema.extend({
     locations: z.string().optional(),
     yearFrom: z.coerce.number().int().optional(),
     yearTo: z.coerce.number().int().optional(),
-    onThisDay: z.coerce.boolean().optional().default(false),
+    onThisDay: z.enum(['true', 'false'])
+        .optional().default('false')
+        .transform((val) => val === 'true'),
+    pastOnly: z.enum(['true', 'false'])
+        .optional()
+        .transform((val) => val === undefined ? undefined : val === 'true'),
     referenceDate: z
         .string()
         .regex(/^\d{4}-\d{2}-\d{2}$/)
@@ -29,6 +34,13 @@ export const productionPaginationQuerySchema = paginationQuerySchema.extend({
         .optional(),
     sort: z.enum(['relevance', 'recent', 'oldest']).optional().default('relevance'),
     lang: z.string().optional().default('nl'),
+    draft: z.enum(['true', 'false', 'all'])
+        .default('false')
+        .transform((val) => {
+            if (val === 'all') return 'all'
+            return val === 'true';
+        }),
+    editorId: z.string().uuid().optional(),
 })
 
 /**
@@ -40,6 +52,7 @@ export const productionLinksSchema = z.object({
     events: z.string().url().optional().nullable().default('https://example.com/'),
     genres: z.string().url().optional().nullable().default('https://example.com/'),
     tags: z.string().url().optional().nullable().default('https://example.com/'),
+    editors: z.string().url().optional().nullable().default('https://example.com/'),
     media_gallery: z.string().url().optional().nullable().default('https://example.com/'),
     review_gallery: z.string().url().optional().nullable().default('https://example.com/'),
     poster_gallery: z.string().url().optional().nullable().default('https://example.com/'),
@@ -90,6 +103,7 @@ export const productionSchema = z.object({
     on_this_day_event_date: z.coerce.date().nullable().optional(),
     genres: z.array(genreSchema).optional(),
     tags: z.array(tagSchema).optional(),
+    draft: z.boolean().nullable(),
     media_gallery_id: z.string().uuid().nullable(),
     review_gallery_id: z.string().uuid().nullable(),
     poster_gallery_id: z.string().uuid().nullable(),
@@ -128,6 +142,7 @@ export const updateProductionSchema = z.object({
     description_short: localizedTextSchema.optional(),
     eticket_info: localizedTextSchema.optional(),
     custom_data: customDataSchema.optional(),
+    draft: z.boolean().nullable().optional(),
     media_gallery_id: z.string().uuid().nullable().optional(),
     review_gallery_id: z.string().uuid().nullable().optional(),
     poster_gallery_id: z.string().uuid().nullable().optional(),

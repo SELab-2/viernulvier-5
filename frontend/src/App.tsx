@@ -1,6 +1,5 @@
 import { Routes, Route } from 'react-router-dom'
 import { lazy, Suspense } from 'react'
-import { getMessages } from './i18n'
 import { getAdminRouteConfig } from './admin/paths'
 import ProtectedAdminRoute, { AdminEntryRoute } from './pages/admin/ProtectedAdminRoute'
 
@@ -13,15 +12,17 @@ import NotFoundPage from './pages/public/NotFoundPage'
 import PosterDetailPage from './pages/public/PosterDetailPage'
 // Eager: NotFound must render instantly for unknown routes (no Suspense flash).
 import AdminNotFoundPage from './pages/admin/NotFoundPage'
+import LoadingPage from './pages/LoadingPage'
 
 // Admin pages (lazy loaded — not included in public bundle)
 const LoginPage = lazy(() => import('./pages/admin/LoginPage'))
 const DashboardPage = lazy(() => import('./pages/admin/DashboardPage'))
 const ArchiveEditPage = lazy(() => import('./pages/admin/ArchiveEditPage'))
 const PostersPage = lazy(() => import('./pages/admin/PostersPage'))
+const CreateBlogPage = lazy(() => import('./pages/admin/CreateBlogPage'))
 
-import CreateBlogPage from './pages/admin/CreateBlogPage'
 import BlogDetailPage from './pages/public/BlogDetailPage'
+import BlogsPage from './pages/public/BlogsPage'
 /**
  * Root App component.
  *
@@ -31,11 +32,10 @@ import BlogDetailPage from './pages/public/BlogDetailPage'
  * - localhost/127.0.0.1 → both available via /admin prefix
  */
 function App() {
-    const messages = getMessages()
     const adminRoutes = getAdminRouteConfig(window.location.hostname)
 
     return (
-        <Suspense fallback={<div>{messages.common.loading}</div>}>
+        <Suspense fallback={<LoadingPage />}>
             <Routes>
                 {!adminRoutes.isAdminHost ? (
                     <>
@@ -51,7 +51,9 @@ function App() {
                         <Route path="/posters/:id" element={<PosterDetailPage />} />
                         <Route path="/nl/posters/:id" element={<PosterDetailPage />} />
                         <Route path="/en/posters/:id" element={<PosterDetailPage />} />
-                        
+                        <Route path="/blogs" element={<BlogsPage />} />
+                        <Route path="/nl/blogs" element={<BlogsPage />} />
+                        <Route path="/en/blogs" element={<BlogsPage />} />
                         <Route path="/blogs/:id" element={<BlogDetailPage />} />
                         <Route path="/nl/blogs/:id" element={<BlogDetailPage />} />
                         <Route path="/en/blogs/:id" element={<BlogDetailPage />} />

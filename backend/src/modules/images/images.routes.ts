@@ -11,6 +11,7 @@ const imagesRoutes: FastifyPluginAsync = async (fastify) => {
 
     fastify.get('/:uuid', {
         schema: {
+            hide: true,
             tags: ['images'],
             summary: 'Get an image by UUID',
             params: imageParamsSchema,
