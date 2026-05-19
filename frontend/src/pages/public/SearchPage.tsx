@@ -1257,8 +1257,12 @@ function SearchPageContent() {
                         lang: locale,
                     })
                     if (query) searchParams.set('search', query)
-                    searchParams.set('yearFrom', String(safeFromYear))
-                    searchParams.set('yearTo', String(safeToYear))
+                    if (safeFromYear > MIN_PERIOD_YEAR) {
+                        searchParams.set('yearFrom', String(safeFromYear))
+                    }
+                    if (safeToYear < MAX_PERIOD_YEAR) {
+                        searchParams.set('yearTo', String(safeToYear))
+                    }
                     if (selectedGenres.length > 0) searchParams.set('genres', selectedGenres.join(','))
                     if (selectedLocations.length > 0) searchParams.set('locations', selectedLocations.join(','))
                     if (sort === 'recent' || sort === 'oldest') searchParams.set('sort', sort)

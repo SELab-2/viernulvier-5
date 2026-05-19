@@ -1,23 +1,6 @@
 import { Prisma, type PrismaClient } from '@prisma/client'
 import type { SearchQuery, SearchResultItem } from './search.schema.js'
-
-const GENRE_SEARCH_ALIASES: Record<string, string[]> = {
-    theater: ['theater', 'theatre'],
-    theatre: ['theatre', 'theater'],
-    dans: ['dans', 'dance'],
-    dance: ['dance', 'dans'],
-    concert: ['concert'],
-    nightlife: ['nightlife'],
-    talks: ['talks', 'talk'],
-    comedy: ['comedy', 'komedie'],
-    komedie: ['komedie', 'comedy'],
-    monument: ['monument'],
-    circus: ['circus'],
-    performance: ['performance', 'voorstelling'],
-    voorstelling: ['voorstelling', 'performance'],
-    'spoken word': ['spoken word'],
-    'listening session': ['listening session'],
-}
+import { ProductionsRepository } from '../productions/productions.repository.js'
 
 export class SearchRepository {
     private pgTrgmAvailable: boolean | null = null
@@ -53,7 +36,6 @@ export class SearchRepository {
         const normalizedSearch = search?.trim().toLowerCase() || ''
         const genreList = genres ? genres.split(',').map((g) => g.trim().toLowerCase()).filter(Boolean) : []
         const locationList = locations ? locations.split(',').map((l) => l.trim().toLowerCase()).filter(Boolean) : []
-        const expandedGenres = genreList.flatMap((g) => GENRE_SEARCH_ALIASES[g] ?? [g])
         const localizedLang = lang === 'en' || lang === 'fr' ? lang : 'nl'
         const posterSortDateSql = sort === 'oldest'
             ? Prisma.sql`MIN(f.created_at) OVER (
@@ -64,7 +46,42 @@ export class SearchRepository {
             )`
 
         const includeProductions = tab === 'all' || tab === 'productions'
-        const includePosters = tab === 'all' || tab === 'posters'
+        const hasProductionOnlyFilters = genreList.length > 0 || locationList.length > 0
+        const includePosters = (tab === 'all' || tab === 'posters') && !(tab === 'all' && hasProductionOnlyFilters)
+
+        const productionsRepository = new ProductionsRepository(this.prisma)
+        let allowedProductionIds: string[] = []
+
+        if (includeProductions) {
+            const normalizedGenres = genreList.length > 0 ? genreList : undefined
+            const normalizedLocations = locationList.length > 0 ? locationList : undefined
+
+            if (normalizedSearch) {
+                const rankedIds = await productionsRepository.findSearchIds(normalizedSearch, localizedLang)
+                allowedProductionIds = rankedIds.length > 0
+                    ? await productionsRepository.findFilteredIds({
+                        search: normalizedSearch,
+                        searchIds: rankedIds,
+                        lang: localizedLang,
+                        genres: normalizedGenres,
+                        locations: normalizedLocations,
+                        yearFrom,
+                        yearTo,
+                        draft: false,
+                        rankedIds,
+                    })
+                    : []
+            } else {
+                allowedProductionIds = await productionsRepository.findAllIds({
+                    lang: localizedLang,
+                    genres: normalizedGenres,
+                    locations: normalizedLocations,
+                    yearFrom,
+                    yearTo,
+                    draft: false,
+                })
+            }
+        }
 
         const ctes: Prisma.Sql[] = []
 
@@ -146,48 +163,7 @@ export class SearchRepository {
                     WHERE
                         p.draft = FALSE
                         AND EXISTS (SELECT 1 FROM "event" e WHERE e.production_id = p.id AND e.starts_at < NOW())
-                        ${normalizedSearch ? Prisma.sql` AND (
-                            LOWER(COALESCE(p.title ->> 'nl', p.title ->> 'en', p.title ->> 'fr', '')) ILIKE CONCAT('%', CAST(${normalizedSearch} AS text), '%') OR
-                            LOWER(COALESCE(p.description_short ->> 'nl', p.description_short ->> 'en', p.description_short ->> 'fr', '')) ILIKE CONCAT('%', CAST(${normalizedSearch} AS text), '%') OR
-                            LOWER(COALESCE(p.description ->> 'nl', p.description ->> 'en', p.description ->> 'fr', '')) ILIKE CONCAT('%', CAST(${normalizedSearch} AS text), '%') OR
-                            LOWER(COALESCE(p.teaser ->> 'nl', p.teaser ->> 'en', p.teaser ->> 'fr', '')) ILIKE CONCAT('%', CAST(${normalizedSearch} AS text), '%') OR
-                            similarity(LOWER(COALESCE(p.title ->> 'nl', p.title ->> 'en', p.title ->> 'fr', '')), CAST(${normalizedSearch} AS text)) >= 0.2 OR
-                            similarity(LOWER(COALESCE(p.description_short ->> 'nl', p.description_short ->> 'en', p.description_short ->> 'fr', '')), CAST(${normalizedSearch} AS text)) >= 0.2 OR
-                            similarity(LOWER(COALESCE(p.description ->> 'nl', p.description ->> 'en', p.description ->> 'fr', '')), CAST(${normalizedSearch} AS text)) >= 0.2 OR
-                            similarity(LOWER(COALESCE(p.teaser ->> 'nl', p.teaser ->> 'en', p.teaser ->> 'fr', '')), CAST(${normalizedSearch} AS text)) >= 0.2 OR
-                            word_similarity(LOWER(COALESCE(p.title ->> 'nl', p.title ->> 'en', p.title ->> 'fr', '')), CAST(${normalizedSearch} AS text)) >= 0.45 OR
-                            word_similarity(LOWER(COALESCE(p.description_short ->> 'nl', p.description_short ->> 'en', p.description_short ->> 'fr', '')), CAST(${normalizedSearch} AS text)) >= 0.45 OR
-                            word_similarity(LOWER(COALESCE(p.description ->> 'nl', p.description ->> 'en', p.description ->> 'fr', '')), CAST(${normalizedSearch} AS text)) >= 0.45 OR
-                            word_similarity(LOWER(COALESCE(p.teaser ->> 'nl', p.teaser ->> 'en', p.teaser ->> 'fr', '')), CAST(${normalizedSearch} AS text)) >= 0.45
-                        )` : Prisma.empty}
-                        ${yearFrom ? Prisma.sql` AND EXISTS (SELECT 1 FROM "event" e WHERE e.production_id = p.id AND e.starts_at < NOW() AND EXTRACT(YEAR FROM e.starts_at) >= ${yearFrom})` : Prisma.empty}
-                        ${yearTo ? Prisma.sql` AND EXISTS (SELECT 1 FROM "event" e WHERE e.production_id = p.id AND e.starts_at < NOW() AND EXTRACT(YEAR FROM e.starts_at) <= ${yearTo})` : Prisma.empty}
-                        ${expandedGenres.length > 0 ? Prisma.sql` AND (
-                            EXISTS (
-                                SELECT 1 FROM "genre_production" gp
-                                JOIN "genre" g ON g.id = gp.genre_id
-                                WHERE gp.production_id = p.id AND (
-                                    ${Prisma.join(expandedGenres.map((g) => Prisma.sql`LOWER(COALESCE(g.name ->> 'nl', g.name ->> 'en', g.name ->> 'fr', '')) ILIKE ${'%' + g + '%'}`), ' OR ')}
-                                )
-                            ) OR
-                            EXISTS (
-                                SELECT 1 FROM "tag_production" tp
-                                JOIN "tag" t ON t.id = tp.tag_id
-                                WHERE tp.production_id = p.id AND (
-                                    ${Prisma.join(expandedGenres.map((g) => Prisma.sql`LOWER(COALESCE(t.name ->> 'nl', t.name ->> 'en', t.name ->> 'fr', '')) ILIKE ${'%' + g + '%'}`), ' OR ')}
-                                )
-                            )
-                        )` : Prisma.empty}
-                        ${locationList.length > 0 ? Prisma.sql` AND (
-                            p.attendance_mode IN (${Prisma.join(locationList)}) OR
-                            EXISTS (
-                                SELECT 1 FROM "event" e
-                                JOIN "hall" h ON h.id = e.hall_id
-                                WHERE e.production_id = p.id AND (
-                                    ${Prisma.join(locationList.map((l) => Prisma.sql`LOWER(COALESCE(h.name ->> 'nl', h.name ->> 'en', h.name ->> 'fr', '')) ILIKE ${'%' + l + '%'}`), ' OR ')}
-                                )
-                            )
-                        )` : Prisma.empty}
+                        ${allowedProductionIds.length > 0 ? Prisma.sql`AND p.id IN (${Prisma.join(allowedProductionIds)})` : Prisma.sql`AND FALSE`}
                 )
             `)
         }
