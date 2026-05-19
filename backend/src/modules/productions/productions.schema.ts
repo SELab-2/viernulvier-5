@@ -144,7 +144,7 @@ export const updateProductionSchema = z.object({
     custom_data: customDataSchema.optional(),
     genre_ids: z.array(z.string().uuid()).optional(),
     tag_ids: z.array(z.string().uuid()).optional(),
-    draft: z.boolean().nullable().optional(),
+    draft: z.boolean().nullable().default(false).optional(),
     media_gallery_id: z.string().uuid().nullable().optional(),
     review_gallery_id: z.string().uuid().nullable().optional(),
     poster_gallery_id: z.string().uuid().nullable().optional(),
