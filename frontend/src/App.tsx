@@ -89,6 +89,23 @@ function App() {
                             }
                         />
                         <Route
+                            path={`/en${adminRoutes.dashboardPath}`}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <DashboardPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+                        <Route
+                            path={`/nl${adminRoutes.dashboardPath}`}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <DashboardPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+
+                        <Route
                             path={adminRoutes.productionsPath}
                             element={
                                 <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
@@ -97,7 +114,39 @@ function App() {
                             }
                         />
                         <Route
+                            path={`/en${adminRoutes.productionsPath}`}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <ProductionsPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+                        <Route
+                            path={`/nl${adminRoutes.productionsPath}`}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <ProductionsPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+                        <Route
                             path={adminRoutes.blogsPath}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <AdminBlogsPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+                        <Route
+                            path={`/en${adminRoutes.blogsPath}`}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <AdminBlogsPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+                        <Route
+                            path={`/nl${adminRoutes.blogsPath}`}
                             element={
                                 <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
                                     <AdminBlogsPage />
@@ -164,6 +213,22 @@ function App() {
                             }
                         />
                         <Route
+                            path={`/en${adminRoutes.archiveEditPath}`}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <ArchiveEditPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+                        <Route
+                            path={`/nl${adminRoutes.archiveEditPath}`}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <ArchiveEditPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+                        <Route
                             path={adminRoutes.postersPath}
                             element={
                                 <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
@@ -194,6 +259,22 @@ function App() {
                             element={
                                 <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
                                     <ArchiveDetailPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+                        <Route
+                            path={`/en${adminRoutes.postersPath}`}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <PostersPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+                        <Route
+                            path={`/nl${adminRoutes.postersPath}`}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <PostersPage />
                                 </ProtectedAdminRoute>
                             }
                         />

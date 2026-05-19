@@ -9,7 +9,7 @@ describe('getAdminRouteConfig', () => {
       isLocalDevHost: false,
       loginPath: '/admin/login',
       dashboardPath: '/admin/dashboard',
-      legacyDashboardPaths: ['/admin', '/dashboard', '/'],
+      legacyDashboardPaths: ['/admin', '/dashboard', '/', '/nl/admin', '/en/admin'],
     })
   })
 
@@ -20,7 +20,7 @@ describe('getAdminRouteConfig', () => {
       isLocalDevHost: true,
       loginPath: '/admin/login',
       dashboardPath: '/admin/dashboard',
-      legacyDashboardPaths: ['/admin', '/dashboard', '/'],
+      legacyDashboardPaths: ['/admin', '/dashboard', '/', '/nl/admin', '/en/admin'],
     })
   })
 
