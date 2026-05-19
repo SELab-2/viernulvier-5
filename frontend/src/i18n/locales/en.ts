@@ -142,7 +142,7 @@ const en: Messages = {
     eventsLocationLabel: 'Location',
     eventsCommentLabel: 'Comment',
     eventsActionsLabel: 'Actions',
-    invalidProductionError: 'Fill in all required fields in atleast one language'
+    invalidProductionError: 'Fill in all required fields in at least one language'
   },
   event: {
     saveButtonLabel: 'Save event',
@@ -151,6 +151,14 @@ const en: Messages = {
     timeLabel: 'Time (start - end)',
     locationLabel: 'Location',
     commentLabel: 'Comment',
+    cancelLabel: 'Cancel',
+    newLocationButton: '+ new location',
+    newLocationNamePlaceholder: 'Name',
+    newLocationAddressPlaceholder: 'Address',
+    newLocationValidationError: 'Name and address are required.',
+    newLocationCreateError: 'Failed to create location.',
+    newLocationCreatingLabel: 'Creating...',
+    newLocationAddLabel: 'Add location',
   },
   auth: {
     localeToggleLabel: 'Switch language',
