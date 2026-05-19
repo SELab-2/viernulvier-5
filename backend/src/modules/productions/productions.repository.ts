@@ -540,6 +540,7 @@ export class ProductionsRepository {
             where: { id },
             data : {
                 ...rest,
+                updated_at: new Date(),
                 ...(genre_ids !== undefined && {
                     genre_production: {
                         deleteMany: {},
