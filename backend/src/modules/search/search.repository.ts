@@ -73,6 +73,7 @@ export class SearchRepository {
         const productionFilter = includeProductions ? Prisma.sql`
             FROM "production" p
             WHERE 
+                p.draft IS FALSE AND
                 EXISTS (SELECT 1 FROM "event" e WHERE e.production_id = p.id AND e.starts_at < NOW())
                 ${normalizedSearch ? Prisma.sql` AND (
                     LOWER(p.title ->> 'nl') ILIKE CONCAT('%', CAST(${normalizedSearch} AS text), '%') OR
@@ -121,7 +122,7 @@ export class SearchRepository {
         const blogFilter = includeBlogs ? Prisma.sql`
             FROM "blog" b
             WHERE 
-                b.draft IS NOT TRUE
+                b.draft IS FALSE
                 ${normalizedSearch ? Prisma.sql` AND (
                     LOWER(b.title ->> 'nl') ILIKE CONCAT('%', CAST(${normalizedSearch} AS text), '%') OR
                     LOWER(b.title ->> 'en') ILIKE CONCAT('%', CAST(${normalizedSearch} AS text), '%') OR
