@@ -300,7 +300,7 @@ describe('ProductionsPage', () => {
 
         fireEvent.click(screen.getByRole('button', { name: /Nieuwe Productie/i }))
 
-        expect(navigate).toHaveBeenCalledWith('/admin/productions/new')
+        expect(navigate).toHaveBeenCalledWith('/admin/archive/create')
     })
 
     // Verwijderen
