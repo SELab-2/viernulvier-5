@@ -111,8 +111,6 @@ function ArchiveDetailPageContent() {
 
 
                 const prod = prodRes.data
-                console.log("HALLO");
-                console.log(isLoggedIn);
                 if (prod.draft && !isLoggedIn) {
                     setNotFound(true)
                     return
