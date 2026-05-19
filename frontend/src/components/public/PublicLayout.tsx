@@ -6,7 +6,6 @@ import { PublicMessagesContext } from './PublicMessagesContext'
 import PublicNavbar from './PublicNavbar'
 import PublicFooter from './PublicFooter'
 import { useLocation } from 'react-router-dom'
-import { trackNavigation } from '../../utils/navigationHistory'
 
 
 type PublicLayoutProps = {
@@ -30,8 +29,8 @@ function PublicLayout({ children }: PublicLayoutProps) {
     const location = useLocation()
 
     useEffect(() => {
-        trackNavigation(location.pathname + location.search + location.hash)
-    }, [location.pathname, location.search, location.hash])
+        window.scrollTo(0, 0)
+    }, [location.pathname])
 
 
     return (

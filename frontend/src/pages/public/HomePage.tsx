@@ -1,12 +1,14 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { getActiveLocale, withLocalePath } from '../../i18n'
+import { getActiveLocale, getMessages, withLocalePath } from '../../i18n'
 import PublicLayout from '../../components/public/PublicLayout'
 import PublicHeroSearch, { type HeroSearchFilters } from '../../components/public/PublicHeroSearch'
 import PublicPopularTags from '../../components/public/PublicPopularTags'
 import PublicCarousel from '../../components/public/PublicCarousel'
 import PublicLatestBlogPreview from '../../components/public/PublicLatestBlogPreview'
 import PublicRecentDigitized from '../../components/public/PublicRecentDigitized'
+import { getRecentProductions, type Production } from '../../api/productions'
+import { getLatestBlog, type Blog } from '../../api/blogs'
 
 /**
  * Public home page — displays the archive listing.
@@ -15,13 +17,17 @@ function HomePage() {
     const navigate = useNavigate()
     const [searchParams] = useSearchParams()
     const locale = getActiveLocale(window.location.pathname)
+    const homeMessages = getMessages(locale).home
+    const fallbackUntitled = homeMessages.fallbackUntitled
+    const [latestBlog, setLatestBlog] = useState<Blog | null>(null)
+    const [recentItems, setRecentItems] = useState<Production[]>([])
 
     const initialFilters = useMemo<HeroSearchFilters>(
         () => ({
             query: searchParams.get('q') ?? '',
-            year: searchParams.get('year') ?? undefined,
+            yearFrom: searchParams.get('yearFrom') ? Number(searchParams.get('yearFrom')) : undefined,
+            yearTo: searchParams.get('yearTo') ? Number(searchParams.get('yearTo')) : undefined,
             genre: searchParams.get('genre') ?? undefined,
-            location: searchParams.get('location') ?? undefined,
         }),
         [searchParams]
     )
@@ -33,16 +39,16 @@ function HomePage() {
             params.set('q', filters.query)
         }
 
-        if (filters.year) {
-            params.set('year', filters.year)
+        if (filters.yearFrom) {
+            params.set('yearFrom', String(filters.yearFrom))
+        }
+
+        if (filters.yearTo) {
+            params.set('yearTo', String(filters.yearTo))
         }
 
         if (filters.genre) {
             params.set('genre', filters.genre)
-        }
-
-        if (filters.location) {
-            params.set('location', filters.location)
         }
 
         const queryString = params.toString()
@@ -50,14 +56,65 @@ function HomePage() {
         navigate(queryString ? `${searchPath}?${queryString}` : searchPath)
     }
 
+    useEffect(() => {
+        let canceled = false
+
+        const loadLatestBlog = async () => {
+            try {
+                const response = await getLatestBlog(locale)
+                const item = response.data[0]
+
+                if (canceled) {
+                    return
+                }
+
+                setLatestBlog(item ?? null)
+            } catch {
+                if (!canceled) {
+                    setLatestBlog(null)
+                }
+            }
+        }
+
+        void loadLatestBlog()
+
+        return () => {
+            canceled = true
+        }
+    }, [locale, fallbackUntitled])
+
     const handlePopularTagClick = (tag: string) => {
         const params = new URLSearchParams()
         params.set('genre', tag)
         navigate(`${withLocalePath('/zoeken', locale)}?${params.toString()}`)
     }
 
-    const handleRecentDigitizedItemClick = (index: number) => {
-        navigate(withLocalePath(`/archive/${index + 1}`, locale))
+    useEffect(() => {
+        let canceled = false
+
+        const loadRecentDigitized = async () => {
+            try {
+                const response = await getRecentProductions(locale, 4)
+
+                if (!canceled) {
+                    setRecentItems(response.data)
+                }
+            } catch {
+                if (!canceled) {
+                    setRecentItems([])
+                }
+            }
+        }
+
+        void loadRecentDigitized()
+
+        return () => {
+            canceled = true
+        }
+    }, [locale, fallbackUntitled])
+
+    const handleRecentDigitizedItemClick = (id: string) => {
+        navigate(withLocalePath(`/archive/${id}`, locale))
     }
 
     const handleRecentDigitizedViewAll = () => {
@@ -73,8 +130,17 @@ function HomePage() {
             />
             <PublicPopularTags onTagClick={handlePopularTagClick} />
             <PublicCarousel />
-            <PublicLatestBlogPreview />
+            <PublicLatestBlogPreview
+                blog={latestBlog}
+                locale={locale}
+                fallbackUntitled={fallbackUntitled}
+                onReadMore={(id) => navigate(withLocalePath(`/blogs/${id}`, locale))}
+                onViewAll={() => navigate(withLocalePath('/blogs', locale))}
+            />
             <PublicRecentDigitized
+                items={recentItems}
+                locale={locale}
+                fallbackUntitled={fallbackUntitled}
                 onViewItem={handleRecentDigitizedItemClick}
                 onViewAll={handleRecentDigitizedViewAll}
             />

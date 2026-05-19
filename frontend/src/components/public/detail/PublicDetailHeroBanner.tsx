@@ -1,5 +1,6 @@
 import type { Genre } from "../../../api/genres"
 import { localize } from "../../../utils/localize"
+import { getMessages, resolveLocale } from "../../../i18n"
 
 type ArchiveDetailHeroProps = {
     imageUrl: string
@@ -10,15 +11,21 @@ type ArchiveDetailHeroProps = {
     locale: string
     shareLabel?: string
     onShare?: () => void
+    isBlog?: boolean
 }
 
-function ArchiveDetailHero({ imageUrl, title, superTitle, artist, genres, locale, shareLabel, onShare }: ArchiveDetailHeroProps) {
+function ArchiveDetailHero({ imageUrl, title, superTitle, artist, genres, locale, shareLabel, onShare, isBlog = false }: ArchiveDetailHeroProps) {
     return (
-        <div className="relative h-[360px] w-full overflow-hidden rounded-xl md:h-[430px]">
+        <div className="relative h-[360px] w-full overflow-hidden rounded-xl md:h-[430px] bg-muted">
+            <img
+                src="/fallback-hero.svg"
+                alt=""
+                className="absolute inset-0 h-full w-full object-cover opacity-50"
+            />
             <img
                 src={imageUrl}
                 alt={title || 'Production image'}
-                className="h-full w-full object-cover"
+                className="absolute inset-0 h-full w-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-black/25 to-black/65" />
             {onShare ? (
@@ -53,6 +60,13 @@ function ArchiveDetailHero({ imageUrl, title, superTitle, artist, genres, locale
                                 </span>
                             )
                         })}
+                    </div>
+                )}
+                {isBlog && (
+                    <div className="mb-3 flex flex-wrap gap-2">
+                        <span className="rounded-full bg-accent px-2.5 py-1 text-xs font-semibold text-white">
+                            {getMessages(resolveLocale(locale)).search.blogTab}
+                        </span>
                     </div>
                 )}
                 {superTitle && (

@@ -8,7 +8,9 @@ import type {
 } from './blogs.schema.js'
 import { AppError } from '../../errors/app-error.js'
 
-type BlogFilterOptions = Pick<BlogPaginationQuery, 'search' | 'yearFrom' | 'yearTo'>
+type BlogFilterOptions = Pick<BlogPaginationQuery, 'search' | 'yearFrom' | 'yearTo' | 'productionId' | 'editorId'> & {
+    draft?: boolean | 'all'
+}
 
 export class BlogsRepository {
     constructor(private readonly prisma: PrismaClient) {}
@@ -46,6 +48,29 @@ export class BlogsRepository {
     private buildWhere(options: BlogFilterOptions): Prisma.blogWhereInput {
         const conditions: Prisma.blogWhereInput[] = []
         const trimmedSearch = options.search?.trim()
+        const draft = options.draft ?? false
+
+        if (draft !== 'all') {
+            if (draft === true) {
+                conditions.push({
+                    OR: [
+                        { draft: true },
+                        { draft: null },
+                    ],
+                })
+            } else {
+                conditions.push({ draft: false })
+            }
+        }
+        if (options.editorId){
+            conditions.push({
+                editor_blog: {
+                    some: {
+                        editor_id: options.editorId,
+                    },
+                },
+            })
+        }
 
         if (trimmedSearch) {
             const dateRange = this.parseSearchDate(trimmedSearch)
@@ -77,7 +102,7 @@ export class BlogsRepository {
             ]
 
             if (dateRange) {
-                searchConditions.push({ createdAt: { gte: dateRange.from, lt: dateRange.to } })
+                searchConditions.push({ created_at: { gte: dateRange.from, lt: dateRange.to } })
             }
 
             conditions.push({ OR: searchConditions })
@@ -87,9 +112,19 @@ export class BlogsRepository {
             const fromYear = Math.min(options.yearFrom ?? 1970, options.yearTo ?? 9999)
             const toYear = Math.max(options.yearFrom ?? 1970, options.yearTo ?? 9999)
             conditions.push({
-                createdAt: {
+                created_at: {
                     gte: new Date(Date.UTC(fromYear, 0, 1)),
                     lt: new Date(Date.UTC(toYear + 1, 0, 1)),
+                },
+            })
+        }
+
+        if (options.productionId) {
+            conditions.push({
+                blog_production: {
+                    some: {
+                        production_id: options.productionId,
+                    },
                 },
             })
         }
@@ -159,17 +194,23 @@ export class BlogsRepository {
         id: string
         title: unknown
         content: unknown
-        createdAt: Date
-        updatedAt: Date
+        draft: boolean | null
+        created_at: Date
+        updated_at: Date
+        thumbnail_index: number | null
+        images: string[]
         blog_production?: Array<{ production_id: string }>
     }): BlogResponse {
         return {
             id: blog.id,
             title: this.normalizeBlogTitle(blog.title),
             content: blog.content,
+            thumbnail_index: blog.thumbnail_index,
+            images: blog.images,
+            draft: blog.draft,
             productions: blog.blog_production?.map((relation) => relation.production_id) ?? [],
-            createdAt: blog.createdAt,
-            updatedAt: blog.updatedAt,
+            created_at: blog.created_at,
+            updated_at: blog.updated_at,
         }
     }
 
@@ -181,7 +222,7 @@ export class BlogsRepository {
         const blogs = await this.prisma.blog.findMany({
             where,
             include: this.blogInclude,
-            orderBy: { createdAt: 'desc' },
+            orderBy: { created_at: 'desc' },
             skip,
             take: limit,
         })
@@ -197,7 +238,7 @@ export class BlogsRepository {
     async countInRange({ from, to }: { from: Date; to: Date }): Promise<number> {
         return this.prisma.blog.count({
             where: {
-                createdAt: {
+                created_at: {
                     gte: from,
                     lt: to,
                 },
@@ -220,6 +261,9 @@ export class BlogsRepository {
             data: {
                 title,
                 content: (data.content ?? null) as Prisma.InputJsonValue,
+                ...(data.draft !== undefined ? { draft: data.draft } : {}),
+                thumbnail_index: data.thumbnail_index ?? null,
+                images: data.images ?? [],
                 blog_production: {
                     create: data.productionIds.map((productionId) => ({
                         production: {
@@ -247,6 +291,9 @@ export class BlogsRepository {
                     ? { title }
                     : {}),
                 ...(data.content !== undefined ? { content: data.content as Prisma.InputJsonValue } : {}),
+                ...(data.draft !== undefined ? { draft: data.draft } : {}),
+                ...(data.thumbnail_index !== undefined ? { thumbnail_index: data.thumbnail_index } : {}),
+                ...(data.images !== undefined ? { images: data.images } : {}),
                 ...(data.productionIds !== undefined
                     ? {
                         blog_production: {
@@ -271,9 +318,30 @@ export class BlogsRepository {
         if (!existing) throw new AppError('Blog not found')
 
         await this.prisma.$transaction([
+            this.prisma.editor_blog.deleteMany({ where: { blog_id: id }}),
             this.prisma.blog_production.deleteMany({ where: { blog_id: id } }),
             this.prisma.blog.delete({ where: { id } }),
         ])
 
+    }
+
+    async addEditor(blogId: string, editorId: string) {
+        return this.prisma.editor_blog.create({
+            data: {
+                blog_id: blogId,
+                editor_id: editorId,
+            }
+        })
+    }
+
+    async removeEditor(blogId: string, editorId: string) {
+        return this.prisma.editor_blog.delete({
+            where: {
+                editor_id_blog_id: {
+                    editor_id: editorId,
+                    blog_id: blogId,
+                }
+            }
+        })
     }
 }

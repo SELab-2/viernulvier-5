@@ -34,12 +34,11 @@ export const productionSchema = z.object({
     info: localizedTextSchema,
     description_short: localizedTextSchema,
     eticket_info: localizedTextSchema,
-    custom_data: localizedTextSchema,    
+    custom_data: localizedTextSchema,   
+    draft: z.boolean().optional(), 
     media_gallery_id: z.string().uuid().nullable(),
     review_gallery_id: z.string().uuid().nullable(),
     poster_gallery_id: z.string().uuid().nullable(),
-    uitdatabank_theme: z.string().uuid().nullable(),
-    uitdatabank_type: z.string().uuid().nullable(),
 
     created_at: z.coerce.date(),
     updated_at: z.coerce.date(),
@@ -47,6 +46,7 @@ export const productionSchema = z.object({
     links: z
         .object({
             self: z.string(),
+            blogs: z.string().optional(),
         })
         .optional(),
 })
@@ -55,6 +55,12 @@ export const productionSchema = z.object({
  * Inferred TypeScript type
  */
 export type Production = z.infer<typeof productionSchema>
+
+export type ProductionListItem = Production
+
+type PaginatedResponse<T> = {
+    data: T[]
+}
 
 
 type ProductionResponse = {
@@ -66,4 +72,15 @@ type ProductionResponse = {
 
 export const getProductionById = (id: string) => {
     return api.get<ProductionResponse>(`/archive/productions/${id}`)
+}
+
+export const getRecentProductions = (locale: 'nl' | 'en', limit = 4) => {
+    const params = new URLSearchParams({
+        page: '1',
+        limit: String(limit),
+        sort: 'recent',
+        lang: locale,
+    })
+
+    return api.get<PaginatedResponse<ProductionListItem>>(`/archive/productions?${params.toString()}`)
 }

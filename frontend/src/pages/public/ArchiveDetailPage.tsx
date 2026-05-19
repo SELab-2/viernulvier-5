@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { getActiveLocale, withLocalePath } from '../../i18n'
 import { localize } from '../../utils/localize'
-import { getYouTubeEmbedUrl } from '../../utils/youtube'
+import { getVideoEmbedUrl } from '../../utils/videos'
 import PublicLayout from '../../components/public/PublicLayout'
 import PublicPillButton from '../../components/public/PublicPillButton'
 import { usePublicMessages } from '../../components/public/PublicMessagesContext'
+import { NotFoundContent } from './NotFoundPage'
+import { ApiError } from '../../api/client'
 import ArchiveDetailHero from '../../components/public/detail/PublicDetailHeroBanner'
 import ArchiveDetailEventsList from '../../components/public/detail/PublicDetailEventsList'
 import ArchiveDetailGallery from '../../components/public/detail/PublicDetailGallery'
+import { getBlogsByProductionId, type Blog } from '../../api/blogs'
 import { getProductionById, type Production } from '../../api/productions'
 import { getGalleryItems, getItemCrops, getPreferredHeroCropUrl, getPreferredMediaCropUrl } from '../../api/media'
 import { getEventsByProductionId, type Event } from '../../api/events'
@@ -17,7 +20,11 @@ import { getTagsByProductionId, type Tag } from '../../api/tags'
 import { getHallById } from '../../api/halls'
 import { getSpaceById } from '../../api/spaces'
 import { getLocationById, type Location } from '../../api/locations'
-import { getPreviousStrippedPath } from '../../utils/navigationHistory'
+import { LeftArrowIcon } from '../../components/shared/icons'
+import { LoadingContent } from '../LoadingPage'
+import {useOptionalAdminSession} from "../../auth/useAdminSessionContext.ts";
+
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 function ArchiveDetailPageContent() {
     const navigate = useNavigate()
@@ -31,19 +38,30 @@ function ArchiveDetailPageContent() {
     const [events, setEvents] = useState<Event[]>([])
     const [genres, setGenres] = useState<Genre[]>([])
     const [tags, setTags] = useState<Tag[]>([])
+    const [blogs, setBlogs] = useState<Blog[]>([])
     const [locationsByEvent, setLocationsByEvent] = useState<Record<string, Location>>({})
     const [shareCopied, setShareCopied] = useState(false)
     const [loadError, setLoadError] = useState(false)
+    const [loading, setLoading] = useState(true)
+    const [notFound, setNotFound] = useState(false)
+    const [previousId, setPreviousId] = useState(id)
+
+    if (id !== previousId) {
+        setPreviousId(id)
+        setLoadError(false)
+        setNotFound(false)
+        setLoading(true)
+    }
+
+    const session = useOptionalAdminSession()
+    const isLoggedIn = Boolean(session?.user)
 
     const handleGoBack = () => {
-        const prev = getPreviousStrippedPath()
-        if (prev) {
-            // navigate directly to the previous page in the current locale
-            // this bypasses any locale-switch history entries entirely
-            navigate(withLocalePath(prev, locale))
-            return
+        if (window.history.state?.idx > 0) {
+            navigate(-1)
+        } else {
+            navigate(withLocalePath('/', locale))
         }
-        navigate(withLocalePath('/', locale))
     }
 
     const formatHtml = (html: string) => {
@@ -81,19 +99,27 @@ function ArchiveDetailPageContent() {
         window.setTimeout(() => setShareCopied(false), 1800)
     }
 
+    const idIsMalformed = typeof id === 'string' && !UUID_REGEX.test(id)
+
     useEffect(() => {
-        if (!id) return
+        if (!id || idIsMalformed) return
 
         const fetchData = async () => {
             try {
-                const [prodRes, eventsRes, genresRes, tagsRes] = await Promise.all([
+                const [prodRes, eventsRes, genresRes, tagsRes, blogsRes] = await Promise.all([
                     getProductionById(id),
                     getEventsByProductionId(id),
                     getGenresByProductionId(id),
                     getTagsByProductionId(id),
+                    getBlogsByProductionId(id).catch(() => ({ data: [] })),
                 ])
 
+
                 const prod = prodRes.data
+                if (prod.draft && !isLoggedIn) {
+                    setNotFound(true)
+                    return
+                }
                 const now = Date.now()
                 const pastEvents = eventsRes.data.filter((event) => {
                     if (!event.starts_at) return false
@@ -104,20 +130,37 @@ function ArchiveDetailPageContent() {
                 setEvents(pastEvents)
                 setGenres(genresRes.data)
                 setTags(tagsRes.data)
+                setBlogs(blogsRes.data)
 
                 if (prod.media_gallery_id) {
                     const galleryRes = await getGalleryItems(prod.media_gallery_id)
                     const items = galleryRes.data
 
                     if (items.length > 0) {
-                        const firstCrops = await getItemCrops(items[0].id)
-                        const heroUrl = getPreferredHeroCropUrl(firstCrops.data)
+                        // Respect explicit positions (ascending). Fall back to newest first when positions are equal/missing.
+                        items.sort((a, b) => {
+                            const pa = a.position ?? 0
+                            const pb = b.position ?? 0
+                            if (pa !== pb) return pa - pb
+                            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+                        })
+
+                        // Fetch crops for all items so we can pick the banner by crop name.
+                        const allCrops = await Promise.all(items.map((item) => getItemCrops(item.id)))
+
+                        // Prefer an item that has the 'FE3_header' crop as banner, otherwise boxed, otherwise first.
+                        let bannerIndex = allCrops.findIndex(res => res.data.some(c => c.name === 'FE3_header'))
+                        if (bannerIndex === -1) {
+                            bannerIndex = allCrops.findIndex(res => res.data.some(c => c.name === 'FE3_boxed'))
+                        }
+                        if (bannerIndex === -1) bannerIndex = 0
+
+                        const heroUrl = getPreferredHeroCropUrl(allCrops[bannerIndex].data)
                         setImageUrl(heroUrl)
 
-                        // First item is used as the hero banner above; remaining items go in the gallery
-                        const remainingItems = items.slice(1)
-                        const allCrops = await Promise.all(remainingItems.map((item) => getItemCrops(item.id)))
-                        setGalleryImages(allCrops.map((res) => getPreferredMediaCropUrl(res.data)).filter(Boolean) as string[])
+                        // Remaining items → gallery images (preserve sorted order, skipping banner)
+                        const remainingCrops = allCrops.filter((_, i) => i !== bannerIndex)
+                        setGalleryImages(remainingCrops.map((res) => getPreferredMediaCropUrl(res.data)).filter(Boolean) as string[])
                     }
                 }
                 
@@ -143,14 +186,35 @@ function ArchiveDetailPageContent() {
                     if (res) locationMap[res.eventId] = res.location
                 })
                 setLocationsByEvent(locationMap)
-
-            } catch {
-                setLoadError(true)
+            } catch (error) {
+                if (error instanceof ApiError && (error.status === 404 || error.status === 400)) {
+                    setNotFound(true)
+                } else {
+                    setLoadError(true)
+                }
+            } finally {
+                setLoading(false)
             }
         }
 
         fetchData()
-    }, [id])
+    }, [id, idIsMalformed, isLoggedIn])
+
+    if (loading) {
+        return <LoadingContent />
+    }
+
+    if (notFound || idIsMalformed) {
+        return <NotFoundContent />
+    }
+
+    if (loadError) {
+        return (
+            <div className="site-container mt-8">
+                <p className="text-sm text-text-accent">{messages.detail.loadError}</p>
+            </div>
+        )
+    }
 
     const title = localize(production?.title, locale)
     const superTitle = localize(production?.super_title, locale)
@@ -161,33 +225,31 @@ function ArchiveDetailPageContent() {
     const quote = localize(production?.quote, locale)
     const quoteSource = localize(production?.quote_source, locale)
     const info = localize(production?.info, locale)
-    const video1 = localize(production?.video_1, locale)
-    const video2 = localize(production?.video_2, locale)
-    const hasSidebar = Boolean(info) || genres.length > 0 || tags.length > 0
+    const hasSidebar = Boolean(info) || genres.length > 0 || tags.length > 0 || blogs.length > 0
     const shareLabel = messages.search.shareLabel
     const shareCopiedLabel = messages.search.shareCopiedLabel
 
     const FALLBACK_IMAGE = '/fallback-hero.svg'
     const heroImage = imageUrl ?? FALLBACK_IMAGE
 
-    const videos = [video1, video2]
-        .filter(Boolean)
-        .map((url) => getYouTubeEmbedUrl(url as string))
-        .filter(Boolean)
-
-    if (loadError) {
-        return (
-            <div className="site-container mt-8">
-                <p className="text-sm text-text-accent">{messages.detail.loadError}</p>
-            </div>
+    const videos = Array.from(
+        new Set(
+            [
+                localize(production?.video_1, locale),
+                localize(production?.video_2, locale),
+            ]
+                .filter((url): url is string => Boolean(url))
+                .map(getVideoEmbedUrl)
+                .filter((url): url is string => Boolean(url))
         )
-    }
+    )
 
     return (
         <>
             <div className="site-container mt-8">
                 <PublicPillButton
                     label={messages.detail.navBack}
+                    icon={<LeftArrowIcon className="h-5 w-5" />}
                     onClick={handleGoBack}
                 />
             </div>
@@ -281,21 +343,10 @@ function ArchiveDetailPageContent() {
 
                     {hasSidebar ? (
                         <aside className="xl:sticky xl:top-22">
-                            <div className="rounded-2xl border border-border bg-surface px-5 py-6">
-                                <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-text-accent">
-                                    {messages.detail.credits}
-                                </h3>
+                            <div className="rounded-2xl border border-border bg-surface px-5 py-6 flex flex-col gap-6">
 
-                                {info ? (
-                                    <div className="prose prose-sm mt-4 max-w-none text-text-accent">
-                                        <div dangerouslySetInnerHTML={{ __html: info.replace(/\r?\n/g, '<br />') }} />
-                                    </div>
-                                ) : (
-                                    <p className="mt-4 text-sm text-text-accent">-</p>
-                                )}
-
-                                {(genres.length > 0 || tags.length > 0) ? (
-                                    <div className="mt-6 border-t border-border pt-4">
+                                {(genres.length > 0 || tags.length > 0) && (
+                                    <div>
                                         <p className="mb-3 text-xs font-semibold uppercase tracking-[0.15em] text-text-accent">
                                             {messages.detail.genresAndTags}
                                         </p>
@@ -320,7 +371,43 @@ function ArchiveDetailPageContent() {
                                             })}
                                         </div>
                                     </div>
-                                ) : null}
+                                )}
+
+                                {blogs.length > 0 && (
+                                    <div>
+                                        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.15em] text-text-accent">
+                                            {messages.detail.relatedBlogs}
+                                        </p>
+                                        <ul className="flex flex-col gap-2">
+                                            {blogs.map((blog) => {
+                                                const title = localize(blog.title, locale)
+                                                return (
+                                                    <li key={blog.id}>
+                                                        <Link
+                                                            to={withLocalePath(`/blogs/${blog.id}`, locale)}
+                                                            className="flex items-center justify-between rounded-lg border border-border bg-surface-sunken px-3 py-2.5 text-sm text-foreground transition-opacity hover:opacity-70"
+                                                        >
+                                                            <span>{title ?? blog.id}</span>
+                                                            <span className="ml-2 shrink-0 text-text-accent">→</span>
+                                                        </Link>
+                                                    </li>
+                                                )
+                                            })}
+                                        </ul>
+                                    </div>
+                                )}
+
+                                {info && (
+                                    <div>
+                                        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.15em] text-text-accent">
+                                            {messages.detail.credits}
+                                        </p>
+                                        <div className="prose prose-sm max-w-none text-text-accent">
+                                            <div dangerouslySetInnerHTML={{ __html: info.replace(/\r?\n/g, '<br />') }} />
+                                        </div>
+                                    </div>
+                                )}
+
                             </div>
                         </aside>
                     ) : null}

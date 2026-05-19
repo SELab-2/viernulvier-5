@@ -19,13 +19,15 @@
         "db:push": "prisma db push",
         "db:seed": "tsx prisma/seed.ts",
         "db:studio": "prisma studio",
-        "scraper": "tsx src/scraper/sync_database.ts"
+        "scraper": "tsx src/scraper/sync_database.ts",
+        "import-legacy": "tsx src/import/import-legacy-csv.ts --productions ./data/productions.csv --events ./data/events.csv"
     },
     "dependencies": {
         "@fastify/cookie": "^11.0.0",
         "@fastify/cors": "^11.0.0",
         "@fastify/helmet": "^13.0.0",
         "@fastify/jwt": "^10.0.0",
+        "@fastify/multipart": "^10.0.0",
         "@fastify/sensible": "^6.0.0",
         "@fastify/swagger": "^9.0.0",
         "@fastify/swagger-ui": "^5.0.0",
@@ -33,10 +35,13 @@
         "@prisma/client": "^7.4.1",
         "axios": "^1.16.0",
         "axios-retry": "^4.5.0",
+        "csv-parse": "^6.2.1",
+        "date-fns-tz": "^3.2.0",
         "dotenv": "^17.3.1",
         "fastify": "^5.8.5",
         "fastify-plugin": "^5.0.0",
         "fastify-type-provider-zod": "^4.0.0",
+        "file-type": "^19.6.0",
         "pg": "^8.19.0",
         "zod": "^3.24.0"
     },

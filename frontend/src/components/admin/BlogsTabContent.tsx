@@ -9,6 +9,7 @@ type BlogsTabContentProps = {
     onJsonChange: (value: unknown) => void
     changeTitle: (value: string) => void
     changeContent: (value: string) => void
+    quillPlaceholder: string
 }
 
 function BlogsTabContent({
@@ -19,6 +20,7 @@ function BlogsTabContent({
     changeTitle,
     changeContent,
     onJsonChange,
+    quillPlaceholder
 }: BlogsTabContentProps) {
     return (
         <section className="relative px-4 py-4 overflow-hidden">
@@ -26,12 +28,12 @@ function BlogsTabContent({
                 <form className="w-full max-w-xl rounded-xl p-2 md:max-w-none">
                     <p className="mb-4 text-sm font-bold tracking-wide">{titleLabel}</p>
                     <div className="admin-detail-input mb-8">
-                        <textarea
+                        <input
+                            type="text"
                             value={title}
                             onChange={(value) => changeTitle(value.target.value)}
                             aria-label={titleLabel}
-                            rows={2}
-                            className="admin-detail-field min-h-12 resize-y py-3 text-sm leading-6 [overflow-wrap:anywhere]"
+                            className="admin-detail-field text-sm leading-6"
                         />
                     </div>
 
@@ -41,7 +43,7 @@ function BlogsTabContent({
                         value={content}
                         onChange={changeContent}
                         onJsonChange={onJsonChange}
-                        placeholder="Schrijf je blog content hier..."
+                        placeholder={quillPlaceholder}
                     />
                 </form>
             </div>

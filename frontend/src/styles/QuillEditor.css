@@ -2,6 +2,7 @@
     .ql-toolbar .ql-stroke {
         fill: none;
         stroke: var(--color-text-accent);;
+    border-radius: 0rem 0 0.75rem 0.75rem;
     }
     .ql-toolbar .ql-fill {
         fill: var(--color-text-accent);
@@ -15,12 +16,14 @@
 
 .quill-editor-wrapper {
     border: 1px solid var(--color-border);
-    border-radius: 0.75rem;
+    border-radius: 0 0 0.75rem 0.75rem;
     overflow: hidden;
     background: var(--color-surface);
     color: var(--color-text);
 }
-
+.ql-toolbar.ql-snow{
+    border-radius: 0.75rem 0.75rem 0 0;
+}
 .quill-editor-wrapper .ql-toolbar.ql-snow {
     border: 0;
     border-bottom: 1px solid var(--color-border);
@@ -28,12 +31,15 @@
 }
 
 .quill-editor-wrapper .ql-container.ql-snow {
-    border: 0;
+    border-radius: 0rem 0 0.75rem 0.75rem; 
     background: var(--color-surface);
 }
 
 .quill-editor-wrapper .ql-editor {
     min-height: 16rem;
+    font-family: inherit;
+    font-size: 1rem;
+    line-height: 1.75;
     color: var(--color-text);
     background: var(--color-surface);
 }
@@ -50,5 +56,25 @@
 
 .quill-editor-wrapper .ql-toolbar.ql-snow .ql-fill {
     fill: var(--color-text-accent);
+}
+
+.quill-detail-wrapper {
+    background: transparent;
+    color: var(--color-text);
+}
+
+.quill-detail-wrapper .ql-container.ql-snow {
+    border: 0;
+    background: transparent;
+}
+
+.quill-detail-wrapper .ql-editor {
+    padding: 0;
+    min-height: 0;
+    font-family: inherit;
+    font-size: 1rem;
+    line-height: 1.75;
+    background: transparent;
+    color: var(--color-text);
 }
 

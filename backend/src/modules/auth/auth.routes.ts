@@ -103,6 +103,7 @@ const authRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.post('/login', {
         preHandler: [enforceLoginRateLimit],
         schema: {
+            hide: true,
             body: loginSchema,
             tags: ['auth'],
             summary: 'Admin login',
@@ -126,6 +127,7 @@ const authRoutes: FastifyPluginAsync = async (fastify) => {
 
     fastify.post('/logout', {
         schema: {
+            hide: true,
             tags: ['auth'],
             summary: 'Logout (clear cookie)',
             response: {
@@ -141,6 +143,7 @@ const authRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.get('/me', {
         preHandler: [requirePermission(Permission.ARCHIVE_READ)],
         schema: {
+            hide: true,
             tags: ['auth'],
             summary: 'Get current user info',
             response: {
@@ -153,12 +156,12 @@ const authRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.patch('/me', {
         preHandler: [requirePermission(Permission.ARCHIVE_READ)],
         schema: {
+            hide: true,
             tags: ['auth'],
             summary: 'Update current user info',
             body: updateMeSchema,
             response: {
                 200: meResponseSchema,
-                401: errorSchema,
                 404: errorSchema,
                 409: errorSchema,
             }

@@ -9,7 +9,7 @@ type Delta = {
 export type DashboardSummary = {
     counts: {
         productions: number
-        events: number
+        posters: number
         blogs: number
         mediaItems: number
         editors: number
@@ -18,18 +18,18 @@ export type DashboardSummary = {
         id: string
         title: string
         type: string
-        status: 'available'
-        languageStatus: {
+        languageStatus?: {
             nl: 'complete' | 'attention'
             en: 'complete' | 'attention' | 'missing'
         }
-        updatedAt: string
+        updated_at: string
     }>
     totalRecentItems: number
     lastScrapedAt: string | null
     deltas: {
         productions: Delta
         blogs: Delta
+        posters: Delta
     }
 }
 

@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type PointerEvent as ReactPointerEvent } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { getActiveLocale, getMessages, withLocalePath } from '../../i18n'
-import type { Locale } from '../../i18n/types'
-import { apiFetch } from '../../api/client'
-import { getLocalizedContent, getLocalizedTitle, normalizeContent } from './blogDetailPage.formatters'
+import { getActiveLocale, withLocalePath } from '../../i18n'
+import type { Locale, Messages } from '../../i18n/types'
+import { apiFetch, normalizeApiAssetUrl } from '../../api/client'
 import PublicLayout from '../../components/public/PublicLayout'
+import { usePublicMessages } from '../../components/public/PublicMessagesContext'
 import SearchPagination from '../../components/public/search/SearchPagination'
 import SearchResultCard, { type SearchResultItem } from '../../components/public/search/SearchResultCard'
 
@@ -12,38 +12,64 @@ type SearchEntry = SearchResultItem & {
     year: number
     genre: string
     location: string
-    type: 'production' | 'blog'
+    type: 'production' | 'poster'
 }
 
 const DEFAULT_PAGE_SIZE = 12
 const PAGE_SIZE_OPTIONS = [12, 24, 48] as const
 const MIN_PERIOD_YEAR = 1982
-const MAX_PERIOD_YEAR = 2026
+const MAX_PERIOD_YEAR = new Date().getFullYear()
 const SEARCH_INPUT_DEBOUNCE_MS = 250
 
+
 const CANONICAL_GENRE_VALUES = [
-    'theater',
-    'dans',
     'concert',
     'nightlife',
     'talks',
-    'comedy',
-    'monument',
-    'circus',
+    'installation',
+    'theatre',
     'performance',
+    'dance',
+    'comedy',
+    'film',
     'spoken word',
-    'listening session',
+    'circus',
+    'food',
+    'monument',
+    'workshop',
+    'party',
+    'expo',
+    'festival',
 ] as const
 
 const GENRE_ALIASES: Record<string, string> = {
-    theater: 'theater',
-    theatre: 'theater',
-    dans: 'dans',
-    dance: 'dans',
+    theater: 'theatre',
+    theatre: 'theatre',
+    dans: 'dance',
+    dance: 'dance',
     music: 'concert',
     komedie: 'comedy',
+    talk: 'talks',
+    talks: 'talks',
+    installatie: 'installation',
+    installation: 'installation',
+    expo: 'expo',
+    tentoonstelling: 'expo',
+    food: 'food',
+    eten: 'food',
+    etenendrinken: 'food',
+    'eten & drinken': 'food',
+    film: 'film',
+    workshop: 'workshop',
+    party: 'party',
+    monument: 'monument',
+    circus: 'circus',
+    performance: 'performance',
+    festival: 'festival',
+    feest: 'party',
     voorstelling: 'performance',
     'spoken-word': 'spoken word',
+    spokenword: 'spoken word',
 }
 
 const NON_GENRE_TAG_VALUES = new Set([
@@ -90,8 +116,6 @@ type ProductionApiItem = {
         media_gallery: string | null
         review_gallery: string | null
         poster_gallery: string | null
-        uitdatabank_theme: string | null
-        uitdatabank_type: string | null
     }
 }
 
@@ -105,9 +129,33 @@ type PaginatedApiResponse<T> = {
     }
 }
 
+type PosterApiItem = {
+    id: string
+    title: string
+    file_url: string
+    mime_type: string | null
+    files?: Array<{
+        id: string
+        file_url: string
+        mime_type: string | null
+    }>
+    file_count?: number
+    created_at: string
+    production: {
+        id: string
+        title: string
+    } | null
+    productions?: Array<{
+        id: string
+        title: string
+    }>
+}
+
 type SearchSort = 'relevance' | 'recent' | 'oldest'
+type SearchTab = 'productions' | 'all' | 'posters'
 
 type SearchFilterState = {
+    tab: SearchTab
     query: string
     yearFrom: number
     yearTo: number
@@ -116,10 +164,10 @@ type SearchFilterState = {
     sort: SearchSort
     page: number
     limit: number
-    tab: 'productions' | 'blogs' | 'all'
 }
 
 type SearchFilterOverrides = {
+    tab?: SearchTab
     query?: string
     yearFrom?: number
     yearTo?: number
@@ -128,7 +176,12 @@ type SearchFilterOverrides = {
     sort?: SearchSort
     page?: number
     limit?: number
-    tab?: 'productions' | 'blogs' | 'all'
+}
+
+function normalizeTab(value: string | null): SearchTab {
+    if (value === 'all') return 'all'
+    if (value === 'posters') return 'posters'
+    return 'productions'
 }
 
 function getLocalizedText(text: LocalizedText, locale: Locale): string {
@@ -165,6 +218,7 @@ function normalizePageSize(value: number): number {
 }
 
 function parseSearchFilterState(searchParams: URLSearchParams): SearchFilterState {
+    const tab = normalizeTab(searchParams.get('tab'))
     const query = (searchParams.get('q') ?? '').trim()
     const legacyYear = Number(searchParams.get('year') ?? String(MAX_PERIOD_YEAR))
     const yearFromParam = Number(searchParams.get('yearFrom') ?? String(MIN_PERIOD_YEAR))
@@ -180,10 +234,8 @@ function parseSearchFilterState(searchParams: URLSearchParams): SearchFilterStat
     const limitParam = Number(searchParams.get('limit') ?? String(DEFAULT_PAGE_SIZE))
     const limit = normalizePageSize(limitParam)
 
-    const tabParam = searchParams.get('tab')
-    const tab: 'productions' | 'blogs' | 'all' = tabParam === 'blogs' ? 'blogs' : tabParam === 'all' ? 'all' : 'productions'
-
     return {
+        tab,
         query,
         yearFrom,
         yearTo,
@@ -192,7 +244,6 @@ function parseSearchFilterState(searchParams: URLSearchParams): SearchFilterStat
         sort,
         page,
         limit,
-        tab,
     }
 }
 
@@ -200,6 +251,7 @@ function buildSearchParams(filters: SearchFilterOverrides): URLSearchParams {
     const params = new URLSearchParams()
     const trimmedQuery = filters.query?.trim() ?? ''
 
+    if (filters.tab && filters.tab !== 'productions') params.set('tab', filters.tab)
     if (trimmedQuery) params.set('q', trimmedQuery)
     if (filters.yearFrom && filters.yearFrom > MIN_PERIOD_YEAR) params.set('yearFrom', String(filters.yearFrom))
     if (filters.yearTo && filters.yearTo < MAX_PERIOD_YEAR) params.set('yearTo', String(filters.yearTo))
@@ -208,8 +260,6 @@ function buildSearchParams(filters: SearchFilterOverrides): URLSearchParams {
     if (filters.sort && filters.sort !== 'relevance') params.set('sort', filters.sort)
     if (filters.page && filters.page > 1) params.set('page', String(filters.page))
     if (filters.limit && filters.limit !== DEFAULT_PAGE_SIZE) params.set('limit', String(filters.limit))
-    if (filters.tab === 'blogs') params.set('tab', 'blogs')
-    if (filters.tab === 'all') params.set('tab', 'all')
 
     return params
 }
@@ -263,8 +313,51 @@ function normalizeGenreValue(value: string): string {
     return GENRE_ALIASES[normalized] ?? normalized
 }
 
-function mapProductionToSearchEntry(item: ProductionApiItem, locale: Locale, preferredGenre?: string): SearchEntry {
-    const searchMessages = getMessages(locale).search
+function mapPosterToSearchEntry(item: PosterApiItem, locale: Locale, searchMessages: Messages['search']): SearchEntry {
+    const date = formatDate(item.created_at, locale)
+    const productionEntries = item.productions?.length
+        ? item.productions
+        : item.production
+            ? [item.production]
+            : []
+    const productionTitles = productionEntries
+        .map((production) => production.title.trim())
+        .filter((title) => title.length > 0)
+    const productionTitle = productionTitles.length > 0
+        ? productionTitles.join(' • ')
+        : ''
+    const posterFiles = Array.isArray(item.files) ? item.files : []
+    const previewUrls = posterFiles
+        .filter((file) => file.mime_type !== 'application/pdf')
+        .map((file) => normalizeApiAssetUrl(file.file_url))
+        .filter((url): url is string => Boolean(url))
+        .slice(0, 3)
+    const knownAssetCount = posterFiles.length > 0
+        ? posterFiles.length
+        : typeof item.file_count === 'number' && item.file_count > 0
+            ? item.file_count
+            : undefined
+
+    return {
+        id: item.id,
+        tag: searchMessages.postersTab,
+        date,
+        title: item.title,
+        excerpt: '',
+        venue: productionTitle,
+        imageUrl: normalizeApiAssetUrl(item.file_url),
+        mimeType: item.mime_type,
+        relatedAssetCount: knownAssetCount,
+        relatedAssetPreviewUrls: previewUrls.length > 0 ? previewUrls : undefined,
+        year: new Date(item.created_at).getFullYear() || MIN_PERIOD_YEAR,
+        genre: '',
+        location: '',
+        isProductionReference: true,
+        type: 'poster' as const,
+    }
+}
+
+function mapProductionToSearchEntry(item: ProductionApiItem, locale: Locale, searchMessages: Messages['search'], preferredGenre?: string): SearchEntry {
     const title = getLocalizedText(item.title, locale) || searchMessages.fallbackUntitled
     const excerptRaw =
         getLocalizedText(item.description_short, locale) ||
@@ -286,19 +379,7 @@ function mapProductionToSearchEntry(item: ProductionApiItem, locale: Locale, pre
     const normalizedPreferredGenre = preferredGenre?.trim().toLowerCase() ?? ''
     const matchedPreferredGenre = normalizedPreferredGenre
         ? normalizedProductionGenres.find((genre) => {
-              if (genre === normalizedPreferredGenre) {
-                  return true
-              }
-
-              if (normalizedPreferredGenre === 'dans' && genre === 'dance') {
-                  return true
-              }
-
-              if (normalizedPreferredGenre === 'theater' && genre === 'theatre') {
-                  return true
-              }
-
-              return false
+              return genre === normalizedPreferredGenre
           })
         : undefined
 
@@ -312,7 +393,7 @@ function mapProductionToSearchEntry(item: ProductionApiItem, locale: Locale, pre
 
     return {
         id: item.id,
-        tag: normalizedGenre ? getGenreLabel(normalizedGenre, locale) : searchMessages.fallbackTag,
+        tag: normalizedGenre ? getGenreLabel(normalizedGenre, searchMessages.genres) : searchMessages.fallbackTag,
         date: formatDate(item.created_at, locale),
         title,
         excerpt,
@@ -325,74 +406,28 @@ function mapProductionToSearchEntry(item: ProductionApiItem, locale: Locale, pre
     }
 }
 
-type BlogApiItem = {
-    id: string
-    title?: unknown
-    content?: unknown
-    productions: string[]
-    createdAt: string
-    updatedAt: string
-    links?: { self: string }
-}
-
 type SearchApiItem = {
     id: string
-    type: 'production' | 'blog'
+    type: 'production' | 'poster'
     title?: unknown
+    excerpt?: string | null
+    date_label?: string | null
+    venue_label?: string | null
+    genre_label?: string | null
     teaser?: unknown
     description_short?: unknown
     description?: unknown
-    content?: unknown
     image_url?: string | null
+    mime_type?: string | null
+    poster_file_count?: number
+    production_id?: string | null
     venue_name?: string | null
     venue_names?: string[]
     production_genres?: string[]
     performer_type?: string | null
     attendance_mode?: string | null
     created_at?: string
-    productions?: string[]
-}
-
-function getBlogExcerpt(content: unknown, locale: Locale, fallback: string): string {
-    const localizedContent = getLocalizedContent(content, locale)
-
-    if (!localizedContent) {
-        return fallback
-    }
-
-    const delta = normalizeContent(localizedContent)
-    if (delta) {
-        const plain = delta.ops
-            .map((operation) => (typeof operation.insert === 'string' ? operation.insert : ''))
-            .join('')
-            .replace(/\s+/g, ' ')
-            .trim()
-
-        return plain || fallback
-    }
-
-    return toPlainText(localizedContent) || fallback
-}
-
-function mapBlogToSearchEntry(item: BlogApiItem, locale: Locale): SearchEntry {
-    const searchMessages = getMessages(locale).search
-    const title = getLocalizedTitle(item.title, locale) || searchMessages.fallbackUntitled
-    const date = item.createdAt ? formatDate(item.createdAt, locale) : '-'
-    const year = item.createdAt ? new Date(item.createdAt).getFullYear() : MIN_PERIOD_YEAR
-
-    return {
-        id: item.id,
-        tag: searchMessages.blogTab,
-        date,
-        title,
-        excerpt: getBlogExcerpt(item.content, locale, title),
-        venue: '',
-        imageUrl: undefined,
-        year,
-        genre: '',
-        location: '',
-        type: 'blog' as const,
-    }
+    links?: ProductionApiItem['links']
 }
 
 function getRelativePath(url: string | null | undefined): string | null {
@@ -446,7 +481,7 @@ function useProductionImages(items: ProductionApiItem[]) {
                             
                             // 5. Find target crop
                             const targetCrop = crops.find((c) => c.name === 'FE3_header') || 
-                                             crops.find((c) => c.name === 'FEA_boxed') || 
+                                             crops.find((c) => c.name === 'FE3_boxed') || 
                                              crops[0]
                             
                             if (targetCrop?.url) {
@@ -565,30 +600,19 @@ function useProductionTaxonomies(items: ProductionApiItem[], locale: Locale) {
 
     useEffect(() => {
         const fetchTaxonomies = async () => {
-            const itemsToFetch = items.filter(item => item.links?.genres || item.links?.tags)
+            const itemsToFetch = items.filter((item) => item.id)
             if (itemsToFetch.length === 0) return
 
             const results = await Promise.allSettled(
                 itemsToFetch.map(async (item) => {
                     try {
-                        // 1. Try Genres
-                        const genresPath = getRelativePath(item.links?.genres)
+                        // Prefer the localized genre name for card labels to keep parity with detail pages.
+                        const genresPath = getRelativePath(item.links?.genres) ?? `/archive/genres?productionId=${item.id}`
                         if (genresPath) {
                             const res = await apiFetch<{ data: Array<{ slug: LocalizedText, name: LocalizedText }> }>(genresPath)
                             const firstGenre = res.data?.[0]
                             if (firstGenre) {
-                                const label = getLocalizedText(firstGenre.slug, locale) || getLocalizedText(firstGenre.name, locale)
-                                if (label) return { id: item.id, label }
-                            }
-                        }
-
-                        // 2. Fallback to Tags
-                        const tagsPath = getRelativePath(item.links?.tags)
-                        if (tagsPath) {
-                            const res = await apiFetch<{ data: Array<{ slug: LocalizedText, name: LocalizedText }> }>(tagsPath)
-                            const firstTag = res.data?.[0]
-                            if (firstTag) {
-                                const label = getLocalizedText(firstTag.slug, locale) || getLocalizedText(firstTag.name, locale)
+                                const label = getLocalizedText(firstGenre.name, locale) || getLocalizedText(firstGenre.slug, locale)
                                 if (label) return { id: item.id, label }
                             }
                         }
@@ -621,8 +645,8 @@ function useAllHalls(locale: Locale) {
     useEffect(() => {
         const fetchHalls = async () => {
             try {
-                // Fetch more halls to be sure
-                const res = await apiFetch<{ data: Array<{ name: LocalizedText }> }>('/archive/halls?limit=500')
+                // Fetch enough halls for autocomplete while keeping the request bounded.
+                const res = await apiFetch<{ data: Array<{ name: LocalizedText }> }>('/archive/halls?limit=100')
                 const names = (res.data || [])
                     .map(h => getLocalizedText(h.name, locale))
                     .filter(Boolean)
@@ -685,22 +709,13 @@ function parseSelectedLocations(searchParams: URLSearchParams): string[] {
     return legacyLocation ? [LOCATION_ALIASES[legacyLocation] ?? legacyLocation] : []
 }
 
-function getGenreLabel(value: string, locale: Locale): string {
-    const labels = getMessages(locale).search.genres
+function getGenreLabel(value: string, genreLabels: Messages['search']['genres']): string {
     const index = CANONICAL_GENRE_VALUES.indexOf(value as (typeof CANONICAL_GENRE_VALUES)[number])
-    return index >= 0 ? labels[index] ?? value : value
+    return index >= 0 ? genreLabels[index] ?? value : value
 }
 
 function getLocationLabel(value: string): string {
     return value
-}
-
-function HamburgerIcon({ className }: { className: string }) {
-    return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
-            <path d="M4 7h16M4 12h16M4 17h16" strokeLinecap="round" />
-        </svg>
-    )
 }
 
 function CloseIcon({ className }: { className: string }) {
@@ -716,15 +731,16 @@ type FilterPanelProps = {
     onAfterChange?: () => void
     showSearch?: boolean
     shareLabel?: string
+    shareCopied?: boolean
     onShare?: () => void
     locationSuggestions?: string[]
 }
 
-function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, onShare, locationSuggestions = [] }: FilterPanelProps) {
+function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, shareCopied = false, onShare, locationSuggestions = [] }: FilterPanelProps) {
     const [searchParams] = useSearchParams()
     const navigate = useNavigate()
     const locale = getActiveLocale(window.location.pathname)
-    const { search: s } = getMessages(locale)
+    const { search: s } = usePublicMessages()
 
     const filterState = useMemo(() => parseSearchFilterState(searchParams), [searchParams])
     const query = filterState.query
@@ -738,12 +754,22 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
     const sliderRef = useRef<HTMLDivElement | null>(null)
 
     const [searchInput, setSearchInput] = useState(query)
+    const [prevQuery, setPrevQuery] = useState(query)
     const [locationInput, setLocationInput] = useState('')
     const [isLocationSuggestionsOpen, setIsLocationSuggestionsOpen] = useState(false)
+    const [draftFromYear, setDraftFromYear] = useState(safeFromYear)
+    const [draftToYear, setDraftToYear] = useState(safeToYear)
+
+    if (query !== prevQuery) {
+        setPrevQuery(query)
+        setSearchInput(query)
+    }
 
     useEffect(() => {
-        setSearchInput(query)
-    }, [query])
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setDraftFromYear(safeFromYear)
+        setDraftToYear(safeToYear)
+    }, [safeFromYear, safeToYear])
 
     const pushFilters = useCallback((filters: SearchFilterOverrides) => {
         const params = buildSearchParams(filters)
@@ -762,8 +788,8 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
         const timerId = window.setTimeout(() => {
             pushFilters({
                 query: nextQuery || undefined,
-                yearFrom: safeFromYear,
-                yearTo: safeToYear,
+                yearFrom: draftFromYear,
+                yearTo: draftToYear,
                 genres: selectedGenres,
                 locations: selectedLocations,
                 sort,
@@ -775,16 +801,16 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
         return () => {
             window.clearTimeout(timerId)
         }
-    }, [searchInput, query, safeFromYear, safeToYear, selectedGenres, selectedLocations, sort, safeLimit, tab, pushFilters])
+    }, [searchInput, query, draftFromYear, draftToYear, selectedGenres, selectedLocations, sort, safeLimit, tab, pushFilters])
 
     const handleSearchSubmit = () => {
-        pushFilters({ query: searchInput.trim() || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: safeLimit, tab })
+        pushFilters({ query: searchInput.trim() || undefined, yearFrom: draftFromYear, yearTo: draftToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: safeLimit, tab })
     }
 
     const handleGenreChange = (next: string) => {
         const nextGenres = selectedGenres.includes(next) ? [] : [next]
 
-        pushFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: nextGenres, locations: selectedLocations, sort, limit: safeLimit, tab })
+        pushFilters({ query: query || undefined, yearFrom: draftFromYear, yearTo: draftToYear, genres: nextGenres, locations: selectedLocations, sort, limit: safeLimit, tab })
     }
 
     const handleLocationChange = (next: string) => {
@@ -792,7 +818,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
             ? selectedLocations.filter((value) => value !== next)
             : [...selectedLocations, next]
 
-        pushFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: selectedGenres, locations: nextLocations, sort, limit: safeLimit, tab })
+        pushFilters({ query: query || undefined, yearFrom: draftFromYear, yearTo: draftToYear, genres: selectedGenres, locations: nextLocations, sort, limit: safeLimit, tab })
     }
 
     const handleAddLocation = () => {
@@ -804,8 +830,8 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
 
         pushFilters({
             query: query || undefined,
-            yearFrom: safeFromYear,
-            yearTo: safeToYear,
+            yearFrom: draftFromYear,
+            yearTo: draftToYear,
             genres: selectedGenres,
             locations: [...selectedLocations, nextLocation],
             sort,
@@ -844,8 +870,8 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
 
         pushFilters({
             query: query || undefined,
-            yearFrom: safeFromYear,
-            yearTo: safeToYear,
+            yearFrom: draftFromYear,
+            yearTo: draftToYear,
             genres: selectedGenres,
             locations: [...selectedLocations, nextLocation],
             sort,
@@ -857,16 +883,39 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
     }
 
     const handleFromYearChange = (next: number) => {
-        const clampedNext = Math.min(next, safeToYear)
-        pushFilters({ query: query || undefined, yearFrom: clampedNext, yearTo: safeToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: safeLimit, tab })
+        setDraftFromYear(Math.min(next, draftToYear))
     }
 
     const handleToYearChange = (next: number) => {
-        const clampedNext = Math.max(next, safeFromYear)
-        pushFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: clampedNext, genres: selectedGenres, locations: selectedLocations, sort, limit: safeLimit, tab })
+        setDraftToYear(Math.max(next, draftFromYear))
+    }
+
+    const commitDraftYears = useCallback(() => {
+        if (draftFromYear === safeFromYear && draftToYear === safeToYear) {
+            return
+        }
+
+        pushFilters({
+            query: query || undefined,
+            yearFrom: draftFromYear,
+            yearTo: draftToYear,
+            genres: selectedGenres,
+            locations: selectedLocations,
+            sort,
+            limit: safeLimit,
+            tab,
+        })
+    }, [draftFromYear, draftToYear, safeFromYear, safeToYear, pushFilters, query, selectedGenres, selectedLocations, sort, safeLimit, tab])
+
+    const handleSliderKeyUp = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key.startsWith('Arrow') || event.key === 'Home' || event.key === 'End' || event.key === 'PageUp' || event.key === 'PageDown') {
+            commitDraftYears()
+        }
     }
 
     const handleReset = () => {
+        setDraftFromYear(MIN_PERIOD_YEAR)
+        setDraftToYear(MAX_PERIOD_YEAR)
         pushFilters({ yearFrom: MIN_PERIOD_YEAR, yearTo: MAX_PERIOD_YEAR, sort, limit: safeLimit, tab })
     }
 
@@ -884,21 +933,46 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
         const clickRatio = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width))
         const nextYear = Math.round(MIN_PERIOD_YEAR + clickRatio * yearRange)
 
-        if (Math.abs(nextYear - safeFromYear) <= Math.abs(nextYear - safeToYear)) {
-            handleFromYearChange(nextYear)
+        if (Math.abs(nextYear - draftFromYear) <= Math.abs(nextYear - draftToYear)) {
+            const nextFromYear = Math.min(nextYear, draftToYear)
+            setDraftFromYear(nextFromYear)
+            pushFilters({ query: query || undefined, yearFrom: nextFromYear, yearTo: draftToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: safeLimit, tab })
             return
         }
 
-        handleToYearChange(nextYear)
+        const nextToYear = Math.max(nextYear, draftFromYear)
+        setDraftToYear(nextToYear)
+        pushFilters({ query: query || undefined, yearFrom: draftFromYear, yearTo: nextToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: safeLimit, tab })
     }
 
     const yearRange = MAX_PERIOD_YEAR - MIN_PERIOD_YEAR
-    const fromPercent = ((safeFromYear - MIN_PERIOD_YEAR) / yearRange) * 100
-    const toPercent = ((safeToYear - MIN_PERIOD_YEAR) / yearRange) * 100
-    const genreOptions = s.genres.map((label, index) => ({
-        label,
-        value: CANONICAL_GENRE_VALUES[index] ?? label.toLowerCase(),
-    }))
+    const fromPercent = ((draftFromYear - MIN_PERIOD_YEAR) / yearRange) * 100
+    const toPercent = ((draftToYear - MIN_PERIOD_YEAR) / yearRange) * 100
+    // Group related genres together for two columns, no headers
+    const genreOptions = [
+        // Muziek/Nightlife/Feest
+        { label: s.genres[0], value: CANONICAL_GENRE_VALUES[0] }, // concert
+        { label: s.genres[1], value: CANONICAL_GENRE_VALUES[1] }, // nightlife
+        { label: s.genres[13], value: CANONICAL_GENRE_VALUES[13] }, // party
+        { label: s.genres[15], value: CANONICAL_GENRE_VALUES[15] }, // festival
+        // Podiumkunsten
+        { label: s.genres[4], value: CANONICAL_GENRE_VALUES[4] }, // theatre
+        { label: s.genres[5], value: CANONICAL_GENRE_VALUES[5] }, // performance
+        { label: s.genres[6], value: CANONICAL_GENRE_VALUES[6] }, // dance
+        { label: s.genres[7], value: CANONICAL_GENRE_VALUES[7] }, // comedy
+        { label: s.genres[8], value: CANONICAL_GENRE_VALUES[8] }, // film
+        { label: s.genres[9], value: CANONICAL_GENRE_VALUES[9] }, // spoken word
+        { label: s.genres[10], value: CANONICAL_GENRE_VALUES[10] }, // circus
+        // Kunst/Expo
+        { label: s.genres[3], value: CANONICAL_GENRE_VALUES[3] }, // installation
+        { label: s.genres[14], value: CANONICAL_GENRE_VALUES[14] }, // expo
+        // Overig
+        { label: s.genres[2], value: CANONICAL_GENRE_VALUES[2] }, // talks
+        { label: s.genres[11], value: CANONICAL_GENRE_VALUES[11] }, // food
+        { label: s.genres[12], value: CANONICAL_GENRE_VALUES[12] }, // monument
+        { label: s.genres[16], value: CANONICAL_GENRE_VALUES[16] }, // workshop
+    ];
+
     return (
         <aside className={`flex h-full flex-col ${className}`}>
             <h2 className="text-3xl text-foreground">{s.heading}</h2>
@@ -927,25 +1001,23 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
                 </form>
             ) : null}
 
-            {tab !== 'blogs' ? (
+            {tab !== 'posters' ? (
             <div className="mt-8 border-t border-border pt-5">
                 <div className="mb-4 flex items-center justify-between">
                     <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground">{s.genreLabel}</h3>
                 </div>
-                <div className="space-y-2 text-sm text-text-accent">
-                    {genreOptions.map(({ label, value }) => {
-                        return (
-                            <label key={value} className="flex items-center gap-2.5 text-foreground/90 transition-all duration-200 hover:translate-x-0.5 hover:text-foreground cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    checked={selectedGenres.includes(value)}
-                                    onChange={() => handleGenreChange(value)}
-                                    className="filter-checkbox cursor-pointer"
-                                />
-                                <span>{label}</span>
-                            </label>
-                        )
-                    })}
+                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-text-accent">
+                    {genreOptions.map(({ label, value }) => (
+                        <label key={value} className="flex items-center gap-2.5 text-foreground/90 transition-all duration-200 hover:translate-x-0.5 hover:text-foreground cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={selectedGenres.includes(value)}
+                                onChange={() => handleGenreChange(value)}
+                                className="filter-checkbox cursor-pointer"
+                            />
+                            <span>{label}</span>
+                        </label>
+                    ))}
                 </div>
             </div>
             ) : null}
@@ -960,8 +1032,10 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
                         type="range"
                         min={MIN_PERIOD_YEAR}
                         max={MAX_PERIOD_YEAR}
-                        value={safeFromYear}
+                        value={draftFromYear}
                         onChange={(event) => handleFromYearChange(Number(event.target.value))}
+                        onPointerUp={commitDraftYears}
+                        onKeyUp={handleSliderKeyUp}
                         className="range-input"
                         aria-label="Start year"
                     />
@@ -969,8 +1043,10 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
                         type="range"
                         min={MIN_PERIOD_YEAR}
                         max={MAX_PERIOD_YEAR}
-                        value={safeToYear}
+                        value={draftToYear}
                         onChange={(event) => handleToYearChange(Number(event.target.value))}
+                        onPointerUp={commitDraftYears}
+                        onKeyUp={handleSliderKeyUp}
                         className="range-input"
                         aria-label="End year"
                     />
@@ -978,34 +1054,34 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
                 <div className="mt-2 flex items-center justify-between text-xs text-muted">
                     <span>{MIN_PERIOD_YEAR}</span>
                     <span className="rounded-full bg-foreground px-2 py-0.5 font-semibold text-surface">
-                        {safeFromYear} - {safeToYear}
+                        {draftFromYear} - {draftToYear}
                     </span>
                     <span>{MAX_PERIOD_YEAR}</span>
                 </div>
             </div>
 
-            {tab !== 'blogs' ? (
+            {tab !== 'posters' ? (
             <div className="mt-6 border-t border-border pt-5 pb-5">
                 <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground">{s.locationLabel}</h3>
                 <div className="mt-4 space-y-3 text-sm text-text-accent">
-                    <div className="flex items-center gap-2">
-                        <input
-                            type="text"
-                            value={locationInput}
-                            onChange={(event) => setLocationInput(event.target.value)}
-                            onFocus={() => setIsLocationSuggestionsOpen(true)}
-                            onBlur={() => {
-                                window.setTimeout(() => {
-                                    setIsLocationSuggestionsOpen(false)
-                                }, 120)
-                            }}
-                            onKeyDown={(event) => {
-                                if (event.key === 'Enter') {
-                                    event.preventDefault()
-                                    handleAddLocation()
-                                }
-                            }}
-                            placeholder={s.locationSearchPlaceholder}
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="text"
+                                value={locationInput}
+                                onChange={(event) => setLocationInput(event.target.value)}
+                                onFocus={() => setIsLocationSuggestionsOpen(true)}
+                                onBlur={() => {
+                                    window.setTimeout(() => {
+                                        setIsLocationSuggestionsOpen(false)
+                                    }, 120)
+                                }}
+                                onKeyDown={(event) => {
+                                    if (event.key === 'Enter') {
+                                        event.preventDefault()
+                                        handleAddLocation()
+                                    }
+                                }}
+                                placeholder={s.locationSearchPlaceholder}
                             className="h-10 w-full rounded-full border border-border bg-surface px-4 text-sm text-foreground"
                         />
                         <button
@@ -1038,7 +1114,10 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
                                 <button
                                     key={value}
                                     type="button"
-                                    onClick={() => handleLocationChange(value)}
+                                    onMouseDown={(e) => {
+                                        e.preventDefault()
+                                        handleLocationChange(value)
+                                    }}
                                     className="inline-flex items-center gap-1.5 rounded-full bg-accent/15 px-3 py-1 text-xs text-accent"
                                 >
                                     <span>{getLocationLabel(value)}</span>
@@ -1054,16 +1133,33 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
             <div className="mt-auto space-y-3">
                 <button
                     type="button"
-                    className="h-10 w-full rounded-full border border-border bg-surface text-sm font-semibold text-foreground md:hidden transition-colors duration-200"
+                    className={`h-10 w-full rounded-full border text-sm font-semibold transition-colors duration-200 md:hidden flex items-center justify-center ${shareCopied ? 'border-violet-600 bg-violet-600 text-white' : 'border-border bg-surface text-foreground'}`}
+                    style={{ minWidth: 0 }}
                     onClick={() => {
                         onShare?.()
                     }}
                 >
-                    {shareLabel ?? s.shareLabel}
+                    <span className="flex items-center justify-center w-5 h-5">
+                        {shareCopied ? '✓' : (
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4" aria-hidden="true">
+                                <circle cx="18" cy="5" r="3" />
+                                <circle cx="6" cy="12" r="3" />
+                                <circle cx="18" cy="19" r="3" />
+                                <path d="M8.59 13.51 15.42 17.49M15.41 6.51 8.59 10.49" strokeLinecap="round" />
+                            </svg>
+                        )}
+                    </span>
+                    <span
+                        className={`ml-2 transition-all duration-200 ${shareCopied ? 'opacity-0 invisible w-0' : 'opacity-100 visible w-auto'}`}
+                        style={{ minWidth: '2.5rem', display: 'inline-block', textAlign: 'center' }}
+                        aria-hidden={shareCopied}
+                    >
+                        {shareLabel ?? s.shareLabel}
+                    </span>
                 </button>
                 <button
                     type="button"
-                    className="h-10 w-full rounded-full bg-black text-sm font-semibold text-white transition-transform duration-200 hover:scale-[1.01] hover:bg-surface/90"
+                    className="h-10 w-full rounded-full bg-black text-sm font-semibold text-white transition-transform duration-200 hover:bg-surface/90"
                     onClick={handleReset}
                 >
                     {s.resetFiltersLabel}
@@ -1073,79 +1169,41 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
     )
 }
 
-function MobileSearchForm({ className = 'mb-5 md:hidden' }: { className?: string }) {
-    const [searchParams] = useSearchParams()
-    const navigate = useNavigate()
-    const locale = getActiveLocale(window.location.pathname)
-    const { search: s } = getMessages(locale)
-    const filterState = useMemo(() => parseSearchFilterState(searchParams), [searchParams])
-    const query = filterState.query
-    const [searchInput, setSearchInput] = useState(query)
+type MobileSearchFormProps = {
+    className?: string
+    value: string
+    onChange: (value: string) => void
+    onSubmit: () => void
+}
 
-    useEffect(() => {
-        setSearchInput(query)
-    }, [query])
-
-    const pushQuery = useCallback((nextQuery: string) => {
-        const filterState = parseSearchFilterState(searchParams)
-        const params = buildSearchParams({
-            query: nextQuery,
-            yearFrom: filterState.yearFrom,
-            yearTo: filterState.yearTo,
-            genres: filterState.genres,
-            locations: filterState.locations,
-            sort: filterState.sort,
-            limit: filterState.limit,
-            tab: filterState.tab,
-        })
-        const path = withLocalePath('/zoeken', locale)
-        const qs = params.toString()
-        navigate(qs ? `${path}?${qs}` : path)
-    }, [searchParams, locale, navigate])
-
-    useEffect(() => {
-        const nextQuery = searchInput.trim()
-        if (nextQuery === query) {
-            return
-        }
-
-        const timerId = window.setTimeout(() => {
-            pushQuery(nextQuery)
-        }, SEARCH_INPUT_DEBOUNCE_MS)
-
-        return () => {
-            window.clearTimeout(timerId)
-        }
-    }, [searchInput, query, pushQuery])
-
-    const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault()
-        pushQuery(searchInput.trim())
-    }
-
+function MobileSearchForm({ className = 'mb-5 md:hidden px-4', value, onChange, onSubmit }: MobileSearchFormProps) {
+    const m = usePublicMessages()
     return (
-        <form className={className} onSubmit={handleSubmit}>
-            <div className="relative">
-                <input
-                    type="text"
-                    value={searchInput}
-                    onChange={(event) => setSearchInput(event.target.value)}
-                    placeholder={s.searchPlaceholder}
-                    className="h-10 w-full rounded-full border border-border bg-surface px-4 pr-10 text-sm text-foreground"
-                />
-                <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted" aria-label="search">
-                    ⌕
-                </button>
-            </div>
+        <form
+            name="mobile-search-form"
+            className={className}
+            onSubmit={(event) => {
+                event.preventDefault()
+                onSubmit()
+            }}
+        >
+            <input
+                type="text"
+                value={value}
+                onChange={(event) => onChange(event.target.value)}
+                className="w-full rounded-full border border-border bg-surface px-4 py-2 text-sm text-foreground"
+                placeholder={m.search.searchPlaceholder}
+            />
         </form>
     )
 }
 
-function SearchPage() {
+function SearchPageContent() {
     const [searchParams] = useSearchParams()
     const navigate = useNavigate()
     const locale = getActiveLocale(window.location.pathname)
-    const m = getMessages(locale)
+    const m = usePublicMessages()
+    const searchMessages = m.search
     const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false)
     const [shareCopied, setShareCopied] = useState(false)
     const [apiEntries, setApiEntries] = useState<SearchEntry[]>([])
@@ -1161,6 +1219,7 @@ function SearchPage() {
     const allAvailableHalls = useAllHalls(locale)
 
     const filterState = useMemo(() => parseSearchFilterState(searchParams), [searchParams])
+    const activeTab = filterState.tab
     const query = filterState.query
     const safeFromYear = filterState.yearFrom
     const safeToYear = filterState.yearTo
@@ -1170,7 +1229,11 @@ function SearchPage() {
     const page = filterState.page
     const pageSize = filterState.limit
     const tab = filterState.tab
-    const isBlogTab = tab === 'blogs'
+    const [mobileSearchInput, setMobileSearchInput] = useState(query)
+
+    useEffect(() => {
+        setMobileSearchInput(query)
+    }, [query])
 
     useEffect(() => {
         const abortController = new AbortController()
@@ -1190,19 +1253,7 @@ function SearchPage() {
                     params.set('search', query)
                 }
 
-                if (tab === 'blogs') {
-                    params.set('yearFrom', String(safeFromYear))
-                    params.set('yearTo', String(safeToYear))
-
-                    const response = await apiFetch<PaginatedApiResponse<BlogApiItem>>(
-                        `/archive/blogs?${params.toString()}`,
-                        { signal: abortController.signal }
-                    )
-                    const mappedEntries = response.data.map((item) => mapBlogToSearchEntry(item, locale))
-                    setApiEntries(mappedEntries)
-                    setTotalResults(response.meta?.total ?? mappedEntries.length)
-                    setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
-                } else if (tab === 'all') {
+                if (tab === 'all') {
                     // Single RESTful call to the unified search endpoint
                     const searchParams = new URLSearchParams({
                         page: String(page),
@@ -1210,8 +1261,12 @@ function SearchPage() {
                         lang: locale,
                     })
                     if (query) searchParams.set('search', query)
-                    searchParams.set('yearFrom', String(safeFromYear))
-                    searchParams.set('yearTo', String(safeToYear))
+                    if (safeFromYear > MIN_PERIOD_YEAR) {
+                        searchParams.set('yearFrom', String(safeFromYear))
+                    }
+                    if (safeToYear < MAX_PERIOD_YEAR) {
+                        searchParams.set('yearTo', String(safeToYear))
+                    }
                     if (selectedGenres.length > 0) searchParams.set('genres', selectedGenres.join(','))
                     if (selectedLocations.length > 0) searchParams.set('locations', selectedLocations.join(','))
                     if (sort === 'recent' || sort === 'oldest') searchParams.set('sort', sort)
@@ -1221,54 +1276,80 @@ function SearchPage() {
                         { signal: abortController.signal }
                     )
 
-                    const preferredGenre = selectedGenres.length === 1 ? selectedGenres[0] : undefined
                     const mappedEntries = response.data.map((item): SearchEntry => {
-                        if (item.type === 'blog') {
-                            return mapBlogToSearchEntry(
+                        if (item.type === 'poster') {
+                            const localizedTitle = getLocalizedText(toLocalizedText(item.title), locale).trim()
+                            const fallbackTitle = typeof item.title === 'string' ? item.title.trim() : ''
+                            const posterTitle = localizedTitle || fallbackTitle
+
+                            return mapPosterToSearchEntry(
                                 {
                                     id: item.id,
-                                    title: item.title,
-                                    content: item.content,
-                                    productions: item.productions ?? [],
-                                    createdAt: item.created_at ?? '',
-                                    updatedAt: item.created_at ?? '',
+                                    title: posterTitle,
+                                    file_url: item.image_url || '',
+                                    mime_type: item.mime_type ?? null,
+                                    file_count: item.poster_file_count,
+                                    created_at: item.created_at ?? '',
+                                    production: item.production_id
+                                        ? { id: item.production_id, title: item.venue_label ?? '' }
+                                        : (item.venue_label ? { id: '', title: item.venue_label } : null),
                                 },
                                 locale,
+                                searchMessages,
                             )
                         }
-                        return mapProductionToSearchEntry(
-                            {
-                                id: item.id,
-                                title: toLocalizedText(item.title),
-                                teaser: toLocalizedText(item.teaser),
-                                description_short: toLocalizedText(item.description_short),
-                                description: toLocalizedText(item.description),
-                                image_url: item.image_url,
-                                venue_name: item.venue_name,
-                                venue_names: item.venue_names,
-                                production_genres: item.production_genres,
-                                performer_type: item.performer_type ?? null,
-                                attendance_mode: item.attendance_mode ?? null,
-                                created_at: item.created_at ?? '',
-                            },
-                            locale,
-                            preferredGenre,
-                        )
+
+                        const title = getLocalizedText(toLocalizedText(item.title), locale) || searchMessages.fallbackUntitled
+                        const normalizedGenre = normalizeGenreValue(item.genre_label ?? '')
+                        const genreTag = normalizedGenre
+                            ? getGenreLabel(normalizedGenre, searchMessages.genres)
+                            : (item.genre_label?.trim() || searchMessages.fallbackTag)
+
+                        const createdDate = item.created_at ?? ''
+                        const parsedCreatedAt = createdDate ? new Date(createdDate) : null
+                        const year = parsedCreatedAt && !Number.isNaN(parsedCreatedAt.getTime())
+                            ? parsedCreatedAt.getFullYear()
+                            : MIN_PERIOD_YEAR
+
+                        return {
+                            id: item.id,
+                            tag: genreTag,
+                            date: item.date_label?.trim() || (createdDate ? formatDate(createdDate, locale) : '-'),
+                            title,
+                            excerpt: item.excerpt?.trim() || '',
+                            venue: item.venue_label?.trim() || searchMessages.fallbackVenue,
+                            imageUrl: item.image_url ?? undefined,
+                            year,
+                            genre: normalizedGenre,
+                            location: '',
+                            type: 'production' as const,
+                        }
                     })
 
+                    const productionItemsForTaxonomy: ProductionApiItem[] = response.data
+                        .filter((item) => item.type === 'production')
+                        .map((item) => ({
+                            id: item.id,
+                            title: toLocalizedText(item.title),
+                            teaser: toLocalizedText(item.teaser),
+                            description_short: toLocalizedText(item.description_short),
+                            description: toLocalizedText(item.description),
+                            image_url: item.image_url,
+                            venue_name: item.venue_name,
+                            venue_names: item.venue_names,
+                            production_genres: item.production_genres,
+                            performer_type: item.performer_type ?? null,
+                            attendance_mode: item.attendance_mode ?? null,
+                            created_at: item.created_at ?? '',
+                            links: undefined,
+                        }))
+
+                    setApiRawItems(productionItemsForTaxonomy)
                     setApiEntries(mappedEntries)
                     setTotalResults(response.meta?.total ?? mappedEntries.length)
                     setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
-                } else {
+                } else if (tab === 'posters') {
                     params.set('lang', locale)
-
-                    if (selectedGenres.length > 0) {
-                        params.set('genres', selectedGenres.join(','))
-                    }
-
-                    if (selectedLocations.length > 0) {
-                        params.set('locations', selectedLocations.join(','))
-                    }
 
                     if (safeFromYear > MIN_PERIOD_YEAR) {
                         params.set('yearFrom', String(safeFromYear))
@@ -1282,17 +1363,100 @@ function SearchPage() {
                         params.set('sort', sort)
                     }
 
-                    const response = await apiFetch<PaginatedApiResponse<ProductionApiItem>>(
-                        `/archive/productions?${params.toString()}`,
+                    const response = await apiFetch<PaginatedApiResponse<PosterApiItem>>(
+                        `/archive/posters?${params.toString()}`,
                         { signal: abortController.signal }
                     )
 
-                    const preferredGenre = selectedGenres.length === 1 ? selectedGenres[0] : undefined
-                    const mappedEntries = response.data.map((item) => mapProductionToSearchEntry(item, locale, preferredGenre))
-                    setApiRawItems(response.data)
+                    const mappedEntries = response.data.map((item) => mapPosterToSearchEntry(item, locale, searchMessages))
                     setApiEntries(mappedEntries)
                     setTotalResults(response.meta?.total ?? mappedEntries.length)
                     setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
+                } else {
+                    // For chronological sorts, use unified search endpoint so sorting is global before pagination.
+                    if (sort === 'recent' || sort === 'oldest') {
+                        const productionSearchParams = new URLSearchParams({
+                            page: String(page),
+                            limit: String(pageSize),
+                            lang: locale,
+                            tab: 'productions',
+                        })
+
+                        if (query) productionSearchParams.set('search', query)
+                        if (safeFromYear > MIN_PERIOD_YEAR) productionSearchParams.set('yearFrom', String(safeFromYear))
+                        if (safeToYear < MAX_PERIOD_YEAR) productionSearchParams.set('yearTo', String(safeToYear))
+                        if (selectedGenres.length > 0) productionSearchParams.set('genres', selectedGenres.join(','))
+                        if (selectedLocations.length > 0) productionSearchParams.set('locations', selectedLocations.join(','))
+                        productionSearchParams.set('sort', sort)
+
+                        const response = await apiFetch<PaginatedApiResponse<SearchApiItem>>(
+                            `/archive/search?${productionSearchParams.toString()}`,
+                            { signal: abortController.signal }
+                        )
+
+                        const mappedEntries = response.data.map((item): SearchEntry => {
+                            const title = getLocalizedText(toLocalizedText(item.title), locale) || searchMessages.fallbackUntitled
+                            const normalizedGenre = normalizeGenreValue(item.genre_label ?? '')
+                            const genreTag = normalizedGenre
+                                ? getGenreLabel(normalizedGenre, searchMessages.genres)
+                                : (item.genre_label?.trim() || searchMessages.fallbackTag)
+
+                            const createdDate = item.created_at ?? ''
+                            const parsedCreatedAt = createdDate ? new Date(createdDate) : null
+                            const year = parsedCreatedAt && !Number.isNaN(parsedCreatedAt.getTime())
+                                ? parsedCreatedAt.getFullYear()
+                                : MIN_PERIOD_YEAR
+
+                            return {
+                                id: item.id,
+                                tag: genreTag,
+                                date: item.date_label?.trim() || (createdDate ? formatDate(createdDate, locale) : '-'),
+                                title,
+                                excerpt: item.excerpt?.trim() || '',
+                                venue: item.venue_label?.trim() || searchMessages.fallbackVenue,
+                                imageUrl: item.image_url ?? undefined,
+                                year,
+                                genre: normalizedGenre,
+                                location: '',
+                                type: 'production' as const,
+                            }
+                        })
+
+                        setApiRawItems([])
+                        setApiEntries(mappedEntries)
+                        setTotalResults(response.meta?.total ?? mappedEntries.length)
+                        setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
+                    } else {
+                        params.set('lang', locale)
+
+                        if (selectedGenres.length > 0) {
+                            params.set('genres', selectedGenres.join(','))
+                        }
+
+                        if (selectedLocations.length > 0) {
+                            params.set('locations', selectedLocations.join(','))
+                        }
+
+                        if (safeFromYear > MIN_PERIOD_YEAR) {
+                            params.set('yearFrom', String(safeFromYear))
+                        }
+
+                        if (safeToYear < MAX_PERIOD_YEAR) {
+                            params.set('yearTo', String(safeToYear))
+                        }
+
+                        const response = await apiFetch<PaginatedApiResponse<ProductionApiItem>>(
+                            `/archive/productions?${params.toString()}`,
+                            { signal: abortController.signal }
+                        )
+
+                        const preferredGenre = selectedGenres.length === 1 ? selectedGenres[0] : undefined
+                        const mappedEntries = response.data.map((item) => mapProductionToSearchEntry(item, locale, searchMessages, preferredGenre))
+                        setApiRawItems(response.data)
+                        setApiEntries(mappedEntries)
+                        setTotalResults(response.meta?.total ?? mappedEntries.length)
+                        setTotalPages(Math.max(1, response.meta?.totalPages ?? 1))
+                    }
                 }
             } catch (error) {
                 if (abortController.signal.aborted) {
@@ -1316,7 +1480,7 @@ function SearchPage() {
         return () => {
             abortController.abort()
         }
-    }, [query, locale, selectedGenres, selectedLocations, safeFromYear, safeToYear, sort, page, pageSize, tab])
+    }, [query, locale, selectedGenres, selectedLocations, safeFromYear, safeToYear, sort, page, pageSize, tab, searchMessages])
 
     const navigateWithFilters = (filters: SearchFilterOverrides) => {
         const params = buildSearchParams(filters)
@@ -1325,23 +1489,42 @@ function SearchPage() {
         navigate(qs ? `${path}?${qs}` : path)
     }
 
+    const handleMobileSearchSubmit = () => {
+        navigateWithFilters({
+            query: mobileSearchInput.trim() || undefined,
+            yearFrom: safeFromYear,
+            yearTo: safeToYear,
+            genres: selectedGenres,
+            locations: selectedLocations,
+            sort,
+            page: 1,
+            limit: pageSize,
+            tab,
+        })
+    }
+
     const currentPage = Math.min(page, totalPages)
     const pageItems = useMemo(() => {
         if (!apiEntries) return []
+
         return apiEntries
             .map(item => {
                 const detail = fetchedDetails[item.id]
                 const fetchedTaxonomy = fetchedTaxonomies[item.id]
+                const normalizedFetchedGenre = fetchedTaxonomy ? normalizeGenreValue(fetchedTaxonomy) : ''
+                const mappedFetchedGenreLabel = normalizedFetchedGenre ? getGenreLabel(normalizedFetchedGenre, searchMessages.genres) : ''
+                const nextTag = mappedFetchedGenreLabel || fetchedTaxonomy || item.tag
+
                 return {
                     ...item,
                     imageUrl: fetchedImages[item.id] || item.imageUrl,
                     date: detail?.date !== undefined && detail.date !== '' ? detail.date : item.date,
                     venue: detail?.venue !== undefined && detail.venue !== '' ? detail.venue : item.venue,
-                    tag: fetchedTaxonomy !== undefined && fetchedTaxonomy !== '' ? fetchedTaxonomy : item.tag
+                    tag: nextTag,
                 }
             })
             .filter(item => fetchedDetails[item.id]?.date !== '')
-    }, [apiEntries, fetchedImages, fetchedDetails, fetchedTaxonomies])
+    }, [apiEntries, fetchedImages, fetchedDetails, fetchedTaxonomies, searchMessages.genres])
 
     // Compacte paginering: 1,2,3,...,laatste
     function getCompactPageLabels(current: number, total: number): string[] {
@@ -1409,6 +1592,25 @@ function SearchPage() {
         })
     }
 
+    const handleCardGenreClick = (genre: string) => {
+        const nextGenre = normalizeGenreValue(genre)
+        if (!nextGenre) {
+            return
+        }
+
+        navigateWithFilters({
+            query: query || undefined,
+            yearFrom: safeFromYear,
+            yearTo: safeToYear,
+            genres: [nextGenre],
+            locations: selectedLocations,
+            sort,
+            page: 1,
+            limit: pageSize,
+            tab,
+        })
+    }
+
     const handleRemoveGenreChip = (genreToRemove: string) => {
         navigateWithFilters({
             query: query || undefined,
@@ -1456,10 +1658,12 @@ function SearchPage() {
         }, 1800)
     }
 
-    const filterChips: Array<{ key: string; label: string; onRemove: () => void }> = [
+    const filterChips: Array<{ key: string; label: string; onRemove: () => void }> = activeTab === 'posters'
+        ? []
+        : [
         ...selectedGenres.map((value) => ({
             key: `genre-${value}`,
-            label: getGenreLabel(value, locale),
+            label: getGenreLabel(value, searchMessages.genres),
             onRemove: () => handleRemoveGenreChip(value),
         })),
         ...selectedLocations.map((value) => ({
@@ -1481,6 +1685,10 @@ function SearchPage() {
     const locationSuggestions = useMemo(() => {
         const normalizedLocale = locale === 'en' ? 'en' : 'nl'
         const uniqueValues = new Set<string>()
+
+        if (activeTab === 'posters') {
+            return []
+        }
 
         // 1. Add predefined aliases
         Object.values(LOCATION_ALIASES).forEach(v => uniqueValues.add(v))
@@ -1507,11 +1715,10 @@ function SearchPage() {
         return Array.from(uniqueValues).sort((a, b) =>
             a.localeCompare(b, normalizedLocale === 'nl' ? 'nl-BE' : 'en-GB', { sensitivity: 'base' }),
         )
-    }, [allAvailableHalls, fetchedDetails, locale])
+    }, [activeTab, allAvailableHalls, fetchedDetails, locale])
 
     return (
-        <PublicLayout>
-            <section className="relative bg-surface-sunken">
+        <section className="relative bg-surface-sunken">
                 <div className="w-full md:flex md:items-stretch">
                     <div
                         aria-hidden="true"
@@ -1522,21 +1729,20 @@ function SearchPage() {
                         locationSuggestions={locationSuggestions}
                     />
 
-                    <div className="flex w-full items-start">
-                        <div className="z-30 flex w-12 shrink-0 self-stretch justify-center border-r border-border bg-surface-inset md:hidden">
-                            <div className="fixed top-[65px] left-1.5 z-40 flex items-start justify-center md:hidden">
+                    <div className="flex w-full items-start py-6 md:py-8">
+                            <div className="fixed bottom-6 right-4 z-40 flex items-end justify-center md:hidden">
                                 <button
                                     type="button"
-                                    className="inline-flex h-9 w-9 items-center justify-center text-foreground"
+                                    className="inline-flex items-center justify-center gap-2 rounded-full bg-accent px-3 py-3 text-sm font-semibold text-white shadow-xl shadow-accent/20 transition hover:bg-accent/90"
                                     aria-label={m.search.filterOpenLabel}
                                     onClick={() => setIsMobileFiltersOpen((open) => !open)}
                                 >
-                                    <HamburgerIcon className="h-5 w-5" />
+                                    <img src="/filter.svg" alt="" className="h-4 w-4 filter invert" />
+                                    <span>{m.search.filterOpenLabel}</span>
                                 </button>
                             </div>
-                        </div>
 
-                        <div className="w-full px-4 py-6 md:py-8 md:pr-0 md:pl-0">
+                        <div className="w-full px-4 md:py-8 md:pr-0 md:pl-0">
                             <div className="search-main-rail">
                             {isMobileFiltersOpen ? (
                                 <>
@@ -1546,8 +1752,8 @@ function SearchPage() {
                                         aria-label={m.search.filterCloseOverlayLabel}
                                         onClick={() => setIsMobileFiltersOpen(false)}
                                     />
-                                    <div className="fixed left-0 top-0 z-50 h-full w-[min(84vw,21rem)] overflow-y-auto border-r border-border bg-surface-inset px-4 py-5 md:hidden">
-                                        <div className="mb-3 flex items-center justify-end">
+                                    <div className="fixed left-0 top-0 z-[9999] h-full w-[min(84vw,21rem)] border-r border-border bg-surface-inset px-4 py-5 md:hidden flex flex-col overflow-hidden">
+                                        <div className="mb-3 flex items-center justify-end shrink-0">
                                             <button
                                                 type="button"
                                                 className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border"
@@ -1558,24 +1764,31 @@ function SearchPage() {
                                             </button>
                                         </div>
 
-                                        <FilterPanel
-                                            className="pb-2"
-                                            showSearch={false}
-                                            shareLabel={shareCopied ? m.search.shareCopiedLabel : m.search.shareLabel}
-                                            locationSuggestions={locationSuggestions}
-                                            onShare={() => {
-                                                void handleShare()
-                                            }}
-                                        />
+                                        <div className="min-h-0 flex-1 overflow-y-auto">
+                                            <FilterPanel
+                                                showSearch={false}
+                                                shareLabel={shareCopied ? m.search.shareCopiedLabel : m.search.shareLabel}
+                                                locationSuggestions={locationSuggestions}
+                                                onShare={() => {
+                                                    void handleShare()
+                                                }}
+                                            />
+                                        </div>
                                     </div>
                                 </>
                             ) : null}
 
-                            <MobileSearchForm key={searchParams.toString()} className="mb-5 md:hidden" />
+                            <MobileSearchForm
+                                key={searchParams.toString()}
+                                className="mb-5 md:hidden"
+                                value={mobileSearchInput}
+                                onChange={setMobileSearchInput}
+                                onSubmit={handleMobileSearchSubmit}
+                            />
 
                             <div className="flex flex-wrap items-center justify-between gap-4">
                                 <div>
-                                    <h1 className="flex items-center gap-3 text-3xl leading-none text-foreground">
+                                    <h1 className="flex items-center gap-3 text-xl md:text-2xl leading-none text-foreground">
                                         <button
                                             type="button"
                                             onClick={() => navigateWithFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: pageSize, page: 1, tab: 'all' })}
@@ -1592,10 +1805,10 @@ function SearchPage() {
                                         </button>
                                         <button
                                             type="button"
-                                            onClick={() => navigateWithFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: pageSize, page: 1, tab: 'blogs' })}
-                                            className={tab === 'blogs' ? 'underline decoration-accent decoration-2 underline-offset-4' : 'text-muted transition-colors hover:text-foreground'}
+                                            onClick={() => navigateWithFilters({ query: query || undefined, yearFrom: safeFromYear, yearTo: safeToYear, genres: selectedGenres, locations: selectedLocations, sort, limit: pageSize, page: 1, tab: 'posters' })}
+                                            className={tab === 'posters' ? 'underline decoration-accent decoration-2 underline-offset-4' : 'text-muted transition-colors hover:text-foreground'}
                                         >
-                                            {m.search.blogTab}
+                                            {m.search.postersTab}
                                         </button>
                                     </h1>
                                     <p className="mt-2 text-sm text-muted">
@@ -1603,7 +1816,7 @@ function SearchPage() {
                                     </p>
                                 </div>
 
-                                {!isBlogTab ? (
+                                {tab !== 'posters' ? (
                                     <div className="flex items-center gap-3">
                                         <label className="text-sm text-muted">{m.search.sortLabel}</label>
                                         <select
@@ -1642,26 +1855,38 @@ function SearchPage() {
                                         </select>
                                         <button
                                             type="button"
-                                            className="group hidden h-9 items-center gap-2 rounded-full border border-border bg-surface px-3 text-sm text-foreground transition-all cursor-pointer duration-200 hover:border-accent/45 hover:text-accent md:inline-flex"
+                                            className={`group relative hidden h-9 items-center gap-2 rounded-full border px-3 text-sm transition-all cursor-pointer duration-200 md:inline-flex ${shareCopied ? 'border-violet-600 bg-violet-600 text-white hover:bg-violet-600 hover:text-white' : 'border-border bg-surface text-foreground hover:border-accent/45 hover:text-accent'}`}
                                             onClick={() => {
                                                 void handleShare()
                                             }}
                                         >
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5" aria-hidden="true">
-                                                <circle cx="18" cy="5" r="3" />
-                                                <circle cx="6" cy="12" r="3" />
-                                                <circle cx="18" cy="19" r="3" />
-                                                <path d="M8.59 13.51 15.42 17.49M15.41 6.51 8.59 10.49" strokeLinecap="round" />
-                                            </svg>
-                                            <span>{shareCopied ? m.search.shareCopiedLabel : m.search.shareLabel}</span>
+                                            {shareCopied ? (
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" className="absolute left-1/2 h-3.5 w-3.5 -translate-x-1/2" aria-hidden="true">
+                                                    <path d="M5 12.5 9.2 16.7 19 7" strokeLinecap="round" strokeLinejoin="round" />
+                                                </svg>
+                                            ) : (
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5" aria-hidden="true">
+                                                    <circle cx="18" cy="5" r="3" />
+                                                    <circle cx="6" cy="12" r="3" />
+                                                    <circle cx="18" cy="19" r="3" />
+                                                    <path d="M8.59 13.51 15.42 17.49M15.41 6.51 8.59 10.49" strokeLinecap="round" />
+                                                </svg>
+                                            )}
+                                            {shareCopied ? (
+                                                <span className="hidden lg:inline invisible select-none" aria-hidden="true">
+                                                    {m.search.shareLabel}
+                                                </span>
+                                            ) : (
+                                                <span className="hidden lg:inline">{m.search.shareLabel}</span>
+                                            )}
                                         </button>
                                     </div>
                                 ) : null}
                             </div>
 
-                        {(isBlogTab ? filterChips.filter((chip) => chip.key === 'period') : filterChips).length > 0 ? (
+                        {filterChips.length > 0 ? (
                             <div className="mt-5 flex flex-wrap items-center gap-2">
-                                {(isBlogTab ? filterChips.filter((chip) => chip.key === 'period') : filterChips).map((chip) => (
+                                {filterChips.map((chip) => (
                                     <button
                                         key={chip.key}
                                         type="button"
@@ -1707,8 +1932,10 @@ function SearchPage() {
                                     <SearchResultCard
                                         key={item.id}
                                         item={item}
-                                        detailHref={ item.type === 'blog'
-                                            ? withLocalePath('/blogs/' + item.id, locale)
+                                        genreValue={item.genre}
+                                        onTagClick={handleCardGenreClick}
+                                        detailHref={ item.type === 'poster'
+                                            ? withLocalePath('/posters/' + item.id, locale)
                                             : withLocalePath('/archive/' + item.id, locale)
                                         }
                                     />
@@ -1735,7 +1962,14 @@ function SearchPage() {
                         </div>
                     </div>
                 </div>
-            </section>
+        </section>
+    )
+}
+
+function SearchPage() {
+    return (
+        <PublicLayout>
+            <SearchPageContent />
         </PublicLayout>
     )
 }

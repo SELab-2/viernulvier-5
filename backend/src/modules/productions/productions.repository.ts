@@ -1,22 +1,5 @@
 import { Prisma, type PrismaClient } from '@prisma/client'
-
-const GENRE_SEARCH_ALIASES: Record<string, string[]> = {
-    theater: ['theater', 'theatre'],
-    theatre: ['theatre', 'theater'],
-    dans: ['dans', 'dance'],
-    dance: ['dance', 'dans'],
-    concert: ['concert'],
-    nightlife: ['nightlife'],
-    talks: ['talks', 'talk'],
-    comedy: ['comedy', 'komedie'],
-    komedie: ['komedie', 'comedy'],
-    monument: ['monument'],
-    circus: ['circus'],
-    performance: ['performance', 'voorstelling'],
-    voorstelling: ['voorstelling', 'performance'],
-    'spoken word': ['spoken word'],
-    'listening session': ['listening session'],
-}
+import { expandGenreTerms } from '../../domain/genre-aliases.js'
 
 type FindAllOptions = {
     page: number
@@ -28,8 +11,11 @@ type FindAllOptions = {
     yearFrom?: number
     yearTo?: number
     onThisDayDate?: Date
+    pastOnly?: boolean
     sort?: 'relevance' | 'recent' | 'oldest'
     lang?: string
+    draft?: boolean | 'all'
+    editorId?: string
 }
 
 type CountOptions = Omit<FindAllOptions, 'page' | 'limit' | 'sort'>
@@ -174,16 +160,6 @@ export class ProductionsRepository {
         return rows.map((row) => row.id)
     }
 
-    private expandGenreTerms(genre: string): string[] {
-        const normalized = genre.trim().toLowerCase()
-        if (!normalized) {
-            return []
-        }
-
-        const fromAliases = GENRE_SEARCH_ALIASES[normalized] ?? [normalized]
-        return Array.from(new Set(fromAliases))
-    }
-
     async findSearchIds(search: string, lang = 'nl'): Promise<string[]> {
         return this.findProductionIdsBySearch(search, lang)
     }
@@ -209,20 +185,48 @@ export class ProductionsRepository {
     }
 
     private async buildWhere(options: CountOptions): Promise<Prisma.productionWhereInput> {
-        const { search, searchIds, genres, locations, yearFrom, yearTo, onThisDayDate, lang = 'nl' } = options
+        const { search, searchIds, genres, locations, yearFrom, yearTo, onThisDayDate, pastOnly, lang = 'nl', draft = false, editorId } = options
         const andFilters: Prisma.productionWhereInput[] = []
         const now = new Date()
+        const requirePastEvents = pastOnly ?? (draft === false)
 
-        // Requirement: Only show productions that have at least one event in the past
-        andFilters.push({
-            events: {
-                some: {
-                    starts_at: {
-                        lt: now
-                    }
-                }
+        if (draft !== 'all') {
+            andFilters.push(draft ? { OR: [{ draft: true }, { draft: null }] } : { draft: false })
+
+            if (requirePastEvents) {
+                andFilters.push({
+                    events: {
+                        some: {
+                            starts_at: {
+                                lt: now,
+                            },
+                        },
+                    },
+                })
             }
-        })
+        } else if (requirePastEvents) {
+            andFilters.push({
+                OR: [
+                    { OR: [{ draft: true }, { draft: null }] },
+                    {
+                        AND: [
+                            { draft: false },
+                            { events: { some: { starts_at: { lt: now } } } },
+                        ],
+                    },
+                ],
+            })
+        }
+
+        if (editorId) {
+            andFilters.push({
+                editor_production: {
+                    some: {
+                        editor_id: editorId,
+                    },
+                },
+            })
+        }
 
         if (onThisDayDate) {
             const matchingProductionIds = await this.findProductionIdsOnMonthDay(onThisDayDate)
@@ -249,7 +253,7 @@ export class ProductionsRepository {
             const tagFilters: any[] = []
 
             for (const genre of genres) {
-                const searchTerms = this.expandGenreTerms(genre)
+                const searchTerms = expandGenreTerms(genre)
                 const languages = Array.from(new Set([lang, 'nl', 'en', 'fr'])).filter(Boolean) as string[]
 
                 for (const term of searchTerms) {
@@ -266,13 +270,12 @@ export class ProductionsRepository {
             andFilters.push({
                 OR: [
                     { genre_production: { some: { OR: genreFilters } } },
-                    { tag_production: { some: { OR: tagFilters } } }
-                ]
+                    { tag_production: { some: { OR: tagFilters } } },
+                ],
             })
         }
 
         if (locations && locations.length > 0) {
-            // ... (keep existing locations logic)
             andFilters.push({
                 OR: locations.map((location) => ({
                     OR: [
@@ -336,16 +339,19 @@ export class ProductionsRepository {
                 eventDateFilter.lte = new Date(Date.UTC(yearTo, 11, 31, 23, 59, 59, 999))
             }
 
-            // Filter productions where at least one PAST event is within the year range
             andFilters.push({
                 events: {
-                    some: {
-                        AND: [
-                            { starts_at: { lt: now } },
-                            { starts_at: eventDateFilter }
-                        ]
-                    }
-                }
+                    some: requirePastEvents
+                        ? {
+                            AND: [
+                                { starts_at: { lt: now } },
+                                { starts_at: eventDateFilter },
+                            ],
+                        }
+                        : {
+                            starts_at: eventDateFilter,
+                        },
+                },
             })
         }
 
@@ -360,59 +366,54 @@ export class ProductionsRepository {
         return { created_at: 'desc' }
     }
 
-    async findAll(options: FindAllOptions) {
-        const { page, limit, sort, search, searchIds, lang } = options
-        const skip = (page - 1) * limit
-
-        if (sort === 'relevance' && search && search.trim().length > 0) {
-            const rankedSearchIds = Array.isArray(searchIds)
-                ? searchIds
-                : await this.findProductionIdsBySearch(search, lang)
-            if (rankedSearchIds.length === 0) {
-                return []
-            }
-
-            const filtersWithoutSearch = await this.buildWhere({
-                ...options,
-                search: undefined,
-            })
-
-            const filteredIds = await this.prisma.production.findMany({
-                where: {
-                    AND: [
-                        filtersWithoutSearch,
-                        {
-                            id: {
-                                in: rankedSearchIds,
-                            },
-                        },
-                    ],
-                },
-                select: {
-                    id: true,
-                },
-            })
-
-            const filteredIdSet = new Set(filteredIds.map((item) => item.id))
-            const orderedFilteredIds = rankedSearchIds.filter((id) => filteredIdSet.has(id))
-            const pagedIds = orderedFilteredIds.slice(skip, skip + limit)
-
-            if (pagedIds.length === 0) {
-                return []
-            }
-
-            const rows = await this.prisma.production.findMany({
-                where: {
-                    id: {
-                        in: pagedIds,
+    private get productionInclude() {
+        return {
+            poster_gallery: {
+                include: {
+                    other_files: {
+                        orderBy: { created_at: 'desc' as const },
                     },
                 },
-            })
-
-            const rowsById = new Map(rows.map((item) => [item.id, item]))
-            return pagedIds.map((id) => rowsById.get(id)).filter((item): item is NonNullable<typeof item> => Boolean(item))
+            },
+            media_gallery: {
+                include: {
+                    items: {
+                        take: 10,
+                        orderBy: { created_at: 'asc' as const },
+                        include: {
+                            crops: {
+                                orderBy: { created_at: 'asc' as const },
+                            },
+                        },
+                    },
+                },
+            },
+            events: {
+                take: 50,
+                orderBy: { starts_at: 'asc' as const },
+                include: {
+                    hall: {
+                        select: {
+                            name: true,
+                        },
+                    },
+                },
+            },
+            genre_production: {
+                include: {
+                    genre: {
+                        select: {
+                            name: true,
+                        },
+                    },
+                },
+            },
         }
+    }
 
+    async findAll(options: FindAllOptions) {
+        const { page, limit, sort } = options
+        const skip = (page - 1) * limit
         const where = await this.buildWhere(options)
 
         return this.prisma.production.findMany({
@@ -420,8 +421,48 @@ export class ProductionsRepository {
             skip,
             take: limit,
             orderBy: this.buildOrderBy(sort),
+            include: this.productionInclude,
         })
     }
+
+    async findFilteredIds(options: CountOptions & { rankedIds: string[] }): Promise<string[]> {
+        const { rankedIds, ...countOptions } = options
+        const filtersWithoutSearch = await this.buildWhere({ ...countOptions, search: undefined })
+
+        const rows = await this.prisma.production.findMany({
+            where: {
+                AND: [
+                    filtersWithoutSearch,
+                    { id: { in: rankedIds } },
+                ],
+            },
+            select: { id: true },
+        })
+
+        return rows.map((row) => row.id)
+    }
+
+    async findAllIds(options: CountOptions): Promise<string[]> {
+        const where = await this.buildWhere(options)
+
+        const rows = await this.prisma.production.findMany({
+            where,
+            select: { id: true },
+        })
+
+        return rows.map((row) => row.id)
+    }
+
+    async findManyByIds(ids: string[]) {
+        const rows = await this.prisma.production.findMany({
+            where: { id: { in: ids } },
+            include: this.productionInclude,
+        })
+
+        const rowsById = new Map(rows.map((item) => [item.id, item]))
+        return ids.map((id) => rowsById.get(id)).filter((item): item is NonNullable<typeof item> => Boolean(item))
+    }
+
 
     async count(options: CountOptions) {
         const where = await this.buildWhere(options)
@@ -434,6 +475,48 @@ export class ProductionsRepository {
     async findById(id: string) {
         const production = await this.prisma.production.findUnique({
             where: { id },
+            include: {
+                events: {
+                    include: {
+                        hall: {
+                            select: {
+                                name: true,
+                            },
+                        },
+                    },
+                },
+                genre_production: {
+                    include: {
+                        genre: true
+                    }
+                },
+                poster_gallery: {
+                    include: {
+                        other_files: {
+                            orderBy: { created_at: 'desc' as const },
+                        },
+                        items: {
+                            include: {
+                                crops: true,
+                            },
+                        },
+                    },
+                },
+                media_gallery: {
+                    include: {
+                        items: {
+                            include: {
+                                crops: true,
+                            },
+                        },
+                    },
+                },
+                tag_production: {
+                    include: {
+                        tag: true,
+                    },
+                },
+            }
         });
 
         if (!production) return null;
@@ -442,21 +525,79 @@ export class ProductionsRepository {
     }
 
     async create(data: any) {
+        const { genre_ids, tag_ids, ...rest} = data;
+
         return this.prisma.production.create({
-            data,
+            data: {
+                ...rest,
+                ...(genre_ids !== undefined && {
+                    genre_production: {
+                        create: genre_ids.map((genre_id: string) => ({genre_id}))
+                    }
+                }),
+                ...(tag_ids !== undefined && {
+                    tag_production: {
+                        create: tag_ids.map((tag_id: string) => ({tag_id}))
+                    }
+                })
+            },
         })
     }
 
     async update(id: string, data: any) {
+        const { genre_ids, tag_ids, ...rest } = data;
+        
         return this.prisma.production.update({
             where: { id },
-            data,
+            data : {
+                ...rest,
+                updated_at: new Date(),
+                ...(genre_ids !== undefined && {
+                    genre_production: {
+                        deleteMany: {},
+                        create: genre_ids.map((genre_id: string) => ({genre_id}))
+                    }
+                }),
+                ...(tag_ids !== undefined && {
+                    tag_production: {
+                        deleteMany: {},
+                        create: tag_ids.map((tag_id: string) => ({tag_id}))
+                    }
+                })
+            },
         })
     }
 
     async delete(id: string) {
-        return this.prisma.production.delete({
-            where: { id }
+        const [, , , , , , production] = await this.prisma.$transaction([
+            this.prisma.event_price.deleteMany({ where: { event: { production_id: id } } }),
+            this.prisma.event.deleteMany({ where: { production_id: id } }),
+            this.prisma.genre_production.deleteMany({ where: { production_id: id } }),
+            this.prisma.tag_production.deleteMany({ where: { production_id: id } }),
+            this.prisma.blog_production.deleteMany({ where: { production_id: id } }),
+            this.prisma.editor_production.deleteMany({ where: { production_id: id } }),
+            this.prisma.production.delete({ where: { id } }),
+        ])
+        return production
+    }
+
+    async addEditor(productionId: string, editorId: string) {
+        return this.prisma.editor_production.create({
+            data: {
+                production_id: productionId,
+                editor_id: editorId,
+            }
+        })
+    }
+
+    async removeEditor(productionId: string, editorId: string) {
+        return this.prisma.editor_production.delete({
+            where: {
+                editor_id_production_id: {
+                    editor_id: editorId,
+                    production_id: productionId,
+                }
+            }
         })
     }
 }

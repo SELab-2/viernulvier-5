@@ -1,5 +1,46 @@
 const API_BASE = '/api/v1'
 
+export class ApiError extends Error {
+    status: number
+
+    constructor(status: number, message: string) {
+        super(message)
+        this.name = 'ApiError'
+        this.status = status
+    }
+}
+
+export function normalizeApiAssetUrl(value: string | null | undefined): string | undefined {
+    if (!value) {
+        return undefined
+    }
+
+    const trimmed = value.trim()
+    if (!trimmed) {
+        return undefined
+    }
+
+    if (trimmed.startsWith('/api/')) {
+        return trimmed
+    }
+
+    if (typeof window === 'undefined') {
+        return trimmed
+    }
+
+    try {
+        const url = new URL(trimmed, window.location.origin)
+
+        if (url.pathname.startsWith('/api/')) {
+            return `${url.pathname}${url.search}${url.hash}`
+        }
+    } catch {
+        return trimmed
+    }
+
+    return trimmed
+}
+
 /**
  * API client for communicating with the Fastify backend.
  *
@@ -11,14 +52,17 @@ export async function apiFetch<T>(
     options: RequestInit = {}
 ): Promise<T> {
     const url = `${API_BASE}${endpoint}`
+    const isFormDataBody = typeof FormData !== 'undefined' && options.body instanceof FormData
 
     const hasBody = options.body !== undefined && options.body !== null
     const defaultHeaders: Record<string, string> = hasBody
+        ? !isFormDataBody
         ? { 'Content-Type': 'application/json' }
+        : {}
         : {}
 
     let response: Response
-
+    
     try {
         response = await fetch(url, {
             credentials: 'include', // Include cookies for auth
@@ -28,6 +72,7 @@ export async function apiFetch<T>(
                 ...options.headers,
             },
         })
+
     } catch (error) {
         const message = error instanceof Error ? error.message : 'Network request failed'
         throw new Error(`Network error while requesting ${url}: ${message}`)
@@ -48,7 +93,7 @@ export async function apiFetch<T>(
                     ? errorPayload
                     : '') || `HTTP ${response.status}`
 
-        throw new Error(message)
+        throw new ApiError(response.status, message)
     }
 
     // Handle 204 No Content
@@ -64,7 +109,9 @@ export const api = {
     get: <T>(endpoint: string) => apiFetch<T>(endpoint),
 
     post: <T>(endpoint: string, body: unknown) =>
-        apiFetch<T>(endpoint, { method: 'POST', body: JSON.stringify(body) }),
+        body instanceof FormData
+        ? apiFetch<T>(endpoint, {method: 'POST', body: body})
+        : apiFetch<T>(endpoint, { method: 'POST', body: JSON.stringify(body) }),
 
     put: <T>(endpoint: string, body: unknown) =>
         apiFetch<T>(endpoint, { method: 'PUT', body: JSON.stringify(body) }),

@@ -10,6 +10,7 @@ type LocalizedText = {
 } | null
 
 export type ProductionCardItem = {
+    draft?: boolean
     id: string
     title: LocalizedText
     artist?: LocalizedText

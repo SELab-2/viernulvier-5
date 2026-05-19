@@ -14,6 +14,8 @@ export type Messages = {
     navAriaLabel: string
     openMenuLabel: string
     closeMenuLabel: string
+    searchLink: string
+    blogsLink: string
   }
   home: {
     title: string
@@ -34,29 +36,22 @@ export type Messages = {
     onThisDayFallbackSubheading: string
     popularTagsLabel: string
     popularTagsMore: string
+    popularTagsLess: string
     popularTags: string[]
     latestBlogHeading: string
     latestBlogSubheading: string
-    latestBlogTitle: string
-    latestBlogParagraphOne: string
-    latestBlogParagraphTwoTitle: string
-    latestBlogParagraphTwo: string
     latestBlogReadMore: string
     latestBlogViewAll: string
     recentDigitizedHeading: string
     recentDigitizedViewItem: string
     recentDigitizedViewAll: string
-    recentDigitizedItems: Array<{
-      dateLabel: string
-      archiveLabel: string
-      title: string
-      description: string
-    }>
+    fallbackUntitled: string
   }
   search: {
     heading: string
     subtitle: string
     productionsTab: string
+    postersTab: string
     blogTab: string
     allTab: string
     resultsCount: string
@@ -72,8 +67,9 @@ export type Messages = {
     filterCloseOverlayLabel: string
     noResults: string
     loadErrorPrefix: string
-    activeFilterTags: string[]
     searchPlaceholder: string
+    blogPageSearchPlaceholder: string
+    blogPageSubtitle: string
     fallbackUntitled: string
     fallbackTag: string
     fallbackVenue: string
@@ -85,8 +81,6 @@ export type Messages = {
     genres: string[]
     periodLabel: string
     periodMin: string
-    periodCurrent: string
-    periodMax: string
     locationLabel: string
     locationSearchPlaceholder: string
     addLocationLabel: string
@@ -94,6 +88,12 @@ export type Messages = {
     resetFiltersLabel: string
     paginationPrevious: string
     paginationNext: string
+    relatedFilesCount: (count: number) => string
+    stampSvgPaths: {
+      days: { singular: string; plural: string }
+      months: { singular: string; plural: string }
+      years: { singular: string; plural: string }
+    }
   }
   auth: {
     localeToggleLabel: string
@@ -121,11 +121,76 @@ export type Messages = {
     archiveLabel: string
     logoutLabel: string
   }
+  production: {
+    // sidbar
+    productionSettingsLabel: string
+    statusLabel: string
+    genreLabel: string
+    tagLabel: string
+    bannerLabel: string
+    extraPicturesLabel: string
+    addGenrePlaceholder: string
+    addTagPlaceholder: string
+    chooseFilePlaceholder: string
+    artistLabel: string
+    // production edit
+    productionEditTitle: string
+    productionEditSubTitle: string
+    // tab tabs
+    dutchOption: string
+    englishOption: string
+    // tab content
+    contentLabels: {
+        super_title: string
+        title: string
+        artist: string
+        teaser: string
+        description: string
+        description_2: string
+    }
+    back: string
+    saveOnDraft: string
+    publish: string
+    // events edit
+    eventsEditTitle: string
+    eventsEditSubTitle: string
+    makeEventsLabel: string
+    eventsDateLabel: string
+    eventsTimeLabel: string
+    eventsLocationLabel: string
+    eventsCommentLabel: string
+    eventsActionsLabel: string
+    // UI messages
+    invalidProductionError: string
+  },
+  event: {
+    // event edit-popup
+    saveButtonLabel: string
+    editLabel: string
+    addLabel: string
+    timeLabel: string
+    locationLabel: string
+    commentLabel: string
+    cancelLabel: string
+    newLocationButton: string
+    newLocationNamePlaceholder: string
+    newLocationAddressPlaceholder: string
+    newLocationValidationError: string
+    newLocationCreateError: string
+    newLocationCreatingLabel: string
+    newLocationAddLabel: string
+  },
   detail: {
     navBack: string
     events: string
     noEvents: string
     loadError: string
+    posterNotFound: string
+    posterLoadError: string
+    loadingPoster: string
+    backToSearch: string
+    relatedProductions: string
+    noLinkedProduction: string
     date: string
     time: string
     location: string
@@ -136,6 +201,16 @@ export type Messages = {
     genresAndTags: string
     previousImage: string
     nextImage: string
+    relatedBlogs: string
+  }
+  notFound: {
+    titleTop: string
+    titleAccent: string
+    titleBottom: string
+    joke: string
+    description: string
+    homeButton: string
+    searchButton: string
   }
   footer: {
     brandLogoAlt: string
@@ -143,10 +218,18 @@ export type Messages = {
     about: string
     navigationTitle: string
     navHome: string
+    navBlogs: string
     navAgenda: string
     navArchiveSearch: string
     navAbout: string
     contactTitle: string
+    addressLine1: string
+    addressLine2: string
+    phone: string
+    email: string
+    vatNumber: string
+    socialTitle: string
+    stayUpdatedCta: string
     newsletterTitle: string
     newsletterText: string
     newsletterPlaceholder: string
@@ -154,7 +237,8 @@ export type Messages = {
     privacy: string
     cookies: string
     disclaimer: string
-    rights: string
+    privacyAndCookies: string
+    rights: (year: number) => string
   }
   settings: {
     title: string
@@ -224,14 +308,17 @@ export type Messages = {
     nav: {
       dashboard: string
       productions: string
+      blogs: string
+      posters: string
       gallery: string
-      organisation: string
       settings: string
+      drafts: string
       dashboardIconAlt: string
       productionsIconAlt: string
-      galleryIconAlt: string
-      organisationIconAlt: string
+      blogsIconAlt: string
+      postersIconAlt: string
       settingsIconAlt: string
+      draftsIconAlt: string
     }
     dashboard: {
       pageTitle: string
@@ -240,14 +327,13 @@ export type Messages = {
       loadingMessage: string
       recentlyEdited: string
       tableColTitle: string
-      tableColType: string
-      tableColStatus: string
       tableColLanguage: string
+      tableColType: string
       tableColDate: string
       tableColActions: string
-      statusAvailable: string
       actionView: string
       actionEdit: string
+      actionDelete: string
       emptyRecent: string
       paginationShowing: (from: number, to: number, total: number) => string
       paginationPrev: string
@@ -262,6 +348,7 @@ export type Messages = {
       statProductions: string
       statBlogConcepts: string
       statVisitors: string
+      statPosters: string
       statMediaItems: string
       deltaVsLastMonth: string
       statLastSync: string
@@ -276,6 +363,100 @@ export type Messages = {
       pageTitle: string
       itemIdLabel: string
     }
+    blogsPage: {
+      pageTitle: string
+      pageSubtitle: string
+      searchPlaceholder: string
+      newButton: string
+      deleteError: string
+      loadError: string
+      paginationShowing: (from: number, to: number, total: number) => string
+      paginationPageLabel: (page: number) => string
+      tableColLinkedProductions: string
+      untitledLabel: string
+      productionCountSingular: string
+      productionCountPlural: (count: number) => string
+    }
+    productions: {
+      pageTitle: string
+      pageSubtitle: string
+      searchPlaceholder: string
+      newButton: string
+      deleteConfirm: string
+      deleteError: string
+      tabAriaLabel: string
+      untitledLabel: string
+      paginationShowing: (from: number, to: number, total: number) => string
+      paginationPageLabel: (page: number) => string
+      loadError: string
+    }
+    notFound: {
+      titleTop: string
+      titleAccent: string
+      titleBottom: string
+      joke: string
+      description: string
+      dashboardButton: string
+    }
+    posters: {
+      pageTitle: string
+      pageSubtitle: string
+      formTitleLabel: string
+      formProductionLabel: string
+      formFileLabel: string
+      formFileHint: string
+      addFileButton: string
+      submitButton: string
+      submittingButton: string
+      overviewHeading: string
+      searchPlaceholder: string
+      searchButton: string
+      loadingMessage: string
+      emptyMessage: string
+      noProductionsAvailable: string
+      searchProductionPlaceholder: string
+      noProductionsFound: string
+      deleteButton: string
+      deletingButton: string
+      deleteConfirm: string
+      deleteError: string
+      validationTitleRequired: string
+      validationProductionRequired: string
+      validationFileRequired: string
+      validationInvalidFileType: string
+      loadPostersError: string
+      loadProductionsError: string
+      noProductionAssigned: string
+      filesSelectedCount: (count: number) => string
+      filesCountLabel: (count: number) => string
+      pdfPreviewTitle: (title: string) => string
+    }
+
+    drafts: {
+      pageTitle: string,
+      pageSubtitle: string,
+      productions: string,
+      blogs: string,
+      filterOnlyCurrent: string,
+      tableColTitle: string
+      tableColType: string
+      tableColStatus: string
+      tableColEditor: string
+      tableColDate: string
+      tableColActions: string
+      statusUnavailable: string
+      actionView: string
+      actionEdit: string
+      actionDelete: string
+      emptyRecent: string
+      loadingMessage: string
+      deleteTitle: string
+      deleteConfirm: (title: string) => string
+      paginationShowing: (from: number, to: number, total: number) => string
+      pageSizeLabel: string
+      paginationPrev: string
+      paginationNext: string
+    }
   }
 
   editHeader: {
@@ -285,8 +466,10 @@ export type Messages = {
   }
 
   blogs: {
+    placeholder: string
+    navBack: string
+
     languageError:string
-    detailPageBack:string
     loadingBlog: string
     loadingProductions: string
     relatedProductions: string
@@ -304,6 +487,7 @@ export type Messages = {
     manageProductionButton: string
     removeProductionAriaLabel: string
     savingButton: string
+    savingDraftButton: string
     deletingButton: string
     deleteButton: string
     deleteConfirm: string
@@ -324,7 +508,34 @@ export type Messages = {
       addButton: string
       close: string
       queryHint: string
+      filtersLabel: string
+      periodLabel: string
+      locationLabel: string
+      locationPlaceholder: string
+      stagedLabel: string
+      selectedCount: (count: number) => string
+      readyCount: (count: number) => string
+      loading: string
+      loadingMore: string
       noProductionFound:string
+    }
+    bannerUpload: {
+      title: string
+      subtitle: string
+      label: string
+      addButton: string
+      allowedFormats: string
+      invalidFileTypes: (fileNames: string) => string
+      alreadyUploaded: (count: number) => string
+      uploadedImagesLabel: string
+      setThumbnailButton: string
+      pendingUploadLabel: (count: number) => string
+      removeButton: string
+      coverLabel: string
+      deleteImageAriaLabel: string
+      coverHint: string
+      uploadFailedRemoved: (errorMessage: string) => string
+      uploadFailedCreatedEditUrl: (errorMessage: string, editUrl: string) => string
     }
   }
 }

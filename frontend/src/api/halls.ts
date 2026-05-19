@@ -15,5 +15,17 @@ export const hallSchema = z.object({
 
 export type Hall = z.infer<typeof hallSchema>
 
+export type CreateHallInput = {
+    name?: {
+        nl?: string
+        en?: string
+        fr?: string
+    } | null
+    space_id?: string | null
+}
+
 export const getHallById = (hallId: string) =>
     api.get<{ data: Hall }>(`/archive/halls/${hallId}`)
+
+export const createHall = (payload: CreateHallInput) =>
+    api.post<{ data: Hall }>(`/archive/halls`, payload)

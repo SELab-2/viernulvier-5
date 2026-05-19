@@ -1,9 +1,11 @@
 export type AdminNavItemId =
     | 'dashboard'
     | 'productions'
+    | 'blogs'
+    | 'posters'
     | 'gallery'
-    | 'organisation'
     | 'settings'
+    | 'drafts'
 
 export type AdminNavigationItem = {
     id: AdminNavItemId
@@ -26,9 +28,11 @@ export function getNavLabel(id: AdminNavItemId, nav: AdminNavMessages): string {
     const labelMap: Record<AdminNavItemId, string> = {
         dashboard: nav.dashboard,
         productions: nav.productions,
+        blogs: nav.blogs,
+        posters: nav.posters,
         gallery: nav.gallery,
-        organisation: nav.organisation,
         settings: nav.settings,
+        drafts: nav.drafts,
     }
 
     return labelMap[id]
@@ -38,23 +42,25 @@ export function getNavIconAlt(id: AdminNavItemId, nav: AdminNavMessages): string
     const altMap: Record<AdminNavItemId, string> = {
         dashboard: nav.dashboardIconAlt,
         productions: nav.productionsIconAlt,
-        gallery: nav.galleryIconAlt,
-        organisation: nav.organisationIconAlt,
+        blogs: nav.productionsIconAlt,
+        posters: nav.postersIconAlt,
+        gallery: nav.gallery,
         settings: nav.settingsIconAlt,
+        drafts: nav.draftsIconAlt,
     }
 
     return altMap[id]
 }
 
 export function getAdminNavigationItems(hostname: string = window.location.hostname): AdminNavigationGroup {
-    const { dashboardPath } = getAdminRouteConfig(hostname)
-
+    const { dashboardPath, productionsPath, blogsPath, postersPath, draftsPath } = getAdminRouteConfig(hostname)
     return {
         primary: [
             { id: 'dashboard', to: dashboardPath, iconSrc: '/admin/sidebar-dashboard.svg' },
-            { id: 'productions', disabled: true, iconSrc: '/admin/sidebar-productions.svg' },
-            { id: 'gallery', disabled: true, iconSrc: '/admin/sidebar-gallery.svg' },
-            { id: 'organisation', disabled: true, iconSrc: '/admin/sidebar-organization.svg' },
+            { id: 'productions', to: productionsPath, iconSrc: '/admin/sidebar-productions.svg' },
+            { id: 'blogs', to: blogsPath, iconSrc: '/admin/sidebar-blogs.svg' },
+            { id: 'posters', to: postersPath, iconSrc: '/admin/sidebar-gallery.svg' },
+            { id: 'drafts', to: draftsPath, iconSrc: '/admin/sidebar-drafts.svg'}
         ],
         secondary: [
             { id: 'settings', disabled: true, iconSrc: '/admin/sidebar-settings.svg' },

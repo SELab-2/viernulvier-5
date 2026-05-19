@@ -42,6 +42,7 @@ describe('BlogsTabContent', () => {
         changeTitle={vi.fn()}
         changeContent={vi.fn()}
         onJsonChange={vi.fn()}
+        quillPlaceholder="Schrijf je blog content hier..."
       />,
     )
 
@@ -66,6 +67,7 @@ describe('BlogsTabContent', () => {
         changeTitle={changeTitle}
         changeContent={changeContent}
         onJsonChange={onJsonChange}
+        quillPlaceholder="Schrijf je blog content hier..."
       />,
     )
 

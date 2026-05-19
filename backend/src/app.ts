@@ -10,6 +10,7 @@ import corsPlugin from './plugins/cors.js'
 import securityPlugin from './plugins/security.js'
 import swaggerPlugin from './plugins/swagger.js'
 import errorHandlerPlugin from './plugins/error-handler.js'
+import multipart from './plugins/multipart.js'
 
 // Modules
 import productionsRoutes from './modules/productions/productions.routes.js'
@@ -20,11 +21,12 @@ import hallsRoutes from './modules/halls/halls.routes.js'
 import spacesRoutes from './modules/spaces/spaces.routes.js'
 import mediaRoutes from './modules/media/media.routes.js'
 import authRoutes from './modules/auth/auth.routes.js'
-import editorsRoutes from './modules/editors/editors.routes.js'
-import uitdatabankRoutes from './modules/uitdatabank/uitdatabank.routes.js'
+import cmsUsersRoutes from './modules/cms-users/cms-users.routes.js'
 import blogsRoutes from './modules/blogs/blogs.routes.js'
+import postersRoutes from './modules/posters/posters.routes.js'
 import dashboardRoutes from './modules/dashboard/dashboard.routes.js'
 import searchRoutes from './modules/search/search.routes.js'
+import imagesRoutes from './modules/images/images.routes.js'
 
 /**
  * Build the Fastify application.
@@ -39,6 +41,7 @@ export async function buildApp(opts = {}): Promise<FastifyInstance> {
                 ? { target: 'pino-pretty', options: { colorize: true } }
                 : undefined,
         },
+        bodyLimit: env.REQUEST_BODY_LIMIT_BYTES,
         ...opts,
     })
 
@@ -52,6 +55,7 @@ export async function buildApp(opts = {}): Promise<FastifyInstance> {
     await app.register(prismaPlugin)
     await app.register(authPlugin)
     await app.register(errorHandlerPlugin)
+    await app.register(multipart)
 
     // --- Feature modules ---
     // Register specific modules at their respective prefixes to preserve sub-routes
@@ -65,12 +69,13 @@ export async function buildApp(opts = {}): Promise<FastifyInstance> {
     await app.register(hallsRoutes, { prefix: '/api/v1/archive/halls' })
     await app.register(spacesRoutes, { prefix: '/api/v1/archive/spaces' })
     await app.register(mediaRoutes, { prefix: '/api/v1/archive/media' })
-    await app.register(uitdatabankRoutes, { prefix: '/api/v1/archive/uitdatabank' })
     await app.register(blogsRoutes, { prefix: '/api/v1/archive/blogs' })
+    await app.register(postersRoutes, { prefix: '/api/v1/archive/posters' })
     await app.register(searchRoutes, { prefix: '/api/v1/archive/search' })
     await app.register(dashboardRoutes, { prefix: '/api/v1/dashboard' })
     await app.register(authRoutes, { prefix: '/api/v1/auth' })
-    await app.register(editorsRoutes, { prefix: '/api/v1/editors' })
+    await app.register(cmsUsersRoutes, { prefix: '/api/v1/cms-users' })
+    await app.register(imagesRoutes, { prefix: '/api/v1/images' })
 
     return app
 }
