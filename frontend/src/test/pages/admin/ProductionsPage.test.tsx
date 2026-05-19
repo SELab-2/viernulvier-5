@@ -113,7 +113,7 @@ beforeEach(() => {
     getAdminRouteConfigMock.mockReset()
     getAdminRouteConfigMock.mockReturnValue({
         archiveEditPath: '/admin/archive/:id/edit',
-        productionCreatePath: '/admin/productions/new',
+        productionCreatePath: '/admin/archive/create',
     })
     vi.stubGlobal('confirm', confirmMock)
     confirmMock.mockReturnValue(true)
@@ -300,7 +300,7 @@ describe('ProductionsPage', () => {
 
         fireEvent.click(screen.getByRole('button', { name: /Nieuwe Productie/i }))
 
-        expect(navigate).toHaveBeenCalledWith('/admin/productions/new')
+        expect(navigate).toHaveBeenCalledWith('/admin/archive/create')
     })
 
     // Verwijderen
