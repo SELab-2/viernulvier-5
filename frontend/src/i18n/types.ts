@@ -400,6 +400,7 @@ export type Messages = {
     manageProductionButton: string
     removeProductionAriaLabel: string
     savingButton: string
+    savingDraftButton: string
     deletingButton: string
     deleteButton: string
     deleteConfirm: string

@@ -410,6 +410,7 @@ const en: Messages = {
       manageProductionButton: 'Add new production',
       removeProductionAriaLabel: 'Remove production',
       savingButton: 'Publishing...',
+      savingDraftButton: 'Saving...',
       deletingButton: 'Deleting...',
       deleteButton: 'Delete blog',
       deleteConfirm: 'Are you sure you want to delete this blog?',
