@@ -216,7 +216,7 @@ function ArchiveEditPage() {
         return Object.keys(errors).length === 0;
     }
 
-    const save = async () => {
+    const save = async (asDraft = false) => {
         if (saving) return;
         setError(null);
 
@@ -251,6 +251,7 @@ function ArchiveEditPage() {
                     description_2:  production.description_2,
                     genre_ids: genreState.items.map(g => g.id),
                     tag_ids: tagState.items.map(t => t.id),
+                    draft: asDraft,
                     media_gallery_id: newGalleryId,
                 });
 
@@ -299,6 +300,7 @@ function ArchiveEditPage() {
                     description_2:  production.description_2,
                     genre_ids: genreState.items.map(g => g.id),
                     tag_ids: tagState.items.map(t => t.id),
+                    draft: asDraft,
                     media_gallery_id: updateGalleryId
                 });
                 

@@ -191,7 +191,7 @@ export class ProductionsRepository {
         const requirePastEvents = pastOnly ?? (draft === false)
 
         if (draft !== 'all') {
-            andFilters.push(draft ? { draft: true } : { OR: [{ draft: false }, { draft: null }] })
+            andFilters.push(draft ? { OR: [{ draft: true }, { draft: null }] } : { draft: false })
 
             if (requirePastEvents) {
                 andFilters.push({
@@ -207,10 +207,10 @@ export class ProductionsRepository {
         } else if (requirePastEvents) {
             andFilters.push({
                 OR: [
-                    { draft: true },
+                    { OR: [{ draft: true }, { draft: null }] },
                     {
                         AND: [
-                            { OR: [{ draft: false }, { draft: null }] },
+                            { draft: false },
                             { events: { some: { starts_at: { lt: now } } } },
                         ],
                     },
