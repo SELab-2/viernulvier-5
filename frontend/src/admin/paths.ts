@@ -5,6 +5,7 @@ export type AdminRouteConfig = {
   loginPath: string
   dashboardPath: string
   legacyDashboardPaths: string[]
+  productionEditPath: string
   productionsPath: string
   blogsPath: string
   archiveEditPath: string
@@ -34,6 +35,7 @@ export function getAdminRouteConfig(hostname: string): AdminRouteConfig {
       canRenderAdminRoutes: true,
       loginPath: '/admin/login',
       dashboardPath: '/admin/dashboard',
+      productionEditPath: '/admin/archive/:id/edit',
       legacyDashboardPaths: ['/admin', '/dashboard', '/', '/nl/admin', '/en/admin'],
       productionsPath: '/admin/productions',
       blogsPath: '/admin/blogs',
@@ -56,6 +58,7 @@ export function getAdminRouteConfig(hostname: string): AdminRouteConfig {
     loginPath: '/admin/login',
     dashboardPath: '/admin',
     legacyDashboardPaths: [],
+    productionEditPath: '/admin/archive/:id/edit',
     productionsPath: '/admin/productions',
     blogsPath: '/admin/blogs',
     archiveEditPath: '/admin/archive/:id/edit',

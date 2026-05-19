@@ -1,5 +1,6 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { MediaService } from './media.service.js'
+
 import type { 
     GalleryPaginationQuery,
     ItemPaginationQuery,
@@ -281,6 +282,14 @@ export class MediaController {
                 self: `${baseUrl}/items/crops/${id}`
             }
         })
+    }
+
+    async uploadCrop(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
+        const data = await request.file()
+        if (!data) return reply.status(400).send({ message: 'No file provided' });
+
+        await this.service.uploadCrop(request.params.id, data);
+        return reply.status(204).send();
     }
 
     async deleteCrop(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {

@@ -19,5 +19,21 @@ export const locationSchema = z.object({
 
 export type Location = z.infer<typeof locationSchema>
 
+export type CreateLocationInput = {
+    name?: {
+        nl?: string
+        en?: string
+        fr?: string
+    } | null
+    street?: string | null
+    number?: string | null
+    postal_code?: string | null
+    city?: string | null
+    country?: string | null
+}
+
 export const getLocationById = (locationId: string) =>
     api.get<{ data: Location }>(`/archive/locations/${locationId}`)
+
+export const createLocation = (payload: CreateLocationInput) =>
+    api.post<{ data: Location }>(`/archive/locations`, payload)

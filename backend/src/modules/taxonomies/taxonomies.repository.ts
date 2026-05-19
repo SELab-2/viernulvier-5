@@ -12,6 +12,7 @@ export class TaxonomiesRepository {
             where.name = {
                 path: [lang],
                 string_contains: search,
+                mode: 'insensitive',
             };
         }
 
@@ -38,6 +39,7 @@ export class TaxonomiesRepository {
             where.name = {
                 path: [lang],
                 string_contains: search,
+                mode: 'insensitive',
             };
         }
 
@@ -91,6 +93,7 @@ export class TaxonomiesRepository {
             where.name = {
                 path: [lang],
                 string_contains: search,
+                mode: 'insensitive',
             };
         }
 
@@ -120,6 +123,7 @@ export class TaxonomiesRepository {
             where.name = {
                 path: [lang],
                 string_contains: search,
+                mode: 'insensitive',
             };
         }
 

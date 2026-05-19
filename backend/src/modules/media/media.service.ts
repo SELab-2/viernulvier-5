@@ -1,4 +1,7 @@
 import { MediaRepository } from './media.repository.js'
+import path  from 'path'
+import { AppError } from '../../errors/app-error.js'
+import { env } from '../../config/env.js'
 import type { 
     GalleryPaginationQuery,
     ItemPaginationQuery,
@@ -14,6 +17,7 @@ import type {
     UpdateCropInput
 } from './media.schema.js'
 import { PaginatedResult, calculateTotalPages, sanitizePage } from '../../utils/pagination.js'
+import { MultipartFile } from '@fastify/multipart'
 
 export class MediaService {
     constructor(private readonly repository: MediaRepository) { }
@@ -131,6 +135,30 @@ export class MediaService {
 
     async updateCrop(id: string, data: UpdateCropInput): Promise<CropResponse> {
         return this.repository.updateCrop(id, data) as any
+    }
+
+    async uploadCrop(id: string, data: MultipartFile): Promise<void> {
+        const allowed = [
+            'image/jpeg',
+            'image/png',
+            'image/webp'
+        ];
+    
+        if(!allowed.includes(data.mimetype)) {
+            throw new AppError('Invalid file type', 400)
+        }
+
+        const extensionByMime: Record<string, string> = {
+            'image/jpeg': 'jpg',
+            'image/png': 'png',
+            'image/webp': 'webp',
+        }
+
+        const ext = extensionByMime[data.mimetype] ?? path.extname(data.filename).replace(/^\./, '').toLowerCase()
+        const filename = ext ? `${id}.${ext}` : id
+        const filepath = path.resolve(env.CROP_LOCATION, filename)
+
+        await this.repository.saveFile(filepath, data.file);
     }
 
     async deleteCrop(id: string): Promise<void> {

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { getActiveLocale, setActiveLocale } from '../../i18n'
 import type { Locale } from '../../i18n/types'
 
@@ -11,12 +11,25 @@ type UseLocaleResult = {
   handleLocaleChange: (nextLocale: Locale) => void
 }
 
+const LOCALE_CHANGE_EVENT = 'admin-locale-change'
+
 export function useLocale(): UseLocaleResult {
   const [locale, setLocale] = useState<Locale>(getInitialLocale)
 
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setLocale(getInitialLocale())
+    }
+
+    window.addEventListener(LOCALE_CHANGE_EVENT, handleStorageChange)
+    return () => window.removeEventListener(LOCALE_CHANGE_EVENT, handleStorageChange)
+  }, [])
+
   const handleLocaleChange = (nextLocale: Locale) => {
-    setLocale(nextLocale)
     setActiveLocale(nextLocale)
+    setLocale(nextLocale)
+    // Dispatch global event so other components using useLocale re-render
+    window.dispatchEvent(new Event(LOCALE_CHANGE_EVENT))
   }
 
   return { locale, handleLocaleChange }

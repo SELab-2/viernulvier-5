@@ -62,7 +62,7 @@ export async function apiFetch<T>(
         : {}
 
     let response: Response
-
+    
     try {
         response = await fetch(url, {
             credentials: 'include', // Include cookies for auth
@@ -72,6 +72,7 @@ export async function apiFetch<T>(
                 ...options.headers,
             },
         })
+
     } catch (error) {
         const message = error instanceof Error ? error.message : 'Network request failed'
         throw new Error(`Network error while requesting ${url}: ${message}`)
@@ -108,7 +109,9 @@ export const api = {
     get: <T>(endpoint: string) => apiFetch<T>(endpoint),
 
     post: <T>(endpoint: string, body: unknown) =>
-        apiFetch<T>(endpoint, { method: 'POST', body: JSON.stringify(body) }),
+        body instanceof FormData
+        ? apiFetch<T>(endpoint, {method: 'POST', body: body})
+        : apiFetch<T>(endpoint, { method: 'POST', body: JSON.stringify(body) }),
 
     put: <T>(endpoint: string, body: unknown) =>
         apiFetch<T>(endpoint, { method: 'PUT', body: JSON.stringify(body) }),

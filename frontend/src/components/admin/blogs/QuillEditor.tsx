@@ -9,13 +9,14 @@ type QuillEditorProps = {
     onJsonChange?: (value: unknown) => void
     placeholder?: string
     onImageUpload?: (file: File) => Promise<string>
+    showImages?: boolean
 }
 
-const toolbarOptions = [
+const toolbarOptions = (showImages: boolean) => [
     [{ header: [1, 2, 3, false] }],
     ['bold', 'italic', 'underline', 'strike'],
     [{ list: 'ordered' }, { list: 'bullet' }],
-    ['link', 'image'],
+    showImages ? ['link', 'image'] : ['link'],
     ['clean'],
 ]
 
@@ -37,9 +38,19 @@ function fileToDataUrl(file: File): Promise<string> {
     })
 }
 
-function QuillEditor({ value, onChange, onJsonChange, placeholder, onImageUpload }: QuillEditorProps) {
+function QuillEditor({ value, onChange, onJsonChange, placeholder, onImageUpload, showImages = true }: QuillEditorProps) {
     const containerRef = useRef<HTMLDivElement | null>(null)
     const quillRef = useRef<Quill | null>(null)
+    const onChangeRef = useRef(onChange);
+    const onJsonChangeRef = useRef(onJsonChange);
+
+    useEffect(() => {
+        onChangeRef.current = onChange;
+    }, [onChange]);
+
+    useEffect(() => {
+        onJsonChangeRef.current = onJsonChange;
+    }, [onJsonChange]);
 
     const handleImageUpload = useCallback(
         async (quill: Quill) => {
@@ -73,24 +84,24 @@ function QuillEditor({ value, onChange, onJsonChange, placeholder, onImageUpload
             return
         }
 
+        const toolbar = showImages
+            ? {
+                container: toolbarOptions(true),
+                handlers: {
+                    image: () => { void handleImageUpload(quill) },
+                },
+            }
+            : { container: toolbarOptions(false) }
+
         const quill = new Quill(containerRef.current, {
             theme: 'snow',
             placeholder,
-            modules: {
-                toolbar: {
-                    container: toolbarOptions,
-                    handlers: {
-                        image: () => {
-                            void handleImageUpload(quill)
-                        },
-                    },
-                },
-            },
+            modules: { toolbar },
         })
 
         quill.on('text-change', () => {
-            onChange(quill.root.innerHTML)
-            onJsonChange?.(quill.getContents())
+            onChangeRef.current(quill.root.innerHTML)
+            onJsonChangeRef.current?.(quill.getContents())
         })
 
         if (value) {
@@ -98,6 +109,7 @@ function QuillEditor({ value, onChange, onJsonChange, placeholder, onImageUpload
         }
 
         quillRef.current = quill
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [handleImageUpload, onChange,onJsonChange, placeholder, value])
 
     useEffect(() => {

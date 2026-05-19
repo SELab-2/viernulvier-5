@@ -515,6 +515,9 @@ function CreateBlogPage() {
             en: (contentJson.en ?? form.en.content) || null,
         }
 
+        console.log(combinedContent);
+        
+
         const blogTitle = {
             nl: form.nl.title || null,
             en: form.en.title || null,
