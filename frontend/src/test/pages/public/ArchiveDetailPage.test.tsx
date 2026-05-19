@@ -284,6 +284,16 @@ describe('ArchiveDetailPage', () => {
         const backButton = await screen.findByText('Terug')
         fireEvent.click(backButton)
 
+        expect(navigate).toHaveBeenCalledWith('/')
+    })
+    it('navigates to prev page when there is history', async () => {
+        vi.stubGlobal('history', { ...window.history, length: 2 })
+
+        renderPage()
+
+        const backButton = await screen.findByText('Terug')
+        fireEvent.click(backButton)
+
         expect(navigate).toHaveBeenCalledWith(-1)
     })
 
