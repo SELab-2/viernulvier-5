@@ -277,13 +277,7 @@ describe('ArchiveDetailPage', () => {
     })
 
     it('navigates to home when there is no history', async () => {
-        Object.defineProperty(window, 'history', {
-            value: {
-                ...window.history,
-                length: 1,
-            },
-            writable: true,
-        })
+        vi.spyOn(window.history, 'length', 'get').mockReturnValue(1)
 
         renderPage()
 
@@ -293,12 +287,7 @@ describe('ArchiveDetailPage', () => {
         expect(navigate).toHaveBeenCalledWith('/')
     })
     it('navigates to prev page when there is history', async () => {
-        Object.defineProperty(window, 'history', {
-            value: {
-                ...window.history,
-                length: 2,
-            },
-        })
+        vi.spyOn(window.history, 'length', 'get').mockReturnValue(2)
 
         renderPage()
 
