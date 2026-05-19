@@ -87,7 +87,7 @@ function PublicNavbar({ locale, onToggleLocale }: PublicNavbarProps) {
         onToggleLocale()
         const nextLocale = locale === 'nl' ? 'en' : 'nl'
         const localizedPath = withLocalePath(location.pathname, nextLocale)
-        navigate(`${localizedPath}${location.search}${location.hash}`)
+        navigate(`${localizedPath}${location.search}${location.hash}`, { replace: true })
     }
 
     return (
