@@ -754,16 +754,19 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
     const sliderRef = useRef<HTMLDivElement | null>(null)
 
     const [searchInput, setSearchInput] = useState(query)
+    const [prevQuery, setPrevQuery] = useState(query)
     const [locationInput, setLocationInput] = useState('')
     const [isLocationSuggestionsOpen, setIsLocationSuggestionsOpen] = useState(false)
     const [draftFromYear, setDraftFromYear] = useState(safeFromYear)
     const [draftToYear, setDraftToYear] = useState(safeToYear)
 
-    useEffect(() => {
+    if (query !== prevQuery) {
+        setPrevQuery(query)
         setSearchInput(query)
-    }, [query])
+    }
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setDraftFromYear(safeFromYear)
         setDraftToYear(safeToYear)
     }, [safeFromYear, safeToYear])

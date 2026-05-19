@@ -39,13 +39,12 @@ function ArchiveDetailEventsList({ events, locationsByEvent, locale }: ArchiveDe
 
                     const locationLabel = location
                         ? localize(location.name, locale) ||
-                          [
-                              location.street && location.number && `${location.street} ${location.number}`,
-                              location.postal_code && location.city && `${location.postal_code} ${location.city}`,
+                          ([
+                              location.street && location.number ? `${location.street} ${location.number}` : location.street,
+                              location.postal_code && location.city ? `${location.postal_code} ${location.city}` : location.city,
                           ]
                               .filter(Boolean)
-                              .join(', ') ||
-                          '—'
+                              .join(', ') || '—')
                         : '—'
 
                     return (

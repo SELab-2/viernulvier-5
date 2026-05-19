@@ -121,6 +121,65 @@ export type Messages = {
     archiveLabel: string
     logoutLabel: string
   }
+  production: {
+    // sidbar
+    productionSettingsLabel: string
+    statusLabel: string
+    genreLabel: string
+    tagLabel: string
+    bannerLabel: string
+    extraPicturesLabel: string
+    addGenrePlaceholder: string
+    addTagPlaceholder: string
+    chooseFilePlaceholder: string
+    artistLabel: string
+    // production edit
+    productionEditTitle: string
+    productionEditSubTitle: string
+    // tab tabs
+    dutchOption: string
+    englishOption: string
+    // tab content
+    contentLabels: {
+        super_title: string
+        title: string
+        artist: string
+        teaser: string
+        description: string
+        description_2: string
+    }
+    back: string
+    saveOnDraft: string
+    publish: string
+    // events edit
+    eventsEditTitle: string
+    eventsEditSubTitle: string
+    makeEventsLabel: string
+    eventsDateLabel: string
+    eventsTimeLabel: string
+    eventsLocationLabel: string
+    eventsCommentLabel: string
+    eventsActionsLabel: string
+    // UI messages
+    invalidProductionError: string
+  },
+  event: {
+    // event edit-popup
+    saveButtonLabel: string
+    editLabel: string
+    addLabel: string
+    timeLabel: string
+    locationLabel: string
+    commentLabel: string
+    cancelLabel: string
+    newLocationButton: string
+    newLocationNamePlaceholder: string
+    newLocationAddressPlaceholder: string
+    newLocationValidationError: string
+    newLocationCreateError: string
+    newLocationCreatingLabel: string
+    newLocationAddLabel: string
+  },
   detail: {
     navBack: string
     events: string

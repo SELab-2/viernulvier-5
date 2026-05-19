@@ -130,6 +130,22 @@ function App() {
                             }
                         />
                         <Route
+                            path={adminRoutes.productionEditPath}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <ArchiveEditPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+                        <Route
+                            path={adminRoutes.productionCreatePath}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <ArchiveEditPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+                        <Route
                             path={adminRoutes.blogsPath}
                             element={
                                 <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
@@ -138,7 +154,7 @@ function App() {
                             }
                         />
                         <Route
-                            path={`/en${adminRoutes.blogsPath}`}
+                            path={`/nl${adminRoutes.blogsPath}`}
                             element={
                                 <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
                                     <AdminBlogsPage />
@@ -146,7 +162,7 @@ function App() {
                             }
                         />
                         <Route
-                            path={`/nl${adminRoutes.blogsPath}`}
+                            path={`/en${adminRoutes.blogsPath}`}
                             element={
                                 <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
                                     <AdminBlogsPage />
