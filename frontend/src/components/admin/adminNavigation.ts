@@ -1,6 +1,7 @@
 export type AdminNavItemId =
     | 'dashboard'
     | 'productions'
+    | 'blogs'
     | 'posters'
     | 'gallery'
     | 'organisation'
@@ -28,6 +29,7 @@ export function getNavLabel(id: AdminNavItemId, nav: AdminNavMessages): string {
     const labelMap: Record<AdminNavItemId, string> = {
         dashboard: nav.dashboard,
         productions: nav.productions,
+        blogs: nav.blogs,
         posters: nav.posters,
         gallery: nav.gallery,
         organisation: nav.organisation,
@@ -42,6 +44,7 @@ export function getNavIconAlt(id: AdminNavItemId, nav: AdminNavMessages): string
     const altMap: Record<AdminNavItemId, string> = {
         dashboard: nav.dashboardIconAlt,
         productions: nav.productionsIconAlt,
+        blogs: nav.productionsIconAlt,
         posters: nav.postersIconAlt,
         gallery: nav.gallery,
         organisation: nav.organisationIconAlt,
@@ -53,12 +56,12 @@ export function getNavIconAlt(id: AdminNavItemId, nav: AdminNavMessages): string
 }
 
 export function getAdminNavigationItems(hostname: string = window.location.hostname): AdminNavigationGroup {
-    const { dashboardPath, postersPath, draftsPath } = getAdminRouteConfig(hostname)
-
+    const { dashboardPath, productionsPath, blogsPath, postersPath, draftsPath } = getAdminRouteConfig(hostname)
     return {
         primary: [
             { id: 'dashboard', to: dashboardPath, iconSrc: '/admin/sidebar-dashboard.svg' },
-            { id: 'productions', disabled: true, iconSrc: '/admin/sidebar-productions.svg' },
+            { id: 'productions', to: productionsPath, iconSrc: '/admin/sidebar-productions.svg' },
+            { id: 'blogs', to: blogsPath, iconSrc: '/admin/sidebar-blogs.svg' },
             { id: 'posters', to: postersPath, iconSrc: '/admin/sidebar-gallery.svg' },
             { id: 'organisation', disabled: true, iconSrc: '/admin/sidebar-organization.svg' },
             { id: 'drafts', to: draftsPath, iconSrc: '/admin/sidebar-drafts.svg'}
