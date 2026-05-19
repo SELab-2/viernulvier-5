@@ -17,7 +17,7 @@ export interface ProductionPayload {
   // is_draft: boolean,
 }
 
-export interface ProductionPayloadRespone {
+export interface ProductionPayloadResponse {
     data: {
         id: string,
         super_title?: LocalizedText,

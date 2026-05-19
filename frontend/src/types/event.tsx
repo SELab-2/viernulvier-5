@@ -26,7 +26,7 @@ export type EventPayload = {
     }
 }
 
-export type EventPayloadRepsone = {
+export type EventPayloadResponse = {
     key: string // always required: local UUID for new / real id for existing
     id?: string 
     starts_at?: string

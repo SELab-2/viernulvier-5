@@ -4,9 +4,9 @@ import AdminLayout from '../../components/admin/AdminLayout'
 import SectionHeading from '../../components/admin/SectionHeading'
 import EventsEdit from '../../components/admin/ManageEvents'
 
-import type { Language, ProductionPayload, LocalizedText, ProductionPayloadRespone } from '../../types/production'
+import type { Language, ProductionPayload, LocalizedText, ProductionPayloadResponse } from '../../types/production'
 import type { Locale } from '../../i18n/types'
-import type { Event, EventPayload, EventPayloadRepsone } from '../../types/event'
+import type { Event, EventPayload, EventPayloadResponse } from '../../types/event'
 
 import { useNavigate, useParams } from 'react-router-dom'
 import { getMessages } from '../../i18n'
@@ -30,7 +30,7 @@ const defaultLocalizedText: LocalizedText = {
     en: '',
 }
 
-const defaultProduciton: ProductionPayload = {
+const defaultProduction: ProductionPayload = {
     super_title: defaultLocalizedText,
     title: defaultLocalizedText,
     artist: defaultLocalizedText,
@@ -93,7 +93,7 @@ function ArchiveEditPage() {
     // ---- State ----
 
     // production state
-    const [production, setProduction] = useState<ProductionPayload>(defaultProduciton);
+    const [production, setProduction] = useState<ProductionPayload>(defaultProduction);
     const [events, setEvents] = useState<Event[]>([]);
     const genreState = useTagInput();
     const tagState = useTagInput();
@@ -122,7 +122,7 @@ function ArchiveEditPage() {
 
         const fetchProduction = async () => {
             try {
-                const response = await api.get<ProductionPayloadRespone>(`/archive/productions/${id}`);
+                const response = await api.get<ProductionPayloadResponse>(`/archive/productions/${id}`);
                 setProduction(response.data);
         
                 // fetch genres
@@ -162,7 +162,7 @@ function ArchiveEditPage() {
         if (!id) return;
         const fetchEvents = async () => {
             try {
-                const res = await api.get<{ data: EventPayloadRepsone[] }>(`/archive/events?productionId=${id}`);
+                const res = await api.get<{ data: EventPayloadResponse[] }>(`/archive/events?productionId=${id}`);
 
                 // Filter all unique hall_id's
                 const hallIds = [...new Set(
@@ -245,7 +245,7 @@ function ArchiveEditPage() {
 
 
                 // create production
-                const res: ProductionPayloadRespone = await api.post(`/archive/productions`, {
+                const res: ProductionPayloadResponse = await api.post(`/archive/productions`, {
                     super_title: production.super_title,
                     title: production.title,
                     artist: production.artist,
