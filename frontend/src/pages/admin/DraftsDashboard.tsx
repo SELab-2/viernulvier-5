@@ -6,6 +6,7 @@ import DraftsTable from '../../components/admin/drafts/DraftsTable'
 import { useProductionDrafts } from "../../components/admin/hooks/useProductionDrafts.ts"
 import { useBlogDrafts } from "../../components/admin/hooks/useBlogDrafts.ts"
 import { useOptionalAdminSession } from '../../auth/useAdminSessionContext'
+import { useNavigate, useParams } from 'react-router-dom'
 
 type TabKey = 'productions' | 'blogs'
 
@@ -29,7 +30,12 @@ function DraftsDashboardPageContent() {
     const session = useOptionalAdminSession()
     const currentUserId = session?.user?.id
 
-    const [tab, setTab] = useState<TabKey>('productions')
+    const navigate = useNavigate()
+    const params = useParams()
+
+    const tab: TabKey =
+        params.tab === 'blogs' ? 'blogs' : 'productions'
+
     const [onlyCurrent, setOnlyCurrent] = useState(false)
     const [refetch, setRefetch] = useState(false)
 
@@ -37,7 +43,7 @@ function DraftsDashboardPageContent() {
     const [pageSize, setPageSize] = useState<FixedPageSize>(readStoredPageSize)
 
     const handleTabChange = (next: TabKey) => {
-        setTab(next)
+        navigate(`/admin/drafts/${next}`)
         setPage(1)
     }
 

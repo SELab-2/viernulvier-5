@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom'
+import {Routes, Route, Navigate} from 'react-router-dom'
 import { lazy, Suspense } from 'react'
 import { getAdminRouteConfig } from './admin/paths'
 import ProtectedAdminRoute, { AdminEntryRoute } from './pages/admin/ProtectedAdminRoute'
@@ -89,6 +89,15 @@ function App() {
                         <Route
                             path={adminRoutes.draftsPath}
                             element={
+                                <Navigate
+                                    to={`${adminRoutes.draftsPath}/productions`}
+                                    replace
+                                />
+                            }
+                        />
+                        <Route
+                            path={`${adminRoutes.draftsPath}/:tab`}
+                            element={
                                 <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
                                     <DraftsDashboard />
                                 </ProtectedAdminRoute>
@@ -97,6 +106,15 @@ function App() {
                         <Route
                             path={`/en${adminRoutes.draftsPath}`}
                             element={
+                                <Navigate
+                                    to={`/en${adminRoutes.draftsPath}/productions`}
+                                    replace
+                                />
+                            }
+                        />
+                        <Route
+                            path={`/en${adminRoutes.draftsPath}/:tab`}
+                            element={
                                 <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
                                     <DraftsDashboard />
                                 </ProtectedAdminRoute>
@@ -104,6 +122,15 @@ function App() {
                         />
                         <Route
                             path={`/nl${adminRoutes.draftsPath}`}
+                            element={
+                                <Navigate
+                                    to={`/nl${adminRoutes.draftsPath}/productions`}
+                                    replace
+                                />
+                            }
+                        />
+                        <Route
+                            path={`/nl${adminRoutes.draftsPath}/:tab`}
                             element={
                                 <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
                                     <DraftsDashboard />
