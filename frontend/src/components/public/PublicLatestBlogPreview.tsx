@@ -41,8 +41,8 @@ function PublicLatestBlogPreview({ blog, locale, fallbackUntitled, onReadMore, o
                 <div className="relative h-[420px] overflow-hidden border border-border bg-surface sm:h-[560px]" aria-hidden="true">
                     <img
                         src={
-                            blog.images && typeof blog.thumbnail_index === 'number' && blog.images[blog.thumbnail_index]
-                                ? blog.images[blog.thumbnail_index]
+                            Array.isArray(blog.images) && typeof blog.thumbnail_index === 'number' && blog.images[blog.thumbnail_index]
+                                ? blog.images[blog.thumbnail_index] || '/fallback-hero.svg'
                                 : '/fallback-hero.svg'
                         }
                         alt=""
