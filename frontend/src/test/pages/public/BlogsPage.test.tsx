@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import BlogsPage from '../../../pages/public/BlogsPage'
+import BlogsPage from '../../../pages/public/BlogsPage.tsx'
 
 const apiFetchMock = vi.hoisted(() => vi.fn())
 
@@ -43,15 +43,14 @@ describe('BlogsPage', () => {
         apiFetchMock.mockResolvedValue(buildPaginatedEmpty())
     })
 
-    it('fetches blogs from unified search endpoint with blogs tab', async () => {
+    it('fetches blogs from blogs endpoint', async () => {
         renderPage('/nl/blogs?q=test')
 
         await waitFor(() => {
             expect(
                 apiFetchMock.mock.calls.some(([endpoint]) =>
                     typeof endpoint === 'string' &&
-                    endpoint.startsWith('/archive/search?') &&
-                    endpoint.includes('tab=blogs') &&
+                    endpoint.startsWith('/archive/blogs?') &&
                     endpoint.includes('search=test'),
                 ),
             ).toBe(true)
@@ -63,13 +62,11 @@ describe('BlogsPage', () => {
             data: [
                 {
                     id: '11111111-1111-1111-1111-111111111111',
-                    type: 'blog',
                     title: { nl: 'Nieuwe Blogtitel' },
-                    excerpt: 'Dit is een korte blogbeschrijving.',
-                    image_url: '/api/v1/images/test-image',
-                    date_label: '18/05/2026',
-                    venue_label: '',
-                    genre_label: 'Blog',
+                    content: { nl: '<p>Dit is een korte blogbeschrijving.</p>' },
+                    images: ['/api/v1/images/test-image'],
+                    thumbnail_index: 0,
+                    created_at: '2026-05-18T00:00:00.000Z',
                 },
             ],
             meta: {
@@ -104,8 +101,7 @@ describe('BlogsPage', () => {
             expect(
                 apiFetchMock.mock.calls.some(([endpoint]) =>
                     typeof endpoint === 'string' &&
-                    endpoint.startsWith('/archive/search?') &&
-                    endpoint.includes('tab=blogs') &&
+                    endpoint.startsWith('/archive/blogs?') &&
                     endpoint.includes('search=banner'),
                 ),
             ).toBe(true)
