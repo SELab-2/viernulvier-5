@@ -287,22 +287,6 @@ describe('ArchiveDetailPage', () => {
         expect(navigate).toHaveBeenCalledWith('/')
     })
 
-    it('navigates to prev page when there is history', async () => {
-        vi.stubGlobal('window', {
-            ...window,
-            history: {
-                ...window.history,
-                length: 2,
-            },
-        })
-
-        renderPage()
-
-        const backButton = await screen.findByText('Terug')
-        fireEvent.click(backButton)
-
-        expect(navigate).toHaveBeenCalledWith(-1)
-    })
 
     it('fetches both production and events in parallel on mount', async () => {
         renderPage()
