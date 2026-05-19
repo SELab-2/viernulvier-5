@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom'
+import {Routes, Route, Navigate} from 'react-router-dom'
 import { lazy, Suspense } from 'react'
 import { getAdminRouteConfig } from './admin/paths'
 import ProtectedAdminRoute, { AdminEntryRoute } from './pages/admin/ProtectedAdminRoute'
@@ -25,6 +25,7 @@ const CreateBlogPage = lazy(() => import('./pages/admin/CreateBlogPage'))
 
 import BlogDetailPage from './pages/public/BlogDetailPage'
 import BlogsPage from './pages/public/BlogsPage'
+import DraftsDashboard from './pages/admin/DraftsDashboard.tsx'
 /**
  * Root App component.
  *
@@ -153,6 +154,57 @@ function App() {
                             }
                         />
                         <Route
+                            path={adminRoutes.draftsPath}
+                            element={
+                                <Navigate
+                                    to={`${adminRoutes.draftsPath}/productions`}
+                                    replace
+                                />
+                            }
+                        />
+                        <Route
+                            path={`${adminRoutes.draftsPath}/:tab`}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <DraftsDashboard />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+                        <Route
+                            path={`/en${adminRoutes.draftsPath}`}
+                            element={
+                                <Navigate
+                                    to={`/en${adminRoutes.draftsPath}/productions`}
+                                    replace
+                                />
+                            }
+                        />
+                        <Route
+                            path={`/en${adminRoutes.draftsPath}/:tab`}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <DraftsDashboard />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+                        <Route
+                            path={`/nl${adminRoutes.draftsPath}`}
+                            element={
+                                <Navigate
+                                    to={`/nl${adminRoutes.draftsPath}/productions`}
+                                    replace
+                                />
+                            }
+                        />
+                        <Route
+                            path={`/nl${adminRoutes.draftsPath}/:tab`}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <DraftsDashboard />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+                        <Route
                             path={adminRoutes.archiveEditPath}
                             element={
                                 <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
@@ -181,6 +233,32 @@ function App() {
                             element={
                                 <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
                                     <PostersPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+                        <Route
+                            path={adminRoutes.archivePreviewPath}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <ArchiveDetailPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+
+                        <Route
+                            path={`/en${adminRoutes.archivePreviewPath}`}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <ArchiveDetailPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+
+                        <Route
+                            path={`/nl${adminRoutes.archivePreviewPath}`}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <ArchiveDetailPage />
                                 </ProtectedAdminRoute>
                             }
                         />
@@ -226,6 +304,32 @@ function App() {
                             }
                         />
 
+                        <Route
+                            path={adminRoutes.blogPreviewPath}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <BlogDetailPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+
+                        <Route
+                            path={`/en${adminRoutes.blogPreviewPath}`}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <BlogDetailPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+
+                        <Route
+                            path={`/nl${adminRoutes.blogPreviewPath}`}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <BlogDetailPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
                         <Route
                             path="/admin/blogs/:id/edit"
                             element={

@@ -22,6 +22,7 @@ import { getSpaceById } from '../../api/spaces'
 import { getLocationById, type Location } from '../../api/locations'
 import { LeftArrowIcon } from '../../components/shared/icons'
 import { LoadingContent } from '../LoadingPage'
+import {useOptionalAdminSession} from "../../auth/useAdminSessionContext.ts";
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -51,6 +52,9 @@ function ArchiveDetailPageContent() {
         setNotFound(false)
         setLoading(true)
     }
+
+    const session = useOptionalAdminSession()
+    const isLoggedIn = Boolean(session?.user)
 
     const handleGoBack = () => {
         if (window.history.state?.idx > 0) {
@@ -110,8 +114,9 @@ function ArchiveDetailPageContent() {
                     getBlogsByProductionId(id).catch(() => ({ data: [] })),
                 ])
 
+
                 const prod = prodRes.data
-                if (prod.draft) {
+                if (prod.draft && !isLoggedIn) {
                     setNotFound(true)
                     return
                 }
@@ -177,7 +182,7 @@ function ArchiveDetailPageContent() {
         }
 
         fetchData()
-    }, [id, idIsMalformed])
+    }, [id, idIsMalformed, isLoggedIn])
 
     if (loading) {
         return <LoadingContent />

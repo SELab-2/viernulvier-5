@@ -8,11 +8,14 @@ export type AdminRouteConfig = {
   productionsPath: string
   blogsPath: string
   archiveEditPath: string
+  archivePreviewPath: string
+  blogPreviewPath: string
   productionCreatePath: string
   blogEditPath: string
   blogCreatePath: string
   postersPath: string
   publicPath: (path: string) => string
+  draftsPath: string
 }
 
 export function getAdminRouteConfig(hostname: string): AdminRouteConfig {
@@ -35,10 +38,13 @@ export function getAdminRouteConfig(hostname: string): AdminRouteConfig {
       productionsPath: '/admin/productions',
       blogsPath: '/admin/blogs',
       archiveEditPath: '/admin/archive/:id/edit',
+      archivePreviewPath: '/admin/archive/:id',
+      blogPreviewPath: '/admin/blogs/:id',
       productionCreatePath: '/admin/archive/create',
       blogEditPath: '/admin/blogs/:id/edit',
       blogCreatePath: '/admin/blogs/create',
       postersPath: '/admin/posters',
+      draftsPath: '/admin/drafts',
       publicPath,
     }
   }
@@ -53,10 +59,13 @@ export function getAdminRouteConfig(hostname: string): AdminRouteConfig {
     productionsPath: '/admin/productions',
     blogsPath: '/admin/blogs',
     archiveEditPath: '/admin/archive/:id/edit',
+    archivePreviewPath: '/admin/archive/:id',
+    blogPreviewPath: '/admin/blogs/:id',
     productionCreatePath: '/admin/archive/create',
     blogEditPath: '/admin/blogs/:id/edit',
     blogCreatePath: '/admin/blogs/create',
     postersPath: '/admin/posters',
+    draftsPath: '/admin',
     publicPath,
   }
 }
