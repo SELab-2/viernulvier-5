@@ -284,7 +284,7 @@ describe('ArchiveDetailPage', () => {
         const backButton = await screen.findByText('Terug')
         fireEvent.click(backButton)
 
-        expect(navigate).toHaveBeenCalledWith('/')
+        expect(navigate).toHaveBeenCalledWith(-1)
     })
 
     it('fetches both production and events in parallel on mount', async () => {
