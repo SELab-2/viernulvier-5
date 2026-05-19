@@ -15,7 +15,10 @@ export const searchQuerySchema = paginationQuerySchema.extend({
 export const searchResultItemSchema = z.object({
     id: z.string().uuid(),
     type: z.enum(['production', 'blog', 'poster']),
-    title: z.union([z.string(), z.record(z.string(), z.string())]).nullable().optional(),
+    title: z.union([
+        z.string(),
+        z.record(z.string(), z.string().nullable()),
+    ]).nullable().optional(),
     excerpt: z.string().nullable().optional(),
     image_url: z.string().nullable().optional(),
     date_label: z.string().nullable().optional(),

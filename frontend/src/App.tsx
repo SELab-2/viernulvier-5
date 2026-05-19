@@ -17,11 +17,14 @@ import LoadingPage from './pages/LoadingPage'
 // Admin pages (lazy loaded — not included in public bundle)
 const LoginPage = lazy(() => import('./pages/admin/LoginPage'))
 const DashboardPage = lazy(() => import('./pages/admin/DashboardPage'))
+const ProductionsPage = lazy(() => import('./pages/admin/ProductionsPage'))
+const AdminBlogsPage = lazy(() => import('./pages/admin/BlogsPage'))
 const ArchiveEditPage = lazy(() => import('./pages/admin/ArchiveEditPage'))
 const PostersPage = lazy(() => import('./pages/admin/PostersPage'))
 const CreateBlogPage = lazy(() => import('./pages/admin/CreateBlogPage'))
 
 import BlogDetailPage from './pages/public/BlogDetailPage'
+import BlogsPage from './pages/public/BlogsPage'
 /**
  * Root App component.
  *
@@ -50,7 +53,9 @@ function App() {
                         <Route path="/posters/:id" element={<PosterDetailPage />} />
                         <Route path="/nl/posters/:id" element={<PosterDetailPage />} />
                         <Route path="/en/posters/:id" element={<PosterDetailPage />} />
-                        
+                        <Route path="/blogs" element={<BlogsPage />} />
+                        <Route path="/nl/blogs" element={<BlogsPage />} />
+                        <Route path="/en/blogs" element={<BlogsPage />} />
                         <Route path="/blogs/:id" element={<BlogDetailPage />} />
                         <Route path="/nl/blogs/:id" element={<BlogDetailPage />} />
                         <Route path="/en/blogs/:id" element={<BlogDetailPage />} />
@@ -79,6 +84,22 @@ function App() {
                             element={
                                 <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
                                     <DashboardPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+                        <Route
+                            path={adminRoutes.productionsPath}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <ProductionsPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+                        <Route
+                            path={adminRoutes.blogsPath}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <AdminBlogsPage />
                                 </ProtectedAdminRoute>
                             }
                         />
