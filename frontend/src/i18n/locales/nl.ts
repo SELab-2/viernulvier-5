@@ -265,13 +265,11 @@ const nl: Messages = {
       blogs: 'Blogs',
       posters: 'Affiches',
       gallery: 'Galerij',
-      organisation: 'Organisatie',
       settings: 'Instellingen',
       dashboardIconAlt: 'Dashboard icoon',
       productionsIconAlt: 'Producties icoon',
       blogsIconAlt: 'Blogs icoon',
       postersIconAlt: 'Affiches icoon',
-      organisationIconAlt: 'Organisatie icoon',
       settingsIconAlt: 'Instellingen icoon',
     },
     dashboard: {
