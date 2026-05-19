@@ -159,11 +159,6 @@ export class MediaService {
         const filepath = path.resolve(env.CROP_LOCATION, filename)
 
         await this.repository.saveFile(filepath, data.file);
-
-        await this.repository.updateCrop(id, {
-            file_location: filepath,
-            url: `/api/v1/images/${id}`,
-        })
     }
 
     async deleteCrop(id: string): Promise<void> {
