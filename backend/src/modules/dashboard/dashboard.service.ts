@@ -46,6 +46,8 @@ type GetSummaryOptions = {
     limit: number
 }
 
+const RECENT_ITEMS_CAP = 30
+
 function computeDelta(thisMonth: number, lastMonth: number): Delta {
     if (lastMonth === 0 && thisMonth === 0) {
         return { changePct: null, direction: 'flat' }
@@ -154,7 +156,6 @@ export class DashboardService {
     constructor(private readonly repository: DashboardRepository) {}
 
     async getSummary({ page, limit }: GetSummaryOptions): Promise<DashboardSummary> {
-        const fetchCount = page * limit
         const now = new Date()
         const { startOfThisMonth, startOfLastMonth } = currentMonthBounds(now)
 
@@ -173,9 +174,9 @@ export class DashboardService {
         ] = await Promise.all([
             this.repository.getCounts(),
             this.repository.getLastScraped(),
-            this.repository.getRecentProductions(fetchCount),
-            this.repository.getRecentBlogs(fetchCount),
-            this.repository.getRecentPosters(fetchCount),
+            this.repository.getRecentProductions(RECENT_ITEMS_CAP),
+            this.repository.getRecentBlogs(RECENT_ITEMS_CAP),
+            this.repository.getRecentPosters(RECENT_ITEMS_CAP),
             this.repository.getProductionCountInRange(startOfThisMonth, now),
             this.repository.getProductionCountInRange(startOfLastMonth, startOfThisMonth),
             this.repository.getBlogCountInRange(startOfThisMonth, now),
@@ -184,8 +185,10 @@ export class DashboardService {
             this.repository.getPosterCountInRange(startOfLastMonth, startOfThisMonth),
         ])
 
-        const totalRecentItems = counts.productions + counts.blogs + counts.posters
         const recentItems = mergeAndPaginate(recentProductions, recentBlogs, recentPosters, page, limit)
+        const totalRecentItems = recentItems.length === limit
+            ? Math.min(counts.productions + counts.blogs + counts.posters, RECENT_ITEMS_CAP)
+            : (page - 1) * limit + recentItems.length
 
         return {
             counts,

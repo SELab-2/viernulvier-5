@@ -29,7 +29,7 @@ const countsSchema = z.object({
 })
 
 export const dashboardSummaryQuerySchema = paginationQuerySchema.extend({
-    limit: z.coerce.number().int().min(1).max(50).default(3),
+    limit: z.coerce.number().int().min(1).max(30).default(3),
 })
 
 export const dashboardSummarySchema = z.object({
