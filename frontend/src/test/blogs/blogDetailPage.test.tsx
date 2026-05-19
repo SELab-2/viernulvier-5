@@ -29,10 +29,6 @@ vi.mock('../../api/client', () => ({
   ApiError: MockApiError,
 }))
 
-vi.mock('../../utils/navigationHistory', () => ({
-  getPreviousStrippedPath: getPreviousStrippedPathMock,
-}))
-
 vi.mock('../../components/public/PublicLayout', () => ({
   default: ({ children }: { children: ReactNode }) => (
     <PublicMessagesContext.Provider value={getMessages()}>{children}</PublicMessagesContext.Provider>

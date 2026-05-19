@@ -13,7 +13,6 @@ import ProductionCard from '../../components/blogs/ProductionCard'
 import ArchiveDetailHero from '../../components/public/detail/PublicDetailHeroBanner'
 import ArchiveDetailGallery from '../../components/public/detail/PublicDetailGallery'
 import '../../styles/QuillEditor.css'
-import { getPreviousStrippedPath } from '../../utils/navigationHistory'
 import {
     getLocalizedContent,
     getLocalizedTitle,
