@@ -1,7 +1,7 @@
 import React from 'react'
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import type { Messages } from '../../../i18n/types'
 import { AdminMessagesContext } from '../../../components/admin/AdminMessagesContext'
 import DraftsDashboardPage from "../../../pages/admin/DraftsDashboard.tsx"
@@ -55,11 +55,17 @@ vi.mock('../../../components/admin/hooks/useBlogDrafts', () => ({
     useBlogDrafts: (args: { page: number; limit: number }) => useBlogDraftsMock(args),
 }))
 
-const renderPage = () => render(
-    <MemoryRouter>
-        <DraftsDashboardPage />
-    </MemoryRouter>
-)
+const renderPage = (initialPath = '/admin/drafts/productions') =>
+    render(
+        <MemoryRouter initialEntries={[initialPath]}>
+            <Routes>
+                <Route
+                    path="/admin/drafts/:tab"
+                    element={<DraftsDashboardPage />}
+                />
+            </Routes>
+        </MemoryRouter>
+    )
 
 describe('DraftsDashboardPage', () => {
     beforeEach(() => {
