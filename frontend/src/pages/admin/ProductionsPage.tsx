@@ -106,6 +106,7 @@ function ProductionsPageContent() {
                 const params = new URLSearchParams({
                     page: String(page),
                     limit: String(PAGE_SIZE),
+                    draft: 'false',
                 })
 
                 if (debouncedQuery) params.set('search', debouncedQuery)
