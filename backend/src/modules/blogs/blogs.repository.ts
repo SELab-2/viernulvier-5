@@ -318,6 +318,7 @@ export class BlogsRepository {
         if (!existing) throw new AppError('Blog not found')
 
         await this.prisma.$transaction([
+            this.prisma.editor_blog.deleteMany({ where: { blog_id: id }}),
             this.prisma.blog_production.deleteMany({ where: { blog_id: id } }),
             this.prisma.blog.delete({ where: { id } }),
         ])
