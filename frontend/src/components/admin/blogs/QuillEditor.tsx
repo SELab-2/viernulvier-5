@@ -109,6 +109,7 @@ function QuillEditor({ value, onChange, onJsonChange, placeholder, onImageUpload
         }
 
         quillRef.current = quill
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [handleImageUpload, onChange,onJsonChange, placeholder, value])
 
     useEffect(() => {
