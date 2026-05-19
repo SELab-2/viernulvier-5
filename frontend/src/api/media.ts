@@ -85,6 +85,15 @@ export const getPreferredMediaCropUrl = (crops: Crop[]): string | null => {
     return null
 }
 
+export const resolveCropUrl = (url?: string | null): string | null => {
+    if (!url) return null
+    if (/^https?:\/\//i.test(url)) return url
+    // use api.defaults.baseURL if configured, otherwise fallback to current origin
+    // @ts-expect-error api.defaults may not be typed
+    const base = (api.defaults && (api.defaults as any).baseURL) || window.location.origin
+    return `${base.replace(/\/$/, '')}/${url.replace(/^\//, '')}`
+}
+
 
 // load galary slots
 
@@ -212,6 +221,10 @@ export async function saveGallerySlots(opts: {
     const createdItems: string[] = []
     const createdCrops: string[] = []
 
+    // Keep the list of created pending items in upload order so we can map them
+    // back to the pending slots when we set positions later.
+    const createdPendingItems: { itemId: string; cropId: string }[] = []
+
     try {
         // 2. Delete removed crops & items (best-effort)
         await Promise.allSettled(removedCropIds.map(id => api.delete(`/archive/media/items/crops/${id}`)))
@@ -223,18 +236,45 @@ export async function saveGallerySlots(opts: {
             const { item, crop } =  await uploadFile(banner.file, galleryId, 'FE3_header', 0)
             createdItems.push(item.id)
             createdCrops.push(crop.id)
+            createdPendingItems.push({ itemId: item.id, cropId: crop.id })
         }
 
         // 4. Upload pending extras
-        let position = 1
+        let position = extras.filter(s => s.kind ==='existing').length + 1
         for (const slot of extras) {
             if (slot.kind === 'pending') {
                 const { item, crop } = await uploadFile(slot.file, galleryId, 'FE3_boxed', position)
                 createdItems.push(item.id)
                 createdCrops.push(crop.id)
+                createdPendingItems.push({ itemId: item.id, cropId: crop.id })
             }
             position++
         }
+
+        // 5. Ensure positions on the server match the desired order.
+        // Desired order: banner (if present) then extras in the order provided.
+        // For existing slots we use their item_id, for pending slots we consume createdPendingItems
+        const desiredItemOrder: string[] = []
+        const pendingIterator = createdPendingItems[Symbol.iterator]()
+        if (banner) {
+            if (banner.kind === 'existing') desiredItemOrder.push(banner.item_id)
+            else {
+                const next = pendingIterator.next()
+                if (!next.done) desiredItemOrder.push(next.value.itemId)
+            }
+        }
+        for (const slot of extras) {
+            if (slot.kind === 'existing') desiredItemOrder.push(slot.item_id)
+            else {
+                const next = pendingIterator.next()
+                if (!next.done) desiredItemOrder.push(next.value.itemId)
+            }
+        }
+
+        // Patch positions to match desired order (0..n-1)
+        await Promise.all(desiredItemOrder.map((itemId, idx) =>
+            api.patch(`/archive/media/items/${itemId}`, { position: idx })
+        ))
 
     } catch (err) { 
         await Promise.allSettled(createdCrops.map(id => api.delete(`/archive/media/items/crops/${id}`)));
@@ -272,4 +312,3 @@ export async function deleteGallery(galleryId: string): Promise<void> {
         // best-effort cleanup; caller should not throw
     }
 }
- 

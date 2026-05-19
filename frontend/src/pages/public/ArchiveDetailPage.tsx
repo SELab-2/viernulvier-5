@@ -128,14 +128,30 @@ function ArchiveDetailPageContent() {
                     const items = galleryRes.data
 
                     if (items.length > 0) {
-                        const firstCrops = await getItemCrops(items[0].id)
-                        const heroUrl = getPreferredHeroCropUrl(firstCrops.data)
+                        // Respect explicit positions (ascending). Fall back to newest first when positions are equal/missing.
+                        items.sort((a, b) => {
+                            const pa = a.position ?? 0
+                            const pb = b.position ?? 0
+                            if (pa !== pb) return pa - pb
+                            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+                        })
+
+                        // Fetch crops for all items so we can pick the banner by crop name.
+                        const allCrops = await Promise.all(items.map((item) => getItemCrops(item.id)))
+
+                        // Prefer an item that has the 'FE3_header' crop as banner, otherwise boxed, otherwise first.
+                        let bannerIndex = allCrops.findIndex(res => res.data.some(c => c.name === 'FE3_header'))
+                        if (bannerIndex === -1) {
+                            bannerIndex = allCrops.findIndex(res => res.data.some(c => c.name === 'FE3_boxed'))
+                        }
+                        if (bannerIndex === -1) bannerIndex = 0
+
+                        const heroUrl = getPreferredHeroCropUrl(allCrops[bannerIndex].data)
                         setImageUrl(heroUrl)
 
-                        // First item is used as the hero banner above; remaining items go in the gallery
-                        const remainingItems = items.slice(1)
-                        const allCrops = await Promise.all(remainingItems.map((item) => getItemCrops(item.id)))
-                        setGalleryImages(allCrops.map((res) => getPreferredMediaCropUrl(res.data)).filter(Boolean) as string[])
+                        // Remaining items → gallery images (preserve sorted order, skipping banner)
+                        const remainingCrops = allCrops.filter((_, i) => i !== bannerIndex)
+                        setGalleryImages(remainingCrops.map((res) => getPreferredMediaCropUrl(res.data)).filter(Boolean) as string[])
                     }
                 }
                 
