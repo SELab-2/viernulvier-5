@@ -10,11 +10,10 @@ model crop {
   created_at    DateTime @default(now()) @db.Timestamp(6)
   updated_at    DateTime @default(now()) @db.Timestamp(6)
   id            String   @id @default(uuid()) @db.Uuid
-  apiId         String?  @unique @db.VarChar
   name          String?  @db.VarChar
   url           String?  @db.VarChar
+  apiId         String?  @unique @db.VarChar
   item_id       String?  @db.Uuid
-  file_location String?
   item          item?    @relation("item_crops", fields: [item_id], references: [id])
 }
 
@@ -22,7 +21,6 @@ model event {
   created_at            DateTime      @default(now()) @db.Timestamp(6)
   updated_at            DateTime      @default(now()) @db.Timestamp(6)
   id                    String        @id @default(uuid()) @db.Uuid
-  apiId                 String?       @unique @db.VarChar
   starts_at             DateTime?     @db.Timestamp(6)
   ends_at               DateTime?     @db.Timestamp(6)
   intermission_at       DateTime?     @db.Timestamp(6)
@@ -39,6 +37,7 @@ model event {
   production_id         String?       @db.Uuid
   status_id             String?       @db.Uuid
   hall_id               String?       @db.Uuid
+  apiId                 String?       @unique @db.VarChar
   hall                  hall?         @relation("event_hall", fields: [hall_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   production            production?   @relation("event_production", fields: [production_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   event_prices          event_price[]
@@ -48,13 +47,13 @@ model event_price {
   created_at    DateTime  @default(now()) @db.Timestamp(6)
   updated_at    DateTime  @default(now()) @db.Timestamp(6)
   id            String    @id @default(uuid()) @db.Uuid
-  apiId         String?   @unique @db.VarChar
   event_id      String?   @db.Uuid
   available     Int?
   amount        String?   @db.VarChar
   box_office_id String?   @db.VarChar
   contigent_id  Int?
   expires_at    DateTime? @db.Timestamp(6)
+  apiId         String?   @unique @db.VarChar
   event         event?    @relation(fields: [event_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
@@ -62,10 +61,10 @@ model gallery {
   created_at                 DateTime     @default(now()) @db.Timestamp(6)
   updated_at                 DateTime     @default(now()) @db.Timestamp(6)
   id                         String       @id @default(uuid()) @db.Uuid
-  apiId                      String?      @unique @db.VarChar
   name                       String?      @db.VarChar
-  items                      item[]
+  apiId                      String?      @unique @db.VarChar
   other_files                file[]
+  items                      item[]
   media_gallery_productions  production[] @relation("production_media_gallery")
   poster_gallery_productions production[] @relation("production_poster_gallery")
   review_gallery_productions production[] @relation("production_review_gallery")
@@ -83,23 +82,16 @@ model file {
   gallery       gallery?  @relation(fields: [gallery_id], references: [id])
 }
 
-enum filetype {
-  video
-  image
-  pdf
-  other
-}
-
 model genre {
   created_at       DateTime           @default(now()) @db.Timestamp(6)
   updated_at       DateTime           @default(now()) @db.Timestamp(6)
   id               String             @id @default(uuid()) @db.Uuid
-  apiId            String?            @unique @db.VarChar
   type             String?            @db.VarChar
   vendor_id        String?            @db.VarChar
   name             Json?
   slug             Json?
   description      Json?
+  apiId            String?            @unique @db.VarChar
   genre_production genre_production[]
 }
 
@@ -116,20 +108,20 @@ model tag {
   created_at     DateTime         @default(now()) @db.Timestamp(6)
   updated_at     DateTime         @default(now()) @db.Timestamp(6)
   id             String           @id @default(uuid()) @db.Uuid
+  name           Json?
   apiId          String?          @unique @db.VarChar
+  description    Json?
+  slug           Json?
   type           String?          @db.VarChar
   vendor_id      String?          @db.VarChar
-  name           Json?
-  slug           Json?
-  description    Json?
   tag_production tag_production[]
 }
 
 model tag_production {
   tag_id        String     @db.Uuid
   production_id String     @db.Uuid
-  tag           tag        @relation(fields: [tag_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   production    production @relation(fields: [production_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  tag           tag        @relation(fields: [tag_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([tag_id, production_id])
 }
@@ -138,7 +130,6 @@ model hall {
   created_at     DateTime @default(now()) @db.Timestamp(6)
   updated_at     DateTime @default(now()) @db.Timestamp(6)
   id             String   @id @default(uuid()) @db.Uuid
-  apiId          String?  @unique @db.VarChar
   vendor_id      String?  @db.VarChar
   box_office_id  String?  @db.VarChar
   seat_selection String?  @db.VarChar
@@ -146,6 +137,7 @@ model hall {
   name           Json?
   remark         Json?
   space_id       String?  @db.Uuid
+  apiId          String?  @unique @db.VarChar
   events         event[]  @relation("event_hall")
   space          space?   @relation("hall_space", fields: [space_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
@@ -154,7 +146,6 @@ model item {
   created_at        DateTime @default(now()) @db.Timestamp(6)
   updated_at        DateTime @default(now()) @db.Timestamp(6)
   id                String   @id @default(uuid()) @db.Uuid
-  apiId             String?  @unique @db.VarChar
   type              String?  @db.VarChar
   original_filename String?  @db.VarChar
   position          Int?
@@ -166,6 +157,7 @@ model item {
   description       Json?
   credits           Json?
   link              Json?
+  apiId             String?  @unique @db.VarChar
   crops             crop[]   @relation("item_crops")
   gallery           gallery? @relation(fields: [gallery_id], references: [id])
 }
@@ -174,7 +166,6 @@ model location {
   created_at   DateTime @default(now()) @db.Timestamp(6)
   updated_at   DateTime @default(now()) @db.Timestamp(6)
   id           String   @id @default(uuid()) @db.Uuid
-  apiId        String?  @unique @db.VarChar
   name         Json?
   code         String?  @db.VarChar
   street       String?  @db.VarChar
@@ -185,21 +176,21 @@ model location {
   phone_2      String?  @db.VarChar
   own_location String?  @db.VarChar
   country      String?  @db.VarChar
+  apiId        String?  @unique @db.VarChar
   spaces       space[]  @relation("space_location")
 }
 
 model blog {
-  id               String            @id @db.Uuid @default(uuid())
-  title            Json?
-  content          Json?
-  thumbnail_index  Int?
-  images           String[]          @default([])
-  blog_production  blog_production[]
-  editor_blog      editor_blog[]
-  draft            Boolean?
-
-  created_at DateTime  @default(now()) @db.Timestamp(6)
-  updated_at DateTime  @default(now()) @db.Timestamp(6)
+  created_at      DateTime          @default(now()) @db.Timestamp(6)
+  updated_at      DateTime          @updatedAt @db.Timestamp(6)
+  id              String            @id @default(uuid()) @db.Uuid
+  title           Json?
+  content         Json?
+  draft           Boolean?
+  images          String[]          @default([])
+  thumbnail_index Int?
+  blog_production blog_production[]
+  editor_blog     editor_blog[]
 }
 
 model blog_production {
@@ -212,25 +203,23 @@ model blog_production {
 }
 
 model editor_blog {
-  editor_id     String     @db.Uuid
-  blog_id       String     @db.Uuid
-  editor        AdminUser  @relation(fields: [editor_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  blog          blog       @relation(fields: [blog_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  editor_id String    @db.Uuid
+  blog_id   String    @db.Uuid
+  blog      blog      @relation(fields: [blog_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  editor    AdminUser @relation(fields: [editor_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([editor_id, blog_id])
 }
 
-
 model production {
-  created_at        DateTime           @default(now()) @db.Timestamp(6)
-  updated_at        DateTime           @default(now()) @db.Timestamp(6)
-  id                String             @id @default(uuid()) @db.Uuid
-  apiId             String?            @unique @db.VarChar
-  vendor_id         String?            @db.VarChar
+  created_at        DateTime            @default(now()) @db.Timestamp(6)
+  updated_at        DateTime            @default(now()) @db.Timestamp(6)
+  id                String              @id @default(uuid()) @db.Uuid
+  vendor_id         String?             @db.VarChar
   box_office_id     Int?
-  performer_field   String?            @db.VarChar
-  performer_type    String?            @db.VarChar
-  attendance_mode   String?            @db.VarChar
+  performer_field   String?             @db.VarChar
+  performer_type    String?             @db.VarChar
+  attendance_mode   String?             @db.VarChar
   super_title       Json?
   title             Json?
   artist            Json?
@@ -250,18 +239,19 @@ model production {
   description_short Json?
   eticket_info      Json?
   custom_data       Json?
-  media_gallery_id  String?            @db.Uuid
-  review_gallery_id String?            @db.Uuid
-  poster_gallery_id String?            @db.Uuid
-  blog_production   blog_production[]
-  events            event[]            @relation("event_production")
-  genre_production  genre_production[]
-  tag_production    tag_production[]
-  editor_production editor_production[]
+  media_gallery_id  String?             @db.Uuid
+  review_gallery_id String?             @db.Uuid
+  poster_gallery_id String?             @db.Uuid
+  apiId             String?             @unique @db.VarChar
   draft             Boolean?
-  media_gallery     gallery?           @relation("production_media_gallery", fields: [media_gallery_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  poster_gallery    gallery?           @relation("production_poster_gallery", fields: [poster_gallery_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  review_gallery    gallery?           @relation("production_review_gallery", fields: [review_gallery_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  blog_production   blog_production[]
+  editor_production editor_production[]
+  events            event[]             @relation("event_production")
+  genre_production  genre_production[]
+  media_gallery     gallery?            @relation("production_media_gallery", fields: [media_gallery_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  poster_gallery    gallery?            @relation("production_poster_gallery", fields: [poster_gallery_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  review_gallery    gallery?            @relation("production_review_gallery", fields: [review_gallery_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  tag_production    tag_production[]
 }
 
 model editor_production {
@@ -277,36 +267,40 @@ model space {
   created_at  DateTime  @default(now()) @db.Timestamp(6)
   updated_at  DateTime  @default(now()) @db.Timestamp(6)
   id          String    @id @default(uuid()) @db.Uuid
-  apiId       String?   @unique @db.VarChar
   vendor_id   String?   @db.VarChar
   name        Json?
   location_id String?   @db.Uuid
+  apiId       String?   @unique @db.VarChar
   halls       hall[]    @relation("hall_space")
   location    location? @relation("space_location", fields: [location_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
-
-// last scraped time
 
 model last_scraped {
   time DateTime
   id   String   @id @default(uuid()) @db.Uuid
 }
 
-// Scaffold-specific admin model for dashboard authentication.
-enum AdminRole {
-  ADMIN
-  EDITOR
-}
-
 model AdminUser {
-  id           String    @id @default(uuid()) @db.Uuid
-  username     String    @unique @db.VarChar
-  passwordHash String    @map("password_hash") @db.VarChar
-  role         AdminRole @default(ADMIN)
-  created_at    DateTime  @default(now()) @db.Timestamp(6)
-  updated_at   DateTime  @default(now()) @db.Timestamp(6)
-  editor_blog  editor_blog[]
+  id                String              @id @default(uuid()) @db.Uuid
+  username          String              @unique @db.VarChar
+  passwordHash      String              @map("password_hash") @db.VarChar
+  created_at        DateTime            @default(now()) @db.Timestamp(6)
+  updated_at        DateTime            @default(now()) @db.Timestamp(6)
+  role              AdminRole           @default(ADMIN)
+  editor_blog       editor_blog[]
   editor_production editor_production[]
 
   @@map("users")
+}
+
+enum filetype {
+  video
+  image
+  pdf
+  other
+}
+
+enum AdminRole {
+  ADMIN
+  EDITOR
 }
