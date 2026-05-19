@@ -392,52 +392,57 @@ function CreateBlogPage() {
                 en: form.en.title || null,
             }
 
-            const payload = {
-                title: blogTitle,
-                content: combinedContent,
-                productionIds: selectedProductionIds,
-                draft: true,
+            let createdBlogId = blogId ?? ''
+            let latestThumbnailIndex = thumbnailIndex
+
+            // Delete removed images first (same as publish)
+            if (isEditMode && blogId && deletedBlogImageUrls.length > 0) {
+                const indicesToDelete = Array.from(
+                    new Set(
+                        deletedBlogImageUrls
+                            .map((imageUrl) => initialBlogImagesRef.current.indexOf(imageUrl))
+                            .filter((index) => index >= 0),
+                    ),
+                ).sort((left, right) => right - left)
+
+                let latestImages = blogImages
+
+                for (const imageIndex of indicesToDelete) {
+                    const response = await apiFetch<{ data: { images: string[]; thumbnail_index: number | null } }>(
+                        `/archive/blogs/${blogId}/images/${imageIndex}`,
+                        { method: 'DELETE' },
+                    )
+                    latestImages = response.data.images ?? latestImages
+                }
+
+                setBlogImages(latestImages)
+                setDeletedBlogImageUrls([])
             }
 
-            let createdBlogId: string
-
-            if (isEditMode && blogId) {
-                const response = await apiFetch<{ data: { id: string } }>(`/archive/blogs/${blogId}`, {
-                    method: 'PATCH',
-                    body: JSON.stringify(payload),
+            // Create if new, patch if edit (same as publish)
+            if (!isEditMode) {
+                const response = await api.post<{ data: { id: string } }>('/archive/blogs', {
+                    title: blogTitle,
+                    content: combinedContent,
+                    productionIds: selectedProductionIds,
+                    draft: true,
                 })
                 createdBlogId = response.data.id
-            } else {
-                const response = await api.post<{ data: { id: string } }>('/archive/blogs', payload)
-                createdBlogId = response.data.id
             }
-
 
             try {
                 if (currentUser) {
                     await apiFetch(`/archive/blogs/${createdBlogId}/editors`, {
                         method: 'POST',
-                        body: JSON.stringify({
-                            editorId: currentUser.id,
-                        }),
+                        body: JSON.stringify({ editorId: currentUser.id }),
                     })
                 }
-
             } catch (error) {
-                // Ignore "editor already linked"
-                if (
-                    error instanceof Error &&
-                    error.message.includes('409')
-                ) {
-                    // do nothing
-                } else {
+                if (!(error instanceof Error && error.message.includes('409'))) {
                     console.log(error)
                 }
             }
 
-
-
-            // handle pending images the same way as publish
             if (pendingImages.length > 0) {
                 setIsUploadingImages(true)
                 const filesPayload = await Promise.all(
@@ -459,7 +464,7 @@ function CreateBlogPage() {
                         }
                     )
                     setBlogImages(imagesResponse.data.images ?? [])
-                    setThumbnailIndex(imagesResponse.data.thumbnail_index ?? null)
+                    latestThumbnailIndex = imagesResponse.data.thumbnail_index ?? latestThumbnailIndex
                     setPendingImages([])
                 } catch (uploadError) {
                     setError(uploadError instanceof Error ? uploadError.message : 'Failed to upload images.')
@@ -467,35 +472,20 @@ function CreateBlogPage() {
                     setIsUploadingImages(false)
                 }
             }
-
-            if (deletedBlogImageUrls.length > 0) {
-                const indicesToDelete = Array.from(
-                    new Set(
-                        deletedBlogImageUrls
-                            .map((imageUrl) => initialBlogImagesRef.current.indexOf(imageUrl))
-                            .filter((index) => index >= 0)
-                    )
-                ).sort((left, right) => right - left)
-
-                let latestImages = blogImages
-                let latestThumbnailIndex = thumbnailIndex
-
-                for (const imageIndex of indicesToDelete) {
-                    const response = await apiFetch<{ data: { images: string[]; thumbnail_index: number | null } }>(
-                        `/archive/blogs/${blogId}/images/${imageIndex}`,
-                        { method: 'DELETE' }
-                    )
-                    latestImages = response.data.images ?? latestImages
-                    latestThumbnailIndex = response.data.thumbnail_index ?? null
-                }
-
-                setBlogImages(latestImages)
-                setThumbnailIndex(latestThumbnailIndex)
-                setDeletedBlogImageUrls([])
+            if (isEditMode && blogId) {
+                const response = await apiFetch<{ data: { id: string } }>(`/archive/blogs/${blogId}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({
+                        title: blogTitle,
+                        content: combinedContent,
+                        productionIds: selectedProductionIds,
+                        draft: true,
+                        thumbnail_index: latestThumbnailIndex,
+                    }),
+                })
+                createdBlogId = response.data.id
             }
 
-
-            // send to preview page
             navigate(`/admin/blogs/${createdBlogId}`)
         } catch (saveError) {
             setError(saveError instanceof Error ? saveError.message : 'Failed to save draft.')
@@ -505,6 +495,7 @@ function CreateBlogPage() {
             setSaveAction(null)
         }
     }
+
 
     const isLocaleFilled = (localeValue: Locale) => {
         const title = form[localeValue].title.trim()
