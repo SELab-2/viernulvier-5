@@ -277,7 +277,13 @@ describe('ArchiveDetailPage', () => {
     })
 
     it('navigates to home when there is no history', async () => {
-        vi.stubGlobal('history', { ...window.history, length: 1 })
+        Object.defineProperty(window, 'history', {
+            value: {
+                ...window.history,
+                length: 1,
+            },
+            writable: true,
+        })
 
         renderPage()
 
@@ -287,7 +293,12 @@ describe('ArchiveDetailPage', () => {
         expect(navigate).toHaveBeenCalledWith('/')
     })
     it('navigates to prev page when there is history', async () => {
-        vi.stubGlobal('history', { ...window.history, length: 2 })
+        Object.defineProperty(window, 'history', {
+            value: {
+                ...window.history,
+                length: 2,
+            },
+        })
 
         renderPage()
 
