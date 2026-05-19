@@ -44,6 +44,9 @@ export function useProductionDrafts({ page, limit, enabled = true, editorId, ref
                 if (!isActive) return
                 console.log(response)
                 const items = response.data
+                    .slice()
+                    .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+
                 const total = response.meta.total
 
                 // no need to fetch the list of editors of the productions if we already know the editor edited it

@@ -39,12 +39,13 @@ export function useBlogDrafts({ page, limit, enabled = true, editorId, refetch }
 
         const editorParam = editorId ? `&editorId=${editorId}` : ''
 
-        api.get<{  data: DraftItem[]; meta: { total: number }}>(`/archive/blogs?draft=true&page=${page}&limit=${limit}${editorParam}`)
+        api.get<{  data: DraftItem[]; meta: { total: number }   }>(`/archive/blogs?draft=true&page=${page}&limit=${limit}${editorParam}`)
             .then((response) => {
                 if (!isActive) return
                 const items = response.data
+                    .slice()
+                    .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
                 const total = response.meta.total
-
 
                 // no need to fetch the list of editors of the blogs if we already know the editor edited it
                 if (editorId) {
