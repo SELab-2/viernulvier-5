@@ -1,4 +1,4 @@
-import type { Prisma, PrismaClient } from '@prisma/client'
+import { Prisma, type PrismaClient } from '@prisma/client'
 import type { CreatePosterPersistenceInput, UpdatePosterInput } from './posters.schema.js'
 
 type FindAllOptions = {
@@ -38,6 +38,8 @@ export type PosterFileStreamRecord = {
     mime_type: string | null
 }
 
+export type RecentPosterRecord = Pick<PosterRecord, 'id' | 'title' | 'updated_at'>
+
 type PosterFileRecord = {
     created_at: Date
     updated_at: Date
@@ -47,7 +49,7 @@ type PosterFileRecord = {
     gallery_id: string | null
     file_location: string | null
     type: 'video' | 'image' | 'pdf' | 'other' | null
-    gallery: {
+    gallery?: {
         poster_gallery_productions: Array<{
             id: string
             title: Prisma.JsonValue
@@ -214,9 +216,54 @@ export class PostersRepository {
         return sorted.slice(skip, skip + limit)
     }
 
+    async findRecent(limit: number): Promise<RecentPosterRecord[]> {
+        return this.prisma.$queryRaw<RecentPosterRecord[]>(Prisma.sql`
+            WITH ranked_posters AS (
+                SELECT
+                    id,
+                    COALESCE(NULLIF(TRIM(name), ''), 'Untitled poster') AS title,
+                    updated_at,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY COALESCE(gallery_id::text, ''), LOWER(TRIM(COALESCE(name, '')))
+                        ORDER BY updated_at DESC, id DESC
+                    ) AS row_number
+                FROM file
+                WHERE type IN ('image'::filetype, 'pdf'::filetype)
+                    AND file_location IS NOT NULL
+            )
+            SELECT id, title, updated_at
+            FROM ranked_posters
+            WHERE row_number = 1
+            ORDER BY updated_at DESC, id DESC
+            LIMIT ${limit}
+        `)
+    }
+
     async count(options: Pick<FindAllOptions, 'search' | 'productionId' | 'yearFrom' | 'yearTo'>) {
         const records = await this.prisma.file.findMany({
             where: this.buildWhere(options),
+            select: {
+                id: true,
+                gallery_id: true,
+                name: true,
+            },
+        })
+
+        const groups = new Set(records.map((record) => `${record.gallery_id ?? ''}::${(record.name ?? '').trim().toLowerCase()}`))
+        return groups.size
+    }
+
+
+
+    async countInRange({ from, to }: { from: Date; to: Date }) {
+        const records = await this.prisma.file.findMany({
+            where: {
+                ...this.buildWhere({}),
+                created_at: {
+                    gte: from,
+                    lt: to,
+                },
+            },
             select: {
                 id: true,
                 gallery_id: true,

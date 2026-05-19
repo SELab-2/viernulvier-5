@@ -73,8 +73,7 @@ export class SearchRepository {
         const productionFilter = includeProductions ? Prisma.sql`
             FROM "production" p
             WHERE 
-                p.draft IS NOT TRUE
-                AND
+                p.draft IS FALSE AND
                 EXISTS (SELECT 1 FROM "event" e WHERE e.production_id = p.id AND e.starts_at < NOW())
                 ${normalizedSearch ? Prisma.sql` AND (
                     LOWER(p.title ->> 'nl') ILIKE CONCAT('%', CAST(${normalizedSearch} AS text), '%') OR
