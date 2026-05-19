@@ -399,26 +399,44 @@ function CreateBlogPage() {
         setSuccess('')
 
         try {
-            const payload = {
-                title: blogTitle,
-                content: combinedContent,
-                productionIds: selectedProductionIds,
+            let createdBlogId = blogId ?? ''
+            let latestThumbnailIndex = thumbnailIndex
+
+            if (isEditMode && blogId && deletedBlogImageUrls.length > 0) {
+                const indicesToDelete = Array.from(
+                    new Set(
+                        deletedBlogImageUrls
+                            .map((imageUrl) => initialBlogImagesRef.current.indexOf(imageUrl))
+                            .filter((index) => index >= 0),
+                    ),
+                ).sort((left, right) => right - left)
+
+                let latestImages = blogImages
+
+                for (const imageIndex of indicesToDelete) {
+                    const response = await apiFetch<{ data: { images: string[]; thumbnail_index: number | null } }>(
+                        `/archive/blogs/${blogId}/images/${imageIndex}`,
+                        {
+                            method: 'DELETE',
+                        },
+                    )
+
+                    latestImages = response.data.images ?? latestImages
+                }
+
+                setBlogImages(latestImages)
+                setDeletedBlogImageUrls([])
             }
 
-            let createdBlogId: string
-
-            if (isEditMode && blogId) {
-                const response = await apiFetch<{ data: { id: string } }>(`/archive/blogs/${blogId}`, {
-                    method: 'PATCH',
-                    body: JSON.stringify(payload),
+            if (!isEditMode) {
+                const response = await api.post<{ data: { id: string } }>('/archive/blogs', {
+                    title: blogTitle,
+                    content: combinedContent,
+                    productionIds: selectedProductionIds,
                 })
                 createdBlogId = response.data.id
-            } else {
-                const response = await api.post<{ data: { id: string } }>('/archive/blogs', payload)
-                createdBlogId = response.data.id
             }
 
-            // Upload images if there are any pending
             if (pendingImages.length > 0) {
                 setIsUploadingImages(true)
                 const filesPayload = await Promise.all(
@@ -441,14 +459,14 @@ function CreateBlogPage() {
                     )
 
                     setBlogImages(imagesResponse.data.images ?? [])
-                    setThumbnailIndex(imagesResponse.data.thumbnail_index ?? null)
+                    latestThumbnailIndex = imagesResponse.data.thumbnail_index ?? latestThumbnailIndex
                     setPendingImages([])
-                    setIsUploadingImages(false)
                 } catch (uploadError) {
                     // Try to roll back the created blog to avoid duplicates on retry
                     try {
-                        await apiFetch(`/archive/blogs/${createdBlogId}`, { method: 'DELETE' })
-                        setIsUploadingImages(false)
+                        if (!isEditMode && createdBlogId) {
+                            await apiFetch(`/archive/blogs/${createdBlogId}`, { method: 'DELETE' })
+                        }
                         setError(
                             messages.blogs.bannerUpload.uploadFailedRemoved(
                                 uploadError instanceof Error ? uploadError.message : ''
@@ -456,46 +474,34 @@ function CreateBlogPage() {
                         )
                     } catch {
                         // Could not roll back — surface edit URL so user can retry there
-                        setIsUploadingImages(false)
-                        const editUrl = `/${locale}/admin/blogs/${createdBlogId}/edit`
-                        setError(
-                            messages.blogs.bannerUpload.uploadFailedCreatedEditUrl(
-                                uploadError instanceof Error ? uploadError.message : '',
-                                editUrl
+                        if (!isEditMode) {
+                            const editUrl = `/${locale}/admin/blogs/${createdBlogId}/edit`
+                            setError(
+                                messages.blogs.bannerUpload.uploadFailedCreatedEditUrl(
+                                    uploadError instanceof Error ? uploadError.message : '',
+                                    editUrl
+                                )
                             )
-                        )
+                        } else {
+                            setError(uploadError instanceof Error ? uploadError.message : 'Failed to upload images.')
+                        }
                     }
+                } finally {
+                    setIsUploadingImages(false)
                 }
             }
 
-            //Delete the deleted images in the backend
-            if (deletedBlogImageUrls.length > 0) {
-                const indicesToDelete = Array.from(
-                    new Set(
-                        deletedBlogImageUrls
-                            .map((imageUrl) => initialBlogImagesRef.current.indexOf(imageUrl))
-                            .filter((index) => index >= 0)
-                    )
-                ).sort((left, right) => right - left)
-
-                let latestImages = blogImages
-                let latestThumbnailIndex = thumbnailIndex
-
-                for (const imageIndex of indicesToDelete) {
-                    const response = await apiFetch<{ data: { images: string[]; thumbnail_index: number | null } }>(
-                        `/archive/blogs/${blogId}/images/${imageIndex}`,
-                        {
-                            method: 'DELETE',
-                        },
-                    )
-
-                    latestImages = response.data.images ?? latestImages
-                    latestThumbnailIndex = response.data.thumbnail_index ?? null
-                }
-
-                setBlogImages(latestImages)
-                setThumbnailIndex(latestThumbnailIndex)
-                setDeletedBlogImageUrls([])
+            if (isEditMode && blogId) {
+                const response = await apiFetch<{ data: { id: string } }>(`/archive/blogs/${blogId}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({
+                        title: blogTitle,
+                        content: combinedContent,
+                        productionIds: selectedProductionIds,
+                        thumbnail_index: latestThumbnailIndex,
+                    }),
+                })
+                createdBlogId = response.data.id
             }
 
             navigate(`/blogs/${createdBlogId}`)
