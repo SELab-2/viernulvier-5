@@ -83,7 +83,11 @@ function BlogDetailPageContent() {
     const idIsMalformed = typeof id === 'string' && !UUID_REGEX.test(id)
 
     const handleGoBack = () => {
-        if (window.history.length > 1) {
+        const hasInternalReferrer =
+            document.referrer &&
+            new URL(document.referrer).origin === window.location.origin
+
+        if (hasInternalReferrer || window.history.length > 2) {
             navigate(-1)
         } else {
             navigate(withLocalePath('/', locale))
