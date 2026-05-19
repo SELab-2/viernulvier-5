@@ -153,7 +153,7 @@ function useProductionImages(items: ProductionApiItem[]) {
                             if (!galleryItem.links?.crops) continue
                             const cropsPath = getRelativePath(galleryItem.links.crops)
                             const cropsRes = await apiFetch<{ data: Array<{ name: string, url: string }> }>(cropsPath!)
-                            const target = cropsRes.data.find(c => c.name === 'FE3_header') || cropsRes.data.find(c => c.name === 'FEA_boxed') || cropsRes.data[0]
+                            const target = cropsRes.data.find(c => c.name === 'FE3_header') || cropsRes.data.find(c => c.name === 'FE3_boxed') || cropsRes.data[0]
                             if (target?.url) return { id: item.id, url: target.url }
                         }
                     } catch { return null }
