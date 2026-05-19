@@ -2,8 +2,8 @@ import { describe, expect, it, vi } from 'vitest'
 import { render, screen, waitFor, fireEvent, within } from '@testing-library/react'
 import type { Messages } from '../../../i18n/types'
 import { AdminMessagesContext } from '../../../components/admin/AdminMessagesContext'
-import { MemoryRouter } from 'react-router-dom'
 import DashboardPage from '../../../pages/admin/DashboardPage'
+import {MemoryRouter} from "react-router-dom";
 
 const useDashboardSummaryMock = vi.hoisted(() => vi.fn())
 const adminLayoutMock = vi.hoisted(() => vi.fn(({ children }: { children: React.ReactNode }) => <div>{children}</div>))
@@ -22,6 +22,7 @@ const mockMessages = vi.hoisted(() => ({
       tableColActions: 'Actions',
       actionView: 'View',
       actionEdit: 'Edit',
+      actionDelete: 'Delete',
       emptyRecent: 'No recent archive items found.',
       paginationShowing: (from: number, to: number, total: number) => `Showing ${from}-${to} of ${total} results`,
       paginationPrev: 'Previous page',
@@ -61,6 +62,13 @@ vi.mock('../../../components/admin/hooks/useDashboardSummary', () => ({
   useDashboardSummary: (args: { page: number; limit: number }) => useDashboardSummaryMock(args),
 }))
 
+const renderDashboard = () =>
+    render(
+        <MemoryRouter>
+          <DashboardPage />
+        </MemoryRouter>,
+    )
+
 describe('DashboardPage', () => {
   it('renders loading state and heading', () => {
     useDashboardSummaryMock.mockReturnValue({
@@ -69,7 +77,7 @@ describe('DashboardPage', () => {
       error: null,
     })
 
-    render(<MemoryRouter><DashboardPage /></MemoryRouter>)
+    renderDashboard()
 
     expect(screen.getByText('Dashboard')).toBeInTheDocument()
     expect(screen.getByText('Overview of archive activity.')).toBeInTheDocument()
@@ -107,7 +115,7 @@ describe('DashboardPage', () => {
       },
     })
 
-    render(<MemoryRouter><DashboardPage /></MemoryRouter>)
+    renderDashboard()
 
     expect(screen.getByText('1.284')).toBeInTheDocument()
     expect(screen.getByText('SNOBS: Editie #11')).toBeInTheDocument()
@@ -224,7 +232,7 @@ describe('DashboardPage', () => {
       },
     })
 
-    render(<MemoryRouter><DashboardPage /></MemoryRouter>)
+    renderDashboard()
 
     expect(screen.getByText('No recent archive items found.')).toBeInTheDocument()
   })
@@ -236,7 +244,7 @@ describe('DashboardPage', () => {
       error: 'Dashboard kon niet geladen worden.',
     })
 
-    render(<MemoryRouter><DashboardPage /></MemoryRouter>)
+    renderDashboard()
 
     expect(screen.getByText('Dashboard kon niet geladen worden.')).toBeInTheDocument()
   })
@@ -263,7 +271,7 @@ describe('DashboardPage', () => {
       },
     })
 
-    render(<MemoryRouter><DashboardPage /></MemoryRouter>)
+    renderDashboard()
 
     expect(screen.getByText('Blogs')).toBeInTheDocument()
   })
@@ -284,7 +292,7 @@ describe('DashboardPage', () => {
       },
     })
 
-    render(<MemoryRouter><DashboardPage /></MemoryRouter>)
+    renderDashboard()
 
     const pill = screen.getByText('+12%')
     expect(pill).toBeInTheDocument()
@@ -307,7 +315,7 @@ describe('DashboardPage', () => {
       },
     })
 
-    render(<MemoryRouter><DashboardPage /></MemoryRouter>)
+    renderDashboard()
 
     expect(screen.getByText('-5%')).toBeInTheDocument()
   })
@@ -328,7 +336,7 @@ describe('DashboardPage', () => {
       },
     })
 
-    render(<MemoryRouter><DashboardPage /></MemoryRouter>)
+    renderDashboard()
 
     expect(screen.getAllByText('—').length).toBeGreaterThan(0)
     expect(screen.queryByText('vs last month')).not.toBeInTheDocument()
@@ -350,7 +358,7 @@ describe('DashboardPage', () => {
       },
     })
 
-    render(<MemoryRouter><DashboardPage /></MemoryRouter>)
+    renderDashboard()
 
     expect(screen.getByText('0%')).toBeInTheDocument()
   })
@@ -398,7 +406,7 @@ describe('DashboardPage', () => {
       },
     })
 
-    render(<MemoryRouter><DashboardPage /></MemoryRouter>)
+    renderDashboard()
 
     expect(screen.getByText('Showing 1-3 of 7 results')).toBeInTheDocument()
   })
@@ -421,7 +429,7 @@ describe('DashboardPage', () => {
       },
     })
 
-    render(<MemoryRouter><DashboardPage /></MemoryRouter>)
+    renderDashboard()
 
     expect(screen.queryByText(/of \d+ results/)).not.toBeInTheDocument()
   })
@@ -444,7 +452,7 @@ describe('DashboardPage', () => {
       },
     })
 
-    render(<MemoryRouter><DashboardPage /></MemoryRouter>)
+    renderDashboard()
 
     expect(screen.getByRole('button', { name: 'Previous page' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Next page' })).toBeInTheDocument()
@@ -469,7 +477,7 @@ describe('DashboardPage', () => {
       },
     })
 
-    render(<MemoryRouter><DashboardPage /></MemoryRouter>)
+    renderDashboard()
 
     const page2Button = screen.getByRole('button', { name: '2' })
     fireEvent.click(page2Button)
@@ -491,7 +499,7 @@ describe('DashboardPage', () => {
 
     useDashboardSummaryMock.mockClear()
 
-    render(<MemoryRouter><DashboardPage /></MemoryRouter>)
+    renderDashboard()
 
     const initialCalls = useDashboardSummaryMock.mock.calls.length
     const select = screen.getByLabelText('Per page') as HTMLSelectElement
@@ -521,7 +529,7 @@ describe('DashboardPage', () => {
     useDashboardSummaryMock.mockClear()
 
     try {
-      render(<MemoryRouter><DashboardPage /></MemoryRouter>)
+      renderDashboard()
 
       const firstCall = useDashboardSummaryMock.mock.calls[0]?.[0]
       expect(firstCall?.limit).toBeGreaterThanOrEqual(9)
@@ -543,7 +551,7 @@ describe('DashboardPage', () => {
       },
     })
 
-    render(<MemoryRouter><DashboardPage /></MemoryRouter>)
+    renderDashboard()
 
     expect(screen.getByRole('button', { name: 'Previous page' })).toBeDisabled()
   })

@@ -17,6 +17,8 @@ import LoadingPage from './pages/LoadingPage'
 // Admin pages (lazy loaded — not included in public bundle)
 const LoginPage = lazy(() => import('./pages/admin/LoginPage'))
 const DashboardPage = lazy(() => import('./pages/admin/DashboardPage'))
+const ProductionsPage = lazy(() => import('./pages/admin/ProductionsPage'))
+const AdminBlogsPage = lazy(() => import('./pages/admin/BlogsPage'))
 const ArchiveEditPage = lazy(() => import('./pages/admin/ArchiveEditPage'))
 const PostersPage = lazy(() => import('./pages/admin/PostersPage'))
 const CreateBlogPage = lazy(() => import('./pages/admin/CreateBlogPage'))
@@ -82,6 +84,22 @@ function App() {
                             element={
                                 <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
                                     <DashboardPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+                        <Route
+                            path={adminRoutes.productionsPath}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <ProductionsPage />
+                                </ProtectedAdminRoute>
+                            }
+                        />
+                        <Route
+                            path={adminRoutes.blogsPath}
+                            element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
+                                    <AdminBlogsPage />
                                 </ProtectedAdminRoute>
                             }
                         />
