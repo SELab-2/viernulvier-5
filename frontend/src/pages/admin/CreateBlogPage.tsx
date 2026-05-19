@@ -21,6 +21,7 @@ import type { Language, BlogContent } from '../../types/blog'
 import type { Locale } from '../../i18n/types'
 
 import AdminLayout from '../../components/admin/AdminLayout'
+import {getAdminRouteConfig} from "../../admin/paths.ts";
 
 /*
 With this page you can create or edit a blog, the blog will look like this:
@@ -383,6 +384,8 @@ function CreateBlogPage() {
     }
 
     const submitPublish = async () => {
+        const { blogsPath } = getAdminRouteConfig(window.location.hostname)
+
         // Combine all language versions into single JSON content
         const combinedContent = {
             nl: (contentJson.nl ?? form.nl.content) || null,
@@ -504,7 +507,7 @@ function CreateBlogPage() {
                 createdBlogId = response.data.id
             }
 
-            navigate(`/blogs/${createdBlogId}`)
+            navigate(blogsPath)
         } catch (saveError) {
             setError(saveError instanceof Error ? saveError.message : 'Failed to save blog.')
             setIsUploadingImages(false)
