@@ -14,7 +14,6 @@ model crop {
   name          String?  @db.VarChar
   url           String?  @db.VarChar
   item_id       String?  @db.Uuid
-  file_location String?
   item          item?    @relation("item_crops", fields: [item_id], references: [id])
 }
 
