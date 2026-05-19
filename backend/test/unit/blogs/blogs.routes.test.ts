@@ -42,6 +42,7 @@ describe('Blogs Routes', () => {
                     url: '/api/v1/archive/blogs',
                     headers: { authorization: `Bearer ${token}` },
                     payload: {
+                        draft: false,
                         title: JSON.stringify({ nl: 'Unieke blogtitel', en: 'Unique blog title' }),
                         content: { nl: JSON.stringify({ ops: [{ insert: 'Beschrijving alpha' }] }) },
                         productionIds: [production.id],
@@ -54,6 +55,7 @@ describe('Blogs Routes', () => {
                     url: '/api/v1/archive/blogs',
                     headers: { authorization: `Bearer ${token}` },
                     payload: {
+                        draft: false,
                         title: JSON.stringify({ nl: 'Andere titel', en: 'Other title' }),
                         content: { nl: JSON.stringify({ ops: [{ insert: 'Beschrijving beta' }] }) },
                         productionIds: [production.id],
@@ -103,6 +105,7 @@ describe('Blogs Routes', () => {
                     url: '/api/v1/archive/blogs',
                     headers: { authorization: `Bearer ${token}` },
                     payload: {
+                        draft: false,
                         title: { nl: 'Blog A', en: 'Blog A' },
                         productionIds: [productionA.id],
                     },
@@ -114,6 +117,7 @@ describe('Blogs Routes', () => {
                     url: '/api/v1/archive/blogs',
                     headers: { authorization: `Bearer ${token}` },
                     payload: {
+                        draft: false,
                         title: { nl: 'Blog B', en: 'Blog B' },
                         productionIds: [productionB.id],
                     },

@@ -442,6 +442,17 @@ export class ProductionsRepository {
         return rows.map((row) => row.id)
     }
 
+    async findAllIds(options: CountOptions): Promise<string[]> {
+        const where = await this.buildWhere(options)
+
+        const rows = await this.prisma.production.findMany({
+            where,
+            select: { id: true },
+        })
+
+        return rows.map((row) => row.id)
+    }
+
     async findManyByIds(ids: string[]) {
         const rows = await this.prisma.production.findMany({
             where: { id: { in: ids } },

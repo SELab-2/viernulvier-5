@@ -50,14 +50,16 @@ export class BlogsRepository {
         const trimmedSearch = options.search?.trim()
         const draft = options.draft ?? false
 
-
         if (draft !== 'all') {
-            if (draft) {
+            if (draft === true) {
                 conditions.push({
-                    OR: [{draft: true}, {draft: null}]
+                    OR: [
+                        { draft: true },
+                        { draft: null },
+                    ],
                 })
             } else {
-                conditions.push({draft: false})
+                conditions.push({ draft: false })
             }
         }
         if (options.editorId){
@@ -259,7 +261,7 @@ export class BlogsRepository {
             data: {
                 title,
                 content: (data.content ?? null) as Prisma.InputJsonValue,
-                draft: data.draft ?? false,
+                ...(data.draft !== undefined ? { draft: data.draft } : {}),
                 thumbnail_index: data.thumbnail_index ?? null,
                 images: data.images ?? [],
                 blog_production: {
@@ -289,7 +291,7 @@ export class BlogsRepository {
                     ? { title }
                     : {}),
                 ...(data.content !== undefined ? { content: data.content as Prisma.InputJsonValue } : {}),
-                ...(data.draft !== undefined ? {draft: data.draft} : {}),
+                ...(data.draft !== undefined ? { draft: data.draft } : {}),
                 ...(data.thumbnail_index !== undefined ? { thumbnail_index: data.thumbnail_index } : {}),
                 ...(data.images !== undefined ? { images: data.images } : {}),
                 ...(data.productionIds !== undefined
