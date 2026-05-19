@@ -1156,7 +1156,7 @@ function FilterPanel({ className, onAfterChange, showSearch = true, shareLabel, 
                 </button>
                 <button
                     type="button"
-                    className="h-10 w-full rounded-full bg-black text-sm font-semibold text-white transition-transform duration-200 hover:scale-[1.01] hover:bg-surface/90"
+                    className="h-10 w-full rounded-full bg-black text-sm font-semibold text-white transition-transform duration-200 hover:bg-surface/90"
                     onClick={handleReset}
                 >
                     {s.resetFiltersLabel}
@@ -1174,6 +1174,7 @@ type MobileSearchFormProps = {
 }
 
 function MobileSearchForm({ className = 'mb-5 md:hidden px-4', value, onChange, onSubmit }: MobileSearchFormProps) {
+    const m = usePublicMessages()
     return (
         <form
             name="mobile-search-form"
@@ -1188,7 +1189,7 @@ function MobileSearchForm({ className = 'mb-5 md:hidden px-4', value, onChange, 
                 value={value}
                 onChange={(event) => onChange(event.target.value)}
                 className="w-full rounded-full border border-border bg-surface px-4 py-2 text-sm text-foreground"
-                placeholder="Search..."
+                placeholder={m.search.searchPlaceholder}
             />
         </form>
     )
