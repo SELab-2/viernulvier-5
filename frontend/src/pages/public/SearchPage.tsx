@@ -1662,7 +1662,7 @@ function SearchPageContent() {
                                     onClick={() => setIsMobileFiltersOpen((open) => !open)}
                                 >
                                     <img src="/filter.svg" alt="" className="h-4 w-4 filter invert" />
-                                    <span>Filters</span>
+                                    <span>{m.search.filterOpenLabel}</span>
                                 </button>
                             </div>
                         </div>
