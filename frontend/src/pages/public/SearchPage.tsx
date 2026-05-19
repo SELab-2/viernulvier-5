@@ -1452,23 +1452,58 @@ function SearchPageContent() {
     const currentPage = Math.min(page, totalPages)
     const pageItems = useMemo(() => {
         if (!apiEntries) return []
-        return apiEntries
+        // Voeg eventDateSortKey toe voor sortering
+        const mapped = apiEntries
             .map(item => {
                 const detail = fetchedDetails[item.id]
                 const fetchedTaxonomy = fetchedTaxonomies[item.id]
                 const normalizedFetchedGenre = fetchedTaxonomy ? normalizeGenreValue(fetchedTaxonomy) : ''
                 const mappedFetchedGenreLabel = normalizedFetchedGenre ? getGenreLabel(normalizedFetchedGenre, searchMessages.genres) : ''
                 const nextTag = mappedFetchedGenreLabel || fetchedTaxonomy || item.tag
+
+                // Probeer een sorteerbare event-datum te pakken (eerste datum in detail.date)
+                let eventDateSortKey: number | null = null
+                if (detail?.date) {
+                    // detail.date kan bv. '15/05/2024 - 16/05/2024' zijn of '2024 - 2025'
+                    // Pak eerste datum die lijkt op dd/mm/yyyy of yyyy
+                    const match = detail.date.match(/(\d{2}\/\d{2}\/\d{4})|(\d{4})/)
+                    if (match) {
+                        const dateStr = match[1] || match[2]
+                        let parsed: Date | null = null
+                        if (dateStr && dateStr.length === 10) {
+                            // dd/mm/yyyy
+                            const [d, m, y] = dateStr.split('/')
+                            parsed = new Date(Number(y), Number(m) - 1, Number(d))
+                        } else if (dateStr && dateStr.length === 4) {
+                            // yyyy
+                            parsed = new Date(Number(dateStr), 0, 1)
+                        }
+                        if (parsed && !isNaN(parsed.getTime())) {
+                            eventDateSortKey = parsed.getTime()
+                        }
+                    }
+                }
+
                 return {
                     ...item,
                     imageUrl: fetchedImages[item.id] || item.imageUrl,
                     date: detail?.date !== undefined && detail.date !== '' ? detail.date : item.date,
                     venue: detail?.venue !== undefined && detail.venue !== '' ? detail.venue : item.venue,
-                    tag: nextTag
+                    tag: nextTag,
+                    eventDateSortKey,
                 }
             })
             .filter(item => fetchedDetails[item.id]?.date !== '')
-    }, [apiEntries, fetchedImages, fetchedDetails, fetchedTaxonomies, searchMessages.genres])
+
+        // Sorteer indien recent/oldest
+        if (sort === 'recent') {
+            return mapped.slice().sort((a, b) => (b.eventDateSortKey ?? 0) - (a.eventDateSortKey ?? 0))
+        }
+        if (sort === 'oldest') {
+            return mapped.slice().sort((a, b) => (a.eventDateSortKey ?? 0) - (b.eventDateSortKey ?? 0))
+        }
+        return mapped
+    }, [apiEntries, fetchedImages, fetchedDetails, fetchedTaxonomies, searchMessages.genres, sort])
 
     // Compacte paginering: 1,2,3,...,laatste
     function getCompactPageLabels(current: number, total: number): string[] {
