@@ -52,9 +52,9 @@ describe('DashboardService', () => {
 
         const summary = await service.getSummary({ page: 1, limit: 3 })
 
-        expect(repository.getRecentProductions).toHaveBeenCalledWith(3)
-        expect(repository.getRecentBlogs).toHaveBeenCalledWith(3)
-        expect(repository.getRecentPosters).toHaveBeenCalledWith(3)
+        expect(repository.getRecentProductions).toHaveBeenCalledWith(30)
+        expect(repository.getRecentBlogs).toHaveBeenCalledWith(30)
+        expect(repository.getRecentPosters).toHaveBeenCalledWith(30)
         expect(summary.recentItems.map((item) => item.type)).toEqual(['Poster', 'Blog', 'Productie'])
         expect(summary.recentItems[0]).not.toHaveProperty('languageStatus')
         expect(summary.totalRecentItems).toBe(6)
