@@ -1,5 +1,6 @@
 import type { Genre } from "../../../api/genres"
 import { localize } from "../../../utils/localize"
+import { getMessages, resolveLocale } from "../../../i18n"
 
 type ArchiveDetailHeroProps = {
     imageUrl: string
@@ -63,12 +64,11 @@ function ArchiveDetailHero({ imageUrl, title, superTitle, artist, genres, locale
                 )}
                 {isBlog && (
                     <div className="mb-3 flex flex-wrap gap-2">
-                                <span className="rounded-full bg-accent px-2.5 py-1 text-xs font-semibold text-white">
-                                    {"Blog"}
-                                </span>   
+                        <span className="rounded-full bg-accent px-2.5 py-1 text-xs font-semibold text-white">
+                            {getMessages(resolveLocale(locale)).search.blogTab}
+                        </span>
                     </div>
-                    )
-                }
+                )}
                 {superTitle && (
                     <p className="text-lg text-white/90">{superTitle}</p>
                 )}
