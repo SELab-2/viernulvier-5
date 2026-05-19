@@ -166,6 +166,7 @@ async function importProductions(filePath: string) {
                     description: toJson(descriptionJson),
                     description_2: toJson(description2Json),
                     vendor_id: vendorId,
+                    draft: false,
                 };
 
                 const isNewProduction = !(await prisma.production.findUnique({ where: { apiId } }));

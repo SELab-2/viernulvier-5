@@ -248,7 +248,7 @@ describe('legacy CSV importer', () => {
       await prisma.production.upsert({
         where: { apiId: PROD_API_ID },
         update: {},
-        create: { apiId: PROD_API_ID, title: { nl: 'Test Productie' } },
+        create: { apiId: PROD_API_ID, title: { nl: 'Test Productie' }, draft: false },
       });
     });
 
