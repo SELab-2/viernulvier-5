@@ -372,7 +372,11 @@ const en: Messages = {
       emptyRecent: 'No recent archive drafts found.',
       loadingMessage: 'Loading drafts...',
       deleteTitle: 'Delete draft',
-      deleteConfirm: (title: string) => `Are you sure you want to delete "${title}"?`
+      deleteConfirm: (title: string) => `Are you sure you want to delete "${title}"?`,
+      paginationShowing: (from: number, to: number, total: number) => `Showing ${from}-${to} of ${total} results`,
+      pageSizeLabel: 'Per page',
+      paginationPrev: 'Previous page',
+      paginationNext: 'Next page',
     }
   },
 

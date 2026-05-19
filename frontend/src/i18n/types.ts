@@ -361,6 +361,10 @@ export type Messages = {
       loadingMessage: string
       deleteTitle: string
       deleteConfirm: (title: string) => string
+      paginationShowing: (from: number, to: number, total: number) => string
+      pageSizeLabel: string
+      paginationPrev: string
+      paginationNext: string
     }
   }
 

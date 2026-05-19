@@ -372,7 +372,11 @@ const nl: Messages = {
       emptyRecent: 'Nog geen recente archiefconcepten gevonden.',
       loadingMessage: 'Concepten worden geladen...',
       deleteTitle: 'Concept verwijderen',
-      deleteConfirm: (title: string) => `Ben je zeker dat je "${title}" wilt verwijderen?`
+      deleteConfirm: (title: string) => `Ben je zeker dat je "${title}" wilt verwijderen?`,
+      paginationShowing: (from: number, to: number, total: number) => `Toont ${from}-${to} van ${total} resultaten`,
+      pageSizeLabel: 'Per pagina',
+      paginationPrev: 'Vorige pagina',
+      paginationNext: 'Volgende pagina',
     }
   },
 
