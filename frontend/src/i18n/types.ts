@@ -252,14 +252,12 @@ export type Messages = {
       blogs: string
       posters: string
       gallery: string
-      organisation: string
       settings: string
       drafts: string
       dashboardIconAlt: string
       productionsIconAlt: string
       blogsIconAlt: string
       postersIconAlt: string
-      organisationIconAlt: string
       settingsIconAlt: string
       draftsIconAlt: string
     }

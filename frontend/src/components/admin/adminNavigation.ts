@@ -4,7 +4,6 @@ export type AdminNavItemId =
     | 'blogs'
     | 'posters'
     | 'gallery'
-    | 'organisation'
     | 'settings'
     | 'drafts'
 
@@ -32,7 +31,6 @@ export function getNavLabel(id: AdminNavItemId, nav: AdminNavMessages): string {
         blogs: nav.blogs,
         posters: nav.posters,
         gallery: nav.gallery,
-        organisation: nav.organisation,
         settings: nav.settings,
         drafts: nav.drafts,
     }
@@ -47,7 +45,6 @@ export function getNavIconAlt(id: AdminNavItemId, nav: AdminNavMessages): string
         blogs: nav.productionsIconAlt,
         posters: nav.postersIconAlt,
         gallery: nav.gallery,
-        organisation: nav.organisationIconAlt,
         settings: nav.settingsIconAlt,
         drafts: nav.draftsIconAlt,
     }
@@ -63,7 +60,6 @@ export function getAdminNavigationItems(hostname: string = window.location.hostn
             { id: 'productions', to: productionsPath, iconSrc: '/admin/sidebar-productions.svg' },
             { id: 'blogs', to: blogsPath, iconSrc: '/admin/sidebar-blogs.svg' },
             { id: 'posters', to: postersPath, iconSrc: '/admin/sidebar-gallery.svg' },
-            { id: 'organisation', disabled: true, iconSrc: '/admin/sidebar-organization.svg' },
             { id: 'drafts', to: draftsPath, iconSrc: '/admin/sidebar-drafts.svg'}
         ],
         secondary: [
