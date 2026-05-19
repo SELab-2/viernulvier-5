@@ -56,7 +56,7 @@ describe('DashboardService', () => {
         expect(repository.getRecentBlogs).toHaveBeenCalledWith(3)
         expect(repository.getRecentPosters).toHaveBeenCalledWith(3)
         expect(summary.recentItems.map((item) => item.type)).toEqual(['Poster', 'Blog', 'Productie'])
-        expect(summary.recentItems[0]?.languageStatus).toEqual({ nl: 'attention', en: 'complete' })
+        expect(summary.recentItems[0]).not.toHaveProperty('languageStatus')
         expect(summary.totalRecentItems).toBe(6)
         expect(summary.counts).not.toHaveProperty('events')
     })

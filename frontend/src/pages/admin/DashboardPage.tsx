@@ -232,37 +232,39 @@ function DashboardPageContent({ onUserRoleChange }: DashboardPageContentProps) {
                       </span>
                     </td>
                     <td className="px-4 py-4">
-                      <div className="flex gap-3 text-[9px] uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
-                        {(['nl', 'en'] as const).map((loc) => {
-                          const state = item.languageStatus[loc]
-                          const dotClass = state === 'complete'
-                            ? 'bg-[#10b981]'
-                            : state === 'attention'
-                              ? 'bg-[#f59e0b]'
-                              : 'bg-[#cbd5e1]'
-                          const tooltip = state === 'complete'
-                            ? d.languageStatusComplete
-                            : state === 'attention'
-                              ? d.languageStatusAttention
-                              : d.languageStatusMissing
+                      {item.languageStatus ? (
+                        <div className="flex gap-3 text-[9px] uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
+                          {(['nl', 'en'] as const).map((loc) => {
+                            const state = item.languageStatus?.[loc]
+                            const dotClass = state === 'complete'
+                              ? 'bg-[#10b981]'
+                              : state === 'attention'
+                                ? 'bg-[#f59e0b]'
+                                : 'bg-[#cbd5e1]'
+                            const tooltip = state === 'complete'
+                              ? d.languageStatusComplete
+                              : state === 'attention'
+                                ? d.languageStatusAttention
+                                : d.languageStatusMissing
 
-                          return (
-                            <span
-                              key={loc}
-                              className={`inline-block cursor-help rounded-sm focus:outline-none focus:ring-2 focus:ring-accent/40 ${state === 'missing' ? 'opacity-40' : ''}`}
-                              title={tooltip}
-                              aria-label={`${loc.toUpperCase()}: ${tooltip}`}
-                              tabIndex={0}
-                            >
-                              <span className="block">{loc}</span>
+                            return (
                               <span
-                                aria-hidden="true"
-                                className={`mt-1 block h-2 w-2 rounded-full ${dotClass}`}
-                              />
-                            </span>
-                          )
-                        })}
-                      </div>
+                                key={loc}
+                                className={`inline-block cursor-help rounded-sm focus:outline-none focus:ring-2 focus:ring-accent/40 ${state === 'missing' ? 'opacity-40' : ''}`}
+                                title={tooltip}
+                                aria-label={`${loc.toUpperCase()}: ${tooltip}`}
+                                tabIndex={0}
+                              >
+                                <span className="block">{loc}</span>
+                                <span
+                                  aria-hidden="true"
+                                  className={`mt-1 block h-2 w-2 rounded-full ${dotClass}`}
+                                />
+                              </span>
+                            )
+                          })}
+                        </div>
+                      ) : null}
                     </td>
                     <td className="px-4 py-4 text-sm text-[#475569] dark:text-slate-300">{formatDate(item.updated_at)}</td>
                     <td className="px-2 py-4">

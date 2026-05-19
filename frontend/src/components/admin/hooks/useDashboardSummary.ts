@@ -19,7 +19,7 @@ export type DashboardSummary = {
         title: string
         type: string
         status: 'available'
-        languageStatus: {
+        languageStatus?: {
             nl: 'complete' | 'attention'
             en: 'complete' | 'attention' | 'missing'
         }

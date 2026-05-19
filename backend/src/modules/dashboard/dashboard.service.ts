@@ -13,15 +13,17 @@ type DashboardDeltas = {
     posters: Delta
 }
 
+type DashboardLanguageStatus = {
+    nl: 'complete' | 'attention'
+    en: 'complete' | 'attention' | 'missing'
+}
+
 type DashboardRecentItem = {
     id: string
     title: string
     type: string
     status: 'available'
-    languageStatus: {
-        nl: 'complete' | 'attention'
-        en: 'complete' | 'attention' | 'missing'
-    }
+    languageStatus?: DashboardLanguageStatus
     updated_at: Date
 }
 
@@ -84,7 +86,7 @@ function hasValue(value: unknown): boolean {
     return typeof value === 'string' && value.trim().length > 0
 }
 
-function resolveLanguageStatus(value: unknown): DashboardRecentItem['languageStatus'] {
+function resolveLanguageStatus(value: unknown): DashboardLanguageStatus {
     const localized = asLocalizedRecord(value)
     const nl = hasValue(localized.nl) ? 'complete' : 'attention'
     const en = hasValue(localized.en) ? 'complete' : 'missing'
@@ -127,7 +129,6 @@ function mapPoster(poster: RawPoster): DashboardRecentItem {
         title: poster.title,
         type: 'Poster',
         status: 'available',
-        languageStatus: { nl: 'attention', en: 'complete' },
         updated_at: poster.updated_at,
     }
 }

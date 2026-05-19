@@ -176,7 +176,6 @@ describe('DashboardPage', () => {
             title: 'Poster row',
             type: 'Poster',
             status: 'available',
-            languageStatus: { nl: 'complete', en: 'complete' },
             updated_at: '2026-01-01T00:00:00.000Z',
           },
         ],
@@ -201,6 +200,8 @@ describe('DashboardPage', () => {
     expect(within(productionRow as HTMLElement).getByRole('link', { name: 'Edit' })).toHaveAttribute('href', '/admin/archive/production-1/edit')
     expect(within(blogRow as HTMLElement).getByRole('link', { name: 'View' })).toHaveAttribute('href', '/blogs/blog-1')
     expect(within(blogRow as HTMLElement).getByRole('link', { name: 'Edit' })).toHaveAttribute('href', '/admin/blogs/blog-1/edit')
+    expect(within(posterRow as HTMLElement).queryByLabelText(/NL:/)).not.toBeInTheDocument()
+    expect(within(posterRow as HTMLElement).queryByLabelText(/EN:/)).not.toBeInTheDocument()
     expect(within(posterRow as HTMLElement).getByRole('link', { name: 'View' })).toHaveAttribute('href', '/posters/poster-1')
     expect(within(posterRow as HTMLElement).getByRole('link', { name: 'Edit' })).toHaveAttribute('href', '/admin/posters')
   })
