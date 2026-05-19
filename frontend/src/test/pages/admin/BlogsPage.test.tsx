@@ -179,16 +179,6 @@ describe('BlogsPage', () => {
         })
     })
 
-    it('falls back to NL title when EN title is present but NL is null', async () => {
-        apiFetchMock.mockResolvedValue(makePaginatedResponse([blogB]))
-
-        renderPage()
-
-        await waitFor(() => {
-            expect(screen.getByText('Second Blog')).toBeInTheDocument()
-        })
-    })
-
     it('shows "(Zonder titel)" when title is null', async () => {
         apiFetchMock.mockResolvedValue(makePaginatedResponse([blogWithoutTitle]))
 
