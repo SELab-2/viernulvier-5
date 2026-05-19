@@ -18,7 +18,7 @@ import LoadingPage from './pages/LoadingPage'
 const LoginPage = lazy(() => import('./pages/admin/LoginPage'))
 const DashboardPage = lazy(() => import('./pages/admin/DashboardPage'))
 const ProductionsPage = lazy(() => import('./pages/admin/ProductionsPage'))
-const BlogsPage = lazy(() => import('./pages/admin/BlogsPage'))
+const AdminBlogsPage = lazy(() => import('./pages/admin/BlogsPage'))
 const ArchiveEditPage = lazy(() => import('./pages/admin/ArchiveEditPage'))
 const PostersPage = lazy(() => import('./pages/admin/PostersPage'))
 const CreateBlogPage = lazy(() => import('./pages/admin/CreateBlogPage'))
@@ -99,7 +99,7 @@ function App() {
                             path={adminRoutes.blogsPath}
                             element={
                                 <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
-                                    <BlogsPage />
+                                    <AdminBlogsPage />
                                 </ProtectedAdminRoute>
                             }
                         />
