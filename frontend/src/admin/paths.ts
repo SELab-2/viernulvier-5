@@ -23,12 +23,9 @@ export function getAdminRouteConfig(hostname: string): AdminRouteConfig {
   const normalizedHostname = hostname.trim().toLowerCase()
   const isAdminHost = normalizedHostname.startsWith('admin.')
   const isLocalDevHost = normalizedHostname === 'localhost' || normalizedHostname === '127.0.0.1'
-  const isPublicAdminHost = normalizedHostname === 'sel2-5.ugent.be'
-  const canRenderAdminRoutes = isAdminHost || isLocalDevHost || isPublicAdminHost
   const publicHostname = isAdminHost ? normalizedHostname.replace(/^admin\./, '') : normalizedHostname
   const publicPath = (path: string) => isAdminHost && publicHostname ? `https://${publicHostname}${path}` : path
 
-  if (isAdminHost || isLocalDevHost) {
     return {
       isAdminHost,
       isLocalDevHost,
@@ -49,26 +46,4 @@ export function getAdminRouteConfig(hostname: string): AdminRouteConfig {
       draftsPath: '/admin/drafts',
       publicPath,
     }
-  }
-
-  return {
-    isAdminHost,
-    isLocalDevHost,
-    canRenderAdminRoutes,
-    loginPath: '/admin/login',
-    dashboardPath: '/admin',
-    legacyDashboardPaths: [],
-    productionEditPath: '/admin/archive/:id/edit',
-    productionsPath: '/admin/productions',
-    blogsPath: '/admin/blogs',
-    archiveEditPath: '/admin/archive/:id/edit',
-    archivePreviewPath: '/admin/archive/:id',
-    blogPreviewPath: '/admin/blogs/:id',
-    productionCreatePath: '/admin/archive/create',
-    blogEditPath: '/admin/blogs/:id/edit',
-    blogCreatePath: '/admin/blogs/create',
-    postersPath: '/admin/posters',
-    draftsPath: '/admin',
-    publicPath,
-  }
 }
