@@ -4,6 +4,7 @@ import { usePublicMessages } from './PublicMessagesContext'
 import type { Blog } from '../../api/blogs'
 import { getLocalizedTitle, getLocalizedContent, normalizeContent } from '../../pages/public/blogDetailPage.formatters'
 import { toPlainText } from '../../utils/text'
+import { resolveBlogImageUrl } from '../admin/blogs/blogImageUrl'
 
 type PublicLatestBlogPreviewProps = {
     blog: Blog | null
@@ -42,7 +43,7 @@ function PublicLatestBlogPreview({ blog, locale, fallbackUntitled, onReadMore, o
                     <img
                         src={
                             Array.isArray(blog.images) && typeof blog.thumbnail_index === 'number' && blog.images[blog.thumbnail_index]
-                                ? blog.images[blog.thumbnail_index] || '/fallback-hero.svg'
+                                ? resolveBlogImageUrl(blog.images[blog.thumbnail_index]!)
                                 : '/fallback-hero.svg'
                         }
                         alt=""

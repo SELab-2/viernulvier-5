@@ -7,6 +7,7 @@ import SearchResultCard, { type SearchResultItem } from '../../components/public
 import { getActiveLocale, withLocalePath } from '../../i18n'
 import { usePublicMessages } from '../../components/public/PublicMessagesContext'
 import { getLocalizedContent, getLocalizedTitle } from './blogDetailPage.formatters'
+import { resolveBlogImageUrl } from '../../components/admin/blogs/blogImageUrl'
 
 type BlogApiItem = {
     id: string
@@ -185,7 +186,7 @@ function BlogsPageContent() {
                         type: 'blog' as const,
                         title: localizedTitle,
                         excerpt: toPlainText(localizedContent).substring(0, 200),
-                        imageUrl: thumbnailImage ?? undefined,
+                        imageUrl: thumbnailImage ? resolveBlogImageUrl(thumbnailImage) : undefined,
                         date: formatDate(item.created_at, locale),
                         venue: '',
                         tag: searchMessages.blogTab,
