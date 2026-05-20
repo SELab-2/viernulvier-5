@@ -172,10 +172,12 @@ function App() {
                         <Route
                             path={adminRoutes.draftsPath}
                             element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
                                 <Navigate
                                     to={`${adminRoutes.draftsPath}/productions`}
                                     replace
                                 />
+                                </ProtectedAdminRoute>
                             }
                         />
                         <Route
@@ -189,10 +191,12 @@ function App() {
                         <Route
                             path={`/en${adminRoutes.draftsPath}`}
                             element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
                                 <Navigate
                                     to={`/en${adminRoutes.draftsPath}/productions`}
                                     replace
                                 />
+                                </ProtectedAdminRoute>
                             }
                         />
                         <Route
@@ -206,10 +210,12 @@ function App() {
                         <Route
                             path={`/nl${adminRoutes.draftsPath}`}
                             element={
+                                <ProtectedAdminRoute loginPath={adminRoutes.loginPath}>
                                 <Navigate
                                     to={`/nl${adminRoutes.draftsPath}/productions`}
                                     replace
                                 />
+                                </ProtectedAdminRoute>
                             }
                         />
                         <Route

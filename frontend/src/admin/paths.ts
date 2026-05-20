@@ -32,7 +32,7 @@ export function getAdminRouteConfig(hostname: string): AdminRouteConfig {
     return {
       isAdminHost,
       isLocalDevHost,
-      canRenderAdminRoutes: true,
+      canRenderAdminRoutes: canRenderAdminRoutes,
       loginPath: '/admin/login',
       dashboardPath: '/admin/dashboard',
       productionEditPath: '/admin/archive/:id/edit',
