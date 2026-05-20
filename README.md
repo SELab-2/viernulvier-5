@@ -68,14 +68,14 @@ Both environments use **Vitest**.
 ## Testing
 
 ### Frontend
-```
+```bash
 cd frontend
 npm install         # if not already done
 npm run test
 ```
 
 ### backend
-```
+```bash
 cd backend
 npm install         # if not already done
 npm run test
