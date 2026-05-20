@@ -17,6 +17,16 @@ if (!window.matchMedia) {
 	})
 }
 
+Object.defineProperty(window, 'localStorage', {
+	writable: true,
+	value: {
+		getItem: () => {},
+		setItem: () => {},
+		removeItem: () => {},
+		clear: () => {},
+	},
+})
+
 window.localStorage.setItem('locale', 'nl')
 document.documentElement.lang = 'nl'
 
