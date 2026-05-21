@@ -24,14 +24,21 @@ Make sure the backend/.env exists by running the following code:
 cd backend
 cp .env.example .env
 ```
-Next startup the development container
+
+Next start the backend
 ```bash
-cd ..                        # return from backend/ to project root
-docker compose -f docker-compose-dev.yml up -d
-# npx prisma db seed         # Seed sample data (optional) this has to be done explicitly in the container
+npm install
+npm run dev
 ```
 
-If you want the scraper to run in Docker, make sure `backend/.env` also contains a valid `API_KEY`.
+Run prisma on another terminal in `/backend`
+```
+npx prisma generate
+npx prisma migrate dev
+npx prisma db seed
+```
+
+To run the scraper make sure the `/backend/.env` also contains a valid `API_KEY`
 
 ### 3. Frontend setup
 
@@ -54,6 +61,18 @@ See nginx/nginx.conf for the production reverse proxy configuration.
 Because this might not work, you should already have a nginx server running on port 80 in a container
 and only then you can modify the ./nginx/nginx.conf to also use certbot
 
+Example config you can use to enable certbot for the first time.
+```nginx
+server {
+    listen 80;
+    server_name example.com www.example.com;
+
+    location / {
+        proxy_pass http://localhost:3000;
+    }
+}
+```
+
 ```bash
 # make sure you have a network for the containers
 docker network create vnv_net
@@ -68,3 +87,5 @@ docker compose up -d --build
 The Docker app services override `DATABASE_URL` to use the `database` container hostname by default: `postgresql://postgres:postgres@database:5432/viernulvier?schema=public`. If your Docker database uses different credentials or a different database name, set `DOCKER_DATABASE_URL` before running `docker compose up`.
 
 The `scraper` service joins the same external `vnv_net` network as the app stack and database. On container startup it runs one scraper sync immediately, then continues on its cron schedule, which defaults to `0 0 * * *`. Logs are written inside the container to `/usr/src/app/logs/scraper.log`. Set `SCRAPER_RUN_ON_STARTUP=false` if you want to disable the startup run.
+
+If you receive `502` errors when accesing the website, try restarting nginx.

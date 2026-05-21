@@ -65,6 +65,22 @@ Both environments use **Vitest**.
 - **Prisma Studio:** Use `npm run db:studio` in the backend folder to manage data visually.
 - **Scraper:** The scraper can be run manually via `npm run scraper` in the backend folder.
 
+## Testing
+
+### Frontend
+```bash
+cd frontend
+npm install         # if not already done
+npm run test
+```
+
+### backend
+```bash
+cd backend
+npm install         # if not already done
+npm run test
+```
+
 ## Documentation
 
 For more in-depth information, refer to the documentation in the `/docs` folder:

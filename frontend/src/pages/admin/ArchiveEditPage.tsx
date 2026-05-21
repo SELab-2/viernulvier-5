@@ -67,7 +67,7 @@ const convertDateTime = (dateTime?: string) => {
     return dateTime.slice(0, 16);
 }
 
-const REQUIRED_FIELDS: (keyof ProductionPayload)[] = ['title', 'super_title', 'artist', 'description'];
+const REQUIRED_FIELDS: (keyof ProductionPayload)[] = ['title'];
 
 
 /**
