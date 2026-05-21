@@ -14,6 +14,8 @@ services:
     restart: unless-stopped
     ports:
       - 3001:3001
+    volumes:
+      - crop_uploads:/usr/src/app/uploads/crops
 
   scraper:
     <<: *backend-service
@@ -25,6 +27,7 @@ services:
       SCRAPER_CRON_SCHEDULE: "0 0 * * *"
     volumes:
       - scraper_logs:/usr/src/app/logs
+      - crop_uploads:/usr/src/app/uploads/crops
 
   frontend:
     build: ./frontend
@@ -68,3 +71,4 @@ networks:
 volumes:
   dist: {}
   scraper_logs: {}
+  crop_uploads: {}
