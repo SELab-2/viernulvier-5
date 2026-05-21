@@ -28,37 +28,14 @@ export function getAdminRouteConfig(hostname: string): AdminRouteConfig {
   const publicHostname = isAdminHost ? normalizedHostname.replace(/^admin\./, '') : normalizedHostname
   const publicPath = (path: string) => isAdminHost && publicHostname ? `https://${publicHostname}${path}` : path
 
-  if (isAdminHost || isLocalDevHost) {
-    return {
-      isAdminHost,
-      isLocalDevHost,
-      canRenderAdminRoutes: true,
-      loginPath: '/admin/login',
-      dashboardPath: '/admin/dashboard',
-      productionEditPath: '/admin/archive/:id/edit',
-      legacyDashboardPaths: ['/admin', '/dashboard', '/', '/nl/admin', '/en/admin'],
-      productionsPath: '/admin/productions',
-      blogsPath: '/admin/blogs',
-      archiveEditPath: '/admin/archive/:id/edit',
-      archivePreviewPath: '/admin/archive/:id',
-      blogPreviewPath: '/admin/blogs/:id',
-      productionCreatePath: '/admin/archive/create',
-      blogEditPath: '/admin/blogs/:id/edit',
-      blogCreatePath: '/admin/blogs/create',
-      postersPath: '/admin/posters',
-      draftsPath: '/admin/drafts',
-      publicPath,
-    }
-  }
-
   return {
     isAdminHost,
     isLocalDevHost,
-    canRenderAdminRoutes,
+    canRenderAdminRoutes: canRenderAdminRoutes,
     loginPath: '/admin/login',
-    dashboardPath: '/admin',
-    legacyDashboardPaths: [],
+    dashboardPath: '/admin/dashboard',
     productionEditPath: '/admin/archive/:id/edit',
+    legacyDashboardPaths: ['/admin', '/dashboard', '/', '/nl/admin', '/en/admin'],
     productionsPath: '/admin/productions',
     blogsPath: '/admin/blogs',
     archiveEditPath: '/admin/archive/:id/edit',
@@ -68,7 +45,7 @@ export function getAdminRouteConfig(hostname: string): AdminRouteConfig {
     blogEditPath: '/admin/blogs/:id/edit',
     blogCreatePath: '/admin/blogs/create',
     postersPath: '/admin/posters',
-    draftsPath: '/admin',
+    draftsPath: '/admin/drafts',
     publicPath,
   }
 }

@@ -12,6 +12,7 @@ import PublicPillButton from '../../components/public/PublicPillButton'
 import ProductionCard from '../../components/blogs/ProductionCard'
 import ArchiveDetailHero from '../../components/public/detail/PublicDetailHeroBanner'
 import ArchiveDetailGallery from '../../components/public/detail/PublicDetailGallery'
+import { resolveBlogImageUrl } from '../../components/admin/blogs/blogImageUrl'
 import '../../styles/QuillEditor.css'
 import {
     getLocalizedContent,
@@ -212,7 +213,7 @@ function BlogDetailPageContent() {
                         imageUrl={
                             // show cover image if thumbnail_index points to a valid image, otherwise fallback
                             (blog.images && typeof blog.thumbnail_index === 'number' && blog.images[blog.thumbnail_index])
-                                ? blog.images[blog.thumbnail_index]!
+                                ? resolveBlogImageUrl(blog.images[blog.thumbnail_index]!)
                                 : '/fallback-hero.svg'
                         }
                         title={getLocalizedTitle(blog.title, locale)}
@@ -242,7 +243,12 @@ function BlogDetailPageContent() {
 
                         {blog.images && blog.images.length > 0 && (
                             <div className="mt-6">
-                                <ArchiveDetailGallery images={blog.images.filter((_, i) => i !== blog.thumbnail_index)} />
+                                <ArchiveDetailGallery
+                                    images={blog.images
+                                        .filter((_, i) => i !== blog.thumbnail_index)
+                                        .map((img) => (img ? resolveBlogImageUrl(img) : null))
+                                    }
+                                />
                             </div>
                         )}
 

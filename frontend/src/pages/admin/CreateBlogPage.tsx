@@ -563,6 +563,7 @@ function CreateBlogPage() {
                     title: blogTitle,
                     content: combinedContent,
                     productionIds: selectedProductionIds,
+                    draft: false,
                 })
                 createdBlogId = response.data.id
             }
