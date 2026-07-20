@@ -33,7 +33,7 @@
         "@fastify/swagger-ui": "^5.0.0",
         "@prisma/adapter-pg": "^7.4.2",
         "@prisma/client": "^7.4.1",
-        "axios": "^1.16.0",
+        "axios": "^1.18.1",
         "axios-retry": "^4.5.0",
         "csv-parse": "^6.2.1",
         "date-fns-tz": "^3.2.0",
