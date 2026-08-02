@@ -59,7 +59,7 @@ jobs:
       - run: npm run test:coverage -- --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage
 
       - name: Post backend coverage comment
-        uses: MishaKav/jest-coverage-comment@v1
+        uses: MishaKav/jest-coverage-comment@v1.0.34
         with:
           title: "Backend Coverage"
           coverage-summary-path: backend/coverage/coverage-summary.json
@@ -90,7 +90,7 @@ jobs:
       - run: npm run test:coverage -- --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage
 
       - name: Post frontend coverage comment
-        uses: MishaKav/jest-coverage-comment@v1
+        uses: MishaKav/jest-coverage-comment@v1.0.34
         with:
           title: "Frontend Coverage"
           coverage-summary-path: frontend/coverage/coverage-summary.json
